@@ -166,7 +166,7 @@ public:
     // Writes do not need similar protection, as failure to write is handled by the caller.
 };
 
-static CCoinsViewErrorCatcher *pcoinscatcher = nullptr;
+static std::unique_ptr<CCoinsViewErrorCatcher> pcoinscatcher;
 static std::unique_ptr<ECCVerifyHandle> globalVerifyHandle;
 
 void Interrupt(boost::thread_group& threadGroup)
@@ -251,17 +251,6 @@ void PrepareShutdown()
         if (pcoinsTip != nullptr) {
             FlushStateToDisk();
         }
-        delete pcoinsTip;
-        pcoinsTip = nullptr;
-
-        delete pcoinscatcher;
-        pcoinscatcher = nullptr;
-
-        delete pcoinsdbview;
-        pcoinsdbview = nullptr;
-
-        delete pblocktree;
-        pblocktree = nullptr;
 
         /** RVN START */
         delete passets;
@@ -319,6 +308,10 @@ void PrepareShutdown()
         pDistributeSnapshotDb = nullptr;
 
         /** RVN END */
+        pcoinsTip.reset();
+        pcoinscatcher.reset();
+        pcoinsdbview.reset();
+        pblocktree.reset();
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -1536,11 +1529,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         do {
             try {
                 UnloadBlockIndex();
-                delete pcoinsTip;
-                delete pcoinsdbview;
-                delete pcoinscatcher;
-                delete pblocktree;
-                pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReset, dbMaxFileSize);
+                pcoinsTip.reset();
+                pcoinsdbview.reset();
+                pcoinscatcher.reset();
+                pblocktree.reset(new CBlockTreeDB(nBlockTreeDBCache, false, fReset));
+
 
                 /** RVN START */
                 {
@@ -1623,7 +1616,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     }
                 }
                 /** RVN END */
-
                 if (fReset) {
                     pblocktree->WriteReindexing(true);
                     //If we're reindexing in prune mode, wipe away unusable block files and all undo data files
@@ -1691,8 +1683,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // At this point we're either in reindex or we've loaded a useful
                 // block tree into mapBlockIndex!
 
-                pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReset || fReindexChainState);
-                pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
+                pcoinsdbview.reset(new CCoinsViewDB(nCoinDBCache, false, fReset || fReindexChainState));
+                pcoinscatcher.reset(new CCoinsViewErrorCatcher(pcoinsdbview.get()));
 
                 // If necessary, upgrade from older database format.
                 // This is a no-op if we cleared the coinsviewdb with -reindex or -reindex-chainstate
@@ -1702,13 +1694,13 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 }
 
                 // ReplayBlocks is a no-op if we cleared the coinsviewdb with -reindex or -reindex-chainstate
-                if (!ReplayBlocks(chainparams, pcoinsdbview)) {
+                if (!ReplayBlocks(chainparams, pcoinsdbview.get())) {
                     strLoadError = _("Unable to replay blocks. You will need to rebuild the database using -reindex-chainstate.");
                     break;
                 }
 
                 // The on-disk coinsdb is now in a good state, create the cache
-                pcoinsTip = new CCoinsViewCache(pcoinscatcher);
+                pcoinsTip.reset(new CCoinsViewCache(pcoinscatcher.get()));
 
                 bool is_coinsview_empty = fReset || fReindexChainState || pcoinsTip->GetBestBlock().IsNull();
                 if (!is_coinsview_empty) {
@@ -1750,7 +1742,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                         }
                     }
 
-                    if (!CVerifyDB().VerifyDB(chainparams, pcoinsdbview, gArgs.GetArg("-checklevel", DEFAULT_CHECKLEVEL),
+                    if (!CVerifyDB().VerifyDB(chainparams, pcoinsdbview.get(), gArgs.GetArg("-checklevel", DEFAULT_CHECKLEVEL),
                                   gArgs.GetArg("-checkblocks", DEFAULT_CHECKBLOCKS))) {
                         strLoadError = _("Corrupted block database detected");
                         break;
