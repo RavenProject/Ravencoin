@@ -2785,7 +2785,7 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
     nNextInvSend = 0;
     fRelayTxes = false;
     fSentAddr = false;
-    pfilter = new CBloomFilter();
+    pfilter = std::unique_ptr<CBloomFilter>(new CBloomFilter());
     timeLastMempoolReq = 0;
     nLastBlockTime = 0;
     nLastTXTime = 0;
@@ -2818,9 +2818,6 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
 CNode::~CNode()
 {
     CloseSocket(hSocket);
-
-    if (pfilter)
-        delete pfilter;
 }
 
 void CNode::AskFor(const CInv& inv)
