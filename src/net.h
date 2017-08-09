@@ -402,8 +402,8 @@ private:
     /** Services this instance offers */
     ServiceFlags nLocalServices;
 
-    CSemaphore *semOutbound;
-    CSemaphore *semAddnode;
+    std::unique_ptr<CSemaphore> semOutbound;
+    std::unique_ptr<CSemaphore> semAddnode;
     int nMaxConnections;
     int nMaxOutbound;
     int nMaxAddnode;
