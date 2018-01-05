@@ -1,5 +1,6 @@
 // Copyright (c) 2012 Pieter Wuille
 // Copyright (c) 2012-2016 The Bitcoin Core developers
+// Copyright (c) 2017 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -76,6 +77,13 @@ CAddrInfo* CAddrMan::Find(const CNetAddr& addr, int* pnId)
     if (it2 != mapInfo.end())
         return &(*it2).second;
     return nullptr;
+}
+
+CAddrInfo* CAddrMan::ById(unsigned long nId) 
+{
+    if ((mapInfo.count(nId) == 0) || (nId < mapInfo.count(nId) - 1))
+        return(nullptr);
+    return &mapInfo[nId];
 }
 
 CAddrInfo* CAddrMan::Create(const CAddress& addr, const CNetAddr& addrSource, int* pnId)

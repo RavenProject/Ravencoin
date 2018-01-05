@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
+# Copyright (c) 2017 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the rawtransaction RPCs.
@@ -12,11 +13,11 @@ Test the following RPCs:
    - getrawtransaction
 """
 
-from test_framework.test_framework import BitcoinTestFramework
+from test_framework.test_framework import RavenTestFramework
 from test_framework.util import *
 
 # Create one-input, one-output, no-fee transaction:
-class RawTransactionsTest(BitcoinTestFramework):
+class RawTransactionsTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
@@ -65,7 +66,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         #use balance deltas instead of absolute values
         bal = self.nodes[2].getbalance()
 
-        # send 1.2 BTC to msig adr
+        # send 1.2 RVN to msig adr
         txId = self.nodes[0].sendtoaddress(mSigObj, 1.2)
         self.sync_all()
         self.nodes[0].generate(1)
@@ -118,7 +119,56 @@ class RawTransactionsTest(BitcoinTestFramework):
         self.sync_all()
         self.nodes[0].generate(1)
         self.sync_all()
-        assert_equal(self.nodes[0].getbalance(), bal+Decimal('50.00000000')+Decimal('2.19000000')) #block reward + tx
+        assert_equal(self.nodes[0].getbalance(), bal+Decimal('5000.00000000')+Decimal('2.19000000')) #block reward + tx
+
+        # 2of2 test for combining transactions
+        bal = self.nodes[2].getbalance()
+        addr1 = self.nodes[1].getnewaddress()
+        addr2 = self.nodes[2].getnewaddress()
+
+        addr1Obj = self.nodes[1].validateaddress(addr1)
+        addr2Obj = self.nodes[2].validateaddress(addr2)
+
+        self.nodes[1].addmultisigaddress(2, [addr1Obj['pubkey'], addr2Obj['pubkey']])
+        mSigObj = self.nodes[2].addmultisigaddress(2, [addr1Obj['pubkey'], addr2Obj['pubkey']])
+        mSigObjValid = self.nodes[2].validateaddress(mSigObj)
+
+        txId = self.nodes[0].sendtoaddress(mSigObj, 2.2)
+        decTx = self.nodes[0].gettransaction(txId)
+        rawTx2 = self.nodes[0].decoderawtransaction(decTx['hex'])
+        self.sync_all()
+        self.nodes[0].generate(1)
+        self.sync_all()
+
+        assert_equal(self.nodes[2].getbalance(), bal) # the funds of a 2of2 multisig tx should not be marked as spendable
+
+        txDetails = self.nodes[0].gettransaction(txId, True)
+        rawTx2 = self.nodes[0].decoderawtransaction(txDetails['hex'])
+        vout = False
+        for outpoint in rawTx2['vout']:
+            if outpoint['value'] == Decimal('2.20000000'):
+                vout = outpoint
+                break
+
+        bal = self.nodes[0].getbalance()
+        inputs = [{ "txid" : txId, "vout" : vout['n'], "scriptPubKey" : vout['scriptPubKey']['hex'], "redeemScript" : mSigObjValid['hex']}]
+        outputs = { self.nodes[0].getnewaddress() : 2.19 }
+        rawTx2 = self.nodes[2].createrawtransaction(inputs, outputs)
+        rawTxPartialSigned1 = self.nodes[1].signrawtransaction(rawTx2, inputs)
+        self.log.info(rawTxPartialSigned1)
+        assert_equal(rawTxPartialSigned['complete'], False) #node1 only has one key, can't comp. sign the tx
+
+        rawTxPartialSigned2 = self.nodes[2].signrawtransaction(rawTx2, inputs)
+        self.log.info(rawTxPartialSigned2)
+        assert_equal(rawTxPartialSigned2['complete'], False) #node2 only has one key, can't comp. sign the tx
+        rawTxComb = self.nodes[2].combinerawtransaction([rawTxPartialSigned1['hex'], rawTxPartialSigned2['hex']])
+        self.log.info(rawTxComb)
+        self.nodes[2].sendrawtransaction(rawTxComb)
+        rawTx2 = self.nodes[0].decoderawtransaction(rawTxComb)
+        self.sync_all()
+        self.nodes[0].generate(1)
+        self.sync_all()
+        assert_equal(self.nodes[0].getbalance(), bal+Decimal('5000.00000000')+Decimal('2.19000000')) #block reward + tx
 
         # 2of2 test for combining transactions
         bal = self.nodes[2].getbalance()
