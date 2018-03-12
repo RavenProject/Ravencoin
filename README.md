@@ -59,7 +59,11 @@ all algos happen an equal amount of times.
 the power consumption is always constant.
 x16rc solves the power spike issues of x16r.
 
+More to come...
 
+
+Ravencoin forked information
+============================
 
 
 Raven Core integration/staging tree
