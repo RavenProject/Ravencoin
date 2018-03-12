@@ -35,7 +35,7 @@ d
 ```
 algo 6 happens five times  
 algo 3 happens three times  
-If these are both high power algos, 50% of the hashes are taken up by high power algos when an average would be 12%.
+If these are both high power algos, 50% of the hashes are taken up by high power algos when an average would be 12%. This causes a significant power spike. In practice, a 800 rig can alternate between 550w and 1300w.
 
 
 x16rc
