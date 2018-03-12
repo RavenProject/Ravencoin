@@ -6,8 +6,11 @@ What is x16rc?
 
 x16rc solves a glaring problem found in the x16r algorithm... power spikes, which are potentially damaging to hardware.
 
-We use the last 16 digits to determine which algorithm to start with in a complete loop. This eliminates high power draw.
+We use the last 16 digits to determine which algorithm to start with before performing all 16 algorithms in a loop. This eliminates high power draw by making the frequency of all algorithms equal.
 
+
+Example
+-------
 
 block 120236, hash fdd83b16db18e1eb0194475f6a176adf83ffbe7d9746aae703a66a1375863d66	
 
@@ -30,8 +33,8 @@ d
 6
 6
 ```
-algo 6 happens five times
-algo 3 happens three times
+algo 6 happens five times  
+algo 3 happens three times  
 If these are both high power algos, 50% of the hashes are taken up by high power algos when an average would be 12%.
 
 
@@ -55,8 +58,8 @@ def0123456789abc
 6789abcdef012345
 ```
 
-all algos happen an equal amount of times.
-the power consumption is always constant.
+all algos happen an equal amount of times.  
+the power consumption is always constant.  
 x16rc solves the power spike issues of x16r.
 
 More to come...
