@@ -12,7 +12,7 @@ x16rc uses the last 16 digits of the previous block hash to determine which algo
 Example
 -------
 
-block 120236, hash fdd83b16db18e1eb0194475f6a176adf83ffbe7d9746aae703a66a1375863d66	
+Ravencoin block 120236, hash fdd83b16db18e1eb0194475f6a176adf83ffbe7d9746aae703a66a1375863d66	
 
 x16r
 ```
