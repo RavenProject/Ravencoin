@@ -4,7 +4,7 @@ x16rc
 What is x16rc?
 --------------
 
-x16rc solves a glaring problem found in the x16r algorithm... power spikes, which are potentially damaging to hardware.
+x16rc is a cryptocurrency algorithm which solves a glaring problem found in the x16r algorithm... power spikes, which are potentially damaging to hardware.
 
 We use the last 16 digits to determine which algorithm to start with before performing all 16 algorithms in a loop. This eliminates high power draw by making the frequency of all algorithms equal.
 
