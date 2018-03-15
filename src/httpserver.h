@@ -1,10 +1,10 @@
 // Copyright (c) 2015-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_HTTPSERVER_H
-#define RAVEN_HTTPSERVER_H
+#ifndef CHICKADEE_HTTPSERVER_H
+#define CHICKADEE_HTTPSERVER_H
 
 #include <string>
 #include <stdint.h>
@@ -151,4 +151,4 @@ private:
 
 std::string urlDecode(const std::string &urlEncoded);
 
-#endif // RAVEN_HTTPSERVER_H
+#endif // CHICKADEE_HTTPSERVER_H

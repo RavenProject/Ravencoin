@@ -1,14 +1,14 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 /**
  * Money parsing/formatting utilities.
  */
-#ifndef RAVEN_UTILMONEYSTR_H
-#define RAVEN_UTILMONEYSTR_H
+#ifndef CHICKADEE_UTILMONEYSTR_H
+#define CHICKADEE_UTILMONEYSTR_H
 
 #include <stdint.h>
 #include <string>
@@ -22,4 +22,4 @@ std::string FormatMoney(const CAmount& n);
 bool ParseMoney(const std::string& str, CAmount& nRet);
 bool ParseMoney(const char* pszIn, CAmount& nRet);
 
-#endif // RAVEN_UTILMONEYSTR_H
+#endif // CHICKADEE_UTILMONEYSTR_H

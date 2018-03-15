@@ -1,11 +1,11 @@
 // Copyright (c) 2012 Pieter Wuille
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ADDRMAN_H
-#define RAVEN_ADDRMAN_H
+#ifndef CHICKADEE_ADDRMAN_H
+#define CHICKADEE_ADDRMAN_H
 
 #include "netaddress.h"
 #include "protocol.h"
@@ -603,4 +603,4 @@ public:
 
 };
 
-#endif // RAVEN_ADDRMAN_H
+#endif // CHICKADEE_ADDRMAN_H

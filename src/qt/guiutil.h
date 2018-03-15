@@ -1,10 +1,10 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_GUIUTIL_H
-#define RAVEN_QT_GUIUTIL_H
+#ifndef CHICKADEE_QT_GUIUTIL_H
+#define CHICKADEE_QT_GUIUTIL_H
 
 #include "amount.h"
 #include "fs.h"
@@ -30,7 +30,7 @@ class QUrl;
 class QWidget;
 QT_END_NAMESPACE
 
-/** Utility functions used by the Raven Qt UI.
+/** Utility functions used by the Chickadee Qt UI.
  */
 namespace GUIUtil
 {
@@ -45,10 +45,10 @@ namespace GUIUtil
     void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
     void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
-    // Parse "raven:" URI into recipient object, return true on successful parsing
-    bool parseRavenURI(const QUrl &uri, SendCoinsRecipient *out);
-    bool parseRavenURI(QString uri, SendCoinsRecipient *out);
-    QString formatRavenURI(const SendCoinsRecipient &info);
+    // Parse "chickadee:" URI into recipient object, return true on successful parsing
+    bool parseChickadeeURI(const QUrl &uri, SendCoinsRecipient *out);
+    bool parseChickadeeURI(QString uri, SendCoinsRecipient *out);
+    QString formatChickadeeURI(const SendCoinsRecipient &info);
 
     // Returns true if given address+amount meets "dust" definition
     bool isDust(const QString& address, const CAmount& amount);
@@ -115,7 +115,7 @@ namespace GUIUtil
     void openDebugLogfile();
 
     // Open the config file
-    bool openRavenConf();
+    bool openChickadeeConf();
 
     // Replace invalid default fonts with known good ones
     void SubstituteFonts(const QString& language);
@@ -244,4 +244,4 @@ namespace GUIUtil
 
 } // namespace GUIUtil
 
-#endif // RAVEN_QT_GUIUTIL_H
+#endif // CHICKADEE_QT_GUIUTIL_H

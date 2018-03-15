@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Base class for RPC testing."""
@@ -44,10 +44,10 @@ TEST_EXIT_PASSED = 0
 TEST_EXIT_FAILED = 1
 TEST_EXIT_SKIPPED = 77
 
-class RavenTestFramework():
-    """Base class for a raven test script.
+class ChickadeeTestFramework():
+    """Base class for a chickadee test script.
 
-    Individual raven test scripts should subclass this class and override the set_test_params() and run_test() methods.
+    Individual chickadee test scripts should subclass this class and override the set_test_params() and run_test() methods.
 
     Individual tests can also override the following methods to customize the test setup:
 
@@ -74,11 +74,11 @@ class RavenTestFramework():
 
         parser = optparse.OptionParser(usage="%prog [options]")
         parser.add_option("--nocleanup", dest="nocleanup", default=False, action="store_true",
-                          help="Leave ravends and test.* datadir on exit or error")
+                          help="Leave chickadeeds and test.* datadir on exit or error")
         parser.add_option("--noshutdown", dest="noshutdown", default=False, action="store_true",
-                          help="Don't stop ravends after the test execution")
+                          help="Don't stop chickadeeds after the test execution")
         parser.add_option("--srcdir", dest="srcdir", default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../../src"),
-                          help="Source directory containing ravend/raven-cli (default: %default)")
+                          help="Source directory containing chickadeed/chickadee-cli (default: %default)")
         parser.add_option("--cachedir", dest="cachedir", default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../cache"),
                           help="Directory for caching pregenerated datadirs")
         parser.add_option("--tmpdir", dest="tmpdir", help="Root directory for datadirs")
@@ -143,7 +143,7 @@ class RavenTestFramework():
             if self.nodes:
                 self.stop_nodes()
         else:
-            self.log.info("Note: ravends were not stopped and may still be running")
+            self.log.info("Note: chickadeeds were not stopped and may still be running")
 
         if not self.options.nocleanup and not self.options.noshutdown and success != TestStatus.FAILED:
             self.log.info("Cleaning up")
@@ -232,7 +232,7 @@ class RavenTestFramework():
             self.nodes.append(TestNode(i, self.options.tmpdir, extra_args[i], rpchost, timewait=timewait, binary=binary[i], stderr=None, mocktime=self.mocktime, coverage_dir=self.options.coveragedir))
 
     def start_node(self, i, extra_args=None, stderr=None):
-        """Start a ravend"""
+        """Start a chickadeed"""
 
         node = self.nodes[i]
 
@@ -243,7 +243,7 @@ class RavenTestFramework():
             coverage.write_all_rpc_commands(self.options.coveragedir, node.rpc)
 
     def start_nodes(self, extra_args=None):
-        """Start multiple ravends"""
+        """Start multiple chickadeeds"""
 
         if extra_args is None:
             extra_args = [None] * self.num_nodes
@@ -263,12 +263,12 @@ class RavenTestFramework():
                 coverage.write_all_rpc_commands(self.options.coveragedir, node.rpc)
 
     def stop_node(self, i):
-        """Stop a ravend test node"""
+        """Stop a chickadeed test node"""
         self.nodes[i].stop_node()
         self.nodes[i].wait_until_stopped()
 
     def stop_nodes(self):
-        """Stop multiple ravend test nodes"""
+        """Stop multiple chickadeed test nodes"""
         for node in self.nodes:
             # Issue RPC to stop nodes
             node.stop_node()
@@ -288,7 +288,7 @@ class RavenTestFramework():
                 self.start_node(i, extra_args, stderr=log_stderr)
                 self.stop_node(i)
             except Exception as e:
-                assert 'ravend exited' in str(e)  # node must have shutdown
+                assert 'chickadeed exited' in str(e)  # node must have shutdown
                 self.nodes[i].running = False
                 self.nodes[i].process = None
                 if expected_msg is not None:
@@ -298,9 +298,9 @@ class RavenTestFramework():
                         raise AssertionError("Expected error \"" + expected_msg + "\" not found in:\n" + stderr)
             else:
                 if expected_msg is None:
-                    assert_msg = "ravend should have exited with an error"
+                    assert_msg = "chickadeed should have exited with an error"
                 else:
-                    assert_msg = "ravend should have exited with expected error " + expected_msg
+                    assert_msg = "chickadeed should have exited with expected error " + expected_msg
                 raise AssertionError(assert_msg)
 
     def wait_for_node_exit(self, i, timeout):
@@ -358,7 +358,7 @@ class RavenTestFramework():
         # User can provide log level as a number or string (eg DEBUG). loglevel was caught as a string, so try to convert it to an int
         ll = int(self.options.loglevel) if self.options.loglevel.isdigit() else self.options.loglevel.upper()
         ch.setLevel(ll)
-        # Format logs the same as ravend's debug.log with microprecision (so log files can be concatenated and sorted)
+        # Format logs the same as chickadeed's debug.log with microprecision (so log files can be concatenated and sorted)
         formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d000 %(name)s (%(levelname)s): %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
         formatter.converter = time.gmtime
         fh.setFormatter(formatter)
@@ -368,7 +368,7 @@ class RavenTestFramework():
         self.log.addHandler(ch)
 
         if self.options.trace_rpc:
-            rpc_logger = logging.getLogger("RavenRPC")
+            rpc_logger = logging.getLogger("ChickadeeRPC")
             rpc_logger.setLevel(logging.DEBUG)
             rpc_handler = logging.StreamHandler(sys.stdout)
             rpc_handler.setLevel(logging.DEBUG)
@@ -395,10 +395,10 @@ class RavenTestFramework():
                 if os.path.isdir(os.path.join(self.options.cachedir, "node" + str(i))):
                     shutil.rmtree(os.path.join(self.options.cachedir, "node" + str(i)))
 
-            # Create cache directories, run ravends:
+            # Create cache directories, run chickadeeds:
             for i in range(MAX_NODES):
                 datadir = initialize_datadir(self.options.cachedir, i)
-                args = [os.getenv("RAVEND", "ravend"), "-server", "-keypool=1", "-datadir=" + datadir, "-discover=0"]
+                args = [os.getenv("CHICKADEED", "chickadeed"), "-server", "-keypool=1", "-datadir=" + datadir, "-discover=0"]
                 if i > 0:
                     args.append("-connect=127.0.0.1:" + str(p2p_port(0)))
                 self.nodes.append(TestNode(i, self.options.cachedir, extra_args=[], rpchost=None, timewait=None, binary=None, stderr=None, mocktime=self.mocktime, coverage_dir=None))
@@ -441,7 +441,7 @@ class RavenTestFramework():
             from_dir = os.path.join(self.options.cachedir, "node" + str(i))
             to_dir = os.path.join(self.options.tmpdir, "node" + str(i))
             shutil.copytree(from_dir, to_dir)
-            initialize_datadir(self.options.tmpdir, i)  # Overwrite port/rpcport in raven.conf
+            initialize_datadir(self.options.tmpdir, i)  # Overwrite port/rpcport in chickadee.conf
 
     def _initialize_chain_clean(self):
         """Initialize empty blockchain for use by the test.
@@ -451,10 +451,10 @@ class RavenTestFramework():
         for i in range(self.num_nodes):
             initialize_datadir(self.options.tmpdir, i)
 
-class ComparisonTestFramework(RavenTestFramework):
+class ComparisonTestFramework(ChickadeeTestFramework):
     """Test framework for doing p2p comparison testing
 
-    Sets up some ravend binaries:
+    Sets up some chickadeed binaries:
     - 1 binary: test binary
     - 2 binaries: 1 test binary, 1 ref binary
     - n>2 binaries: 1 test binary, n-1 ref binaries"""
@@ -465,11 +465,11 @@ class ComparisonTestFramework(RavenTestFramework):
 
     def add_options(self, parser):
         parser.add_option("--testbinary", dest="testbinary",
-                          default=os.getenv("RAVEND", "ravend"),
-                          help="ravend binary to test")
+                          default=os.getenv("CHICKADEED", "chickadeed"),
+                          help="chickadeed binary to test")
         parser.add_option("--refbinary", dest="refbinary",
-                          default=os.getenv("RAVEND", "ravend"),
-                          help="ravend binary to use for reference nodes (if any)")
+                          default=os.getenv("CHICKADEED", "chickadeed"),
+                          help="chickadeed binary to use for reference nodes (if any)")
 
     def setup_network(self):
         extra_args = [['-whitelist=127.0.0.1']] * self.num_nodes

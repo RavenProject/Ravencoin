@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test account RPCs.
@@ -14,10 +14,10 @@ RPCs tested are:
     - move (with account arguments)
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import assert_equal
 
-class WalletAccountsTest(RavenTestFramework):
+class WalletAccountsTest(ChickadeeTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1
@@ -35,7 +35,7 @@ class WalletAccountsTest(RavenTestFramework):
         assert_equal(node.getbalance(), 10000)
 
         # there should be 2 address groups
-        # each with 1 address with a balance of 50 Ravens
+        # each with 1 address with a balance of 50 Chickadees
         address_groups = node.listaddressgroupings()
         assert_equal(len(address_groups), 2)
         # the addresses aren't linked now, but will be after we send to the

@@ -1,13 +1,13 @@
 # Copyright (c) 2013-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-TESTS += test/test_raven
-bin_PROGRAMS += test/test_raven
-noinst_PROGRAMS += test/test_raven_fuzzy
+TESTS += test/test_chickadee
+bin_PROGRAMS += test/test_chickadee
+noinst_PROGRAMS += test/test_chickadee_fuzzy
 TEST_SRCDIR = test
-TEST_BINARY=test/test_raven$(EXEEXT)
+TEST_BINARY=test/test_chickadee$(EXEEXT)
 
 JSON_TEST_FILES = \
   test/data/script_tests.json \
@@ -22,8 +22,8 @@ RAW_TEST_FILES =
 
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
-# test_raven binary #
-RAVEN_TESTS =\
+# test_chickadee binary #
+CHICKADEE_TESTS =\
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \
   test/addrman_tests.cpp \
@@ -75,9 +75,9 @@ RAVEN_TESTS =\
   test/sigopcount_tests.cpp \
   test/skiplist_tests.cpp \
   test/streams_tests.cpp \
-  test/test_raven.cpp \
-  test/test_raven.h \
-  test/test_raven_main.cpp \
+  test/test_chickadee.cpp \
+  test/test_chickadee.h \
+  test/test_chickadee_main.cpp \
   test/timedata_tests.cpp \
   test/torcontrol_tests.cpp \
   test/transaction_tests.cpp \
@@ -88,7 +88,7 @@ RAVEN_TESTS =\
   test/util_tests.cpp
 
 if ENABLE_WALLET
-RAVEN_TESTS += \
+CHICKADEE_TESTS += \
   wallet/test/wallet_test_fixture.cpp \
   wallet/test/wallet_test_fixture.h \
   wallet/test/accounting_tests.cpp \
@@ -96,61 +96,61 @@ RAVEN_TESTS += \
   wallet/test/crypto_tests.cpp
 endif
 
-test_test_raven_SOURCES = $(RAVEN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
-test_test_raven_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
-test_test_raven_LDADD =
+test_test_chickadee_SOURCES = $(CHICKADEE_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
+test_test_chickadee_CPPFLAGS = $(AM_CPPFLAGS) $(CHICKADEE_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
+test_test_chickadee_LDADD =
 if ENABLE_WALLET
-test_test_raven_LDADD += $(LIBRAVEN_WALLET)
+test_test_chickadee_LDADD += $(LIBCHICKADEE_WALLET)
 endif
-test_test_raven_LDADD += $(LIBRAVEN_SERVER) $(LIBRAVEN_CLI) $(LIBRAVEN_COMMON) $(LIBRAVEN_UTIL) $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(LIBUNIVALUE) \
+test_test_chickadee_LDADD += $(LIBCHICKADEE_SERVER) $(LIBCHICKADEE_CLI) $(LIBCHICKADEE_COMMON) $(LIBCHICKADEE_UTIL) $(LIBCHICKADEE_CONSENSUS) $(LIBCHICKADEE_CRYPTO) $(LIBUNIVALUE) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
-test_test_raven_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_chickadee_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_raven_LDADD += $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
-test_test_raven_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+test_test_chickadee_LDADD += $(LIBCHICKADEE_CONSENSUS) $(LIBCHICKADEE_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+test_test_chickadee_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-test_test_raven_LDADD += $(ZMQ_LIBS)
+test_test_chickadee_LDADD += $(ZMQ_LIBS)
 endif
 #
 
-# test_raven_fuzzy binary #
-test_test_raven_fuzzy_SOURCES = test/test_raven_fuzzy.cpp
-test_test_raven_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-test_test_raven_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-test_test_raven_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# test_chickadee_fuzzy binary #
+test_test_chickadee_fuzzy_SOURCES = test/test_chickadee_fuzzy.cpp
+test_test_chickadee_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(CHICKADEE_INCLUDES)
+test_test_chickadee_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_chickadee_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
-test_test_raven_fuzzy_LDADD = \
+test_test_chickadee_fuzzy_LDADD = \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBCHICKADEE_SERVER) \
+  $(LIBCHICKADEE_COMMON) \
+  $(LIBCHICKADEE_UTIL) \
+  $(LIBCHICKADEE_CONSENSUS) \
+  $(LIBCHICKADEE_CRYPTO) \
   $(LIBSECP256K1)
 
-test_test_raven_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+test_test_chickadee_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
-nodist_test_test_raven_SOURCES = $(GENERATED_TEST_FILES)
+nodist_test_test_chickadee_SOURCES = $(GENERATED_TEST_FILES)
 
-$(RAVEN_TESTS): $(GENERATED_TEST_FILES)
+$(CHICKADEE_TESTS): $(GENERATED_TEST_FILES)
 
-CLEAN_RAVEN_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
+CLEAN_CHICKADEE_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
 
-CLEANFILES += $(CLEAN_RAVEN_TEST)
+CLEANFILES += $(CLEAN_CHICKADEE_TEST)
 
-raven_test: $(TEST_BINARY)
+chickadee_test: $(TEST_BINARY)
 
-raven_test_check: $(TEST_BINARY) FORCE
+chickadee_test_check: $(TEST_BINARY) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
-raven_test_clean : FORCE
-	rm -f $(CLEAN_RAVEN_TEST) $(test_test_raven_OBJECTS) $(TEST_BINARY)
+chickadee_test_clean : FORCE
+	rm -f $(CLEAN_CHICKADEE_TEST) $(test_test_chickadee_OBJECTS) $(TEST_BINARY)
 
 check-local:
-	@echo "Running test/util/raven-util-test.py..."
-	$(PYTHON) $(top_builddir)/test/util/raven-util-test.py
+	@echo "Running test/util/chickadee-util-test.py..."
+	$(PYTHON) $(top_builddir)/test/util/chickadee-util-test.py
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 check
 if EMBEDDED_UNIVALUE
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C univalue check

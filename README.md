@@ -1,40 +1,125 @@
-Raven Core integration/staging tree
+x16rc
+=====
+
+What is x16rc?
+--------------
+
+x16rc is a cryptocurrency algorithm which solves a glaring problem found in the x16r algorithm... power spikes, which are potentially damaging to hardware.
+
+x16rc uses the last 16 digits of the previous block hash to determine which algorithm to start with before performing all 16 algorithms in a loop. This eliminates high power draw by making the frequency of all algorithms equal.
+
+
+Example
+-------
+
+Chickadee block 120236, hash fdd83b16db18e1eb0194475f6a176adf83ffbe7d9746aae703a66a1375863d66	
+
+x16r
+```
+0
+3
+a
+6
+6
+a
+1
+3
+7
+5
+8
+6
+3
+d
+6
+6
+```
+
+```
+Frequency distribution: 
+0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f 
+-----------------------------------------------
+1  1  0  3  0  1  5  1  1  0  2  0  0  1  0  0 
+```
+algo 6 happens five times  
+algo 3 happens three times  
+If these are both high power algos, 50% of the hashes are taken up by high power algos when an average would be 12%. This causes a significant power spike. In practice, an 800w rig can alternate between 550w and 1300w.
+
+
+x16rc
+```
+0123456789abcdef
+3456789abcdef012
+abcdef0123456789
+6789abcdef012345
+6789abcdef012345
+abcdef0123456789
+123456789abcedf0
+3456789abcdef012
+789abcdef0123456
+56789abcdef01234
+89abcdef01234567
+6789abcdef012345
+3456789abcdef012
+def0123456789abc
+6789abcdef012345
+6789abcdef012345
+```
+
+```
+Frequency distribution: 
+0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+-----------------------------------------------
+16 16 16 16 16 16 16 16 16 16 16 16 16 16 16 16
+```
+
+all algos happen an equal amount of times.  
+the power consumption is always constant.  
+x16rc solves the power spike issues of x16r.
+
+More to come...
+
+
+Chickadee forked information
+============================
+
+
+Chickadee Core integration/staging tree
 =====================================
 
-https://ravencoin.org
+https://x16rc.org
 
-What is Raven?
+What is Chickadee?
 ----------------
 
-Raven is an experimental digital currency that enables instant payments to
-anyone, anywhere in the world. Raven uses peer-to-peer technology to operate
+Chickadee is an experimental digital currency that enables instant payments to
+anyone, anywhere in the world. Chickadee uses peer-to-peer technology to operate
 with no central authority: managing transactions and issuing money are carried
-out collectively by the network. Raven Core is the name of open source
+out collectively by the network. Chickadee Core is the name of open source
 software which enables the use of this currency.
 
 For more information, as well as an immediately useable, binary version of
-the Raven Core software, see https://ravencoin.org
+the Chickadee Core software, see https://x16rc.org
 
 License
 -------
 
-Raven Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+Chickadee Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see https://opensource.org/licenses/MIT.
 
 Development Process
 -------------------
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/RavenProject/Ravencoin/tags) are created
-regularly to indicate new official, stable release versions of Raven Core.
+completely stable. [Tags](https://github.com/lukepighetti/x16rc/tags) are created
+regularly to indicate new official, stable release versions of Chickadee Core.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The developer [mailing list](https://lists.linuxfoundation.org/mailman/listinfo/raven-dev)
+The developer [mailing list](https://lists.linuxfoundation.org/mailman/listinfo/chickadee-dev)
 should be used to discuss complicated or controversial changes before working
 on a patch set.
 
-Developer IRC can be found on Freenode at #raven-core-dev.
+Developer IRC can be found on Freenode at #chickadee-core-dev.
 
 Testing
 -------
@@ -46,7 +131,7 @@ lots of money.
 
 Testnet is now up and running and available to use during development. There is an issue when connecting to the testnet that requires the use of the -maxtipage parameter in order to connect to the test network initially. After the initial launch the -maxtipage parameter is not required.
 
-Use this command to initially start ravend on the testnet. <code>./ravend -testnet -maxtipage=259200</code>
+Use this command to initially start chickadeed on the testnet. <code>./chickadeed -testnet -maxtipage=259200</code>
 
 ### Automated Testing
 
@@ -68,23 +153,23 @@ to add a test plan to the pull request description if testing the changes is
 not straightforward.
 
 
-About Ravencoin
+About Chickadee
 ----------------
 A digital peer to peer network for the facilitation of asset transfer.
 
 
 
-In the fictional world of Westeros, ravens are used as messengers who carry statements of truth. Ravencoin is a use case specific blockchain designed to carry statements of truth about who owns what assets. 
+In the fictional world of Westeros, chickadees are used as messengers who carry statements of truth. Chickadee is a use case specific blockchain designed to carry statements of truth about who owns what assets. 
 
 
 
 Thank you to the Bitcoin developers. 
 
-The Ravencoin project is launched based on the hard work and continuous effort of over 400 Bitcoin developers who made over 14,000 commits over the life to date of the Bitcoin project. We are eternally grateful to you for your efforts and diligence in making a secure network and for their support of free and open source software development.  The Ravencoin experiment is made on the foundation you built.
+The Chickadee project is launched based on the hard work and continuous effort of over 400 Bitcoin developers who made over 14,000 commits over the life to date of the Bitcoin project. We are eternally grateful to you for your efforts and diligence in making a secure network and for their support of free and open source software development.  The Chickadee experiment is made on the foundation you built.
 
 
 Abstract
-Ravencoin aims to implement a blockchain which is optimized specifically for the use case of transferring assets such as securities from one holder to another. Based on the extensive development and testing of Bitcoin, Ravencoin is built on a fork of the Bitcoin code. Key changes include a faster block reward time and a change in the number, but not weighed distribution schedule, of coins. Ravencoin is free and open source and will be issued and mined transparently with no pre-mine, developer allocation or any other similar set aside. Ravencoin is intended to prioritize user control, privacy and censorship resistance and be jurisdiction agnostic while allowing simple optional additional features for users based on need.
+Chickadee aims to implement a blockchain which is optimized specifically for the use case of transferring assets such as securities from one holder to another. Based on the extensive development and testing of Bitcoin, Chickadee is built on a fork of the Bitcoin code. Key changes include a faster block reward time and a change in the number, but not weighed distribution schedule, of coins. Chickadee is free and open source and will be issued and mined transparently with no pre-mine, developer allocation or any other similar set aside. Chickadee is intended to prioritize user control, privacy and censorship resistance and be jurisdiction agnostic while allowing simple optional additional features for users based on need.
 
 
 
@@ -94,9 +179,9 @@ The success of the Etherium ERC 20 token shows the demand for tokenized assets t
 
 Bitcoin also has the capability of serving as the rails for tokens by using projects such as Omnilayer, RSK or Counterparty. However, neither Bitcoin nor Ethereum was specifically designed for facilitating ownership of other assets. 
 
-Ravencoin is designed to be a use case specific blockchain designed to efficiently handle one specific function: the transfer of assets from one party to another.
+Chickadee is designed to be a use case specific blockchain designed to efficiently handle one specific function: the transfer of assets from one party to another.
 
-Bitcoin is and always should be focused on its goals of being a better form of money. Bitcoin developers will unlikely prioritize improvements or features which are specifically beneficial to the facilitation of token transfers.  One goal of the Ravencoin project is to see if a use case specific blockchain and development effort can create code which can either improve existing structures like Bitcoin or provide advantages for specific use cases.
+Bitcoin is and always should be focused on its goals of being a better form of money. Bitcoin developers will unlikely prioritize improvements or features which are specifically beneficial to the facilitation of token transfers.  One goal of the Chickadee project is to see if a use case specific blockchain and development effort can create code which can either improve existing structures like Bitcoin or provide advantages for specific use cases.
 
 In the new global economy, borders and jurisdictions will be less relevant as more assets are tradable and trade across borders is increasingly frictionless. In an age where people can move significant amounts of wealth instantly using Bitcoin, global consumers will likely demand the same efficiency for their securities and similar asset holdings.
 

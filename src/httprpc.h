@@ -1,10 +1,10 @@
 // Copyright (c) 2015 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_HTTPRPC_H
-#define RAVEN_HTTPRPC_H
+#ifndef CHICKADEE_HTTPRPC_H
+#define CHICKADEE_HTTPRPC_H
 
 #include <string>
 #include <map>

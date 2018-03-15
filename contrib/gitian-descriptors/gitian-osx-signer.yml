@@ -1,5 +1,5 @@
 ---
-name: "raven-dmg-signer"
+name: "chickadee-dmg-signer"
 suites:
 - "trusty"
 architectures:
@@ -7,10 +7,10 @@ architectures:
 packages:
 - "faketime"
 remotes:
-- "url": "https://github.com/raven-core/raven-detached-sigs.git"
+- "url": "https://github.com/chickadee-core/chickadee-detached-sigs.git"
   "dir": "signature"
 files:
-- "raven-osx-unsigned.tar.gz"
+- "chickadee-osx-unsigned.tar.gz"
 script: |
   WRAP_DIR=$HOME/wrapped
   mkdir -p ${WRAP_DIR}
@@ -27,8 +27,8 @@ script: |
     chmod +x ${WRAP_DIR}/${prog}
   done
 
-  UNSIGNED=raven-osx-unsigned.tar.gz
-  SIGNED=raven-osx-signed.dmg
+  UNSIGNED=chickadee-osx-unsigned.tar.gz
+  SIGNED=chickadee-osx-signed.dmg
 
   tar -xf ${UNSIGNED}
   OSX_VOLNAME="$(cat osx_volname)"

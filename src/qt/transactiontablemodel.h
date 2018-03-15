@@ -1,12 +1,12 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_TRANSACTIONTABLEMODEL_H
-#define RAVEN_QT_TRANSACTIONTABLEMODEL_H
+#ifndef CHICKADEE_QT_TRANSACTIONTABLEMODEL_H
+#define CHICKADEE_QT_TRANSACTIONTABLEMODEL_H
 
-#include "ravenunits.h"
+#include "chickadeeunits.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -99,7 +99,7 @@ private:
     QString formatTxDate(const TransactionRecord *wtx) const;
     QString formatTxType(const TransactionRecord *wtx) const;
     QString formatTxToAddress(const TransactionRecord *wtx, bool tooltip) const;
-    QString formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed=true, RavenUnits::SeparatorStyle separators=RavenUnits::separatorStandard) const;
+    QString formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed=true, ChickadeeUnits::SeparatorStyle separators=ChickadeeUnits::separatorStandard) const;
     QString formatTooltip(const TransactionRecord *rec) const;
     QVariant txStatusDecoration(const TransactionRecord *wtx) const;
     QVariant txWatchonlyDecoration(const TransactionRecord *wtx) const;
@@ -118,4 +118,4 @@ public Q_SLOTS:
     friend class TransactionTablePriv;
 };
 
-#endif // RAVEN_QT_TRANSACTIONTABLEMODEL_H
+#endif // CHICKADEE_QT_TRANSACTIONTABLEMODEL_H

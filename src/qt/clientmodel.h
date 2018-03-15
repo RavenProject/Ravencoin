@@ -1,10 +1,10 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_CLIENTMODEL_H
-#define RAVEN_QT_CLIENTMODEL_H
+#ifndef CHICKADEE_QT_CLIENTMODEL_H
+#define CHICKADEE_QT_CLIENTMODEL_H
 
 #include <QObject>
 #include <QDateTime>
@@ -35,7 +35,7 @@ enum NumConnections {
     CONNECTIONS_ALL  = (CONNECTIONS_IN | CONNECTIONS_OUT),
 };
 
-/** Model for Raven network client. */
+/** Model for Chickadee network client. */
 class ClientModel : public QObject
 {
     Q_OBJECT
@@ -117,4 +117,4 @@ public Q_SLOTS:
     void updateBanlist();
 };
 
-#endif // RAVEN_QT_CLIENTMODEL_H
+#endif // CHICKADEE_QT_CLIENTMODEL_H

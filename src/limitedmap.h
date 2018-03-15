@@ -1,10 +1,10 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_LIMITEDMAP_H
-#define RAVEN_LIMITEDMAP_H
+#ifndef CHICKADEE_LIMITEDMAP_H
+#define CHICKADEE_LIMITEDMAP_H
 
 #include <assert.h>
 #include <map>
@@ -98,4 +98,4 @@ public:
     }
 };
 
-#endif // RAVEN_LIMITEDMAP_H
+#endif // CHICKADEE_LIMITEDMAP_H

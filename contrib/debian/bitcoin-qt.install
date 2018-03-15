@@ -1,6 +1,6 @@
-usr/local/bin/raven-qt usr/bin
-share/pixmaps/raven32.xpm usr/share/pixmaps
-share/pixmaps/raven16.xpm usr/share/pixmaps
-share/pixmaps/raven128.png usr/share/pixmaps
-debian/raven-qt.desktop usr/share/applications
-debian/raven-qt.protocol usr/share/kde4/services/
+usr/local/bin/chickadee-qt usr/bin
+share/pixmaps/chickadee32.xpm usr/share/pixmaps
+share/pixmaps/chickadee16.xpm usr/share/pixmaps
+share/pixmaps/chickadee128.png usr/share/pixmaps
+debian/chickadee-qt.desktop usr/share/applications
+debian/chickadee-qt.protocol usr/share/kde4/services/

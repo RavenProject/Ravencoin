@@ -1,12 +1,12 @@
 *.tar.gz
 
-src/raven
-src/ravend
-src/raven-cli
-src/raven-tx
-src/test/test_raven
-src/test/test_raven_fuzzy
-src/qt/test/test_raven-qt
+src/chickadee
+src/chickadeed
+src/chickadee-cli
+src/chickadee-tx
+src/test/test_chickadee
+src/test/test_chickadee_fuzzy
+src/qt/test/test_chickadee-qt
 .vscode
 output.txt
 
@@ -31,8 +31,8 @@ config.log
 config.status
 configure
 libtool
-src/config/raven-config.h
-src/config/raven-config.h.in
+src/config/chickadee-config.h
+src/config/chickadee-config.h.in
 src/config/stamp-h1
 share/setup.nsi
 share/qt/Info.plist
@@ -79,11 +79,11 @@ src/qt/test/moc*.cpp
 # Compilation and Qt preprocessor part
 *.qm
 Makefile
-Raven-Qt.app
+Chickadee-Qt.app
 
 # Unit-tests
 Makefile.test
-raven-qt_test
+chickadee-qt_test
 
 # Resources cpp
 qrc_*.cpp
@@ -96,7 +96,7 @@ build
 *.gcno
 *.gcda
 /*.info
-test_raven.coverage/
+test_chickadee.coverage/
 total.coverage/
 coverage_percent.txt
 
@@ -111,5 +111,5 @@ test/cache/*
 
 /doc/doxygen/
 
-libravenconsensus.pc
+libchickadeeconsensus.pc
 contrib/devtools/split-debug.sh

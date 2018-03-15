@@ -1,5 +1,5 @@
 // Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2016 The Raven Core developers
+// Copyright (c) 2009-2016 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -134,7 +134,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
 
-    
+
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -144,11 +144,11 @@ public:
 
 
         // The best chain should have at least this much work.
-    
+
         //TODO: This needs to be changed when we re-start the chain
         //consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000000c000c00");
 
-        //TODO - Set this to genesis block 
+        //TODO - Set this to genesis block
         // By default assume that the signatures in ancestors of this block are valid.
         //consensus.defaultAssumeValid = uint256S("0x0000000000000000003b9ce759c2a087d52abc4266f8f4ebd6d768b89defa50a"); //477890
 
@@ -161,20 +161,20 @@ public:
         pchMessageStart[1] = 0x41;
         pchMessageStart[2] = 0x56;
         pchMessageStart[3] = 0x4e;
-        nDefaultPort = 8767;
+        nDefaultPort = 8757;
         nPruneAfterHeight = 100000;
-                  
-        genesis = CreateGenesisBlock(1514999494, 25023712, 0x1e00ffff, 4, 5000 * COIN); 
 
-        consensus.hashGenesisBlock = genesis.GetHash();        
+        genesis = CreateGenesisBlock(1514999494, 25023712, 0x1e00ffff, 4, 5000 * COIN);
+
+        consensus.hashGenesisBlock = genesis.GetHash();
         //std::cout << consensus.hashGenesisBlock.GetHex() << "\n";
         //std::cout << "Merkle: " << genesis.hashMerkleRoot.GetHex() << "\n";
 
         assert(consensus.hashGenesisBlock == uint256S("0x0000006b444bc2f2ffe627be9d9e7e7a0730000870ef6eb6da46c8eae389df90"));
         assert(genesis.hashMerkleRoot == uint256S("0x28ff00a867739a352523808d301f504bc4547699398d70faf2266a8bae5f3516"));
 
-        vSeeds.emplace_back("seed-raven.ravencoin.org", false); 
-        vSeeds.emplace_back("seed-raven.bitactivate.com", false); 
+        vSeeds.emplace_back("seed-chickadee.x16rc.org", false);
+        vSeeds.emplace_back("seed-chickadee.bitactivate.com", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,60);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,122);
@@ -193,12 +193,12 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-               
+
             }
         };
 
         chainTxData = ChainTxData{
-            // Update as we know more about the contents of the Raven chain
+            // Update as we know more about the contents of the Chickadee chain
             1509572692, // * UNIX timestamp of last known number of transactions
             1,          // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
@@ -244,10 +244,10 @@ public:
         pchMessageStart[1] = 0x56;
         pchMessageStart[2] = 0x4E;
         pchMessageStart[3] = 0x54;
-        nDefaultPort = 18767;
+        nDefaultPort = 18757;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1517350340, 4791361, 0x1e00ffff, 4, 5000 * COIN); 
+        genesis = CreateGenesisBlock(1517350340, 4791361, 0x1e00ffff, 4, 5000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
         //Test MerkleRoot and GenesisBlock
@@ -257,8 +257,8 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
 
-        vSeeds.emplace_back("seed-testnet-raven.ravencoin.org", false); 
-        vSeeds.emplace_back("seed-testnet-raven.bitactivate.com", false); 
+        vSeeds.emplace_back("seed-testnet-chickadee.x16rc.org", false);
+        vSeeds.emplace_back("seed-testnet-chickadee.bitactivate.com", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
@@ -281,7 +281,7 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Update as we know more about the contents of the Raven chain
+            // Update as we know more about the contents of the Chickadee chain
             1513705170, // * UNIX timestamp of last known number of transactions
             1,          // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
@@ -413,5 +413,3 @@ void TurnOffBIP65() {
 void TurnOffBIP66() {
 	globalChainParams->TurnOffBIP66();
 }
-
-

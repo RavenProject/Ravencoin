@@ -1,10 +1,10 @@
 // Copyright (c) 2017 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CRYPTO_CHACHA20_H
-#define RAVEN_CRYPTO_CHACHA20_H
+#ifndef CHICKADEE_CRYPTO_CHACHA20_H
+#define CHICKADEE_CRYPTO_CHACHA20_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -24,4 +24,4 @@ public:
     void Output(unsigned char* output, size_t bytes);
 };
 
-#endif // RAVEN_CRYPTO_CHACHA20_H
+#endif // CHICKADEE_CRYPTO_CHACHA20_H

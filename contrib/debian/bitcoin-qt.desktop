@@ -1,13 +1,13 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=Raven Core
-Comment=Connect to the Raven P2P Network
-Comment[de]=Verbinde mit dem Raven peer-to-peer Netzwerk
-Comment[fr]=Raven, monnaie virtuelle cryptographique pair à pair
-Comment[tr]=Raven, eşten eşe kriptografik sanal para birimi
-Exec=raven-qt %u
+Name=Chickadee Core
+Comment=Connect to the Chickadee P2P Network
+Comment[de]=Verbinde mit dem Chickadee peer-to-peer Netzwerk
+Comment[fr]=Chickadee, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Chickadee, eşten eşe kriptografik sanal para birimi
+Exec=chickadee-qt %u
 Terminal=false
 Type=Application
-Icon=raven128
-MimeType=x-scheme-handler/raven;
+Icon=chickadee128
+MimeType=x-scheme-handler/chickadee;
 Categories=Office;Finance;

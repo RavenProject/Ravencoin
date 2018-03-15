@@ -1,10 +1,10 @@
 // Copyright (c) 2017 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_FEEBUMPER_H
-#define RAVEN_WALLET_FEEBUMPER_H
+#ifndef CHICKADEE_WALLET_FEEBUMPER_H
+#define CHICKADEE_WALLET_FEEBUMPER_H
 
 #include <primitives/transaction.h>
 
@@ -59,4 +59,4 @@ private:
     CAmount nNewFee;
 };
 
-#endif // RAVEN_WALLET_FEEBUMPER_H
+#endif // CHICKADEE_WALLET_FEEBUMPER_H

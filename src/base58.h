@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,8 +12,8 @@
  * - E-mail usually won't line-break if there's no punctuation to break at.
  * - Double-clicking selects the whole string as one word if it's all alphanumeric.
  */
-#ifndef RAVEN_BASE58_H
-#define RAVEN_BASE58_H
+#ifndef CHICKADEE_BASE58_H
+#define CHICKADEE_BASE58_H
 
 #include "chainparams.h"
 #include "key.h"
@@ -98,7 +98,7 @@ public:
 /**
  * A base58-encoded secret key
  */
-class CRavenSecret : public CBase58Data
+class CChickadeeSecret : public CBase58Data
 {
 public:
     void SetKey(const CKey& vchSecret);
@@ -107,11 +107,11 @@ public:
     bool SetString(const char* pszSecret);
     bool SetString(const std::string& strSecret);
 
-    CRavenSecret(const CKey& vchSecret) { SetKey(vchSecret); }
-    CRavenSecret() {}
+    CChickadeeSecret(const CKey& vchSecret) { SetKey(vchSecret); }
+    CChickadeeSecret() {}
 };
 
-template<typename K, int Size, CChainParams::Base58Type Type> class CRavenExtKeyBase : public CBase58Data
+template<typename K, int Size, CChainParams::Base58Type Type> class CChickadeeExtKeyBase : public CBase58Data
 {
 public:
     void SetKey(const K &key) {
@@ -129,23 +129,23 @@ public:
         return ret;
     }
 
-    CRavenExtKeyBase(const K &key) {
+    CChickadeeExtKeyBase(const K &key) {
         SetKey(key);
     }
 
-    CRavenExtKeyBase(const std::string& strBase58c) {
+    CChickadeeExtKeyBase(const std::string& strBase58c) {
         SetString(strBase58c.c_str(), Params().Base58Prefix(Type).size());
     }
 
-    CRavenExtKeyBase() {}
+    CChickadeeExtKeyBase() {}
 };
 
-typedef CRavenExtKeyBase<CExtKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_SECRET_KEY> CRavenExtKey;
-typedef CRavenExtKeyBase<CExtPubKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_PUBLIC_KEY> CRavenExtPubKey;
+typedef CChickadeeExtKeyBase<CExtKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_SECRET_KEY> CChickadeeExtKey;
+typedef CChickadeeExtKeyBase<CExtPubKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_PUBLIC_KEY> CChickadeeExtPubKey;
 
 std::string EncodeDestination(const CTxDestination& dest);
 CTxDestination DecodeDestination(const std::string& str);
 bool IsValidDestinationString(const std::string& str);
 bool IsValidDestinationString(const std::string& str, const CChainParams& params);
 
-#endif // RAVEN_BASE58_H
+#endif // CHICKADEE_BASE58_H

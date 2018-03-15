@@ -1,11 +1,11 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WARNINGS_H
-#define RAVEN_WARNINGS_H
+#ifndef CHICKADEE_WARNINGS_H
+#define CHICKADEE_WARNINGS_H
 
 #include <stdlib.h>
 #include <string>
@@ -25,4 +25,4 @@ std::string GetWarnings(const std::string& strFor);
 
 static const bool DEFAULT_TESTSAFEMODE = false;
 
-#endif //  RAVEN_WARNINGS_H
+#endif //  CHICKADEE_WARNINGS_H

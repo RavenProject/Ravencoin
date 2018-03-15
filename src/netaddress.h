@@ -1,13 +1,13 @@
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_NETADDRESS_H
-#define RAVEN_NETADDRESS_H
+#ifndef CHICKADEE_NETADDRESS_H
+#define CHICKADEE_NETADDRESS_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/chickadee-config.h"
 #endif
 
 #include "compat.h"
@@ -175,4 +175,4 @@ class CService : public CNetAddr
         }
 };
 
-#endif // RAVEN_NETADDRESS_H
+#endif // CHICKADEE_NETADDRESS_H

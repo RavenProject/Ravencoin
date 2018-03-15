@@ -1,11 +1,11 @@
 Sample configuration files for:
 ```
-SystemD: ravend.service
-Upstart: ravend.conf
-OpenRC:  ravend.openrc
-         ravend.openrcconf
-CentOS:  ravend.init
-OS X:    org.raven.ravend.plist
+SystemD: chickadeed.service
+Upstart: chickadeed.conf
+OpenRC:  chickadeed.openrc
+         chickadeed.openrcconf
+CentOS:  chickadeed.init
+OS X:    org.chickadee.chickadeed.plist
 ```
 have been made available to assist packagers in creating node packages here.
 

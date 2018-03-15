@@ -1,10 +1,10 @@
 // Copyright (c) 2014 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CRYPTO_HMAC_SHA256_H
-#define RAVEN_CRYPTO_HMAC_SHA256_H
+#ifndef CHICKADEE_CRYPTO_HMAC_SHA256_H
+#define CHICKADEE_CRYPTO_HMAC_SHA256_H
 
 #include "crypto/sha256.h"
 
@@ -30,4 +30,4 @@ public:
     void Finalize(unsigned char hash[OUTPUT_SIZE]);
 };
 
-#endif // RAVEN_CRYPTO_HMAC_SHA256_H
+#endif // CHICKADEE_CRYPTO_HMAC_SHA256_H

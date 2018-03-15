@@ -1,10 +1,10 @@
 // Copyright (c) 2014-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CRYPTO_RIPEMD160_H
-#define RAVEN_CRYPTO_RIPEMD160_H
+#ifndef CHICKADEE_CRYPTO_RIPEMD160_H
+#define CHICKADEE_CRYPTO_RIPEMD160_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -26,4 +26,4 @@ public:
     CRIPEMD160& Reset();
 };
 
-#endif // RAVEN_CRYPTO_RIPEMD160_H
+#endif // CHICKADEE_CRYPTO_RIPEMD160_H

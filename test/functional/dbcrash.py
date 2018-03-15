@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test recovery from a crash during chainstate writing.
@@ -34,7 +34,7 @@ import time
 
 from test_framework.mininode import *
 from test_framework.script import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import *
 
 HTTP_DISCONNECT_ERRORS = [http.client.CannotSendRequest]
@@ -43,7 +43,7 @@ try:
 except AttributeError:
     pass
 
-class ChainstateWriteCrashTest(RavenTestFramework):
+class ChainstateWriteCrashTest(ChickadeeTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
         self.setup_clean_chain = False
@@ -85,14 +85,14 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 return utxo_hash
             except:
                 # An exception here should mean the node is about to crash.
-                # If ravend exits, then try again.  wait_for_node_exit()
-                # should raise an exception if ravend doesn't exit.
+                # If chickadeed exits, then try again.  wait_for_node_exit()
+                # should raise an exception if chickadeed doesn't exit.
                 self.wait_for_node_exit(node_index, timeout=10)
             self.crashed_on_restart += 1
             time.sleep(1)
 
-        # If we got here, ravend isn't coming back up on restart.  Could be a
-        # bug in ravend, or we've gotten unlucky with our dbcrash ratio --
+        # If we got here, chickadeed isn't coming back up on restart.  Could be a
+        # bug in chickadeed, or we've gotten unlucky with our dbcrash ratio --
         # perhaps we generated a test case that blew up our cache?
         # TODO: If this happens a lot, we should try to restart without -dbcrashratio
         # and make sure that recovery happens.

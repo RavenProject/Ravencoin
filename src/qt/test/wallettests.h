@@ -1,5 +1,5 @@
-#ifndef RAVEN_QT_TEST_WALLETTESTS_H
-#define RAVEN_QT_TEST_WALLETTESTS_H
+#ifndef CHICKADEE_QT_TEST_WALLETTESTS_H
+#define CHICKADEE_QT_TEST_WALLETTESTS_H
 
 #include <QObject>
 #include <QTest>
@@ -12,4 +12,4 @@ private Q_SLOTS:
     void walletTests();
 };
 
-#endif // RAVEN_QT_TEST_WALLETTESTS_H
+#endif // CHICKADEE_QT_TEST_WALLETTESTS_H

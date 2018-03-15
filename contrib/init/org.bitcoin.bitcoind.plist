@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>org.raven.ravend</string>
+	<string>org.chickadee.chickadeed</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/local/bin/ravend</string>
+		<string>/usr/local/bin/chickadeed</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>

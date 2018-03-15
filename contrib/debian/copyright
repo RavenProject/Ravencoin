@@ -1,13 +1,13 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Raven
+Upstream-Name: Chickadee
 Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
- irc://#raven@freenode.net
-Source: https://github.com/RavenProject/Ravencoin
+ irc://#chickadee@freenode.net
+Source: https://github.com/lukepighetti/x16rc
 
 Files: *
-Copyright: 2009-2017, Raven Core Developers
+Copyright: 2009-2017, Chickadee Core Developers
 License: Expat
-Comment: The Raven Core Developers encompasses the current developers listed on raven.org,
+Comment: The Chickadee Core Developers encompasses the current developers listed on x16rc.org,
          as well as the numerous contributors to the project.
 
 Files: debian/*
@@ -78,12 +78,12 @@ License: Expat
 Comment: Modifications of Stephan Hutchings Typicons
 
 Files: src/qt/res/icons/about.png
-       src/qt/res/icons/raven.*
-       share/pixmaps/raven*
-       src/qt/res/src/raven.svg
+       src/qt/res/icons/chickadee.*
+       share/pixmaps/chickadee*
+       src/qt/res/src/chickadee.svg
 Copyright: Bitboy, Jonas Schnelli
 License: public-domain
-Comment: Site: https://raventalk.org/?topic=1756.0
+Comment: Site: https://chickadeetalk.org/?topic=1756.0
 
 
 License: Expat

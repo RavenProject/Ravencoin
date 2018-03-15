@@ -1,11 +1,11 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_DB_H
-#define RAVEN_WALLET_DB_H
+#ifndef CHICKADEE_WALLET_DB_H
+#define CHICKADEE_WALLET_DB_H
 
 #include "clientversion.h"
 #include "fs.h"
@@ -369,4 +369,4 @@ public:
     bool static Rewrite(CWalletDBWrapper& dbw, const char* pszSkip = nullptr);
 };
 
-#endif // RAVEN_WALLET_DB_H
+#endif // CHICKADEE_WALLET_DB_H

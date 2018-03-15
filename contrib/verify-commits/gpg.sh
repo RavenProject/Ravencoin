@@ -1,6 +1,6 @@
 #!/bin/sh
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,7 +9,7 @@ VALID=false
 REVSIG=false
 IFS='
 '
-if [ "$RAVEN_VERIFY_COMMITS_ALLOW_SHA1" = 1 ]; then
+if [ "$CHICKADEE_VERIFY_COMMITS_ALLOW_SHA1" = 1 ]; then
 	GPG_RES="$(echo "$INPUT" | gpg --trust-model always "$@" 2>/dev/null)"
 else
 	# Note how we've disabled SHA1 with the --weak-digest option, disabling
@@ -43,12 +43,12 @@ for LINE in $(echo "$GPG_RES"); do
 		done < ./contrib/verify-commits/trusted-keys
 		;;
 	"[GNUPG:] REVKEYSIG "*)
-		[ "$RAVEN_VERIFY_COMMITS_ALLOW_REVSIG" != 1 ] && exit 1
+		[ "$CHICKADEE_VERIFY_COMMITS_ALLOW_REVSIG" != 1 ] && exit 1
 		REVSIG=true
 		GOODREVSIG="[GNUPG:] GOODSIG ${LINE#* * *}"
 		;;
 	"[GNUPG:] EXPKEYSIG "*)
-		[ "$RAVEN_VERIFY_COMMITS_ALLOW_REVSIG" != 1 ] && exit 1
+		[ "$CHICKADEE_VERIFY_COMMITS_ALLOW_REVSIG" != 1 ] && exit 1
 		REVSIG=true
 		GOODREVSIG="[GNUPG:] GOODSIG ${LINE#* * *}"
 		;;
