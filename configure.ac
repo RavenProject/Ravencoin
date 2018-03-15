@@ -1,4 +1,4 @@
-dnl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
+chickadeednl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
 AC_PREREQ([2.60])
 define(_CLIENT_VERSION_MAJOR, 0)
 define(_CLIENT_VERSION_MINOR, 15)
@@ -7,17 +7,17 @@ define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
 define(_COPYRIGHT_YEAR, 2017)
 define(_COPYRIGHT_HOLDERS,[The %s developers])
-define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Raven Core]])
-AC_INIT([Raven Core],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/RavenProject/Ravencoin/issues],[raven],[https://ravencoin.org/])
+define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Chickadee Core]])
+AC_INIT([Chickadee Core],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/lukepighetti/x16rc/issues],[chickadee],[http://x16rc.org/])
 AC_CONFIG_SRCDIR([src/validation.cpp])
 AC_CONFIG_HEADERS([src/config/raven-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
 
-RAVEN_DAEMON_NAME=ravend
-RAVEN_GUI_NAME=raven-qt
-RAVEN_CLI_NAME=raven-cli
-RAVEN_TX_NAME=raven-tx
+RAVEN_DAEMON_NAME=chickadeed
+RAVEN_GUI_NAME=chickadee-qt
+RAVEN_CLI_NAME=chickadee-cli
+RAVEN_TX_NAME=chickadee-tx
 
 dnl Unless the user specified ARFLAGS, force it to be cr
 AC_ARG_VAR(ARFLAGS, [Flags for the archiver, defaults to <cr> if not set])
@@ -83,7 +83,7 @@ AC_PATH_TOOL(RANLIB, ranlib)
 AC_PATH_TOOL(STRIP, strip)
 AC_PATH_TOOL(GCOV, gcov)
 AC_PATH_PROG(LCOV, lcov)
-dnl Python 3.x is supported from 3.4 on (see https://github.com/RavenProject/Ravencoin/issues/7893)
+dnl Python 3.x is supported from 3.4 on (see https://github.com/lukepighetti/x16rc/issues/7893)
 AC_PATH_PROGS([PYTHON], [python3.6 python3.5 python3.4 python3 python2.7 python2 python])
 AC_PATH_PROG(GENHTML, genhtml)
 AC_PATH_PROG([GIT], [git])
@@ -164,7 +164,7 @@ AC_ARG_ENABLE([lcov],
   [enable lcov testing (default is no)])],
   [use_lcov=yes],
   [use_lcov=no])
-  
+
 AC_ARG_ENABLE([lcov-branch-coverage],
   [AS_HELP_STRING([--enable-lcov-branch-coverage],
   [enable lcov testing branch coverage (default is no)])],
@@ -291,7 +291,7 @@ CPPFLAGS="$CPPFLAGS -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
 
 AC_ARG_WITH([utils],
   [AS_HELP_STRING([--with-utils],
-  [build raven-cli raven-tx (default=yes)])],
+  [build chickadee-cli chickadee-tx (default=yes)])],
   [build_raven_utils=$withval],
   [build_raven_utils=yes])
 
@@ -303,9 +303,9 @@ AC_ARG_WITH([libs],
 
 AC_ARG_WITH([daemon],
   [AS_HELP_STRING([--with-daemon],
-  [build ravend daemon (default=yes)])],
-  [build_ravend=$withval],
-  [build_ravend=yes])
+  [build chickadeed daemon (default=yes)])],
+  [build_chickadeed=$withval],
+  [build_chickadeed=yes])
 
 use_pkgconfig=yes
 case $host in
@@ -724,7 +724,7 @@ RAVEN_QT_INIT
 dnl sets $raven_enable_qt, $raven_enable_qt_test, $raven_enable_qt_dbus
 RAVEN_QT_CONFIGURE([$use_pkgconfig], [qt5])
 
-if test x$build_raven_utils$build_ravend$raven_enable_qt$use_tests$use_bench = xnonononono; then
+if test x$build_raven_utils$build_chickadeed$raven_enable_qt$use_tests$use_bench = xnonononono; then
     use_boost=no
 else
     use_boost=yes
@@ -910,7 +910,7 @@ if test x$use_pkgconfig = xyes; then
       if test x$use_qr != xno; then
         RAVEN_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
       fi
-      if test x$build_raven_utils$build_ravend$raven_enable_qt$use_tests != xnononono; then
+      if test x$build_raven_utils$build_chickadeed$raven_enable_qt$use_tests != xnononono; then
         PKG_CHECK_MODULES([EVENT], [libevent],, [AC_MSG_ERROR(libevent not found.)])
         if test x$TARGET_OS != xwindows; then
           PKG_CHECK_MODULES([EVENT_PTHREADS], [libevent_pthreads],, [AC_MSG_ERROR(libevent_pthreads not found.)])
@@ -935,7 +935,7 @@ else
   AC_CHECK_HEADER([openssl/ssl.h],, AC_MSG_ERROR(libssl headers missing),)
   AC_CHECK_LIB([ssl],         [main],SSL_LIBS=-lssl, AC_MSG_ERROR(libssl missing))
 
-  if test x$build_raven_utils$build_ravend$raven_enable_qt$use_tests != xnononono; then
+  if test x$build_raven_utils$build_chickadeed$raven_enable_qt$use_tests != xnononono; then
     AC_CHECK_HEADER([event2/event.h],, AC_MSG_ERROR(libevent headers missing),)
     AC_CHECK_LIB([event],[main],EVENT_LIBS=-levent,AC_MSG_ERROR(libevent missing))
     if test x$TARGET_OS != xwindows; then
@@ -984,7 +984,7 @@ dnl univalue check
 
 need_bundled_univalue=yes
 
-if test x$build_raven_utils$build_ravend$raven_enable_qt$use_tests$use_bench = xnonononono; then
+if test x$build_raven_utils$build_chickadeed$raven_enable_qt$use_tests$use_bench = xnonononono; then
   need_bundled_univalue=no
 else
 
@@ -1030,11 +1030,11 @@ AC_SUBST(UNIVALUE_LIBS)
 
 RAVEN_QT_PATH_PROGS([PROTOC], [protoc],$protoc_bin_path)
 
-AC_MSG_CHECKING([whether to build ravend])
-AM_CONDITIONAL([BUILD_RAVEND], [test x$build_ravend = xyes])
-AC_MSG_RESULT($build_ravend)
+AC_MSG_CHECKING([whether to build chickadeed])
+AM_CONDITIONAL([BUILD_chickadeed], [test x$build_chickadeed = xyes])
+AC_MSG_RESULT($build_chickadeed)
 
-AC_MSG_CHECKING([whether to build utils (raven-cli raven-tx)])
+AC_MSG_CHECKING([whether to build utils (chickadee-cli chickadee-tx)])
 AM_CONDITIONAL([BUILD_RAVEN_UTILS], [test x$build_raven_utils = xyes])
 AC_MSG_RESULT($build_raven_utils)
 
@@ -1135,7 +1135,7 @@ if test x$raven_enable_qt != xno; then
     AC_MSG_WARN("xgettext is required to update qt translations")
   fi
 
-  AC_MSG_CHECKING([whether to build test_raven-qt])
+  AC_MSG_CHECKING([whether to build test_chickadee-qt])
   if test x$use_gui_tests$raven_enable_qt_test = xyesyes; then
     AC_MSG_RESULT([yes])
     BUILD_TEST_QT="yes"
@@ -1162,7 +1162,7 @@ else
   AC_MSG_RESULT([no])
 fi
 
-if test x$build_raven_utils$build_raven_libs$build_ravend$raven_enable_qt$use_bench$use_tests = xnononononono; then
+if test x$build_raven_utils$build_raven_libs$build_chickadeed$raven_enable_qt$use_bench$use_tests = xnononononono; then
   AC_MSG_ERROR([No targets! Please specify at least one of: --with-utils --with-libs --with-daemon --with-gui --enable-bench or --enable-tests])
 fi
 
@@ -1286,7 +1286,7 @@ case ${OS} in
    ;;
 esac
 
-echo 
+echo
 echo "Options used to compile and link:"
 echo "  with wallet   = $enable_wallet"
 echo "  with gui / qt = $raven_enable_qt"
@@ -1301,7 +1301,7 @@ echo "  with upnp     = $use_upnp"
 echo "  use asm       = $use_asm"
 echo "  debug enabled = $enable_debug"
 echo "  werror        = $enable_werror"
-echo 
+echo
 echo "  target os     = $TARGET_OS"
 echo "  build os      = $BUILD_OS"
 echo
@@ -1312,4 +1312,4 @@ echo "  CXX           = $CXX"
 echo "  CXXFLAGS      = $CXXFLAGS"
 echo "  LDFLAGS       = $LDFLAGS"
 echo "  ARFLAGS       = $ARFLAGS"
-echo 
+echo

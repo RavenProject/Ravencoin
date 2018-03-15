@@ -708,7 +708,7 @@
 <context>
     <name>raven-core</name>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Raven மையம்</translation>
     </message>
     <message>

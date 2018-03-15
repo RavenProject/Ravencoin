@@ -2430,7 +2430,7 @@
         <translation>HTTP-palvelinta ei voitu käynnistää. Katso debug-lokista lisätietoja.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Raven-ydin</translation>
     </message>
     <message>

@@ -1,5 +1,5 @@
 # Copyright (c) 2013-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -74,7 +74,7 @@ if BUILD_RAVEN_UTILS
 endif
 
 .PHONY: FORCE check-symbols check-security
-# raven core #
+# Chickadee Core #
 RAVEN_CORE_H = \
   addrdb.h \
   addrman.h \

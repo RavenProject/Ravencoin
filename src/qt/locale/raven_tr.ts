@@ -3054,7 +3054,7 @@
         <translation>HTTP sunucusu başlatılamadı. Ayrıntılar için debug.log dosyasına bakınız.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Raven Çekirdeği</translation>
     </message>
     <message>

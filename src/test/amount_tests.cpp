@@ -1,5 +1,5 @@
 // Copyright (c) 2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(BinaryOperatorTest)
     BOOST_CHECK(a <= a);
     BOOST_CHECK(b >= a);
     BOOST_CHECK(b >= b);
-    // a should be 0.00000002 RVN/kB now
+    // a should be 0.00000002 X16RC/kB now
     a += a;
     BOOST_CHECK(a == b);
 }
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(ToStringTest)
 {
     CFeeRate feeRate;
     feeRate = CFeeRate(1);
-    BOOST_CHECK_EQUAL(feeRate.ToString(), "0.00000001 RVN/kB");
+    BOOST_CHECK_EQUAL(feeRate.ToString(), "0.00000001 X16RC/kB");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

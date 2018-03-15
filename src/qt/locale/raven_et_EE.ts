@@ -760,8 +760,8 @@
         <translation>Valikud:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Chickadee Core</source>
+        <translation>Chickadee Core</translation>
     </message>
     <message>
         <source>Information</source>

@@ -1758,7 +1758,7 @@
         <translation>Tööta taustal ning aktsepteeri käsklusi</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Raveni tuumik</translation>
     </message>
     <message>

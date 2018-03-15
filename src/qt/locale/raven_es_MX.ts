@@ -608,7 +608,7 @@
         <translation>Opciones:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>nucleo Raven</translation>
     </message>
     <message>

@@ -1028,7 +1028,7 @@
         <translation>Executar no fondo como un demo e aceptar comandos</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Core de Raven</translation>
     </message>
     <message>

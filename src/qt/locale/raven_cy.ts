@@ -484,7 +484,7 @@
         <translation>Opsiynau:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Craidd Raven</translation>
     </message>
     <message>

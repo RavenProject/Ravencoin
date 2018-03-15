@@ -3055,8 +3055,8 @@
         <translation>無法啟動 HTTP 伺服器。詳情請看除錯紀錄。</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Chickadee Core</source>
+        <translation>Chickadee Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

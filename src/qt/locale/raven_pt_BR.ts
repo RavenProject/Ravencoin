@@ -3054,8 +3054,8 @@
         <translation>Não foi possível iniciar o servidor HTTP. Veja o log para detaihes.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Chickadee Core</source>
+        <translation>Chickadee Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

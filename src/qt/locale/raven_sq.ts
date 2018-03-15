@@ -784,7 +784,7 @@
         <translation>Opsionet:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Berthama Raven</translation>
     </message>
     <message>

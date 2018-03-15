@@ -1124,8 +1124,8 @@
         <translation>Darbināt fonā kā servisu un pieņemt komandas</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Chickadee Core</source>
+        <translation>Chickadee Core</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>

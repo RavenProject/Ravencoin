@@ -1894,8 +1894,8 @@
         <translation>Unable to start HTTP server. See debug log for details.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Chickadee Core</source>
+        <translation>Chickadee Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

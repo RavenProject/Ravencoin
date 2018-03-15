@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,9 +18,9 @@ RavenUnits::RavenUnits(QObject *parent):
 QList<RavenUnits::Unit> RavenUnits::availableUnits()
 {
     QList<RavenUnits::Unit> unitlist;
-    unitlist.append(RVN);
-    unitlist.append(mRVN);
-    unitlist.append(uRVN);
+    unitlist.append(X16RC);
+    unitlist.append(mX16RC);
+    unitlist.append(uX16RC);
     return unitlist;
 }
 
@@ -28,9 +28,9 @@ bool RavenUnits::valid(int unit)
 {
     switch(unit)
     {
-    case RVN:
-    case mRVN:
-    case uRVN:
+    case X16RC:
+    case mX16RC:
+    case uX16RC:
         return true;
     default:
         return false;
@@ -41,9 +41,9 @@ QString RavenUnits::name(int unit)
 {
     switch(unit)
     {
-    case RVN: return QString("RVN");
-    case mRVN: return QString("mRVN");
-    case uRVN: return QString::fromUtf8("μRVN");
+    case X16RC: return QString("X16RC");
+    case mX16RC: return QString("mX16RC");
+    case uX16RC: return QString::fromUtf8("μX16RC");
     default: return QString("???");
     }
 }
@@ -52,9 +52,9 @@ QString RavenUnits::description(int unit)
 {
     switch(unit)
     {
-    case RVN: return QString("Ravens");
-    case mRVN: return QString("Milli-Ravens (1 / 1" THIN_SP_UTF8 "000)");
-    case uRVN: return QString("Micro-Ravens (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case X16RC: return QString("Ravens");
+    case mX16RC: return QString("Milli-Ravens (1 / 1" THIN_SP_UTF8 "000)");
+    case uX16RC: return QString("Micro-Ravens (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
 }
@@ -63,9 +63,9 @@ qint64 RavenUnits::factor(int unit)
 {
     switch(unit)
     {
-    case RVN:  return 100000000;
-    case mRVN: return 100000;
-    case uRVN: return 100;
+    case X16RC:  return 100000000;
+    case mX16RC: return 100000;
+    case uX16RC: return 100;
     default:   return 100000000;
     }
 }
@@ -74,9 +74,9 @@ int RavenUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case RVN: return 8;
-    case mRVN: return 5;
-    case uRVN: return 2;
+    case X16RC: return 8;
+    case mX16RC: return 5;
+    case uX16RC: return 2;
     default: return 0;
     }
 }

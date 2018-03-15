@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -71,7 +71,7 @@ I2zpYle11ANzu4gAthN17uRQHV2O5QxVtzNaMdKeJLXT2L9tfEdyL++9ZUqoQmdA\
 YG9ix330hQIDAQABoxAwDjAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4GB\
 AIkyO99KC68bi9PFRyQQ7nvn5GlQEb3Ca1bRG5+AKN9N5vc8rZ9G2hejtM8wEXni\
 eGBP+chVMsbTPEHKLrwREn7IvcyCcbAStaklPC3w0B/2idQSHskb6P3X13OR2bTH\
-a2+6wuhsOZRUrVNr24rM95DKx/eCC6JN1VW+qRPU6fqzIjQSHwiw2wYSGXapFJVg\
+a2+6wuhsOZRUX16RCr24rM95DKx/eCC6JN1VW+qRPU6fqzIjQSHwiw2wYSGXapFJVg\
 igPI+6XpExtNLO/i1WFV8ZmoiKwYsuHFiwUqC1VuaXRUZXN0T25lKoABS0j59iMU\
 Uc9MdIfwsO1BskIET0eJSGNZ7eXb9N62u+qf831PMpEHkmlGpk8rHy92nPcgua/U\
 Yt8oZMn3QaTZ5A6HjJbc3A73eLylp1a0SwCl+KDMEvDQhqMn1jAVu2v92AH3uB7n\
@@ -436,7 +436,7 @@ d2hj739GDLz0b5KuJ2SG6VknMRQM976w/m2qlq0ccVGaaZ2zMIGfpzL3p6adwx/5\
 ";
 
 //
-// Payment request with amount overflow (amount is set to 21000001 RVN)
+// Payment request with amount overflow (amount is set to 21000001 X16RC)
 //
 const char* paymentrequest5_cert2_BASE64 =
 "\

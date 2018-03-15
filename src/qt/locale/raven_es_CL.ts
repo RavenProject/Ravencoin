@@ -772,8 +772,8 @@
 </translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>raven core</translation>
+        <source>Chickadee Core</source>
+        <translation>Chickadee Core</translation>
     </message>
     <message>
         <source>Error loading block database</source>

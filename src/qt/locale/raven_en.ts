@@ -4066,8 +4066,8 @@
     </message>
     <message>
         <location line="-386"/>
-        <source>Raven Core</source>
-        <translation type="unfinished">Raven Core</translation>
+        <source>Chickadee Core</source>
+        <translation type="unfinished">Chickadee Core</translation>
     </message>
     <message>
         <location line="+1"/>

@@ -9,7 +9,7 @@
 #define UNUSED
 #endif
 static const char UNUSED *raven_strings[] = {
-QT_TRANSLATE_NOOP("raven-core", "Raven Core"),
+QT_TRANSLATE_NOOP("raven-core", "Chickadee Core"),
 QT_TRANSLATE_NOOP("raven-core", "The %s developers"),
 QT_TRANSLATE_NOOP("raven-core", ""
 "(1 = keep tx meta data e.g. account owner and payment request information, 2 "

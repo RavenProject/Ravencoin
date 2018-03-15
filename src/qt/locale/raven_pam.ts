@@ -752,7 +752,7 @@
         <translation>Gumana king gulut bilang daemon at tumanggap commands</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Chickadee Core</source>
         <translation>Kapilubluban ning Raven</translation>
     </message>
     <message>
