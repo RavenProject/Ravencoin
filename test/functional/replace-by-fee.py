@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the RBF code."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import *
 from test_framework.script import *
 from test_framework.mininode import *
@@ -60,7 +60,7 @@ def make_utxo(node, amount, confirmed=True, scriptPubKey=CScript([1])):
 
     return COutPoint(int(txid, 16), 0)
 
-class ReplaceByFeeTest(RavenTestFramework):
+class ReplaceByFeeTest(ChickadeeTestFramework):
 
     def set_test_params(self):
         self.num_nodes = 2
@@ -141,7 +141,7 @@ class ReplaceByFeeTest(RavenTestFramework):
         # This will raise an exception due to transaction replacement being disabled
         assert_raises_rpc_error(-26, "txn-mempool-conflict", self.nodes[1].sendrawtransaction, tx1b_hex, True)
 
-        # Extra 0.1 RVN fee
+        # Extra 0.1 x16rc fee
         tx1b = CTransaction()
         tx1b.vin = [CTxIn(tx0_outpoint, nSequence=0)]
         tx1b.vout = [CTxOut(int(0.9*COIN), CScript([b'b']))]
@@ -183,7 +183,7 @@ class ReplaceByFeeTest(RavenTestFramework):
             prevout = COutPoint(int(txid, 16), 0)
 
         # Whether the double-spend is allowed is evaluated by including all
-        # child fees - 40 RVN - so this attempt is rejected.
+        # child fees - 40 x16rc - so this attempt is rejected.
         dbl_tx = CTransaction()
         dbl_tx.vin = [CTxIn(tx0_outpoint, nSequence=0)]
         dbl_tx.vout = [CTxOut(initial_nValue - 30*COIN, CScript([1]))]
@@ -253,7 +253,7 @@ class ReplaceByFeeTest(RavenTestFramework):
         # This will raise an exception due to insufficient fee
         assert_raises_rpc_error(-26, "insufficient fee", self.nodes[0].sendrawtransaction, dbl_tx_hex, True)
 
-        # 1 RVN fee is enough
+        # 1 x16rc fee is enough
         dbl_tx = CTransaction()
         dbl_tx.vin = [CTxIn(tx0_outpoint, nSequence=0)]
         dbl_tx.vout = [CTxOut(initial_nValue - fee*n - 1*COIN, CScript([1]))]

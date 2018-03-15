@@ -8,7 +8,7 @@
 #include "chainparams.h"
 #include "random.h"
 
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 #include <boost/test/unit_test.hpp>
 

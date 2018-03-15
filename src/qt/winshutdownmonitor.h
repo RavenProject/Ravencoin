@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_WINSHUTDOWNMONITOR_H
-#define RAVEN_QT_WINSHUTDOWNMONITOR_H
+#ifndef CHICKADEE_QT_WINSHUTDOWNMONITOR_H
+#define CHICKADEE_QT_WINSHUTDOWNMONITOR_H
 
 #ifdef WIN32
 #include <QByteArray>
@@ -27,4 +27,4 @@ public:
 #endif
 #endif
 
-#endif // RAVEN_QT_WINSHUTDOWNMONITOR_H
+#endif // CHICKADEE_QT_WINSHUTDOWNMONITOR_H

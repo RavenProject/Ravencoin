@@ -18,4 +18,4 @@ FORMS += \
     ../src/qt/forms/transactiondescdialog.ui \
 
 RESOURCES += \
-    ../src/qt/raven.qrc
+    ../src/qt/chickadee.qrc

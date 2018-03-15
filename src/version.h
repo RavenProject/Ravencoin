@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_VERSION_H
-#define RAVEN_VERSION_H
+#ifndef CHICKADEE_VERSION_H
+#define CHICKADEE_VERSION_H
 
 /**
  * network protocol versioning
@@ -43,4 +43,4 @@ static const int SHORT_IDS_BLOCKS_VERSION = 70014;
 //! not banning for invalid compact blocks starts with this version
 static const int INVALID_CB_NO_BAN_VERSION = 70015;
 
-#endif // RAVEN_VERSION_H
+#endif // CHICKADEE_VERSION_H

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_NETWORKSTYLE_H
-#define RAVEN_QT_NETWORKSTYLE_H
+#ifndef CHICKADEE_QT_NETWORKSTYLE_H
+#define CHICKADEE_QT_NETWORKSTYLE_H
 
 #include <QIcon>
 #include <QPixmap>
@@ -31,4 +31,4 @@ private:
     QString titleAddText;
 };
 
-#endif // RAVEN_QT_NETWORKSTYLE_H
+#endif // CHICKADEE_QT_NETWORKSTYLE_H

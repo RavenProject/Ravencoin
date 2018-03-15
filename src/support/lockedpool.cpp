@@ -7,7 +7,7 @@
 #include "support/cleanse.h"
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/chickadee-config.h"
 #endif
 
 #ifdef WIN32

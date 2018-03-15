@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/chickadee-config.h"
 #endif
 
 #include "timedata.h"
@@ -43,20 +43,20 @@ static int64_t abs64(int64_t n)
     return (n >= 0 ? n : -n);
 }
 
-#define RAVEN_TIMEDATA_MAX_SAMPLES 200
+#define CHICKADEE_TIMEDATA_MAX_SAMPLES 200
 
 void AddTimeData(const CNetAddr& ip, int64_t nOffsetSample)
 {
     LOCK(cs_nTimeOffset);
     // Ignore duplicates
     static std::set<CNetAddr> setKnown;
-    if (setKnown.size() == RAVEN_TIMEDATA_MAX_SAMPLES)
+    if (setKnown.size() == CHICKADEE_TIMEDATA_MAX_SAMPLES)
         return;
     if (!setKnown.insert(ip).second)
         return;
 
     // Add data
-    static CMedianFilter<int64_t> vTimeOffsets(RAVEN_TIMEDATA_MAX_SAMPLES, 0);
+    static CMedianFilter<int64_t> vTimeOffsets(CHICKADEE_TIMEDATA_MAX_SAMPLES, 0);
     vTimeOffsets.input(nOffsetSample);
     LogPrint(BCLog::NET,"added time data, samples %d, offset %+d (%+d minutes)\n", vTimeOffsets.size(), nOffsetSample, nOffsetSample/60);
 

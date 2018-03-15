@@ -10,7 +10,7 @@
 #include "serialize.h"
 #include "streams.h"
 
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 #include <boost/test/unit_test.hpp>
 

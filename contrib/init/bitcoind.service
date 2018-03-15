@@ -1,15 +1,15 @@
 [Unit]
-Description=Raven's distributed currency daemon
+Description=Chickadee's distributed currency daemon
 After=network.target
 
 [Service]
-User=raven
-Group=raven
+User=chickadee
+Group=chickadee
 
 Type=forking
-PIDFile=/var/lib/ravend/ravend.pid
-ExecStart=/usr/bin/ravend -daemon -pid=/var/lib/ravend/ravend.pid \
--conf=/etc/raven/raven.conf -datadir=/var/lib/ravend -disablewallet
+PIDFile=/var/lib/chickadeed/chickadeed.pid
+ExecStart=/usr/bin/chickadeed -daemon -pid=/var/lib/chickadeed/chickadeed.pid \
+-conf=/etc/chickadee/chickadee.conf -datadir=/var/lib/chickadeed -disablewallet
 
 Restart=always
 PrivateTmp=true

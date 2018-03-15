@@ -14,7 +14,7 @@
 - (NSString *)__bundleIdentifier
 {
     if (self == [NSBundle mainBundle]) {
-        return @"org.ravenfoundation.Raven-Qt";
+        return @"org.chickadeefoundation.Chickadee-Qt";
     } else {
         return [self __bundleIdentifier];
     }

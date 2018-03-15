@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_NETMESSAGEMAKER_H
-#define RAVEN_NETMESSAGEMAKER_H
+#ifndef CHICKADEE_NETMESSAGEMAKER_H
+#define CHICKADEE_NETMESSAGEMAKER_H
 
 #include "net.h"
 #include "serialize.h"
@@ -34,4 +34,4 @@ private:
     const int nVersion;
 };
 
-#endif // RAVEN_NETMESSAGEMAKER_H
+#endif // CHICKADEE_NETMESSAGEMAKER_H

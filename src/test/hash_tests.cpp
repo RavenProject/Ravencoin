@@ -5,7 +5,7 @@
 
 #include "hash.h"
 #include "utilstrencodings.h"
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 #include "consensus/merkle.h"
 
 #include <vector>
@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(murmurhash3)
 
     // Test MurmurHash3 with various inputs. Of course this is retested in the
     // bloom filter tests - they would fail if MurmurHash3() had any problems -
-    // but is useful for those trying to implement Raven libraries as a
+    // but is useful for those trying to implement Chickadee libraries as a
     // source of test data for their MurmurHash3() primitive during
     // development.
     //

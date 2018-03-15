@@ -1,6 +1,6 @@
 [Protocol]
-exec=raven-qt '%u'
-protocol=raven
+exec=chickadee-qt '%u'
+protocol=chickadee
 input=none
 output=none
 helper=true

@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_UINT256_H
-#define RAVEN_UINT256_H
+#ifndef CHICKADEE_UINT256_H
+#define CHICKADEE_UINT256_H
 
 #include <assert.h>
 #include <cstring>
@@ -176,4 +176,4 @@ public:
         return result;
     }
 };
-#endif // RAVEN_UINT256_H
+#endif // CHICKADEE_UINT256_H

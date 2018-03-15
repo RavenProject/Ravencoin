@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_WALLETMODEL_H
-#define RAVEN_QT_WALLETMODEL_H
+#ifndef CHICKADEE_QT_WALLETMODEL_H
+#define CHICKADEE_QT_WALLETMODEL_H
 
 #include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
@@ -95,7 +95,7 @@ public:
     }
 };
 
-/** Interface to Raven wallet from Qt view code. */
+/** Interface to Chickadee wallet from Qt view code. */
 class WalletModel : public QObject
 {
     Q_OBJECT
@@ -286,4 +286,4 @@ public Q_SLOTS:
     void pollBalanceChanged();
 };
 
-#endif // RAVEN_QT_WALLETMODEL_H
+#endif // CHICKADEE_QT_WALLETMODEL_H

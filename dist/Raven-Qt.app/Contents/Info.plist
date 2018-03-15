@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+  <key>LSMinimumSystemVersion</key>
+  <string>10.8.0</string>
+
+  <key>LSArchitecturePriority</key>
+  <array>
+    <string>x86_64</string>
+  </array>
+
+  <key>CFBundleIconFile</key>
+  <string>chickadee.icns</string>
+
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+
+  <key>CFBundleGetInfoString</key>
+  <string>0.15.99, Copyright © 2009-2017 The Chickadee Core developers</string>
+
+  <key>CFBundleShortVersionString</key>
+  <string>0.15.99</string>
+
+  <key>CFBundleVersion</key>
+  <string>0.15.99</string>
+
+  <key>CFBundleSignature</key>
+  <string>????</string>
+
+  <key>CFBundleExecutable</key>
+  <string>Chickadee-Qt</string>
+  
+  <key>CFBundleName</key>
+  <string>Chickadee-Qt</string>
+
+  <key>LSHasLocalizedDisplayName</key>
+  <true/>
+
+  <key>CFBundleIdentifier</key>
+  <string>org.chickadeefoundation.Chickadee-Qt</string>
+
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleURLName</key>
+      <string>org.chickadee.ChickadeePayment</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>chickadee</string>
+      </array>
+    </dict>
+  </array>
+
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>org.chickadee.paymentrequest</string>
+      <key>UTTypeDescription</key>
+      <string>Chickadee payment request</string>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.data</string>
+      </array>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.mime-type</key>
+        <string>application/x-chickadee-payment-request</string>
+        <key>public.filename-extension</key>
+        <array>
+          <string>chickadeepaymentrequest</string>
+        </array>
+      </dict>
+    </dict>
+  </array>
+
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>org.chickadee.paymentrequest</string>
+      </array>
+      <key>LSHandlerRank</key>
+      <string>Owner</string>
+    </dict>
+  </array>
+
+  <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+  <key>NSHighResolutionCapable</key>
+    <string>True</string>
+
+  <key>LSAppNapIsDisabled</key>
+    <string>True</string>
+  
+  <key>LSApplicationCategoryType</key>
+    <string>public.app-category.finance</string>
+</dict>
+</plist>

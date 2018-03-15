@@ -3,7 +3,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 #include "utilstrencodings.h"
 #include "wallet/crypter.h"
 

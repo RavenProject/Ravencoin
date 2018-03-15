@@ -198,7 +198,7 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Update as we know more about the contents of the Raven chain
+            // Update as we know more about the contents of the Chickadee chain
             1509572692, // * UNIX timestamp of last known number of transactions
             1,          // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)
@@ -281,7 +281,7 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Update as we know more about the contents of the Raven chain
+            // Update as we know more about the contents of the Chickadee chain
             1513705170, // * UNIX timestamp of last known number of transactions
             1,          // * total number of transactions between genesis and that timestamp
                         //   (the tx=... number in the SetBestChain debug.log lines)

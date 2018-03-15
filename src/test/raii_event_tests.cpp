@@ -13,7 +13,7 @@
 
 #include "support/events.h"
 
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 #include <vector>
 

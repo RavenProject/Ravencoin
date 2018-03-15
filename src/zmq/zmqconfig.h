@@ -3,11 +3,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ZMQ_ZMQCONFIG_H
-#define RAVEN_ZMQ_ZMQCONFIG_H
+#ifndef CHICKADEE_ZMQ_ZMQCONFIG_H
+#define CHICKADEE_ZMQ_ZMQCONFIG_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/chickadee-config.h"
 #endif
 
 #include <stdarg.h>
@@ -22,4 +22,4 @@
 
 void zmqError(const char *str);
 
-#endif // RAVEN_ZMQ_ZMQCONFIG_H
+#endif // CHICKADEE_ZMQ_ZMQCONFIG_H

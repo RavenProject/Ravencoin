@@ -5,8 +5,8 @@
 
 #include "guiutil.h"
 
-#include "ravenaddressvalidator.h"
-#include "ravenunits.h"
+#include "chickadeeaddressvalidator.h"
+#include "chickadeeunits.h"
 #include "qvalidatedlineedit.h"
 #include "walletmodel.h"
 
@@ -129,11 +129,11 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
-    widget->setPlaceholderText(QObject::tr("Enter a Raven address (e.g. %1)").arg(
+    widget->setPlaceholderText(QObject::tr("Enter a Chickadee address (e.g. %1)").arg(
         QString::fromStdString(DummyAddress(Params()))));
 #endif
-    widget->setValidator(new RavenAddressEntryValidator(parent));
-    widget->setCheckValidator(new RavenAddressCheckValidator(parent));
+    widget->setValidator(new ChickadeeAddressEntryValidator(parent));
+    widget->setCheckValidator(new ChickadeeAddressCheckValidator(parent));
 }
 
 void setupAmountWidget(QLineEdit *widget, QWidget *parent)
@@ -145,10 +145,10 @@ void setupAmountWidget(QLineEdit *widget, QWidget *parent)
     widget->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
 }
 
-bool parseRavenURI(const QUrl &uri, SendCoinsRecipient *out)
+bool parseChickadeeURI(const QUrl &uri, SendCoinsRecipient *out)
 {
-    // return if URI is not valid or is no raven: URI
-    if(!uri.isValid() || uri.scheme() != QString("raven"))
+    // return if URI is not valid or is no chickadee: URI
+    if(!uri.isValid() || uri.scheme() != QString("chickadee"))
         return false;
 
     SendCoinsRecipient rv;
@@ -188,7 +188,7 @@ bool parseRavenURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!RavenUnits::parse(RavenUnits::X16RC, i->second, &rv.amount))
+                if(!ChickadeeUnits::parse(ChickadeeUnits::X16RC, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -206,28 +206,28 @@ bool parseRavenURI(const QUrl &uri, SendCoinsRecipient *out)
     return true;
 }
 
-bool parseRavenURI(QString uri, SendCoinsRecipient *out)
+bool parseChickadeeURI(QString uri, SendCoinsRecipient *out)
 {
-    // Convert raven:// to raven:
+    // Convert chickadee:// to chickadee:
     //
-    //    Cannot handle this later, because raven:// will cause Qt to see the part after // as host,
+    //    Cannot handle this later, because chickadee:// will cause Qt to see the part after // as host,
     //    which will lower-case it (and thus invalidate the address).
-    if(uri.startsWith("raven://", Qt::CaseInsensitive))
+    if(uri.startsWith("chickadee://", Qt::CaseInsensitive))
     {
-        uri.replace(0, 10, "raven:");
+        uri.replace(0, 10, "chickadee:");
     }
     QUrl uriInstance(uri);
-    return parseRavenURI(uriInstance, out);
+    return parseChickadeeURI(uriInstance, out);
 }
 
-QString formatRavenURI(const SendCoinsRecipient &info)
+QString formatChickadeeURI(const SendCoinsRecipient &info)
 {
-    QString ret = QString("raven:%1").arg(info.address);
+    QString ret = QString("chickadee:%1").arg(info.address);
     int paramCount = 0;
 
     if (info.amount)
     {
-        ret += QString("?amount=%1").arg(RavenUnits::format(RavenUnits::X16RC, info.amount, false, RavenUnits::separatorNever));
+        ret += QString("?amount=%1").arg(ChickadeeUnits::format(ChickadeeUnits::X16RC, info.amount, false, ChickadeeUnits::separatorNever));
         paramCount++;
     }
 
@@ -417,9 +417,9 @@ void openDebugLogfile()
         QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathDebug)));
 }
 
-bool openRavenConf()
+bool openChickadeeConf()
 {
-    boost::filesystem::path pathConfig = GetConfigFile(RAVEN_CONF_FILENAME);
+    boost::filesystem::path pathConfig = GetConfigFile(CHICKADEE_CONF_FILENAME);
 
     /* Create the file */
     boost::filesystem::ofstream configFile(pathConfig, std::ios_base::app);
@@ -429,7 +429,7 @@ bool openRavenConf()
     
     configFile.close();
     
-    /* Open raven.conf with the associated application */
+    /* Open chickadee.conf with the associated application */
     return QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathConfig)));
 }
 
@@ -617,15 +617,15 @@ fs::path static StartupShortcutPath()
 {
     std::string chain = ChainNameFromCommandLine();
     if (chain == CBaseChainParams::MAIN)
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "Raven.lnk";
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Chickadee.lnk";
     if (chain == CBaseChainParams::TESTNET) // Remove this special case when CBaseChainParams::TESTNET = "testnet4"
-        return GetSpecialFolderPath(CSIDL_STARTUP) / "Raven (testnet).lnk";
-    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Raven (%s).lnk", chain);
+        return GetSpecialFolderPath(CSIDL_STARTUP) / "Chickadee (testnet).lnk";
+    return GetSpecialFolderPath(CSIDL_STARTUP) / strprintf("Chickadee (%s).lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
 {
-    // check for Raven*.lnk
+    // check for Chickadee*.lnk
     return fs::exists(StartupShortcutPath());
 }
 
@@ -715,8 +715,8 @@ fs::path static GetAutostartFilePath()
 {
     std::string chain = ChainNameFromCommandLine();
     if (chain == CBaseChainParams::MAIN)
-        return GetAutostartDir() / "raven.desktop";
-    return GetAutostartDir() / strprintf("raven-%s.lnk", chain);
+        return GetAutostartDir() / "chickadee.desktop";
+    return GetAutostartDir() / strprintf("chickadee-%s.lnk", chain);
 }
 
 bool GetStartOnSystemStartup()
@@ -756,13 +756,13 @@ bool SetStartOnSystemStartup(bool fAutoStart)
         if (!optionFile.good())
             return false;
         std::string chain = ChainNameFromCommandLine();
-        // Write a raven.desktop file to the autostart directory:
+        // Write a chickadee.desktop file to the autostart directory:
         optionFile << "[Desktop Entry]\n";
         optionFile << "Type=Application\n";
         if (chain == CBaseChainParams::MAIN)
-            optionFile << "Name=Raven\n";
+            optionFile << "Name=Chickadee\n";
         else
-            optionFile << strprintf("Name=Raven (%s)\n", chain);
+            optionFile << strprintf("Name=Chickadee (%s)\n", chain);
         optionFile << "Exec=" << pszExePath << strprintf(" -min -testnet=%d -regtest=%d\n", gArgs.GetBoolArg("-testnet", false), gArgs.GetBoolArg("-regtest", false));
         optionFile << "Terminal=false\n";
         optionFile << "Hidden=false\n";
@@ -788,7 +788,7 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
         return nullptr;
     }
     
-    // loop through the list of startup items and try to find the raven app
+    // loop through the list of startup items and try to find the chickadee app
     for(int i = 0; i < CFArrayGetCount(listSnapshot); i++) {
         LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(listSnapshot, i);
         UInt32 resolutionFlags = kLSSharedFileListNoUserInteraction | kLSSharedFileListDoNotMountVolumes;
@@ -822,38 +822,38 @@ LSSharedFileListItemRef findStartupItemInList(LSSharedFileListRef list, CFURLRef
 
 bool GetStartOnSystemStartup()
 {
-    CFURLRef ravenAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    if (ravenAppUrl == nullptr) {
+    CFURLRef chickadeeAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    if (chickadeeAppUrl == nullptr) {
         return false;
     }
     
     LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, ravenAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, chickadeeAppUrl);
 
-    CFRelease(ravenAppUrl);
+    CFRelease(chickadeeAppUrl);
     return !!foundItem; // return boolified object
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
-    CFURLRef ravenAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    if (ravenAppUrl == nullptr) {
+    CFURLRef chickadeeAppUrl = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    if (chickadeeAppUrl == nullptr) {
         return false;
     }
     
     LSSharedFileListRef loginItems = LSSharedFileListCreate(nullptr, kLSSharedFileListSessionLoginItems, nullptr);
-    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, ravenAppUrl);
+    LSSharedFileListItemRef foundItem = findStartupItemInList(loginItems, chickadeeAppUrl);
 
     if(fAutoStart && !foundItem) {
-        // add raven app to startup item list
-        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, ravenAppUrl, nullptr, nullptr);
+        // add chickadee app to startup item list
+        LSSharedFileListInsertItemURL(loginItems, kLSSharedFileListItemBeforeFirst, nullptr, nullptr, chickadeeAppUrl, nullptr, nullptr);
     }
     else if(!fAutoStart && foundItem) {
         // remove item
         LSSharedFileListItemRemove(loginItems, foundItem);
     }
     
-    CFRelease(ravenAppUrl);
+    CFRelease(chickadeeAppUrl);
     return true;
 }
 #pragma GCC diagnostic pop

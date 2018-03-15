@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test Hierarchical Deterministic wallet function."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import (
     assert_equal,
     connect_nodes_bi,
@@ -13,7 +13,7 @@ from test_framework.util import (
 import shutil
 import os
 
-class WalletHDTest(RavenTestFramework):
+class WalletHDTest(ChickadeeTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2

@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_PRIMITIVES_BLOCK_H
-#define RAVEN_PRIMITIVES_BLOCK_H
+#ifndef CHICKADEE_PRIMITIVES_BLOCK_H
+#define CHICKADEE_PRIMITIVES_BLOCK_H
 
 #include "primitives/transaction.h"
 #include "serialize.h"
@@ -158,4 +158,4 @@ struct CBlockLocator
     }
 };
 
-#endif // RAVEN_PRIMITIVES_BLOCK_H
+#endif // CHICKADEE_PRIMITIVES_BLOCK_H

@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SCRIPT_SIGCACHE_H
-#define RAVEN_SCRIPT_SIGCACHE_H
+#ifndef CHICKADEE_SCRIPT_SIGCACHE_H
+#define CHICKADEE_SCRIPT_SIGCACHE_H
 
 #include "script/interpreter.h"
 
@@ -54,4 +54,4 @@ public:
 
 void InitSignatureCache();
 
-#endif // RAVEN_SCRIPT_SIGCACHE_H
+#endif // CHICKADEE_SCRIPT_SIGCACHE_H

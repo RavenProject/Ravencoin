@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_VALIDATIONINTERFACE_H
-#define RAVEN_VALIDATIONINTERFACE_H
+#ifndef CHICKADEE_VALIDATIONINTERFACE_H
+#define CHICKADEE_VALIDATIONINTERFACE_H
 
 #include <memory>
 
@@ -105,4 +105,4 @@ public:
 
 CMainSignals& GetMainSignals();
 
-#endif // RAVEN_VALIDATIONINTERFACE_H
+#endif // CHICKADEE_VALIDATIONINTERFACE_H

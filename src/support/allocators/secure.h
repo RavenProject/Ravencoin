@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SUPPORT_ALLOCATORS_SECURE_H
-#define RAVEN_SUPPORT_ALLOCATORS_SECURE_H
+#ifndef CHICKADEE_SUPPORT_ALLOCATORS_SECURE_H
+#define CHICKADEE_SUPPORT_ALLOCATORS_SECURE_H
 
 #include "support/lockedpool.h"
 #include "support/cleanse.h"
@@ -56,4 +56,4 @@ struct secure_allocator : public std::allocator<T> {
 // This is exactly like std::string, but with a custom allocator.
 typedef std::basic_string<char, std::char_traits<char>, secure_allocator<char> > SecureString;
 
-#endif // RAVEN_SUPPORT_ALLOCATORS_SECURE_H
+#endif // CHICKADEE_SUPPORT_ALLOCATORS_SECURE_H

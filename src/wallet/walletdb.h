@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_WALLETDB_H
-#define RAVEN_WALLET_WALLETDB_H
+#ifndef CHICKADEE_WALLET_WALLETDB_H
+#define CHICKADEE_WALLET_WALLETDB_H
 
 #include "amount.h"
 #include "primitives/transaction.h"
@@ -252,4 +252,4 @@ private:
 //! Compacts BDB state so that wallet.dat is self-contained (if there are changes)
 void MaybeCompactWalletDB();
 
-#endif // RAVEN_WALLET_WALLETDB_H
+#endif // CHICKADEE_WALLET_WALLETDB_H

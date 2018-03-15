@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the dumpwallet RPC."""
 
 import os
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import (assert_equal, assert_raises_rpc_error)
 
 
@@ -56,7 +56,7 @@ def read_dump(file_name, addrs, hd_master_addr_old):
         return found_addr, found_addr_chg, found_addr_rsv, hd_master_addr_ret
 
 
-class WalletDumpTest(RavenTestFramework):
+class WalletDumpTest(ChickadeeTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [["-keypool=90"]]

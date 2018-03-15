@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Run regression test suite.
@@ -11,7 +11,7 @@ forward all unrecognized arguments onto the individual test scripts.
 Functional tests are disabled on Windows by default. Use --force to run them anyway.
 
 For a description of arguments recognized by test scripts, see
-`test/functional/test_framework/test_framework.py:RavenTestFramework.main`.
+`test/functional/test_framework/test_framework.py:ChickadeeTestFramework.main`.
 
 """
 
@@ -82,7 +82,7 @@ BASE_SCRIPTS= [
     # vv Tests less than 30s vv
     'keypool-topup.py',
     'zmq_test.py',
-    'raven_cli.py',
+    'chickadee_cli.py',
     'mempool_resurrect_test.py',
     'txn_doublespend.py --mineblock',
     'txn_clone.py',
@@ -203,23 +203,23 @@ def main():
     logging.basicConfig(format='%(message)s', level=logging_level)
 
     # Create base test directory
-    tmpdir = "%s/raven_test_runner_%s" % (args.tmpdirprefix, datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    tmpdir = "%s/chickadee_test_runner_%s" % (args.tmpdirprefix, datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
     os.makedirs(tmpdir)
 
     logging.debug("Temporary test directory at %s" % tmpdir)
 
     enable_wallet = config["components"].getboolean("ENABLE_WALLET")
     enable_utils = config["components"].getboolean("ENABLE_UTILS")
-    enable_ravend = config["components"].getboolean("ENABLE_RAVEND")
+    enable_chickadeed = config["components"].getboolean("ENABLE_CHICKADEED")
 
     if config["environment"]["EXEEXT"] == ".exe" and not args.force:
-        # https://github.com/RavenProject/Ravencoin/commit/d52802551752140cf41f0d9a225a43e84404d3e9
-        # https://github.com/RavenProject/Ravencoin/pull/5677#issuecomment-136646964
+        # https://github.com/lukepighetti/x16rc/commit/d52802551752140cf41f0d9a225a43e84404d3e9
+        # https://github.com/lukepighetti/x16rc/pull/5677#issuecomment-136646964
         print("Tests currently disabled on Windows by default. Use --force option to enable")
         sys.exit(0)
 
-    if not (enable_wallet and enable_utils and enable_ravend):
-        print("No functional tests to run. Wallet, utils, and ravend must all be enabled")
+    if not (enable_wallet and enable_utils and enable_chickadeed):
+        print("No functional tests to run. Wallet, utils, and chickadeed must all be enabled")
         print("Rerun `configure` with -enable-wallet, -with-utils and -with-daemon and rerun make")
         sys.exit(0)
 
@@ -273,10 +273,10 @@ def main():
     run_tests(test_list, config["environment"]["SRCDIR"], config["environment"]["BUILDDIR"], config["environment"]["EXEEXT"], tmpdir, args.jobs, args.coverage, passon_args)
 
 def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_coverage=False, args=[]):
-    # Warn if ravend is already running (unix only)
+    # Warn if chickadeed is already running (unix only)
     try:
-        if subprocess.check_output(["pidof", "ravend"]) is not None:
-            print("%sWARNING!%s There is already a ravend process running on this system. Tests may fail unexpectedly due to resource contention!" % (BOLD[1], BOLD[0]))
+        if subprocess.check_output(["pidof", "chickadeed"]) is not None:
+            print("%sWARNING!%s There is already a chickadeed process running on this system. Tests may fail unexpectedly due to resource contention!" % (BOLD[1], BOLD[0]))
     except (OSError, subprocess.SubprocessError):
         pass
 
@@ -286,9 +286,9 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_cove
         print("%sWARNING!%s There is a cache directory here: %s. If tests fail unexpectedly, try deleting the cache directory." % (BOLD[1], BOLD[0], cache_dir))
 
     #Set env vars
-    if "RAVEND" not in os.environ:
-        os.environ["RAVEND"] = build_dir + '/src/ravend' + exeext
-        os.environ["RAVENCLI"] = build_dir + '/src/raven-cli' + exeext
+    if "CHICKADEED" not in os.environ:
+        os.environ["CHICKADEED"] = build_dir + '/src/chickadeed' + exeext
+        os.environ["CHICKADEECLI"] = build_dir + '/src/chickadee-cli' + exeext
 
     tests_dir = src_dir + '/test/functional/'
 
@@ -376,7 +376,7 @@ class TestHandler:
         self.num_running = 0
         self.num_finished = 0
         self.num_jobs = len(test_list)
-        # In case there is a graveyard of zombie ravends, we can apply a
+        # In case there is a graveyard of zombie chickadeeds, we can apply a
         # pseudorandom offset to hopefully jump over them.
         # (625 is PORT_RANGE/MAX_NODES)
         self.portseed_offset = int(time.time() * 1000) % 625
@@ -475,7 +475,7 @@ class RPCCoverage():
     Coverage calculation works by having each test script subprocess write
     coverage files into a particular directory. These files contain the RPC
     commands invoked during testing, as well as a complete listing of RPC
-    commands per `raven-cli help` (`rpc_interface.txt`).
+    commands per `chickadee-cli help` (`rpc_interface.txt`).
 
     After all tests complete, the commands run are combined and diff'd against
     the complete list to calculate uncovered RPC commands.

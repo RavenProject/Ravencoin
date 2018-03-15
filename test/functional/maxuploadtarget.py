@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test behavior of -maxuploadtarget.
@@ -15,7 +15,7 @@ from collections import defaultdict
 import time
 
 from test_framework.mininode import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import *
 
 class TestNode(NodeConnCB):
@@ -30,7 +30,7 @@ class TestNode(NodeConnCB):
         message.block.calc_sha256()
         self.block_receive_map[message.block.sha256] += 1
 
-class MaxUploadTest(RavenTestFramework):
+class MaxUploadTest(ChickadeeTestFramework):
  
     def set_test_params(self):
         self.setup_clean_chain = True

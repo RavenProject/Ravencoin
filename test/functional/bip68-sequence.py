@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test BIP68 implementation."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import *
 from test_framework.blocktools import *
 
@@ -17,7 +17,7 @@ SEQUENCE_LOCKTIME_MASK = 0x0000ffff
 # RPC error for non-BIP68 final transactions
 NOT_FINAL_ERROR = "64: non-BIP68-final"
 
-class BIP68Test(RavenTestFramework):
+class BIP68Test(ChickadeeTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.extra_args = [[], ["-acceptnonstdtxn=0"]]
@@ -39,7 +39,7 @@ class BIP68Test(RavenTestFramework):
     def test_disable_flag(self):
         # Create some unconfirmed inputs
         new_addr = self.nodes[0].getnewaddress()
-        self.nodes[0].sendtoaddress(new_addr, 2) # send 2 RVN
+        self.nodes[0].sendtoaddress(new_addr, 2) # send 2 x16rc
 
         utxos = self.nodes[0].listunspent(0, 0)
         assert(len(utxos) > 0)

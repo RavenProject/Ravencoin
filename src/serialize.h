@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SERIALIZE_H
-#define RAVEN_SERIALIZE_H
+#ifndef CHICKADEE_SERIALIZE_H
+#define CHICKADEE_SERIALIZE_H
 
 #include "compat/endian.h"
 
@@ -964,4 +964,4 @@ size_t GetSerializeSize(const S& s, const T& t)
     return (CSizeComputer(s.GetType(), s.GetVersion()) << t).size();
 }
 
-#endif // RAVEN_SERIALIZE_H
+#endif // CHICKADEE_SERIALIZE_H

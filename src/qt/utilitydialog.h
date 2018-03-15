@@ -3,13 +3,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_UTILITYDIALOG_H
-#define RAVEN_QT_UTILITYDIALOG_H
+#ifndef CHICKADEE_QT_UTILITYDIALOG_H
+#define CHICKADEE_QT_UTILITYDIALOG_H
 
 #include <QDialog>
 #include <QObject>
 
-class RavenGUI;
+class ChickadeeGUI;
 
 namespace Ui {
     class HelpMessageDialog;
@@ -43,10 +43,10 @@ class ShutdownWindow : public QWidget
 
 public:
     explicit ShutdownWindow(QWidget *parent=0, Qt::WindowFlags f=0);
-    static QWidget *showShutdownWindow(RavenGUI *window);
+    static QWidget *showShutdownWindow(ChickadeeGUI *window);
 
 protected:
     void closeEvent(QCloseEvent *event);
 };
 
-#endif // RAVEN_QT_UTILITYDIALOG_H
+#endif // CHICKADEE_QT_UTILITYDIALOG_H

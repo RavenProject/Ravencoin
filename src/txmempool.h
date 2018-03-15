@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_TXMEMPOOL_H
-#define RAVEN_TXMEMPOOL_H
+#ifndef CHICKADEE_TXMEMPOOL_H
+#define CHICKADEE_TXMEMPOOL_H
 
 #include <memory>
 #include <set>
@@ -776,4 +776,4 @@ struct DisconnectedBlockTransactions {
     }
 };
 
-#endif // RAVEN_TXMEMPOOL_H
+#endif // CHICKADEE_TXMEMPOOL_H

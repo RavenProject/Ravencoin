@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_COINCONTROL_H
-#define RAVEN_WALLET_COINCONTROL_H
+#ifndef CHICKADEE_WALLET_COINCONTROL_H
+#define CHICKADEE_WALLET_COINCONTROL_H
 
 #include "policy/feerate.h"
 #include "policy/fees.h"
@@ -85,4 +85,4 @@ private:
     std::set<COutPoint> setSelected;
 };
 
-#endif // RAVEN_WALLET_COINCONTROL_H
+#endif // CHICKADEE_WALLET_COINCONTROL_H

@@ -13,7 +13,7 @@
 #include "random.h"
 #include "script/standard.h"
 #include "script/sign.h"
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 #include "utiltime.h"
 #include "core_io.h"
 #include "keystore.h"

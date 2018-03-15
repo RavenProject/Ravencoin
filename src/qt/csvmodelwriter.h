@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_CSVMODELWRITER_H
-#define RAVEN_QT_CSVMODELWRITER_H
+#ifndef CHICKADEE_QT_CSVMODELWRITER_H
+#define CHICKADEE_QT_CSVMODELWRITER_H
 
 #include <QList>
 #include <QObject>
@@ -44,4 +44,4 @@ private:
     QList<Column> columns;
 };
 
-#endif // RAVEN_QT_CSVMODELWRITER_H
+#endif // CHICKADEE_QT_CSVMODELWRITER_H

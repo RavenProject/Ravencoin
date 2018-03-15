@@ -178,7 +178,7 @@ bool CKey::VerifyPubKey(const CPubKey& pubkey) const {
         return false;
     }
     unsigned char rnd[8];
-    std::string str = "Raven key verification\n";
+    std::string str = "Chickadee key verification\n";
     GetRandBytes(rnd, sizeof(rnd));
     uint256 hash;
     CHash256().Write((unsigned char*)str.data(), str.size()).Write(rnd, sizeof(rnd)).Finalize(hash.begin());

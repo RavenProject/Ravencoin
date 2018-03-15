@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_OVERVIEWPAGE_H
-#define RAVEN_QT_OVERVIEWPAGE_H
+#ifndef CHICKADEE_QT_OVERVIEWPAGE_H
+#define CHICKADEE_QT_OVERVIEWPAGE_H
 
 #include "amount.h"
 
@@ -68,4 +68,4 @@ private Q_SLOTS:
     void handleOutOfSyncWarningClicks();
 };
 
-#endif // RAVEN_QT_OVERVIEWPAGE_H
+#endif // CHICKADEE_QT_OVERVIEWPAGE_H

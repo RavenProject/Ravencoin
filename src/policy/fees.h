@@ -3,8 +3,8 @@
 // Copyright (c) 2017 The Chickadee Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef RAVEN_POLICYESTIMATOR_H
-#define RAVEN_POLICYESTIMATOR_H
+#ifndef CHICKADEE_POLICYESTIMATOR_H
+#define CHICKADEE_POLICYESTIMATOR_H
 
 #include "amount.h"
 #include "feerate.h"
@@ -295,4 +295,4 @@ private:
     FastRandomContext insecure_rand;
 };
 
-#endif /*RAVEN_POLICYESTIMATOR_H */
+#endif /*CHICKADEE_POLICYESTIMATOR_H */

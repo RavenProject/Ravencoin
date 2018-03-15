@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017 The Chickadee Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """An example functional test
@@ -25,7 +25,7 @@ from test_framework.mininode import (
     msg_block,
     msg_getdata,
 )
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import ChickadeeTestFramework
 from test_framework.util import (
     assert_equal,
     connect_nodes,
@@ -68,11 +68,11 @@ def custom_function():
 
     If this function is more generally useful for other tests, consider
     moving it to a module in test_framework."""
-    # self.log.info("running custom_function")  # Oops! Can't run self.log outside the RavenTestFramework
+    # self.log.info("running custom_function")  # Oops! Can't run self.log outside the ChickadeeTestFramework
     pass
 
-class ExampleTest(RavenTestFramework):
-    # Each functional test is a subclass of the RavenTestFramework class.
+class ExampleTest(ChickadeeTestFramework):
+    # Each functional test is a subclass of the ChickadeeTestFramework class.
 
     # Override the set_test_params(), add_options(), setup_chain(), setup_network()
     # and setup_nodes() methods to customize the test setup as required.
@@ -127,7 +127,7 @@ class ExampleTest(RavenTestFramework):
 
         Define it in a method here because you're going to use it repeatedly.
         If you think it's useful in general, consider moving it to the base
-        RavenTestFramework class so other tests can use it."""
+        ChickadeeTestFramework class so other tests can use it."""
 
         self.log.info("Running custom_method")
 

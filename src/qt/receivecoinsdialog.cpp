@@ -8,7 +8,7 @@
 
 #include "addressbookpage.h"
 #include "addresstablemodel.h"
-#include "ravenunits.h"
+#include "chickadeeunits.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
 #include "platformstyle.h"
@@ -273,7 +273,7 @@ void ReceiveCoinsDialog::copyURI()
     }
 
     const RecentRequestsTableModel * const submodel = model->getRecentRequestsTableModel();
-    const QString uri = GUIUtil::formatRavenURI(submodel->entry(sel.row()).recipient);
+    const QString uri = GUIUtil::formatChickadeeURI(submodel->entry(sel.row()).recipient);
     GUIUtil::setClipboard(uri);
 }
 

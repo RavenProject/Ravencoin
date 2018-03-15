@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_POLICY_FEERATE_H
-#define RAVEN_POLICY_FEERATE_H
+#ifndef CHICKADEE_POLICY_FEERATE_H
+#define CHICKADEE_POLICY_FEERATE_H
 
 #include "amount.h"
 #include "serialize.h"
@@ -57,4 +57,4 @@ public:
     }
 };
 
-#endif //  RAVEN_POLICY_FEERATE_H
+#endif //  CHICKADEE_POLICY_FEERATE_H

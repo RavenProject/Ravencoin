@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_TRANSACTIONDESC_H
-#define RAVEN_QT_TRANSACTIONDESC_H
+#ifndef CHICKADEE_QT_TRANSACTIONDESC_H
+#define CHICKADEE_QT_TRANSACTIONDESC_H
 
 #include <QObject>
 #include <QString>
@@ -29,4 +29,4 @@ private:
     static QString FormatTxStatus(const CWalletTx& wtx);
 };
 
-#endif // RAVEN_QT_TRANSACTIONDESC_H
+#endif // CHICKADEE_QT_TRANSACTIONDESC_H

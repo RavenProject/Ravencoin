@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
-#define RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
+#ifndef CHICKADEE_ZMQ_ZMQPUBLISHNOTIFIER_H
+#define CHICKADEE_ZMQ_ZMQPUBLISHNOTIFIER_H
 
 #include "zmqabstractnotifier.h"
 
@@ -53,4 +53,4 @@ public:
     bool NotifyTransaction(const CTransaction &transaction) override;
 };
 
-#endif // RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
+#endif // CHICKADEE_ZMQ_ZMQPUBLISHNOTIFIER_H

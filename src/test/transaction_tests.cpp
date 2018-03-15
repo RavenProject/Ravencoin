@@ -5,7 +5,7 @@
 
 #include "data/tx_invalid.json.h"
 #include "data/tx_valid.json.h"
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 #include "clientversion.h"
 #include "checkqueue.h"

@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_TEST_SCRIPTNUM10_H
-#define RAVEN_TEST_SCRIPTNUM10_H
+#ifndef CHICKADEE_TEST_SCRIPTNUM10_H
+#define CHICKADEE_TEST_SCRIPTNUM10_H
 
 #include <algorithm>
 #include <limits>
@@ -181,4 +181,4 @@ private:
 };
 
 
-#endif // RAVEN_TEST_BIGNUM_H
+#endif // CHICKADEE_TEST_BIGNUM_H

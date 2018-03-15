@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <algorithm>
 
-class CRavenLevelDBLogger : public leveldb::Logger {
+class CChickadeeLevelDBLogger : public leveldb::Logger {
 public:
     // This code is adapted from posix_logger.h, which is why it is using vsprintf.
     // Please do not do this in normal code
@@ -43,7 +43,7 @@ public:
                 if (p < limit) {
                     va_list backup_ap;
                     va_copy(backup_ap, ap);
-                    // Do not use vsnprintf elsewhere in raven source code, see above.
+                    // Do not use vsnprintf elsewhere in chickadee source code, see above.
                     p += vsnprintf(p, limit - p, format, backup_ap);
                     va_end(backup_ap);
                 }
@@ -82,7 +82,7 @@ static leveldb::Options GetOptions(size_t nCacheSize)
     options.filter_policy = leveldb::NewBloomFilterPolicy(10);
     options.compression = leveldb::kNoCompression;
     options.max_open_files = 64;
-    options.info_log = new CRavenLevelDBLogger();
+    options.info_log = new CChickadeeLevelDBLogger();
     if (leveldb::kMajorVersion > 1 || (leveldb::kMajorVersion == 1 && leveldb::kMinorVersion >= 16)) {
         // LevelDB versions before 1.16 consider short writes to be corruption. Only trigger error
         // on corruption in later versions.

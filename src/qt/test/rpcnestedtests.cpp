@@ -12,7 +12,7 @@
 #include "rpc/register.h"
 #include "rpc/server.h"
 #include "rpcconsole.h"
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 #include "univalue.h"
 #include "util.h"
 

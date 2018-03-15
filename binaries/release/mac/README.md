@@ -1,20 +1,20 @@
-# RavenBinaries Mac Download Instructions
+# ChickadeeBinaries Mac Download Instructions
 
-1) Download and copy raven.dmg to desired folder 
+1) Download and copy chickadee.dmg to desired folder 
 
-2) Double click the raven.dmg
+2) Double click the chickadee.dmg
 
-3) Drag Raven Core icon to the Applications 
+3) Drag Chickadee Core icon to the Applications 
 
-4) Launch Raven Core
+4) Launch Chickadee Core
 
-Note: On Raven Core launch if you get this error
+Note: On Chickadee Core launch if you get this error
 
 ```
 Dyld Error Message:
   Library not loaded: @loader_path/libboost_system-mt.dylib
-  Referenced from: /Applications/Raven-Qt.app/Contents/Frameworks/libboost_thread-mt.dylib
+  Referenced from: /Applications/Chickadee-Qt.app/Contents/Frameworks/libboost_thread-mt.dylib
   Reason: image not found
 ```
-You will need to copy libboost_system.dylib to libboost_system-mt.dylib in the /Applications/Raven-Qt.app/Contents/Frameworks folder  
+You will need to copy libboost_system.dylib to libboost_system-mt.dylib in the /Applications/Chickadee-Qt.app/Contents/Frameworks folder  
   

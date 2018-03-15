@@ -19,7 +19,7 @@
 #include "util.h"
 #include "utilstrencodings.h"
 
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 #include <memory>
 

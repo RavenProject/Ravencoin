@@ -3,10 +3,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_TEST_FIXTURE_H
-#define RAVEN_WALLET_TEST_FIXTURE_H
+#ifndef CHICKADEE_WALLET_TEST_FIXTURE_H
+#define CHICKADEE_WALLET_TEST_FIXTURE_H
 
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 /** Testing setup and teardown for wallet.
  */

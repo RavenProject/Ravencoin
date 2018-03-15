@@ -10,7 +10,7 @@
 #include "script/script.h"
 #include "script/standard.h"
 #include "uint256.h"
-#include "test/test_raven.h"
+#include "test/test_chickadee.h"
 
 #include <vector>
 

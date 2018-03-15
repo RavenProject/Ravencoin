@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CHECKQUEUE_H
-#define RAVEN_CHECKQUEUE_H
+#ifndef CHICKADEE_CHECKQUEUE_H
+#define CHICKADEE_CHECKQUEUE_H
 
 #include "sync.h"
 
@@ -215,4 +215,4 @@ public:
     }
 };
 
-#endif // RAVEN_CHECKQUEUE_H
+#endif // CHICKADEE_CHECKQUEUE_H
