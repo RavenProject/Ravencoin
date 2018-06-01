@@ -59,7 +59,7 @@ BASE_SCRIPTS= [
     'walletbackup.py',
     # vv Tests less than 5m vv
     #'p2p-fullblocktest.py', TODO - fix comptool.TestInstance timeout (
-    #'fundrawtransaction.py', TODO - fix fee calculation dummy signing bug
+    'fundrawtransaction.py',
     #'p2p-compactblocks.py' - TODO - refactor to assume segwit is always active
     # 'segwit.py', TODO fix mininode rehash methods to use X16R
     # vv Tests less than 2m vv
@@ -67,17 +67,17 @@ BASE_SCRIPTS= [
     'wallet-accounts.py',
     # 'p2p-segwit.py',TODO - refactor to assume segwit is always active
     'wallet-dump.py',
-    #'listtransactions.py', TODO - fix Mempool sync failed
+    'listtransactions.py',
     # vv Tests less than 60s vv
     # 'sendheaders.py', TODO fix mininode rehash methods to use X16R
     'zapwallettxes.py',
-    #'importmulti.py', TODO fix AssertionError
+    'importmulti.py',
     'mempool_limit.py',
     'merkle_blocks.py',
-    #'receivedby.py', TODO fix Mempool sync failed
+    'receivedby.py',
     'abandonconflict.py',
     #'bip68-112-113-p2p.py', - TODO - currently testing softfork activations, we need to test the features
-    #'rawtransactions.py', TODO fix AssertionError
+    'rawtransactions.py',
     'reindex.py',
     # vv Tests less than 30s vv
     'keypool-topup.py',
