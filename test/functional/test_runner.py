@@ -115,7 +115,7 @@ BASE_SCRIPTS= [
     'import-rescan.py',
     # 'mining.py', TODO fix mininode rehash methods to use X16R
     # 'bumpfee.py', TODO fix mininode rehash methods to use X16R
-    #'rpcnamedargs.py', TODO fix 'assert_raises_jsonrpc' is not defined
+    'rpcnamedargs.py',
     'listsinceblock.py',
     'p2p-leaktests.py',
     'wallet-encryption.py',
