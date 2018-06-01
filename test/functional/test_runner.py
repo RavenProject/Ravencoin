@@ -94,7 +94,7 @@ BASE_SCRIPTS= [
     'multiwallet.py',
     'httpbasics.py',
     'multi_rpc.py',
-    #'proxy_test.py', TODO - fix timeout
+    'proxy_test.py',
     'signrawtransactions.py',
     'disconnect_ban.py',
     'decodescript.py',
