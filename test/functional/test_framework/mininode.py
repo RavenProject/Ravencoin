@@ -28,9 +28,11 @@ import copy
 import hashlib
 from io import BytesIO
 import logging
+import os
 import random
 import socket
 import struct
+import subprocess
 import sys
 import time
 from threading import RLock, Thread
@@ -79,6 +81,14 @@ def ripemd160(s):
 
 def hash256(s):
     return sha256(sha256(s))
+
+x16r_hash_cmd = os.path.dirname(os.path.realpath(__file__)) + "/../../../src/test/test_raven_hash"
+def hash_x16r(s):
+    cmd = [x16r_hash_cmd, s]
+    print(cmd)
+    hash = subprocess.run(cmd, stdout=subprocess.PIPE, check=True).stdout.decode('ascii')
+    print(hash)
+    return hash
 
 def ser_compact_size(l):
     r = b""
@@ -572,6 +582,7 @@ class CBlockHeader():
         r += struct.pack("<I", self.nNonce)
         return r
 
+    # TODO: rename calc_sha256 and self.sha256 to calc_x16r and self.x16r for clarity
     def calc_sha256(self):
         if self.sha256 is None:
             r = b""
@@ -581,8 +592,8 @@ class CBlockHeader():
             r += struct.pack("<I", self.nTime)
             r += struct.pack("<I", self.nBits)
             r += struct.pack("<I", self.nNonce)
-            self.sha256 = uint256_from_str(hash256(r))
-            self.hash = encode(hash256(r)[::-1], 'hex_codec').decode('ascii')
+            self.hash = hash_x16r(encode(r, 'hex_codec').decode('ascii'))
+            self.sha256 = int(self.hash, 16)
 
     def rehash(self):
         self.sha256 = None
@@ -655,11 +666,16 @@ class CBlock(CBlockHeader):
         return True
 
     def solve(self):
+        print("Solving....................")
         self.rehash()
+        print("Starting sha256: " + str(self.sha256))
         target = uint256_from_compact(self.nBits)
+        print("Target:          " + str(target))
         while self.sha256 > target:
             self.nNonce += 1
             self.rehash()
+            print("sha256 at nonce " + str(self.nNonce) + ": " + str(self.sha256))
+        print("Solved....................!")
 
     def __repr__(self):
         return "CBlock(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x vtx=%s)" \
