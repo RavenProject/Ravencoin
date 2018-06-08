@@ -85,9 +85,7 @@ def hash256(s):
 x16r_hash_cmd = os.path.dirname(os.path.realpath(__file__)) + "/../../../src/test/test_raven_hash"
 def hash_x16r(s):
     cmd = [x16r_hash_cmd, s]
-    print(cmd)
     hash = subprocess.run(cmd, stdout=subprocess.PIPE, check=True).stdout.decode('ascii')
-    print(hash)
     return hash
 
 def ser_compact_size(l):
@@ -666,16 +664,11 @@ class CBlock(CBlockHeader):
         return True
 
     def solve(self):
-        print("Solving....................")
         self.rehash()
-        print("Starting sha256: " + str(self.sha256))
         target = uint256_from_compact(self.nBits)
-        print("Target:          " + str(target))
         while self.sha256 > target:
             self.nNonce += 1
             self.rehash()
-            print("sha256 at nonce " + str(self.nNonce) + ": " + str(self.sha256))
-        print("Solved....................!")
 
     def __repr__(self):
         return "CBlock(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x vtx=%s)" \
