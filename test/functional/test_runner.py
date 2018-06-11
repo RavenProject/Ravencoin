@@ -81,7 +81,7 @@ BASE_SCRIPTS= [
     'reindex.py',
     # vv Tests less than 30s vv
     'keypool-topup.py',
-    #'zmq_test.py', TODO fix AssertionError
+    'zmq_test.py',
     'raven_cli.py',
     'mempool_resurrect_test.py',
     'txn_doublespend.py --mineblock',
@@ -107,14 +107,14 @@ BASE_SCRIPTS= [
     'prioritise_transaction.py',
     # 'invalidblockrequest.py', TODO fix mininode rehash methods to use X16R
     # 'invalidtxrequest.py', TODO fix mininode rehash methods to use X16R
-    # 'p2p-versionbits-warning.py', TODO fix mininode rehash methods to use X16R
+    'p2p-versionbits-warning.py',
     'preciousblock.py',
     'importprunedfunds.py',
     'signmessages.py',
     # 'nulldummy.py',  TODO fix mininode rehash methods to use X16R
     'import-rescan.py',
     # 'mining.py', TODO fix mininode rehash methods to use X16R
-    # 'bumpfee.py', TODO fix mininode rehash methods to use X16R
+    'bumpfee.py',
     'rpcnamedargs.py',
     'listsinceblock.py',
     'p2p-leaktests.py',
