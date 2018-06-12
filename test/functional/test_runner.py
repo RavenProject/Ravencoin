@@ -135,9 +135,9 @@ EXTENDED_SCRIPTS = [
     # vv Tests less than 20m vv
     'smartfees.py',
     # vv Tests less than 5m vv
-    # 'maxuploadtarget.py', TODO fix mininode rehash methods to use X16R
+    'maxuploadtarget.py',
     'mempool_packages.py',
-    #'dbcrash.py',
+    'dbcrash.py',
     # vv Tests less than 2m vv
     'bip68-sequence.py',
     'getblocktemplate_longpoll.py',
@@ -148,12 +148,12 @@ EXTENDED_SCRIPTS = [
     'rpcbind_test.py',
     # vv Tests less than 30s vv
     'assumevalid.py',
-    #'example_test.py', TODO fix mininode rehash methods to use X16R
+    #'example_test.py',
     'txn_doublespend.py',
     'txn_clone.py --mineblock',
     'notifications.py',
     'invalidateblock.py',
-    #'p2p-acceptblock.py',  TODO fix mininode rehash methods to use X16R
+    #'p2p-acceptblock.py',
     'replace-by-fee.py',
 ]
 
