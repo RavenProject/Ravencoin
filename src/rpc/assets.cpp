@@ -56,8 +56,8 @@ UniValue issue(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. \"asset_name\"            (string, required) a unique name\n"
             "2. \"qty\"                   (integer, required) the number of units to be issued\n"
-            "3. \"address\"               (string), required), address asset will be sent to, if it is empty, address will be generated for you\n"
-            "4. \"units\"                 (integer, optional, default=1), the atomic unit size (1, 0.1, ... ,0.00000001)\n"
+            "3. \"to_address\"            (string), required), address asset will be sent to, if it is empty, address will be generated for you\n"
+            "4. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "5. \"reissuable\"            (boolean, optional, default=false), whether future reissuance is allowed\n"
             "6. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
             "7. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash\n"
@@ -239,20 +239,20 @@ UniValue getassetdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-                "getallassets assets_name\n"
+                "getassetdata asset_name\n"
                 "\nReturns assets metadata if that asset exists\n"
 
                 "\nArguments:\n"
-                "1. \"assets_name\"               (string, required) the name of the asset\n"
+                "1. \"asset_name\"               (string, required) the name of the asset\n"
 
                 "\nResult:\n"
                 "[ "
-                "{ name : (string)\n"
-                "  amount : (number)\n"
-                "  units : (number)\n"
-                "  reissuable : (number)\n"
-                "  has_ipfs : (number)\n"
-                "  ipfs_hash : (hash)}\n, only if has_ipfs = 1"
+                "{ name: (string)\n"
+                "  amount: (number)\n"
+                "  units: (number)\n"
+                "  reissuable: (number)\n"
+                "  has_ipfs: (number)\n"
+                "  ipfs_hash: (hash)}\n, only if has_ipfs = 1"
                 "{...}, {...}\n"
                 "]\n"
 
@@ -272,13 +272,13 @@ UniValue getassetdata(const JSONRPCRequest& request)
             return NullUniValue;
 
         UniValue value(UniValue::VOBJ);
-        value.push_back(Pair("name: ", asset.strName));
-        value.push_back(Pair("amount: ", asset.nAmount));
-        value.push_back(Pair("units: ", asset.units));
-        value.push_back(Pair("reissuable: ", asset.nReissuable));
-        value.push_back(Pair("has_ipfs: ", asset.nHasIPFS));
+        value.push_back(Pair("name", asset.strName));
+        value.push_back(Pair("amount", asset.nAmount));
+        value.push_back(Pair("units", asset.units));
+        value.push_back(Pair("reissuable", asset.nReissuable));
+        value.push_back(Pair("has_ipfs", asset.nHasIPFS));
         if (asset.nHasIPFS)
-            value.push_back(Pair("ipfs_hash: ", asset.strIPFSHash));
+            value.push_back(Pair("ipfs_hash", asset.strIPFSHash));
 
         result.push_back(value);
 
@@ -297,17 +297,21 @@ UniValue getmyassets(const JSONRPCRequest& request)
 
                 "\nResult:\n"
                 "[ "
-                "{ name : (string)\n"
-                "  amount : (number)\n"
-                "  units : (number)\n"
-                "  reissuable : (number)\n"
-                "  has_ipfs : (number)\n"
-                "  ipfs_hash : (hash)}\n, only if has_ipfs = 1"
-                "{...}, {...}\n"
+                "  {\n"
+                "    (asset_name):\n"
+                "    [\n"
+                "      {\n"
+                "        \"txid\": txid,\n"
+                "        \"index\": index\n"
+                "      }\n"
+                "      {...}, {...}\n"
+                "    ]\n"
+                "  }\n"
+                "  {...}, {...}\n"
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("getmyassets", "")
+                + HelpExampleRpc("getmyassets", "")
                 + HelpExampleCli("getmyassets", "")
         );
 
@@ -382,7 +386,6 @@ UniValue getassetaddresses(const JSONRPCRequest& request)
     return addresses;
 }
 
-// TODO Used to test database, remove before release
 UniValue transfer(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
