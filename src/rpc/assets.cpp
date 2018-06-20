@@ -642,8 +642,8 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",           &getassetdata,           {"asset_name"}},
     { "assets",   "getmyassets",            &getmyassets,            {}},
     { "assets",   "getassetaddresses",      &getassetaddresses,      {"asset_name"}},
-    { "assets",   "transfer",               &transfer,               {"asset_name, address, amount"}},
-    { "assets",   "reissue",                &reissue,                {"asset_name, address, amount, reissuable, new_ipfs"}}
+    { "assets",   "transfer",               &transfer,               {"asset_name", "address", "amount"}},
+    { "assets",   "reissue",                &reissue,                {"asset_name", "address", "amount", "reissuable", "new_ipfs"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)
