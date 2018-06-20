@@ -71,7 +71,7 @@ class AssetTest(RavenTestFramework):
 
         self.log.info("Calling transfer()...")
         address1 = n1.getnewaddress()
-        n0.transfer("MY_ASSET", address1, 200.0000)
+        n0.transfer(asset_name="MY_ASSET", address=address1, amount=200)
 
         self.log.info("Waiting for ten confirmations after transfer...")
         n0.generate(10)
@@ -90,14 +90,35 @@ class AssetTest(RavenTestFramework):
 
         self.log.info("Checking getaddressbalances()...")
         assert_equal(n1.getaddressbalances(address1)["MY_ASSET"], 200 * COIN)
-        found_change = False
+        changeaddress = None
         # TODO: Uses *considered harmful* getassetaddresses.  Not sure how to get change otherwise w/o work..
         for assaddr in n0.getassetaddresses("MY_ASSET").keys():
             if n0.validateaddress(assaddr)["ismine"] == True:
-                found_change = True
-                assert_equal(n0.getaddressbalances(assaddr)["MY_ASSET"], 800 * COIN)
-        assert(found_change)
+                changeaddress = assaddr
+                assert_equal(n0.getaddressbalances(changeaddress)["MY_ASSET"], 800 * COIN)
+        assert(changeaddress != None)
         assert_equal(n0.getaddressbalances(address0)["MY_ASSET!"], COIN)
+
+        self.log.info("Calling reissue()...")
+        n0.reissue(asset_name="MY_ASSET", address=address0, amount=2000, \
+                   reissuable=False, new_ipfs=ipfs_hash[::-1])
+
+        self.log.info("Waiting for ten confirmations after reissue...")
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Checkout getassetdata()...")
+        assetdata = n0.getassetdata("MY_ASSET")
+        assert_equal(len(assetdata), 1)
+        assert_equal(assetdata[0]["name"], "MY_ASSET")
+        assert_equal(assetdata[0]["amount"], 3000 * COIN)
+        assert_equal(assetdata[0]["units"], 4)
+        assert_equal(assetdata[0]["reissuable"], 0)
+        assert_equal(assetdata[0]["has_ipfs"], 1)
+        assert_equal(assetdata[0]["ipfs_hash"], ipfs_hash[::-1])
+
+        self.log.info("Checking getaddressbalances()...")
+        assert_equal(n0.getaddressbalances(address0)["MY_ASSET"], 2000 * COIN)
 
 
 if __name__ == '__main__':
