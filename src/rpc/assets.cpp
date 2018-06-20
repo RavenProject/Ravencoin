@@ -36,8 +36,6 @@
 #include "wallet/walletdb.h"
 
 
-//issue(to_address, asset_name, qty, units=1, reissuable=false)
-//Issue an asset with unique name. Unit as 1 for whole units, or 0.00000001 for satoshi-like units. Qty should be whole number. Reissuable is true/false for whether additional units can be issued by the original issuer.
 UniValue issue(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -179,8 +177,6 @@ UniValue issue(const JSONRPCRequest& request)
     return result;
 }
 
-//getaddressbalances(address, minconf=1)
-//Returns a list of all the asset balances for address in this node’s wallet, with at least minconf confirmations.
 UniValue getaddressbalances(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 1)
@@ -337,7 +333,7 @@ UniValue getmyassets(const JSONRPCRequest& request)
     return result;
 }
 
-// TODO Used to test database, remove before release
+// TODO: Used to test database, remove before release(?)
 UniValue getassetaddresses(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -490,7 +486,6 @@ UniValue transfer(const JSONRPCRequest& request)
     return result;
 }
 
-// TODO Used to test database, remove before release
 UniValue reissue(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -638,38 +633,6 @@ UniValue reissue(const JSONRPCRequest& request)
     return result;
 }
 
-//issuefrom(from_address, to_address, qty, units, units=1, reissuable=false)
-//Issue an asset with unique name from a specific address -- allows control of which address/private_key is used to issue the asset. Unit as 1 for whole units, or 0.00000001 for satoshi-like units. Qty should be whole number. Reissuable is true/false for whether additional units can be issued by the original issuer.
-
-//issuemore(to_address, asset_name, qty)
-//Issue more of a specific asset. This is only allowed by the original issuer of the asset and if the reissuable flag was set to true at the time of original issuance.
-
-//makeuniqueasset(address, asset_name, unique_id)
-//Creates a unique asset from a pool of assets with a specific name. Example: If the asset name is SOFTLICENSE, then this could make unique assets like SOFTLICENSE:38293 and SOFTLICENSE:48382 This would be called once per unique asset needed.
-
-//listassets(assets=*, verbose=false, count=MAX, start=0)
-//This lists assets that have already been created. It does not distinguish unique assets.
-
-//listuniqueassets(asset)
-//This lists the assets that have been made unique, and the address that owns the asset.
-
-//sendasset(to_address, asset, amount)
-//This sends assets from one asset holder to another.
-
-//sendassetfrom(from_address, to_address, asset, amount)
-//This sends asset from one asset holder to another, but allows spIsecifying which address to send from, so that if a wallet that has multiple addresses holding a given asset, the send can disambiguate the address from which to send.
-
-//getassettransaction(asset, txid)
-//This returns details for a specific asset transaction.
-
-//listassettransactions(asset, verbose=false, count=100, start=0)
-//This returns a list of transactions for a given asset.
-
-//reward(from_address, asset, amount, except=[])
-//Sends RVN to holders of the the specified asset. The Raven is split pro-rata to holders of the asset. Any remainder that cannot be evenly divided to the satoshi (1/100,000,000 RVN) level will be added to the mining fee. ​except​ is a list of addresses to exclude from the distribution - used so that you could exclude treasury shares that do not participate in the reward.
-
-//send_asset(from_address, from_asset, to_asset, amount, except=[])
-//Sends an asset to holders of the the specified to_asset. This can be used to send a voting token to holders of an asset. Combined with a messaging protocol explaining the vote, it could act as a distributed voting system.
 
 static const CRPCCommand commands[] =
 { //  category    name                      actor (function)         argNames
