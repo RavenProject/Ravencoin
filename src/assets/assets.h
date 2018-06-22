@@ -328,4 +328,9 @@ void UpdatePossibleAssets();
 bool GetAssetFromCoin(const Coin& coin, std::string& strName, CAmount& nAmount);
 
 bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName, const std::string& address);
+bool GetMyOwnedAssets(CAssetsCache& cache, std::vector<std::string>& assets);
+bool GetMyOwnedAssets(CAssetsCache& cache, const std::string prefix, std::vector<std::string>& assetNames);
+bool GetMyAssetBalance(CAssetsCache& cache, const std::string& assetName, CAmount& balance);
+bool GetMyAssetBalances(CAssetsCache& cache, const std::vector<std::string>& assetNames, std::map<std::string, CAmount>& balances);
+bool GetMyAssetBalances(CAssetsCache& cache, std::map<std::string, CAmount>& balances);
 #endif //RAVENCOIN_ASSET_PROTOCOL_H

@@ -6,6 +6,7 @@
 //#include <base58.h>
 #include <assets/assets.h>
 #include <assets/assetdb.h>
+#include <map>
 #include <tinyformat.h>
 //#include <rpc/server.h>
 //#include <script/standard.h>
@@ -215,7 +216,7 @@ UniValue getaddressbalances(const JSONRPCRequest& request)
 
     for (auto it : passets->mapAssetsAddressAmount) {
         if (address.compare(it.first.second) == 0) {
-            result.push_back(Pair(it.first.first, it.second));
+            result.push_back(Pair(it.first.first, ValueFromAmount(it.second)));
         }
     }
 
@@ -278,7 +279,12 @@ UniValue getassetdata(const JSONRPCRequest& request)
 
 UniValue listmyassets(const JSONRPCRequest &request)
 {
-    if (request.fHelp || request.params.size() > 0)
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
                 "listmyassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
                 "\nReturns a list of all asset that are owned by this wallet\n"
@@ -290,57 +296,138 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found\n"
 
                 "\nResult (verbose=false):\n"
-                "  {\n"
-                "    (asset_name): balance,\n"
-                "    ...\n"
-                "  }\n"
+                "{\n"
+                "  (asset_name): balance,\n"
+                "  ...\n"
+                "}\n"
 
                 "\nResult (verbose=true):\n"
-                "[ "
-                "  {\n"
-                "    (asset_name):\n"
-                "      {\n"
-                "        \"balance\": balance,\n"
-                "        \"outpoints\":\n"
-                "          [\n"
-                "            {\n"
-                "              \"txid\": txid,\n"
-                "              \"index\": index\n"
-                "            }\n"
-                "            {...}, {...}\n"
-                "          ]\n"
-                "      }\n"
-                "  }\n"
-                "  {...}, {...}\n"
-                "]\n"
+                "{\n"
+                "  (asset_name):\n"
+                "    {\n"
+                "      \"balance\": balance,\n"
+                "      \"outpoints\":\n"
+                "        [\n"
+                "          {\n"
+                "            \"txid\": txid,\n"
+                "            \"index\": index,\n"
+                "            \"amount\": amount\n"
+                "          }\n"
+                "          {...}, {...}\n"
+                "        ]\n"
+                "    }\n"
+                "}\n"
+                "{...}, {...}\n"
 
                 "\nExamples:\n"
                 + HelpExampleRpc("listmyassets", "")
                 + HelpExampleCli("listmyassets", "asset")
-                + HelpExampleCli("listmyassets", "asset*", true, 10, 20)
+                + HelpExampleCli("listmyassets", "\"asset*\" true 10 20")
         );
+    // TODO: should probably be throwing errors in a lot of cases we're returning NullUniValue
 
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
 
-    LOCK(cs_main);
+    if (!passets)
+        return NullUniValue;
 
+    std::string filter = "*";
+    if (request.params.size() > 0)
+        filter = request.params[0].get_str();
 
-    UniValue result (UniValue::VARR);
-    if (passets) {
-        UniValue assets(UniValue::VOBJ);
-        for (auto it : passets->mapMyUnspentAssets) {
-            UniValue outs(UniValue::VARR);
-            for (auto out : it.second) {
+    if (filter == "")
+        filter = "*";
+
+    bool verbose = false;
+    if (request.params.size() > 1)
+        verbose = request.params[1].get_bool();
+
+    // TODO: implement pagination
+    int count = INT_MAX;
+    if (request.params.size() > 2)
+        count = request.params[2].get_int();
+
+    int start = 0;
+    if (request.params.size() > 3)
+        start = request.params[3].get_int();
+
+    std::map<std::string, CAmount> balances;
+    if (filter == "*") {
+        if (!GetMyAssetBalances(*passets, balances))
+            return NullUniValue;
+    }
+    else if (filter.back() == '*') {
+        std::vector<std::string> assetNames;
+        filter.pop_back();
+        if (!GetMyOwnedAssets(*passets, filter, assetNames))
+            return NullUniValue;
+        if (!GetMyAssetBalances(*passets, assetNames, balances))
+            return NullUniValue;
+    }
+    else {
+        if (!IsAssetNameValid(filter))
+            return NullUniValue;
+        CAmount balance;
+        if (!GetMyAssetBalance(*passets, filter, balance))
+            return NullUniValue;
+        balances[filter] = balance;
+    }
+
+    UniValue result(UniValue::VOBJ);
+    if (verbose) {
+        for (auto const& bal : balances) {
+            UniValue asset(UniValue::VOBJ);
+            asset.push_back(Pair("balance", ValueFromAmount(bal.second)));
+            UniValue outpoints(UniValue::VARR);
+            for (auto const& out : passets->mapMyUnspentAssets[bal.first]) {
                 UniValue tempOut(UniValue::VOBJ);
                 tempOut.push_back(Pair("txid", out.hash.GetHex()));
                 tempOut.push_back(Pair("index", std::to_string(out.n)));
-                outs.push_back(tempOut);
-            }
-            assets.push_back(Pair(it.first, outs));
-            outs.clear();
-        }
-        result.push_back(assets);
-    }
 
+                //
+                // get amount for this outpoint (from gettransaction())
+                CAmount txAmount = 0;
+                auto it = pwallet->mapWallet.find(out.hash);
+                if (it == pwallet->mapWallet.end()) {
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id");
+                }
+                const CWalletTx& wtx = it->second;
+                CTxOut txOut = wtx.tx->vout[out.n];
+                std::string strAddress;
+                if (CheckIssueDataTx(txOut)) {
+                    CNewAsset asset;
+                    if (!AssetFromScript(txOut.scriptPubKey, asset, strAddress))
+                        throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset from script.");
+                    txAmount = asset.nAmount;
+                }
+                else if (CheckReissueDataTx(txOut)) {
+                    CReissueAsset asset;
+                    if (!ReissueAssetFromScript(txOut.scriptPubKey, asset, strAddress))
+                        throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset from script.");
+                    txAmount = asset.nAmount;
+                }
+                else if (CheckTransferOwnerTx(txOut)) {
+                    CAssetTransfer asset;
+                    if (!TransferAssetFromScript(txOut.scriptPubKey, asset, strAddress))
+                        throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset from script.");
+                    txAmount = asset.nAmount;
+                }
+                tempOut.push_back(Pair("amount", ValueFromAmount(txAmount)));
+                //
+                //
+
+                outpoints.push_back(tempOut);
+            }
+            asset.push_back(Pair("outpoints", outpoints));
+            result.push_back(Pair(bal.first, asset));
+        }
+    }
+    else {
+        for (auto const& entry : balances) {
+            result.push_back(Pair(entry.first, ValueFromAmount(entry.second)));
+        }
+    }
     return result;
 }
 
@@ -649,7 +736,7 @@ static const CRPCCommand commands[] =
     { "assets",   "issue",                  &issue,                  {"asset_name","qty","to_address","units","reissuable","has_ipfs","ipfs_hash"} },
     { "assets",   "getaddressbalances",     &getaddressbalances,     {"address"} },
     { "assets",   "getassetdata",           &getassetdata,           {"asset_name"}},
-    { "assets",   "listmyassets", &listmyassets,            {}},
+    { "assets",   "listmyassets",           &listmyassets,           {"asset", "verbose", "count", "start"}},
     { "assets",   "getassetaddresses",      &getassetaddresses,      {"asset_name"}},
     { "assets",   "transfer",               &transfer,               {"asset_name", "qty", "to_address"}},
     { "assets",   "reissue",                &reissue,                {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}}

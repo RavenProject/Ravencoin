@@ -1679,12 +1679,58 @@ bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName
     return false;
 }
 
-//! sets _balance_ to the total quantity of _assetName_ owned across all addresses
-bool CAssets::getMyAssetBalance(std::string strError, std::string assetName, CAmount& balance) {
+//! sets _assetNames_ to the set of names of owned assets
+bool GetMyOwnedAssets(CAssetsCache& cache, std::vector<std::string>& assetNames) {
+    for (auto const& entry : cache.mapMyUnspentAssets) {
+        assetNames.push_back(entry.first);
+    }
 
+    return true;
 }
 
-//! sets _assets_ to the set of names of owned assets
-bool CAssets::getMyOwnedAssets(std::string strError, std::vector<std::string> assets) {
+//! sets _assetNames_ to the set of names of owned assets that start with _prefix_
+bool GetMyOwnedAssets(CAssetsCache& cache, const std::string prefix, std::vector<std::string>& assetNames) {
+    for (auto const& entry : cache.mapMyUnspentAssets)
+        if (entry.first.find(prefix) == 0)
+            assetNames.push_back(entry.first);
 
+    return true;
+}
+
+//! sets _balance_ to the total quantity of _assetName_ owned across all addresses
+bool GetMyAssetBalance(CAssetsCache& cache, const std::string& assetName, CAmount& balance) {
+    balance = 0;
+    for (auto const& address : cache.mapAssetsAddresses[assetName]) {
+        if (!GetBestAssetAddressAmount(cache, assetName, address))
+            return false;
+
+        balance += cache.mapAssetsAddressAmount[make_pair(assetName, address)];
+    }
+
+    return true;
+}
+
+//! sets _balances_ with the total quantity of each asset in _assetNames_
+bool GetMyAssetBalances(CAssetsCache& cache, const std::vector<std::string>& assetNames, std::map<std::string, CAmount>& balances) {
+    for (auto const& assetName : assetNames) {
+        CAmount balance;
+        if (!GetMyAssetBalance(cache, assetName, balance))
+            return false;
+
+        balances[assetName] = balance;
+    }
+
+    return true;
+}
+
+//! sets _balances_ with the total quantity of each owned asset
+bool GetMyAssetBalances(CAssetsCache& cache, std::map<std::string, CAmount>& balances) {
+    std::vector<std::string> assetNames;
+    if (!GetMyOwnedAssets(cache, assetNames))
+        return false;
+
+    if (!GetMyAssetBalances(cache, assetNames, balances))
+        return false;
+
+    return true;
 }
