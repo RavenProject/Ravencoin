@@ -159,7 +159,7 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (!IsAssetNameValid(std::string(strName)))
-        strError = "Invalid parameter: asset_name must only consist of valid characters and have a size between 3 and 31 characters. See help for more details.";
+        strError = "Invalid parameter: asset_name must only consist of valid characters and have a size between 3 and 30 characters. See help for more details.";
 
     if (nAmount <= 0)
         strError  = "Invalid parameter: asset amount can't be equal to or less than zero.";
@@ -486,7 +486,7 @@ bool CAssetTransfer::IsValid(std::string& strError) const
     strError = "";
 
     if (!IsAssetNameValid(std::string(strName)))
-        strError = "Invalid parameter: asset_name must only consist of valid characters and have a size between 3 and 31 characters. See help for more details.";
+        strError = "Invalid parameter: asset_name must only consist of valid characters and have a size between 3 and 30 characters. See help for more details.";
 
     if (nAmount <= 0)
         strError  = "Invalid parameter: asset amount can't be equal to or less than zero.";
@@ -1648,4 +1648,14 @@ CAmount GetIssueSubAssetBurnAmount()
 CAmount GetIssueUniqueAssetBurnAmount()
 {
     return Params().IssueUniqueAssetBurnAmount();
+}
+
+//! sets _balance_ to the total quantity of _assetName_ owned across all addresses
+bool CAssets::getMyAssetBalance(std::string strError, std::string assetName, CAmount& balance) {
+
+}
+
+//! sets _assets_ to the set of names of owned assets
+bool CAssets::getMyOwnedAssets(std::string strError, std::vector<std::string> assets) {
+
 }

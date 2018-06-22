@@ -35,7 +35,7 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
-
+// reorder args: to_address, asset_name, qty
 UniValue issue(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -43,18 +43,18 @@ UniValue issue(const JSONRPCRequest& request)
         return NullUniValue;
     }
 
-    if (request.fHelp || request.params.size() < 3 || request.params.size() > 7)
+    if (request.fHelp || request.params.size() < 2 || request.params.size() > 7)
         throw std::runtime_error(
-            "issue \"asset-name\" qty \"address\" ( units ) ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
+            "issue \"asset_name\" qty \"( to_address )\" ( units ) ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
             "\nIssue an asset with unique name.\n"
-            "Unit as 1 for whole units, or 0.00000001 for satoshi-like units.\n"
+            "Unit as the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "Qty should be whole number.\n"
             "Reissuable is true/false for whether additional units can be issued by the original issuer.\n"
 
             "\nArguments:\n"
             "1. \"asset_name\"            (string, required) a unique name\n"
             "2. \"qty\"                   (integer, required) the number of units to be issued\n"
-            "3. \"to_address\"            (string), required), address asset will be sent to, if it is empty, address will be generated for you\n"
+            "3. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
             "4. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "5. \"reissuable\"            (boolean, optional, default=false), whether future reissuance is allowed\n"
             "6. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
@@ -64,9 +64,10 @@ UniValue issue(const JSONRPCRequest& request)
             "\"txid\"                     (string) The transaction id\n"
 
             "\nExamples:\n"
+            + HelpExampleCli("issue", "\"myassetname\" 1000")
             + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\"")
-            + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\" \"0.0001\"")
-            + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\" \"0.01\" true")
+            + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\" 4")
+            + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\" 2 true")
         );
 
 
@@ -79,7 +80,9 @@ UniValue issue(const JSONRPCRequest& request)
 
     CAmount nAmount = AmountFromValue(request.params[1]);
 
-    std::string address = request.params[2].get_str();
+    std::string address = "";
+    if (request.params.size() > 2)
+        address = request.params[2].get_str();
 
     if (address != "") {
         CTxDestination destination = DecodeDestination(address);
@@ -177,16 +180,16 @@ UniValue issue(const JSONRPCRequest& request)
     return result;
 }
 
+// listassetbalancesbyaddress
 UniValue getaddressbalances(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() < 1)
+    if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "getaddressbalances \"address\" ( minconf )\n"
-            "\nReturns a list of all the asset balances for address in this node's wallet, with at least minconf confirmations.\n"
+            "getaddressbalances \"address\"\n"
+            "\nReturns a list of all asset balances for an address.\n"
 
             "\nArguments:\n"
             "1. \"address\"               (string, required) a raven address\n"
-            "2. \"minconf\"               (integer, optional, default=1) the minimum required confirmations\n"
 
             "\nResult:\n"
             "{\n"
@@ -196,24 +199,12 @@ UniValue getaddressbalances(const JSONRPCRequest& request)
 
             "\nExamples:\n"
             + HelpExampleCli("getaddressbalances", "\"myaddress\"")
-            + HelpExampleCli("getaddressbalances", "\"myaddress\" 5")
         );
 
     std::string address = request.params[0].get_str();
     CTxDestination destination = DecodeDestination(address);
     if (!IsValidDestination(destination)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
-    }
-
-    int minconf = 1;
-    if (!request.params[1].isNull()) {
-        if (request.params[1].get_int() != 1) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("TODO: implement miniconf != 1"));
-        }
-        minconf = request.params[1].get_int();
-        if (minconf < 1) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid minconf: ") + std::to_string(minconf));
-        }
     }
 
     LOCK(cs_main);
@@ -231,6 +222,7 @@ UniValue getaddressbalances(const JSONRPCRequest& request)
     return result;
 }
 
+// maybe change to just an object here...
 UniValue getassetdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -284,35 +276,54 @@ UniValue getassetdata(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
-UniValue getmyassets(const JSONRPCRequest& request)
+UniValue listmyassets(const JSONRPCRequest &request)
 {
     if (request.fHelp || request.params.size() > 0)
         throw std::runtime_error(
-                "getmyassets\n"
+                "listmyassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
                 "\nReturns a list of all asset that are owned by this wallet\n"
 
-                "\nResult:\n"
+                "\nArguments:\n"
+                "1. \"asset\"                    (string, optional, default=\"*\") filters results -- a '*' matches all trailing characters\n"
+                "2. \"verbose\"                  (boolean, optional, default=false) when false results only contain balances -- when true results include outpoints\n"
+                "3. \"count\"                    (integer, optional, default=ALL) truncates results to include only the first _count_ assets found\n"
+                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found\n"
+
+                "\nResult (verbose=false):\n"
+                "  {\n"
+                "    (asset_name): balance,\n"
+                "    ...\n"
+                "  }\n"
+
+                "\nResult (verbose=true):\n"
                 "[ "
                 "  {\n"
                 "    (asset_name):\n"
-                "    [\n"
                 "      {\n"
-                "        \"txid\": txid,\n"
-                "        \"index\": index\n"
+                "        \"balance\": balance,\n"
+                "        \"outpoints\":\n"
+                "          [\n"
+                "            {\n"
+                "              \"txid\": txid,\n"
+                "              \"index\": index\n"
+                "            }\n"
+                "            {...}, {...}\n"
+                "          ]\n"
                 "      }\n"
-                "      {...}, {...}\n"
-                "    ]\n"
                 "  }\n"
                 "  {...}, {...}\n"
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleRpc("getmyassets", "")
-                + HelpExampleCli("getmyassets", "")
+                + HelpExampleRpc("listmyassets", "")
+                + HelpExampleCli("listmyassets", "asset")
+                + HelpExampleCli("listmyassets", "asset*", true, 10, 20)
         );
 
 
     LOCK(cs_main);
+
+
     UniValue result (UniValue::VARR);
     if (passets) {
         UniValue assets(UniValue::VOBJ);
@@ -333,7 +344,7 @@ UniValue getmyassets(const JSONRPCRequest& request)
     return result;
 }
 
-// TODO: Used to test database, remove before release(?)
+// listaddressesbyasset
 UniValue getassetaddresses(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -391,13 +402,13 @@ UniValue transfer(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-                "transfer asset_name address amount\n"
+                "transfer asset_name qty to_address\n"
                 "\nTransfers a quantity of an owned asset to a given address"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"               (string, required) name of asset\n"
-                "2. \"address\"                  (string, required) address to send the asset to\n"
-                "3. \"amount\"                   (number, required) number of assets you want to send to the address\n"
+                "3. \"qty\"                      (number, required) number of assets you want to send to the address\n"
+                "2. \"to_address\"               (string, required) address to send the asset to\n"
 
                 "\nResult:\n"
                 "txid"
@@ -406,8 +417,8 @@ UniValue transfer(const JSONRPCRequest& request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("transfer", "\"asset_name\" \"address\" \"20\"")
-                + HelpExampleCli("transfer", "\"asset_name\" \"address\" \"20\"")
+                + HelpExampleCli("transfer", "\"asset_name\" 20 \"address\"")
+                + HelpExampleCli("transfer", "\"asset_name\" 20 \"address\"")
         );
 
     ObserveSafeMode();
@@ -417,9 +428,9 @@ UniValue transfer(const JSONRPCRequest& request)
 
     std::string asset_name = request.params[0].get_str();
 
-    std::string address = request.params[1].get_str();
+    CAmount nAmount = AmountFromValue(request.params[1]);
 
-    CAmount nAmount = AmountFromValue(request.params[2]);
+    std::string address = request.params[2].get_str();
 
     if (!IsValidDestinationString(address))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
@@ -495,24 +506,24 @@ UniValue reissue(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() > 5 || request.params.size() < 3)
         throw std::runtime_error(
-                "reissue \"asset_name\" \"address\" amount reissuable \"new_ipfs\" \n"
+                "reissue \"asset_name\" qty \"to_address\" reissuable \"new_ipfs\" \n"
                 "\nReissues a quantity of an asset to an owned address if you own the Owner Token"
                 "\nCan change the reissuable flag during reissuance"
                 "\nCan change the ipfs hash during reissuance"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"               (string, required) name of asset that is being reissued\n"
-                "2. \"address\"                  (string, required) address to send the asset to\n"
-                "3. \"amount\"                   (number, required) number of assets to reissue\n"
+                "2. \"qty\"                      (number, required) number of assets to reissue\n"
+                "3. \"to_address\"               (string, required) address to send the asset to\n"
                 "4. \"reissuable\"               (boolean, optional, default=true), whether future reissuance is allowed\n"
-                "5. \"new_ifps\"                  (string, optional, default=\"\"), whether to update the current ipfshash\n"
+                "5. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("reissue", "\"asset_name\" \"address\" \"20\"")
-                + HelpExampleCli("reissue", "\"asset_name\" \"address\" \"20\" \"true\" \"JUSTGA63B1T1MNF54OX776PCK8TSXM1JLFDOQ9KF\"")
+                + HelpExampleCli("reissue", "\"asset_name\" 20 \"address\"")
+                + HelpExampleCli("reissue", "\"asset_name\" 20 \"address\" \"true\" \"JUSTGA63B1T1MNF54OX776PCK8TSXM1JLFDOQ9KF\"")
         );
 
     ObserveSafeMode();
@@ -523,8 +534,8 @@ UniValue reissue(const JSONRPCRequest& request)
 
     // Get that paramaters
     std::string asset_name = request.params[0].get_str();
-    std::string address = request.params[1].get_str();
-    CAmount nAmount = AmountFromValue(request.params[2]);
+    CAmount nAmount = AmountFromValue(request.params[1]);
+    std::string address = request.params[2].get_str();
 
     bool reissuable = true;
     if (request.params.size() > 3) {
@@ -638,12 +649,12 @@ static const CRPCCommand commands[] =
 { //  category    name                      actor (function)         argNames
   //  ----------- ------------------------  -----------------------  ----------
     { "assets",   "issue",                  &issue,                  {"asset_name","qty","to_address","units","reissuable","has_ipfs","ipfs_hash"} },
-    { "assets",   "getaddressbalances",     &getaddressbalances,     {"address", "minconf"} },
+    { "assets",   "getaddressbalances",     &getaddressbalances,     {"address"} },
     { "assets",   "getassetdata",           &getassetdata,           {"asset_name"}},
-    { "assets",   "getmyassets",            &getmyassets,            {}},
+    { "assets",   "listmyassets", &listmyassets,            {}},
     { "assets",   "getassetaddresses",      &getassetaddresses,      {"asset_name"}},
-    { "assets",   "transfer",               &transfer,               {"asset_name", "address", "amount"}},
-    { "assets",   "reissue",                &reissue,                {"asset_name", "address", "amount", "reissuable", "new_ipfs"}}
+    { "assets",   "transfer",               &transfer,               {"asset_name", "qty", "to_address"}},
+    { "assets",   "reissue",                &reissue,                {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

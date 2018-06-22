@@ -30,7 +30,7 @@ class AssetTest(RavenTestFramework):
         n2.generate(100)
         self.sync_all()
         assert_equal(n0.getbalance(), 5000)
-
+        #import pdb; pdb.set_trace()
         self.log.info("Calling issue()...")
         address0 = n0.getnewaddress()
         ipfs_hash = "uPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
@@ -71,7 +71,7 @@ class AssetTest(RavenTestFramework):
 
         self.log.info("Calling transfer()...")
         address1 = n1.getnewaddress()
-        n0.transfer(asset_name="MY_ASSET", address=address1, amount=200)
+        n0.transfer(asset_name="MY_ASSET", qty=200, to_address=address1)
 
         self.log.info("Waiting for ten confirmations after transfer...")
         n0.generate(10)
@@ -91,7 +91,6 @@ class AssetTest(RavenTestFramework):
         self.log.info("Checking getaddressbalances()...")
         assert_equal(n1.getaddressbalances(address1)["MY_ASSET"], 200 * COIN)
         changeaddress = None
-        # TODO: Uses *considered harmful* getassetaddresses.  Not sure how to get change otherwise w/o work..
         for assaddr in n0.getassetaddresses("MY_ASSET").keys():
             if n0.validateaddress(assaddr)["ismine"] == True:
                 changeaddress = assaddr
@@ -100,7 +99,7 @@ class AssetTest(RavenTestFramework):
         assert_equal(n0.getaddressbalances(address0)["MY_ASSET!"], COIN)
 
         self.log.info("Calling reissue()...")
-        n0.reissue(asset_name="MY_ASSET", address=address0, amount=2000, \
+        n0.reissue(asset_name="MY_ASSET", qty=2000, to_address=address0, \
                    reissuable=False, new_ipfs=ipfs_hash[::-1])
 
         self.log.info("Waiting for ten confirmations after reissue...")
