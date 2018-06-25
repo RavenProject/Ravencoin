@@ -453,11 +453,11 @@ UniValue listmyassets(const JSONRPCRequest &request)
 }
 
 // listaddressesbyasset
-UniValue getassetaddresses(const JSONRPCRequest& request)
+UniValue listaddressesbyasset(const JSONRPCRequest &request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-                "getassetaddresses asset_name\n"
+                "listaddressesbyasset \"asset_name\"\n"
                 "\nReturns a list of all address that own the given asset"
 
                 "\nArguments:\n"
@@ -465,9 +465,9 @@ UniValue getassetaddresses(const JSONRPCRequest& request)
 
                 "\nResult:\n"
                 "[ "
-                "address,\n"
-                "address,\n"
-                "address,\n"
+                "  address,\n"
+                "  address,\n"
+                "  address,\n"
                 "...\n"
                 "]\n"
 
@@ -758,7 +758,7 @@ static const CRPCCommand commands[] =
     { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address"} },
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
-    { "assets",   "getassetaddresses",          &getassetaddresses,          {"asset_name"}},
+    { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}}
 };
