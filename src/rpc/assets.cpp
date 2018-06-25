@@ -222,27 +222,25 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest &request)
     return result;
 }
 
-// maybe change to just an object here...
 UniValue getassetdata(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-                "getassetdata asset_name\n"
+                "getassetdata \"asset_name\"\n"
                 "\nReturns assets metadata if that asset exists\n"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"               (string, required) the name of the asset\n"
 
                 "\nResult:\n"
-                "[ "
-                "{ name: (string)\n"
-                "  amount: (number)\n"
-                "  units: (number)\n"
-                "  reissuable: (number)\n"
-                "  has_ipfs: (number)\n"
-                "  ipfs_hash: (hash)}\n, only if has_ipfs = 1"
-                "{...}, {...}\n"
-                "]\n"
+                "{\n"
+                "  name: (string),\n"
+                "  amount: (number),\n"
+                "  units: (number),\n"
+                "  reissuable: (number),\n"
+                "  has_ipfs: (number),\n"
+                "  ipfs_hash: (hash) (only if has_ipfs = 1)\n"
+                "}\n"
 
                 "\nExamples:\n"
                 + HelpExampleCli("getallassets", "\"assetname\"")
@@ -252,23 +250,20 @@ UniValue getassetdata(const JSONRPCRequest& request)
     std::string asset_name = request.params[0].get_str();
 
     LOCK(cs_main);
-    UniValue result (UniValue::VARR);
+    UniValue result (UniValue::VOBJ);
 
     if (passets) {
         CNewAsset asset;
         if (!passets->GetAssetIfExists(asset_name, asset))
             return NullUniValue;
 
-        UniValue value(UniValue::VOBJ);
-        value.push_back(Pair("name", asset.strName));
-        value.push_back(Pair("amount", asset.nAmount));
-        value.push_back(Pair("units", asset.units));
-        value.push_back(Pair("reissuable", asset.nReissuable));
-        value.push_back(Pair("has_ipfs", asset.nHasIPFS));
+        result.push_back(Pair("name", asset.strName));
+        result.push_back(Pair("amount", asset.nAmount));
+        result.push_back(Pair("units", asset.units));
+        result.push_back(Pair("reissuable", asset.nReissuable));
+        result.push_back(Pair("has_ipfs", asset.nHasIPFS));
         if (asset.nHasIPFS)
-            value.push_back(Pair("ipfs_hash", asset.strIPFSHash));
-
-        result.push_back(value);
+            result.push_back(Pair("ipfs_hash", asset.strIPFSHash));
 
         return result;
     }
@@ -352,19 +347,19 @@ UniValue listmyassets(const JSONRPCRequest &request)
     if (request.params.size() > 1)
         verbose = request.params[1].get_bool();
 
-    int count = INT_MAX;
-    if (request.params.size() > 2)
+    size_t count = INT_MAX;
+    if (request.params.size() > 2) {
+        if (request.params[2].get_int() < 1)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
         count = request.params[2].get_int();
+    }
 
-    if (count < 1)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
-
-    int start = 0;
-    if (request.params.size() > 3)
+    size_t start = 0;
+    if (request.params.size() > 3) {
+        if (request.params[3].get_int() < 0)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "start can't be less than zero.");
         start = request.params[3].get_int();
-
-    if (start < 0)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "start can't be less than zero.");
+    }
 
     std::map<std::string, CAmount> balances;
     if (filter == "*") {
