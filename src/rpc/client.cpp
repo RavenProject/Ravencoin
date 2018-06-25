@@ -36,7 +36,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "transfer", 1, "qty"},
     { "reissue", 1, "qty"},
     { "reissue", 3, "reissuable"},
-    { "getaddressbalances", 1, "minconf" },
+    { "listassetbalancesbyaddress", 1, "minconf" },
     { "listmyassets", 1, "verbose" },
     { "listmyassets", 2, "count" },
     { "listmyassets", 3, "start"},

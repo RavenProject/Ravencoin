@@ -181,12 +181,11 @@ UniValue issue(const JSONRPCRequest& request)
     return result;
 }
 
-// listassetbalancesbyaddress
-UniValue getaddressbalances(const JSONRPCRequest& request)
+UniValue listassetbalancesbyaddress(const JSONRPCRequest &request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
-            "getaddressbalances \"address\"\n"
+            "listassetbalancesbyaddress \"address\"\n"
             "\nReturns a list of all asset balances for an address.\n"
 
             "\nArguments:\n"
@@ -199,7 +198,7 @@ UniValue getaddressbalances(const JSONRPCRequest& request)
             "}\n"
 
             "\nExamples:\n"
-            + HelpExampleCli("getaddressbalances", "\"myaddress\"")
+            + HelpExampleCli("listassetbalancesbyaddress", "\"myaddress\"")
         );
 
     std::string address = request.params[0].get_str();
@@ -753,15 +752,15 @@ UniValue reissue(const JSONRPCRequest& request)
 
 
 static const CRPCCommand commands[] =
-{ //  category    name                      actor (function)         argNames
-  //  ----------- ------------------------  -----------------------  ----------
-    { "assets",   "issue",                  &issue,                  {"asset_name","qty","to_address","units","reissuable","has_ipfs","ipfs_hash"} },
-    { "assets",   "getaddressbalances",     &getaddressbalances,     {"address"} },
-    { "assets",   "getassetdata",           &getassetdata,           {"asset_name"}},
-    { "assets",   "listmyassets",           &listmyassets,           {"asset", "verbose", "count", "start"}},
-    { "assets",   "getassetaddresses",      &getassetaddresses,      {"asset_name"}},
-    { "assets",   "transfer",               &transfer,               {"asset_name", "qty", "to_address"}},
-    { "assets",   "reissue",                &reissue,                {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}}
+{ //  category    name                          actor (function)             argNames
+  //  ----------- ------------------------      -----------------------      ----------
+    { "assets",   "issue",                      &issue,                      {"asset_name","qty","to_address","units","reissuable","has_ipfs","ipfs_hash"} },
+    { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address"} },
+    { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
+    { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
+    { "assets",   "getassetaddresses",          &getassetaddresses,          {"asset_name"}},
+    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
+    { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)
