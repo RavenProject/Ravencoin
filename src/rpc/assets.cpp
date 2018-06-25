@@ -277,6 +277,17 @@ UniValue getassetdata(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+template <class Iter, class Incr>
+void safe_advance(Iter& curr, const Iter& end, Incr n)
+{
+    size_t remaining(std::distance(curr, end));
+    if (remaining < n)
+    {
+        n = remaining;
+    }
+    std::advance(curr, n);
+};
+
 UniValue listmyassets(const JSONRPCRequest &request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -290,7 +301,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 "\nReturns a list of all asset that are owned by this wallet\n"
 
                 "\nArguments:\n"
-                "1. \"asset\"                    (string, optional, default=\"*\") filters results -- a '*' matches all trailing characters\n"
+                "1. \"asset\"                    (string, optional, default=\"*\") filters results -- must be an asset name or a partial asset name followed by '*' ('*' matches all trailing characters)\n"
                 "2. \"verbose\"                  (boolean, optional, default=false) when false results only contain balances -- when true results include outpoints\n"
                 "3. \"count\"                    (integer, optional, default=ALL) truncates results to include only the first _count_ assets found\n"
                 "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found\n"
@@ -324,13 +335,12 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 + HelpExampleCli("listmyassets", "asset")
                 + HelpExampleCli("listmyassets", "\"asset*\" true 10 20")
         );
-    // TODO: should probably be throwing errors in a lot of cases we're returning NullUniValue
 
     ObserveSafeMode();
     LOCK2(cs_main, pwallet->cs_wallet);
 
     if (!passets)
-        return NullUniValue;
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Asset cache unavailable.");
 
     std::string filter = "*";
     if (request.params.size() > 0)
@@ -343,44 +353,56 @@ UniValue listmyassets(const JSONRPCRequest &request)
     if (request.params.size() > 1)
         verbose = request.params[1].get_bool();
 
-    // TODO: implement pagination
     int count = INT_MAX;
     if (request.params.size() > 2)
         count = request.params[2].get_int();
+
+    if (count < 1)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
 
     int start = 0;
     if (request.params.size() > 3)
         start = request.params[3].get_int();
 
+    if (start < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "start can't be less than zero.");
+
     std::map<std::string, CAmount> balances;
     if (filter == "*") {
         if (!GetMyAssetBalances(*passets, balances))
-            return NullUniValue;
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances.");
     }
     else if (filter.back() == '*') {
         std::vector<std::string> assetNames;
         filter.pop_back();
         if (!GetMyOwnedAssets(*passets, filter, assetNames))
-            return NullUniValue;
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get owned assets.");
         if (!GetMyAssetBalances(*passets, assetNames, balances))
-            return NullUniValue;
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances.");
     }
     else {
         if (!IsAssetNameValid(filter))
-            return NullUniValue;
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid asset name.");
         CAmount balance;
         if (!GetMyAssetBalance(*passets, filter, balance))
-            return NullUniValue;
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances.");
         balances[filter] = balance;
     }
 
     UniValue result(UniValue::VOBJ);
+
+    // pagination setup
+    auto bal = balances.begin();
+    safe_advance(bal, balances.end(), start);
+    auto end = bal;
+    safe_advance(end, balances.end(), count);
+
     if (verbose) {
-        for (auto const& bal : balances) {
+        for (; bal != end && bal != balances.end(); bal++) {
             UniValue asset(UniValue::VOBJ);
-            asset.push_back(Pair("balance", ValueFromAmount(bal.second)));
+            asset.push_back(Pair("balance", ValueFromAmount(bal->second)));
             UniValue outpoints(UniValue::VARR);
-            for (auto const& out : passets->mapMyUnspentAssets[bal.first]) {
+            for (auto const& out : passets->mapMyUnspentAssets[bal->first]) {
                 UniValue tempOut(UniValue::VOBJ);
                 tempOut.push_back(Pair("txid", out.hash.GetHex()));
                 tempOut.push_back(Pair("index", std::to_string(out.n)));
@@ -420,12 +442,12 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 outpoints.push_back(tempOut);
             }
             asset.push_back(Pair("outpoints", outpoints));
-            result.push_back(Pair(bal.first, asset));
+            result.push_back(Pair(bal->first, asset));
         }
     }
     else {
-        for (auto const& entry : balances) {
-            result.push_back(Pair(entry.first, ValueFromAmount(entry.second)));
+        for (; bal != end && bal != balances.end(); bal++) {
+            result.push_back(Pair(bal->first, ValueFromAmount(bal->second)));
         }
     }
     return result;
