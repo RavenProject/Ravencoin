@@ -139,3 +139,51 @@ bool CAssetsDB::LoadAssets()
     return true;
 }
 
+bool CAssetsDB::AssetDir(std::vector<CNewAsset>& assets, const std::string filter, const size_t count, const size_t start)
+{
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->Seek(std::make_pair(ASSET_FLAG, std::string()));
+
+    auto prefix = filter;
+    bool wildcard = prefix.back() == '*';
+    if (wildcard)
+        prefix.pop_back();
+
+    size_t loaded = 0;
+    size_t offset = 0;
+
+    // Load assets
+    while (pcursor->Valid() && loaded < count) {
+        boost::this_thread::interruption_point();
+
+        std::pair<char, std::string> key;
+        if (pcursor->GetKey(key) && key.first == ASSET_FLAG) {
+            if (prefix == "" ||
+                    (wildcard && key.second.find(prefix) == 0) ||
+                    (!wildcard && key.second == prefix)) {
+                if (offset < start) {
+                    offset += 1;
+                }
+                else {
+                    CNewAsset asset;
+                    if (pcursor->GetValue(asset)) {
+                        assets.push_back(asset);
+                        loaded += 1;
+                    } else {
+                        return error("%s: failed to read asset", __func__);
+                    }
+                }
+            }
+            pcursor->Next();
+        } else {
+            break;
+        }
+    }
+
+    return true;
+}
+
+bool CAssetsDB::AssetDir(std::vector<CNewAsset>& assets)
+{
+    return CAssetsDB::AssetDir(assets, "*", MAX_SIZE, 0);
+}

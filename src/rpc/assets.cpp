@@ -55,7 +55,7 @@ UniValue issue(const JSONRPCRequest& request)
             "1. \"asset_name\"            (string, required) a unique name\n"
             "2. \"qty\"                   (integer, required) the number of units to be issued\n"
             "3. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
-            "4. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
+            "4. \"units\"                 (integer, optional, default=8, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "5. \"reissuable\"            (boolean, optional, default=false), whether future reissuance is allowed\n"
             "6. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
             "7. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash\n"
@@ -109,7 +109,7 @@ UniValue issue(const JSONRPCRequest& request)
         address = EncodeDestination(keyID);
     }
 
-    int units = 1;
+    int units = 8;
     if (request.params.size() > 3)
         units = request.params[3].get_int();
     bool reissuable = false;
@@ -508,7 +508,7 @@ UniValue transfer(const JSONRPCRequest& request)
 
     if (request.fHelp || request.params.size() != 3)
         throw std::runtime_error(
-                "transfer asset_name qty to_address\n"
+                "transfer \"asset_name\" qty \"to_address\"\n"
                 "\nTransfers a quantity of an owned asset to a given address"
 
                 "\nArguments:\n"
@@ -750,6 +750,100 @@ UniValue reissue(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue listassets(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() > 4)
+        throw std::runtime_error(
+                "listassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
+                "\nReturns a list of all asset that are owned by this wallet\n"
+                "\nThis could be a slow/expensive operation as it reads from the database\n"
+
+                "\nArguments:\n"
+                "1. \"asset\"                    (string, optional, default=\"*\") filters results -- must be an asset name or a partial asset name followed by '*' ('*' matches all trailing characters)\n"
+                "2. \"verbose\"                  (boolean, optional, default=false) when false result is just a list of asset names -- when true results are asset name mapped to metadata\n"
+                "3. \"count\"                    (integer, optional, default=ALL) truncates results to include only the first _count_ assets found\n"
+                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found\n"
+
+                "\nResult (verbose=false):\n"
+                "[\n"
+                "  asset_name,\n"
+                "  ...\n"
+                "]\n"
+
+                "\nResult (verbose=true):\n"
+                "{\n"
+                "  (asset_name):\n"
+                "    {\n"
+                "      amount: (number),\n"
+                "      units: (number),\n"
+                "      reissuable: (number),\n"
+                "      has_ipfs: (number),\n"
+                "      ipfs_hash: (hash) (only if has_ipfs = 1)\n"
+                "    },\n"
+                "  {...}, {...}\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleRpc("listassets", "")
+                + HelpExampleCli("listassets", "asset")
+                + HelpExampleCli("listassets", "\"asset*\" true 10 20")
+        );
+
+    ObserveSafeMode();
+    LOCK(cs_main);
+
+    if (!passetsdb)
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "asset db unavailable.");
+
+    std::string filter = "*";
+    if (request.params.size() > 0)
+        filter = request.params[0].get_str();
+
+    if (filter == "")
+        filter = "*";
+
+    bool verbose = false;
+    if (request.params.size() > 1)
+        verbose = request.params[1].get_bool();
+
+    size_t count = INT_MAX;
+    if (request.params.size() > 2) {
+        if (request.params[2].get_int() < 1)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
+        count = request.params[2].get_int();
+    }
+
+    size_t start = 0;
+    if (request.params.size() > 3) {
+        if (request.params[3].get_int() < 0)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "start can't be less than zero.");
+        start = request.params[3].get_int();
+    }
+
+    std::vector<CNewAsset> assets;
+    if (!passetsdb->AssetDir(assets, filter, count, start))
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "couldn't retrieve asset directory.");
+
+    UniValue result;
+    result = verbose ? UniValue(UniValue::VOBJ) : UniValue(UniValue::VARR);
+
+    for (auto asset : assets) {
+        if (verbose) {
+            UniValue detail(UniValue::VOBJ);
+            detail.push_back(Pair("name", asset.strName));
+            detail.push_back(Pair("amount", asset.nAmount));
+            detail.push_back(Pair("units", asset.units));
+            detail.push_back(Pair("reissuable", asset.nReissuable));
+            detail.push_back(Pair("has_ipfs", asset.nHasIPFS));
+            if (asset.nHasIPFS)
+                detail.push_back(Pair("ipfs_hash", asset.strIPFSHash));
+            result.push_back(Pair(asset.strName, detail));
+        } else {
+            result.push_back(asset.strName);
+        }
+    }
+
+    return result;
+}
 
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
@@ -760,7 +854,8 @@ static const CRPCCommand commands[] =
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
-    { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}}
+    { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "reissuable", "new_ipfs"}},
+    { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)
