@@ -80,6 +80,42 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
     {
     case TX_NONSTANDARD:
     case TX_NULL_DATA:
+    /** RVN START */
+    case TX_NEW_ASSET:
+        keyID = CKeyID(uint160(vSolutions[0]));
+        if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
+            return false;
+        else
+        {
+            CPubKey vch;
+            creator.KeyStore().GetPubKey(keyID, vch);
+            ret.push_back(ToByteVector(vch));
+        }
+        return true;
+    case TX_TRANSFER_ASSET:
+        keyID = CKeyID(uint160(vSolutions[0]));
+        if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
+            return false;
+        else
+        {
+            CPubKey vch;
+            creator.KeyStore().GetPubKey(keyID, vch);
+            ret.push_back(ToByteVector(vch));
+        }
+        return true;
+
+    case TX_REISSUE_ASSET:
+        keyID = CKeyID(uint160(vSolutions[0]));
+        if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
+            return false;
+        else
+        {
+            CPubKey vch;
+            creator.KeyStore().GetPubKey(keyID, vch);
+            ret.push_back(ToByteVector(vch));
+        }
+        return true;
+    /** RVN END */
     case TX_WITNESS_UNKNOWN:
         return false;
     case TX_PUBKEY:
@@ -373,7 +409,23 @@ static Stacks CombineSignatures(const CScript& scriptPubKey, const BaseSignature
             result.witness.push_back(valtype(pubKey2.begin(), pubKey2.end()));
             return result;
         }
-    default:
+    case TX_TRANSFER_ASSET:
+        // Signatures are bigger than placeholders or empty scripts:
+        if (sigs1.script.empty() || sigs1.script[0].empty())
+            return sigs2;
+        return sigs1;
+    case TX_NEW_ASSET:
+        // Signatures are bigger than placeholders or empty scripts:
+        if (sigs1.script.empty() || sigs1.script[0].empty())
+            return sigs2;
+        return sigs1;
+    case TX_REISSUE_ASSET:
+        // Signatures are bigger than placeholders or empty scripts:
+        if (sigs1.script.empty() || sigs1.script[0].empty())
+            return sigs2;
+        return sigs1;
+
+        default:
         return Stacks();
     }
 }
