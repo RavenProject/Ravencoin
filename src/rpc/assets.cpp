@@ -36,7 +36,6 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
-// reorder args: to_address, asset_name, qty
 UniValue issue(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -454,7 +453,6 @@ UniValue listmyassets(const JSONRPCRequest &request)
     return result;
 }
 
-// listaddressesbyasset
 UniValue listaddressesbyasset(const JSONRPCRequest &request)
 {
     if (request.fHelp || request.params.size() != 1)
