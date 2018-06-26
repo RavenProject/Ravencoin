@@ -36,6 +36,23 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
+UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name)
+{
+    if (!passets)
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Asset cache isn't available.");
+
+    uint8_t units = OWNER_UNITS;
+    if (!IsAssetNameAnOwner(asset_name)) {
+        CNewAsset assetData;
+        if (!passets->GetAssetIfExists(asset_name, assetData))
+            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't load asset from cache: " + asset_name);
+
+        units = assetData.units;
+    }
+
+    return ValueFromAmount(amount, units);
+}
+
 UniValue issue(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -214,7 +231,7 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest &request)
 
     for (auto it : passets->mapAssetsAddressAmount) {
         if (address.compare(it.first.second) == 0) {
-            result.push_back(Pair(it.first.first, ValueFromAmount(it.second)));
+            result.push_back(Pair(it.first.first, UnitValueFromAmount(it.second, it.first.first)));
         }
     }
 
@@ -257,7 +274,7 @@ UniValue getassetdata(const JSONRPCRequest& request)
             return NullUniValue;
 
         result.push_back(Pair("name", asset.strName));
-        result.push_back(Pair("amount", asset.nAmount));
+        result.push_back(Pair("amount", UnitValueFromAmount(asset.nAmount, asset.strName)));
         result.push_back(Pair("units", asset.units));
         result.push_back(Pair("reissuable", asset.nReissuable));
         result.push_back(Pair("has_ipfs", asset.nHasIPFS));
@@ -394,7 +411,8 @@ UniValue listmyassets(const JSONRPCRequest &request)
     if (verbose) {
         for (; bal != end && bal != balances.end(); bal++) {
             UniValue asset(UniValue::VOBJ);
-            asset.push_back(Pair("balance", ValueFromAmount(bal->second)));
+            asset.push_back(Pair("balance", UnitValueFromAmount(bal->second, bal->first)));
+
             UniValue outpoints(UniValue::VARR);
             for (auto const& out : passets->mapMyUnspentAssets[bal->first]) {
                 UniValue tempOut(UniValue::VOBJ);
@@ -435,7 +453,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                         throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset from script.");
                     txAmount = OWNER_ASSET_AMOUNT;
                 }
-                tempOut.push_back(Pair("amount", ValueFromAmount(txAmount)));
+                tempOut.push_back(Pair("amount", UnitValueFromAmount(txAmount, bal->first)));
                 //
                 //
 
@@ -447,7 +465,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
     }
     else {
         for (; bal != end && bal != balances.end(); bal++) {
-            result.push_back(Pair(bal->first, ValueFromAmount(bal->second)));
+            result.push_back(Pair(bal->first, UnitValueFromAmount(bal->second, bal->first)));
         }
     }
     return result;
@@ -458,17 +476,15 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
                 "listaddressesbyasset \"asset_name\"\n"
-                "\nReturns a list of all address that own the given asset"
+                "\nReturns a list of all address that own the given asset (with balances)"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"               (string, required) name of asset\n"
 
                 "\nResult:\n"
                 "[ "
-                "  address,\n"
-                "  address,\n"
-                "  address,\n"
-                "...\n"
+                "  (address): balance,\n"
+                "  ...\n"
                 "]\n"
 
                 "\nExamples:\n"
@@ -493,7 +509,7 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
         auto pair = std::make_pair(asset_name, it);
 
         if (GetBestAssetAddressAmount(*passets, asset_name, it))
-            addresses.push_back(Pair(it, ValueFromAmount(passets->mapAssetsAddressAmount.at(pair))));
+            addresses.push_back(Pair(it, UnitValueFromAmount(passets->mapAssetsAddressAmount.at(pair), asset_name)));
     }
 
     return addresses;
@@ -830,7 +846,7 @@ UniValue listassets(const JSONRPCRequest& request) {
         if (verbose) {
             UniValue detail(UniValue::VOBJ);
             detail.push_back(Pair("name", asset.strName));
-            detail.push_back(Pair("amount", asset.nAmount));
+            detail.push_back(Pair("amount", UnitValueFromAmount(asset.nAmount, asset.strName)));
             detail.push_back(Pair("units", asset.units));
             detail.push_back(Pair("reissuable", asset.nReissuable));
             detail.push_back(Pair("has_ipfs", asset.nHasIPFS));
