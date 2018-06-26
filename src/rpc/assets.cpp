@@ -314,7 +314,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 "1. \"asset\"                    (string, optional, default=\"*\") filters results -- must be an asset name or a partial asset name followed by '*' ('*' matches all trailing characters)\n"
                 "2. \"verbose\"                  (boolean, optional, default=false) when false results only contain balances -- when true results include outpoints\n"
                 "3. \"count\"                    (integer, optional, default=ALL) truncates results to include only the first _count_ assets found\n"
-                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found\n"
+                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found (if negative it skips back from the end)\n"
 
                 "\nResult (verbose=false):\n"
                 "{\n"
@@ -370,10 +370,8 @@ UniValue listmyassets(const JSONRPCRequest &request)
         count = request.params[2].get_int();
     }
 
-    size_t start = 0;
+    long start = 0;
     if (request.params.size() > 3) {
-        if (request.params[3].get_int() < 0)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "start can't be less than zero.");
         start = request.params[3].get_int();
     }
 
@@ -402,7 +400,10 @@ UniValue listmyassets(const JSONRPCRequest &request)
 
     // pagination setup
     auto bal = balances.begin();
-    safe_advance(bal, balances.end(), start);
+    if (start >= 0)
+        safe_advance(bal, balances.end(), (size_t)start);
+    else
+        safe_advance(bal, balances.end(), balances.size() + start);
     auto end = bal;
     safe_advance(end, balances.end(), count);
 
@@ -772,12 +773,13 @@ UniValue listassets(const JSONRPCRequest& request) {
                 "listassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
                 "\nReturns a list of all asset that are owned by this wallet\n"
                 "\nThis could be a slow/expensive operation as it reads from the database\n"
+                "\nAssets come back in timestamp order (oldest to newest)\n"
 
                 "\nArguments:\n"
                 "1. \"asset\"                    (string, optional, default=\"*\") filters results -- must be an asset name or a partial asset name followed by '*' ('*' matches all trailing characters)\n"
                 "2. \"verbose\"                  (boolean, optional, default=false) when false result is just a list of asset names -- when true results are asset name mapped to metadata\n"
                 "3. \"count\"                    (integer, optional, default=ALL) truncates results to include only the first _count_ assets found\n"
-                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found\n"
+                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found (if negative it skips back from the end)\n"
 
                 "\nResult (verbose=false):\n"
                 "[\n"
@@ -828,10 +830,8 @@ UniValue listassets(const JSONRPCRequest& request) {
         count = request.params[2].get_int();
     }
 
-    size_t start = 0;
+    long start = 0;
     if (request.params.size() > 3) {
-        if (request.params[3].get_int() < 0)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "start can't be less than zero.");
         start = request.params[3].get_int();
     }
 
