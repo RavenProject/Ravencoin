@@ -360,9 +360,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "             {\n"
             "               \"asset_name\":\"asset-name\",  (string, required) name of asset to be reissued\n"
             "               \"asset_quantity\":n,         (number, required) the number of raw units to issue\n"
-            "               \"reissuable\":[0-1],         (number, optional) 1=reissuable asset\n"
-            "               \"has_ipfs\":[0-1],           (number, optional) 0=reset any existing ipfs hash, 1=passing new ipfs_hash\n"
-            "               \"ipfs_hash\":\"hash\"          (string, optional) an ipfs hash for discovering asset metadata\n"
+            "               \"reissuable\":[0-1],         (number, optional) default is 1, 1=reissuable asset\n"
+            "               \"ipfs_hash\":\"hash\"        (string, optional) An ipfs hash for discovering asset metadata, Overrides the current ipfs hash if given\n"
             "             }\n"
             "         }\n"
             "         or\n"
@@ -534,6 +533,71 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     rawTx.vout.push_back(out);
 
                 } else if (assetKey_ == "reissue") {
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"reissue\": {\"key\": value}, ...}"));
+
+                    // Get the asset data object from the json
+                    auto reissueData = asset_.getValues()[0].get_obj();
+
+                    CReissueAsset reissueObj;
+
+                    /**-------Process the reissue data-------**/
+                    const UniValue& asset_name = find_value(reissueData, "asset_name");
+                    if (!asset_name.isStr())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing reissue data for key: asset_name");
+
+                    const UniValue& asset_quantity = find_value(reissueData, "asset_quantity");
+                    if (!asset_quantity.isNum())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing reissue data for key: asset_quantity");
+
+                    const UniValue& reissuable = find_value(reissueData, "reissuable");
+                    if (!reissuable.isNull()) {
+                        if (!reissuable.isNum())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, missing reissue metadata for key: reissuable");
+
+                        int nReissuable = reissuable.get_int();
+                        if (nReissuable > 1 || nReissuable < 0)
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, reissuable data must be a 0 or 1");
+
+                        reissueObj.nReissuable = int8_t(nReissuable);
+                    }
+
+                    const UniValue& ipfs_hash = find_value(reissueData, "ipfs_hash");
+                    if (!ipfs_hash.isNull()) {
+                        if (!ipfs_hash.isStr())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, missing reissue metadata for key: ipfs_hash");
+                        reissueObj.strIPFSHash = ipfs_hash.get_str();
+                    }
+
+                    // Add the received data into the reissue object
+                    reissueObj.strName = asset_name.get_str();
+                    reissueObj.nAmount = AmountFromValue(asset_quantity);
+
+                    // Validate the the object is valid
+                    std::string strError;
+                    if (!reissueObj.IsValid(strError, *passets))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+
+
+                    // Create the scripts for the change of the ownership toekn
+                    CScript scriptTransferOwnerAsset = GetScriptForDestination(destination);
+                    CAssetTransfer assetTransfer(asset_name.get_str() + OWNER, OWNER_ASSET_AMOUNT);
+                    assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+
+                    // Create the scripts for the reissued assets
+                    CScript scriptReissueAsset = GetScriptForDestination(destination);
+                    reissueObj.ConstructTransaction(scriptReissueAsset);
+
+                    // Create the CTxOut for the owner token
+                    CTxOut out(0, scriptTransferOwnerAsset);
+                    rawTx.vout.push_back(out);
+
+                    // Create the CTxOut for the reissue asset
+                    CTxOut out2(0, scriptReissueAsset);
+                    rawTx.vout.push_back(out2);
 
                 } else if (assetKey_ == "transfer") {
                     if (asset_[0].type() != UniValue::VOBJ)
@@ -546,7 +610,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"transfer\": {\"asset_name\": amount, ...} }"));
 
                     UniValue asset_quantity;
-                    int idx = 0;
                     for (auto asset_name : keys) {
                         asset_quantity = find_value(transferData, asset_name);
 
@@ -568,10 +631,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         transfer.ConstructTransaction(scriptPubKey);
 
                         // Push into vouts
-                        CTxOut out(idx, scriptPubKey);
+                        CTxOut out(0, scriptPubKey);
                         rawTx.vout.push_back(out);
-
-                        idx++;
                     }
                 }
                 else {
@@ -678,7 +739,15 @@ UniValue decodescript(const JSONRPCRequest& request)
             "     \"address\"     (string) raven address\n"
             "     ,...\n"
             "  ],\n"
-            "  \"p2sh\",\"address\" (string) address of P2SH script wrapping this redeem script (not returned if the script is already a P2SH).\n"
+            "  \"p2sh\":\"address\",       (string) address of P2SH script wrapping this redeem script (not returned if the script is already a P2SH).\n"
+            "  \"(The following only appears if the script is an asset script)\n"
+            "  \"asset_name\":\"name\",      (string) Name of the asset.\n"
+            "  \"amount\":\"x.xx\",          (numeric) The amount of assets interacted with.\n"
+            "  \"units\": n,                (numeric) The units of the asset. (Only appears in the type (new_asset)\n"
+            "  \"reissuable\": true|false, (boolean) If this asset is reissuable. (Only appears in type (new_asset|reissue_asset))\n"
+            "  \"hasIPFS\": true|false,    (boolean) If this asset has an IPFS hash. (Only appears in type (new_asset if hasIPFS is true)\n"
+            "  \"ipfs_hash\": \"hash\",      (string) The ipfs hash for the new asset. (Only appears in type (new_asset)\n"
+            "  \"new_ipfs_hash\":\"hash\",    (string) If new ipfs hash (Only appears in type. (reissue_asset))\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("decodescript", "\"hexstring\"")
@@ -705,6 +774,55 @@ UniValue decodescript(const JSONRPCRequest& request)
         // don't return the address for a P2SH of the P2SH.
         r.push_back(Pair("p2sh", EncodeDestination(CScriptID(script))));
     }
+
+    /** RVN START */
+    if (type.isStr() && type.get_str() == ASSET_TRANSFER_STRING) {
+        CAssetTransfer transfer;
+        std::string address;
+
+        if (!TransferAssetFromScript(script, transfer, address))
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Failed to deserialize the transfer asset script");
+
+        r.push_back(Pair("asset_name", transfer.strName));
+        r.push_back(Pair("amount", ValueFromAmount(transfer.nAmount)));
+
+    } else if (type.isStr() && type.get_str() == ASSET_REISSUE_STRING) {
+        CReissueAsset reissue;
+        std::string address;
+
+        if (!ReissueAssetFromScript(script, reissue, address))
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Failed to deserialize the reissue asset script");
+
+        r.push_back(Pair("asset_name", reissue.strName));
+        r.push_back(Pair("amount", ValueFromAmount(reissue.nAmount)));
+
+        bool reissuable = reissue.nReissuable ? true : false;
+        r.push_back(Pair("reissuable", reissuable));
+
+        if (reissue.strIPFSHash != "")
+            r.push_back(Pair("new_ipfs_hash", reissue.strIPFSHash));
+
+    } else if (type.isStr() && type.get_str() == ASSET_NEW_STRING) {
+        CNewAsset asset;
+        std::string address;
+
+        if(!AssetFromScript(script, asset, address))
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Failed to deserialize the new asset script");
+
+        r.push_back(Pair("asset_name", asset.strName));
+        r.push_back(Pair("amount", ValueFromAmount(asset.nAmount)));
+        r.push_back(Pair("units", asset.units));
+
+        bool reissuable = asset.nReissuable ? true : false;
+        r.push_back(Pair("reissuable", reissuable));
+
+        bool hasIPFS = asset.nHasIPFS ? true : false;
+        r.push_back(Pair("hasIPFS", hasIPFS));
+
+        if (hasIPFS)
+            r.push_back(Pair("ipfs_hash", asset.strIPFSHash));
+    }
+    /** RVN END */
 
     return r;
 }
