@@ -361,6 +361,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
         start = request.params[3].get_int();
     }
 
+    // retrieve balances
     std::map<std::string, CAmount> balances;
     if (filter == "*") {
         if (!GetMyAssetBalances(*passets, balances))
@@ -383,14 +384,14 @@ UniValue listmyassets(const JSONRPCRequest &request)
         balances[filter] = balance;
     }
 
-    UniValue result(UniValue::VOBJ);
-
     // pagination setup
     auto bal = balances.begin();
     safe_advance(bal, balances.end(), start);
     auto end = bal;
     safe_advance(end, balances.end(), count);
 
+    // generate output
+    UniValue result(UniValue::VOBJ);
     if (verbose) {
         for (; bal != end && bal != balances.end(); bal++) {
             UniValue asset(UniValue::VOBJ);
@@ -402,7 +403,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 tempOut.push_back(Pair("index", std::to_string(out.n)));
 
                 //
-                // get amount for this outpoint (from gettransaction())
+                // get amount for this outpoint
                 CAmount txAmount = 0;
                 auto it = pwallet->mapWallet.find(out.hash);
                 if (it == pwallet->mapWallet.end()) {
@@ -428,6 +429,12 @@ UniValue listmyassets(const JSONRPCRequest &request)
                     if (!TransferAssetFromScript(txOut.scriptPubKey, asset, strAddress))
                         throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset from script.");
                     txAmount = asset.nAmount;
+                }
+                else if (CheckOwnerDataTx(txOut)) {
+                    std::string assetName;
+                    if (!OwnerAssetFromScript(txOut.scriptPubKey, assetName, strAddress))
+                        throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset from script.");
+                    txAmount = OWNER_ASSET_AMOUNT;
                 }
                 tempOut.push_back(Pair("amount", ValueFromAmount(txAmount)));
                 //

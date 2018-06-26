@@ -1701,10 +1701,16 @@ bool GetMyOwnedAssets(CAssetsCache& cache, const std::string prefix, std::vector
 bool GetMyAssetBalance(CAssetsCache& cache, const std::string& assetName, CAmount& balance) {
     balance = 0;
     for (auto const& address : cache.mapAssetsAddresses[assetName]) {
-        if (!GetBestAssetAddressAmount(cache, assetName, address))
+        if (vpwallets.size() == 0)
             return false;
 
-        balance += cache.mapAssetsAddressAmount[make_pair(assetName, address)];
+        if (IsMine(*vpwallets[0], DecodeDestination(address), SIGVERSION_BASE) & ISMINE_ALL) {
+            if (!GetBestAssetAddressAmount(cache, assetName, address))
+                return false;
+
+            auto amt = cache.mapAssetsAddressAmount[make_pair(assetName, address)];
+            balance += amt;
+        }
     }
 
     return true;
