@@ -6,8 +6,6 @@
 """Testing asset use cases
 
 """
-from functools import reduce
-from test_framework.mininode import COIN
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import (
     assert_equal,
@@ -44,7 +42,7 @@ class AssetTest(RavenTestFramework):
         self.log.info("Checkout getassetdata()...")
         assetdata = n0.getassetdata("MY_ASSET")
         assert_equal(assetdata["name"], "MY_ASSET")
-        assert_equal(assetdata["amount"], 1000 * COIN)
+        assert_equal(assetdata["amount"], 1000)
         assert_equal(assetdata["units"], 4)
         assert_equal(assetdata["reissuable"], 1)
         assert_equal(assetdata["has_ipfs"], 1)
@@ -113,7 +111,7 @@ class AssetTest(RavenTestFramework):
         self.log.info("Checkout getassetdata()...")
         assetdata = n0.getassetdata("MY_ASSET")
         assert_equal(assetdata["name"], "MY_ASSET")
-        assert_equal(assetdata["amount"], 3000 * COIN)
+        assert_equal(assetdata["amount"], 3000)
         assert_equal(assetdata["units"], 4)
         assert_equal(assetdata["reissuable"], 0)
         assert_equal(assetdata["has_ipfs"], 1)
@@ -121,6 +119,18 @@ class AssetTest(RavenTestFramework):
 
         self.log.info("Checking listassetbalancesbyaddress()...")
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET"], 2000)
+
+        self.log.info("Checking listassets()...")
+        n0.issue("RAVEN1", 1000)
+        n0.issue("RAVEN2", 1000)
+        n0.issue("RAVEN3", 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        raven_assets = n0.listassets(asset="RAVEN*", verbose=False, count=2, start=-2)
+        assert_equal(len(raven_assets), 2)
+        assert_equal(raven_assets[0], "RAVEN2")
+        assert_equal(raven_assets[1], "RAVEN3")
 
 
 if __name__ == '__main__':
