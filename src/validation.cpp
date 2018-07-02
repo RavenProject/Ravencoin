@@ -4636,6 +4636,17 @@ double GuessVerificationProgress(const ChainTxData& data, CBlockIndex *pindex) {
     return pindex->nChainTx / fTxTotal;
 }
 
+/** RVN START */
+bool AreAssetsDeployed()
+{
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        return true;
+
+    return false;
+}
+/** RVN END */
+
 class CMainCleanup
 {
 public:
