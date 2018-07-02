@@ -38,6 +38,9 @@
 
 UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     if (!passets)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Asset cache isn't available.");
 
@@ -788,7 +791,11 @@ UniValue reissue(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue listassets(const JSONRPCRequest& request) {
+UniValue listassets(const JSONRPCRequest& request)
+{
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     if (request.fHelp || request.params.size() > 4)
         throw std::runtime_error(
                 "listassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
