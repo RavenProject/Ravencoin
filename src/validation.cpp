@@ -594,8 +594,18 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         /** RVN START */
-        if (!Consensus::CheckTxAssets(tx, state, view))
-            return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
+        if (!AreAssetsDeployed()) {
+            for (auto out : tx.vout) {
+                if (out.scriptPubKey.IsAsset())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-contained-asset-when-not-active");
+            }
+        }
+
+        if (AreAssetsDeployed()) {
+            if (!Consensus::CheckTxAssets(tx, state, view))
+                return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
+                             FormatStateMessage(state));
+        }
         /** RVN END */
 
         // Check for non-standard pay-to-script-hash in inputs
@@ -1486,9 +1496,11 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
     view.AddCoin(out, std::move(undo), !fClean);
 
     /** RVN START */
-    if (assetCache && fIsAsset) {
-        if (!assetCache->UndoAssetCoin(tempCoin, out))
-            fClean = false;
+    if (AreAssetsDeployed()) {
+        if (assetCache && fIsAsset) {
+            if (!assetCache->UndoAssetCoin(tempCoin, out))
+                fClean = false;
+        }
     }
     /** RVN END */
 
@@ -1538,73 +1550,82 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                 }
 
                 /** RVN START */
-                if (assetsCache) {
-                    if (IsScriptTransferAsset(tx.vout[o].scriptPubKey))
-                        vAssetTxIndex.emplace_back(o);
+                if (AreAssetsDeployed()) {
+                    if (assetsCache) {
+                        if (IsScriptTransferAsset(tx.vout[o].scriptPubKey))
+                            vAssetTxIndex.emplace_back(o);
+                    }
                 }
                 /** RVN START */
             }
         }
 
         /** RVN START */
-        if (assetsCache) {
-            if (tx.IsNewAsset()) {
-                // Remove the newly created asset
-                CNewAsset asset;
-                std::string strAddress;
-                if (!AssetFromTransaction(tx, asset, strAddress)) {
-                    error("%s : Failed to get asset from transaction. TXID : ", __func__, tx.GetHash().GetHex());
-                    return DISCONNECT_FAILED;
-                }
-                if (assetsCache->ContainsAsset(asset)) {
-                    if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
-                        error("%s : Failed to Remove Asset. Asset Name : %s", __func__, asset.strName);
+        if (AreAssetsDeployed()) {
+            if (assetsCache) {
+                if (tx.IsNewAsset()) {
+                    // Remove the newly created asset
+                    CNewAsset asset;
+                    std::string strAddress;
+                    if (!AssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get asset from transaction. TXID : ", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
+                    }
+                    if (assetsCache->ContainsAsset(asset)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Remove Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+
+                    // Get the owner from the transaction and remove it
+                    std::string ownerName;
+                    std::string ownerAddress;
+                    if (!OwnerFromTransaction(tx, ownerName, ownerAddress)) {
+                        error("%s : Failed to get owner from transaction. TXID : ", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (!assetsCache->RemoveOwnerAsset(ownerName, ownerAddress)) {
+                        error("%s : Failed to Remove Owner from transaction. TXID : ", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+                } else if (tx.IsReissueAsset()) {
+                    CReissueAsset reissue;
+                    std::string strAddress;
+
+                    if (!ReissueAssetFromTransaction(tx, reissue, strAddress)) {
+                        error("%s : Failed to get reissue asset from transaction. TXID : ", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(reissue.strName)) {
+                        if (!assetsCache->RemoveReissueAsset(reissue, strAddress,
+                                                             COutPoint(tx.GetHash(), tx.vout.size() - 1),
+                                                             blockUndo.vIPFSHashes)) {
+                            error("%s : Failed to Undo Reissue Asset. Asset Name : %s", __func__, reissue.strName);
+                            return DISCONNECT_FAILED;
+                        }
                     }
                 }
 
-                // Get the owner from the transaction and remove it
-                std::string ownerName;
-                std::string ownerAddress;
-                if (!OwnerFromTransaction(tx, ownerName, ownerAddress)) {
-                    error("%s : Failed to get owner from transaction. TXID : ", __func__, tx.GetHash().GetHex());
-                    return DISCONNECT_FAILED;
-                }
-
-                if (!assetsCache->RemoveOwnerAsset(ownerName, ownerAddress)) {
-                    error("%s : Failed to Remove Owner from transaction. TXID : ", __func__, tx.GetHash().GetHex());
-                    return DISCONNECT_FAILED;
-                }
-            } else if (tx.IsReissueAsset()) {
-                CReissueAsset reissue;
-                std::string strAddress;
-
-                if (!ReissueAssetFromTransaction(tx, reissue, strAddress)) {
-                    error("%s : Failed to get reissue asset from transaction. TXID : ", __func__, tx.GetHash().GetHex());
-                    return DISCONNECT_FAILED;
-                }
-
-                if (assetsCache->ContainsAsset(reissue.strName)) {
-                    if (!assetsCache->RemoveReissueAsset(reissue, strAddress, COutPoint(tx.GetHash(), tx.vout.size() - 1), blockUndo.vIPFSHashes)) {
-                        error("%s : Failed to Undo Reissue Asset. Asset Name : %s", __func__, reissue.strName);
+                for (auto index : vAssetTxIndex) {
+                    CAssetTransfer transfer;
+                    std::string strAddress;
+                    if (!TransferAssetFromScript(tx.vout[index].scriptPubKey, transfer, strAddress)) {
+                        error("%s : Failed to get transfer asset from transaction. CTxOut : ", __func__,
+                              tx.vout[index].ToString());
                         return DISCONNECT_FAILED;
                     }
-                }
-            }
 
-            for (auto index : vAssetTxIndex) {
-                CAssetTransfer transfer;
-                std::string strAddress;
-                if (!TransferAssetFromScript(tx.vout[index].scriptPubKey, transfer, strAddress)) {
-                    error("%s : Failed to get transfer asset from transaction. CTxOut : ", __func__, tx.vout[index].ToString());
-                    return DISCONNECT_FAILED;
-                }
-
-                COutPoint out(hash, index);
-                if (!assetsCache->RemoveTransfer(transfer, strAddress, out)) {
-                    error("%s : Failed to Remove the transfer of an asset. Asset Name : %s, COutPoint : %s", __func__,
-                          transfer.strName, out.ToString());
-                    return DISCONNECT_FAILED;
+                    COutPoint out(hash, index);
+                    if (!assetsCache->RemoveTransfer(transfer, strAddress, out)) {
+                        error("%s : Failed to Remove the transfer of an asset. Asset Name : %s, COutPoint : %s",
+                              __func__,
+                              transfer.strName, out.ToString());
+                        return DISCONNECT_FAILED;
+                    }
                 }
             }
         }
@@ -1898,8 +1919,17 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             }
 
             /** RVN START */
-            if (!Consensus::CheckTxAssets(tx, state, view)) {
-                return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
+            if (!AreAssetsDeployed()) {
+                for (auto out : tx.vout)
+                    if (out.scriptPubKey.IsAsset())
+                        return state.DoS(100, error("%s : Received Block with tx that contained an asset when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-assets-not-active");
+            }
+
+            if (AreAssetsDeployed()) {
+                if (!Consensus::CheckTxAssets(tx, state, view)) {
+                    return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
+                                 FormatStateMessage(state));
+                }
             }
             /** RVN END */
 
@@ -1940,6 +1970,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         /** RVN START */
         if (assetsCache) {
             if (tx.IsNewAsset()) {
+                if (!AreAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bax-txns-new-asset-when-assets-is-not-active");
                 CNewAsset asset;
                 std::string strAddress;
                 if (!AssetFromTransaction(tx, asset, strAddress))
@@ -1952,6 +1984,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!asset.IsValid(strError, *assetsCache))
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-asset");
             } else if (tx.IsReissueAsset()) {
+                if (!AreAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bax-txns-reissue-asset-when-assets-is-not-active");
                 CReissueAsset reissue;
                 std::string strAddress;
                 if (!ReissueAssetFromTransaction(tx, reissue, strAddress))
@@ -2131,9 +2165,12 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
         if (fDoFullFlush) {
 
             /** RVN START */
+
             size_t assetsSize = 0;
-            if (passets)
-                assetsSize = passets->GetCacheSize() * 2;
+            if (AreAssetsDeployed()) {
+                if (passets)
+                    assetsSize = passets->GetCacheSize() * 2;
+            }
             /** RVN END */
 
             // Typical Coin structures on disk are around 48 bytes in size.
@@ -2150,9 +2187,12 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
 
             /** RVN START */
             // Flush the assetstate
-            if (passets) {
-                if (!passets->Flush(false, true))
-                    return AbortNode(state, "Failed to write to asset database");
+            if (AreAssetsDeployed()) {
+                // Flush the assetstate
+                if (passets) {
+                    if (!passets->Flush(false, true))
+                        return AbortNode(state, "Failed to write to asset database");
+                }
             }
             /** RVN END */
 
