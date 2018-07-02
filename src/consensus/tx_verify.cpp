@@ -187,7 +187,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
 
         /** RVN START */
         if (!AreAssetsDeployed() && txout.scriptPubKey.IsAsset())
-            return state.DoS(100, false, REJECT_INVALID, "bad-tsnx-is-asset-and-asset-not-active");
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-is-asset-and-asset-not-active");
 
         // Check for transfers that don't meet the assets units only if the assetCache is not null
         if (AreAssetsDeployed()) {
