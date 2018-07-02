@@ -38,6 +38,9 @@
 
 UniValue issue(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
@@ -179,6 +182,9 @@ UniValue issue(const JSONRPCRequest& request)
 
 UniValue getaddressbalances(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     if (request.fHelp || request.params.size() < 1)
         throw std::runtime_error(
             "getaddressbalances \"address\" ( minconf )\n"
@@ -233,6 +239,9 @@ UniValue getaddressbalances(const JSONRPCRequest& request)
 
 UniValue getassetdata(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
                 "getassetdata asset_name\n"
@@ -286,6 +295,9 @@ UniValue getassetdata(const JSONRPCRequest& request)
 
 UniValue getmyassets(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     if (request.fHelp || request.params.size() > 0)
         throw std::runtime_error(
                 "getmyassets\n"
@@ -336,6 +348,9 @@ UniValue getmyassets(const JSONRPCRequest& request)
 // TODO: Used to test database, remove before release(?)
 UniValue getassetaddresses(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
                 "getassetaddresses asset_name\n"
@@ -382,6 +397,9 @@ UniValue getassetaddresses(const JSONRPCRequest& request)
 
 UniValue transfer(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
@@ -486,6 +504,9 @@ UniValue transfer(const JSONRPCRequest& request)
 
 UniValue reissue(const JSONRPCRequest& request)
 {
+    if (!AreAssetsDeployed())
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, std::string("Assets is not active"));
+
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
         return NullUniValue;
