@@ -14,6 +14,7 @@
 #include "platformstyle.h"
 #include "transactionfilterproxy.h"
 #include "transactiontablemodel.h"
+#include "assettablemodel.h"
 #include "walletmodel.h"
 
 #include <QAbstractItemDelegate>
@@ -230,6 +231,10 @@ void OverviewPage::setWalletModel(WalletModel *model)
 
         ui->listTransactions->setModel(filter.get());
         ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
+
+        assetFilter.reset(new QSortFilterProxyModel());
+        assetFilter->setSourceModel(model->getAssetTableModel());
+        ui->listAssets->setModel(assetFilter.get());
 
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getUnconfirmedBalance(), model->getImmatureBalance(),
