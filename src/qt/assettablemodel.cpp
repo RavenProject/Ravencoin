@@ -108,14 +108,15 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
         return QVariant();
     AssetRecord *rec = static_cast<AssetRecord*>(index.internalPointer());
 
-    QString display = QString::fromStdString(rec->name);
-    display.append(" [");
-    display.append(QString::number(rec->quantity));
-    display.append("]");
-
-    qDebug() << "AssetTableModel::data --> " << display;
-
-    return display;
+    switch (index.column())
+    {
+        case Name:
+            return QString::fromStdString(rec->name);
+        case Quantity:
+            return QString::number(rec->quantity);
+        default:
+            return QString();
+    }
 }
 
 QVariant AssetTableModel::headerData(int section, Qt::Orientation orientation, int role) const
