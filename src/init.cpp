@@ -45,6 +45,8 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validationinterface.h"
+#include "assets/assets.h"
+#include "assets/assetdb.h"
 #ifdef ENABLE_WALLET
 #include "wallet/init.h"
 #endif
@@ -247,6 +249,12 @@ void Shutdown()
         pcoinsdbview = nullptr;
         delete pblocktree;
         pblocktree = nullptr;
+        delete passets;
+        passets = nullptr;
+        delete passetsdb;
+        passetsdb = nullptr;
+        delete passetsCache;
+        passetsCache = nullptr;
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -487,7 +495,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-whitelistforcerelay", strprintf(_("Force relay of transactions from whitelisted peers even if they violate local relay policy (default: %d)"), DEFAULT_WHITELISTFORCERELAY));
 
     strUsage += HelpMessageGroup(_("Block creation options:"));
-    strUsage += HelpMessageOpt("-blockmaxweight=<n>", strprintf(_("Set maximum BIP141 block weight (default: %d)"), DEFAULT_BLOCK_MAX_WEIGHT));
+    strUsage += HelpMessageOpt("-blockmaxweight=<n>", strprintf(_("Set maximum BIP141 block weight (default: %d)"), GetMaxBlockWeight() - 4000));
     strUsage += HelpMessageOpt("-blockmaxsize=<n>", _("Set maximum BIP141 block weight to this * 4. Deprecated, use blockmaxweight"));
     strUsage += HelpMessageOpt("-blockmintxfee=<amt>", strprintf(_("Set lowest fee rate (in %s/kB) for transactions to be included in block creation. (default: %s)"), CURRENCY_UNIT, FormatMoney(DEFAULT_BLOCK_MIN_TX_FEE)));
     if (showDebug)
@@ -1422,6 +1430,25 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReset);
 
+
+                delete passets;
+                delete passetsdb;
+                delete passetsCache;
+                passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
+                passets = new CAssetsCache();
+                passetsCache = new CLRUCache<std::string, CNewAsset>(MAX_CACHE_ASSETS_SIZE);
+
+
+                // Need to load assets before we verify the database
+                if (!passetsdb->LoadAssets()) {
+                    strLoadError = _("Failed to load Assets Database");
+                    break;
+                }
+                std::cout << std::endl << "Loaded Assets without error" << std::endl << "Cache of assets size: "
+                          << passetsCache->Size() << std::endl << "number of assets I have: "
+                          << passets->mapMyUnspentAssets.size() << std::endl;
+
+
                 if (fReset) {
                     pblocktree->WriteReindexing(true);
                     //If we're reindexing in prune mode, wipe away unusable block files and all undo data files
@@ -1725,5 +1752,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     StartWallets(scheduler);
 #endif
 
+
+    UpdatePossibleAssets();
     return !fRequestShutdown;
 }

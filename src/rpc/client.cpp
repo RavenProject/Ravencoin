@@ -29,6 +29,19 @@ public:
  */
 static const CRPCConvertParam vRPCConvertParams[] =
 {
+    { "issue", 1, "qty" },
+    { "issue", 3, "units" },
+    { "issue", 4, "reissuable" },
+    { "issue", 5, "has_ipfs" },
+    { "transfer", 1, "qty"},
+    { "reissue", 1, "qty"},
+    { "reissue", 3, "reissuable"},
+    { "listmyassets", 1, "verbose" },
+    { "listmyassets", 2, "count" },
+    { "listmyassets", 3, "start"},
+    { "listassets", 1, "verbose" },
+    { "listassets", 2, "count" },
+    { "listassets", 3, "start" },
     { "setmocktime", 0, "timestamp" },
     { "generate", 0, "nblocks" },
     { "generate", 1, "maxtries" },
