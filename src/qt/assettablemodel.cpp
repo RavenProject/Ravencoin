@@ -19,6 +19,28 @@
 #include <QDebug>
 #include <QStringList>
 
+/* Just for testing */
+    void getRandomAsset(char *name) {
+        int len = rand()%28+3; //3 to 30
+        std::cout << "len:" << len << std::endl;
+        int i;
+        for(i=0;i<=len;i++)
+        {
+            name[i]=65+rand()%26;
+        }
+        name[i]=0;
+    }
+
+    CAmount getRandomQty(){
+        CAmount qty = (CAmount)rand() * (CAmount)rand();
+        return(qty);
+    }
+
+    int getRandomUnits(){
+        return(rand() % 9);
+    }
+/****************************/
+
 
 class AssetTablePriv {
 public:
@@ -40,11 +62,20 @@ public:
                 LOCK(cs_main);
                 //GetMyOwnedAssets()...
 
-                cachedAssets.append(AssetRecord("First Asset", COIN * 1000));
-                cachedAssets.append(AssetRecord("Second Asset", COIN * 10000));
+                cachedAssets.append(AssetRecord("First Asset", COIN * 1000, 0));
+                cachedAssets.append(AssetRecord("Second Asset", COIN * 10000, 0));
+                char name[40];
+                int a;
+                for (a=0;a<1000;a++){
+                    getRandomAsset(name);
+
+                    cachedAssets.append(AssetRecord(name, getRandomQty(), getRandomUnits()));
+                    
+                }
             }
         }
     }
+
 
     int size() {
         qDebug() << "AssetTablePriv::size";
@@ -117,7 +148,8 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
         case Name:
             return QString::fromStdString(rec->name);
         case Quantity:
-            return QString::number(rec->quantity);
+            //return QString::number(rec->quantity);
+            return QString::fromStdString(rec->formatted());
         default:
             return QString();
     }
