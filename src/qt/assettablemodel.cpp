@@ -72,6 +72,7 @@ AssetTableModel::AssetTableModel(WalletModel *parent) :
     qDebug() << "AssetTableModel::AssetTableModel";
     columns << tr("Name") << tr("Quantity");
 
+    //setSectionResizeMode(QHeaderView::ResizeToContents);
     priv->refreshWallet();
 };
 
@@ -102,6 +103,9 @@ int AssetTableModel::columnCount(const QModelIndex &parent) const
 
 QVariant AssetTableModel::data(const QModelIndex &index, int role) const
 {
+    if (role != Qt::DisplayRole)  //Fix for checkboxes in QTableView
+        return QVariant();
+
     qDebug() << "AssetTableModel::data(" << index << ", " << role << ")";
     Q_UNUSED(role);
     if(!index.isValid())
@@ -122,6 +126,12 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
 QVariant AssetTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     qDebug() << "AssetTableModel::headerData";
+    if(role == Qt::DisplayRole)
+        {
+            if (section < columns.size())
+                return columns.at(section);
+        }
+
     return QVariant();
 }
 
