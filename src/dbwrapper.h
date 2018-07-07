@@ -221,7 +221,7 @@ public:
      * @param[in] compression   Enable snappy compression for the database
      * @param[in] maxOpenFiles  The maximum number of open files for the database
      */
-    CDBWrapper(const fs::path& path, size_t nCacheSize, bool fMemory = false, bool fWipe = false, bool obfuscate = false, bool compression = false, int maxOpenFiles = 64);
+    CDBWrapper(const fs::path& path, size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate, bool compression, int maxOpenFiles, size_t maxFileSize);
     ~CDBWrapper();
 
     template <typename K, typename V>
