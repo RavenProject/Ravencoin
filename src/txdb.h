@@ -113,7 +113,7 @@ private:
 class CBlockTreeDB : public CDBWrapper
 {
 public:
-    explicit CBlockTreeDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false, bool compression = true, int maxOpenFiles = 1000);
+    explicit CBlockTreeDB(size_t nCacheSize, bool fMemory, bool fWipe, bool compression, int maxOpenFiles, size_t maxFileSize);
 
     CBlockTreeDB(const CBlockTreeDB&) = delete;
     CBlockTreeDB& operator=(const CBlockTreeDB&) = delete;

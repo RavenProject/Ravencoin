@@ -74,7 +74,7 @@ public:
     }
 };
 
-static leveldb::Options GetOptions(size_t nCacheSize, bool compression, int maxOpenFiles)
+static leveldb::Options GetOptions(size_t nCacheSize, bool compression, int maxOpenFiles, size_t maxFileSize)
 {
     leveldb::Options options;
     options.block_cache = leveldb::NewLRUCache(nCacheSize / 2);
@@ -83,6 +83,7 @@ static leveldb::Options GetOptions(size_t nCacheSize, bool compression, int maxO
     options.compression = compression ? leveldb::kSnappyCompression : leveldb::kNoCompression;
     options.max_open_files = maxOpenFiles;
     options.info_log = new CRavenLevelDBLogger();
+    options.max_file_size = maxFileSize;
     if (leveldb::kMajorVersion > 1 || (leveldb::kMajorVersion == 1 && leveldb::kMinorVersion >= 16)) {
         // LevelDB versions before 1.16 consider short writes to be corruption. Only trigger error
         // on corruption in later versions.
@@ -91,14 +92,14 @@ static leveldb::Options GetOptions(size_t nCacheSize, bool compression, int maxO
     return options;
 }
 
-CDBWrapper::CDBWrapper(const fs::path& path, size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate, bool compression, int maxOpenFiles)
+CDBWrapper::CDBWrapper(const fs::path& path, size_t nCacheSize, bool fMemory, bool fWipe, bool obfuscate, bool compression, int maxOpenFiles, size_t maxFileSize)
 {
     penv = nullptr;
     readoptions.verify_checksums = true;
     iteroptions.verify_checksums = true;
     iteroptions.fill_cache = false;
     syncoptions.sync = true;
-    options = GetOptions(nCacheSize, compression, maxOpenFiles);
+    options = GetOptions(nCacheSize, compression, maxOpenFiles, maxFileSize);
     options.create_if_missing = true;
     if (fMemory) {
         penv = leveldb::NewMemEnv(leveldb::Env::Default());
