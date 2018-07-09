@@ -8,6 +8,7 @@
 
 #include "math.h"
 #include "amount.h"
+#include "tinyformat.h"
 
 
 /** UI model for unspent assets.
@@ -26,16 +27,14 @@ public:
     {
     }
 
-
-    std::string formatted(){
-        char formatted[100];
+    std::string formattedQuantity() {
+        int64_t quotient = quantity / COIN;
         if (units == 0) {
-            sprintf(formatted, "%lld", quantity);
+            return strprintf("%d", quotient);
         } else {
-            CAmount unit_pow = ipow(10,units);
-            sprintf(formatted, "%lld.%lld", quantity / unit_pow, quantity % unit_pow);
+            int64_t remainder = quantity % COIN;
+            return strprintf("%d.%0" + std::to_string(units) + "d", quotient, remainder);
         }
-        return(formatted);
     }
 
     /** @name Immutable attributes
@@ -45,22 +44,6 @@ public:
     int units;
     /**@}*/
 
-private: 
-    CAmount ipow(CAmount base, CAmount exp)
-    {
-        CAmount result = 1;
-        for (;;)
-        {
-            if (exp & 1)
-                result *= base;
-            exp >>= 1;
-            if (!exp)
-                break;
-            base *= base;
-        }
-
-        return result;
-    }
 };
 
 #endif // RAVEN_QT_ASSETRECORD_H

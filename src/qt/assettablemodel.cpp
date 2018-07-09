@@ -19,28 +19,6 @@
 #include <QDebug>
 #include <QStringList>
 
-/* Just for testing */
-    void getRandomAsset(char *name) {
-        int len = rand()%28+3; //3 to 30
-        std::cout << "len:" << len << std::endl;
-        int i;
-        for(i=0;i<=len;i++)
-        {
-            name[i]=65+rand()%26;
-        }
-        name[i]=0;
-    }
-
-    CAmount getRandomQty(){
-        CAmount qty = (CAmount)rand() * (CAmount)rand();
-        return(qty);
-    }
-
-    int getRandomUnits(){
-        return(rand() % 9);
-    }
-/****************************/
-
 
 class AssetTablePriv {
 public:
@@ -51,26 +29,34 @@ public:
 
     AssetTableModel *parent;
 
-    QList<AssetRecord> cachedAssets;
+    QList<AssetRecord> cachedBalances;
 
     // loads all current balances into cache
     void refreshWallet() {
         qDebug() << "AssetTablePriv::refreshWallet";
-        cachedAssets.clear();
+        cachedBalances.clear();
         if (passets) {
             {
                 LOCK(cs_main);
-                //GetMyOwnedAssets()...
+                std::map<std::string, CAmount> balances;
+                if (!GetMyAssetBalances(*passets, balances)) {
+                    qWarning("AssetTablePriv::refreshWallet: Error retrieving asset balances");
+                    return;
+                }
 
-                cachedAssets.append(AssetRecord("First Asset", COIN * 1000, 0));
-                cachedAssets.append(AssetRecord("Second Asset", COIN * 10000, 0));
-                char name[40];
-                int a;
-                for (a=0;a<1000;a++){
-                    getRandomAsset(name);
-
-                    cachedAssets.append(AssetRecord(name, getRandomQty(), getRandomUnits()));
-                    
+                auto bal = balances.begin();
+                for (; bal != balances.end(); bal++) {
+                    // retrieve units for asset
+                    uint8_t units = OWNER_UNITS;
+                    if (!IsAssetNameAnOwner(bal->first)) {
+                        CNewAsset assetData;
+                        if (!passets->GetAssetIfExists(bal->first, assetData)) {
+                            qWarning("AssetTablePriv::refreshWallet: Error retrieving asset data");
+                            return;
+                        }
+                        units = assetData.units;
+                    }
+                    cachedBalances.append(AssetRecord(bal->first, bal->second, units));
                 }
             }
         }
@@ -79,15 +65,13 @@ public:
 
     int size() {
         qDebug() << "AssetTablePriv::size";
-        return cachedAssets.size();
+        return cachedBalances.size();
     }
 
     AssetRecord *index(int idx) {
         qDebug() << "AssetTablePriv::index(" << idx << ")";
-        if (idx >= 0 && idx < cachedAssets.size()) {
-            std::cout << "AssetTablePriv::index --> " << cachedAssets.at(idx).name << std::endl;
-            std::cout << " or " << cachedAssets[idx].name << std::endl;
-            return &cachedAssets[idx];
+        if (idx >= 0 && idx < cachedBalances.size()) {
+            return &cachedBalances[idx];
         }
         qDebug() << "AssetTablePriv::index --> 0";
         return 0;
@@ -113,8 +97,12 @@ AssetTableModel::~AssetTableModel()
 };
 
 void AssetTableModel::checkBalanceChanged() {
-    // update cache and, if there were changes, emit some event so the screen updates..
     qDebug() << "AssetTableModel::CheckBalanceChanged";
+    // TODO: optimize by 1) updating cache incrementally; and 2) emitting more specific dataChanged signals
+    Q_EMIT layoutAboutToBeChanged();
+    priv->refreshWallet();
+    Q_EMIT dataChanged(index(0, 0, QModelIndex()), index(priv->size(), columns.length()-1, QModelIndex()));
+    Q_EMIT layoutChanged();
 }
 
 int AssetTableModel::rowCount(const QModelIndex &parent) const
@@ -147,7 +135,7 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
         case Name:
             return QString::fromStdString(rec->name);
         case Quantity:
-            return QString::fromStdString(rec->formatted());
+            return QString::fromStdString(rec->formattedQuantity());
         default:
             return QString();
     }
