@@ -19,6 +19,9 @@
 #include "script/script_error.h"
 #include "sync.h"
 #include "versionbits.h"
+#include "spentindex.h"
+#include "addressindex.h"
+#include "timestampindex.h"
 
 #include <algorithm>
 #include <exception>
@@ -136,6 +139,15 @@ static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
 static const bool DEFAULT_PERMIT_BAREMULTISIG = true;
 static const bool DEFAULT_CHECKPOINTS_ENABLED = true;
 static const bool DEFAULT_TXINDEX = false;
+static const bool DEFAULT_ADDRESSINDEX = false;
+static const bool DEFAULT_TIMESTAMPINDEX = false;
+static const bool DEFAULT_SPENTINDEX = false;
+static const unsigned int DEFAULT_DB_MAX_OPEN_FILES = 1000;
+static const bool DEFAULT_DB_COMPRESSION = true;
+
+/** Default for -dbmaxfilesize , in MB */
+static const int64_t DEFAULT_DB_MAX_FILE_SIZE = 2;
+
 static const unsigned int DEFAULT_BANSCORE_THRESHOLD = 100;
 /** Default for -persistmempool */
 static const bool DEFAULT_PERSIST_MEMPOOL = true;
@@ -175,6 +187,9 @@ extern std::atomic_bool fImporting;
 extern std::atomic_bool fReindex;
 extern int nScriptCheckThreads;
 extern bool fTxIndex;
+extern bool fAddressIndex;
+extern bool fSpentIndex;
+extern bool fTimestampIndex;
 extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
 extern bool fCheckBlockIndex;
@@ -223,7 +238,7 @@ static const unsigned int DEFAULT_CHECKLEVEL = 3;
 // Setting the target to > than 550MB will make it likely we can respect the target.
 static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 550 * 1024 * 1024;
 
-/** 
+/**
  * Process an incoming block. This only returns after the best known valid
  * block is made active. Note that it does not, however, guarantee that the
  * specific block passed to it has been checked for validity!
@@ -234,7 +249,7 @@ static const uint64_t MIN_DISK_SPACE_FOR_BLOCK_FILES = 550 * 1024 * 1024;
  *
  * Note that we guarantee that either the proof-of-work is valid on pblock, or
  * (and possibly also) BlockChecked will have been called.
- * 
+ *
  * Call without cs_main held.
  *
  * @param[in]   pblock  The block we want to process.
@@ -363,12 +378,13 @@ bool CheckSequenceLocks(const CTransaction &tx, int flags, LockPoints* lp = null
 
 /**
  * Closure representing one script verification
- * Note that this stores references to the spending transaction 
+ * Note that this stores references to the spending transaction
  */
 class CScriptCheck
 {
 private:
-    CTxOut m_tx_out;
+    CScript scriptPubKey;
+    CAmount amount;
     const CTransaction *ptxTo;
     unsigned int nIn;
     unsigned int nFlags;
@@ -377,15 +393,17 @@ private:
     PrecomputedTransactionData *txdata;
 
 public:
-    CScriptCheck(): ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
-    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn) :
-        m_tx_out(outIn), ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn) { }
+    CScriptCheck(): amount(0), ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
+    CScriptCheck(const CScript& scriptPubKeyIn, const CAmount amountIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn) :
+        scriptPubKey(scriptPubKeyIn), amount(amountIn),
+        ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn) { }
 
     bool operator()();
 
     void swap(CScriptCheck &check) {
+        scriptPubKey.swap(check.scriptPubKey);
         std::swap(ptxTo, check.ptxTo);
-        std::swap(m_tx_out, check.m_tx_out);
+        std::swap(amount, check.amount);
         std::swap(nIn, check.nIn);
         std::swap(nFlags, check.nFlags);
         std::swap(cacheStore, check.cacheStore);
@@ -399,6 +417,14 @@ public:
 /** Initializes the script-execution cache */
 void InitScriptExecutionCache();
 
+bool GetTimestampIndex(const unsigned int &high, const unsigned int &low, const bool fActiveOnly, std::vector<std::pair<uint256, unsigned int> > &hashes);
+bool GetSpentIndex(CSpentIndexKey &key, CSpentIndexValue &value);
+bool HashOnchainActive(const uint256 &hash);
+bool GetAddressIndex(uint160 addressHash, int type,
+                     std::vector<std::pair<CAddressIndexKey, CAmount> > &addressIndex,
+                     int start = 0, int end = 0);
+bool GetAddressUnspent(uint160 addressHash, int type,
+                       std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > &unspentOutputs);
 
 /** Functions for disk access for blocks */
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos, const Consensus::Params& consensusParams);
