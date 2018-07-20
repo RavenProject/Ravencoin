@@ -22,6 +22,8 @@ guiutil.cpp
 guiutil.h
 intro.cpp
 intro.h
+ipfs.cpp
+ipfs.h
 macdockiconhandler.h
 macnotificationhandler.h
 modaloverlay.cpp
