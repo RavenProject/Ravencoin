@@ -25,7 +25,7 @@
 #define RVN_T 116
 #define RVN_O 111
 
-#define OWNER "!"
+#define OWNER_TAG "!"
 #define OWNER_LENGTH 1
 #define OWNER_UNITS 0
 #define MIN_ASSET_LENGTH 3
@@ -49,6 +49,17 @@ struct CAssetOutputEntry;
 
 // 50000 * 82 Bytes == 4.1 Mb
 #define MAX_CACHE_ASSETS_SIZE 50000
+
+enum AssetType
+{
+    ROOT,
+    OWNER,
+    SUB,
+    UNIQUE,
+    CHANNEL,
+    VOTE,
+    INVALID
+};
 
 class CAssets {
 public:
@@ -301,6 +312,7 @@ CAmount GetIssueSubAssetBurnAmount();
 CAmount GetIssueUniqueAssetBurnAmount();
 
 bool IsAssetNameValid(const std::string& name);
+bool IsAssetNameValid(const std::string& name, AssetType& assetType);
 bool IsAssetNameAnOwner(const std::string& name);
 
 bool IsAssetNameSizeValid(const std::string& name);

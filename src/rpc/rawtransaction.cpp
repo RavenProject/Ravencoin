@@ -634,7 +634,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     // Create the scripts for the change of the ownership toekn
                     CScript scriptTransferOwnerAsset = GetScriptForDestination(destination);
-                    CAssetTransfer assetTransfer(asset_name.get_str() + OWNER, OWNER_ASSET_AMOUNT);
+                    CAssetTransfer assetTransfer(asset_name.get_str() + OWNER_TAG, OWNER_ASSET_AMOUNT);
                     assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
 
                     // Create the scripts for the reissued assets
