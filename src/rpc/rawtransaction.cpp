@@ -880,6 +880,8 @@ UniValue decodescript(const JSONRPCRequest& request)
 
         if (hasIPFS)
             r.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+    } else {
+
     }
     /** RVN END */
 

@@ -29,13 +29,12 @@
 #define OWNER_LENGTH 1
 #define OWNER_UNITS 0
 #define MIN_ASSET_LENGTH 3
-#define MAX_ASSET_LENGTH 31
 #define OWNER_ASSET_AMOUNT 1 * COIN
 
 #define ASSET_TRANSFER_STRING "transfer_asset"
 #define ASSET_NEW_STRING "new_asset"
 #define ASSET_REISSUE_STRING "reissue_asset"
-
+#define ASSET_RESERVED_STRING "reserved_asset"
 
 class CScript;
 class CDataStream;
