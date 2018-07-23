@@ -115,26 +115,7 @@ public:
             Process(script);
     }
 
-    void operator()(const WitnessV0ScriptHash& scriptID)
-    {
-        CScriptID id;
-        CRIPEMD160().Write(scriptID.begin(), 32).Finalize(id.begin());
-        CScript script;
-        if (keystore.GetCScript(id, script)) {
-            Process(script);
-        }
-    }
-
-    void operator()(const WitnessV0KeyHash& keyid)
-    {
-        CKeyID id(keyid);
-        if (keystore.HaveKey(id)) {
-            vKeys.push_back(id);
-        }
-    }
-
-    template<typename X>
-    void operator()(const X &none) {}
+    void operator()(const CNoDestination &none) {}
 };
 
 const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
@@ -2719,9 +2700,6 @@ bool CWallet::SelectAssets(const std::map<std::string, std::vector<COutput> >& m
             mapValueRet.insert(std::make_pair(asset.first, 0));
 
         for (auto out : asset.second) {
-            if (out.nDepth < 10)
-                continue;
-
             if (!out.fSpendable)
                 continue;
 
@@ -2757,7 +2735,7 @@ bool CWallet::SelectAssets(const std::map<std::string, std::vector<COutput> >& m
         }
 
         if (mapValueRet.at(asset.first) < mapAssetTargetValue.at(asset.first)) {
-            return error("%s : Tried to transfer an asset but this wallet didn't have enough (Assets must 10 confirmations before you are able to send them), Asset Name: %s, Transfer Amount: %d, Wallet Total: %d", __func__, asset.first, mapValueRet.at(asset.first), mapAssetTargetValue.at(asset.first));
+            return error("%s : Tried to transfer an asset but this wallet didn't have enough, Asset Name: %s, Transfer Amount: %d, Wallet Total: %d", __func__, asset.first, mapValueRet.at(asset.first), mapAssetTargetValue.at(asset.first));
         }
     }
 
