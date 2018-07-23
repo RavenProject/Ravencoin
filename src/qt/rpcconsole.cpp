@@ -637,6 +637,7 @@ void RPCConsole::setClientModel(ClientModel *model)
         ui->startupTime->setText(model->formatClientStartupTime());
         ui->networkName->setText(QString::fromStdString(Params().NetworkIDString()));
 
+
         //Setup autocomplete and attach it
         QStringList wordList;
         std::vector<std::string> commandList = tableRPC.listCommands();
@@ -922,6 +923,36 @@ void RPCConsole::on_openDebugLogfileButton_clicked()
 {
     GUIUtil::openDebugLogfile();
 }
+
+
+void RPCConsole::on_activateIPFS_Button_clicked()
+{
+    //Notes:
+    //    * Exact path to ipfs, or must be on path
+    //    * Need to factor in the different dir structure of Windows
+    //    * std_err is not captured by the exec command - echoed to console
+
+
+    std::string result;
+    result = ipfs.init();
+    //result = testfunc();
+
+    result = ipfs.start_daemon();
+
+    if (result.find("ipfs configuration file already exists") != std::string::npos)
+    {
+        ui->IPFS_Active->setText("Already initialized");
+    }
+    else
+    {
+        ui->IPFS_Active->setText("Active");
+    }
+
+    ui->IPFS_Result->setText(result.c_str());
+
+    //GUIUtil::openDebugLogfile();
+}
+
 
 void RPCConsole::scrollToEnd()
 {

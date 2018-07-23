@@ -6,6 +6,7 @@
 #ifndef RAVEN_QT_RPCCONSOLE_H
 #define RAVEN_QT_RPCCONSOLE_H
 
+#include "ipfs.h"
 #include "guiutil.h"
 #include "peertablemodel.h"
 
@@ -68,6 +69,8 @@ private Q_SLOTS:
     void on_tabWidget_currentChanged(int index);
     /** open the debug.log from the current datadir */
     void on_openDebugLogfileButton_clicked();
+
+    void on_activateIPFS_Button_clicked();    
     /** change the time range of the network traffic graph */
     void on_sldGraphRange_valueChanged(int value);
     /** update traffic statistics */
@@ -152,6 +155,7 @@ private:
     int consoleFontSize;
     QCompleter *autoCompleter;
     QThread thread;
+    Ipfs ipfs;
 
     /** Update UI with latest network info from model. */
     void updateNetworkState();
