@@ -63,6 +63,9 @@
 #include <QUrl>
 #else
 #include <QUrlQuery>
+#include <validation.h>
+#include <tinyformat.h>
+
 #endif
 
 const std::string RavenGUI::DEFAULT_UIPLATFORM =
@@ -592,7 +595,7 @@ void RavenGUI::setWalletActionsEnabled(bool enabled)
     openAction->setEnabled(enabled);
 
     /** RVN START */
-    assetAction->setEnabled(enabled);
+    assetAction->setEnabled(false);
     /** RVN END */
 }
 
@@ -1015,11 +1018,12 @@ void RavenGUI::showEvent(QShowEvent *event)
 }
 
 #ifdef ENABLE_WALLET
-void RavenGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label)
+void RavenGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label, const QString& assetName)
 {
     // On new transaction, make an info balloon
     QString msg = tr("Date: %1\n").arg(date) +
-                  tr("Amount: %1\n").arg(RavenUnits::formatWithUnit(unit, amount, true)) +
+                  tr("Amount: %1\n").arg(amount) +
+                  tr("Asset: %1\n").arg(assetName) +
                   tr("Type: %1\n").arg(type);
     if (!label.isEmpty())
         msg += tr("Label: %1\n").arg(label);
@@ -1027,6 +1031,16 @@ void RavenGUI::incomingTransaction(const QString& date, int unit, const CAmount&
         msg += tr("Address: %1\n").arg(address);
     message((amount)<0 ? tr("Sent transaction") : tr("Incoming transaction"),
              msg, CClientUIInterface::MSG_INFORMATION);
+}
+
+void RavenGUI::checkAssets()
+{
+    // Check that status of RIP2 and activate the assets icon if it is active
+    if(AreAssetsDeployed())
+        assetAction->setDisabled(false);
+    else
+        assetAction->setDisabled(true);
+
 }
 #endif // ENABLE_WALLET
 
