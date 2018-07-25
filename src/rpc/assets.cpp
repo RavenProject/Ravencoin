@@ -303,7 +303,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 "        [\n"
                 "          {\n"
                 "            \"txid\": txid,\n"
-                "            \"index\": index,\n"
+                "            \"vout\": vout,\n"
                 "            \"amount\": amount\n"
                 "          }\n"
                 "          {...}, {...}\n"
@@ -395,7 +395,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
             for (auto const& out : passets->mapMyUnspentAssets[bal->first]) {
                 UniValue tempOut(UniValue::VOBJ);
                 tempOut.push_back(Pair("txid", out.hash.GetHex()));
-                tempOut.push_back(Pair("index", std::to_string(out.n)));
+                tempOut.push_back(Pair("vout", (int)out.n));
 
                 //
                 // get amount for this outpoint
