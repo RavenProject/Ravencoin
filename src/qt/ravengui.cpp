@@ -324,7 +324,7 @@ void RavenGUI::createActions()
 
     /** RVN START */
     assetAction = new QAction(platformStyle->SingleColorIcon(":/icons/open"), tr("&Assets"), this);
-    assetAction->setStatusTip(tr("Show asset information"));
+    assetAction->setStatusTip(tr("Manage Assets"));
     assetAction->setToolTip(assetAction->statusTip());
     assetAction->setCheckable(true);
     assetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
@@ -807,6 +807,13 @@ void RavenGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVerif
         else
             modalOverlay->tipUpdate(count, blockDate, nVerificationProgress);
     }
+
+#ifdef ENABLE_WALLET
+    if(walletFrame)
+        {
+            walletFrame->displayAssetInfo();
+        }
+#endif // ENABLE_WALLET
     if (!clientModel)
         return;
 
@@ -1036,10 +1043,15 @@ void RavenGUI::incomingTransaction(const QString& date, int unit, const CAmount&
 void RavenGUI::checkAssets()
 {
     // Check that status of RIP2 and activate the assets icon if it is active
-    if(AreAssetsDeployed())
+    if(AreAssetsDeployed()) {
         assetAction->setDisabled(false);
-    else
+        assetAction->setToolTip(tr("Manage Assets"));
+        }
+    else {
         assetAction->setDisabled(true);
+        assetAction->setToolTip(tr("Assets not yet active"));
+
+        }
 
 }
 #endif // ENABLE_WALLET
