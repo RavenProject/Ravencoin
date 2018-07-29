@@ -239,7 +239,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
             "  \"account\" : \"account\"         (string) DEPRECATED. The account associated with the address, \"\" is the default account\n"
             "  \"timestamp\" : timestamp,        (number, optional) The creation time of the key if available in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"hdkeypath\" : \"keypath\"       (string, optional) The HD keypath if the key is HD and available\n"
-            "  \"hdmasterkeyid\" : \"<hash160>\" (string, optional) The Hash160 of the HD master pubkey\n"
+            "  \"hdseedid\" : \"<hash160>\" (string, optional) The Hash160 of the HD master pubkey\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("validateaddress", "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\"")
@@ -287,7 +287,7 @@ UniValue validateaddress(const JSONRPCRequest& request)
                 ret.push_back(Pair("timestamp", it->second.nCreateTime));
                 if (!it->second.hdKeypath.empty()) {
                     ret.push_back(Pair("hdkeypath", it->second.hdKeypath));
-                    ret.push_back(Pair("hdmasterkeyid", it->second.hdMasterKeyID.GetHex()));
+                    ret.push_back(Pair("hdseedid", it->second.hd_seed_id.GetHex()));
                 }
             }
         }
