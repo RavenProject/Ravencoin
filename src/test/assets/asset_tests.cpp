@@ -129,7 +129,40 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(IsAssetNameValid("ABC!", type));
         BOOST_CHECK(type == AssetType::OWNER);
 
+        // vote
+        BOOST_CHECK(IsAssetNameValid("ABC^VOTE"));
+        BOOST_CHECK(!IsAssetNameValid("ABC^"));
+        BOOST_CHECK(IsAssetNameValid("ABC^VOTING"));
+        BOOST_CHECK(IsAssetNameValid("ABC^VOTING_IS_30_CHARACTERS_LN"));
+        BOOST_CHECK(!IsAssetNameValid("ABC^VOTING_IS_31_CHARACTERS_LN!"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB/SUB/SUB^VOTE"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB/SUB/SUB/SUB/30^VOT"));
+        BOOST_CHECK(!IsAssetNameValid("ABC/SUB/SUB/SUB/SUB/SUB/31^VOTE"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB^VOTE", type));
+        BOOST_CHECK(type == AssetType::VOTE);
 
+
+        // Check type for different type of sub assets
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH#UNIQUE", type));
+        BOOST_CHECK(type == AssetType::UNIQUE);
+
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH~CHANNEL", type));
+        BOOST_CHECK(type == AssetType::CHANNEL);
+
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH/SUB#UNIQUE", type));
+        BOOST_CHECK(type == AssetType::UNIQUE);
+
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH/SUB~CHANNEL", type));
+        BOOST_CHECK(type == AssetType::CHANNEL);
+
+        // Check ParentName function
+        BOOST_CHECK(GetParentName("TEST!") == "TEST!");
+        BOOST_CHECK(GetParentName("TEST") == "TEST");
+        BOOST_CHECK(GetParentName("TEST/SUB") == "TEST");
+        BOOST_CHECK(GetParentName("TEST/SUB#UNIQUE") == "TEST/SUB");
+        BOOST_CHECK(GetParentName("TEST/TEST/SUB/SUB") == "TEST/TEST/SUB");
+        BOOST_CHECK(GetParentName("TEST/SUB^VOTE") == "TEST/SUB");
+        BOOST_CHECK(GetParentName("TEST/SUB/SUB~CHANNEL") == "TEST/SUB/SUB");
     }
 
     BOOST_AUTO_TEST_CASE(transfer_asset_coin_check) {
@@ -167,6 +200,17 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         Coin coin(txOut, 0, 0);
 
         BOOST_CHECK_MESSAGE(coin.IsAsset(), "New Asset Coin isn't as asset");
+    }
+
+    BOOST_AUTO_TEST_CASE(dwg_version_check) {
+
+
+        int32_t version = 0x30000000;
+        int32_t mask = 0xF0000000;
+        int32_t new_version = version & mask;
+        int32_t shifted = new_version >> 28;
+
+        BOOST_CHECK_MESSAGE(shifted == 3, "New version didn't equal 3");
     }
 
 BOOST_AUTO_TEST_SUITE_END()
