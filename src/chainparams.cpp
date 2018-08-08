@@ -328,7 +328,7 @@ public:
 
 //        /////////////////////////////////////////////////////////////////
 
-        genesis = CreateGenesisBlock(1533751200, 555705, 0x1e00ffff, 2test, 5000 * COIN);
+        genesis = CreateGenesisBlock(1533751200, 555705, 0x1e00ffff, 2, 5000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
         //Test MerkleRoot and GenesisBlock
