@@ -20,14 +20,14 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
     }
 
     BOOST_AUTO_TEST_CASE(name_validation_tests) {
-        AssetType type;
+        assettype::AssetType type;
     
         // regular
         BOOST_CHECK(IsAssetNameValid("MIN", type));
-        BOOST_CHECK(type == AssetType::ROOT);
+        BOOST_CHECK(type == assettype::AssetType::ROOT);
         BOOST_CHECK(IsAssetNameValid("MAX_ASSET_IS_30_CHARACTERS_LNG", type));
         BOOST_CHECK(!IsAssetNameValid("MAX_ASSET_IS_31_CHARACTERS_LONG", type));
-        BOOST_CHECK(type == AssetType::INVALID);
+        BOOST_CHECK(type == assettype::AssetType::INVALID);
         BOOST_CHECK(IsAssetNameValid("A_BCDEFGHIJKLMNOPQRSTUVWXY.Z", type));
         BOOST_CHECK(IsAssetNameValid("0_12345678.9", type));
 
@@ -66,7 +66,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // subs
         BOOST_CHECK(IsAssetNameValid("ABC/A", type));
-        BOOST_CHECK(type == AssetType::SUB);
+        BOOST_CHECK(type == assettype::AssetType::SUB);
         BOOST_CHECK(IsAssetNameValid("ABC/A/1", type));
         BOOST_CHECK(IsAssetNameValid("ABC/A_1/1.A", type));
         BOOST_CHECK(IsAssetNameValid("ABC/AB/XYZ/STILL/MAX/30/123456", type));
@@ -89,7 +89,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // unique
         BOOST_CHECK(IsAssetNameValid("ABC#AZaz09", type));
-        BOOST_CHECK(type == AssetType::UNIQUE);
+        BOOST_CHECK(type == assettype::AssetType::UNIQUE);
         BOOST_CHECK(IsAssetNameValid("ABC#@$%&*()[]{}<>-_.;?\\:", type));
         BOOST_CHECK(!IsAssetNameValid("ABC#no!bangs", type));
         BOOST_CHECK(IsAssetNameValid("ABC/THING#_STILL_30_MAX------_", type));
@@ -103,7 +103,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // channel
         BOOST_CHECK(IsAssetNameValid("ABC~1", type));
-        BOOST_CHECK(type == AssetType::CHANNEL);
+        BOOST_CHECK(type == assettype::AssetType::CHANNEL);
         BOOST_CHECK(IsAssetNameValid("ABC~STILL_MAX_OF_30.CHARS_1234", type));
 
         BOOST_CHECK(!IsAssetNameValid("MIN~", type));
@@ -127,7 +127,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(IsAssetNameAnOwner("ABC/A!"));
         BOOST_CHECK(IsAssetNameAnOwner("ABC/A/1!"));
         BOOST_CHECK(IsAssetNameValid("ABC!", type));
-        BOOST_CHECK(type == AssetType::OWNER);
+        BOOST_CHECK(type == assettype::AssetType::OWNER);
 
 
     }

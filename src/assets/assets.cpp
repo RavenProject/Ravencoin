@@ -108,9 +108,9 @@ bool IsAssetNameASubasset(const std::string& name)
     return parts.size() > 1;
 }
 
-bool IsAssetNameValid(const std::string& name, AssetType& assetType)
+bool IsAssetNameValid(const std::string& name, assettype::AssetType& assetType)
 {
-    assetType = INVALID;
+    assetType = assettype::AssetType::INVALID;
     if (std::regex_match(name, UNIQUE_INDICATOR))
     {
         if (name.size() > MAX_NAME_LENGTH) return false;
@@ -118,7 +118,7 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType)
         boost::split(parts, name, boost::is_any_of(UNIQUE_TAG_DELIMITER));
         bool valid = IsNameValidBeforeTag(parts.front()) && IsUniqueTagValid(parts.back());
         if (!valid) return false;
-        assetType = AssetType::UNIQUE;
+        assetType = assettype::AssetType::UNIQUE;
         return true;
     }
     else if (std::regex_match(name, CHANNEL_INDICATOR))
@@ -128,7 +128,7 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType)
         boost::split(parts, name, boost::is_any_of(CHANNEL_TAG_DELIMITER));
         bool valid = IsNameValidBeforeTag(parts.front()) && IsChannelTagValid(parts.back());
         if (!valid) return false;
-        assetType = AssetType::CHANNEL;
+        assetType = assettype::AssetType::CHANNEL;
         return true;
     }
     else if (std::regex_match(name, OWNER_INDICATOR))
@@ -136,7 +136,7 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType)
         if (name.size() > MAX_NAME_LENGTH + 1) return false;
         bool valid = IsNameValidBeforeTag(name.substr(0, name.size() - 1));
         if (!valid) return false;
-        assetType = AssetType::OWNER;
+        assetType = assettype::AssetType::OWNER;
         return true;
     }
     else
@@ -144,14 +144,14 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType)
         if (name.size() > MAX_NAME_LENGTH) return false;
         bool valid = IsNameValidBeforeTag(name);
         if (!valid) return false;
-        assetType = IsAssetNameASubasset(name) ? AssetType::SUB : AssetType::ROOT;
+        assetType = IsAssetNameASubasset(name) ? assettype::AssetType::SUB : assettype::AssetType::ROOT;
         return true;
     }
 }
 
 bool IsAssetNameValid(const std::string& name)
 {
-    AssetType _assetType;
+    assettype::AssetType _assetType;
     return IsAssetNameValid(name, _assetType);
 }
 
