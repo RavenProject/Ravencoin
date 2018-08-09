@@ -5,13 +5,13 @@
 Ravencoin (RVN) is a Proof of Work coin built on the Bitcoin UTXO model. As with other Bitcoin derivatives, RVN coins are distributed to persons augmenting the Raven network by mining Raven.
 *  x1000 coin distribution (21 Billion Total)
 *  10x faster blocks (1 per minute)
-*  In app CPU mining
+*  In app CPU and GPU mining
 *  ~1.4 Day difficulty adjustment (2016 blocks)
 *  Addresses start with R... for regular addresses, or r... for multisig
 *  Network Port: 8767
 *  RPC Port: 8766
 
-### Phase 2 - Assets (in progress)
+### Phase 2 - Assets (Testnet Launched)
 
 #### ASIC Resistance
 
@@ -31,8 +31,9 @@ _TOKEN
 THEEND.  
 A..B (consecutive punctuation)  
 AB  
-12  
-.FIRST  
+12 
+.FIRST
+apple
 
 The RVN used to issue assets will be sent to a burn address, which will reduce the amount of RVN available.  
 
