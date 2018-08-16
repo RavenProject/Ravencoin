@@ -53,6 +53,8 @@ static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 
 static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^RAVENC0IN$|^RAVENCO1N$|^RAVENC01N$");
 
+std::map<COutPoint, uint256> mapMempoolAssetOutpoints;
+
 bool IsRootNameValid(const std::string& name)
 {
     return std::regex_match(name, ROOT_NAME_CHARACTERS)
