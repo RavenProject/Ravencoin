@@ -225,10 +225,10 @@ def main():
         print("Tests currently disabled on Windows by default. Use --force option to enable")
         sys.exit(0)
 
-    if not (enable_wallet and enable_utils and enable_ravend):
-        print("No functional tests to run. Wallet, utils, and ravend must all be enabled")
-        print("Rerun `configure` with -enable-wallet, -with-utils and -with-daemon and rerun make")
-        sys.exit(0)
+    # if not (enable_wallet and enable_utils and enable_ravend):
+    #     print("No functional tests to run. Wallet, utils, and ravend must all be enabled")
+    #     print("Rerun `configure` with -enable-wallet, -with-utils and -with-daemon and rerun make")
+    #     sys.exit(0)
 
     # Build list of tests
     if tests:
