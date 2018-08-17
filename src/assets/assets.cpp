@@ -620,7 +620,7 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache) con
 
     CNewAsset asset;
     if (!assetCache.GetAssetIfExists(this->strName, asset)) {
-        strError = std::string("Unable to reissue asset: asset_name '") + strName + std::string("' doesn't exsist in the database");
+        strError = std::string("Unable to reissue asset: asset_name '") + strName + std::string("' doesn't exist in the database");
         return false;
     }
 
@@ -815,7 +815,7 @@ bool CAssetsCache::AddToMyUpspentOutPoints(const std::string& strName, const COu
         mapMyUnspentAssets.insert(std::make_pair(strName, setOuts));
     } else {
         if (!mapMyUnspentAssets[strName].insert(out).second)
-            return error("%s: Tried adding an asset to my map of upspent assets, but it already exsisted in the set of assets: %s, COutPoint: %s", __func__, strName, out.ToString());
+            return error("%s: Tried adding an asset to my map of upspent assets, but it already existed in the set of assets: %s, COutPoint: %s", __func__, strName, out.ToString());
     }
 
     // Add the outpoint to the set so we know what we need to database
@@ -1010,12 +1010,12 @@ bool CAssetsCache::RemoveNewAsset(const CNewAsset& asset, const std::string addr
 bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address)
 {
     if(CheckIfAssetExists(asset.strName))
-        return error("%s: Tried adding new asset, but it already exsisted in the set of assets: %s", __func__, asset.strName);
+        return error("%s: Tried adding new asset, but it already existed in the set of assets: %s", __func__, asset.strName);
 
     // Insert the asset into the assets address map
     if (mapAssetsAddresses.count(asset.strName)) {
         if (mapAssetsAddresses[asset.strName].count(address))
-            return error("%s : Tried adding a new asset and saving its quantity, but it already exsisted in the map of assets addresses: %s", __func__, asset.strName);
+            return error("%s : Tried adding a new asset and saving its quantity, but it already existed in the map of assets addresses: %s", __func__, asset.strName);
 
         mapAssetsAddresses[asset.strName].insert(address);
     } else {
@@ -1154,7 +1154,7 @@ bool CAssetsCache::AddOwnerAsset(const std::string& assetsName, const std::strin
 {
     if (mapAssetsAddresses.count(assetsName)) {
         if (mapAssetsAddresses[assetsName].count(address))
-            return error("%s : Tried adding an owner asset, but it already exsisted in the map of assets addresses: %s",
+            return error("%s : Tried adding an owner asset, but it already existed in the map of assets addresses: %s",
                          __func__, assetsName);
 
         mapAssetsAddresses[assetsName].insert(address);
@@ -1227,23 +1227,6 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
         if (fFlushDB) {
             bool dirty = false;
             std::string message;
-
-            // Save the assets that have been spent by erasing the quantity in the database
-            for (auto spentAsset : vSpentAssets) {
-                auto pair = make_pair(spentAsset.assetName, spentAsset.address);
-                if (mapAssetsAddressAmount.count(pair)) {
-                    if (mapAssetsAddressAmount.at(make_pair(spentAsset.assetName, spentAsset.address)) == 0) {
-                        if (!passetsdb->EraseAssetAddressQuantity(spentAsset.assetName, spentAsset.address)) {
-                            dirty = true;
-                            message = "_Failed Erasing a Spent Asset, from database";
-                        }
-
-                        if (dirty) {
-                            return error("%s : %s", __func__, message);
-                        }
-                    }
-                }
-            }
 
             // Remove new assets from the database
             for (auto newAsset : setNewAssetsToRemove) {
@@ -1381,7 +1364,7 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
 
                     if (mapAssetsAddressAmount.count(pair)) {
                         if (!passetsdb->WriteAssetAddressQuantity(pair.first, pair.second,
-                                                                  mapAssetsAddressAmount[pair])) {
+                                                                  mapAssetsAddressAmount.at(pair))) {
                             dirty = true;
                             message = "_Failed Writing reissue asset quantity to the address quantity database";
                         }
@@ -1450,6 +1433,32 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
 
                     if (dirty) {
                         return error("%s : %s", __func__, message);
+                    }
+                }
+            }
+
+            // Save the assets that have been spent by erasing the quantity in the database
+            for (auto spentAsset : vSpentAssets) {
+                auto pair = make_pair(spentAsset.assetName, spentAsset.address);
+                if (mapAssetsAddressAmount.count(pair)) {
+                    if (mapAssetsAddressAmount.at(make_pair(spentAsset.assetName, spentAsset.address)) == 0) {
+                        if (!passetsdb->EraseAssetAddressQuantity(spentAsset.assetName, spentAsset.address)) {
+                            dirty = true;
+                            message = "_Failed Erasing a Spent Asset, from database";
+                        }
+
+                        if (dirty) {
+                            return error("%s : %s", __func__, message);
+                        }
+                    } else  {
+                        if (!passetsdb->WriteAssetAddressQuantity(spentAsset.assetName, spentAsset.address, mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Erasing a Spent Asset, from database";
+                        }
+
+                        if (dirty) {
+                            return error("%s : %s", __func__, message);
+                        }
                     }
                 }
             }
