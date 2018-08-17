@@ -2401,6 +2401,7 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
         error = std::make_pair(RPC_WALLET_ERROR, strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason()));
         return false;
     }
+
     txid = transaction.GetHash().GetHex();
     return true;
 }
@@ -2413,23 +2414,23 @@ bool VerifyAssetOwner(const std::string& asset_name, std::set<COutPoint>& myOwne
                                std::string("This wallet is not the owner of the asset: ") + asset_name);
         return false;
     }
-
-    // Get the outpoint that belongs to the Owner Asset
-    if (!passets->GetAssetsOutPoints(asset_name + OWNER_TAG, myOwnerOutPoints)) {
-        error = std::make_pair(RPC_INVALID_PARAMS, std::string("This wallet can't find the owner token information for: ") + asset_name);
-        return false;
-    }
-
-    // Check to make sure we have the right amount of outpoints
-    if (myOwnerOutPoints.size() == 0) {
-        error = std::make_pair(RPC_INVALID_PARAMS, std::string("This wallet doesn't own any assets with the name: ") + asset_name + OWNER_TAG);
-        return false;
-    }
-
-    if (myOwnerOutPoints.size() != 1) {
-        error = std::make_pair(RPC_INVALID_PARAMS, "Found multiple Owner Assets. Database is out of sync. You might have to run the wallet with -reindex");
-        return false;
-    }
+//
+//    // Get the outpoint that belongs to the Owner Asset
+//    if (!passets->GetAssetsOutPoints(asset_name + OWNER_TAG, myOwnerOutPoints)) {
+//        error = std::make_pair(RPC_INVALID_PARAMS, std::string("This wallet can't find the owner token information for: ") + asset_name);
+//        return false;
+//    }
+//
+//    // Check to make sure we have the right amount of outpoints
+//    if (myOwnerOutPoints.size() == 0) {
+//        error = std::make_pair(RPC_INVALID_PARAMS, std::string("This wallet doesn't own any assets with the name: ") + asset_name + OWNER_TAG);
+//        return false;
+//    }
+//
+//    if (myOwnerOutPoints.size() != 1) {
+//        error = std::make_pair(RPC_INVALID_PARAMS, "Found multiple Owner Assets. Database is out of sync. You might have to run the wallet with -reindex");
+//        return false;
+//    }
 
     return true;
 }

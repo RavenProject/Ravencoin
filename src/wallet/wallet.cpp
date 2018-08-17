@@ -2170,194 +2170,14 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
         CAmount nTotal = 0;
 
         /** RVN START */
-        if (AreAssetsDeployed()) {
-            // A set of the hashes that have already been used
-            std::set<uint256> usedMempoolHashes;
+        bool fFoundEnoughRVN = false;
+        // A set of the hashes that have already been used
+        std::set<uint256> usedMempoolHashes;
 
-            std::map<std::string, CAmount> mapAssetTotals;
-            std::map<uint256, COutPoint> mapOutPoints;
-            if (fWithAssets) {
-                std::set<std::string> setAssetMaxFound;
-                // Turn the OutPoints into a map that is easily interatable.
-                for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
-                    const uint256 &wtxid = it->first;
-                    const CWalletTx *pcoin = &(*it).second;
-
-                    if (!CheckFinalTx(*pcoin))
-                        continue;
-
-                    if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
-                        continue;
-
-                    int nDepth = pcoin->GetDepthInMainChain();
-                    if (nDepth < 0)
-                        continue;
-
-                    // We should not consider coins which aren't at least in our mempool
-                    // It's possible for these to be conflicted via ancestors which we may never be able to detect
-                    if (nDepth == 0 && !pcoin->InMempool())
-                        continue;
-
-                    bool safeTx = pcoin->IsTrusted();
-
-                    // We should not consider coins from transactions that are replacing
-                    // other transactions.
-                    //
-                    // Example: There is a transaction A which is replaced by bumpfee
-                    // transaction B. In this case, we want to prevent creation of
-                    // a transaction B' which spends an output of B.
-                    //
-                    // Reason: If transaction A were initially confirmed, transactions B
-                    // and B' would no longer be valid, so the user would have to create
-                    // a new transaction C to replace B'. However, in the case of a
-                    // one-block reorg, transactions B' and C might BOTH be accepted,
-                    // when the user only wanted one of them. Specifically, there could
-                    // be a 1-block reorg away from the chain where transactions A and C
-                    // were accepted to another chain where B, B', and C were all
-                    // accepted.
-                    if (nDepth == 0 && pcoin->mapValue.count("replaces_txid")) {
-                        safeTx = false;
-                    }
-
-                    // Similarly, we should not consider coins from transactions that
-                    // have been replaced. In the example above, we would want to prevent
-                    // creation of a transaction A' spending an output of A, because if
-                    // transaction B were initially confirmed, conflicting with A and
-                    // A', we wouldn't want to the user to create a transaction D
-                    // intending to replace A', but potentially resulting in a scenario
-                    // where A, A', and D could all be accepted (instead of just B and
-                    // D, or just A and A' like the user would want).
-                    if (nDepth == 0 && pcoin->mapValue.count("replaced_by_txid")) {
-                        safeTx = false;
-                    }
-
-                    if (fOnlySafe && !safeTx) {
-                        continue;
-                    }
-
-                    if (nDepth < nMinDepth || nDepth > nMaxDepth)
-                        continue;
-
-                    for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
-
-                        if (coinControl && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint((*it).first, i)))
-                            continue;
-
-                        if (IsLockedCoin((*it).first, i))
-                            continue;
-
-                        if (IsSpent(wtxid, i))
-                            continue;
-
-                        isminetype mine = IsMine(pcoin->tx->vout[i]);
-
-                        if (mine == ISMINE_NO) {
-                            continue;
-                        }
-
-                        bool fSpendableIn = ((mine & ISMINE_SPENDABLE) != ISMINE_NO) ||
-                                            (coinControl && coinControl->fAllowWatchOnly &&
-                                             (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO);
-                        bool fSolvableIn = (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO;
-
-                        std::string address;
-                        CAssetTransfer assetTransfer;
-                        CNewAsset asset;
-                        CReissueAsset reissue;
-                        std::string ownerName;
-                        bool fWasNewAssetOutPoint = false;
-                        bool fWasTransferAssetOutPoint = false;
-                        bool fWasOwnerAssetOutPoint = false;
-                        bool fWasReissueAssetOutPoint = false;
-                        std::string strAssetName;
-
-                        int nType;
-                        bool fIsOwner;
-                        if (pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner)) {
-
-                            if ((txnouttype)nType == TX_TRANSFER_ASSET) {
-                                if(TransferAssetFromScript(pcoin->tx->vout[i].scriptPubKey, assetTransfer, address)) {
-                                    strAssetName = assetTransfer.strName;
-                                    fWasTransferAssetOutPoint = true;
-                                }
-                            } else if ((txnouttype)nType == TX_NEW_ASSET && !fIsOwner) {
-                                if (AssetFromScript(pcoin->tx->vout[i].scriptPubKey, asset, address))
-                                {
-                                    strAssetName = asset.strName;
-                                    fWasNewAssetOutPoint = true;
-                                }
-                            } else if ((txnouttype)nType == TX_NEW_ASSET && fIsOwner) {
-                                if (OwnerAssetFromScript(pcoin->tx->vout[i].scriptPubKey, ownerName, address)) {
-                                    strAssetName = ownerName;
-                                    fWasOwnerAssetOutPoint = true;
-                                }
-                            } else if ((txnouttype)nType == TX_REISSUE_ASSET) {
-                                if (ReissueAssetFromScript(pcoin->tx->vout[i].scriptPubKey, reissue, address)) {
-                                    strAssetName = reissue.strName;
-                                    fWasReissueAssetOutPoint = true;
-                                }
-                            } else {
-                                continue;
-                            }
-                        }
-
-                        if (fWasNewAssetOutPoint || fWasTransferAssetOutPoint || fWasOwnerAssetOutPoint || fWasReissueAssetOutPoint) {
-
-                            // If we already have the maximum amount or size for this asset, skip it
-                            if (setAssetMaxFound.count(strAssetName))
-                                continue;
-
-                            // Initialize the map vector is it doesn't exist yet
-                            if (!mapAssetCoins.count(strAssetName)) {
-                                std::vector<COutput> vOutput;
-                                mapAssetCoins.insert(std::make_pair(strAssetName, vOutput));
-                            }
-
-                            // Add the COutput to the map of available Asset Coins
-                            mapAssetCoins.at(strAssetName).push_back(
-                                    COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
-
-                            // Initialize the map of current asset totals
-                            if (!mapAssetTotals.count(strAssetName))
-                                mapAssetTotals[strAssetName] = 0;
-
-                            // Update the map of totals depending the which type of asset tx we are looking at
-                            if (fWasNewAssetOutPoint)
-                                mapAssetTotals[strAssetName] += asset.nAmount;
-                            else if (fWasTransferAssetOutPoint)
-                                mapAssetTotals[strAssetName] += assetTransfer.nAmount;
-                            else if (fWasReissueAssetOutPoint)
-                                mapAssetTotals[strAssetName] += reissue.nAmount;
-                            else if (fWasOwnerAssetOutPoint)
-                                mapAssetTotals[strAssetName] = OWNER_ASSET_AMOUNT;
-                        }
-
-                        // Checks the sum amount of all UTXO's, and adds to the set of assets that we found the max for
-                        if (nMinimumSumAmount != MAX_MONEY) {
-                            if (mapAssetTotals[strAssetName] >= nMinimumSumAmount)
-                                setAssetMaxFound.insert(strAssetName);
-                        }
-
-                        // Checks the maximum number of UTXO's, and addes to set of of asset that we found the max for
-                        if (nMaximumCount > 0 && mapAssetCoins[strAssetName].size() >= nMaximumCount) {
-                            setAssetMaxFound.insert(strAssetName);
-                        }
-                    }
-                }
-            }
-
-            // TODO Remove when done logging
-            for (auto asset : mapAssetTotals)
-                LogPrintf("%s : Found a total number of assets available from transfer. Asset: %s, Amount: %d\n",
-                          __func__, asset.first, asset.second);
-
-            for (auto asset : mapAssetCoins)
-                for (auto out : asset.second)
-                    LogPrintf("%s : %s Output Found: %s\n", __func__, asset.first, out.ToString());
-
-        }
-        /** RVN END */
-
+        std::map<std::string, CAmount> mapAssetTotals;
+        std::map<uint256, COutPoint> mapOutPoints;
+        std::set<std::string> setAssetMaxFound;
+        // Turn the OutPoints into a map that is easily interatable.
         for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
             const uint256 &wtxid = it->first;
             const CWalletTx *pcoin = &(*it).second;
@@ -2418,8 +2238,6 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                 continue;
 
             for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
-                if (pcoin->tx->vout[i].nValue < nMinimumAmount || pcoin->tx->vout[i].nValue > nMaximumAmount)
-                    continue;
 
                 if (coinControl && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint((*it).first, i)))
                     continue;
@@ -2436,26 +2254,224 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                     continue;
                 }
 
-                bool fSpendableIn = ((mine & ISMINE_SPENDABLE) != ISMINE_NO) || (coinControl && coinControl->fAllowWatchOnly && (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO);
+                bool fSpendableIn = ((mine & ISMINE_SPENDABLE) != ISMINE_NO) ||
+                                    (coinControl && coinControl->fAllowWatchOnly &&
+                                     (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO);
                 bool fSolvableIn = (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO;
 
-                vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+                std::string address;
+                CAssetTransfer assetTransfer;
+                CNewAsset asset;
+                CReissueAsset reissue;
+                std::string ownerName;
+                bool fWasNewAssetOutPoint = false;
+                bool fWasTransferAssetOutPoint = false;
+                bool fWasOwnerAssetOutPoint = false;
+                bool fWasReissueAssetOutPoint = false;
+                std::string strAssetName;
 
-                // Checks the sum amount of all UTXO's.
-                if (nMinimumSumAmount != MAX_MONEY) {
-                    nTotal += pcoin->tx->vout[i].nValue;
+                int nType;
+                bool fIsOwner;
+                if (AreAssetsDeployed() && fWithAssets && pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner)) { // If it is an asset
 
-                    if (nTotal >= nMinimumSumAmount) {
-                        return;
+                    if ((txnouttype) nType == TX_TRANSFER_ASSET) {
+                        if (TransferAssetFromScript(pcoin->tx->vout[i].scriptPubKey, assetTransfer, address)) {
+                            strAssetName = assetTransfer.strName;
+                            fWasTransferAssetOutPoint = true;
+                        }
+                    } else if ((txnouttype) nType == TX_NEW_ASSET && !fIsOwner) {
+                        if (AssetFromScript(pcoin->tx->vout[i].scriptPubKey, asset, address)) {
+                            strAssetName = asset.strName;
+                            fWasNewAssetOutPoint = true;
+                        }
+                    } else if ((txnouttype) nType == TX_NEW_ASSET && fIsOwner) {
+                        if (OwnerAssetFromScript(pcoin->tx->vout[i].scriptPubKey, ownerName, address)) {
+                            strAssetName = ownerName;
+                            fWasOwnerAssetOutPoint = true;
+                        }
+                    } else if ((txnouttype) nType == TX_REISSUE_ASSET) {
+                        if (ReissueAssetFromScript(pcoin->tx->vout[i].scriptPubKey, reissue, address)) {
+                            strAssetName = reissue.strName;
+                            fWasReissueAssetOutPoint = true;
+                        }
+                    } else {
+                        continue;
                     }
-                }
 
-                // Checks the maximum number of UTXO's.
-                if (nMaximumCount > 0 && vCoins.size() >= nMaximumCount) {
-                    return;
+                    if (AreAssetsDeployed() && fWithAssets && (fWasNewAssetOutPoint || fWasTransferAssetOutPoint || fWasOwnerAssetOutPoint || fWasReissueAssetOutPoint)) {
+
+                        // If we already have the maximum amount or size for this asset, skip it
+                        if (setAssetMaxFound.count(strAssetName))
+                            continue;
+
+                        // Initialize the map vector is it doesn't exist yet
+                        if (!mapAssetCoins.count(strAssetName)) {
+                            std::vector<COutput> vOutput;
+                            mapAssetCoins.insert(std::make_pair(strAssetName, vOutput));
+                        }
+
+                        // Add the COutput to the map of available Asset Coins
+                        mapAssetCoins.at(strAssetName).push_back(
+                                COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+
+                        // Initialize the map of current asset totals
+                        if (!mapAssetTotals.count(strAssetName))
+                            mapAssetTotals[strAssetName] = 0;
+
+                        // Update the map of totals depending the which type of asset tx we are looking at
+                        if (fWasNewAssetOutPoint)
+                            mapAssetTotals[strAssetName] += asset.nAmount;
+                        else if (fWasTransferAssetOutPoint)
+                            mapAssetTotals[strAssetName] += assetTransfer.nAmount;
+                        else if (fWasReissueAssetOutPoint)
+                            mapAssetTotals[strAssetName] += reissue.nAmount;
+                        else if (fWasOwnerAssetOutPoint)
+                            mapAssetTotals[strAssetName] = OWNER_ASSET_AMOUNT;
+
+                        // Checks the sum amount of all UTXO's, and adds to the set of assets that we found the max for
+                        if (nMinimumSumAmount != MAX_MONEY) {
+                            if (mapAssetTotals[strAssetName] >= nMinimumSumAmount)
+                                setAssetMaxFound.insert(strAssetName);
+                        }
+
+                        // Checks the maximum number of UTXO's, and addes to set of of asset that we found the max for
+                        if (nMaximumCount > 0 && mapAssetCoins[strAssetName].size() >= nMaximumCount) {
+                            setAssetMaxFound.insert(strAssetName);
+                        }
+                    }
+
+                    // TODO Remove when done logging/ Uncomment if you need to print out the available coins found
+//                    for (auto asset : mapAssetTotals)
+//                        LogPrintf("%s : Found a total number of assets available from transfer. Asset: %s, Amount: %d\n",
+//                                  __func__, asset.first, asset.second);
+//
+//                    for (auto asset : mapAssetCoins)
+//                        for (auto out : asset.second)
+//                            LogPrintf("%s : %s Output Found: %s\n", __func__, asset.first, out.ToString());
+
+                } else { // If it is RVN
+                    if (fFoundEnoughRVN) // We hit our limit
+                        continue;
+
+                    vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+
+                    // Checks the sum amount of all UTXO's.
+                    if (nMinimumSumAmount != MAX_MONEY) {
+                        nTotal += pcoin->tx->vout[i].nValue;
+
+                        if (nTotal >= nMinimumSumAmount) {
+                            fFoundEnoughRVN = true;
+                        }
+                    }
+
+                    // Checks the maximum number of UTXO's.
+                    if (nMaximumCount > 0 && vCoins.size() >= nMaximumCount) {
+                        fFoundEnoughRVN = true;
+                    }
+                    continue;
                 }
             }
         }
+        /** RVN END */
+
+//        for (std::map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it) {
+//            const uint256 &wtxid = it->first;
+//            const CWalletTx *pcoin = &(*it).second;
+//
+//            if (!CheckFinalTx(*pcoin))
+//                continue;
+//
+//            if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
+//                continue;
+//
+//            int nDepth = pcoin->GetDepthInMainChain();
+//            if (nDepth < 0)
+//                continue;
+//
+//            // We should not consider coins which aren't at least in our mempool
+//            // It's possible for these to be conflicted via ancestors which we may never be able to detect
+//            if (nDepth == 0 && !pcoin->InMempool())
+//                continue;
+//
+//            bool safeTx = pcoin->IsTrusted();
+//
+//            // We should not consider coins from transactions that are replacing
+//            // other transactions.
+//            //
+//            // Example: There is a transaction A which is replaced by bumpfee
+//            // transaction B. In this case, we want to prevent creation of
+//            // a transaction B' which spends an output of B.
+//            //
+//            // Reason: If transaction A were initially confirmed, transactions B
+//            // and B' would no longer be valid, so the user would have to create
+//            // a new transaction C to replace B'. However, in the case of a
+//            // one-block reorg, transactions B' and C might BOTH be accepted,
+//            // when the user only wanted one of them. Specifically, there could
+//            // be a 1-block reorg away from the chain where transactions A and C
+//            // were accepted to another chain where B, B', and C were all
+//            // accepted.
+//            if (nDepth == 0 && pcoin->mapValue.count("replaces_txid")) {
+//                safeTx = false;
+//            }
+//
+//            // Similarly, we should not consider coins from transactions that
+//            // have been replaced. In the example above, we would want to prevent
+//            // creation of a transaction A' spending an output of A, because if
+//            // transaction B were initially confirmed, conflicting with A and
+//            // A', we wouldn't want to the user to create a transaction D
+//            // intending to replace A', but potentially resulting in a scenario
+//            // where A, A', and D could all be accepted (instead of just B and
+//            // D, or just A and A' like the user would want).
+//            if (nDepth == 0 && pcoin->mapValue.count("replaced_by_txid")) {
+//                safeTx = false;
+//            }
+//
+//            if (fOnlySafe && !safeTx) {
+//                continue;
+//            }
+//
+//            if (nDepth < nMinDepth || nDepth > nMaxDepth)
+//                continue;
+//
+//            for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
+//                if (pcoin->tx->vout[i].nValue < nMinimumAmount || pcoin->tx->vout[i].nValue > nMaximumAmount)
+//                    continue;
+//
+//                if (coinControl && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint((*it).first, i)))
+//                    continue;
+//
+//                if (IsLockedCoin((*it).first, i))
+//                    continue;
+//
+//                if (IsSpent(wtxid, i))
+//                    continue;
+//
+//                isminetype mine = IsMine(pcoin->tx->vout[i]);
+//
+//                if (mine == ISMINE_NO) {
+//                    continue;
+//                }
+//
+//                bool fSpendableIn = ((mine & ISMINE_SPENDABLE) != ISMINE_NO) || (coinControl && coinControl->fAllowWatchOnly && (mine & ISMINE_WATCH_SOLVABLE) != ISMINE_NO);
+//                bool fSolvableIn = (mine & (ISMINE_SPENDABLE | ISMINE_WATCH_SOLVABLE)) != ISMINE_NO;
+//
+//                vCoins.push_back(COutput(pcoin, i, nDepth, fSpendableIn, fSolvableIn, safeTx));
+//
+//                // Checks the sum amount of all UTXO's.
+//                if (nMinimumSumAmount != MAX_MONEY) {
+//                    nTotal += pcoin->tx->vout[i].nValue;
+//
+//                    if (nTotal >= nMinimumSumAmount) {
+//                        return;
+//                    }
+//                }
+//
+//                // Checks the maximum number of UTXO's.
+//                if (nMaximumCount > 0 && vCoins.size() >= nMaximumCount) {
+//                    return;
+//                }
+//            }
+//        }
     }
 }
 
@@ -3138,17 +3154,11 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
         return false;
 
     /** RVN START */
-    if (fTransferAsset && setAssetOutPoints.size() == 0)
-        return error("%s : Tried transfering an asset and didn't have any asset outpoints selected", __func__);
-
     if (fNewAsset && (asset.IsNull() || !IsValidDestination(destination)))
         return error("%s : Tried creating a new asset transaction and the asset was null or the destination was invalid", __func__);
 
     if ((fNewAsset && fTransferAsset) || (fReissueAsset && fTransferAsset) || (fReissueAsset && fNewAsset))
         return error("%s : Only one type of asset transaction allowed per transaction");
-
-    if (fReissueAsset && setAssetOutPoints.size() == 0)
-        return error("%s : Tried reissuing an asset and didn't have the owner asset outpoint selected", __func__);
 
     if (fReissueAsset && (reissueAsset.IsNull() || !IsValidDestination(destination)))
         return error("%s : Tried reissuing an asset and the reissue data was null or the destination was invalid", __func__);
@@ -3668,6 +3678,8 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CCon
             if (!wtxNew.AcceptToMemoryPool(maxTxFee, state)) {
                 LogPrintf("CommitTransaction(): Transaction cannot be broadcast immediately, %s\n", state.GetRejectReason());
                 // TODO: if we expect the failure to be long term or permanent, instead delete wtx from the wallet and return failure.
+                AbandonTransaction(wtxNew.tx->GetHash());
+                return false;
             } else {
                 wtxNew.RelayWalletTransaction(connman);
             }

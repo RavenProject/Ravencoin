@@ -401,21 +401,26 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                                      "bad-txns" + strError);
                 }
             }
-
         }
     }
 
-    // Check the input values and the output values
-    if (totalOutputs.size() != totalInputs.size()) {
-        return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-inputs-size-does-not-match-outputs-size");
+    for (const auto& outValue : totalOutputs) {
+        if (!totalInputs.count(outValue.first)) {
+            std::string errorMsg;
+            errorMsg = strprintf("Bad Transaction - Trying to create outpoint for asset that you don't have: %s", outValue.first);
+            return state.DoS(100, false, REJECT_INVALID, "bad-tx-inputs-outputs-mismatch " + errorMsg);
+        }
+
+        if (totalInputs.at(outValue.first) != outValue.second) {
+            std::string errorMsg;
+            errorMsg = strprintf("Bad Transaction - Assets would be burnt %s", outValue.first);
+            return state.DoS(100, false, REJECT_INVALID, "bad-tx-inputs-outputs-mismatch " + errorMsg);
+        }
     }
 
-    for (const auto& outValue : totalOutputs) {
-        if (!totalInputs.count(outValue.first))
-            return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-inputs-does-not-have-asset-that-is-in-outputs");
-
-        if (totalInputs.at(outValue.first) != outValue.second)
-            return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-inputs-amount-mismatch-with-outputs-amount");
+    // Check the input size and the output size
+    if (totalOutputs.size() != totalInputs.size()) {
+        return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-inputs-size-does-not-match-outputs-size");
     }
 
     return true;
