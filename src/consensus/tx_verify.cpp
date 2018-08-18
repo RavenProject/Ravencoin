@@ -237,6 +237,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         if (assetCache) {
             // Get the new asset from the transaction
             if (tx.IsNewAsset()) {
+                if(!tx.VerifyNewAsset())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-verifying-issue-asset");
+
                 CNewAsset asset;
                 std::string strAddress;
                 if (!AssetFromTransaction(tx, asset, strAddress))
@@ -251,6 +254,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-" + strError);
 
             } else if (tx.IsReissueAsset()) {
+
                 CReissueAsset reissue;
                 std::string strAddress;
                 if (!ReissueAssetFromTransaction(tx, reissue, strAddress))

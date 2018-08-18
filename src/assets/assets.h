@@ -49,9 +49,6 @@ struct CAssetOutputEntry;
 // 50000 * 82 Bytes == 4.1 Mb
 #define MAX_CACHE_ASSETS_SIZE 50000
 
-extern std::map<COutPoint, uint256> mapMempoolAssetOutpoints;
-
-
 class CAssets {
 public:
     std::map<std::string, std::set<COutPoint> > mapMyUnspentAssets; // Asset Name -> COutPoint

@@ -1700,8 +1700,8 @@ bool CWalletTx::RelayWalletTransaction(CConnman* connman)
     assert(pwallet->GetBroadcastTransactions());
     if (!IsCoinBase() && !isAbandoned() && GetDepthInMainChain() == 0)
     {
-        CValidationState state;
         /* GetDepthInMainChain already catches known conflicts. */
+        CValidationState state;
         if (InMempool() || AcceptToMemoryPool(maxTxFee, state)) {
             LogPrintf("Relaying wtx %s\n", GetHash().ToString());
             if (connman) {
@@ -3664,8 +3664,6 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CCon
                 CWalletTx &coin = mapWallet[txin.prevout.hash];
                 coin.BindWallet(this);
                 NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);
-
-                mapMempoolAssetOutpoints[txin.prevout] = wtxNew.tx->GetHash();
             }
         }
 

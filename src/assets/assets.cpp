@@ -26,6 +26,7 @@
 #include "protocol.h"
 #include "wallet/coincontrol.h"
 #include "utilmoneystr.h"
+#include "coins.h"
 
 // excluding owner tag ('!')
 static const auto MAX_NAME_LENGTH = 30;
@@ -52,8 +53,6 @@ static const std::regex OWNER_INDICATOR(R"(^[^^~#!]+!$)");
 static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 
 static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^RAVENC0IN$|^RAVENCO1N$|^RAVENC01N$");
-
-std::map<COutPoint, uint256> mapMempoolAssetOutpoints;
 
 bool IsRootNameValid(const std::string& name)
 {
@@ -512,6 +511,16 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
 
 bool CTransaction::IsNewAsset() const
 {
+    // Check for the assets data CTxOut. This will always be the last output in the transaction
+    if (!CheckIssueDataTx(vout[vout.size() - 1]))
+        return false;
+
+    return true;
+}
+
+//! To be called on CTransactions where IsNewAsset returns true
+bool CTransaction::VerifyNewAsset() const
+{
     // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Change Tx, Reissue Tx)
     if (vout.size() < 3)
         return false;
@@ -533,6 +542,14 @@ bool CTransaction::IsNewAsset() const
     AssetType assetType;
     IsAssetNameValid(asset.strName, assetType);
 
+    bool fFoundOwnerAsset;
+    std::string strOwnerName;
+    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address))
+        return false;
+
+    if (strOwnerName != asset.strName + OWNER_TAG)
+        return false;
+
     // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
     for (auto out : vout)
         if (CheckIssueBurnTx(out, assetType))
@@ -543,6 +560,16 @@ bool CTransaction::IsNewAsset() const
 
 bool CTransaction::IsReissueAsset() const
 {
+    // Check for the reissue asset data CTxOut. This will always be the last output in the transaction
+    if (!CheckReissueDataTx(vout[vout.size() - 1]))
+        return false;
+
+    return true;
+}
+
+//! To be called on CTransactions where IsReissueAsset returns true
+bool CTransaction::VerifyReissueAsset(CCoinsViewCache& view) const
+{
     // Reissuing an Asset must contain at least 3 CTxOut ( Raven Burn Tx, Any Number of other Outputs ..., Reissue Asset Tx, Owner Asset Change Tx)
     if (vout.size() < 3)
         return false;
@@ -552,14 +579,45 @@ bool CTransaction::IsReissueAsset() const
         return false;
 
     // Check that there is an asset transfer, this will be the owner asset change
-    bool ownerFound = false;
-    for (auto out : vout)
+    bool fOwnerOutFound = false;
+    for (auto out : vout) {
         if (CheckTransferOwnerTx(out)) {
-            ownerFound = true;
+            fOwnerOutFound = true;
             break;
         }
+    }
 
-    if (!ownerFound)
+    if (!fOwnerOutFound)
+        return false;
+
+    CReissueAsset reissue;
+    std::string address;
+    if (!ReissueAssetFromScript(vout[vout.size() - 1].scriptPubKey, reissue, address))
+        return false;
+
+    bool fFoundCorrectInput = false;
+    for (unsigned int i = 0; i < vin.size(); ++i) {
+        const COutPoint &prevout = vin[i].prevout;
+        const Coin& coin = view.AccessCoin(prevout);
+        assert(!coin.IsSpent());
+
+        int nType = -1;
+        bool fOwner = false;
+        if (coin.out.scriptPubKey.IsAssetScript(nType, fOwner)) {
+            std::string strAssetName;
+            CAmount nAssetAmount;
+            if (!GetAssetFromCoin(coin, strAssetName, nAssetAmount))
+                continue;
+            if (IsAssetNameAnOwner(strAssetName)) {
+                if (strAssetName == reissue.strName + OWNER_TAG) {
+                    fFoundCorrectInput = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!fFoundCorrectInput)
         return false;
 
     // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is placed in a random position in the CWalletTx
@@ -778,10 +836,14 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
     if (address != "" && assetName != "" && nAmount > 0) {
         CAssetCacheSpendAsset spend(assetName, address, nAmount);
         if (GetBestAssetAddressAmount(*this, assetName, address)) {
-            assert(mapAssetsAddressAmount[make_pair(assetName, address)] >= nAmount);
-            mapAssetsAddressAmount[make_pair(assetName, address)] -= nAmount;
+            std::cout << assetName << " : " << address << " : " << nAmount << " : " << mapAssetsAddressAmount[make_pair(assetName, address)] << std::endl;
+            auto pair = make_pair(assetName, address);
+//            assert(mapAssetsAddressAmount[pair] >= nAmount);
+            mapAssetsAddressAmount.at(pair) -= nAmount;
 
-            if (mapAssetsAddressAmount[make_pair(assetName, address)] == 0 &&
+            if (mapAssetsAddressAmount.at(pair) < 0)
+                mapAssetsAddressAmount.at(pair) = 0;
+            if (mapAssetsAddressAmount.at(pair) == 0 &&
                 mapAssetsAddresses.count(assetName))
                 mapAssetsAddresses.at(assetName).erase(address);
 
@@ -2408,12 +2470,12 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
 
 bool VerifyAssetOwner(const std::string& asset_name, std::set<COutPoint>& myOwnerOutPoints, std::pair<int, std::string>& error)
 {
-    // Check to make sure this wallet is the owner of the asset
-    if(!CheckAssetOwner(asset_name)) {
-        error = std::make_pair(RPC_INVALID_PARAMS,
-                               std::string("This wallet is not the owner of the asset: ") + asset_name);
-        return false;
-    }
+//    // Check to make sure this wallet is the owner of the asset
+//    if(!CheckAssetOwner(asset_name)) {
+//        error = std::make_pair(RPC_INVALID_PARAMS,
+//                               std::string("This wallet is not the owner of the asset: ") + asset_name);
+//        return false;
+//    }
 //
 //    // Get the outpoint that belongs to the Owner Asset
 //    if (!passets->GetAssetsOutPoints(asset_name + OWNER_TAG, myOwnerOutPoints)) {
