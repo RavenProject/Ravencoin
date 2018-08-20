@@ -542,7 +542,6 @@ bool CTransaction::VerifyNewAsset() const
     AssetType assetType;
     IsAssetNameValid(asset.strName, assetType);
 
-    bool fFoundOwnerAsset;
     std::string strOwnerName;
     if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address))
         return false;

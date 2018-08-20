@@ -836,12 +836,16 @@ public:
     /**
      * populate vCoins with vector of available COutputs, and populates vAssetCoins in fWithAssets is set to true.
      */
-    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fWithAssets = false, bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fOnlyAssets = false, bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
 
     /**
      * Helper function that calls AvailableCoinsAll, used for transfering assets
      */
-    void AvailableCoinsWithAssets(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fWithAssets = false, bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
+                         const std::set<COutPoint> &setAssetOutPoint, bool fOnlyAssets = false, bool fOnlySafe = true,
+                         const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
+                         const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
+                         const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
 
     /**
      * populate vCoins with vector of available COutputs.
