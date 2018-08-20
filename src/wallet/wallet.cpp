@@ -2353,16 +2353,6 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                             setAssetMaxFound.insert(strAssetName);
                         }
                     }
-
-                    // TODO Remove when done logging / Uncomment if you need to print out the available asset coins found
-//                    for (auto asset : mapAssetTotals)
-//                        LogPrintf("%s : Found a total number of assets available from transfer. Asset: %s, Amount: %d\n",
-//                                  __func__, asset.first, asset.second);
-//
-//                    for (auto asset : mapAssetCoins)
-//                        for (auto out : asset.second)
-//                            LogPrintf("%s : %s Output Found: %s\n", __func__, asset.first, out.ToString());
-
                 }
 
                 if (fGetRVN) { // Looking for RVN Tx OutPoints Only
