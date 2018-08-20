@@ -2228,7 +2228,7 @@ bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std:
     // Get the owner outpoints if this is a subasset
     if (assetType == AssetType::SUB) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-        if (!VerifyWalletHasAsset(GetParentName(asset.strName + OWNER_TAG), error)) {
+        if (!VerifyWalletHasAsset(GetParentName(asset.strName) + OWNER_TAG, error)) {
             return false;
         }
     }
