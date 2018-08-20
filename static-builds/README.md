@@ -36,13 +36,12 @@ Run the automated shell script from ~/ on an Ubuntu18 machine:
 [script.sh](/static-builds/script.sh)
 
 
-Both of the following variables allow you to change parameters of the build:
+The following variables allow you to change parameters of the build:
 ```
 DISTNAME
 ```
 (to change the build number of the release)
 
-and
 
 ```
 MAKEOPTS
@@ -50,8 +49,16 @@ MAKEOPTS
 (to specify the  number of cores you woulf like to compile on `-jX` where X is the number of cores)
 
 
+```
+BRANCH
+```
+(to specify the branch you would like to build from)
 
 
+### Post Script.sh step
+
+Because the script runs as root, you may need to `$ sudo chown -R someusername:somegroup ~/sign ~/release`   
+to comfortably perform the next steps.
 
 
 Signing Binaries
