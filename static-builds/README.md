@@ -19,7 +19,7 @@ sudo apt install git p7zip-full sleuthkit
 git clone https://github.com/ravenproject/ravencoin
 mkdir ~/dmg && cd ~/dmg
 ```
-Register for a developer account with Apple, then download the Xcode 7.3.1 dmg from:   https://developer.apple.com/devcenter/download.action?path=/Developer_Tools/Xcode_9.4.1/Xcode_9.4.1.dmg  
+Register for a developer account with Apple, then download the Xcode 7.3.1 dmg from:   https://developer.apple.com/devcenter/download.action?path=/Developer_Tools/Xcode_7.3.1/Xcode_7.3.1.dmg  
 Transfer Xcode_7.3.1.dmg to the target machine into ~/dmg 
 
 ```
