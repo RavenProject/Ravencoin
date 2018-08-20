@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Set DISTNAME to the desired version
-DISTNAME=raven-2.0.1
+# Set DISTNAME, BRANCH and MAKEOPTS to the desired settings
+DISTNAME=raven-2.0.3
 MAKEOPTS="-j4"
+BRANCH=master
 clear
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run with sudo"
@@ -24,8 +25,13 @@ echo @@@
 
 apt install -y curl g++-aarch64-linux-gnu g++-7-aarch64-linux-gnu gcc-7-aarch64-linux-gnu binutils-aarch64-linux-gnu g++-arm-linux-gnueabihf g++-7-arm-linux-gnueabihf gcc-7-arm-linux-gnueabihf binutils-arm-linux-gnueabihf g++-7-multilib gcc-7-multilib binutils-gold git pkg-config autoconf libtool automake bsdmainutils ca-certificates python g++ mingw-w64 g++-mingw-w64 nsis zip rename librsvg2-bin libtiff-tools cmake imagemagick libcap-dev libz-dev libbz2-dev python-dev python-setuptools fonts-tuffy
 cd ~/
+
+# Removes any existing builds and starts clean WARNING
 rm -rf ~/ravencoin ~/sign ~/release
+
 git clone https://github.com/ravenproject/ravencoin
+cd ~/ravencoin
+git checkout $BRANCH
 
 
 echo @@@
