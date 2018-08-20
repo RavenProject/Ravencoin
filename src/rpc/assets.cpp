@@ -60,22 +60,24 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
 
 UniValue issue(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 2 || request.params.size() > 8)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 8)
         throw std::runtime_error(
             "issue \"asset_name\" qty \"( to_address )\" \"( change_address )\" ( units ) ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
             + AssetActivationWarning() +
-            "\nIssue an asset or subasset with unique name.\n"
+            "\nIssue an asset, subasset or unique asset.\n"
+            "Asset name must not conflict with any existing asset.\n"
             "Unit as the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "Qty should be whole number.\n"
             "Reissuable is true/false for whether additional units can be issued by the original issuer.\n"
+            "If issuing a unique asset these values are required (and will be defaulted to): qty=1, units=0, reissuable=false.\n"
 
             "\nArguments:\n"
             "1. \"asset_name\"            (string, required) a unique name\n"
-            "2. \"qty\"                   (integer, required) the number of units to be issued\n"
+            "2. \"qty\"                   (integer, optional, default=1) the number of units to be issued\n"
             "3. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
             "4. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
-            "5. \"units\"                 (integer, optional, default=8, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
-            "6. \"reissuable\"            (boolean, optional, default=true), whether future reissuance is allowed\n"
+            "5. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
+            "6. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
             "7. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
             "8. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash\n"
 
@@ -88,6 +90,7 @@ UniValue issue(const JSONRPCRequest& request)
             + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\" \"changeaddress\" 4")
             + HelpExampleCli("issue", "\"myassetname\" 1000 \"myaddress\" \"changeaddress\" 2 true")
             + HelpExampleCli("issue", "\"myassetname/mysubasset\" 1000 \"myaddress\" \"changeaddress\" 2 true")
+            + HelpExampleCli("issue", "\"myassetname#uniquetag\"")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -100,9 +103,21 @@ UniValue issue(const JSONRPCRequest& request)
 
     EnsureWalletIsUnlocked(pwallet);
 
-    std::string asset_name = request.params[0].get_str();
+    // Check asset name and infer assetType
+    std::string assetName = request.params[0].get_str();
+    AssetType assetType;
+    if (!IsAssetNameValid(assetName, assetType)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName);
+    }
 
-    CAmount nAmount = AmountFromValue(request.params[1]);
+    // Check assetType supported
+    if (!(assetType == AssetType::ROOT || assetType == AssetType::SUB || assetType == AssetType::UNIQUE)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + PrintAssetType(assetType));
+    }
+
+    CAmount nAmount = COIN;
+    if (request.params.size() > 1)
+        nAmount = AmountFromValue(request.params[1]);
 
     std::string address = "";
     if (request.params.size() > 2)
@@ -144,10 +159,11 @@ UniValue issue(const JSONRPCRequest& request)
         }
     }
 
-    int units = 8;
+    int units = 0;
     if (request.params.size() > 4)
         units = request.params[4].get_int();
-    bool reissuable = true;
+
+    bool reissuable = assetType != AssetType::UNIQUE;
     if (request.params.size() > 5)
         reissuable = request.params[5].get_bool();
 
@@ -159,7 +175,12 @@ UniValue issue(const JSONRPCRequest& request)
     if (request.params.size() > 7 && has_ipfs)
         ipfs_hash = request.params[7].get_str();
 
-    CNewAsset asset(asset_name, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeIPFS(ipfs_hash));
+    // check for required unique asset params
+    if (assetType == AssetType::UNIQUE && (nAmount != COIN || units != 0 || reissuable)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a unique asset."));
+    }
+
+    CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeIPFS(ipfs_hash));
 
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;

@@ -10,6 +10,7 @@ from test_framework.test_framework import RavenTestFramework
 from test_framework.util import (
     assert_equal,
     assert_is_hash_string,
+    assert_raises_rpc_error,
 )
 
 class AssetTest(RavenTestFramework):
@@ -17,17 +18,20 @@ class AssetTest(RavenTestFramework):
         self.setup_clean_chain = True
         self.num_nodes = 3
 
-    def run_test(self):
-        self.log.info("Running test!")
-
+    def activate_assets(self):
+        self.log.info("Generating RVN for node[0] and activating assets...")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
-        self.log.info("Generating RVN for node[0] and activating assets...")
         n0.generate(1)
         self.sync_all()
         n2.generate(431)
         self.sync_all()
         assert_equal(n0.getbalance(), 5000)
+        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
+
+    def big_test(self):
+        self.log.info("Running big test!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
         self.log.info("Calling issue()...")
         address0 = n0.getnewaddress()
@@ -159,6 +163,35 @@ class AssetTest(RavenTestFramework):
         assert_equal(raven_assets[1], "RAVEN3")
         self.sync_all()
 
+    def issue_param_checks(self):
+        self.log.info("Checking bad parameter handling!")
+        n0 = self.nodes[0]
+
+        # just plain bad asset name
+        assert_raises_rpc_error(-8, "Invalid asset name: bad-asset-name", \
+            n0.issue, "bad-asset-name");
+
+        # trying to issue things that can't be issued
+        assert_raises_rpc_error(-8, "Unsupported asset type: OWNER", \
+            n0.issue, "AN_OWNER!");
+        assert_raises_rpc_error(-8, "Unsupported asset type: MSGCHANNEL", \
+            n0.issue, "A_MSGCHANNEL~CHANNEL_4");
+        assert_raises_rpc_error(-8, "Unsupported asset type: VOTE", \
+            n0.issue, "A_VOTE^PEDRO");
+
+        # check bad unique params
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
+            n0.issue, "A_UNIQUE#ASSET", 2)
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
+            n0.issue, "A_UNIQUE#ASSET", 1, "", "", 1)
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
+            n0.issue, "A_UNIQUE#ASSET", 1, "", "", 0, True)
+
+
+    def run_test(self):
+        self.activate_assets();
+        self.big_test();
+        self.issue_param_checks();
 
 if __name__ == '__main__':
     AssetTest().main()

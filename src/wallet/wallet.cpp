@@ -2907,7 +2907,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     for (const auto& recipient : vecSend)
     {
         /** RVN START */
-        if (fTransferAsset || fReissueAsset || assetType == AssetType::SUB) {
+        if (fTransferAsset || fReissueAsset || assetType == AssetType::SUB || assetType == AssetType::UNIQUE) {
             CAssetTransfer assetTransfer;
             std::string address;
             if (TransferAssetFromScript(recipient.scriptPubKey, assetTransfer, address)) {
@@ -2987,7 +2987,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             /** RVN START */
             std::vector<COutput> vAvailableCoins;
             std::map<std::string, std::vector<COutput> > mapAssetCoins;
-            if (fTransferAsset || fReissueAsset || assetType == AssetType::SUB)
+            if (fTransferAsset || fReissueAsset || assetType == AssetType::SUB || assetType == AssetType::UNIQUE)
                 AvailableCoinsWithAssets(vAvailableCoins, mapAssetCoins, setAssetOutPoints, true, true, &coin_control);
             else
                 AvailableCoins(vAvailableCoins, true, &coin_control);
@@ -3159,16 +3159,17 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 /** RVN START */
                 if (AreAssetsDeployed()) {
                     if (fNewAsset) {
+                        // Create the owner token output for non-unique assets
+                        if (assetType != AssetType::UNIQUE) {
+                            CScript ownerScript = GetScriptForDestination(destination);
+                            asset.ConstructOwnerTransaction(ownerScript);
+                            CTxOut ownerTxOut(0, ownerScript);
+                            txNew.vout.push_back(ownerTxOut);
+                        }
+
                         // Create the asset transaction and push it back so it is the last CTxOut in the transaction
                         CScript scriptPubKey = GetScriptForDestination(destination);
-                        CScript ownerScript = GetScriptForDestination(destination);
-
                         asset.ConstructTransaction(scriptPubKey);
-                        asset.ConstructOwnerTransaction(ownerScript);
-
-                        CTxOut ownerTxOut(0, ownerScript);
-                        txNew.vout.push_back(ownerTxOut);
-
                         CTxOut newTxOut(0, scriptPubKey);
                         txNew.vout.push_back(newTxOut);
                     } else if (fReissueAsset) {

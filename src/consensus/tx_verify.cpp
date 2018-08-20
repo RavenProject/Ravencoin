@@ -199,11 +199,24 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
 
+                    // Check asset name validity and get type
+                    AssetType assetType;
+                    if (!IsAssetNameValid(transfer.strName, assetType)) {
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-name-invalid");
+                    }
+
                     // If the transfer is an ownership asset. Check to make sure that it is OWNER_ASSET_AMOUNT
                     if (IsAssetNameAnOwner(transfer.strName)) {
                         if (transfer.nAmount != OWNER_ASSET_AMOUNT)
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-owner-amount-was-not-1");
                     }
+
+                    // If the transfer is a unique asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
+                    if (assetType == AssetType::UNIQUE) {
+                        if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-unique-amount-was-not-1");
+                    }
+
                 }
             }
         }

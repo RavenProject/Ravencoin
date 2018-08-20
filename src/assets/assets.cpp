@@ -2147,8 +2147,8 @@ bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std:
     CRecipient recipient = {scriptPubKey, burnAmount, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
 
-    // If the asset is a subasset. We need to send the ownertoken change back to ourselfs
-    if (assetType == AssetType::SUB) {
+    // If the asset is a subasset or unique asset. We need to send the ownertoken change back to ourselfs
+    if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE) {
         // Get the script for the destination address for the assets
         CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
 
@@ -2159,9 +2159,9 @@ bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std:
         vecSend.push_back(rec);
     }
 
-    // Get the owner outpoints if this is a subasset
+    // Get the owner outpoints if this is a subasset or unique asset
     std::set<COutPoint> myAssetOutPoints;
-    if (assetType == AssetType::SUB) {
+    if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
         if (!VerifyAssetOwner(GetParentName(asset.strName), myAssetOutPoints, error)) {
             return false;

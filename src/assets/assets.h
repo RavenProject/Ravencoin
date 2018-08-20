@@ -30,6 +30,7 @@
 #define OWNER_UNITS 0
 #define MIN_ASSET_LENGTH 3
 #define OWNER_ASSET_AMOUNT 1 * COIN
+#define UNIQUE_ASSET_AMOUNT 1 * COIN
 
 #define ASSET_TRANSFER_STRING "transfer_asset"
 #define ASSET_NEW_STRING "new_asset"

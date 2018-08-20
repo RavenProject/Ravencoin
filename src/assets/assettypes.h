@@ -27,6 +27,20 @@ enum AssetType
     REISSUE
 };
 
+std::string PrintAssetType(AssetType& assetType) {
+    switch (assetType) {
+        case ROOT:          return "ROOT";
+        case OWNER:         return "OWNER";
+        case SUB:           return "SUB";
+        case UNIQUE:        return "UNIQUE";
+        case MSGCHANNEL:    return "MSGCHANNEL";
+        case VOTE:          return "VOTE";
+        case INVALID:       return "INVALID";
+        case REISSUE:       return "REISSUE";
+        default:            return "UNKNOWN";
+    }
+}
+
 class CNewAsset {
 public:
     std::string strName; // MAX 31 Bytes
