@@ -357,7 +357,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             std::string strName;
             CAmount nAmount;
 
-            if (!GetAssetFromCoin(coin, strName, nAmount))
+            if (!GetAssetInfoFromCoin(coin, strName, nAmount))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-failed-to-get-asset-from-script");
 
             // Add to the total value of assets in the inputs

@@ -836,21 +836,35 @@ public:
     /**
      * populate vCoins with vector of available COutputs, and populates vAssetCoins in fWithAssets is set to true.
      */
-    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fOnlyAssets = false, bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins,
+                            bool fGetRVN = true, bool fOnlyAssets = false,
+                            bool fOnlySafe = true, const CCoinControl *coinControl = nullptr,
+                            const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                            const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
+                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
 
     /**
      * Helper function that calls AvailableCoinsAll, used for transfering assets
      */
-    void AvailableAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
-                         const std::set<COutPoint> &setAssetOutPoint, bool fOnlyAssets = false, bool fOnlySafe = true,
+    void AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe = true,
                          const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
                          const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
                          const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
 
     /**
+     * Helper function that calls AvailableCoinsAll, used to receive all coins, Assets and RVN
+     */
+    void AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
+                                  bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
+                                  const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
+                                  const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
+    /**
      * populate vCoins with vector of available COutputs.
      */
-    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlySafe=true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlySafe=true, const CCoinControl *coinControl = nullptr,
+                        const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                        const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
+                        const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
 
     /**
      * Return list of available coins and locked coins grouped by non-change output address.
@@ -976,13 +990,13 @@ public:
 
     /** RVN START */
     bool CreateTransactionWithAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                   std::string& strFailReason, const CCoinControl& coin_control, const CNewAsset& asset, const CTxDestination dest, const std::set<COutPoint>& setAssetOutPoints, const AssetType& assetType, bool sign = true);
+                                   std::string& strFailReason, const CCoinControl& coin_control, const CNewAsset& asset, const CTxDestination dest, const AssetType& assetType, bool sign = true);
 
     bool CreateTransactionWithTransferAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                                     std::string& strFailReason, const CCoinControl& coin_control, const std::set<COutPoint>& setAssetOutPoints, bool sign = true);
+                                                     std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
 
     bool CreateTransactionWithReissueAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                                    std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, const std::set<COutPoint>& setAssetOutPoints, bool sign = true);
+                                                    std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, bool sign = true);
 
     bool CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
                            std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
@@ -993,7 +1007,7 @@ public:
      * @note passing nChangePosInOut as -1 will result in setting a random position
      */
     bool CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                           std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination dest, bool fTransferAsset, const std::set<COutPoint>& setAssetOutPoints, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign = true);
+                           std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination dest, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign = true);
 
     /** RVN END */
 

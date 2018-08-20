@@ -2146,12 +2146,10 @@ CAmount CWallet::GetAvailableBalance(const CCoinControl* coinControl) const
 void CWallet::AvailableCoins(std::vector<COutput> &vCoins, bool fOnlySafe, const CCoinControl *coinControl, const CAmount &nMinimumAmount, const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount, const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth) const
 {
     std::map<std::string, std::vector<COutput> > mapAssetCoins;
-    std::set<COutPoint> setAssetOutPoint;
-    AvailableCoinsAll(vCoins, mapAssetCoins, setAssetOutPoint, false, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
+    AvailableCoinsAll(vCoins, mapAssetCoins, true, false, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
 }
 
-void CWallet::AvailableAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
-                              const std::set<COutPoint> &setAssetOutPoint, bool fOnlyAssets, bool fOnlySafe,
+void CWallet::AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe,
                               const CCoinControl *coinControl, const CAmount &nMinimumAmount,
                               const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
                               const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth) const
@@ -2159,13 +2157,23 @@ void CWallet::AvailableAssets(std::vector<COutput> &vCoins, std::map<std::string
     if (!AreAssetsDeployed())
         return;
 
-    if (!fOnlyAssets)
-        return;
+    std::vector<COutput> vCoins;
 
-    AvailableCoinsAll(vCoins, mapAssetCoins, setAssetOutPoint, fOnlyAssets, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
+    AvailableCoinsAll(vCoins, mapAssetCoins, false, true, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
 }
 
-void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fOnlyAssets, bool fOnlySafe, const CCoinControl *coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t& nMaximumCount, const int& nMinDepth, const int& nMaxDepth) const {
+void CWallet::AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
+                              bool fOnlySafe, const CCoinControl *coinControl, const CAmount &nMinimumAmount,
+                              const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
+                              const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth) const
+{
+    if (!AreAssetsDeployed())
+        return;
+
+    AvailableCoinsAll(vCoins, mapAssetCoins, true, true, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
+}
+
+void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, bool fGetRVN, bool fGetAssets, bool fOnlySafe, const CCoinControl *coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t& nMaximumCount, const int& nMinDepth, const int& nMaxDepth) const {
     vCoins.clear();
 
     {
@@ -2278,7 +2286,7 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                 bool fIsOwner;
 
                 // Looking for Asset Tx OutPoints Only
-                if (AreAssetsDeployed() && fOnlyAssets && pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner)) {
+                if (fGetAssets && AreAssetsDeployed() && pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner)) {
 
                     if ((txnouttype) nType == TX_TRANSFER_ASSET) {
                         if (TransferAssetFromScript(pcoin->tx->vout[i].scriptPubKey, assetTransfer, address)) {
@@ -2355,7 +2363,9 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
 //                        for (auto out : asset.second)
 //                            LogPrintf("%s : %s Output Found: %s\n", __func__, asset.first, out.ToString());
 
-                } else { // Looking for RVN Tx OutPoints Only
+                }
+
+                if (fGetRVN) { // Looking for RVN Tx OutPoints Only
                     if (fRVNLimitHit) // We hit our limit
                         continue;
 
@@ -3016,32 +3026,28 @@ bool CWallet::FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, int& nC
 }
 
 bool CWallet::CreateTransactionWithAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                               std::string& strFailReason, const CCoinControl& coin_control, const CNewAsset& asset, const CTxDestination destination, const std::set<COutPoint>& setAssetOutPoints, const AssetType& type, bool sign)
+                               std::string& strFailReason, const CCoinControl& coin_control, const CNewAsset& asset, const CTxDestination destination, const AssetType& type, bool sign)
 {
     CReissueAsset reissueAsset;
-    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, true, asset, destination, false, setAssetOutPoints, false, reissueAsset, type, sign);
+    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, true, asset, destination, false, false, reissueAsset, type, sign);
 }
 
 bool CWallet::CreateTransactionWithTransferAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                         std::string& strFailReason, const CCoinControl& coin_control, const std::set<COutPoint>& setAssetOutPoints, bool sign)
+                                         std::string& strFailReason, const CCoinControl& coin_control, bool sign)
 {
-
-    if (setAssetOutPoints.size() == 0)
-        return error("%s : Tried transfering an asset and didn't have any asset outpoints selected", __func__);
-
     CNewAsset asset;
     CReissueAsset reissueAsset;
     CTxDestination destination;
     AssetType assetType = AssetType::INVALID;
-    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, false, asset, destination, true, setAssetOutPoints, false, reissueAsset, assetType, sign);
+    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, false, asset, destination, true, false, reissueAsset, assetType, sign);
 }
 
 bool CWallet::CreateTransactionWithReissueAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                         std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, const std::set<COutPoint>& setAssetOutPoints, bool sign)
+                                         std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, bool sign)
 {
     CNewAsset asset;
     AssetType assetType = AssetType::REISSUE;
-    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, false, asset, destination, false, setAssetOutPoints, true, reissueAsset, assetType, sign);
+    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, false, asset, destination, false, true, reissueAsset, assetType, sign);
 }
 
 bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
@@ -3051,14 +3057,13 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
     CNewAsset asset;
     CReissueAsset reissueAsset;
     CTxDestination destination;
-    std::set<COutPoint> setAssetOutPoints;
     AssetType assetType = AssetType::INVALID;
-    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, false,  asset, destination, false, setAssetOutPoints, false, reissueAsset, assetType, sign);
+    return CreateTransactionAll(vecSend, wtxNew, reservekey, nFeeRet, nChangePosInOut, strFailReason, coin_control, false,  asset, destination, false, false, reissueAsset, assetType, sign);
 }
 
 
 bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
-                                int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination destination, bool fTransferAsset, const std::set<COutPoint>& setAssetOutPoints, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign)
+                                int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination destination, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign)
 {
 
     if (!AreAssetsDeployed() && (fTransferAsset || fNewAsset || fReissueAsset))
@@ -3163,7 +3168,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             std::vector<COutput> vAvailableCoins;
             std::map<std::string, std::vector<COutput> > mapAssetCoins;
             if (fTransferAsset || fReissueAsset || assetType == AssetType::SUB)
-                AvailableAssets(vAvailableCoins, mapAssetCoins, setAssetOutPoints, true, true, &coin_control);
+                AvailableCoinsWithAssets(vAvailableCoins, mapAssetCoins, true, &coin_control);
             else
                 AvailableCoins(vAvailableCoins, true, &coin_control);
             /** RVN END */
