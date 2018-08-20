@@ -836,9 +836,7 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
     if (address != "" && assetName != "" && nAmount > 0) {
         CAssetCacheSpendAsset spend(assetName, address, nAmount);
         if (GetBestAssetAddressAmount(*this, assetName, address)) {
-            std::cout << assetName << " : " << address << " : " << nAmount << " : " << mapAssetsAddressAmount[make_pair(assetName, address)] << std::endl;
             auto pair = make_pair(assetName, address);
-//            assert(mapAssetsAddressAmount[pair] >= nAmount);
             mapAssetsAddressAmount.at(pair) -= nAmount;
 
             if (mapAssetsAddressAmount.at(pair) < 0)
