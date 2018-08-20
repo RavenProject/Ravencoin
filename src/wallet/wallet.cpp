@@ -2167,10 +2167,7 @@ void CWallet::AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<st
                               const CAmount &nMaximumAmount, const CAmount &nMinimumSumAmount,
                               const uint64_t &nMaximumCount, const int &nMinDepth, const int &nMaxDepth) const
 {
-    if (!AreAssetsDeployed())
-        return;
-
-    AvailableCoinsAll(vCoins, mapAssetCoins, true, true, fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
+    AvailableCoinsAll(vCoins, mapAssetCoins, true, AreAssetsDeployed(), fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
 }
 
 void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, bool fGetRVN, bool fGetAssets, bool fOnlySafe, const CCoinControl *coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t& nMaximumCount, const int& nMinDepth, const int& nMaxDepth) const {
@@ -2806,19 +2803,6 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
             coinLowestLarger = coin;
             coinLowestLargerAmount = nTempAmount;
         }
-
-
-//        setCoinsRet.insert(CInputCoin(out.tx, out.i));
-//
-//        if (mapValueRet.at(asset.first) >= mapAssetTargetValue.at(asset.first))
-//            break;
-//
-//        if (mapValueRet.at(asset.first) < mapAssetTargetValue.at(asset.first)) {
-//            return error(
-//                    "%s : Tried to transfer an asset but this wallet didn't have enough, Asset Name: %s, Transfer Amount: %d, Wallet Total: %d",
-//                    __func__, asset.first, mapValueRet.at(asset.first), mapAssetTargetValue.at(asset.first));
-//        }
-        //-------------------------------
     }
 
     if (nTotalLower == nTargetValue)
