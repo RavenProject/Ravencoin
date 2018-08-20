@@ -186,14 +186,24 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
 
         /** RVN START */
-        if (!AreAssetsDeployed() && txout.scriptPubKey.IsAssetScript() && !fReindex)
+        bool isAsset = false;
+        int nType;
+        bool fIsOwner;
+        if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
+            isAsset = true;
+
+        // Make sure that all asset tx have a nValue of zero RVN
+        if (isAsset && txout.nValue != 0)
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-tx-amount-isn't-zero");
+
+        if (!AreAssetsDeployed() && isAsset && !fReindex)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-is-asset-and-asset-not-active");
 
         // Check for transfers that don't meet the assets units only if the assetCache is not null
         if (AreAssetsDeployed()) {
             if (assetCache) {
                 // Get the transfer transaction data from the scriptPubKey
-                if (txout.scriptPubKey.IsTransferAsset()) {
+                if ((txnouttype) nType == TX_TRANSFER_ASSET) {
                     CAssetTransfer transfer;
                     std::string address;
                     if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
