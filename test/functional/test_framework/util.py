@@ -26,6 +26,10 @@ logger = logging.getLogger("TestFramework.utils")
 # Assert functions
 ##################
 
+def assert_contains(val, arr):
+    if not (val in arr):
+        raise AssertionError("val %s not in arr" % (val))
+
 def assert_contains_pair(key, val, dict):
     if not (key in dict and val == dict[key]):
         raise AssertionError("k/v pair (%s,%s) not in dict" % (key, val))

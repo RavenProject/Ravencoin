@@ -10,7 +10,9 @@ import random
 
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import (
+    assert_contains,
     assert_equal,
+    assert_raises_rpc_error,
 )
 
 
@@ -49,7 +51,7 @@ class UniqueAssetTest(RavenTestFramework):
         n0.generate(1)
         return tx_hash
 
-    def test_issue_one(self):
+    def issue_one(self):
         self.log.info("Issuing a unique asset...")
         n0 = self.nodes[0]
         root = gen_root_asset_name()
@@ -59,16 +61,50 @@ class UniqueAssetTest(RavenTestFramework):
         self.issue_unique_asset(asset_name)
         assert_equal(1, n0.listmyassets()[asset_name])
 
-    # TODO: try issuing where we don't own the parent or the parent doesn't exist
-    # TODO: test decodescript
-    # TODO: test raw transactions (both properly and improperly constructed)
-    # TODO: test block invalidation
-    # TODO: try issuing multiple assets at the same time (via raw)
-    # TODO: work on issue_uniqu rpc call to issue multiples
+    def issue_invalid(self):
+        self.log.info("Trying some invalid calls...")
+        n0, n1 = self.nodes[0], self.nodes[1]
+        n1.generate(10)
+        self.sync_all()
+
+        root = gen_root_asset_name()
+        asset_name = gen_unique_asset_name(root)
+
+        # no root
+        assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {root}!", n0.issue, asset_name)
+
+        # don't own root
+        n0.sendtoaddress(n1.getnewaddress(), 501)
+        n0.generate(1)
+        self.sync_all()
+        n1.issue(root)
+        n1.generate(1)
+        self.sync_all()
+        assert_contains(root, n0.listassets())
+        assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {root}!", n0.issue, asset_name)
+        n1.transfer(f"{root}!", 1, n0.getnewaddress())
+        n1.generate(1)
+        self.sync_all()
+
+        # bad qty
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", n0.issue, asset_name, 2)
+
+        # bad units
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", n0.issue, asset_name, 1, "", "", 1)
+
+        # reissuable
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", n0.issue, asset_name, 1, "", "", 0, True)
+
+        # already exists
+        n0.issue(asset_name)
+        n0.generate(1)
+        self.sync_all()
+        assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used", n0.issue, asset_name)
 
     def run_test(self):
         self.activate_assets()
-        self.test_issue_one()
+        self.issue_one()
+        self.issue_invalid()
 
 
 if __name__ == '__main__':

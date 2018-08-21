@@ -207,5 +207,6 @@ class RawAssetTransactionsTest(RavenTestFramework):
     def run_test(self):
         self.issue_reissue_transfer_test()
 
+
 if __name__ == '__main__':
     RawAssetTransactionsTest().main()
