@@ -338,7 +338,7 @@ bool IsScriptTransferAsset(const CScript& scriptPubKey);
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
 
-void GetAllOwnedAssets(std::vector<std::string>& names);
+void GetAllOwnedAssets(CWallet* pwallet, std::vector<std::string>& names);
 void GetAllMyAssets(std::vector<std::string>& names);
 
 void UpdatePossibleAssets();

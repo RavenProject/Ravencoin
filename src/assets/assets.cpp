@@ -1952,12 +1952,17 @@ void GetAssetData(const CScript& script, CAssetOutputEntry& data)
     }
 }
 
-void GetAllOwnedAssets(std::vector<std::string>& names)
+void GetAllOwnedAssets(CWallet* pwallet, std::vector<std::string>& names)
 {
-    for (auto owned : passets->mapMyUnspentAssets) {
-        if (IsAssetNameAnOwner(owned.first)) {
-            names.emplace_back(owned.first);
-        }
+    if(!pwallet)
+        return;
+
+    std::map<std::string, std::vector<COutput> > mapAssets;
+    pwallet->AvailableAssets(mapAssets);
+
+    for (auto item : mapAssets) {
+        if (IsAssetNameAnOwner(item.first))
+            names.emplace_back(item.first);
     }
 }
 

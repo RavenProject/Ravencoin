@@ -28,13 +28,14 @@ public:
     explicit CreateAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0, WalletModel *model = NULL);
     ~CreateAssetDialog();
 
+    int type;
+
 private:
     Ui::CreateAssetDialog *ui;
     WalletModel *model;
     const PlatformStyle *platformStyle;
 
     bool checkedAvailablity = false;
-
 
     void toggleIPFSText();
     void setUpValues();
@@ -44,6 +45,7 @@ private:
     void disableCreateButton();
     void enableCreateButton();
     void CheckFormState();
+    void updatePresentedAssetName(QString name);
 
 private Q_SLOTS:
     void ipfsStateChanged();
@@ -56,6 +58,8 @@ private Q_SLOTS:
     void onUnitChanged(int value);
     void onCustomAddressClicked();
     void onChangeAddressChanged(QString changeAddress);
+    void onAssetTypeActivated(int index);
+    void onAssetListActivated(int index);
 };
 
 #endif // RAVEN_QT_CREATEASSETDIALOG_H
