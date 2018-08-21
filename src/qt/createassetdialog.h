@@ -29,6 +29,7 @@ public:
     ~CreateAssetDialog();
 
     int type;
+    QString format;
 
 private:
     Ui::CreateAssetDialog *ui;
@@ -46,6 +47,7 @@ private:
     void enableCreateButton();
     void CheckFormState();
     void updatePresentedAssetName(QString name);
+    QString getSpecialCharacter();
 
 private Q_SLOTS:
     void ipfsStateChanged();

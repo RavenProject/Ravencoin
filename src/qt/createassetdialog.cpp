@@ -46,6 +46,8 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
 
     // Setup the default values
     setUpValues();
+
+    format = "%1<font color=green>%2%3</font>";
 }
 
 CreateAssetDialog::~CreateAssetDialog()
@@ -74,7 +76,7 @@ void CreateAssetDialog::setUpValues()
     QStringList list;
     list.append(tr("Main Asset"));
     list.append(tr("Sub Asset"));
-    list.append(tr("Unique Asset"));
+//    list.append(tr("Unique Asset"));
     ui->assetType->addItems(list);
     type = ISSUE_ROOT;
     ui->assetTypeLabel->setText(tr("Asset Type") + ":");
@@ -249,10 +251,13 @@ void CreateAssetDialog::onNameChanged(QString name)
 {
     QString assetName = name;
 
+    // Get the identifier for the asset type
+    QString identifier = getSpecialCharacter();
+
     if (name.size() == 0) {
         hideMessage();
         ui->availabilityButton->setDisabled(true);
-        updatePresentedAssetName(assetName);
+        updatePresentedAssetName(name);
         return;
     }
 
@@ -265,7 +270,6 @@ void CreateAssetDialog::onNameChanged(QString name)
         }
 
         AssetType assetType;
-
         if (IsAssetNameValid(name.toStdString(), assetType) && assetType == ROOT) {
             hideMessage();
             ui->availabilityButton->setDisabled(false);
@@ -281,16 +285,8 @@ void CreateAssetDialog::onNameChanged(QString name)
             return;
         }
 
-        // Get the identifier for the asset type
-        QString identifier = "";
-        if (type == ISSUE_SUB)
-            identifier = "/";
-        else if (type == ISSUE_UNIQUE)
-            identifier = "#";
-
         AssetType assetType;
-        assetName = ui->assetList->currentText() + identifier + name;
-        if (IsAssetNameValid(ui->assetList->currentText().toStdString() + "/" + name.toStdString(), assetType) && assetType == SUB) {
+        if (IsAssetNameValid(ui->assetList->currentText().toStdString() + identifier.toStdString() + name.toStdString(), assetType) && assetType == SUB) {
             hideMessage();
             ui->availabilityButton->setDisabled(false);
         } else {
@@ -300,7 +296,9 @@ void CreateAssetDialog::onNameChanged(QString name)
         }
     }
 
-    updatePresentedAssetName(assetName);
+    // Set the assetName
+    updatePresentedAssetName(format.arg(type == ISSUE_ROOT ? "" : ui->assetList->currentText(), identifier, name));
+
     checkedAvailablity = false;
     disableCreateButton();
 }
@@ -492,21 +490,21 @@ void CreateAssetDialog::onChangeAddressChanged(QString changeAddress)
 
 void CreateAssetDialog::onAssetTypeActivated(int index)
 {
-    type = (IssueAssetType)index;
-    QString identifier = "";
-    if (type == ISSUE_SUB)
-        identifier = "/";
-    else if (type == ISSUE_UNIQUE)
-        identifier = "#";
+    type = index;
+
+    // Get the identifier for the asset type
+    QString identifier = getSpecialCharacter();
 
     if (index != 0) {
         ui->assetList->show();
-        ui->assetFullName->setText(ui->assetList->currentText() + identifier + ui->nameText->text());
+        ui->nameText->setMaxLength(30 - (ui->assetList->currentText().size() + 1));
     } else {
         ui->assetList->hide();
-        ui->assetFullName->setText(ui->nameText->text());
         ui->nameText->setMaxLength(30);
     }
+
+    // Set assetName
+    updatePresentedAssetName(format.arg(type == ISSUE_ROOT ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
 
     if (ui->nameText->text().size())
         ui->availabilityButton->setDisabled(false);
@@ -517,16 +515,17 @@ void CreateAssetDialog::onAssetTypeActivated(int index)
 
 void CreateAssetDialog::onAssetListActivated(int index)
 {
+    // Get the identifier for the asset type
+    QString identifier = getSpecialCharacter();
+
     if (type == ISSUE_ROOT) {
-        ui->assetFullName->setText(ui->nameText->text());
         ui->nameText->setMaxLength(30);
-    } else if (type == ISSUE_SUB) {
-        ui->assetFullName->setText(ui->assetList->currentText() + "/" + ui->nameText->text());
-        ui->nameText->setMaxLength(30 - (ui->assetList->currentText().size() + 1));
-    } else if (type == ISSUE_UNIQUE) {
-        ui->assetFullName->setText(ui->assetList->currentText() + "#" + ui->nameText->text());
+    } else if (type == ISSUE_SUB || type == ISSUE_UNIQUE) {
         ui->nameText->setMaxLength(30 - (ui->assetList->currentText().size() + 1));
     }
+
+    // Set assetName
+    updatePresentedAssetName(format.arg(type == ISSUE_ROOT ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
 
     if (ui->nameText->text().size())
         ui->availabilityButton->setDisabled(false);
@@ -538,4 +537,14 @@ void CreateAssetDialog::onAssetListActivated(int index)
 void CreateAssetDialog::updatePresentedAssetName(QString name)
 {
     ui->assetFullName->setText(name);
+}
+
+QString CreateAssetDialog::getSpecialCharacter()
+{
+    if (type == ISSUE_SUB)
+        return "/";
+    else if (type == ISSUE_UNIQUE)
+        return "#";
+
+    return "";
 }
