@@ -14,20 +14,22 @@ from test_framework.util import (
 )
 
 
-def get_random_unique_asset_name():
-    tag_ab = "-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@$%&*()[]{}<>_.;?\\:"
+def gen_root_asset_name():
     size = random.randint(3, 14)
     name = ""
     for _ in range(1, size+1):
         ch = random.randint(65, 65+25)
         name += chr(ch)
-    name += "#"
+    return name
+
+def gen_unique_asset_name(root):
+    tag_ab = "-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@$%&*()[]{}<>_.;?\\:"
+    name = root + "#"
     tag_size = random.randint(1, 15)
     for _ in range(1, tag_size+1):
         tag_c = tag_ab[random.randint(0, len(tag_ab) - 1)]
         name += tag_c
     return name
-
 
 class UniqueAssetTest(RavenTestFramework):
     def set_test_params(self):
@@ -41,31 +43,28 @@ class UniqueAssetTest(RavenTestFramework):
         self.sync_all()
         assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
 
-    def issue_unique_asset(self):
+    def issue_unique_asset(self, asset_name):
         n0 = self.nodes[0]
-        asset_name = get_random_unique_asset_name()
-        print(asset_name)
-        root_name = asset_name.split("#")[0]
-        address0 = n0.getnewaddress()
-        n0.issue(asset_name=root_name)
-        n0.generate(1)
         tx_hash = n0.issue(asset_name=asset_name)
-        print(tx_hash)
         n0.generate(1)
-        return asset_name
+        return tx_hash
 
     def test_issue_one(self):
         self.log.info("Issuing a unique asset...")
         n0 = self.nodes[0]
-        asset_name = self.issue_unique_asset()
-        print(n0.listmyassets())
-        print(n0.listaddressesbyasset(asset_name.split("#")[0] + "*"))
-        print(n0.listassets())
+        root = gen_root_asset_name()
+        n0.issue(asset_name=root)
+        n0.generate(1)
+        asset_name = gen_unique_asset_name(root)
+        self.issue_unique_asset(asset_name)
         assert_equal(1, n0.listmyassets()[asset_name])
 
     # TODO: try issuing where we don't own the parent or the parent doesn't exist
     # TODO: test decodescript
     # TODO: test raw transactions (both properly and improperly constructed)
+    # TODO: test block invalidation
+    # TODO: try issuing multiple assets at the same time (via raw)
+    # TODO: work on issue_uniqu rpc call to issue multiples
 
     def run_test(self):
         self.activate_assets()

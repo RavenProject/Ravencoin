@@ -1725,6 +1725,28 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             return DISCONNECT_FAILED;
                         }
                     }
+                } else if (tx.IsNewUniqueAsset()) {
+                    for (int n = 0; n < tx.vout.size(); n++)
+                    {
+                        auto out = tx.vout[n];
+                        CNewAsset asset;
+                        std::string strAddress;
+
+                        if (IsScriptNewUniqueAsset(out.scriptPubKey))
+                        {
+                            if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
+                                error("%s : Failed to get unique asset from transaction. TXID : %s, vout: %s", __func__,
+                                      tx.GetHash().GetHex(), n);
+                            return DISCONNECT_FAILED;
+                        }
+
+                        if (assetsCache->ContainsAsset(asset.strName)) {
+                            if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                                error("%s : Failed to Undo Unique Asset. Asset Name : %s", __func__, asset.strName);
+                                return DISCONNECT_FAILED;
+                            }
+                        }
+                    }
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -2187,7 +2209,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         /** RVN START */
         if (assetsCache) {
-            if (tx.IsNewAsset()) {
+            if (tx.IsNewAsset())
+            {
                 if (!AreAssetsDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-asset-when-assets-is-not-active");
 
@@ -2206,7 +2229,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!asset.IsValid(strError, *assetsCache))
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-asset");
 
-            } else if (tx.IsReissueAsset()) {
+            }
+            else if (tx.IsReissueAsset())
+            {
                 if (!AreAssetsDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-when-assets-is-not-active");
 
@@ -2221,6 +2246,29 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 std::string strError = "";
                 if (!reissue.IsValid(strError, *assetsCache))
                     return state.DoS(100, false, REJECT_INVALID, strError);
+            }
+            else if (tx.IsNewUniqueAsset())
+            {
+                if (!AreAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-when-assets-is-not-active");
+
+                if (!tx.VerifyNewUniqueAsset(view))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-failed-verify");
+
+                for (auto out : tx.vout)
+                {
+                    if (IsScriptNewUniqueAsset(out.scriptPubKey))
+                    {
+                        CNewAsset asset;
+                        std::string strAddress;
+                        if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-serialization");
+
+                        std::string strError = "";
+                        if (!asset.IsValid(strError, *assetsCache))
+                            return state.DoS(100, false, REJECT_INVALID, strError);
+                    }
+                }
             }
         }
         /** RVN END */
@@ -3527,6 +3575,18 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
             std::string strAddress;
             if (!ReissueAssetFromTransaction(*tx, reissue, strAddress))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset");
+        }
+
+        if (tx->IsNewUniqueAsset()) {
+            for (auto out : tx->vout) {
+                CNewAsset asset;
+                std::string strAddress;
+
+                if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
+                    if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset");
+                }
+            }
         }
     }
 

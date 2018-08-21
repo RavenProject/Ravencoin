@@ -320,6 +320,7 @@ bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string&
 bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, std::string& strAddress);
 bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue, std::string& strAddress);
 
+bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued);
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type);
 bool CheckReissueBurnTx(const CTxOut& txOut);
 
@@ -329,10 +330,12 @@ bool CheckReissueDataTx(const CTxOut& txOut);
 bool CheckTransferOwnerTx(const CTxOut& txOut);
 
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptOwnerAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptNewAsset(const CScript& scriptPubKey);
+bool IsScriptNewUniqueAsset(const CScript& scriptPubKey);
 bool IsScriptOwnerAsset(const CScript& scriptPubKey);
 bool IsScriptReissueAsset(const CScript& scriptPubKey);
 bool IsScriptTransferAsset(const CScript& scriptPubKey);
