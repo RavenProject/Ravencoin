@@ -166,7 +166,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
             tx_bad_transfer = self.nodes[0].createrawtransaction(inputs, bad_outputs)
             tx_bad_transfer_signed = self.nodes[0].signrawtransaction(tx_bad_transfer)
             tx_bad_hex = tx_bad_transfer_signed['hex']
-            assert_raises_rpc_error(-26, "bad-tx-asset-inputs-amount-mismatch-with-outputs-amount",
+            assert_raises_rpc_error(-26, "bad-tx-inputs-outputs-mismatch Bad Transaction - Assets would be burnt TEST_ASSET",
                                     self.nodes[0].sendrawtransaction, tx_bad_hex)
 
         ########################################

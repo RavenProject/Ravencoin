@@ -26,9 +26,8 @@ class AssetTest(RavenTestFramework):
 
         n0.generate(1)
         self.sync_all()
-        n2.generate(431)
+        n0.generate(431)
         self.sync_all()
-        assert_equal(n0.getbalance(), 5000)
         assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
 
     def big_test(self):
@@ -194,6 +193,7 @@ class AssetTest(RavenTestFramework):
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
         chain_address = n0.getnewaddress()
+        ipfs_hash = "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"
         chain_string = "CHAIN1"
         n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", \
                  units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
