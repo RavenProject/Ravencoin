@@ -846,10 +846,7 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
 
             // Update the cache so we can save to database
             vSpentAssets.push_back(spend);
-        } else {
-            return error("%s : ERROR Failed to find current assets address amount. Asset %s: , Address : %s", __func__, assetName, address);
         }
-
     } else {
         return error("%s : ERROR Failed to get asset from the OutPoint: %s", __func__, out.ToString());
     }
