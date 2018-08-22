@@ -31,6 +31,8 @@
 #define MIN_ASSET_LENGTH 3
 #define OWNER_ASSET_AMOUNT 1 * COIN
 #define UNIQUE_ASSET_AMOUNT 1 * COIN
+#define UNIQUE_ASSET_UNITS 0
+#define UNIQUE_ASSETS_REISSUABLE 0
 
 #define ASSET_TRANSFER_STRING "transfer_asset"
 #define ASSET_NEW_STRING "new_asset"
@@ -306,6 +308,7 @@ bool IsAssetNameValid(const std::string& name);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType);
 bool IsAssetNameAnOwner(const std::string& name);
 std::string GetParentName(const std::string& name); // Gets the parent name of a subasset TEST/TESTSUB would return TEST
+std::string GetUniqueAssetName(const std::string& parent, const std::string& tag);
 
 bool IsAssetNameSizeValid(const std::string& name);
 

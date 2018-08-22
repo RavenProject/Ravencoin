@@ -6,7 +6,7 @@
 """Test the rawtransaction RPCs for asset transactions.
 """
 from io import BytesIO
-
+from pprint import *
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import *
 from test_framework.mininode import CTransaction, CScriptTransfer
@@ -212,13 +212,67 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_equal(400, n1.listmyassets('TEST_ASSET')['TEST_ASSET'])
 
 
-    def run_test(self):
-        self.activate_assets()
-        self.issue_reissue_transfer_test()
+    def unique_assets_test(self):
+        self.log.info("Testing unique assets...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
-    # TODO: test block invalidation
+        root = "RINGU"
+        owner = f"{root}!"
+        n0.issue(root)
+        n0.generate(1)
+        self.sync_all()
+
+        asset_tags = ["myprecious1", "bind3", "gold7", "men9"]
+        ipfs_hashes = ["QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"] * len(asset_tags)
+
+        to_address = n0.getnewaddress()
+        change_address = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+        unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+            {k: unspent_asset_owner[k] for k in ['txid', 'vout']},
+        ]
+
+        burn = 5 * len(asset_tags)
+        outputs = {
+            'n1issueUniqueAssetXXXXXXXXXXS4695i': burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue_unique': {
+                    'root_name':    root,
+                    'asset_tags':   asset_tags,
+                    'ipfs_hashes':  ipfs_hashes,
+                }
+            }
+        }
+
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.generate(1)
+        self.sync_all()
+
+        for tag in asset_tags:
+            asset_name = f"{root}#{tag}"
+            assert_equal(1, n0.listmyassets()[asset_name])
+            assert_equal(1, n0.listassets(asset_name, True)[asset_name]['has_ipfs'])
+            assert_equal(ipfs_hashes[0], n0.listassets(asset_name, True)[asset_name]['ipfs_hash'])
+
     # TODO: test raw transactions (both properly and improperly constructed)
     # TODO: try issuing multiple assets at the same time (via raw)
+    # TODO: fix corrupt db issue
+    # TODO: fix invalidation issue
+
+
+
+    def run_test(self):
+        self.activate_assets()
+        # self.issue_reissue_transfer_test()
+        self.unique_assets_test()
+
+    # TODO: test block invalidation
     # TODO: work on issue_unique rpc call to issue multiples
 
 

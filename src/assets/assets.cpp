@@ -204,6 +204,17 @@ std::string GetParentName(const std::string& name)
     return name;
 }
 
+std::string GetUniqueAssetName(const std::string& parent, const std::string& tag)
+{
+    if (!IsRootNameValid(parent))
+        return "";
+
+    if (!IsUniqueTagValid(tag))
+        return "";
+
+    return parent + "#" + tag;
+}
+
 bool CNewAsset::IsNull() const
 {
     return strName == "";
