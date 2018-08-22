@@ -597,6 +597,16 @@ void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason)
     if (minerPolicyEstimator) {minerPolicyEstimator->removeTx(hash, false);}
     removeAddressIndex(hash);
     removeSpentIndex(hash);
+
+    /** RVN START */
+    // If the transaction being removed from the mempool is locking other reissues. Free them
+    if (mapReissuedTx.count(hash)) {
+        if (mapReissuedAssets.count(mapReissuedTx.at(hash))) {
+            mapReissuedAssets.erase(mapReissuedTx.at((hash)));
+            mapReissuedTx.erase(hash);
+        }
+    }
+    /** RVN END */
 }
 
 // Calculates descendants of entry that are not already in setDescendants, and adds to

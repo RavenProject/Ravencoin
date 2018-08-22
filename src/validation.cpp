@@ -916,11 +916,11 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             if (!pool.exists(hash))
                 return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool full");
         }
-    }
 
-    for (auto out : vReissueAssets) {
-        mapReissuedAssets.insert(out);
-        mapReissuedTx.insert(std::make_pair(out.second, out.first));
+        for (auto out : vReissueAssets) {
+            mapReissuedAssets.insert(out);
+            mapReissuedTx.insert(std::make_pair(out.second, out.first));
+        }
     }
 
     GetMainSignals().TransactionAddedToMempool(ptx);
@@ -2501,6 +2501,9 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
                         return AbortNode(state, "Failed to write to asset database");
                 }
             }
+            // Write the reissue mempool data to database
+            if (passetsdb)
+                passetsdb->WriteReissuedMempoolState();
             /** RVN END */
 
             nLastFlush = nNow;
