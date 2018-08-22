@@ -465,6 +465,9 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
 {
     const CTransaction& tx = *ptx;
     const uint256 hash = tx.GetHash();
+
+    /** RVN START */
+    std::vector<std::pair<std::string, uint256>> vReissueAssets;
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
@@ -605,7 +608,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         if (AreAssetsDeployed()) {
-            if (!Consensus::CheckTxAssets(tx, state, view))
+            if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets))
                 return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                              FormatStateMessage(state));
         }
@@ -913,6 +916,11 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             if (!pool.exists(hash))
                 return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "mempool full");
         }
+    }
+
+    for (auto out : vReissueAssets) {
+        mapReissuedAssets.insert(out);
+        mapReissuedTx.insert(std::make_pair(out.second, out.first));
     }
 
     GetMainSignals().TransactionAddedToMempool(ptx);
@@ -2104,7 +2112,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             }
 
             if (AreAssetsDeployed()) {
-                if (!Consensus::CheckTxAssets(tx, state, view)) {
+                std::vector<std::pair<std::string, uint256>> vReissueAssets;
+                if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets)) {
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
                 }
@@ -2753,6 +2762,14 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
             if (state.IsInvalid())
                 InvalidBlockFound(pindexNew, state);
             return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
+        }
+
+        for (auto tx : blockConnecting.vtx) {
+            uint256 txHash = tx->GetHash();
+            if (mapReissuedTx.count(txHash)) {
+                mapReissuedAssets.erase(mapReissuedTx.at(txHash));
+                mapReissuedTx.erase(txHash);
+            }
         }
         nTime3 = GetTimeMicros(); nTimeConnectTotal += nTime3 - nTime2;
         LogPrint(BCLog::BENCH, "  - Connect total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime3 - nTime2) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
