@@ -47,7 +47,10 @@ private:
     void enableCreateButton();
     void CheckFormState();
     void updatePresentedAssetName(QString name);
-    QString getSpecialCharacter();
+    QString GetSpecialCharacter();
+    QString GetAssetName();
+    void UpdateAssetNameMaxSize();
+    void UpdateAssetNameToUpper();
 
 private Q_SLOTS:
     void ipfsStateChanged();
