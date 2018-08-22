@@ -244,7 +244,6 @@ void CreateAssetDialog::onNameChanged(QString name)
 
     // Get the identifier for the asset type
     QString identifier = GetSpecialCharacter();
-    std::cout << "onNameChangedCalled" << std::endl;
 
     if (name.size() == 0) {
         hideMessage();
