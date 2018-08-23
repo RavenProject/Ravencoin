@@ -15,7 +15,7 @@ Ravencoin (RVN) is a Proof of Work coin built on the Bitcoin UTXO model. As with
 
 #### ASIC Resistance
 
-ASIC Resistance - A published commitment to continual attempts at ASIC resistance. If ASICs are created for x16r, then we will, at a specific block number, modify one of the algorithms to add Equihash, EthHash or similar efforts to increase the resistance to ASIC miners for Raven.
+ASIC Resistance - A published commitment to continual attempts at ASIC resistance. If ASICs are created for x16r, then we will, at a specific block number, modify one of the algorithms to add Equihash, Dagger-Hashimoto(EthHash) or similar efforts to increase the resistance to ASIC miners for Raven.
 
 #### Asset Support
 
@@ -33,6 +33,7 @@ A..B (consecutive punctuation)
 AB  
 12  
 .FIRST  
+apple
 
 The RVN used to issue assets will be sent to a burn address, which will reduce the amount of RVN available.  
 
