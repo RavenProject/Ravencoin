@@ -117,10 +117,14 @@ class UniqueAssetTest(RavenTestFramework):
             assert_equal(ipfs_hashes[0], n0.listassets(asset_name, True)[asset_name]['ipfs_hash'])
 
         # invalidate
-        # n0.invalidateblock(block_hash)
-        # print(n0.listmyassets())
-        # assert_does_not_contain_key(root, n0.listmyassets())
-        # assert_does_not_contain_key(asset_name, n0.listmyassets())
+        n0.invalidateblock(block_hash)
+        assert_does_not_contain_key(root, n0.listmyassets())
+        assert_does_not_contain_key(asset_name, n0.listmyassets())
+
+        # reconsider
+        n0.reconsiderblock(block_hash)
+        assert_contains(root, n0.listmyassets())
+        assert_contains(asset_name, n0.listmyassets())
 
         # root doesn't exist
         missing_asset = "VAPOUR"

@@ -1734,24 +1734,23 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         }
                     }
                 } else if (tx.IsNewUniqueAsset()) {
-                    for (int n = 0; n < tx.vout.size(); n++)
-                    {
+                    for (int n = 0; n < tx.vout.size(); n++) {
                         auto out = tx.vout[n];
                         CNewAsset asset;
                         std::string strAddress;
 
-                        if (IsScriptNewUniqueAsset(out.scriptPubKey))
-                        {
-                            if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
+                        if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
+                            if (!AssetFromScript(out.scriptPubKey, asset, strAddress)) {
                                 error("%s : Failed to get unique asset from transaction. TXID : %s, vout: %s", __func__,
                                       tx.GetHash().GetHex(), n);
-                            return DISCONNECT_FAILED;
-                        }
-
-                        if (assetsCache->ContainsAsset(asset.strName)) {
-                            if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
-                                error("%s : Failed to Undo Unique Asset. Asset Name : %s", __func__, asset.strName);
                                 return DISCONNECT_FAILED;
+                            }
+
+                            if (assetsCache->ContainsAsset(asset.strName)) {
+                                if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                                    error("%s : Failed to Undo Unique Asset. Asset Name : %s", __func__, asset.strName);
+                                    return DISCONNECT_FAILED;
+                                }
                             }
                         }
                     }
