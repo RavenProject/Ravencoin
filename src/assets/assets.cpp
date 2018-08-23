@@ -255,7 +255,7 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (nAmount > MAX_MONEY) {
-        strError = "Invalid parameter: asset amount greater than max.";
+        strError = "Invalid parameter: asset amount greater than max money: " + MAX_MONEY / COIN;
         return false;
     }
 
@@ -265,7 +265,7 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (!CheckAmountWithUnits(nAmount, units)) {
-        strError = "bad-txns-transfer-asset-amount-not-match-units";
+        strError = "Invalid parameter: amount must be divisible by the smaller unit assigned to the asset";
         return false;
     }
 
@@ -721,7 +721,7 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache) con
     }
 
     if (!CheckAmountWithUnits(nAmount, asset.units)) {
-        strError = "Unable to reissue asset: amount must be divisable by the smaller unit assigned to the asset";
+        strError = "Unable to reissue asset: amount must be divisible by the smaller unit assigned to the asset";
         return false;
     }
 
