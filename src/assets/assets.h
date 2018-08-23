@@ -52,6 +52,11 @@ struct CAssetOutputEntry;
 // 50000 * 82 Bytes == 4.1 Mb
 #define MAX_CACHE_ASSETS_SIZE 50000
 
+// Create map that store that state of current reissued transaction that the mempool as accepted.
+// If an asset name is in this map, any other reissue transactions wont be accepted into the mempool
+extern std::map<uint256, std::string> mapReissuedTx;
+extern std::map<std::string, uint256> mapReissuedAssets;
+
 class CAssets {
 public:
     std::map<std::string, std::set<COutPoint> > mapMyUnspentAssets; // Asset Name -> COutPoint
@@ -333,6 +338,8 @@ bool CheckOwnerDataTx(const CTxOut& txOut);
 bool CheckReissueDataTx(const CTxOut& txOut);
 bool CheckTransferOwnerTx(const CTxOut& txOut);
 
+bool CheckAmountWithUnits(const CAmount& nAmount, const uint8_t nUnits);
+
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptOwnerAsset(const CScript& scriptPubKey, int& nStartingIndex);
@@ -346,7 +353,7 @@ bool IsScriptTransferAsset(const CScript& scriptPubKey);
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
 
-void GetAllOwnedAssets(std::vector<std::string>& names);
+void GetAllOwnedAssets(CWallet* pwallet, std::vector<std::string>& names);
 void GetAllMyAssets(std::vector<std::string>& names);
 
 void UpdatePossibleAssets();

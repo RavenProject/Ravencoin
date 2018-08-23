@@ -28,6 +28,9 @@
 #include "utilmoneystr.h"
 #include "coins.h"
 
+std::map<uint256, std::string> mapReissuedTx;
+std::map<std::string, uint256> mapReissuedAssets;
+
 // excluding owner tag ('!')
 static const auto MAX_NAME_LENGTH = 30;
 
@@ -247,28 +250,52 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
         }
     }
 
-    if (!IsAssetNameValid(std::string(strName)))
+    if (!IsAssetNameValid(std::string(strName))) {
         strError = "Invalid parameter: asset_name must only consist of valid characters and have a size between 3 and 30 characters. See help for more details.";
+        return false;
+    }
 
-    if (IsAssetNameAnOwner(std::string(strName)))
+    if (IsAssetNameAnOwner(std::string(strName))) {
         strError = "Invalid parameters: asset_name can't have a '!' at the end of it. See help for more details.";
+        return false;
+    }
 
-    if (nAmount <= 0)
-        strError  = "Invalid parameter: asset amount can't be equal to or less than zero.";
+    if (nAmount <= 0) {
+        strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
+        return false;
+    }
 
-    if (units < 0 || units > 8)
-        strError  = "Invalid parameter: units must be between 0-8.";
+    if (nAmount > MAX_MONEY) {
+        strError = "Invalid parameter: asset amount greater than max money: " + MAX_MONEY / COIN;
+        return false;
+    }
 
-    if (nReissuable != 0 && nReissuable != 1)
-        strError  = "Invalid parameter: reissuable must be 0 or 1";
+    if (units < 0 || units > 8) {
+        strError = "Invalid parameter: units must be between 0-8.";
+        return false;
+    }
 
-    if (nHasIPFS != 0 && nHasIPFS != 1)
-        strError  = "Invalid parameter: has_ipfs must be 0 or 1.";
+    if (!CheckAmountWithUnits(nAmount, units)) {
+        strError = "Invalid parameter: amount must be divisible by the smaller unit assigned to the asset";
+        return false;
+    }
 
-    if (nHasIPFS && strIPFSHash.size() != 34)
-        strError  = "Invalid parameter: ipfs_hash must be 34 bytes.";
+    if (nReissuable != 0 && nReissuable != 1) {
+        strError = "Invalid parameter: reissuable must be 0 or 1";
+        return false;
+    }
 
-    return strError == "";
+    if (nHasIPFS != 0 && nHasIPFS != 1) {
+        strError = "Invalid parameter: has_ipfs must be 0 or 1.";
+        return false;
+    }
+
+    if (nHasIPFS && strIPFSHash.size() != 34) {
+        strError = "Invalid parameter: ipfs_hash must be 34 bytes.";
+        return false;
+    }
+
+    return true;
 }
 
 CNewAsset::CNewAsset(const CNewAsset& asset)
@@ -795,8 +822,8 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache) con
         return false;
     }
 
-    if (nAmount % int64_t(pow(10, (MAX_UNIT - asset.units))) != 0) {
-        strError = "Unable to reissue asset: amount must be divisable by the smaller unit assigned to the asset";
+    if (!CheckAmountWithUnits(nAmount, asset.units)) {
+        strError = "Unable to reissue asset: amount must be divisible by the smaller unit assigned to the asset";
         return false;
     }
 
@@ -948,10 +975,7 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
 
             // Update the cache so we can save to database
             vSpentAssets.push_back(spend);
-        } else {
-            return error("%s : ERROR Failed to find current assets address amount. Asset %s: , Address : %s", __func__, assetName, address);
         }
-
     } else {
         return error("%s : ERROR Failed to get asset from the OutPoint: %s", __func__, out.ToString());
     }
@@ -2087,12 +2111,17 @@ void GetAssetData(const CScript& script, CAssetOutputEntry& data)
     }
 }
 
-void GetAllOwnedAssets(std::vector<std::string>& names)
+void GetAllOwnedAssets(CWallet* pwallet, std::vector<std::string>& names)
 {
-    for (auto owned : passets->mapMyUnspentAssets) {
-        if (IsAssetNameAnOwner(owned.first)) {
-            names.emplace_back(owned.first);
-        }
+    if(!pwallet)
+        return;
+
+    std::map<std::string, std::vector<COutput> > mapAssets;
+    pwallet->AvailableAssets(mapAssets);
+
+    for (auto item : mapAssets) {
+        if (IsAssetNameAnOwner(item.first))
+            names.emplace_back(item.first);
     }
 }
 
@@ -2624,4 +2653,10 @@ bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::str
 
     pairError = std::make_pair(RPC_INVALID_REQUEST, strprintf("Wallet doesn't have asset: %s", asset_name));
     return false;
+}
+
+// Return true if the amount is valid with the units passed in
+bool CheckAmountWithUnits(const CAmount& nAmount, const uint8_t nUnits)
+{
+    return nAmount % int64_t(pow(10, (MAX_UNIT - nUnits))) == 0;
 }
