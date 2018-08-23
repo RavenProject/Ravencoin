@@ -2271,14 +2271,22 @@ std::string EncodeIPFS(std::string decoded){
 
 bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, std::string& rvnChangeAddress, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired)
 {
+    std::vector<CNewAsset> assets;
+    assets.push_back(asset);
+    return CreateAssetTransaction(pwallet, assets, address, error, rvnChangeAddress, wtxNew, reservekey, nFeeRequired);
+}
 
+bool CreateAssetTransaction(CWallet* pwallet, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, std::string& rvnChangeAddress, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired)
+{
     std::string change_address = rvnChangeAddress;
 
     // Validate the assets data
     std::string strError;
-    if (!asset.IsValid(strError, *passets)) {
-        error = std::make_pair(RPC_INVALID_PARAMETER, strError);
-        return false;
+    for (auto asset : assets) {
+        if (!asset.IsValid(strError, *passets)) {
+            error = std::make_pair(RPC_INVALID_PARAMETER, strError);
+            return false;
+        }
     }
 
     if (!change_address.empty()) {
@@ -2308,15 +2316,28 @@ bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std:
         change_address = EncodeDestination(keyID);
     }
 
-
     AssetType assetType;
-    if (!IsAssetNameValid(asset.strName, assetType)) {
-        error = std::make_pair(RPC_INVALID_PARAMETER, "Asset name not valid");
-        return false;
+    std::string parentName;
+    for (auto asset : assets) {
+        if (!IsAssetNameValid(asset.strName, assetType)) {
+            error = std::make_pair(RPC_INVALID_PARAMETER, "Asset name not valid");
+            return false;
+        }
+        if (assets.size() > 1 && assetType != AssetType::UNIQUE) {
+            error = std::make_pair(RPC_INVALID_PARAMETER, "Only unique assets can be issued in bulk.");
+            return false;
+        }
+        std::string parent = GetParentName(asset.strName);
+        if (parentName.empty())
+            parentName = parent;
+        if (parentName != parent) {
+            error = std::make_pair(RPC_INVALID_PARAMETER, "All assets must have the same parent.");
+            return false;
+        }
     }
 
     // Assign the correct burn amount and the correct burn address depending on the type of asset issuance that is happening
-    CAmount burnAmount = GetBurnAmount(assetType);
+    CAmount burnAmount = GetBurnAmount(assetType) * assets.size();
     CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetBurnAddress(assetType)));
 
     CAmount curBalance = pwallet->GetBalance();
@@ -2353,8 +2374,7 @@ bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std:
         // Get the script for the destination address for the assets
         CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
 
-        std::string parent_name = GetParentName(asset.strName);
-        CAssetTransfer assetTransfer(parent_name + OWNER_TAG, OWNER_ASSET_AMOUNT);
+        CAssetTransfer assetTransfer(parentName + OWNER_TAG, OWNER_ASSET_AMOUNT);
         assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
         CRecipient rec = {scriptTransferOwnerAsset, 0, fSubtractFeeFromAmount};
         vecSend.push_back(rec);
@@ -2363,12 +2383,14 @@ bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std:
     // Get the owner outpoints if this is a subasset or unique asset
     if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-        if (!VerifyWalletHasAsset(GetParentName(asset.strName) + OWNER_TAG, error)) {
-            return false;
+        for (auto asset : assets) {
+            if (!VerifyWalletHasAsset(parentName + OWNER_TAG, error)) {
+                return false;
+            }
         }
     }
 
-    if (!pwallet->CreateTransactionWithAsset(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coin_control, asset, DecodeDestination(address), assetType)) {
+    if (!pwallet->CreateTransactionWithAssets(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coin_control, assets, DecodeDestination(address), assetType)) {
         if (!fSubtractFeeFromAmount && burnAmount + nFeeRequired > curBalance)
             strTxError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         error = std::make_pair(RPC_WALLET_ERROR, strTxError);

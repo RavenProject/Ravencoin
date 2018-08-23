@@ -306,6 +306,7 @@ std::string GetBurnAddress(const AssetType type);
 
 bool IsAssetNameValid(const std::string& name);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType);
+bool IsUniqueTagValid(const std::string& tag);
 bool IsAssetNameAnOwner(const std::string& name);
 std::string GetParentName(const std::string& name); // Gets the parent name of a subasset TEST/TESTSUB would return TEST
 std::string GetUniqueAssetName(const std::string& parent, const std::string& tag);
@@ -370,6 +371,7 @@ std::string DecodeIPFS(std::string encoded);
 std::string EncodeIPFS(std::string decoded);
 
 bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, std::string& rvnChangeAddress, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
+bool CreateAssetTransaction(CWallet* pwallet, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, std::string& rvnChangeAddress, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool CreateReissueAssetTransaction(CWallet* pwallet, const CReissueAsset& asset, const std::string& address, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool CreateTransferAssetTransaction(CWallet* pwallet, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey& reserveKey, std::pair<int, std::string>& error, std::string& txid);

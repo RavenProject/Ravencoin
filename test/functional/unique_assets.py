@@ -11,6 +11,7 @@ import random
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import (
     assert_contains,
+    assert_does_not_contain_key,
     assert_equal,
     assert_raises_rpc_error,
 )
@@ -45,12 +46,6 @@ class UniqueAssetTest(RavenTestFramework):
         self.sync_all()
         assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
 
-    def issue_unique_asset(self, asset_name):
-        n0 = self.nodes[0]
-        tx_hash = n0.issue(asset_name=asset_name)
-        n0.generate(1)
-        return tx_hash
-
     def issue_one(self):
         self.log.info("Issuing a unique asset...")
         n0 = self.nodes[0]
@@ -58,7 +53,8 @@ class UniqueAssetTest(RavenTestFramework):
         n0.issue(asset_name=root)
         n0.generate(1)
         asset_name = gen_unique_asset_name(root)
-        self.issue_unique_asset(asset_name)
+        tx_hash = n0.issue(asset_name=asset_name)
+        n0.generate(1)
         assert_equal(1, n0.listmyassets()[asset_name])
 
     def issue_invalid(self):
@@ -101,8 +97,45 @@ class UniqueAssetTest(RavenTestFramework):
         self.sync_all()
         assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used", n0.issue, asset_name)
 
+
+    def issueunique_test(self):
+        self.log.info("Testing issueunique RPC...")
+        n0, n1 = self.nodes[0], self.nodes[1]
+        n0.sendtoaddress(n1.getnewaddress(), 501)
+
+        root = gen_root_asset_name()
+        n0.issue(asset_name=root)
+        asset_tags = ["first", "second"]
+        ipfs_hashes = ["QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"] * len(asset_tags)
+        n0.issueunique(root, asset_tags, ipfs_hashes)
+        block_hash = n0.generate(1)[0]
+
+        for tag in asset_tags:
+            asset_name = f"{root}#{tag}"
+            assert_equal(1, n0.listmyassets()[asset_name])
+            assert_equal(1, n0.listassets(asset_name, True)[asset_name]['has_ipfs'])
+            assert_equal(ipfs_hashes[0], n0.listassets(asset_name, True)[asset_name]['ipfs_hash'])
+
+        # invalidate
+        # n0.invalidateblock(block_hash)
+        # print(n0.listmyassets())
+        # assert_does_not_contain_key(root, n0.listmyassets())
+        # assert_does_not_contain_key(asset_name, n0.listmyassets())
+
+        # root doesn't exist
+        missing_asset = "VAPOUR"
+        assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {missing_asset}!", n0.issueunique, missing_asset, asset_tags)
+
+        # don't own root
+        n1.issue(missing_asset)
+        n1.generate(1)
+        self.sync_all()
+        assert_contains(missing_asset, n0.listassets())
+        assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {missing_asset}!", n0.issueunique, missing_asset, asset_tags)
+
     def run_test(self):
         self.activate_assets()
+        self.issueunique_test()
         self.issue_one()
         self.issue_invalid()
 

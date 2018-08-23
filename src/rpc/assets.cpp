@@ -201,6 +201,147 @@ UniValue issue(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue issueunique(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
+        throw std::runtime_error(
+                "issueunique \"root_name\" [asset_tags] ( [ipfs_hashes] ) \"( to_address )\" \"( change_address )\"\n"
+                + AssetActivationWarning() +
+                "\nIssue unique asset(s).\n"
+                "root_name must be an asset you own.\n"
+                "An asset will be created for each element of asset_tags.\n"
+                "If provided ipfs_hashes must be the same length as asset_tags.\n"
+                "Five (5) RVN will be burned for each asset created.\n"
+
+                "\nArguments:\n"
+                "1. \"root_name\"             (string, required) name of the asset the unique asset(s) are being issued under\n"
+                "2. \"asset_tags\"            (array, required) the unique tag for each asset which is to be issued\n"
+                "3. \"ipfs_hashes\"           (array, optional) ipfs hashes corresponding to each supplied tag (should be same size as \"asset_tags\")\n"
+                "4. \"to_address\"            (string, optional, default=\"\"), address assets will be sent to, if it is empty, address will be generated for you\n"
+                "5. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+
+                "\nResult:\n"
+                "\"txid\"                     (string) The transaction id\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("issueunique", "\"MY_ASSET\" [\"primo\",\"secundo\"]")
+                + HelpExampleCli("issueunique", "\"MY_ASSET\" [\"primo\",\"secundo\"] [\"first_hash\",\"second_hash\"]")
+        );
+
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+
+    const std::string rootName = request.params[0].get_str();
+    AssetType assetType;
+    if (!IsAssetNameValid(rootName, assetType)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + rootName);
+    }
+    if (assetType != AssetType::ROOT && assetType != AssetType::SUB) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Root asset must be a regular top-level or sub-asset."));
+    }
+
+    const UniValue& assetTags = request.params[1];
+    if (!assetTags.isArray() || assetTags.size() < 1) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset tags must be a non-empty array."));
+    }
+
+    const UniValue& ipfsHashes = request.params[2];
+    if (!ipfsHashes.isNull()) {
+        if (!ipfsHashes.isArray() || ipfsHashes.size() != assetTags.size()) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("If provided, IPFS hashes must be an array of the same size as the asset tags array."));
+        }
+    }
+
+    std::string address = "";
+    if (request.params.size() > 3)
+        address = request.params[3].get_str();
+
+    if (!address.empty()) {
+        CTxDestination destination = DecodeDestination(address);
+        if (!IsValidDestination(destination)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        }
+    } else {
+        // Create a new address
+        std::string strAccount;
+
+        if (!pwallet->IsLocked()) {
+            pwallet->TopUpKeyPool();
+        }
+
+        // Generate a new key that is added to wallet
+        CPubKey newKey;
+        if (!pwallet->GetKeyFromPool(newKey)) {
+            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        }
+        CKeyID keyID = newKey.GetID();
+
+        pwallet->SetAddressBook(keyID, strAccount, "receive");
+
+        address = EncodeDestination(keyID);
+    }
+
+    std::string changeAddress = "";
+    if (request.params.size() > 4)
+        changeAddress = request.params[4].get_str();
+    if (!changeAddress.empty()) {
+        CTxDestination destination = DecodeDestination(changeAddress);
+        if (!IsValidDestination(destination)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                               std::string("Invalid Change Address: Invalid Raven address: ") + changeAddress);
+        }
+    }
+
+    std::vector<CNewAsset> assets;
+    for (int i = 0; i < assetTags.size(); i++) {
+        std::string tag = assetTags[i].get_str();
+
+        if (!IsUniqueTagValid(tag)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unique asset tag is invalid: " + tag));
+        }
+
+        std::string assetName = GetUniqueAssetName(rootName, tag);
+        CNewAsset asset;
+
+        if (ipfsHashes.isNull())
+        {
+            asset = CNewAsset(assetName, UNIQUE_ASSET_AMOUNT, UNIQUE_ASSET_UNITS, UNIQUE_ASSETS_REISSUABLE, 0, "");
+        }
+        else
+        {
+            asset = CNewAsset(assetName, UNIQUE_ASSET_AMOUNT, UNIQUE_ASSET_UNITS, UNIQUE_ASSETS_REISSUABLE, 1,
+                              DecodeIPFS(ipfsHashes[i].get_str()));
+        }
+
+        assets.push_back(asset);
+    }
+
+    CReserveKey reservekey(pwallet);
+    CWalletTx transaction;
+    CAmount nRequiredFee;
+    std::pair<int, std::string> error;
+
+    // Create the Transaction
+    if (!CreateAssetTransaction(pwallet, assets, address, error, changeAddress, transaction, reservekey, nRequiredFee))
+        throw JSONRPCError(error.first, error.second);
+
+    // Send the Transaction to the network
+    std::string txid;
+    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+        throw JSONRPCError(error.first, error.second);
+
+    UniValue result(UniValue::VARR);
+    result.push_back(txid);
+    return result;
+}
 
 UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
 {
@@ -767,6 +908,7 @@ static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
   //  ----------- ------------------------      -----------------------      ----------
     { "assets",   "issue",                      &issue,                      {"asset_name","qty","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
+    { "assets",   "issueunique",                &issueunique,                {"root_name", "asset_tags", "ipfs_hashes", "to_address", "change_address"}},
     { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address"} },
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
