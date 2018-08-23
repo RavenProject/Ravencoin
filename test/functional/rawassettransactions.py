@@ -260,20 +260,11 @@ class RawAssetTransactionsTest(RavenTestFramework):
             assert_equal(1, n0.listassets(asset_name, True)[asset_name]['has_ipfs'])
             assert_equal(ipfs_hashes[0], n0.listassets(asset_name, True)[asset_name]['ipfs_hash'])
 
-    # TODO: test raw transactions (both properly and improperly constructed)
-    # TODO: try issuing multiple assets at the same time (via raw)
-    # TODO: fix corrupt db issue
-    # TODO: fix invalidation issue
-
-
 
     def run_test(self):
         self.activate_assets()
-        # self.issue_reissue_transfer_test()
+        self.issue_reissue_transfer_test()
         self.unique_assets_test()
-
-    # TODO: test block invalidation
-    # TODO: work on issue_unique rpc call to issue multiples
 
 
 if __name__ == '__main__':
