@@ -51,7 +51,7 @@ static const std::regex CHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");
 static const std::regex OWNER_INDICATOR(R"(^[^^~#!]+!$)");
 static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 
-static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^RAVENC0IN$|^RAVENCO1N$|^RAVENC01N$");
+static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^RAVENC0IN$|^RAVENCO1N$|^RAVENC01N$|^R4VENC01N$|^R4VEN$|^R4VENCOIN$|^R4VENC0IN$|^R4VENCO1N$|^R4VENC01N$");
 
 bool IsRootNameValid(const std::string& name)
 {
