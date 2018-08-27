@@ -640,8 +640,10 @@ bool CTransaction::VerifyNewUniqueAsset(CCoinsViewCache& view) const
     // check for burn outpoint (must account for each new asset)
     bool fBurnOutpointFound = false;
     for (auto out : vout)
-        if (CheckIssueBurnTx(out, AssetType::UNIQUE, assetOutpointCount))
+        if (CheckIssueBurnTx(out, AssetType::UNIQUE, assetOutpointCount)) {
             fBurnOutpointFound = true;
+            break;
+        }
     if (!fBurnOutpointFound)
         return false;
 
