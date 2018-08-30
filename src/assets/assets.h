@@ -30,6 +30,9 @@
 #define OWNER_UNITS 0
 #define MIN_ASSET_LENGTH 3
 #define OWNER_ASSET_AMOUNT 1 * COIN
+#define UNIQUE_ASSET_AMOUNT 1 * COIN
+#define UNIQUE_ASSET_UNITS 0
+#define UNIQUE_ASSETS_REISSUABLE 0
 
 #define ASSET_TRANSFER_STRING "transfer_asset"
 #define ASSET_NEW_STRING "new_asset"
@@ -45,9 +48,15 @@ class CWallet;
 class CReserveKey;
 class CWalletTx;
 struct CAssetOutputEntry;
+class CCoinControl;
 
 // 50000 * 82 Bytes == 4.1 Mb
 #define MAX_CACHE_ASSETS_SIZE 50000
+
+// Create map that store that state of current reissued transaction that the mempool as accepted.
+// If an asset name is in this map, any other reissue transactions wont be accepted into the mempool
+extern std::map<uint256, std::string> mapReissuedTx;
+extern std::map<std::string, uint256> mapReissuedAssets;
 
 class CAssets {
 public:
@@ -299,12 +308,16 @@ CAmount GetReissueAssetBurnAmount();
 CAmount GetIssueSubAssetBurnAmount();
 CAmount GetIssueUniqueAssetBurnAmount();
 CAmount GetBurnAmount(const AssetType type);
+CAmount GetBurnAmount(const int nType);
 std::string GetBurnAddress(const AssetType type);
+std::string GetBurnAddress(const int nType);
 
 bool IsAssetNameValid(const std::string& name);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType);
+bool IsUniqueTagValid(const std::string& tag);
 bool IsAssetNameAnOwner(const std::string& name);
 std::string GetParentName(const std::string& name); // Gets the parent name of a subasset TEST/TESTSUB would return TEST
+std::string GetUniqueAssetName(const std::string& parent, const std::string& tag);
 
 bool IsAssetNameSizeValid(const std::string& name);
 
@@ -319,6 +332,7 @@ bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string&
 bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, std::string& strAddress);
 bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue, std::string& strAddress);
 
+bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued);
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type);
 bool CheckReissueBurnTx(const CTxOut& txOut);
 
@@ -327,24 +341,30 @@ bool CheckOwnerDataTx(const CTxOut& txOut);
 bool CheckReissueDataTx(const CTxOut& txOut);
 bool CheckTransferOwnerTx(const CTxOut& txOut);
 
+bool CheckAmountWithUnits(const CAmount& nAmount, const uint8_t nUnits);
+
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptOwnerAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptNewAsset(const CScript& scriptPubKey);
+bool IsScriptNewUniqueAsset(const CScript& scriptPubKey);
 bool IsScriptOwnerAsset(const CScript& scriptPubKey);
 bool IsScriptReissueAsset(const CScript& scriptPubKey);
 bool IsScriptTransferAsset(const CScript& scriptPubKey);
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
 
-bool CheckAssetOwner(const std::string& assetName);
-void GetAllOwnedAssets(std::vector<std::string>& names);
-void GetAllMyAssets(std::vector<std::string>& names);
+void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names);
+void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, bool fIncludeAdministrator = false, bool fOnlyAdministrator = false);
+/** TO BE USED ONLY ON STARTUP */
+void GetAllMyAssetsFromCache(std::vector<std::string>& names);
 
 void UpdatePossibleAssets();
 
-bool GetAssetFromCoin(const Coin& coin, std::string& strName, CAmount& nAmount);
+bool GetAssetInfoFromCoin(const Coin& coin, std::string& strName, CAmount& nAmount);
+bool GetAssetInfoFromScript(const CScript& scriptPubKey, std::string& strName, CAmount& nAmount);
 
 void GetAssetData(const CScript& script, CAssetOutputEntry& data);
 
@@ -356,13 +376,15 @@ bool GetMyAssetBalance(CAssetsCache& cache, const std::string& assetName, CAmoun
 bool GetMyAssetBalances(CAssetsCache& cache, const std::vector<std::string>& assetNames, std::map<std::string, CAmount>& balances);
 bool GetMyAssetBalances(CAssetsCache& cache, std::map<std::string, CAmount>& balances);
 
-bool VerifyAssetOwner(const std::string& asset_name, std::set<COutPoint>& myOwnerOutPoints, std::pair<int, std::string>& error);
+/** Verifies that this wallet owns the give asset */
+bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
 
 std::string DecodeIPFS(std::string encoded);
 std::string EncodeIPFS(std::string decoded);
 
 bool CreateAssetTransaction(CWallet* pwallet, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, std::string& rvnChangeAddress, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
+bool CreateAssetTransaction(CWallet* pwallet, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, std::string& rvnChangeAddress, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool CreateReissueAssetTransaction(CWallet* pwallet, const CReissueAsset& asset, const std::string& address, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
-bool CreateTransferAssetTransaction(CWallet* pwallet, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
+bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey& reserveKey, std::pair<int, std::string>& error, std::string& txid);
 #endif //RAVENCOIN_ASSET_PROTOCOL_H

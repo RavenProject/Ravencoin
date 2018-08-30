@@ -17,15 +17,29 @@ class CAssetsCache;
 
 enum AssetType
 {
-    ROOT,
-    OWNER,
-    SUB,
-    UNIQUE,
-    MSGCHANNEL,
-    VOTE,
-    INVALID,
-    REISSUE
+    ROOT = 0,
+    SUB = 1,
+    UNIQUE = 2,
+    OWNER = 3,
+    MSGCHANNEL = 4,
+    VOTE = 5,
+    REISSUE = 6,
+    INVALID = 7
 };
+
+std::string PrintAssetType(AssetType& assetType) {
+    switch (assetType) {
+        case ROOT:          return "ROOT";
+        case SUB:           return "SUB";
+        case UNIQUE:        return "UNIQUE";
+        case OWNER:         return "OWNER";
+        case MSGCHANNEL:    return "MSGCHANNEL";
+        case VOTE:          return "VOTE";
+        case REISSUE:       return "REISSUE";
+        case INVALID:       return "INVALID";
+        default:            return "UNKNOWN";
+    }
+}
 
 class CNewAsset {
 public:
