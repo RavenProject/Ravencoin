@@ -9,7 +9,7 @@ from io import BytesIO
 from pprint import *
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import *
-from test_framework.mininode import CTransaction, CScriptTransfer
+from test_framework.mininode import CTransaction, CScriptTransfer, CScriptIssue
 
 class RawAssetTransactionsTest(RavenTestFramework):
     def set_test_params(self):
@@ -49,9 +49,33 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
+
         tx_issue = n0.createrawtransaction(inputs, outputs)
         tx_issue_signed = n0.signrawtransaction(tx_issue)
-        tx_issue_hash = n0.sendrawtransaction(tx_issue_signed['hex'])
+        tx_issue_hex = tx_issue_signed['hex']
+
+        ########################################
+        # try tampering to issue an asset that already exists
+        # try tampering to issue an asset with no owner output
+        # try tampering to issue an owner token with no asset
+        # try tampering to issue a mismatched owner/asset
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_issue_hex))
+        tx.deserialize(f)
+        # grabbing last out which should be new asset
+        rvnq = '72766e71' #rvnq
+        op_drop = '75'
+        script_hex = bytes_to_hex_str(tx.vout[-1].scriptPubKey)
+        print(script_hex)
+        f = BytesIO(hex_str_to_bytes(script_hex[script_hex.index(rvnq) + len(rvnq):-len(op_drop)]))
+        issue = CScriptIssue()
+        issue.deserialize(f)
+        pprint(bytes_to_hex_str(issue.serialize()))
+
+
+        ########################################
+        # send the good issue
+        tx_issue_hash = n0.sendrawtransaction(tx_issue_hex)
         assert_is_hash_string(tx_issue_hash)
         self.log.info("issue tx: " + tx_issue_hash)
 
