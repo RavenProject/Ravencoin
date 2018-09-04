@@ -26,6 +26,62 @@ class RawAssetTransactionsTest(RavenTestFramework):
         self.sync_all()
         assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
 
+    def issue_tampering_test(self):
+        self.log.info("Tampering with raw issues...")
+
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        ########################################
+        # issue
+        asset_name = 'TAMPER_TEST_ASSET'
+        to_address = n0.getnewaddress()
+        change_address = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+        inputs = [{k: unspent[k] for k in ['txid', 'vout']}]
+        outputs = {
+            'n1issueAssetXXXXXXXXXXXXXXXXWdnemQ': 500,
+            change_address: float(unspent['amount']) - 500.0001,
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1000,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         0,
+                }
+            }
+        }
+
+        tx_issue = n0.createrawtransaction(inputs, outputs)
+        tx_issue_signed = n0.signrawtransaction(tx_issue)
+        tx_issue_hex = tx_issue_signed['hex']
+
+        ########################################
+        # try tampering to issue an asset with no owner output
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_issue_hex))
+        tx.deserialize(f)
+        # grabbing last out which should be new asset
+        rvnq = '72766e71' #rvnq
+        op_drop = '75'
+        # remove the owner output from vout
+        tampered_vout = []
+        for out in tx.vout:
+            script_hex = bytes_to_hex_str(out.scriptPubKey)
+            if rvnq in script_hex:
+                print(script_hex)
+            else:
+                tampered_vout.append(out)
+        f = BytesIO(hex_str_to_bytes(script_hex[script_hex.index(rvnq) + len(rvnq):-len(op_drop)]))
+        issue = CScriptIssue()
+        issue.deserialize(f)
+
+        # try tampering to issue an owner token with no asset
+        # try tampering to issue a mismatched owner/asset
+        # try tampering to issue an asset that already exists
+
+
+
     def issue_reissue_transfer_test(self):
         self.log.info("Doing a big issue-reissue-transfer test...")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
@@ -49,33 +105,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-
         tx_issue = n0.createrawtransaction(inputs, outputs)
         tx_issue_signed = n0.signrawtransaction(tx_issue)
-        tx_issue_hex = tx_issue_signed['hex']
-
-        ########################################
-        # try tampering to issue an asset that already exists
-        # try tampering to issue an asset with no owner output
-        # try tampering to issue an owner token with no asset
-        # try tampering to issue a mismatched owner/asset
-        tx = CTransaction()
-        f = BytesIO(hex_str_to_bytes(tx_issue_hex))
-        tx.deserialize(f)
-        # grabbing last out which should be new asset
-        rvnq = '72766e71' #rvnq
-        op_drop = '75'
-        script_hex = bytes_to_hex_str(tx.vout[-1].scriptPubKey)
-        print(script_hex)
-        f = BytesIO(hex_str_to_bytes(script_hex[script_hex.index(rvnq) + len(rvnq):-len(op_drop)]))
-        issue = CScriptIssue()
-        issue.deserialize(f)
-        pprint(bytes_to_hex_str(issue.serialize()))
-
-
-        ########################################
-        # send the good issue
-        tx_issue_hash = n0.sendrawtransaction(tx_issue_hex)
+        tx_issue_hash = n0.sendrawtransaction(tx_issue_signed['hex'])
         assert_is_hash_string(tx_issue_hash)
         self.log.info("issue tx: " + tx_issue_hash)
 
@@ -287,8 +319,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def run_test(self):
         self.activate_assets()
-        self.issue_reissue_transfer_test()
-        self.unique_assets_test()
+        # self.issue_reissue_transfer_test()
+        # self.unique_assets_test()
+        self.issue_tampering_test()
 
 
 if __name__ == '__main__':
