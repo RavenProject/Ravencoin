@@ -1563,7 +1563,6 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
 
                 if (fIsMine & filter)
                     assetsReceived.emplace_back(assetoutput);
-
             }
         }
         /** RVN END */

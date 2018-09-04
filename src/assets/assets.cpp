@@ -2095,7 +2095,7 @@ void GetAssetData(const CScript& script, CAssetOutputEntry& data)
             data.destination = DecodeDestination(address);
             data.assetName = transfer.strName;
         }
-    } else if (type == TX_NEW_ASSET && !fIsOwner) {
+    } else if (type == TX_NEW_ASSET && fIsOwner) {
         if (OwnerAssetFromScript(script, assetName, address)) {
             data.type = ASSET_NEW_STRING;
             data.amount = OWNER_ASSET_AMOUNT;
