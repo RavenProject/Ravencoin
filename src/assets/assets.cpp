@@ -27,6 +27,7 @@
 #include "wallet/coincontrol.h"
 #include "utilmoneystr.h"
 #include "coins.h"
+#include "wallet/wallet.h"
 
 std::map<uint256, std::string> mapReissuedTx;
 std::map<std::string, uint256> mapReissuedAssets;
@@ -2356,22 +2357,20 @@ bool CreateAssetTransaction(CWallet* pwallet, const std::vector<CNewAsset> asset
             return false;
         }
     } else {
-        // Create a new address
-        std::string strAccount;
+        // Note: We use a new key here to keep it from being obvious which side is the change.
+        //  The drawback is that by not reusing a previous key, the change may be lost if a
+        //  backup is restored, if the backup doesn't have the new private key for the change.
+        //  If we reused the old key, it would be possible to add code to look for and
+        //  rediscover unknown transactions that were written with keys of ours to recover
+        //  post-backup change.
 
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            error = std::make_pair(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        // Reserve a new key pair from key pool
+        CKeyID keyID;
+        std::string strFailReason;
+        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason)) {
+            error = std::make_pair(RPC_WALLET_KEYPOOL_RAN_OUT, strFailReason);
             return false;
         }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
 
         change_address = EncodeDestination(keyID);
     }
@@ -2416,7 +2415,6 @@ bool CreateAssetTransaction(CWallet* pwallet, const std::vector<CNewAsset> asset
     CCoinControl coin_control;
 
     coin_control.destChange = DecodeDestination(change_address);
-
 
     LOCK2(cs_main, pwallet->cs_wallet);
 
@@ -2477,22 +2475,20 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, const CReissueAsset& reissu
             return false;
         }
     } else {
-        // Create a new address
-        std::string strAccount;
+        // Note: We use a new key here to keep it from being obvious which side is the change.
+        //  The drawback is that by not reusing a previous key, the change may be lost if a
+        //  backup is restored, if the backup doesn't have the new private key for the change.
+        //  If we reused the old key, it would be possible to add code to look for and
+        //  rediscover unknown transactions that were written with keys of ours to recover
+        //  post-backup change.
 
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            error = std::make_pair(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        // Reserve a new key pair from key pool
+        CKeyID keyID;
+        std::string strFailReason;
+        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason)) {
+            error = std::make_pair(RPC_WALLET_KEYPOOL_RAN_OUT, strFailReason);
             return false;
         }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
 
         change_address = EncodeDestination(keyID);
     }
