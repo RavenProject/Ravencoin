@@ -347,6 +347,17 @@ CNewAsset::CNewAsset(const std::string& strName, const CAmount& nAmount, const i
     this->strIPFSHash = strIPFSHash;
 }
 
+CNewAsset::CNewAsset(const std::string& strName, const CAmount& nAmount)
+{
+    this->SetNull();
+    this->strName = strName;
+    this->nAmount = nAmount;
+    this->units = int8_t(DEFAULT_UNITS);
+    this->nReissuable = int8_t(DEFAULT_REISSUABLE);
+    this->nHasIPFS = int8_t(DEFAULT_HAS_IPFS);
+    this->strIPFSHash = DEFAULT_IPFS;
+}
+
 /**
  * Constructs a CScript that carries the asset name and quantity and adds to to the end of the given script
  * @param dest - The destination that the asset will belong to
