@@ -386,14 +386,27 @@ class CScriptWitness():
             return False
         return True
 
+class CScriptOwner():
+    def __init__(self):
+        self.name = b""
+
+    def deserialize(self, f):
+        self.name = deser_string(f)
+
+    def serialize(self):
+        r = b""
+        r += ser_string(self.name)
+        return r
+
+
 class CScriptIssue():
     def __init__(self):
-        self.name = None
+        self.name = b""
         self.amount = 0
         self.units = 0
         self.reissuable = 1
         self.has_ipfs = 0
-        self.ipfs_hash = None
+        self.ipfs_hash = b""
 
     def deserialize(self, f):
         self.name = deser_string(f)
@@ -416,7 +429,7 @@ class CScriptIssue():
 
 class CScriptTransfer():
     def __init__(self):
-        self.name = None
+        self.name = b""
         self.amount = 0
 
     def deserialize(self, f):
