@@ -375,7 +375,7 @@ void CNewAsset::ConstructTransaction(CScript& script) const
     vchMessage.push_back(RVN_Q); // q
 
     vchMessage.insert(vchMessage.end(), ssAsset.begin(), ssAsset.end());
-    script << OP_RVN_ASSET << vchMessage << OP_DROP;
+    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 void CNewAsset::ConstructOwnerTransaction(CScript& script) const
@@ -390,7 +390,7 @@ void CNewAsset::ConstructOwnerTransaction(CScript& script) const
     vchMessage.push_back(RVN_O); // o
 
     vchMessage.insert(vchMessage.end(), ssOwner.begin(), ssOwner.end());
-    script << OP_RVN_ASSET << vchMessage << OP_DROP;
+    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
@@ -559,6 +559,7 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
     return true;
 }
 
+//! Call VerifyNewAsset if this function returns true
 bool CTransaction::IsNewAsset() const
 {
     // Check for the assets data CTxOut. This will always be the last output in the transaction
@@ -611,6 +612,7 @@ bool CTransaction::VerifyNewAsset() const
     return false;
 }
 
+//! Make sure to call VerifyNewUniqueAsset if this call returns true
 bool CTransaction::IsNewUniqueAsset() const
 {
     // Check trailing outpoint for issue data with unique asset name
@@ -623,6 +625,7 @@ bool CTransaction::IsNewUniqueAsset() const
     return true;
 }
 
+//! Call this function after IsNewUniqueAsset
 bool CTransaction::VerifyNewUniqueAsset(CCoinsViewCache& view) const
 {
     // Must contain at least 3 outpoints (RVN burn, owner change and one or more new unique assets that share a root (should be in trailing position))
@@ -801,7 +804,7 @@ void CAssetTransfer::ConstructTransaction(CScript& script) const
     vchMessage.push_back(RVN_T); // t
 
     vchMessage.insert(vchMessage.end(), ssTransfer.begin(), ssTransfer.end());
-    script << OP_RVN_ASSET << vchMessage << OP_DROP;
+    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 CReissueAsset::CReissueAsset(const std::string &strAssetName, const CAmount &nAmount, const int &nReissuable,
@@ -866,7 +869,7 @@ void CReissueAsset::ConstructTransaction(CScript& script) const
     vchMessage.push_back(RVN_R); // r
 
     vchMessage.insert(vchMessage.end(), ssReissue.begin(), ssReissue.end());
-    script << OP_RVN_ASSET << vchMessage << OP_DROP;
+    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 bool CReissueAsset::IsNull() const

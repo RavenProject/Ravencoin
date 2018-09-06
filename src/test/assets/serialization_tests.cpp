@@ -25,13 +25,13 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
     BOOST_CHECK(IsValidDestination(dest));
 
-    CScript scriptPubkey = GetScriptForDestination(dest);
+    CScript scriptPubKey = GetScriptForDestination(dest);
 
-    asset.ConstructTransaction(scriptPubkey);
+    asset.ConstructTransaction(scriptPubKey);
 
     CNewAsset serializedAsset;
     std::string address;
-    BOOST_CHECK_MESSAGE(AssetFromScript(scriptPubkey, serializedAsset, address), "Failed to get asset from script");
+    BOOST_CHECK_MESSAGE(AssetFromScript(scriptPubKey, serializedAsset, address), "Failed to get asset from script");
     BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
     BOOST_CHECK_MESSAGE(serializedAsset.strName == "SERIALIZATION", "Asset names weren't equal");
     BOOST_CHECK_MESSAGE(serializedAsset.nAmount == 100000000, "Amount weren't equal");
@@ -49,13 +49,13 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
         BOOST_CHECK(IsValidDestination(dest));
 
-        CScript scriptPubkey = GetScriptForDestination(dest);
+        CScript scriptPubKey = GetScriptForDestination(dest);
 
-        reissue.ConstructTransaction(scriptPubkey);
+        reissue.ConstructTransaction(scriptPubKey);
 
         CReissueAsset serializedAsset;
         std::string address;
-        BOOST_CHECK_MESSAGE(ReissueAssetFromScript(scriptPubkey, serializedAsset, address), "Failed to get asset from script");
+        BOOST_CHECK_MESSAGE(ReissueAssetFromScript(scriptPubKey, serializedAsset, address), "Failed to get asset from script");
         BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nAmount == 100000000, "Amount weren't equal");
@@ -73,15 +73,15 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
         BOOST_CHECK(IsValidDestination(dest));
 
-        CScript scriptPubkey = GetScriptForDestination(dest);
+        CScript scriptPubKey = GetScriptForDestination(dest);
 
-        asset.ConstructOwnerTransaction(scriptPubkey);
+        asset.ConstructOwnerTransaction(scriptPubKey);
 
         std::string strOwnerName;
         std::string address;
         std::stringstream ownerName;
         ownerName << name << OWNER_TAG;
-        BOOST_CHECK_MESSAGE(OwnerAssetFromScript(scriptPubkey, strOwnerName, address), "Failed to get asset from script");
+        BOOST_CHECK_MESSAGE(OwnerAssetFromScript(scriptPubKey, strOwnerName, address), "Failed to get asset from script");
         BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(strOwnerName == ownerName.str(), "Asset names weren't equal");
     }
