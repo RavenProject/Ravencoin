@@ -426,6 +426,69 @@ class RawAssetTransactionsTest(RavenTestFramework):
                                     n0.sendrawtransaction, tx_bad_hex)
 
         ########################################
+        # try tampering to change the output asset name to one that doesn't exist
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_hex))
+        tx.deserialize(f)
+        rvnt = '72766e74' #rvnt
+        op_drop = '75'
+        # change asset name
+        for n in range(0, len(tx.vout)):
+            out = tx.vout[n]
+            if rvnt in bytes_to_hex_str(out.scriptPubKey):
+                script_hex = bytes_to_hex_str(out.scriptPubKey)
+                f = BytesIO(hex_str_to_bytes(script_hex[script_hex.index(rvnt) + len(rvnt):-len(op_drop)]))
+                transfer = CScriptTransfer()
+                transfer.deserialize(f)
+                transfer.name = b"ASSET_DOES_NOT_EXIST"
+                tampered_transfer = bytes_to_hex_str(transfer.serialize())
+                tampered_script = script_hex[:script_hex.index(rvnt)] + rvnt + tampered_transfer + op_drop
+                tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
+        tampered_hex = bytes_to_hex_str(tx.serialize())
+        assert_raises_rpc_error(-26, "bad-txns-transfer-asset-not-exist",
+                                n0.sendrawtransaction, tampered_hex)
+
+        ########################################
+        # try tampering to change the output asset name to one that exists
+        alternate_asset_name = "ALTERNATE"
+        n0.issue(alternate_asset_name)
+        n0.generate(1)
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_hex))
+        tx.deserialize(f)
+        rvnt = '72766e74' #rvnt
+        op_drop = '75'
+        # change asset name
+        for n in range(0, len(tx.vout)):
+            out = tx.vout[n]
+            if rvnt in bytes_to_hex_str(out.scriptPubKey):
+                script_hex = bytes_to_hex_str(out.scriptPubKey)
+                f = BytesIO(hex_str_to_bytes(script_hex[script_hex.index(rvnt) + len(rvnt):-len(op_drop)]))
+                transfer = CScriptTransfer()
+                transfer.deserialize(f)
+                transfer.name = alternate_asset_name.encode()
+                tampered_transfer = bytes_to_hex_str(transfer.serialize())
+                tampered_script = script_hex[:script_hex.index(rvnt)] + rvnt + tampered_transfer + op_drop
+                tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
+        tampered_hex = bytes_to_hex_str(tx.serialize())
+        assert_raises_rpc_error(-26, "bad-tx-inputs-outputs-mismatch Bad Transaction - " +
+                                f"Trying to create outpoint for asset that you don't have: {alternate_asset_name}",
+                                n0.sendrawtransaction, tampered_hex)
+
+        ########################################
+        # try tampering to remove the asset output
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_hex))
+        tx.deserialize(f)
+        rvnt = '72766e74' #rvnt
+        # remove the transfer output from vout
+        bad_vout = list(filter(lambda out : rvnt not in bytes_to_hex_str(out.scriptPubKey), tx.vout))
+        tx.vout = bad_vout
+        tampered_hex = bytes_to_hex_str(tx.serialize())
+        assert_raises_rpc_error(-26, "bad-tx-asset-inputs-size-does-not-match-outputs-size",
+                                n0.sendrawtransaction, tampered_hex)
+
+        ########################################
         # send the good transfer
         tx_transfer_hash = n0.sendrawtransaction(tx_hex)
         assert_is_hash_string(tx_transfer_hash)
