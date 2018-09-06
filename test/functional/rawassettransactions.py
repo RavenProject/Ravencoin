@@ -72,7 +72,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.vout = bad_vout
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+        assert_raises_rpc_error(-26, "bad-txns-bad-asset-transaction",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -86,7 +86,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.vout = bad_vout
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-bad-new-asset-transaction",
+        assert_raises_rpc_error(-26, "bad-txns-bad-asset-transaction",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -113,6 +113,25 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
         assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+                                n0.sendrawtransaction, tx_bad_issue_signed)
+
+        ########################################
+        # try tampering to make owner output script invalid
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_issue_hex))
+        tx.deserialize(f)
+        rvno = '72766e6f' #rvno
+        RVNO = '52564e4f' #RVNO
+        # change the owner output script type to be invalid
+        for n in range(0, len(tx.vout)):
+            out = tx.vout[n]
+            if rvno in bytes_to_hex_str(out.scriptPubKey):
+                owner_script_hex = bytes_to_hex_str(out.scriptPubKey)
+                tampered_script = owner_script_hex.replace(rvno, RVNO)
+                tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
+        tx_bad_issue = bytes_to_hex_str(tx.serialize())
+        tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-bad-asset-script",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
