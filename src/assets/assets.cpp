@@ -2095,7 +2095,7 @@ void GetAssetData(const CScript& script, CAssetOutputEntry& data)
     if (type == TX_NEW_ASSET && !fIsOwner) {
         CNewAsset asset;
         if (AssetFromScript(script, asset, address)) {
-            data.type = ASSET_NEW_STRING;
+            data.type = TX_NEW_ASSET;
             data.amount = asset.nAmount;
             data.destination = DecodeDestination(address);
             data.assetName = asset.strName;
@@ -2103,14 +2103,14 @@ void GetAssetData(const CScript& script, CAssetOutputEntry& data)
     } else if (type == TX_TRANSFER_ASSET) {
         CAssetTransfer transfer;
         if (TransferAssetFromScript(script, transfer, address)) {
-            data.type = ASSET_TRANSFER_STRING;
+            data.type = TX_TRANSFER_ASSET;
             data.amount = transfer.nAmount;
             data.destination = DecodeDestination(address);
             data.assetName = transfer.strName;
         }
     } else if (type == TX_NEW_ASSET && fIsOwner) {
         if (OwnerAssetFromScript(script, assetName, address)) {
-            data.type = ASSET_NEW_STRING;
+            data.type = TX_NEW_ASSET;
             data.amount = OWNER_ASSET_AMOUNT;
             data.destination = DecodeDestination(address);
             data.assetName = assetName;
@@ -2118,7 +2118,7 @@ void GetAssetData(const CScript& script, CAssetOutputEntry& data)
     } else if (type == TX_REISSUE_ASSET) {
         CReissueAsset reissue;
         if (ReissueAssetFromScript(script, reissue, address)) {
-            data.type = ASSET_REISSUE_STRING;
+            data.type = TX_REISSUE_ASSET;
             data.amount = reissue.nAmount;
             data.destination = DecodeDestination(address);
             data.assetName = reissue.strName;
