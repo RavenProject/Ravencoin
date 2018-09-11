@@ -1,11 +1,9 @@
-#Shows data from the first five blocks
+#Shows data from the first 1000 blocks
 
 import random
 import os
 import subprocess
-import csv
 import json
-import hashlib
 
 
 #Set this to your raven-cli program
