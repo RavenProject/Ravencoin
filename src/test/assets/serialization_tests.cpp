@@ -60,7 +60,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
         // Create asset
         std::string name = "SERIALIZATION";
-        CReissueAsset reissue(name, 100000000, 0, DecodeIPFS("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
+        CReissueAsset reissue(name, 100000000, 0, 0, DecodeIPFS("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
 
         // Create destination
         CTxDestination dest = DecodeDestination("mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp"); // Testnet Address
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(EncodeIPFS(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
 
         // Empty IPFS
-        CReissueAsset reissue2(name, 100000000, 0, "");
+        CReissueAsset reissue2(name, 100000000, 0, 0, "");
         scriptPubKey = GetScriptForDestination(dest);
         reissue2.ConstructTransaction(scriptPubKey);
         CReissueAsset serializedAsset2;

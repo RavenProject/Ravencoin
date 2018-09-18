@@ -166,6 +166,7 @@ class CReissueAsset
 public:
     std::string strName;
     CAmount nAmount;
+    int8_t nUnits;
     int8_t nReissuable;
     std::string strIPFSHash;
 
@@ -178,6 +179,7 @@ public:
     {
         nAmount = 0;
         strName = "";
+        nUnits = 0;
         nReissuable = 1;
         strIPFSHash = "";
     }
@@ -189,11 +191,12 @@ public:
     {
         READWRITE(strName);
         READWRITE(nAmount);
+        READWRITE(nUnits);
         READWRITE(nReissuable);
         ReadWriteIPFSHash(s, ser_action, strIPFSHash);
     }
 
-    CReissueAsset(const std::string& strAssetName, const CAmount& nAmount, const int& nReissuable, const std::string& strIPFSHash);
+    CReissueAsset(const std::string& strAssetName, const CAmount& nAmount, const int& nUnits, const int& nReissuable, const std::string& strIPFSHash);
     bool IsValid(std::string& strError, CAssetsCache& assetCache) const;
     void ConstructTransaction(CScript& script) const;
     bool IsNull() const;
