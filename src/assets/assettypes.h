@@ -8,6 +8,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <list>
 #include <unordered_map>
 #include "assert.h"
@@ -35,6 +36,33 @@ AssetType AssetTypeFromInt(int nType);
 
 const char IPFS_SHA2_256 = 0x12;
 const char IPFS_SHA2_256_LEN = 0x20;
+
+template <typename Stream, typename Operation>
+void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash) {
+    // 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, ...)
+    if (ser_action.ForRead())
+    {
+        strIPFSHash = "";
+        if (!s.empty() and s.size() >= 34) {
+            char sha2_256;
+            ::Unserialize(s, sha2_256);
+            if (sha2_256 == IPFS_SHA2_256) {
+                std::basic_string<char> hash;
+                ::Unserialize(s, hash);
+                if (hash.length() == 32) {
+                    std::ostringstream os;
+                    os << sha2_256 << IPFS_SHA2_256_LEN << hash;
+                    strIPFSHash = os.str();
+                }
+            }
+        }
+    } else {
+        if (strIPFSHash.length() == 34 && strIPFSHash.at(0) == IPFS_SHA2_256 && strIPFSHash.at(1) == IPFS_SHA2_256_LEN) {
+            ::Serialize(s, IPFS_SHA2_256);
+            ::Serialize(s, strIPFSHash.substr(2));
+        }
+    }
+};
 
 class CNewAsset
 {
@@ -85,29 +113,9 @@ public:
         READWRITE(nAmount);
         READWRITE(units);
         READWRITE(nReissuable);
-
         READWRITE(nHasIPFS);
         if (nHasIPFS == 1) {
-            // 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, ...)
-            if (ser_action.ForRead()) {
-                strIPFSHash = "";
-                char sha2_256;
-                ::Unserialize(s, sha2_256);
-                assert(sha2_256 == IPFS_SHA2_256);
-                std::basic_string<char> hash;
-                ::Unserialize(s, hash);
-                assert(hash.length() == 32);
-                std::cout << "****Read Body: " << hash;
-                strIPFSHash = hash;
-                strIPFSHash.insert(0, &IPFS_SHA2_256_LEN);
-                strIPFSHash.insert(0, &sha2_256);
-                std::cout << "****Read: " << strIPFSHash;
-            } else {
-                std::cout << "****Writing: " << strIPFSHash;
-                assert(strIPFSHash.length() == 34 && strIPFSHash.at(0) == IPFS_SHA2_256 && strIPFSHash.at(1) == IPFS_SHA2_256_LEN);
-                ::Serialize(s, IPFS_SHA2_256);
-                ::Serialize(s, strIPFSHash.substr(2));
-            }
+            ReadWriteIPFSHash(s, ser_action, strIPFSHash);
         }
     }
 };
@@ -182,7 +190,7 @@ public:
         READWRITE(strName);
         READWRITE(nAmount);
         READWRITE(nReissuable);
-        READWRITE(strIPFSHash);
+        ReadWriteIPFSHash(s, ser_action, strIPFSHash);
     }
 
     CReissueAsset(const std::string& strAssetName, const CAmount& nAmount, const int& nReissuable, const std::string& strIPFSHash);
