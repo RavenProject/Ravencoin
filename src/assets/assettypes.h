@@ -7,11 +7,9 @@
 #define RAVENCOIN_NEWASSET_H
 
 #include <string>
-#include <iostream>
 #include <sstream>
 #include <list>
 #include <unordered_map>
-#include "assert.h"
 #include "amount.h"
 #include "primitives/transaction.h"
 
@@ -38,7 +36,8 @@ const char IPFS_SHA2_256 = 0x12;
 const char IPFS_SHA2_256_LEN = 0x20;
 
 template <typename Stream, typename Operation>
-void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash) {
+void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash)
+{
     // 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, ...)
     if (ser_action.ForRead())
     {
@@ -56,7 +55,9 @@ void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash
                 }
             }
         }
-    } else {
+    }
+    else
+    {
         if (strIPFSHash.length() == 34 && strIPFSHash.at(0) == IPFS_SHA2_256 && strIPFSHash.at(1) == IPFS_SHA2_256_LEN) {
             ::Serialize(s, IPFS_SHA2_256);
             ::Serialize(s, strIPFSHash.substr(2));
