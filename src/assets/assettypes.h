@@ -7,8 +7,10 @@
 #define RAVENCOIN_NEWASSET_H
 
 #include <string>
+#include <iostream>
 #include <list>
 #include <unordered_map>
+#include "assert.h"
 #include "amount.h"
 #include "primitives/transaction.h"
 
@@ -30,6 +32,9 @@ enum class AssetType
 
 int IntFromAssetType(AssetType type);
 AssetType AssetTypeFromInt(int nType);
+
+const char IPFS_SHA2_256 = 0x12;
+const char IPFS_SHA2_256_LEN = 0x20;
 
 class CNewAsset
 {
@@ -80,8 +85,30 @@ public:
         READWRITE(nAmount);
         READWRITE(units);
         READWRITE(nReissuable);
+
         READWRITE(nHasIPFS);
-        READWRITE(strIPFSHash);
+        if (nHasIPFS == 1) {
+            // 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, ...)
+            if (ser_action.ForRead()) {
+                strIPFSHash = "";
+                char sha2_256;
+                ::Unserialize(s, sha2_256);
+                assert(sha2_256 == IPFS_SHA2_256);
+                std::basic_string<char> hash;
+                ::Unserialize(s, hash);
+                assert(hash.length() == 32);
+                std::cout << "****Read Body: " << hash;
+                strIPFSHash = hash;
+                strIPFSHash.insert(0, &IPFS_SHA2_256_LEN);
+                strIPFSHash.insert(0, &sha2_256);
+                std::cout << "****Read: " << strIPFSHash;
+            } else {
+                std::cout << "****Writing: " << strIPFSHash;
+                assert(strIPFSHash.length() == 34 && strIPFSHash.at(0) == IPFS_SHA2_256 && strIPFSHash.at(1) == IPFS_SHA2_256_LEN);
+                ::Serialize(s, IPFS_SHA2_256);
+                ::Serialize(s, strIPFSHash.substr(2));
+            }
+        }
     }
 };
 
