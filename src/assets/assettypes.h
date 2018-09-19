@@ -38,27 +38,23 @@ const char IPFS_SHA2_256_LEN = 0x20;
 template <typename Stream, typename Operation>
 void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash)
 {
-    // 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, ...)
+    // assuming 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, 32 more bytes)
     if (ser_action.ForRead())
     {
         strIPFSHash = "";
         if (!s.empty() and s.size() >= 34) {
-            char sha2_256;
-            ::Unserialize(s, sha2_256);
-            if (sha2_256 == IPFS_SHA2_256) {
-                std::basic_string<char> hash;
-                ::Unserialize(s, hash);
-                if (hash.length() == 32) {
-                    std::ostringstream os;
-                    os << sha2_256 << IPFS_SHA2_256_LEN << hash;
-                    strIPFSHash = os.str();
-                }
-            }
+            char _sha2_256;
+            ::Unserialize(s, _sha2_256);
+            std::basic_string<char> hash;
+            ::Unserialize(s, hash);
+            std::ostringstream os;
+            os << IPFS_SHA2_256 << IPFS_SHA2_256_LEN << hash.substr(0, 32);
+            strIPFSHash = os.str();
         }
     }
     else
     {
-        if (strIPFSHash.length() == 34 && strIPFSHash.at(0) == IPFS_SHA2_256 && strIPFSHash.at(1) == IPFS_SHA2_256_LEN) {
+        if (strIPFSHash.length() == 34) {
             ::Serialize(s, IPFS_SHA2_256);
             ::Serialize(s, strIPFSHash.substr(2));
         }

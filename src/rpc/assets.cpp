@@ -187,8 +187,13 @@ UniValue issue(const JSONRPCRequest& request)
         has_ipfs = request.params[6].get_bool();
 
     std::string ipfs_hash = "";
-    if (request.params.size() > 7 && has_ipfs)
+    if (request.params.size() > 7 && has_ipfs) {
         ipfs_hash = request.params[7].get_str();
+        if (ipfs_hash.length() != 46)
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
+        if (ipfs_hash.substr(0,2) != "Qm")
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
+    }
 
     // check for required unique asset params
     if (assetType == AssetType::UNIQUE && (nAmount != COIN || units != 0 || reissuable)) {
@@ -815,7 +820,9 @@ UniValue reissue(const JSONRPCRequest& request)
     if (request.params.size() > 6) {
         newipfs = request.params[6].get_str();
         if (newipfs.length() != 46)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters"));
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
+        if (newipfs.substr(0,2) != "Qm")
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
     }
 
     CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeIPFS(newipfs));
