@@ -19,6 +19,9 @@ RAVEN_GUI_NAME=raven-qt
 RAVEN_CLI_NAME=raven-cli
 RAVEN_TX_NAME=raven-tx
 
+AX_COMPILER_VERSION
+AX_COMPILER_VENDOR
+
 dnl Unless the user specified ARFLAGS, force it to be cr
 AC_ARG_VAR(ARFLAGS, [Flags for the archiver, defaults to <cr> if not set])
 if test "x${ARFLAGS+set}" != "xset"; then
@@ -446,8 +449,14 @@ case $host in
    *linux*)
      TARGET_OS=linux
      LEVELDB_TARGET_FLAGS="-DOS_LINUX"
-     CXXFLAGS="$TEMP_CXXFLAGS -fPIC"
-     CPPFLAGS="$CPPFLAGS -fPIC"
+     # Check for GCC version >= 7.3.
+     AX_COMPARE_VERSION([$ax_cv_c_compiler_version], [ge], [7.3], [is_ge_gxx73=yes], [is_ge_gxx73=no])
+     if test "x$is_ge_gxx73" != "xyes"; then
+       # GCC version < 7.3 compile will fail without -fPIC flag
+       AC_MSG_WARN([GCC 7.3.0 or higher is needed to compile without -fPIC flag (found $ax_cv_c_compiler_version), enabling -fPIC])
+       CXXFLAGS="$TEMP_CXXFLAGS -fPIC"
+       CPPFLAGS="$CPPFLAGS -fPIC"
+     fi
      ;;
    *freebsd*)
      LEVELDB_TARGET_FLAGS="-DOS_FREEBSD"
@@ -914,8 +923,8 @@ if test x$use_pkgconfig = xyes; then
   m4_ifdef(
     [PKG_CHECK_MODULES],
     [
-      PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl  not found.)])
-      PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto  not found.)])
+      PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl not found.)])
+      PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto not found.)])
       RAVEN_QT_CHECK([PKG_CHECK_MODULES([PROTOBUF], [protobuf], [have_protobuf=yes], [RAVEN_QT_FAIL(libprotobuf not found)])])
       if test x$use_qr != xno; then
         RAVEN_QT_CHECK([PKG_CHECK_MODULES([QR], [libqrencode], [have_qrencode=yes], [have_qrencode=no])])
@@ -1304,6 +1313,7 @@ esac
 
 echo
 echo "Options used to compile and link:"
+echo "  compiler        = ${ax_cv_c_compiler_vendor} (${ax_cv_c_compiler_version})"
 echo "  build raven-cli = $build_raven_cli"
 echo "  build raven-tx  = $build_raven_tx"
 echo "  with wallet     = $enable_wallet"
