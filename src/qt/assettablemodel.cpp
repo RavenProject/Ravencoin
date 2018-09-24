@@ -43,20 +43,40 @@ public:
                     qWarning("AssetTablePriv::refreshWallet: Error retrieving asset balances");
                     return;
                 }
-
+                std::set<std::string> setAssetsToSkip;
                 auto bal = balances.begin();
                 for (; bal != balances.end(); bal++) {
                     // retrieve units for asset
                     uint8_t units = OWNER_UNITS;
+                    bool fIsAdministrator = true;
+
+                    if (setAssetsToSkip.count(bal->first))
+                        continue;
+
                     if (!IsAssetNameAnOwner(bal->first)) {
+                        // Asset is not an administrator asset
                         CNewAsset assetData;
                         if (!passets->GetAssetIfExists(bal->first, assetData)) {
                             qWarning("AssetTablePriv::refreshWallet: Error retrieving asset data");
                             return;
                         }
                         units = assetData.units;
+                        // If we have the administrator asset, add it to the skip listå
+                        if (balances.count(bal->first + OWNER_TAG)) {
+                            setAssetsToSkip.insert(bal->first + OWNER_TAG);
+                        } else {
+                            fIsAdministrator = false;
+                        }
+                    } else {
+                        // Asset is an administrator asset, if we own assets that is administrators, skip this balance
+                        std::string name = bal->first;
+                        name.pop_back();
+                        if (balances.count(name)) {
+                            setAssetsToSkip.insert(bal->first);
+                            continue;
+                        }
                     }
-                    cachedBalances.append(AssetRecord(bal->first, bal->second, units));
+                    cachedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator));
                 }
             }
         }
@@ -64,16 +84,13 @@ public:
 
 
     int size() {
-        qDebug() << "AssetTablePriv::size";
         return cachedBalances.size();
     }
 
     AssetRecord *index(int idx) {
-        qDebug() << "AssetTablePriv::index(" << idx << ")";
         if (idx >= 0 && idx < cachedBalances.size()) {
             return &cachedBalances[idx];
         }
-        qDebug() << "AssetTablePriv::index --> 0";
         return 0;
     }
 
@@ -84,7 +101,6 @@ AssetTableModel::AssetTableModel(WalletModel *parent) :
         walletModel(parent),
         priv(new AssetTablePriv(this))
 {
-    qDebug() << "AssetTableModel::AssetTableModel";
     columns << tr("Name") << tr("Quantity");
 
     priv->refreshWallet();
@@ -92,7 +108,6 @@ AssetTableModel::AssetTableModel(WalletModel *parent) :
 
 AssetTableModel::~AssetTableModel()
 {
-    qDebug() << "AssetTableModel::~AssetTableModel";
     delete priv;
 };
 
@@ -107,24 +122,18 @@ void AssetTableModel::checkBalanceChanged() {
 
 int AssetTableModel::rowCount(const QModelIndex &parent) const
 {
-    qDebug() << "AssetTableModel::rowCount";
     Q_UNUSED(parent);
     return priv->size();
 }
 
 int AssetTableModel::columnCount(const QModelIndex &parent) const
 {
-    qDebug() << "AssetTableModel::columnCount";
     Q_UNUSED(parent);
     return columns.length();
 }
 
 QVariant AssetTableModel::data(const QModelIndex &index, int role) const
 {
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
-    qDebug() << "AssetTableModel::data(" << index << ", " << role << ")";
     Q_UNUSED(role);
     if(!index.isValid())
         return QVariant();
@@ -133,37 +142,59 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
     switch (index.column())
     {
         case Name:
-            return QString::fromStdString(rec->name);
+            if (role == Qt::TextAlignmentRole) {
+                return Qt::AlignLeft + Qt::AlignVCenter;
+            } else if (role == Qt::DisplayRole) {
+                return QString::fromStdString(rec->name);
+            } else if (role == Qt::DecorationRole) {
+                QPixmap pixmap = QPixmap::fromImage(QImage(":/icons/asset_administrator"));
+                return rec->fIsAdministrator ? pixmap : QVariant();
+            } else if (role == Qt::SizeHintRole) {
+                QPixmap pixmap = QPixmap::fromImage(QImage(":/icons/asset_administrator"));
+                return pixmap.size();
+            } else {
+                return QVariant();
+            }
         case Quantity:
-            return QString::fromStdString(rec->formattedQuantity());
+            if (role == Qt::TextAlignmentRole) {
+                return Qt::AlignHCenter + Qt::AlignVCenter;
+            } else if (role == Qt::DisplayRole) {
+                return QString::fromStdString(rec->formattedQuantity());
+            } else {
+                return QVariant();
+            }
         default:
-            return QString();
+            return QVariant();
     }
 }
 
 QVariant AssetTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    qDebug() << "AssetTableModel::headerData";
-    if(role == Qt::DisplayRole)
-        {
+    if (role == Qt::DisplayRole)
+    {
             if (section < columns.size())
                 return columns.at(section);
-        }
+    } else if (role == Qt::SizeHintRole) {
+        if (section == 0)
+            return QSize(300, 50);
+        else if (section == 1)
+            return QSize(200, 50);
+    } else if (role == Qt::TextAlignmentRole) {
+        return Qt::AlignHCenter + Qt::AlignVCenter;
+    }
 
     return QVariant();
 }
 
 QModelIndex AssetTableModel::index(int row, int column, const QModelIndex &parent) const
 {
-    qDebug() << "AssetTableModel::index(" << row << ", " << column << ", " << parent << ")";
     Q_UNUSED(parent);
     AssetRecord *data = priv->index(row);
     if(data)
     {
         QModelIndex idx = createIndex(row, column, priv->index(row));
-        qDebug() << "AssetTableModel::index --> " << idx;
         return idx;
     }
-    qDebug() << "AssetTableModel::index --> " << QModelIndex();
+
     return QModelIndex();
 }

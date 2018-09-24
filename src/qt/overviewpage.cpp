@@ -137,6 +137,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->labelTransactionsStatus->setIcon(icon);
     ui->labelWalletStatus->setIcon(icon);
     ui->labelAssetStatus->setIcon(icon);
+    ui->labelAssetAdministrator->setPixmap(QPixmap::fromImage(QImage(":/icons/asset_administrator")));
 
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
@@ -299,10 +300,12 @@ void OverviewPage::showAssets()
         ui->listAssets->show();
         ui->assetBalanceLabel->show();
         ui->labelAssetStatus->show();
+        ui->labelAssetAdministrator->show();
     } else {
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
         ui->listAssets->hide();
+        ui->labelAssetAdministrator->hide();
     }
 
     displayAssetInfo();
