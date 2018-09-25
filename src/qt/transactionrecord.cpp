@@ -47,6 +47,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         {
             const CTxOut& txout = wtx.tx->vout[i];
             isminetype mine = wallet->IsMine(txout);
+
+            /** RVN START */
+            if (txout.scriptPubKey.IsAssetScript())
+                continue;
+            /** RVN START */
+
             if(mine)
             {
                 TransactionRecord sub(hash, nTime);
@@ -90,6 +96,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         isminetype fAllToMe = ISMINE_SPENDABLE;
         for (const CTxOut& txout : wtx.tx->vout)
         {
+            /** RVN START */
+            if (txout.scriptPubKey.IsAssetScript())
+                continue;
+            /** RVN START */
+
             isminetype mine = wallet->IsMine(txout);
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllToMe > mine) fAllToMe = mine;
@@ -114,6 +125,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
             {
                 const CTxOut& txout = wtx.tx->vout[nOut];
+
+                /** RVN START */
+                if (txout.scriptPubKey.IsAssetScript())
+                    continue;
+                /** RVN START */
+
                 TransactionRecord sub(hash, nTime);
                 sub.idx = nOut;
                 sub.involvesWatchAddress = involvesWatchAddress;
@@ -156,8 +173,29 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             //
             // Mixed debit transaction, can't break down payees
             //
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
-            parts.last().involvesWatchAddress = involvesWatchAddress;
+
+
+            /** RVN START */
+            // We will only show mixed debit transactions that are nNet < 0 or if they are nNet == 0 and
+            // they do not contain assets. This is so the list of transaction doesn't add 0 amount transactions to the
+            // list.
+            bool fIsMixedDebit = true;
+            if (nNet == 0) {
+                for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++) {
+                    const CTxOut &txout = wtx.tx->vout[nOut];
+
+                    if (txout.scriptPubKey.IsAssetScript()) {
+                        fIsMixedDebit = false;
+                        break;
+                    }
+                }
+            }
+
+            if (fIsMixedDebit) {
+                parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
+                parts.last().involvesWatchAddress = involvesWatchAddress;
+            }
+            /** RVN START */
         }
     }
 
