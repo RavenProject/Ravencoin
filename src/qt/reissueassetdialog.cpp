@@ -395,12 +395,14 @@ void ReissueAssetDialog::buildUpdatedData()
         ipfs = formatGreen.arg(tr("IPFS Hash"), ":", ui->ipfsText->text()) + "\n";
     }
 
+    ui->updatedAssetData->clear();
     ui->updatedAssetData->append(name);
     ui->updatedAssetData->append(quantity);
     ui->updatedAssetData->append(units);
     ui->updatedAssetData->append(reissue);
     ui->updatedAssetData->append(ipfs);
     ui->updatedAssetData->show();
+    ui->updatedAssetData->setFixedHeight(ui->updatedAssetData->document()->size().height());
 }
 
 void ReissueAssetDialog::setDisplayedDataToNone()
@@ -462,6 +464,7 @@ void ReissueAssetDialog::onAssetSelected(int index)
         ui->currentAssetData->append(units);
         ui->currentAssetData->append(reissue);
         ui->currentAssetData->append(ipfs);
+        ui->currentAssetData->setFixedHeight(ui->currentAssetData->document()->size().height());
 
         buildUpdatedData();
 
