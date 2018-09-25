@@ -2579,7 +2579,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     }
 
     // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-    if (!VerifyWalletHasAsset(asset_name, error)) {
+    if (!VerifyWalletHasAsset(asset_name + OWNER_TAG, error)) {
         return false;
     }
 
