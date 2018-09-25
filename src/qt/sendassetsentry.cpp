@@ -15,6 +15,8 @@
 #include "walletmodel.h"
 #include "assetcontroldialog.h"
 
+#include "wallet/coincontrol.h"
+
 #include <QApplication>
 #include <QClipboard>
 #include <validation.h>
@@ -313,8 +315,7 @@ void SendAssetsEntry::onSendOwnershipChanged()
         return;
 
     if (ui->administratorCheckBox->isChecked()) {
-        LOCK(cs_main);
-        if (!fUsingAssetControl) {
+        if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllAdministrativeAssets(model->getWallet(), names);
 
@@ -337,8 +338,7 @@ void SendAssetsEntry::onSendOwnershipChanged()
         ui->ownershipWarningMessage->setStyleSheet("color: red");
         ui->ownershipWarningMessage->show();
     } else {
-        LOCK(cs_main);
-        if (!fUsingAssetControl) {
+        if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllMyAssets(model->getWallet(), names);
             QStringList list;
