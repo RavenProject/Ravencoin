@@ -248,8 +248,8 @@ UniValue issueunique(const JSONRPCRequest& request)
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("issueunique", "\"MY_ASSET\" [\"primo\",\"secundo\"]")
-                + HelpExampleCli("issueunique", "\"MY_ASSET\" [\"primo\",\"secundo\"] [\"first_hash\",\"second_hash\"]")
+                + HelpExampleCli("issueunique", "\"MY_ASSET\" \'[\"primo\",\"secundo\"]\'")
+                + HelpExampleCli("issueunique", "\"MY_ASSET\" \'[\"primo\",\"secundo\"\'] \'[\"first_hash\",\"second_hash\"]\'")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
