@@ -437,6 +437,25 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="labelAssetAdministrator">
+              <property name="toolTip">
+               <string>Displayed next to assets that you are the administrator of</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::AutoText</enum>
+              </property>
+              <property name="pixmap">
+               <pixmap>../res/icons/asset_administrator.png</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="labelAssetStatus">
               <property name="enabled">
                <bool>true</bool>
