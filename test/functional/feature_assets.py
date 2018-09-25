@@ -108,6 +108,11 @@ class AssetTest(RavenTestFramework):
         assert(changeaddress != None)
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET!"], 1)
 
+        self.log.info("Burning all units to test reissue on zero units...")
+        n0.transfer(asset_name="MY_ASSET", qty=800, to_address="n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP")
+        n0.generate(1)
+        assert_equal(0, n0.listmyassets(asset="MY_ASSET", verbose=True)["MY_ASSET"]["balance"])
+
         self.log.info("Calling reissue()...")
         address1 = n0.getnewaddress()
         ipfs_hash2 = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
