@@ -895,7 +895,7 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache) con
     strError = "";
 
     CNewAsset asset;
-    if (!assetCache.GetAssetIfExists(this->strName, asset)) {
+    if (!assetCache.GetAssetMetaDataIfExists(this->strName, asset)) {
         strError = std::string("Unable to reissue asset: asset_name '") + strName + std::string("' doesn't exist in the database");
         return false;
     }
@@ -1333,7 +1333,7 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
     auto pair = std::make_pair(reissue.strName, address);
 
     CNewAsset assetData;
-    if (!GetAssetIfExists(reissue.strName, assetData))
+    if (!GetAssetMetaDataIfExists(reissue.strName, assetData))
         return error("%s: Tried reissuing an asset, but that asset didn't exist: %s", __func__, reissue.strName);
 
     // Insert the asset into the assets address map
@@ -1390,7 +1390,7 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
     auto pair = std::make_pair(reissue.strName, address);
 
     CNewAsset assetData;
-    if (!GetAssetIfExists(reissue.strName, assetData))
+    if (!GetAssetMetaDataIfExists(reissue.strName, assetData))
         return error("%s: Tried undoing reissue of an asset, but that asset didn't exist: %s", __func__, reissue.strName);
 
     // Remove the reissued asset outpoint if it belongs to my unspent assets
@@ -2070,7 +2070,7 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name)
     return false;
 }
 
-bool CAssetsCache::GetAssetIfExists(const std::string& name, CNewAsset& asset)
+bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset)
 {
     // Check the map that contains the reissued asset data. If it is in this map, it hasn't been saved to disk yet
     if (mapReissuedAssetData.count(name)) {
@@ -2186,21 +2186,21 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
     return false;
 }
 
-void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names)
+void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names, int nMinConf)
 {
     if(!pwallet)
         return;
 
-    GetAllMyAssets(pwallet, names, true, true);
+    GetAllMyAssets(pwallet, names, nMinConf, true, true);
 }
 
-void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, bool fIncludeAdministrator, bool fOnlyAdministrator)
+void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, int nMinConf, bool fIncludeAdministrator, bool fOnlyAdministrator)
 {
     if(!pwallet)
         return;
 
     std::map<std::string, std::vector<COutput> > mapAssets;
-    pwallet->AvailableAssets(mapAssets);
+    pwallet->AvailableAssets(mapAssets, true, nullptr, 1, MAX_MONEY, MAX_MONEY, 0, nMinConf); // Set the mincof, set the rest to the defaults
 
     for (auto item : mapAssets) {
         bool isOwner = IsAssetNameAnOwner(item.first);

@@ -65,7 +65,7 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
     uint8_t units = OWNER_UNITS;
     if (!IsAssetNameAnOwner(asset_name)) {
         CNewAsset assetData;
-        if (!passets->GetAssetIfExists(asset_name, assetData))
+        if (!passets->GetAssetMetaDataIfExists(asset_name, assetData))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't load asset from cache: " + asset_name);
 
         units = assetData.units;
@@ -446,7 +446,7 @@ UniValue getassetdata(const JSONRPCRequest& request)
 
     if (passets) {
         CNewAsset asset;
-        if (!passets->GetAssetIfExists(asset_name, asset))
+        if (!passets->GetAssetMetaDataIfExists(asset_name, asset))
             return NullUniValue;
 
         result.push_back(Pair("name", asset.strName));

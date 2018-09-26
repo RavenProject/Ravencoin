@@ -462,7 +462,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                 } else {
                     // For all other types of assets, make sure they are sending the right type of units
                     CNewAsset asset;
-                    if (!passets->GetAssetIfExists(transfer.strName, asset))
+                    if (!passets->GetAssetMetaDataIfExists(transfer.strName, asset))
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-not-exist");
 
                     if (asset.strName != transfer.strName)

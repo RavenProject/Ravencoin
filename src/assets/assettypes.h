@@ -14,6 +14,7 @@
 #include "primitives/transaction.h"
 
 #define MAX_UNIT 8
+#define MIN_UNIT 0
 
 class CAssetsCache;
 

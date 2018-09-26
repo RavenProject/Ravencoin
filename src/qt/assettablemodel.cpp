@@ -56,7 +56,7 @@ public:
                     if (!IsAssetNameAnOwner(bal->first)) {
                         // Asset is not an administrator asset
                         CNewAsset assetData;
-                        if (!passets->GetAssetIfExists(bal->first, assetData)) {
+                        if (!passets->GetAssetMetaDataIfExists(bal->first, assetData)) {
                             qWarning("AssetTablePriv::refreshWallet: Error retrieving asset data");
                             return;
                         }

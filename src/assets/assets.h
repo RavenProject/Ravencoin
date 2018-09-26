@@ -259,7 +259,7 @@ public :
     bool AddPossibleOutPoint(const CAssetCachePossibleMine& possibleMine);
 
     bool CheckIfAssetExists(const std::string& name);
-    bool GetAssetIfExists(const std::string& name, CNewAsset& asset);
+    bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset);
 
     //! Calculate the size of the CAssets (in bytes)
     size_t DynamicMemoryUsage() const;
@@ -359,8 +359,8 @@ bool IsScriptTransferAsset(const CScript& scriptPubKey);
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
 
-void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names);
-void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, bool fIncludeAdministrator = false, bool fOnlyAdministrator = false);
+void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names, int nMinConf = 1);
+void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, int nMinConf = 1, bool fIncludeAdministrator = false, bool fOnlyAdministrator = false);
 /** TO BE USED ONLY ON STARTUP */
 void GetAllMyAssetsFromCache(std::vector<std::string>& names);
 
