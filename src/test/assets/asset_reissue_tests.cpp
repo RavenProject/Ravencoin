@@ -44,7 +44,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
 
     // Get the new asset data from the cache
     CNewAsset asset2;
-    BOOST_CHECK_MESSAGE(cache.GetAssetIfExists("RVNASSET", asset2), "Failed to get the asset2");
+    BOOST_CHECK_MESSAGE(cache.GetAssetMetaDataIfExists("RVNASSET", asset2), "Failed to get the asset2");
 
     // Chech the asset metadata
     BOOST_CHECK_MESSAGE(asset2.nReissuable == 1, "Asset2: Reissuable isn't 1");
@@ -60,7 +60,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
 
     // Get the asset data from the cache now that the reissuance was removed
     CNewAsset asset3;
-    BOOST_CHECK_MESSAGE(cache.GetAssetIfExists("RVNASSET", asset3), "Failed to get the asset3");
+    BOOST_CHECK_MESSAGE(cache.GetAssetMetaDataIfExists("RVNASSET", asset3), "Failed to get the asset3");
 
     // Chech the asset3 metadata and make sure all the changed from the reissue were removed
     BOOST_CHECK_MESSAGE(asset3.nReissuable == 1, "Asset3: Reissuable isn't 1");

@@ -297,7 +297,7 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
     CNewAsset asset;
     if (IsAssetNameAnOwner(rec->assetName))
         rec->units = OWNER_UNITS;
-    else if (passets && passets->GetAssetIfExists(rec->assetName, asset))
+    else if (passets && passets->GetAssetMetaDataIfExists(rec->assetName, asset))
         rec->units = asset.units;
     else
         rec->units = MAX_ASSET_UNITS;
