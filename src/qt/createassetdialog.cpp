@@ -109,6 +109,8 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     setUpValues();
 
     format = "%1<font color=green>%2%3</font>";
+
+    adjustSize();
 }
 
 void CreateAssetDialog::setClientModel(ClientModel *_clientModel)
@@ -137,6 +139,9 @@ void CreateAssetDialog::setModel(WalletModel *_model)
         connect(_model->getOptionsModel(), SIGNAL(coinControlFeaturesChanged(bool)), this, SLOT(coinControlFeatureChanged(bool)));
         ui->frameCoinControl->setVisible(_model->getOptionsModel()->getCoinControlFeatures());
         coinControlUpdateLabels();
+
+        // Custom Fee Control
+        ui->frameFee->setVisible(_model->getOptionsModel()->getCustomFeeFeatures());
 
         // fee section
         for (const int &n : confTargets) {

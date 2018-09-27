@@ -95,6 +95,8 @@ private Q_SLOTS:
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
 
+    void customFeeFeatureChanged(bool);
+
     /** RVN START */
     void createAssetButtonClicked();
     void ressieAssetButtonClicked();
