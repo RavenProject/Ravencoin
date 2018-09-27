@@ -661,7 +661,7 @@
         <x>0</x>
         <y>0</y>
         <width>1044</width>
-        <height>274</height>
+        <height>294</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
@@ -1178,16 +1178,6 @@
              </item>
             </layout>
            </item>
-           <item>
-            <widget class="QCheckBox" name="optInRBF">
-             <property name="toolTip">
-              <string>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</string>
-             </property>
-             <property name="text">
-              <string>Request Replace-By-Fee</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -1335,15 +1325,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QValidatedLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>qvalidatedlineedit.h</header>
-  </customwidget>
-  <customwidget>
    <class>RavenAmountField</class>
    <extends>QLineEdit</extends>
    <header>ravenamountfield.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QValidatedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qvalidatedlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

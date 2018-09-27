@@ -90,7 +90,6 @@ BASE_SCRIPTS= [
     'rpc_rawtransaction.py',
     'rpc_addressindex.py',
     'wallet_dump.py',
-    'wallet_bumpfee.py',
     'mempool_persist.py',
     'rpc_timestampindex.py',
     'wallet_listreceivedby.py',
@@ -159,7 +158,6 @@ EXTENDED_SCRIPTS = [
     # These tests are not run by the travis build process.
     # Longest test should go first, to favor running tests in parallel
     # 'p2p_acceptblock.py',
-    # 'feature_rbf.py',
     # 'feature_assumevalid.py',
     # 'mempool_packages.py',
     # 'feature_bip_softforks.py', # use this for future soft fork testing

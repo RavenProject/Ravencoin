@@ -23,7 +23,6 @@
 #include "policy/feerate.h"
 #include "policy/fees.h"
 #include "policy/policy.h"
-#include "policy/rbf.h"
 #include "rpc/mining.h"
 #include "rpc/safemode.h"
 #include "rpc/server.h"
@@ -32,7 +31,6 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "wallet/coincontrol.h"
-#include "wallet/feebumper.h"
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 

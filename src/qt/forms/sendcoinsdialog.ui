@@ -588,7 +588,7 @@
         <x>0</x>
         <y>0</y>
         <width>824</width>
-        <height>69</height>
+        <height>84</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
@@ -1105,16 +1105,6 @@
              </item>
             </layout>
            </item>
-           <item>
-            <widget class="QCheckBox" name="optInRBF">
-             <property name="toolTip">
-              <string>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</string>
-             </property>
-             <property name="text">
-              <string>Request Replace-By-Fee</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -1153,7 +1143,7 @@
         <string>S&amp;end</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../raven.qrc">
          <normaloff>:/icons/send</normaloff>:/icons/send</iconset>
        </property>
        <property name="autoDefault">
@@ -1179,7 +1169,7 @@
         <string>Clear &amp;All</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../raven.qrc">
          <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
        </property>
        <property name="autoDefault">
@@ -1196,7 +1186,7 @@
         <string>Add &amp;Recipient</string>
        </property>
        <property name="icon">
-        <iconset>
+        <iconset resource="../raven.qrc">
          <normaloff>:/icons/add</normaloff>:/icons/add</iconset>
        </property>
        <property name="autoDefault">
@@ -1262,15 +1252,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QValidatedLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>qvalidatedlineedit.h</header>
-  </customwidget>
-  <customwidget>
    <class>RavenAmountField</class>
    <extends>QLineEdit</extends>
    <header>ravenamountfield.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QValidatedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qvalidatedlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>
