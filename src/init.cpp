@@ -359,7 +359,8 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-feefilter", strprintf("Tell other nodes to filter invs to us by our mempool min fee (default: %u)", DEFAULT_FEEFILTER));
     strUsage += HelpMessageOpt("-loadblock=<file>", _("Imports blocks from external blk000??.dat file on startup"));
     strUsage += HelpMessageOpt("-maxreorg=<n>", strprintf(_("Set the Maximum reorg depth (default: %u)"), defaultChainParams->MaxReorganizationDepth()));
-    strUsage += HelpMessageOpt("-minreorgpeers=<n>", strprintf(_("Set the Minimum amount of peers required to not allow reorgs. Peers must be greater than. (default: %u)"), defaultChainParams->MinReorganizationPeers()));
+    strUsage += HelpMessageOpt("-minreorgpeers=<n>", strprintf(_("Set the Minimum amount of peers required to disallow reorg of chains of depth >= maxreorg. Peers must be greater than. (default: %u)"), defaultChainParams->MinReorganizationPeers()));
+    strUsage += HelpMessageOpt("-minreorgage=<n>", strprintf(_("Set the Minimum tip age (in seconds) required to allow reorg of a chain of depth >= maxreorg on a node with more than minreorgpeers peers. (default: %u)"), defaultChainParams->MinReorganizationAge()));
     strUsage += HelpMessageOpt("-maxorphantx=<n>", strprintf(_("Keep at most <n> unconnectable transactions in memory (default: %u)"), DEFAULT_MAX_ORPHAN_TRANSACTIONS));
     strUsage += HelpMessageOpt("-maxmempool=<n>", strprintf(_("Keep the transaction memory pool below <n> megabytes (default: %u)"), DEFAULT_MAX_MEMPOOL_SIZE));
     strUsage += HelpMessageOpt("-mempoolexpiry=<n>", strprintf(_("Do not keep transactions in the mempool longer than <n> hours (default: %u)"), DEFAULT_MEMPOOL_EXPIRY));
