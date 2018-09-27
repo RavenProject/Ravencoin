@@ -365,6 +365,11 @@ def disconnect_nodes(from_connection, node_num):
     else:
         raise AssertionError("timed out waiting for disconnect")
 
+def disconnect_all_nodes(nodes):
+    for i in range(0, len(nodes)):
+        for j in range(i+1, len(nodes)):
+            disconnect_nodes(nodes[i], j)
+
 def connect_nodes(from_connection, node_num):
     ip_port = "127.0.0.1:" + str(p2p_port(node_num))
     from_connection.addnode(ip_port, "onetry")
@@ -376,6 +381,11 @@ def connect_nodes(from_connection, node_num):
 def connect_nodes_bi(nodes, a, b):
     connect_nodes(nodes[a], b)
     connect_nodes(nodes[b], a)
+
+def connect_all_nodes_bi(nodes):
+    for i in range(0, len(nodes)):
+        for j in range(i+1, len(nodes)):
+            connect_nodes_bi(nodes, i, j)
 
 def sync_blocks(rpc_connections, *, wait=1, timeout=60):
     """

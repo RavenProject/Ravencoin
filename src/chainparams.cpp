@@ -225,6 +225,7 @@ public:
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** RVN End **/
     }
 };
@@ -395,6 +396,7 @@ public:
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** RVN End **/
 
     }
@@ -553,6 +555,7 @@ public:
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** RVN End **/
     }
 };

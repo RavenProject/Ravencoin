@@ -105,6 +105,7 @@ public:
 
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
+    int MinReorganizationAge() const { return nMinReorganizationAge; }
     /** RVN End **/
 
 protected:
@@ -146,6 +147,7 @@ protected:
 
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;
+    int nMinReorganizationAge;
     /** RVN End **/
 };
 
