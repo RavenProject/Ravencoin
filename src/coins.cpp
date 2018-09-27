@@ -140,7 +140,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, bool 
 
                 // Get the asset before we change it
                 CNewAsset asset;
-                if (!assetsCache->GetAssetIfExists(reissue.strName, asset))
+                if (!assetsCache->GetAssetMetaDataIfExists(reissue.strName, asset))
                     error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
                           __func__, reissue.strName);
 

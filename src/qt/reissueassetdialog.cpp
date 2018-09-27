@@ -200,7 +200,7 @@ void ReissueAssetDialog::setUpValues()
 
     LOCK(cs_main);
     std::vector<std::string> assets;
-    GetAllAdministrativeAssets(model->getWallet(), assets);
+    GetAllAdministrativeAssets(model->getWallet(), assets, 0);
 
     ui->comboBox->addItem("Select an asset");
 
@@ -208,7 +208,7 @@ void ReissueAssetDialog::setUpValues()
     for (auto item : assets) {
         std::string name = QString::fromStdString(item).split("!").first().toStdString();
         CNewAsset asset;
-        if (passets->GetAssetIfExists(name, asset)) {
+        if (passets->GetAssetMetaDataIfExists(name, asset)) {
             if (asset.nReissuable)
                 ui->comboBox->addItem(QString::fromStdString(asset.strName));
         }
@@ -429,7 +429,7 @@ void ReissueAssetDialog::onAssetSelected(int index)
 
         LOCK(cs_main);
         // Get the asset data
-        if (!passets->GetAssetIfExists(qstr_name.toStdString(), *asset)) {
+        if (!passets->GetAssetMetaDataIfExists(qstr_name.toStdString(), *asset)) {
             CheckFormState();
             disableAll();
             asset->SetNull();

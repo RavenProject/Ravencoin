@@ -251,7 +251,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 else
                 {
                     CNewAsset asset;
-                    if (passets->GetAssetIfExists(sub.assetName, asset))
+                    if (passets->GetAssetMetaDataIfExists(sub.assetName, asset))
                         sub.units = asset.units;
                 }
 
@@ -287,7 +287,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 else
                 {
                     CNewAsset asset;
-                    if (passets->GetAssetIfExists(sub.assetName, asset))
+                    if (passets->GetAssetMetaDataIfExists(sub.assetName, asset))
                         sub.units = asset.units;
                 }
 

@@ -51,9 +51,6 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(!IsAssetNameValid("RVN", type));
         BOOST_CHECK(!IsAssetNameValid("RAVEN", type));
         BOOST_CHECK(!IsAssetNameValid("RAVENCOIN", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVENC0IN", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVENCO1N", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVENC01N", type));
 
         //- Versions of RAVENCOIN ALLOWED
         BOOST_CHECK(IsAssetNameValid("RAVEN.COIN", type));
