@@ -75,19 +75,6 @@
        </property>
       </spacer>
      </item>
-     <item>
-      <widget class="QPushButton" name="refreshButton">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -1335,15 +1322,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QValidatedLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>qvalidatedlineedit.h</header>
-  </customwidget>
-  <customwidget>
    <class>RavenAmountField</class>
    <extends>QLineEdit</extends>
    <header>ravenamountfield.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QValidatedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qvalidatedlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

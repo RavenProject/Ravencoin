@@ -1056,7 +1056,6 @@ void RavenGUI::checkAssets()
     else {
         assetAction->setDisabled(true);
         assetAction->setToolTip(tr("Assets not yet active"));
-
         }
 
 }

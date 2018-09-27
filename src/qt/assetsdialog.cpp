@@ -117,10 +117,7 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
 
     /** RVN START */
     connect(ui->createAssetButton, SIGNAL(clicked()), this, SLOT(createAssetButtonClicked()));
-    connect(ui->reissueAssetButton, SIGNAL(clicked()), this, SLOT(ressieAssetButtonClicked()));
-    connect(ui->refreshButton, SIGNAL(clicked()), this, SLOT(refreshButtonClicked()));
-    ui->refreshButton->setIcon(platformStyle->SingleColorIcon(":/icons/refresh"));
-    ui->refreshButton->setToolTip(tr("Refresh the page to display newly received assets"));
+    connect(ui->reissueAssetButton, SIGNAL(clicked()), this, SLOT(reissueAssetButtonClicked()));
     ui->optInRBF->hide();
 
     // If the network is regtest. Add some helper buttons to the asset GUI
@@ -400,7 +397,7 @@ SendAssetsEntry *AssetsDialog::addEntry()
     LOCK(cs_main);
     std::vector<std::string> assets;
     if (model)
-        GetAllMyAssets(model->getWallet(), assets);
+        GetAllMyAssets(model->getWallet(), assets, 0);
     else // If the model isn't present. Grab the list of assets that the cache thinks you own
         GetAllMyAssetsFromCache(assets);
 
@@ -897,7 +894,7 @@ void AssetsDialog::createAssetButtonClicked()
     dlg.exec();
 }
 
-void AssetsDialog::ressieAssetButtonClicked()
+void AssetsDialog::reissueAssetButtonClicked()
 {
     WalletModel::UnlockContext ctx(model->requestUnlock());
     if(!ctx.isValid())
@@ -910,20 +907,6 @@ void AssetsDialog::ressieAssetButtonClicked()
     dlg.setModel(model);
     dlg.setClientModel(clientModel);
     dlg.exec();
-}
-
-void AssetsDialog::refreshButtonClicked()
-{
-    for(int i = 0; i < ui->entries->count(); ++i)
-    {
-        SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(i)->widget());
-        if(entry)
-        {
-            removeEntry(entry);
-        }
-    }
-
-    addEntry();
 }
 
 void AssetsDialog::mineButtonClicked()
@@ -950,7 +933,6 @@ void AssetsDialog::mineButtonClicked()
 
 void AssetsDialog::assetControlUpdateSendCoinsDialog()
 {
-    AssetControlDialog::assetControl->HasAssetSelected();
     for(int i = 0; i < ui->entries->count(); ++i)
     {
         SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(i)->widget());
@@ -962,5 +944,17 @@ void AssetsDialog::assetControlUpdateSendCoinsDialog()
 
     addEntry();
 
+}
+
+void AssetsDialog::processNewTransaction()
+{
+    for(int i = 0; i < ui->entries->count(); ++i)
+    {
+        SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(i)->widget());
+        if(entry)
+        {
+            entry->refreshAssetList();
+        }
+    }
 }
 /** RVN END */

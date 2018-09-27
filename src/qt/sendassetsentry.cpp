@@ -55,7 +55,9 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->assetSelectionBox, SIGNAL(activated(int)), this, SLOT(onAssetSelected(int)));
-    connect(ui->administratorCheckBox, SIGNAL(clicked()), this, SLOT(onSendOwnershipChanged()));
+    connect(ui->administratorToolButton, SIGNAL(clicked()), this, SLOT(onSendOwnershipChanged()));
+
+    ui->administratorToolButton->setToolTip(tr("Select to view administrator assets to transfer"));
 
     ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
     ui->assetSelectionBox->addItems(myAssetsNames);
@@ -63,6 +65,8 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     ui->payAmount->setValue(0.00000000);
     ui->payAmount->setDisabled(true);
     ui->ownershipWarningMessage->hide();
+
+    fShowAdministratorList = false;
 }
 
 SendAssetsEntry::~SendAssetsEntry()
@@ -182,8 +186,6 @@ QWidget *SendAssetsEntry::setupTabChain(QWidget *prev)
     QWidget::setTabOrder(ui->payTo, ui->addAsLabel);
     QWidget::setTabOrder(ui->addressBookButton, ui->pasteButton);
     QWidget::setTabOrder(ui->pasteButton, ui->deleteButton);
-    QWidget::setTabOrder(ui->payAmount, ui->administratorCheckBox);
-    QWidget::setTabOrder(ui->administratorCheckBox, ui->assetAmountLabel);
     return ui->deleteButton;
 }
 
@@ -261,7 +263,7 @@ void SendAssetsEntry::onAssetSelected(int index)
     QString name = ui->assetSelectionBox->currentText();
     // If the name
     if (index == 0) {
-        ui->payAmount->setValue(0.00000000);
+        ui->payAmount->clear();
         ui->payAmount->setDisabled(false);
         ui->assetAmountLabel->clear();
         return;
@@ -283,7 +285,8 @@ void SendAssetsEntry::onAssetSelected(int index)
         clear();
         ui->messageLabel->show();
         ui->messageTextLabel->show();
-        ui->messageTextLabel->setText(tr("Failed to get asset metadata. The transaction in which the asset was issued. Must be mined into a block before you can transfer the asset"));
+        ui->messageTextLabel->setText(tr("Failed to get asset metadata for: ") + name + "." + tr(" The transaction in which the asset was issued must be mined into a block before you can transfer it"));
+        ui->assetAmountLabel->clear();
         return;
     }
 
@@ -336,20 +339,58 @@ void SendAssetsEntry::onAssetSelected(int index)
 
 void SendAssetsEntry::onSendOwnershipChanged()
 {
+    switchAdministratorList(true);
+}
+
+void SendAssetsEntry::CheckOwnerBox() {
+    fUsingAssetControl = true;
+    switchAdministratorList();
+}
+
+void SendAssetsEntry::IsAssetControl(bool fIsAssetControl, bool fIsOwner)
+{
+    if (fIsOwner) {
+        CheckOwnerBox();
+    }
+    if (fIsAssetControl) {
+        ui->administratorToolButton->setDisabled(true);
+        fUsingAssetControl = true;
+    }
+}
+
+void SendAssetsEntry::setCurrentIndex(int index)
+{
+    if (index < ui->assetSelectionBox->count()) {
+        ui->assetSelectionBox->setCurrentIndex(index);
+        ui->assetSelectionBox->activated(index);
+    }
+}
+
+void SendAssetsEntry::refreshAssetList()
+{
+    switchAdministratorList(false);
+}
+
+void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
+{
     if(!model)
         return;
 
-    if (ui->administratorCheckBox->isChecked()) {
+    if (fSwitchStatus)
+        fShowAdministratorList = !fShowAdministratorList;
+
+    if (fShowAdministratorList) {
+        ui->administratorToolButton->setStyleSheet(QString("background-color: lawngreen"));
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
-            GetAllAdministrativeAssets(model->getWallet(), names);
+            GetAllAdministrativeAssets(model->getWallet(), names, 0);
 
             QStringList list;
             for (auto name: names)
                 list << QString::fromStdString(name);
 
             ui->assetSelectionBox->clear();
-            ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
+            ui->assetSelectionBox->addItem(tr("Select an administrator asset to transfer"));
             ui->assetSelectionBox->addItems(list);
             ui->assetSelectionBox->setCurrentIndex(0);
         }
@@ -363,9 +404,10 @@ void SendAssetsEntry::onSendOwnershipChanged()
         ui->ownershipWarningMessage->setStyleSheet("color: red");
         ui->ownershipWarningMessage->show();
     } else {
+        ui->administratorToolButton->setStyleSheet("");
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
-            GetAllMyAssets(model->getWallet(), names);
+            GetAllMyAssets(model->getWallet(), names, 0);
             QStringList list;
             for (auto name : names) {
                 if (!IsAssetNameAnOwner(name))
@@ -376,32 +418,8 @@ void SendAssetsEntry::onSendOwnershipChanged()
             ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
             ui->assetSelectionBox->addItems(list);
             ui->assetSelectionBox->setCurrentIndex(0);
+            ui->payAmount->clear();
         }
         ui->ownershipWarningMessage->hide();
-    }
-}
-
-void SendAssetsEntry::CheckOwnerBox() {
-    ui->administratorCheckBox->setChecked(true);
-    fUsingAssetControl = true;
-    onSendOwnershipChanged();
-}
-
-void SendAssetsEntry::IsAssetControl(bool fIsAssetControl, bool fIsOwner)
-{
-    if (fIsOwner) {
-        CheckOwnerBox();
-    }
-    if (fIsAssetControl) {
-        ui->administratorCheckBox->setDisabled(true);
-        fUsingAssetControl = true;
-    }
-}
-
-void SendAssetsEntry::setCurrentIndex(int index)
-{
-    if (index < ui->assetSelectionBox->count()) {
-        ui->assetSelectionBox->setCurrentIndex(index);
-        ui->assetSelectionBox->activated(index);
     }
 }
