@@ -184,6 +184,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
     // With the addition of asset transactions, there can be multiple transaction that need notifications
     // so we need to loop through all new transaction that were added to the transaction table and display
     // notifications for each individual transaction
+    QString assetName = "";
     for (int i = start; i <= end; i++) {
         QString date = ttm->index(i, TransactionTableModel::Date, parent).data().toString();
         qint64 amount = ttm->index(i, TransactionTableModel::Amount, parent).data(Qt::EditRole).toULongLong();
@@ -191,17 +192,21 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
         QModelIndex index = ttm->index(i, 0, parent);
         QString address = ttm->data(index, TransactionTableModel::AddressRole).toString();
         QString label = ttm->data(index, TransactionTableModel::LabelRole).toString();
-        QString assetName = ttm->data(index, TransactionTableModel::AssetNameRole).toString();
+        assetName = ttm->data(index, TransactionTableModel::AssetNameRole).toString();
 
         Q_EMIT incomingTransaction(date, walletModel->getOptionsModel()->getDisplayUnit(), amount, type, address, label,
                                    assetName);
     }
-    /** RVN START */
+    /** RVN END */
 
     /** Everytime we get an new transaction. We should check to see if assets are enabled or not */
     overviewPage->showAssets();
     transactionView->showAssets();
     Q_EMIT checkAssets();
+    // If we receive a new transaction that contains an asset, we want all of our SendAssetEntries to update
+    // so that the new received assets are displayed in the list
+    if (assetName != "RVN")
+        assetsPage->processNewTransaction();
 }
 
 void WalletView::gotoOverviewPage()

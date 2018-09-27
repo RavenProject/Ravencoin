@@ -51,6 +51,10 @@ public:
     void setFocus();
 
     bool fUsingAssetControl;
+    bool fShowAdministratorList;
+
+    void refreshAssetList();
+    void switchAdministratorList(bool fSwitchStatus = true);
 
 
 public Q_SLOTS:

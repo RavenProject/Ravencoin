@@ -45,6 +45,7 @@ public:
     void setAddress(const QString &address);
     void pasteEntry(const SendAssetsRecipient &rv);
     bool handlePaymentRequest(const SendAssetsRecipient &recipient);
+    void processNewTransaction();
 
 public Q_SLOTS:
     void clear();
@@ -97,8 +98,7 @@ private Q_SLOTS:
 
     /** RVN START */
     void createAssetButtonClicked();
-    void ressieAssetButtonClicked();
-    void refreshButtonClicked();
+    void reissueAssetButtonClicked();
     void mineButtonClicked();
     void assetControlUpdateSendCoinsDialog();
     /** RVN END */
