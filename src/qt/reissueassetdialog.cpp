@@ -325,13 +325,12 @@ void ReissueAssetDialog::CheckFormState()
         }
     }
 
-    if (ui->ipfsBox->isChecked() && ui->ipfsText->text().size() != 46) {
-        showMessage(tr("Invalid IPFS Hash"));
-        return;
-    }
+    if (ui->ipfsBox->isChecked())
+        if (!checkIPFSHash(ui->ipfsText->text()))
+            return;
 
     // Keep the button disabled if no changes have been made
-    if (!ui->ipfsBox->isChecked() && ui->reissuableBox->isChecked() && ui->quantitySpinBox->value() == 0 && ui->unitSpinBox->value() == asset->units) {
+    if ((!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty())) && ui->reissuableBox->isChecked() && ui->quantitySpinBox->value() == 0 && ui->unitSpinBox->value() == asset->units) {
         hideMessage();
         return;
     }
@@ -394,9 +393,9 @@ void ReissueAssetDialog::buildUpdatedData()
         reissue = formatGreen.arg(tr("Can Reisssue"), ":", reissuable) + "\n";
 
     QString ipfs;
-    if (asset->nHasIPFS && !ui->ipfsBox->isChecked())
+    if (asset->nHasIPFS && (!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty())))
         ipfs = formatBlack.arg(tr("IPFS Hash"), ":", QString::fromStdString(EncodeIPFS(asset->strIPFSHash))) + "\n";
-    else if (ui->ipfsBox->isChecked()) {
+    else if (ui->ipfsBox->isChecked() && !ui->ipfsText->text().isEmpty()) {
         ipfs = formatGreen.arg(tr("IPFS Hash"), ":", ui->ipfsText->text()) + "\n";
     }
 
@@ -492,20 +491,39 @@ void ReissueAssetDialog::onIPFSStateChanged()
     toggleIPFSText();
 }
 
+bool ReissueAssetDialog::checkIPFSHash(QString hash)
+{
+    if (!hash.isEmpty()) {
+        std::string error;
+        if (!CheckEncodedIPFS(hash.toStdString(), error)) {
+            ui->ipfsText->setStyleSheet("border: 2px solid red");
+            showMessage("IPFS Hash must start with 'Qm'");
+            disableReissueButton();
+            return false;
+        } else if (hash.size() != 46) {
+            ui->ipfsText->setStyleSheet("border: 2px solid red");
+            showMessage("IPFS Hash must have size of 46 characters");
+            disableReissueButton();
+            return false;
+        } else if (DecodeIPFS(ui->ipfsText->text().toStdString()).empty()) {
+            showMessage("IPFS hash is not valid. Please use a valid IPFS hash");
+            disableReissueButton();
+            return false;
+        }
+    }
+
+    // No problems where found with the hash, reset the border, and hide the messages.
+    hideMessage();
+    ui->ipfsText->setStyleSheet("");
+
+    return true;
+}
+
 void ReissueAssetDialog::onIPFSHashChanged(QString hash)
 {
-    if (hash.size() == 0) {
-        hideMessage();
+
+    if (checkIPFSHash(hash))
         CheckFormState();
-    }
-    else if (hash.size() != 46) {
-        ui->ipfsText->setStyleSheet("border: 1px solid red");
-        showMessage("IPFS hash must be the correct length");
-    } else {
-        hideMessage();
-        ui->ipfsText->setStyleSheet("");
-        CheckFormState();
-    }
 
     buildUpdatedData();
 }
@@ -548,7 +566,7 @@ void ReissueAssetDialog::onReissueAssetClicked()
     QString name = ui->comboBox->currentText();
     CAmount quantity = ui->quantitySpinBox->value() * COIN;
     bool reissuable = ui->reissuableBox->isChecked();
-    bool hasIPFS = ui->ipfsBox->isChecked();
+    bool hasIPFS = ui->ipfsBox->isChecked() && !ui->ipfsText->text().isEmpty();
 
     int unit = ui->unitSpinBox->value();
     if (unit == asset->units)

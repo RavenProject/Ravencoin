@@ -70,6 +70,9 @@ private:
     void updateFeeMinimizedLabel();
     void minimizeFeeSection(bool fMinimize);
 
+    //Validation
+    bool checkIPFSHash(QString hash);
+
 private Q_SLOTS:
     void ipfsStateChanged();
     void checkAvailabilityClicked();

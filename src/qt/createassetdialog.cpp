@@ -294,6 +294,35 @@ void CreateAssetDialog::enableCreateButton()
         ui->createAssetButton->setDisabled(false);
 }
 
+bool CreateAssetDialog::checkIPFSHash(QString hash)
+{
+    if (!hash.isEmpty()) {
+        std::string error;
+        if (!CheckEncodedIPFS(hash.toStdString(), error)) {
+            ui->ipfsText->setStyleSheet("border: 2px solid red");
+            showMessage("IPFS Hash must start with 'Qm'");
+            disableCreateButton();
+            return false;
+        }
+        else if (hash.size() != 46) {
+            ui->ipfsText->setStyleSheet("border: 2px solid red");
+            showMessage("IPFS Hash must have size of 46 characters");
+            disableCreateButton();
+            return false;
+        } else if (DecodeIPFS(hash.toStdString()).empty()) {
+            showMessage("IPFS hash is not valid. Please use a valid IPFS hash");
+            disableCreateButton();
+            return false;
+        }
+    }
+
+    // No problems where found with the hash, reset the border, and hide the messages.
+    hideMessage();
+    ui->ipfsText->setStyleSheet("");
+
+    return true;
+}
+
 void CreateAssetDialog::CheckFormState()
 {
     disableCreateButton(); // Disable the button by default
@@ -319,11 +348,9 @@ void CreateAssetDialog::CheckFormState()
         return;
     }
 
-    if (ui->ipfsBox->isChecked() && ui->ipfsText->text().size() != 46) {
-        ui->ipfsText->setStyleSheet("border: 1px solid red");
-        showMessage(tr("If JSON Meta Data is selected, a valid IPFS hash must be given"));
-        return;
-    }
+    if (ui->ipfsBox->isChecked())
+        if (!checkIPFSHash(ui->ipfsText->text()))
+            return;
 
     if (checkedAvailablity) {
         showValidMessage(tr("Valid Asset"));
@@ -431,7 +458,8 @@ void CreateAssetDialog::onAddressNameChanged(QString address)
 
 void CreateAssetDialog::onIPFSHashChanged(QString hash)
 {
-    CheckFormState();
+    if (checkIPFSHash(hash))
+        CheckFormState();
 }
 
 void CreateAssetDialog::onCloseClicked()
@@ -452,7 +480,7 @@ void CreateAssetDialog::onCreateAssetClicked()
     CAmount quantity = ui->quantitySpinBox->value() * COIN;
     int units = ui->unitBox->value();
     bool reissuable = ui->reissuableBox->isChecked();
-    bool hasIPFS = ui->ipfsBox->isChecked();
+    bool hasIPFS = ui->ipfsBox->isChecked() && !ui->ipfsText->text().isEmpty();
 
     std::string ipfsDecoded = "";
     if (hasIPFS)
