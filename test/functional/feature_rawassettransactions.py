@@ -675,6 +675,205 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_raises_rpc_error(-8, "Invalid parameter: ipfs_hash must start with 'Qm'.", n0.createrawtransaction, inputs, outputs)
 
 
+    def atomic_swaps(self):
+        self.log.info("Testing atomic swaps...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        jaina = "JAINA"
+        anduin = "ANDUIN"
+        jaina_owner = f"{jaina}!"
+        anduin_owner = f"{anduin}!"
+
+        starting_amount = 1000
+
+        receive1 = n1.getnewaddress()
+        change1 = n1.getnewaddress()
+        n0.sendtoaddress(receive1, 50000)
+        n0.generate(1); self.sync_all()
+        n1.issue(jaina, starting_amount)
+        n1.generate(1); self.sync_all()
+        balance1 = float(n1.getwalletinfo()['balance'])
+
+        receive2 = n2.getnewaddress()
+        change2 = n2.getnewaddress()
+        n0.sendtoaddress(receive2, 50000)
+        n0.generate(1); self.sync_all()
+        n2.issue(anduin, starting_amount)
+        n2.generate(1); self.sync_all()
+        balance2 = float(n2.getwalletinfo()['balance'])
+
+        ########################################
+        # rvn for assets
+
+        # n1 buys 400 ANDUIN from n2 for 4000 RVN
+        price = 4000
+        amount = 400
+        fee = 0.0001
+
+        unspent1 = n1.listunspent()[0]
+        unspent_amount1 = float(unspent1['amount'])
+        assert(unspent_amount1 > price + fee)
+
+        unspent_asset2 = n2.listmyassets(anduin, True)[anduin]['outpoints'][0]
+        unspent_asset_amount2 = unspent_asset2['amount']
+        assert(unspent_asset_amount2 > amount)
+
+        inputs = [
+            {k: unspent1[k] for k in ['txid', 'vout']},
+            {k: unspent_asset2[k] for k in ['txid', 'vout']},
+        ]
+        outputs = {
+            receive1: {
+                'transfer': {
+                    anduin: amount
+                }
+            },
+            change1: unspent_amount1 - price - fee,
+            receive2: price,
+            change2: {
+                'transfer': {
+                    anduin: unspent_asset_amount2 - amount
+                }
+            },
+        }
+
+        unsigned = n1.createrawtransaction(inputs, outputs)
+        signed1 = n1.signrawtransaction(unsigned)['hex']
+        signed2 = n2.signrawtransaction(signed1)['hex']
+        _tx_id = n0.sendrawtransaction(signed2)
+        n0.generate(10)
+        self.sync_all()
+
+        newbalance1 = float(n1.getwalletinfo()['balance'])
+        newbalance2 = float(n2.getwalletinfo()['balance'])
+        assert_equal(balance1 - price - fee, newbalance1)
+        assert_equal(balance2 + price, newbalance2)
+
+        assert_equal(amount, int(n1.listmyassets()[anduin]))
+        assert_equal(starting_amount - amount, int(n2.listmyassets()[anduin]))
+
+
+        ########################################
+        # rvn for owner
+
+        # n2 buys JAINA! from n1 for 20000 RVN
+        price = 20000
+        amount = 1
+        balance1 = newbalance1
+        balance2 = newbalance2
+
+        unspent2 = next(u for u in n2.listunspent() if u['amount'] > price + fee)
+        unspent_amount2 = float(unspent2['amount'])
+
+        unspent_owner1 = n1.listmyassets(jaina_owner, True)[jaina_owner]['outpoints'][0]
+        unspent_owner_amount1 = unspent_owner1['amount']
+        assert_equal(amount, unspent_owner_amount1)
+
+        inputs = [
+            {k: unspent2[k] for k in ['txid', 'vout']},
+            {k: unspent_owner1[k] for k in ['txid', 'vout']},
+        ]
+        outputs = {
+            receive1: price,
+            receive2: {
+                'transfer': {
+                    jaina_owner: amount
+                }
+            },
+            change2: unspent_amount2 - price - fee,
+        }
+
+        unsigned = n2.createrawtransaction(inputs, outputs)
+        signed2 = n2.signrawtransaction(unsigned)['hex']
+        signed1 = n1.signrawtransaction(signed2)['hex']
+        _tx_id = n0.sendrawtransaction(signed1)
+        n0.generate(10)
+        self.sync_all()
+
+        newbalance1 = float(n1.getwalletinfo()['balance'])
+        newbalance2 = float(n2.getwalletinfo()['balance'])
+        assert_equal(balance1 + price, newbalance1)
+        assert_equal(balance2 - price - fee, newbalance2)
+
+        assert_does_not_contain_key(jaina_owner, n1.listmyassets())
+        assert_equal(amount, int(n2.listmyassets()[jaina_owner]))
+
+        ########################################
+        # assets for assets and owner
+
+        # n1 buys ANDUIN! and 300 ANDUIN from n2 for 900 JAINA
+        price = 900
+        amount = 300
+        amount_owner = 1
+        balance1 = newbalance1
+        balance2 = newbalance2
+
+        unspent1 = n1.listunspent()[0]
+        unspent_amount1 = float(unspent1['amount'])
+        assert(unspent_amount1 > fee)
+
+        unspent_asset1 = n1.listmyassets(jaina, True)[jaina]['outpoints'][0]
+        unspent_asset_amount1 = unspent_asset1['amount']
+
+        unspent_asset2 = n2.listmyassets(anduin, True)[anduin]['outpoints'][0]
+        unspent_asset_amount2 = unspent_asset2['amount']
+
+        unspent_owner2 = n2.listmyassets(anduin_owner, True)[anduin_owner]['outpoints'][0]
+        unspent_owner_amount2 = unspent_owner2['amount']
+
+        assert(unspent_asset_amount1 > price)
+        assert(unspent_asset_amount2 > amount)
+        assert_equal(amount_owner, unspent_owner_amount2)
+
+        inputs = [
+            {k: unspent1[k] for k in ['txid', 'vout']},
+            {k: unspent_asset1[k] for k in ['txid', 'vout']},
+            {k: unspent_asset2[k] for k in ['txid', 'vout']},
+            {k: unspent_owner2[k] for k in ['txid', 'vout']},
+        ]
+        outputs = {
+            receive1: {
+                'transfer': {
+                    anduin: amount,
+                    anduin_owner: amount_owner,
+                }
+            },
+            # output map can't use change1 twice...
+            n1.getnewaddress(): unspent_amount1 - fee,
+            change1: {
+                'transfer': {
+                    jaina: unspent_asset_amount1 - price
+                }
+            },
+            receive2: {
+                'transfer': {
+                    jaina: price
+                }
+            },
+            change2: {
+                'transfer': {
+                    anduin: unspent_asset_amount2 - amount
+                }
+            },
+        }
+
+        unsigned = n1.createrawtransaction(inputs, outputs)
+        signed1 = n1.signrawtransaction(unsigned)['hex']
+        signed2 = n2.signrawtransaction(signed1)['hex']
+        _tx_id = n0.sendrawtransaction(signed2)
+        n0.generate(10)
+        self.sync_all()
+
+        newbalance1 = float(n1.getwalletinfo()['balance'])
+        assert_equal(balance1 - fee, newbalance1)
+
+        assert_does_not_contain_key(anduin_owner, n2.listmyassets())
+        assert_equal(amount_owner, int(n1.listmyassets()[anduin_owner]))
+
+        assert_equal(unspent_asset_amount1 - price, n1.listmyassets()[jaina])
+        assert_equal(unspent_asset_amount2 - amount, n2.listmyassets()[anduin])
+
+
     def run_test(self):
         self.activate_assets()
         self.issue_reissue_transfer_test()
@@ -683,6 +882,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         self.reissue_tampering_test()
         self.unique_assets_via_issue_test()
         self.bad_ipfs_hash()
+        self.atomic_swaps()
 
 if __name__ == '__main__':
     RawAssetTransactionsTest().main()
