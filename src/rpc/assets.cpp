@@ -824,6 +824,8 @@ UniValue reissue(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
         if (newipfs.substr(0,2) != "Qm")
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
+        if (DecodeIPFS(newipfs).empty())
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (contains invalid characters)"));
     }
 
     CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeIPFS(newipfs));

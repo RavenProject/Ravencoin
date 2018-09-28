@@ -344,6 +344,8 @@ bool CheckOwnerDataTx(const CTxOut& txOut);
 bool CheckReissueDataTx(const CTxOut& txOut);
 bool CheckTransferOwnerTx(const CTxOut& txOut);
 
+bool CheckEncodedIPFS(const std::string& hash, std::string& strError);
+
 bool CheckAmountWithUnits(const CAmount& nAmount, const uint8_t nUnits);
 
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);

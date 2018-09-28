@@ -68,6 +68,9 @@ private:
     void updateFeeMinimizedLabel();
     void minimizeFeeSection(bool fMinimize);
 
+    //Validation of IPFS
+    bool checkIPFSHash(QString hash);
+
 private Q_SLOTS:
     void onCloseClicked();
     void onAssetSelected(int index);
