@@ -113,6 +113,8 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
 
     formatGreen = "%1%2 <font color=green><b>%3</b></font>";
     formatBlack = "%1%2 <font color=black><b>%3</b></font>";
+
+    adjustSize();
 }
 
 void ReissueAssetDialog::setClientModel(ClientModel *_clientModel)
@@ -141,6 +143,9 @@ void ReissueAssetDialog::setModel(WalletModel *_model)
         connect(_model->getOptionsModel(), SIGNAL(coinControlFeaturesChanged(bool)), this, SLOT(coinControlFeatureChanged(bool)));
         ui->frameCoinControl->setVisible(_model->getOptionsModel()->getCoinControlFeatures());
         coinControlUpdateLabels();
+
+        // Custom Fee Control
+        ui->frameFee->setVisible(_model->getOptionsModel()->getCustomFeeFeatures());
 
         // fee section
         for (const int &n : confTargets) {

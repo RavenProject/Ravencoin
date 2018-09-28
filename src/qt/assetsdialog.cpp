@@ -167,10 +167,13 @@ void AssetsDialog::setModel(WalletModel *_model)
         connect(_model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(assetControlUpdateLabels()));
         connect(_model->getOptionsModel(), SIGNAL(coinControlFeaturesChanged(bool)), this, SLOT(assetControlFeatureChanged(bool)));
 
+        // Custom Fee Control
+        connect(_model->getOptionsModel(), SIGNAL(customFeeFeaturesChanged(bool)), this, SLOT(customFeeFeatureChanged(bool)));
+
 
         ui->frameAssetControl->setVisible(false);
-        //TODO Turn on the coin control features for assets
         ui->frameAssetControl->setVisible(_model->getOptionsModel()->getCoinControlFeatures());
+        ui->frameFee->setVisible(_model->getOptionsModel()->getCustomFeeFeatures());
         assetControlUpdateLabels();
 
         // fee section
@@ -755,6 +758,11 @@ void AssetsDialog::assetControlFeatureChanged(bool checked)
         AssetControlDialog::assetControl->SetNull();
 
     assetControlUpdateLabels();
+}
+
+void AssetsDialog::customFeeFeatureChanged(bool checked)
+{
+    ui->frameFee->setVisible(checked);
 }
 
 // Coin Control: button inputs -> show actual coin control dialog
