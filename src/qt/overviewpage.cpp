@@ -301,11 +301,17 @@ void OverviewPage::showAssets()
         ui->assetBalanceLabel->show();
         ui->labelAssetStatus->show();
         ui->labelAssetAdministrator->show();
+
+        // Disable the vertical space so that listAssets goes to the bottom of the screen
+        ui->assetVeriticalSpaceWidget->hide();
     } else {
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
         ui->listAssets->hide();
         ui->labelAssetAdministrator->hide();
+
+        // This keeps the RVN balance grid from expanding and looking terrible when asset balance is hidden
+        ui->assetVeriticalSpaceWidget->show();
     }
 
     displayAssetInfo();
