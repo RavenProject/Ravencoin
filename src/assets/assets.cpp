@@ -283,7 +283,7 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     if (fCheckMempool) {
         for (const CTxMemPoolEntry &entry : mempool.mapTx) {
             CTransaction tx = entry.GetTx();
-            if (tx.IsNewAsset()) {
+            if (tx.IsNewAsset() || tx.IsNewUniqueAsset()) {
                 CNewAsset asset;
                 std::string address;
                 AssetFromTransaction(tx, asset, address);
