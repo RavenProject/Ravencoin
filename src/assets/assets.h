@@ -329,6 +329,7 @@ bool IsAssetUnitsValid(const CAmount& units);
 bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress);
 bool ReissueAssetFromTransaction(const CTransaction& tx, CReissueAsset& reissue, std::string& strAddress);
+bool UniqueAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 
 bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetTransfer, std::string& strAddress);
 bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string& strAddress);

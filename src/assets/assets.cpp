@@ -283,10 +283,21 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     if (fCheckMempool) {
         for (const CTxMemPoolEntry &entry : mempool.mapTx) {
             CTransaction tx = entry.GetTx();
-            if (tx.IsNewAsset() || tx.IsNewUniqueAsset()) {
+
+            bool fIsNewAsset = tx.IsNewAsset();
+            bool fIsNewUniqueAsset = false;
+            if (!fIsNewAsset)
+                fIsNewUniqueAsset = tx.IsNewUniqueAsset();
+
+            if (fIsNewAsset || fIsNewUniqueAsset) {
                 CNewAsset asset;
                 std::string address;
-                AssetFromTransaction(tx, asset, address);
+
+                if (fIsNewAsset)
+                    AssetFromTransaction(tx, asset, address);
+                else
+                    UniqueAssetFromTransaction(tx, asset, address);
+
                 if (asset.strName == strName) {
                     strError = _("Asset with this name is already in the mempool");
                     return false;
@@ -480,6 +491,18 @@ bool ReissueAssetFromTransaction(const CTransaction& tx, CReissueAsset& reissue,
     CScript scriptPubKey = tx.vout[tx.vout.size() - 1].scriptPubKey;
 
     return ReissueAssetFromScript(scriptPubKey, reissue, strAddress);
+}
+
+bool UniqueAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
+{
+    // Check to see if the transaction is an new asset issue tx
+    if (!tx.IsNewUniqueAsset())
+        return false;
+
+    // Get the scriptPubKey from the last tx in vout
+    CScript scriptPubKey = tx.vout[tx.vout.size() - 1].scriptPubKey;
+
+    return AssetFromScript(scriptPubKey, asset, strAddress);
 }
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg)
