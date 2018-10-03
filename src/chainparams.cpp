@@ -137,7 +137,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1540944000; // Oct 31, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1572480000; // Oct 31, 2019
 
-
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 
