@@ -97,7 +97,8 @@ class ListTransactionsTest(RavenTestFramework):
                             {"category": "receive", "amount": Decimal("0.1")},
                             {"txid": txid, "account": "watchonly"})
 
-        self.run_rbf_opt_in_test()
+        # - This section of the test is removed since we are no longer supporting RBF (for now)
+        #self.run_rbf_opt_in_test()
 
     # Check that the opt-in-rbf flag works properly, for sent and received
     # transactions.

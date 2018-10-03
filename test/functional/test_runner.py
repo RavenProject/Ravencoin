@@ -68,6 +68,7 @@ BASE_SCRIPTS= [
     # 'p2p_compactblocks.py',       TODO - refactor to assume segwit is always active
     # 'p2p_segwit.py',              TODO - refactor to assume segwit is always active
     # 'feature_csv_activation.py',  TODO - currently testing softfork activations, we need to test the features
+    #'wallet_bumpfee.py',           TODO - Now fails because we removed RBF
     # 'example_test.py',
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 2m vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     'wallet_backup.py',
@@ -90,7 +91,6 @@ BASE_SCRIPTS= [
     'rpc_rawtransaction.py',
     'rpc_addressindex.py',
     'wallet_dump.py',
-    'wallet_bumpfee.py',
     'mempool_persist.py',
     'rpc_timestampindex.py',
     'wallet_listreceivedby.py',
