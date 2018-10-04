@@ -140,8 +140,14 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
 
                 int reissueIndex = tx.vout.size() - 1;
 
-                CNewAsset originalAsset;
-                if (!assetsCache->AddReissueAsset(reissue, strAddress, COutPoint(txid, reissueIndex), originalAsset))
+
+                // Get the asset before we change it
+                CNewAsset asset;
+                if (!assetsCache->GetAssetMetaDataIfExists(reissue.strName, asset))
+                    error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
+                          __func__, reissue.strName);
+
+                if (!assetsCache->AddReissueAsset(reissue, strAddress, COutPoint(txid, reissueIndex)))
                     error("%s: Failed to reissue an asset. Asset Name : %s", __func__, reissue.strName);
 
                 // Set the old IPFSHash for the blockundo
@@ -149,7 +155,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 bool fUnitsChanged = reissue.nUnits != -1;
                 if (fIPFSChanged || fUnitsChanged) {
                     undoAssetData->first = reissue.strName; // Asset Name
-                    undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, originalAsset.strIPFSHash, originalAsset.units}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
+                    undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, asset.strIPFSHash, asset.units}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
                 }
 
                 CAssetCachePossibleMine possibleMine(reissue.strName, COutPoint(tx.GetHash(), reissueIndex),

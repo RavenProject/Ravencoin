@@ -247,7 +247,7 @@ public :
     bool AddTransferAsset(const CAssetTransfer& transferAsset, const std::string& address, const COutPoint& out, const CTxOut& txOut);
     bool AddOwnerAsset(const std::string& assetsName, const std::string address);
     bool AddToMyUpspentOutPoints(const std::string& strName, const COutPoint& out);
-    bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out, CNewAsset& orginalAsset);
+    bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out);
 
     // Cache only validation functions
     bool TrySpendCoin(const COutPoint& out, const CTxOut& coin);

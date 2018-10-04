@@ -36,8 +36,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
     COutPoint out(uint256S("BF50CB9A63BE0019171456252989A459A7D0A5F494735278290079D22AB704A4"), 1);
 
     // Add an reissuance of the asset to the cache
-    CNewAsset originalAsset;
-    BOOST_CHECK_MESSAGE(cache.AddReissueAsset(reissue1, Params().GlobalBurnAddress(), out, originalAsset), "Failed to add reissue");
+    BOOST_CHECK_MESSAGE(cache.AddReissueAsset(reissue1, Params().GlobalBurnAddress(), out), "Failed to add reissue");
 
     // Check to see if the reissue changed the cache data correctly
     BOOST_CHECK_MESSAGE(cache.mapReissuedAssetData.count("RVNASSET"), "Map Reissued Asset should contain the asset \"RVNASSET\"");

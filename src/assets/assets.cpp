@@ -422,7 +422,6 @@ CNewAsset::CNewAsset(const std::string& strName, const CAmount& nAmount, const i
     this->nHasIPFS = int8_t(nHasIPFS);
     this->strIPFSHash = strIPFSHash;
 }
-
 CNewAsset::CNewAsset(const std::string& strName, const CAmount& nAmount)
 {
     this->SetNull();
@@ -1358,13 +1357,14 @@ bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address
 }
 
 //! Changes Memory Only
-bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out, CNewAsset& orginalAsset)
+bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out)
 {
     auto pair = std::make_pair(reissue.strName, address);
 
+    CNewAsset asset;
     int assetHeight;
     uint256 assetBlockHash;
-    if (!GetAssetMetaDataIfExists(reissue.strName, orginalAsset, assetHeight, assetBlockHash))
+    if (!GetAssetMetaDataIfExists(reissue.strName, asset, assetHeight, assetBlockHash))
         return error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
                      __func__, reissue.strName);
 
@@ -1387,16 +1387,16 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
 
     // Insert the reissue information into the reissue map
     if (!mapReissuedAssetData.count(reissue.strName)) {
-        orginalAsset.nAmount += reissue.nAmount;
-        orginalAsset.nReissuable = reissue.nReissuable;
+        asset.nAmount += reissue.nAmount;
+        asset.nReissuable = reissue.nReissuable;
         if (reissue.nUnits != -1)
-            orginalAsset.units = reissue.nUnits;
+            asset.units = reissue.nUnits;
 
         if (reissue.strIPFSHash != "") {
-            orginalAsset.nHasIPFS = 1;
-            orginalAsset.strIPFSHash = reissue.strIPFSHash;
+            asset.nHasIPFS = 1;
+            asset.strIPFSHash = reissue.strIPFSHash;
         }
-        mapReissuedAssetData.insert(make_pair(reissue.strName, orginalAsset));
+        mapReissuedAssetData.insert(make_pair(reissue.strName, asset));
     } else {
         mapReissuedAssetData.at(reissue.strName).nAmount += reissue.nAmount;
         mapReissuedAssetData.at(reissue.strName).nReissuable = reissue.nReissuable;
