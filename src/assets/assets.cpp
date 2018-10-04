@@ -268,13 +268,13 @@ bool CNewAsset::IsNull() const
     return strName == "";
 }
 
-bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool, bool fCheckDuplicateInputs) const
+bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool, bool fCheckDuplicateInputs, bool fForceDuplicateCheck) const
 {
     strError = "";
 
     // Check our current passets to see if the asset has been created yet
     if (fCheckDuplicateInputs) {
-        if (assetCache.CheckIfAssetExists(this->strName)) {
+        if (assetCache.CheckIfAssetExists(this->strName, fForceDuplicateCheck)) {
             strError = std::string(_("Invalid parameter: asset_name '")) + strName + std::string(_("' has already been used"));
             return false;
         }
@@ -432,6 +432,19 @@ CNewAsset::CNewAsset(const std::string& strName, const CAmount& nAmount)
     this->nReissuable = int8_t(DEFAULT_REISSUABLE);
     this->nHasIPFS = int8_t(DEFAULT_HAS_IPFS);
     this->strIPFSHash = DEFAULT_IPFS;
+}
+
+CDatabasedAssetData::CDatabasedAssetData(const CNewAsset& asset, const int& nHeight, const uint256& blockHash)
+{
+    this->SetNull();
+    this->asset = asset;
+    this->nHeight = nHeight;
+    this->blockHash = blockHash;
+}
+
+CDatabasedAssetData::CDatabasedAssetData()
+{
+    this->SetNull();
 }
 
 /**
@@ -1303,7 +1316,7 @@ bool CAssetsCache::RemoveNewAsset(const CNewAsset& asset, const std::string addr
 
     mapAssetsAddressAmount[std::make_pair(asset.strName, address)] = 0;
 
-    CAssetCacheNewAsset newAsset(asset, address);
+    CAssetCacheNewAsset newAsset(asset, address, 0 , uint256());
 
     if (setNewAssetsToAdd.count(newAsset))
         setNewAssetsToAdd.erase(newAsset);
@@ -1314,7 +1327,7 @@ bool CAssetsCache::RemoveNewAsset(const CNewAsset& asset, const std::string addr
 }
 
 //! Changes Memory Only
-bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address)
+bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash)
 {
     if(CheckIfAssetExists(asset.strName))
         return error("%s: Tried adding new asset, but it already existed in the set of assets: %s", __func__, asset.strName);
@@ -1334,7 +1347,7 @@ bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address
     // Insert the asset into the assests address amount map
     mapAssetsAddressAmount[std::make_pair(asset.strName, address)] = asset.nAmount;
 
-    CAssetCacheNewAsset newAsset(asset, address);
+    CAssetCacheNewAsset newAsset(asset, address, nHeight, blockHash);
 
     if (setNewAssetsToRemove.count(newAsset))
         setNewAssetsToRemove.erase(newAsset);
@@ -1345,13 +1358,15 @@ bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address
 }
 
 //! Changes Memory Only
-bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out)
+bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out, CNewAsset& orginalAsset)
 {
     auto pair = std::make_pair(reissue.strName, address);
 
-    CNewAsset assetData;
-    if (!GetAssetMetaDataIfExists(reissue.strName, assetData))
-        return error("%s: Tried reissuing an asset, but that asset didn't exist: %s", __func__, reissue.strName);
+    int assetHeight;
+    uint256 assetBlockHash;
+    if (!GetAssetMetaDataIfExists(reissue.strName, orginalAsset, assetHeight, assetBlockHash))
+        return error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
+                     __func__, reissue.strName);
 
     // Insert the asset into the assets address map
     if (mapAssetsAddresses.count(reissue.strName)) {
@@ -1372,16 +1387,16 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
 
     // Insert the reissue information into the reissue map
     if (!mapReissuedAssetData.count(reissue.strName)) {
-        assetData.nAmount += reissue.nAmount;
-        assetData.nReissuable = reissue.nReissuable;
+        orginalAsset.nAmount += reissue.nAmount;
+        orginalAsset.nReissuable = reissue.nReissuable;
         if (reissue.nUnits != -1)
-            assetData.units = reissue.nUnits;
+            orginalAsset.units = reissue.nUnits;
 
         if (reissue.strIPFSHash != "") {
-            assetData.nHasIPFS = 1;
-            assetData.strIPFSHash = reissue.strIPFSHash;
+            orginalAsset.nHasIPFS = 1;
+            orginalAsset.strIPFSHash = reissue.strIPFSHash;
         }
-        mapReissuedAssetData.insert(make_pair(reissue.strName, assetData));
+        mapReissuedAssetData.insert(make_pair(reissue.strName, orginalAsset));
     } else {
         mapReissuedAssetData.at(reissue.strName).nAmount += reissue.nAmount;
         mapReissuedAssetData.at(reissue.strName).nReissuable = reissue.nReissuable;
@@ -1391,7 +1406,7 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
         }
     }
 
-    CAssetCacheReissueAsset reissueAsset(reissue, address, out);
+    CAssetCacheReissueAsset reissueAsset(reissue, address, out, assetHeight, assetBlockHash);
 
     if (setNewReissueToRemove.count(reissueAsset))
         setNewReissueToRemove.erase(reissueAsset);
@@ -1407,7 +1422,9 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
     auto pair = std::make_pair(reissue.strName, address);
 
     CNewAsset assetData;
-    if (!GetAssetMetaDataIfExists(reissue.strName, assetData))
+    int height;
+    uint256 blockHash;
+    if (!GetAssetMetaDataIfExists(reissue.strName, assetData, height, blockHash))
         return error("%s: Tried undoing reissue of an asset, but that asset didn't exist: %s", __func__, reissue.strName);
 
     // Remove the reissued asset outpoint if it belongs to my unspent assets
@@ -1451,7 +1468,7 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
 
     mapReissuedAssetData[assetData.strName] = assetData;
 
-    CAssetCacheReissueAsset reissueAsset(reissue, address, out);
+    CAssetCacheReissueAsset reissueAsset(reissue, address, out, height, blockHash);
 
     if (setNewReissueToAdd.count(reissueAsset))
         setNewReissueToAdd.erase(reissueAsset);
@@ -1565,8 +1582,8 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
             // Add the new assets to the database
             for (auto newAsset : setNewAssetsToAdd) {
 
-                passetsCache->Put(newAsset.asset.strName, newAsset.asset);
-                if (!passetsdb->WriteAssetData(newAsset.asset)) {
+                passetsCache->Put(newAsset.asset.strName, CDatabasedAssetData(newAsset.asset, newAsset.blockHeight, newAsset.blockHash));
+                if (!passetsdb->WriteAssetData(newAsset.asset, newAsset.blockHeight, newAsset.blockHash)) {
                     dirty = true;
                     message = "_Failed Writing New Asset Data to database";
                 }
@@ -1663,7 +1680,7 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
                 auto reissue_name = newReissue.reissue.strName;
                 auto pair = make_pair(reissue_name, newReissue.address);
                 if (mapReissuedAssetData.count(reissue_name)) {
-                    if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name))) {
+                    if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), newReissue.blockHeight, newReissue.blockHash)) {
                         dirty = true;
                         message = "_Failed Writing reissue asset data to database";
                     }
@@ -1691,7 +1708,7 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
             for (auto undoReissue : setNewReissueToRemove) {
                 auto reissue_name = undoReissue.reissue.strName;
                 if (mapReissuedAssetData.count(reissue_name)) {
-                    if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name))) {
+                    if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), undoReissue.blockHeight, undoReissue.blockHash)) {
                         dirty = true;
                         message = "_Failed Writing undo reissue asset data to database";
                     }
@@ -2053,32 +2070,47 @@ void UpdatePossibleAssets()
 
 
 //! Returns a boolean on if the asset exists
-bool CAssetsCache::CheckIfAssetExists(const std::string& name)
+bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck)
 {
     // TODO we need to add some Locks to this I would think
 
     // Create objects that will be used to check the dirty cache
     CNewAsset asset;
     asset.strName = name;
-    CAssetCacheNewAsset cachedAsset(asset, "");
+    CAssetCacheNewAsset cachedAsset(asset, "", 0, uint256());
 
     // Check the dirty caches first and see if it was recently added or removed
     if (setNewAssetsToRemove.count(cachedAsset))
         return false;
 
-    if (setNewAssetsToAdd.count(cachedAsset))
-        return true;
+    if (setNewAssetsToAdd.count(cachedAsset)) {
+        if (fForceDuplicateCheck)
+            return true;
+        else {
+            LogPrintf("%s : Found asset %s in setNewAssetsToAdd but force duplicate check wasn't true\n", __func__, name);
+        }
+    }
 
     // Check the cache, if it doesn't exist in the cache. Try and read it from database
     if (passetsCache) {
         if (passetsCache->Exists(name)) {
-            return true;
+            if (fForceDuplicateCheck)
+                return true;
+            else {
+                LogPrintf("%s : Found asset %s in passetsCache but force duplicate check wasn't true\n", __func__, name);
+            }
         } else {
             if (passetsdb) {
                 CNewAsset readAsset;
-                if (passetsdb->ReadAssetData(name, readAsset)) {
-                    passetsCache->Put(readAsset.strName, readAsset);
-                    return true;
+                int nHeight;
+                uint256 hash;
+                if (passetsdb->ReadAssetData(name, readAsset, nHeight, hash)) {
+                    passetsCache->Put(readAsset.strName, CDatabasedAssetData(readAsset, nHeight, hash));
+                    if (fForceDuplicateCheck)
+                        return true;
+                    else {
+                        LogPrintf("%s : Found asset %s in passetsdb but force duplicate check wasn't true\n", __func__, name);
+                    }
                 }
             }
         }
@@ -2089,6 +2121,13 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name)
 
 bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset)
 {
+    int height;
+    uint256 hash;
+    return GetAssetMetaDataIfExists(name, asset, height, hash);
+}
+
+bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash)
+{
     // Check the map that contains the reissued asset data. If it is in this map, it hasn't been saved to disk yet
     if (mapReissuedAssetData.count(name)) {
         asset = mapReissuedAssetData.at(name);
@@ -2098,7 +2137,7 @@ bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &
     // Create objects that will be used to check the dirty cache
     CNewAsset tempAsset;
     tempAsset.strName = name;
-    CAssetCacheNewAsset cachedAsset(tempAsset, "");
+    CAssetCacheNewAsset cachedAsset(tempAsset, "", 0, uint256());
 
     // Check the dirty caches first and see if it was recently added or removed
     if (setNewAssetsToRemove.count(cachedAsset)) {
@@ -2108,22 +2147,32 @@ bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &
     auto setIterator = setNewAssetsToAdd.find(cachedAsset);
     if (setIterator != setNewAssetsToAdd.end()) {
         asset = setIterator->asset;
+        nHeight = setIterator->blockHeight;
+        blockHash = setIterator->blockHash;
         return true;
     }
 
     // Check the cache, if it doesn't exist in the cache. Try and read it from database
     if (passetsCache) {
         if (passetsCache->Exists(name)) {
-            asset = passetsCache->Get(name);
+            CDatabasedAssetData data;
+            data = passetsCache->Get(name);
+            asset = data.asset;
+            nHeight = data.nHeight;
+            blockHash = data.blockHash;
             return true;
         }
     }
 
     if (passetsdb && passetsCache) {
         CNewAsset readAsset;
-        if (passetsdb->ReadAssetData(name, readAsset)) {
+        int height;
+        uint256 hash;
+        if (passetsdb->ReadAssetData(name, readAsset, height, hash)) {
             asset = readAsset;
-            passetsCache->Put(readAsset.strName, readAsset);
+            nHeight = height;
+            blockHash = hash;
+            passetsCache->Put(readAsset.strName, CDatabasedAssetData(readAsset, height, hash));
             return true;
         }
     }

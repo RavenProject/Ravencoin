@@ -921,14 +921,15 @@ UniValue listassets(const JSONRPCRequest& request)
         start = request.params[3].get_int();
     }
 
-    std::vector<CNewAsset> assets;
+    std::vector<CDatabasedAssetData> assets;
     if (!passetsdb->AssetDir(assets, filter, count, start))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "couldn't retrieve asset directory.");
 
     UniValue result;
     result = verbose ? UniValue(UniValue::VOBJ) : UniValue(UniValue::VARR);
 
-    for (auto asset : assets) {
+    for (auto data : assets) {
+        CNewAsset asset = data.asset;
         if (verbose) {
             UniValue detail(UniValue::VOBJ);
             detail.push_back(Pair("name", asset.strName));
@@ -936,6 +937,8 @@ UniValue listassets(const JSONRPCRequest& request)
             detail.push_back(Pair("units", asset.units));
             detail.push_back(Pair("reissuable", asset.nReissuable));
             detail.push_back(Pair("has_ipfs", asset.nHasIPFS));
+            detail.push_back(Pair("block_height", data.nHeight));
+            detail.push_back(Pair("blockhash", data.blockHash.GetHex()));
             if (asset.nHasIPFS)
                 detail.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
             result.push_back(Pair(asset.strName, detail));

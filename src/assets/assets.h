@@ -243,11 +243,11 @@ public :
     bool UndoAssetCoin(const Coin& coin, const COutPoint& out);
 
     // Cache only add asset functions
-    bool AddNewAsset(const CNewAsset& asset, const std::string address);
+    bool AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash);
     bool AddTransferAsset(const CAssetTransfer& transferAsset, const std::string& address, const COutPoint& out, const CTxOut& txOut);
     bool AddOwnerAsset(const std::string& assetsName, const std::string address);
     bool AddToMyUpspentOutPoints(const std::string& strName, const COutPoint& out);
-    bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out);
+    bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out, CNewAsset& orginalAsset);
 
     // Cache only validation functions
     bool TrySpendCoin(const COutPoint& out, const CTxOut& coin);
@@ -258,7 +258,8 @@ public :
     bool ContainsAsset(const std::string& assetName);
     bool AddPossibleOutPoint(const CAssetCachePossibleMine& possibleMine);
 
-    bool CheckIfAssetExists(const std::string& name);
+    bool CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck = true);
+    bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash);
     bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset);
 
     //! Calculate the size of the CAssets (in bytes)
