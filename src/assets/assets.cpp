@@ -281,28 +281,9 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (fCheckMempool) {
-        for (const CTxMemPoolEntry &entry : mempool.mapTx) {
-            CTransaction tx = entry.GetTx();
-
-            bool fIsNewAsset = tx.IsNewAsset();
-            bool fIsNewUniqueAsset = false;
-            if (!fIsNewAsset)
-                fIsNewUniqueAsset = tx.IsNewUniqueAsset();
-
-            if (fIsNewAsset || fIsNewUniqueAsset) {
-                CNewAsset asset;
-                std::string address;
-
-                if (fIsNewAsset)
-                    AssetFromTransaction(tx, asset, address);
-                else
-                    UniqueAssetFromTransaction(tx, asset, address);
-
-                if (asset.strName == strName) {
-                    strError = _("Asset with this name is already in the mempool");
-                    return false;
-                }
-            }
+        if (mempool.mapAssetToHash.count(strName)) {
+            strError = _("Asset with this name is already in the mempool");
+            return false;
         }
     }
 

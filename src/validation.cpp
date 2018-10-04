@@ -922,6 +922,20 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             mapReissuedAssets.insert(out);
             mapReissuedTx.insert(std::make_pair(out.second, out.first));
         }
+
+        if (AreAssetsDeployed()) {
+            for (auto out : tx.vout) {
+                if (out.scriptPubKey.IsAssetScript()) {
+                    CAssetOutputEntry data;
+                    if (!GetAssetData(out.scriptPubKey, data))
+                        continue;
+                    if (data.type == TX_NEW_ASSET && !IsAssetNameAnOwner(data.assetName)) {
+                        pool.mapAssetToHash[data.assetName] = hash;
+                        pool.mapHashToAsset[hash] = data.assetName;
+                    }
+                }
+            }
+        }
     }
 
     GetMainSignals().TransactionAddedToMempool(ptx);
@@ -2802,10 +2816,20 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     int64_t nTime2 = GetTimeMicros(); nTimeReadFromDisk += nTime2 - nTime1;
     int64_t nTime3;
     LogPrint(BCLog::BENCH, "  - Load block from disk: %.2fms [%.2fs]\n", (nTime2 - nTime1) * MILLI, nTimeReadFromDisk * MICRO);
+
+    /** RVN START */
+    // Initialize sets used from removing asset entries from the mempool
+    std::set<CAssetCacheNewAsset> prevNewAssets;
+    std::set<CAssetCacheNewAsset> afterNewAsset;
+    /** RVN END */
+
     {
         CCoinsViewCache view(pcoinsTip);
 
+        /** RVN START */
         CAssetsCache assetCache(*passets);
+        prevNewAssets = assetCache.setNewAssetsToAdd; // List of newly cached assets before block is connected
+        /** RVN END */
 
         bool rv = ConnectBlock(blockConnecting, state, pindexNew, view, chainparams, &assetCache);
         GetMainSignals().BlockChecked(blockConnecting, state);
@@ -2815,6 +2839,14 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
             return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
         }
 
+        /** RVN START */
+        // Get the newly created assets, from the connectblock assetCache
+        afterNewAsset = assetCache.setNewAssetsToAdd;
+        for (auto it : prevNewAssets) {
+            if (afterNewAsset.count(it))
+                afterNewAsset.erase(it);
+        }
+
         for (auto tx : blockConnecting.vtx) {
             uint256 txHash = tx->GetHash();
             if (mapReissuedTx.count(txHash)) {
@@ -2822,13 +2854,17 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
                 mapReissuedTx.erase(txHash);
             }
         }
+        /** RVN END */
+
         nTime3 = GetTimeMicros(); nTimeConnectTotal += nTime3 - nTime2;
         LogPrint(BCLog::BENCH, "  - Connect total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime3 - nTime2) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
         bool flushed = view.Flush();
         assert(flushed);
 
+        /** RVN START */
         bool assetFlushed = assetCache.Flush(true);
         assert(assetFlushed);
+        /** RVN END */
     }
     int64_t nTime4 = GetTimeMicros(); nTimeFlush += nTime4 - nTime3;
     LogPrint(BCLog::BENCH, "  - Flush: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime4 - nTime3) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
@@ -2838,7 +2874,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     int64_t nTime5 = GetTimeMicros(); nTimeChainState += nTime5 - nTime4;
     LogPrint(BCLog::BENCH, "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO, nTimeChainState * MILLI / nBlocksTotal);
     // Remove conflicting transactions from the mempool.;
-    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight);
+    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, afterNewAsset);
     disconnectpool.removeForBlock(blockConnecting.vtx);
     // Update chainActive & related variables.
     UpdateTip(pindexNew, chainparams);
