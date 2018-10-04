@@ -15,6 +15,7 @@
 class CNewAsset;
 class uint256;
 class COutPoint;
+class CDatabasedAssetData;
 
 struct CBlockAssetUndo
 {
@@ -44,14 +45,14 @@ public:
     CAssetsDB& operator=(const CAssetsDB&) = delete;
 
     // Write to database functions
-    bool WriteAssetData(const CNewAsset& asset);
+    bool WriteAssetData(const CNewAsset& asset, const int nHeight, const uint256& blockHash);
     bool WriteMyAssetsData(const std::string &strName, const std::set<COutPoint>& setOuts);
     bool WriteAssetAddressQuantity(const std::string& assetName, const std::string& address, const CAmount& quantity);
     bool WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData);
     bool WriteReissuedMempoolState();
 
     // Read from database functions
-    bool ReadAssetData(const std::string& strName, CNewAsset& asset);
+    bool ReadAssetData(const std::string& strName, CNewAsset& asset, int& nHeight, uint256& blockHash);
     bool ReadMyAssetsData(const std::string &strName, std::set<COutPoint>& setOuts);
     bool ReadAssetAddressQuantity(const std::string& assetName, const std::string& address, CAmount& quantity);
     bool ReadBlockUndoAssetData(const uint256& blockhash, std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData);
@@ -65,8 +66,8 @@ public:
     // Helper functions
     bool EraseMyOutPoints(const std::string& assetName);
     bool LoadAssets();
-    bool AssetDir(std::vector<CNewAsset>& assets, const std::string filter, const size_t count, const long start);
-    bool AssetDir(std::vector<CNewAsset>& assets);
+    bool AssetDir(std::vector<CDatabasedAssetData>& assets, const std::string filter, const size_t count, const long start);
+    bool AssetDir(std::vector<CDatabasedAssetData>& assets);
 };
 
 

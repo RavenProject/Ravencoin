@@ -1450,7 +1450,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete passetsCache;
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
-                passetsCache = new CLRUCache<std::string, CNewAsset>(MAX_CACHE_ASSETS_SIZE);
+                passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
 
 
                 // Need to load assets before we verify the database

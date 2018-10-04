@@ -95,7 +95,7 @@ public:
 
     bool IsNull() const;
 
-    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool = false, bool fCheckDuplicateInputs = true) const;
+    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool = false, bool fCheckDuplicateInputs = true, bool fForceDuplicateCheck = true) const;
 
     std::string ToString();
 
@@ -124,6 +124,34 @@ public:
     bool operator()(const CNewAsset& s1, const CNewAsset& s2) const
     {
         return s1.strName < s2.strName;
+    }
+};
+
+class CDatabasedAssetData
+{
+public:
+    CNewAsset asset;
+    int nHeight;
+    uint256 blockHash;
+
+    CDatabasedAssetData(const CNewAsset& asset, const int& nHeight, const uint256& blockHash);
+    CDatabasedAssetData();
+
+    void SetNull()
+    {
+        asset.SetNull();
+        nHeight = -1;
+        blockHash = uint256();
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(asset);
+        READWRITE(nHeight);
+        READWRITE(blockHash);
     }
 };
 
@@ -206,11 +234,15 @@ struct CAssetCacheNewAsset
 {
     CNewAsset asset;
     std::string address;
+    uint256 blockHash;
+    int blockHeight;
 
-    CAssetCacheNewAsset(const CNewAsset& asset, const std::string& address)
+    CAssetCacheNewAsset(const CNewAsset& asset, const std::string& address, const int& blockHeight, const uint256& blockHash)
     {
         this->asset = asset;
         this->address = address;
+        this->blockHash = blockHash;
+        this->blockHeight = blockHeight;
     }
 
     bool operator<(const CAssetCacheNewAsset& rhs) const
@@ -224,12 +256,17 @@ struct CAssetCacheReissueAsset
     CReissueAsset reissue;
     std::string address;
     COutPoint out;
+    uint256 blockHash;
+    int blockHeight;
 
-    CAssetCacheReissueAsset(const CReissueAsset& reissue, const std::string& address, const COutPoint& out)
+
+    CAssetCacheReissueAsset(const CReissueAsset& reissue, const std::string& address, const COutPoint& out, const int& blockHeight, const uint256& blockHash)
     {
         this->reissue = reissue;
         this->address = address;
         this->out = out;
+        this->blockHash = blockHash;
+        this->blockHeight = blockHeight;
     }
 
     bool operator<(const CAssetCacheReissueAsset& rhs) const
