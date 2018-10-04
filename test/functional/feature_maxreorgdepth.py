@@ -52,29 +52,41 @@ class MaxReorgTest(RavenTestFramework):
         self.log.info(f"Doing a reorg test with height: {height}, peers: {peers}, tip_age: {tip_age}.  " + \
                       f"Should reorg? *{should_reorg}*")
 
+        asset_name = "MOON_STONES"
         adversary = self.nodes[0]
         subject = self.nodes[-1]
 
-        start = 10
+        # enough to activate assets
+        start = 432
 
         self.log.info(f"Setting all node times to {tip_age} seconds ago...")
         now = int(round(time.time()))
         set_node_times(self.nodes, now - tip_age)
 
         self.log.info(f"Mining {start} starter blocks on all nodes and syncing...")
-        subject.generate(start)
+        subject.generate(round(start/2))
+        self.sync_all()
+        adversary.generate(round(start/2))
         self.sync_all()
 
-        self.log.info("Disconnecting adversary node...")
+        self.log.info("Stopping adversary node...")
         self.stop_node(0)
+
+        self.log.info(f"Subject is issuing asset: {asset_name}...")
+        subject.issue(asset_name)
 
         self.log.info(f"Miners are mining {height} blocks...")
         subject.generate(height)
         wait_until(lambda: [n.getblockcount() for n in self.nodes[1:]] == [height+start] * (peers-1))
         print([start] + [n.getblockcount() for n in self.nodes[1:]])
 
-        self.log.info(f"Adversary is mining {height*2} (2 x {height}) blocks over the next ~{tip_age} seconds...")
+        self.log.info("Restarting adversary node...")
         self.start_node(0)
+
+        self.log.info(f"Adversary is issuing asset: {asset_name}...")
+        adversary.issue(asset_name)
+
+        self.log.info(f"Adversary is mining {height*2} (2 x {height}) blocks over the next ~{tip_age} seconds...")
         interval = round(tip_age / (height * 2)) + 1
         for i in range(0, height*2):
             set_node_times(self.nodes, (now - tip_age) + ((i+1) * interval))
@@ -88,16 +100,17 @@ class MaxReorgTest(RavenTestFramework):
         print([n.getblockcount() for n in self.nodes])
 
         self.log.info("Reconnecting the network and syncing the chain...")
-        # import pdb;pdb.set_trace()
         for i in range(1, peers):
             connect_nodes_bi(self.nodes, 0, i)
 
         expected_height = start + height
+        subject_owns_asset = True
         if should_reorg > 0:
-            self.log.info(f"Expected a reorg -- blockcount should be {expected_height} (waiting 5 seconds)...")
+            self.log.info(f"Expected a reorg -- blockcount should be {expected_height} and subject should own {asset_name} (waiting 5 seconds)...")
             expected_height += height
+            subject_owns_asset = False
         else:
-            self.log.info(f"Didn't expect a reorg -- blockcount should remain {expected_height} (waiting 5 seconds)...")
+            self.log.info(f"Didn't expect a reorg -- blockcount should remain {expected_height} and both subject and adversary should own {asset_name} (waiting 5 seconds)...")
 
         try:
             wait_until(lambda: [n.getblockcount() for n in self.nodes] == [expected_height] * peers, timeout=5)
@@ -105,6 +118,11 @@ class MaxReorgTest(RavenTestFramework):
             pass
         print([n.getblockcount() for n in self.nodes])
         assert_equal(subject.getblockcount(), expected_height)
+        assert_contains_pair(asset_name + '!', 1, adversary.listmyassets())
+        if subject_owns_asset:
+            assert_contains_pair(asset_name + '!', 1, subject.listmyassets())
+        else:
+            assert_does_not_contain_key(asset_name + '!', subject.listmyassets())
 
 
     def run_test(self):
