@@ -345,6 +345,8 @@ class AssetTest(RavenTestFramework):
             n0.reissue(asset_name, 10.0**(-i), address, "", True, i+1)
             n0.generate(1)
             assert_equal(i+1, n0.listassets("*", True)[asset_name]["units"])
+            assert_raises_rpc_error(-25, "Error: Unable to reissue asset: unit must be larger than current unit selection", \
+                                    n0.reissue, asset_name, 10.0**(-i), address, "", True, i)
 
         n0.reissue(asset_name, 0.00000001, address)
         n0.generate(1)
