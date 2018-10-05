@@ -330,12 +330,34 @@ class AssetTest(RavenTestFramework):
         assert_equal(ipfs_hash, ad['ipfs_hash'])
 
 
+    def reissue_prec_change(self):
+        self.log.info("Testing precision change on reissue...")
+        n0 = self.nodes[0]
+
+        asset_name = "PREC_CHANGES"
+        address = n0.getnewaddress()
+
+        n0.issue(asset_name, 10, "", "", 0, True, False)
+        n0.generate(1)
+        assert_equal(0, n0.listassets("*", True)[asset_name]["units"])
+
+        for i in range(0, 8):
+            n0.reissue(asset_name, 10.0**(-i), address, "", True, i+1)
+            n0.generate(1)
+            assert_equal(i+1, n0.listassets("*", True)[asset_name]["units"])
+
+        n0.reissue(asset_name, 0.00000001, address)
+        n0.generate(1)
+        assert_equal(Decimal('11.11111111'), n0.listassets("*", True)[asset_name]["amount"])
+
+
     def run_test(self):
         self.activate_assets()
         self.big_test()
         self.issue_param_checks()
         self.chain_assets()
         self.ipfs_state()
+        self.reissue_prec_change()
 
 if __name__ == '__main__':
     AssetTest().main()
