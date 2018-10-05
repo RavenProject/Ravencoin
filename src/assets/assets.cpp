@@ -665,6 +665,16 @@ bool CTransaction::VerifyNewAsset() const
     if (vout.size() < 3)
         return false;
 
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners != 1 || nIssues != 1 || nReissues > 0)
+        return false;
+
     // Check for the assets data CTxOut. This will always be the last output in the transaction
     if (!CheckIssueDataTx(vout[vout.size() - 1]))
         return false;
@@ -785,6 +795,18 @@ bool CTransaction::VerifyNewUniqueAsset(CCoinsViewCache& view) const
     if (!fFoundCorrectInput)
         return false;
 
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners > 0 || nReissues > 0 || nIssues != assetOutpointCount) {
+        return false;
+    }
+
+
     return true;
 }
 
@@ -854,6 +876,17 @@ bool CTransaction::VerifyReissueAsset(CCoinsViewCache& view) const
     for (auto out : vout)
         if (CheckReissueBurnTx(out))
             return true;
+
+
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners > 0 || nReissues != 1 || nIssues > 0)
+        return false;
 
     return false;
 }
@@ -2802,4 +2835,22 @@ bool CheckEncodedIPFS(const std::string& hash, std::string& strError)
     }
 
     return true;
+}
+
+void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reissues, int& transfers, int& owners)
+{
+    for (auto out: vout) {
+        int type;
+        bool fIsOwner;
+        if (out.scriptPubKey.IsAssetScript(type, fIsOwner)) {
+            if (type == TX_NEW_ASSET && !fIsOwner)
+                issues++;
+            else if (type == TX_NEW_ASSET && fIsOwner)
+                owners++;
+            else if (type == TX_TRANSFER_ASSET)
+                transfers++;
+            else if (type == TX_REISSUE_ASSET)
+                reissues++;
+        }
+    }
 }

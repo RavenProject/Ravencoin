@@ -591,11 +591,18 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     // Construct the asset transaction
                     asset.ConstructTransaction(scriptPubKey);
 
-                    asset.ConstructOwnerTransaction(ownerPubKey);
+                    AssetType type;
+                    if (IsAssetNameValid(asset.strName, type)) {
+                        if (type != AssetType::UNIQUE) {
+                            asset.ConstructOwnerTransaction(ownerPubKey);
 
-                    // Push the scriptPubKey into the vouts.
-                    CTxOut ownerOut(0, ownerPubKey);
-                    rawTx.vout.push_back(ownerOut);
+                            // Push the scriptPubKey into the vouts.
+                            CTxOut ownerOut(0, ownerPubKey);
+                            rawTx.vout.push_back(ownerOut);
+                        }
+                    } else {
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, ("Invalid parameter, invalid asset name"));
+                    }
 
                     // Push the scriptPubKey into the vouts.
                     CTxOut out(0, scriptPubKey);
