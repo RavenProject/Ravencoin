@@ -329,6 +329,26 @@ class AssetTest(RavenTestFramework):
         assert_equal(1, ad['has_ipfs'])
         assert_equal(ipfs_hash, ad['ipfs_hash'])
 
+    def db_corruption_regression(self):
+        self.log.info("Checking db corruption invalidate block...")
+        n0 = self.nodes[0]
+        asset_name = "DATA_CORRUPT"
+
+        # Test to make sure that undoing a reissue and an issue during a reorg doesn't screw up the database/cache
+        n0.issue(asset_name)
+        a = n0.generate(1)[0]
+        print(a)
+
+        n0.reissue(asset_name, 500, n0.getnewaddress())
+        b = n0.generate(1)[0]
+        print(b)
+
+        print(f"Invalidating {a}...")
+        n0.invalidateblock(a)
+
+        print(n0.listassets(asset_name, True))
+        assert_equal(0, len(n0.listassets(asset_name, True)))
+
 
     def run_test(self):
         self.activate_assets()
@@ -336,6 +356,7 @@ class AssetTest(RavenTestFramework):
         self.issue_param_checks()
         self.chain_assets()
         self.ipfs_state()
+        self.db_corruption_regression()
 
 if __name__ == '__main__':
     AssetTest().main()
