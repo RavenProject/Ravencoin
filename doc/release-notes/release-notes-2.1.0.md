@@ -1,4 +1,4 @@
-Raven Core version *2.1.0.0* is now available!!
+Raven Core version *2.1.0* is now available!!
 ==============
 
   <https://github.com/RavenProject/Ravencoin/releases/tag/v2.1.0>
@@ -62,7 +62,7 @@ known issues running the release binaries on Mojave.
 Notable changes
 ==============
 
-- Mainnet asset activation (Voting begins October 30, 2018)
+- Mainnet asset activation (Voting begins October 31, 2018)
 - Double-spend attack mitigation
 - Many QT Wallet UI enhancement
 - Removed Replace by Fee (RBF)
@@ -72,7 +72,7 @@ Notable changes
 - Added asset transaction chaining
 - Chain synchronization stability
 
-2.1.0.0 Change log
+2.1.0 Change log
 ==============
 
 Changelog available here: <https://github.com/RavenProject/Ravencoin/commits/release_2.1.0>
