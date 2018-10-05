@@ -337,17 +337,37 @@ class AssetTest(RavenTestFramework):
         # Test to make sure that undoing a reissue and an issue during a reorg doesn't screw up the database/cache
         n0.issue(asset_name)
         a = n0.generate(1)[0]
-        print(a)
 
         n0.reissue(asset_name, 500, n0.getnewaddress())
         b = n0.generate(1)[0]
-        print(b)
 
-        print(f"Invalidating {a}...")
+        self.log.info(f"Invalidating {a}...")
         n0.invalidateblock(a)
 
-        print(n0.listassets(asset_name, True))
         assert_equal(0, len(n0.listassets(asset_name, True)))
+
+
+    def reissue_prec_change(self):
+        self.log.info("Testing precision change on reissue...")
+        n0 = self.nodes[0]
+
+        asset_name = "PREC_CHANGES"
+        address = n0.getnewaddress()
+
+        n0.issue(asset_name, 10, "", "", 0, True, False)
+        n0.generate(1)
+        assert_equal(0, n0.listassets("*", True)[asset_name]["units"])
+
+        for i in range(0, 8):
+            n0.reissue(asset_name, 10.0**(-i), address, "", True, i+1)
+            n0.generate(1)
+            assert_equal(i+1, n0.listassets("*", True)[asset_name]["units"])
+            assert_raises_rpc_error(-25, "Error: Unable to reissue asset: unit must be larger than current unit selection", \
+                                    n0.reissue, asset_name, 10.0**(-i), address, "", True, i)
+
+        n0.reissue(asset_name, 0.00000001, address)
+        n0.generate(1)
+        assert_equal(Decimal('11.11111111'), n0.listassets("*", True)[asset_name]["amount"])
 
 
     def run_test(self):
@@ -357,6 +377,8 @@ class AssetTest(RavenTestFramework):
         self.chain_assets()
         self.ipfs_state()
         self.db_corruption_regression()
+        self.reissue_prec_change()
+
 
 if __name__ == '__main__':
     AssetTest().main()
