@@ -1687,6 +1687,15 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
             }
 
             for (auto undoReissue : setNewReissueToRemove) {
+                // In the case the the issue and reissue are both being removed
+                // we can skip this call because the removal of the issue should remove all data pertaining the to asset
+                // Fixes the issue where the reissue data will write over the removed asset meta data that was removed above
+                CNewAsset asset(undoReissue.reissue.strName, 0);
+                CAssetCacheNewAsset testNewAssetCache(asset, "", 0 , uint256());
+                if (setNewAssetsToRemove.count(testNewAssetCache)) {
+                    continue;
+                }
+
                 auto reissue_name = undoReissue.reissue.strName;
                 if (mapReissuedAssetData.count(reissue_name)) {
                     if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), undoReissue.blockHeight, undoReissue.blockHash)) {
