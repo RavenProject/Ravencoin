@@ -315,6 +315,8 @@ CAmount GetBurnAmount(const int nType);
 std::string GetBurnAddress(const AssetType type);
 std::string GetBurnAddress(const int nType);
 
+void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reissues, int& transfers, int& owners);
+
 bool IsAssetNameValid(const std::string& name);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string& error);

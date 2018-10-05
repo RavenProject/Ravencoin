@@ -185,6 +185,20 @@ class RawAssetTransactionsTest(RavenTestFramework):
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
+        # try tampering to issue an asset with duplicate owner outputs
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_issue_hex))
+        tx.deserialize(f)
+        rvno = '72766e6f' #rvno
+        # find the owner output from vout and insert a duplicate back in
+        owner_vout = list(filter(lambda out : rvno in bytes_to_hex_str(out.scriptPubKey), tx.vout))[0]
+        tx.vout.insert(-1, owner_vout)
+        tx_bad_issue = bytes_to_hex_str(tx.serialize())
+        tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+                                n0.sendrawtransaction, tx_bad_issue_signed)
+
+        ########################################
         # try tampering to issue an owner token with no asset
         tx = CTransaction()
         f = BytesIO(hex_str_to_bytes(tx_issue_hex))
@@ -508,7 +522,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         root = "RINGU"
         owner = f"{root}!"
         n0.issue(root)
-        n0.generate(1)
+        n0.generate(10)
 
         asset_tags = ["myprecious1", "bind3", "gold7", "men9"]
         ipfs_hashes = ["QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"] * len(asset_tags)
