@@ -83,6 +83,7 @@ BASE_SCRIPTS= [
     'mempool_limit.py',
     'feature_assets.py',
     'feature_assets_reorg.py',
+    'feature_assets_mempool.py',
     'mining_prioritisetransaction.py',
     'feature_maxreorgdepth.py 4 --height=60 --tip_age=0 --should_reorg=0',      # Don't Reorg
     'feature_maxreorgdepth.py 3 --height=60 --tip_age=0 --should_reorg=1',      # Reorg (low peer count)
