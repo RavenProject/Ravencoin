@@ -36,6 +36,7 @@
 #include "init.h"
 #include "ui_interface.h"
 #include "util.h"
+#include "core_io.h"
 
 #include <iostream>
 
@@ -117,6 +118,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     openRPCConsoleAction(0),
     openAction(0),
     showHelpMessageAction(0),
+    assetAction(0),
     trayIcon(0),
     trayIconMenu(0),
     notificator(0),
@@ -125,8 +127,8 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     modalOverlay(0),
     prevBlocks(0),
     spinnerFrame(0),
-    platformStyle(_platformStyle),
-    assetAction(0)
+    platformStyle(_platformStyle)
+
 {
     QSettings settings;
     if (!restoreGeometry(settings.value("MainWindowGeometry").toByteArray())) {
@@ -1028,10 +1030,14 @@ void RavenGUI::showEvent(QShowEvent *event)
 void RavenGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label, const QString& assetName)
 {
     // On new transaction, make an info balloon
-    QString msg = tr("Date: %1\n").arg(date) +
-                  tr("Amount: %1\n").arg(amount) +
-                  tr("Asset: %1\n").arg(assetName) +
-                  tr("Type: %1\n").arg(type);
+    QString msg = tr("Date: %1\n").arg(date);
+    if (assetName == "RVN")
+        msg += tr("Amount: %1\n").arg(RavenUnits::formatWithUnit(unit, amount, true));
+    else
+        msg += tr("Amount: %1\n").arg(RavenUnits::formatWithCustomName(assetName, amount, MAX_ASSET_UNITS, true));
+
+    msg += tr("Type: %1\n").arg(type);
+    
     if (!label.isEmpty())
         msg += tr("Label: %1\n").arg(label);
     else if (!address.isEmpty())
@@ -1050,7 +1056,6 @@ void RavenGUI::checkAssets()
     else {
         assetAction->setDisabled(true);
         assetAction->setToolTip(tr("Assets not yet active"));
-
         }
 
 }

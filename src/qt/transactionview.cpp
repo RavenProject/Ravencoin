@@ -167,8 +167,8 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
 
     // Actions
     abandonAction = new QAction(tr("Abandon transaction"), this);
-    bumpFeeAction = new QAction(tr("Increase transaction fee"), this);
-    bumpFeeAction->setObjectName("bumpFeeAction");
+//    bumpFeeAction = new QAction(tr("Increase transaction fee"), this);
+//    bumpFeeAction->setObjectName("bumpFeeAction");
     QAction *copyAddressAction = new QAction(tr("Copy address"), this);
     QAction *copyLabelAction = new QAction(tr("Copy label"), this);
     QAction *copyAmountAction = new QAction(tr("Copy amount"), this);
@@ -188,7 +188,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     contextMenu->addAction(copyTxPlainText);
     contextMenu->addAction(showDetailsAction);
     contextMenu->addSeparator();
-    contextMenu->addAction(bumpFeeAction);
+//    contextMenu->addAction(bumpFeeAction);
     contextMenu->addAction(abandonAction);
     contextMenu->addAction(editLabelAction);
 
@@ -210,7 +210,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     connect(view, SIGNAL(doubleClicked(QModelIndex)), this, SIGNAL(doubleClicked(QModelIndex)));
     connect(view, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextualMenu(QPoint)));
 
-    connect(bumpFeeAction, SIGNAL(triggered()), this, SLOT(bumpFee()));
+//    connect(bumpFeeAction, SIGNAL(triggered()), this, SLOT(bumpFee()));
     connect(abandonAction, SIGNAL(triggered()), this, SLOT(abandonTx()));
     connect(copyAddressAction, SIGNAL(triggered()), this, SLOT(copyAddress()));
     connect(copyLabelAction, SIGNAL(triggered()), this, SLOT(copyLabel()));
@@ -450,7 +450,7 @@ void TransactionView::contextualMenu(const QPoint &point)
     uint256 hash;
     hash.SetHex(selection.at(0).data(TransactionTableModel::TxHashRole).toString().toStdString());
     abandonAction->setEnabled(model->transactionCanBeAbandoned(hash));
-    bumpFeeAction->setEnabled(model->transactionCanBeBumped(hash));
+//    bumpFeeAction->setEnabled(model->transactionCanBeBumped(hash));
 
     if(index.isValid())
     {

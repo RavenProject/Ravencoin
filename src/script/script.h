@@ -10,6 +10,7 @@
 #include "crypto/common.h"
 #include "prevector.h"
 #include "serialize.h"
+#include "amount.h"
 
 #include <assert.h>
 #include <climits>
@@ -19,6 +20,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+
 
 // Maximum number of bytes pushable to the stack
 static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520;
@@ -660,7 +662,6 @@ public:
     bool IsOwnerAsset() const;
     bool IsReissueAsset() const;
     bool IsTransferAsset() const;
-    bool IsReservedAsset() const;
     bool IsAsset() const;
     /** RVN END */
 
@@ -678,10 +679,8 @@ public:
      * regardless of the initial stack. This allows outputs to be pruned
      * instantly when entering the UTXO set.
      */
-    bool IsUnspendable() const
-    {
-        return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE);
-    }
+    bool IsUnspendable() const;
+
 
     void clear()
     {
@@ -715,5 +714,16 @@ public:
     CReserveScript() {}
     virtual ~CReserveScript() {}
 };
+
+//! These are needed because script.h and script.cpp do not have access to asset.h and asset.cpp functions. This is
+//! because the make file compiles them at different times. This is becauses script files are compiled with other
+//! consensus files, and asset files are compiled with core files
+bool GetAssetAmountFromScript(const CScript& script, CAmount& nAmount);
+bool AmountFromNewAssetScript(const CScript& scriptPubKey, CAmount& nAmount);
+bool AmountFromTransferScript(const CScript& scriptPubKey, CAmount& nAmount);
+bool AmountFromReissueScript(const CScript& scriptPubKey, CAmount& nAmount);
+bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
 #endif // RAVEN_SCRIPT_SCRIPT_H

@@ -19,6 +19,7 @@
 #include "wallet/crypter.h"
 #include "wallet/walletdb.h"
 #include "wallet/rpcwallet.h"
+#include "assets/assettypes.h"
 
 #include <algorithm>
 #include <atomic>
@@ -29,7 +30,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <assets/assettypes.h>
+
 
 typedef CWallet* CWalletRef;
 extern std::vector<CWalletRef> vpwallets;
@@ -83,7 +84,6 @@ class CBlockPolicyEstimator;
 class CWalletTx;
 struct FeeCalculation;
 enum class FeeEstimateMode;
-class CNewAsset;
 
 /** (client) version numbers for particular wallet features */
 enum WalletFeature
@@ -190,10 +190,10 @@ struct COutputEntry
 /** RVN START */
 struct CAssetOutputEntry
 {
-    std::string type;
+    txnouttype type;
     std::string assetName;
     CTxDestination destination;
-    CAmount amount;
+    CAmount nAmount;
     int vout;
 };
 /** RVN END */
@@ -836,22 +836,46 @@ public:
     /**
      * populate vCoins with vector of available COutputs, and populates vAssetCoins in fWithAssets is set to true.
      */
-    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fWithAssets = false, bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins,
+                            bool fGetRVN = true, bool fOnlyAssets = false,
+                            bool fOnlySafe = true, const CCoinControl *coinControl = nullptr,
+                            const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                            const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
+                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
 
     /**
      * Helper function that calls AvailableCoinsAll, used for transfering assets
      */
-    void AvailableCoinsWithAssets(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, const std::set<COutPoint>& setAssetOutPoint, bool fWithAssets = false, bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableAssets(std::map<std::string, std::vector<COutput> > &mapAssetCoins, bool fOnlySafe = true,
+                         const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
+                         const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
+                         const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
 
+    /**
+     * Helper function that calls AvailableCoinsAll, used to receive all coins, Assets and RVN
+     */
+    void AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
+                                  bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
+                                  const CAmount &nMaximumAmount = MAX_MONEY, const CAmount &nMinimumSumAmount = MAX_MONEY,
+                                  const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
     /**
      * populate vCoins with vector of available COutputs.
      */
-    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlySafe=true, const CCoinControl *coinControl = nullptr, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY, const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0, const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+    void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlySafe=true, const CCoinControl *coinControl = nullptr,
+                        const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                        const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
+                        const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
 
     /**
      * Return list of available coins and locked coins grouped by non-change output address.
      */
     std::map<CTxDestination, std::vector<COutput>> ListCoins() const;
+
+    /**
+     * Return list of available assets and locked assets grouped by non-change output address.
+     */
+    std::map<CTxDestination, std::vector<COutput>> ListAssets() const;
+
 
     /**
      * Find non-change parent output.
@@ -865,6 +889,7 @@ public:
      * assembled
      */
     bool SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, uint64_t nMaxAncestors, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet) const;
+    bool SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMine, const int nConfTheirs, const uint64_t nMaxAncestors, const std::string& strAssetName, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet) const;
 
     bool IsSpent(const uint256& hash, unsigned int n) const;
 
@@ -970,14 +995,14 @@ public:
     bool SignTransaction(CMutableTransaction& tx);
 
     /** RVN START */
-    bool CreateTransactionWithAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                   std::string& strFailReason, const CCoinControl& coin_control, const CNewAsset& asset, const CTxDestination dest, const std::set<COutPoint>& setAssetOutPoints, const AssetType& assetType, bool sign = true);
+    bool CreateTransactionWithAssets(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
+                                   std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination dest, const AssetType& assetType, bool sign = true);
 
     bool CreateTransactionWithTransferAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                                     std::string& strFailReason, const CCoinControl& coin_control, const std::set<COutPoint>& setAssetOutPoints, bool sign = true);
+                                                     std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
 
     bool CreateTransactionWithReissueAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                                    std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, const std::set<COutPoint>& setAssetOutPoints, bool sign = true);
+                                                    std::string& strFailReason, const CCoinControl& coin_control, const CReissueAsset& reissueAsset, const CTxDestination destination, bool sign = true);
 
     bool CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
                            std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
@@ -988,7 +1013,12 @@ public:
      * @note passing nChangePosInOut as -1 will result in setting a random position
      */
     bool CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                           std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination dest, bool fTransferAsset, const std::set<COutPoint>& setAssetOutPoints, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign = true);
+                           std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const CNewAsset& asset, const CTxDestination dest, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign = true);
+
+    bool CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet,
+                              int& nChangePosInOut, std::string& strFailReason, const CCoinControl& coin_control, bool fNewAsset, const std::vector<CNewAsset> assets, const CTxDestination destination, bool fTransferAsset, bool fReissueAsset, const CReissueAsset& reissueAsset, const AssetType& assetType, bool sign);
+
+    bool CreateNewChangeAddress(CReserveKey& reservekey, CKeyID& keyID, std::string& strFailReason);
 
     /** RVN END */
 
@@ -1029,6 +1059,7 @@ public:
      * filter, otherwise returns 0
      */
     CAmount GetDebit(const CTxIn& txin, const isminefilter& filter) const;
+    CAmount GetDebit(const CTxIn& txin, const isminefilter& filter, CAssetOutputEntry& assetData) const;
     isminetype IsMine(const CTxOut& txout) const;
     CAmount GetCredit(const CTxOut& txout, const isminefilter& filter) const;
     bool IsChange(const CTxOut& txout) const;
@@ -1143,14 +1174,17 @@ public:
     /* Returns true if HD is enabled */
     bool IsHDEnabled() const;
 
-    /* Generates a new HD master key (will not be activated) */
-    CPubKey GenerateNewHDMasterKey();
+     /* Generates a new HD seed (will not be activated) */
+    CPubKey GenerateNewSeed();
     
-    /* Set the current HD master key (will reset the chain child index counters)
-       Sets the master key's version based on the current wallet version (so the
+    /* Derives a new HD seed (will not be activated) */
+    CPubKey DeriveNewSeed(const CKey& key);
+    
+    /* Set the current HD seed (will reset the chain child index counters)
+       Sets the seed's version based on the current wallet version (so the
        caller must ensure the current wallet version is correct before calling
        this function). */
-    bool SetHDMasterKey(const CPubKey& key);
+    bool SetHDSeed(const CPubKey& key);
 };
 
 /** A key allocated from the key pool. */

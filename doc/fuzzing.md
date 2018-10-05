@@ -55,7 +55,7 @@ AFLOUT=$PWD/outputs
 
 Example inputs are available from:
 
-- https://download.visucore.com/raven/raven_fuzzy_in.tar.xz
+- https://download.visucore.com/bitcoin/bitcoin_fuzzy_in.tar.xz
 - http://strateman.ninja/fuzzing.tar.xz
 
 Extract these (or other starting inputs) into the `inputs` directory before starting fuzzing.
