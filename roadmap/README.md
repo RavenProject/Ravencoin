@@ -101,14 +101,14 @@ Lists your assets.
 `listassetbalancesbyaddress (address)`
 Lists asset balance by address.
 
-`listaddressesbyasset (asset_name)`
+`listaddressesbyasset (asset_name)` 
 Lists addresses by asset.
 
 `getassetdata (asset_name)`
 Lists asset data of an asset.
 
-`reward(from_address, asset, amount, except=[])`  
+`reward (from_address, asset, amount, except=[])`  
 Sends RVN to holders of the the specified asset. The Raven is split pro-rata to holders of the asset. Any remainder that cannot be evenly divided to the satoshi (1/100,000,000 RVN) level will be added to the mining fee. ​except​ is a list of addresses to exclude from the distribution - used so that you could exclude treasury shares that do not participate in the reward.  
 
-`send_asset(from_address, from_asset, to_asset, amount, except=[])`  
+`send_asset (from_address, from_asset, to_asset, amount, except=[])`  
 Sends an asset to holders of the the specified to_asset. This can be used to send a voting token to holders of an asset. Combined with a messaging protocol explaining the vote, it could act as a distributed voting system.
