@@ -45,6 +45,7 @@ public:
     void setAddress(const QString &address);
     void pasteEntry(const SendAssetsRecipient &rv);
     bool handlePaymentRequest(const SendAssetsRecipient &recipient);
+    void processNewTransaction();
 
 public Q_SLOTS:
     void clear();
@@ -70,7 +71,7 @@ private:
     void minimizeFeeSection(bool fMinimize);
     void updateFeeMinimizedLabel();
     // Update the passed in CCoinControl with state from the GUI
-    void updateCoinControlState(CCoinControl& ctrl);
+    void updateAssetControlState(CCoinControl& ctrl);
 
 private Q_SLOTS:
     void on_sendButton_clicked();
@@ -78,28 +79,30 @@ private Q_SLOTS:
     void on_buttonMinimizeFee_clicked();
     void removeEntry(SendAssetsEntry* entry);
     void updateDisplayUnit();
-    void coinControlFeatureChanged(bool);
-    void coinControlButtonClicked();
-    void coinControlChangeChecked(int);
-    void coinControlChangeEdited(const QString &);
-    void coinControlUpdateLabels();
-    void coinControlClipboardQuantity();
-    void coinControlClipboardAmount();
-    void coinControlClipboardFee();
-    void coinControlClipboardAfterFee();
-    void coinControlClipboardBytes();
-    void coinControlClipboardLowOutput();
-    void coinControlClipboardChange();
+    void assetControlFeatureChanged(bool);
+    void assetControlButtonClicked();
+    void assetControlChangeChecked(int);
+    void assetControlChangeEdited(const QString &);
+    void assetControlUpdateLabels();
+    void assetControlClipboardQuantity();
+    void assetControlClipboardAmount();
+    void assetControlClipboardFee();
+    void assetControlClipboardAfterFee();
+    void assetControlClipboardBytes();
+    void assetControlClipboardLowOutput();
+    void assetControlClipboardChange();
     void setMinimumFee();
     void updateFeeSectionControls();
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
 
+    void customFeeFeatureChanged(bool);
+
     /** RVN START */
     void createAssetButtonClicked();
-    void ressieAssetButtonClicked();
-    void refreshButtonClicked();
+    void reissueAssetButtonClicked();
     void mineButtonClicked();
+    void assetControlUpdateSendCoinsDialog();
     /** RVN END */
 
     Q_SIGNALS:

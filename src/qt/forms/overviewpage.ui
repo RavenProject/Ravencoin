@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>570</height>
+    <width>1000</width>
+    <height>608</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -437,6 +437,25 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="labelAssetAdministrator">
+              <property name="toolTip">
+               <string>Displayed next to assets that you are the administrator of</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::AutoText</enum>
+              </property>
+              <property name="pixmap">
+               <pixmap>../res/icons/asset_administrator.png</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="labelAssetStatus">
               <property name="enabled">
                <bool>true</bool>
@@ -522,17 +541,23 @@
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
+           <widget class="QWidget" name="assetVeriticalSpaceWidget" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <spacer name="assetVerticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
