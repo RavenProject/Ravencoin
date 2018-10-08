@@ -47,6 +47,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         {
             const CTxOut& txout = wtx.tx->vout[i];
             isminetype mine = wallet->IsMine(txout);
+
+            /** RVN START */
+            if (txout.scriptPubKey.IsAssetScript())
+                continue;
+            /** RVN START */
+
             if(mine)
             {
                 TransactionRecord sub(hash, nTime);
@@ -90,6 +96,11 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         isminetype fAllToMe = ISMINE_SPENDABLE;
         for (const CTxOut& txout : wtx.tx->vout)
         {
+            /** RVN START */
+            if (txout.scriptPubKey.IsAssetScript())
+                continue;
+            /** RVN START */
+
             isminetype mine = wallet->IsMine(txout);
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllToMe > mine) fAllToMe = mine;
@@ -114,6 +125,12 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++)
             {
                 const CTxOut& txout = wtx.tx->vout[nOut];
+
+                /** RVN START */
+                if (txout.scriptPubKey.IsAssetScript())
+                    continue;
+                /** RVN START */
+
                 TransactionRecord sub(hash, nTime);
                 sub.idx = nOut;
                 sub.involvesWatchAddress = involvesWatchAddress;
@@ -156,8 +173,29 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             //
             // Mixed debit transaction, can't break down payees
             //
-            parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
-            parts.last().involvesWatchAddress = involvesWatchAddress;
+
+
+            /** RVN START */
+            // We will only show mixed debit transactions that are nNet < 0 or if they are nNet == 0 and
+            // they do not contain assets. This is so the list of transaction doesn't add 0 amount transactions to the
+            // list.
+            bool fIsMixedDebit = true;
+            if (nNet == 0) {
+                for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++) {
+                    const CTxOut &txout = wtx.tx->vout[nOut];
+
+                    if (txout.scriptPubKey.IsAssetScript()) {
+                        fIsMixedDebit = false;
+                        break;
+                    }
+                }
+            }
+
+            if (fIsMixedDebit) {
+                parts.append(TransactionRecord(hash, nTime, TransactionRecord::Other, "", nNet, 0));
+                parts.last().involvesWatchAddress = involvesWatchAddress;
+            }
+            /** RVN START */
         }
     }
 
@@ -186,17 +224,20 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
 
                 sub.address = EncodeDestination(data.destination);
                 sub.assetName = data.assetName;
-                sub.credit = data.amount;
+                sub.credit = data.nAmount;
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
 
-                if (data.type == ASSET_NEW_STRING)
+                if (data.type == TX_NEW_ASSET)
                     sub.type = TransactionRecord::Issue;
-                else if (data.type == ASSET_REISSUE_STRING)
+                else if (data.type == TX_REISSUE_ASSET)
                     sub.type = TransactionRecord::Reissue;
-                else if (data.type == ASSET_TRANSFER_STRING)
+                else if (data.type == TX_TRANSFER_ASSET)
                     sub.type = TransactionRecord::TransferFrom;
-                else
+                else {
                     sub.type = TransactionRecord::Other;
+                }
+
+                sub.units = DEFAULT_UNITS;
 
                 if (IsAssetNameAnOwner(sub.assetName))
                     sub.units = OWNER_UNITS;
@@ -210,7 +251,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 else
                 {
                     CNewAsset asset;
-                    if (passets->GetAssetIfExists(sub.assetName, asset))
+                    if (passets->GetAssetMetaDataIfExists(sub.assetName, asset))
                         sub.units = asset.units;
                 }
 
@@ -226,10 +267,10 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 sub.idx = data.vout;
                 sub.address = EncodeDestination(data.destination);
                 sub.assetName = data.assetName;
-                sub.credit = -data.amount;
+                sub.credit = -data.nAmount;
                 sub.involvesWatchAddress = false;
 
-                if (data.type == ASSET_TRANSFER_STRING)
+                if (data.type == TX_TRANSFER_ASSET)
                     sub.type = TransactionRecord::TransferTo;
                 else
                     sub.type = TransactionRecord::Other;
@@ -246,7 +287,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 else
                 {
                     CNewAsset asset;
-                    if (passets->GetAssetIfExists(sub.assetName, asset))
+                    if (passets->GetAssetMetaDataIfExists(sub.assetName, asset))
                         sub.units = asset.units;
                 }
 

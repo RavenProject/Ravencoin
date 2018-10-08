@@ -597,6 +597,22 @@ void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason)
     if (minerPolicyEstimator) {minerPolicyEstimator->removeTx(hash, false);}
     removeAddressIndex(hash);
     removeSpentIndex(hash);
+
+    /** RVN START */
+    // If the transaction being removed from the mempool is locking other reissues. Free them
+    if (mapReissuedTx.count(hash)) {
+        if (mapReissuedAssets.count(mapReissuedTx.at(hash))) {
+            mapReissuedAssets.erase(mapReissuedTx.at((hash)));
+            mapReissuedTx.erase(hash);
+        }
+    }
+
+    // Erase from the asset mempool maps if they match txid
+    if (mapHashToAsset.count(hash)) {
+        mapAssetToHash.erase(mapHashToAsset.at(hash));
+        mapHashToAsset.erase(hash);
+    }
+    /** RVN END */
 }
 
 // Calculates descendants of entry that are not already in setDescendants, and adds to
@@ -714,10 +730,20 @@ void CTxMemPool::removeConflicts(const CTransaction &tx)
     }
 }
 
+
 /**
  * Called when a block is connected. Removes from mempool and updates the miner fee estimator.
  */
 void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight)
+{
+    std::set<CAssetCacheNewAsset> set;
+    removeForBlock(vtx, nBlockHeight, set);
+}
+
+/**
+ * Called when a block is connected. Removes from mempool and updates the miner fee estimator.
+ */
+void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, std::set<CAssetCacheNewAsset>& setNewAssets)
 {
     LOCK(cs);
     std::vector<const CTxMemPoolEntry*> entries;
@@ -729,6 +755,21 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
         if (i != mapTx.end())
             entries.push_back(&*i);
     }
+
+    /** RVN START */
+    // Get the newly added assets, and make sure they are in the entries
+    std::vector<CTransaction> trans;
+    for (auto it : setNewAssets) {
+        if (mapAssetToHash.count(it.asset.strName)) {
+            indexed_transaction_set::iterator i = mapTx.find(mapAssetToHash.at(it.asset.strName));
+            if (i != mapTx.end()) {
+                entries.push_back(&*i);
+                trans.emplace_back(i->GetTx());
+            }
+        }
+    }
+    /** RVN END */
+
     // Before the txs in the new block have been removed from the mempool, update policy estimates
     if (minerPolicyEstimator) {minerPolicyEstimator->processBlock(nBlockHeight, entries);}
     for (const auto& tx : vtx)
@@ -742,6 +783,22 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
         removeConflicts(*tx);
         ClearPrioritisation(tx->GetHash());
     }
+
+    /** RVN START */
+    // Remove newly added asset issue transactions from the mempool if they haven't been removed already
+    for (auto tx : trans)
+    {
+        txiter it = mapTx.find(tx.GetHash());
+        if (it != mapTx.end()) {
+            setEntries stage;
+            stage.insert(it);
+            RemoveStaged(stage, true, MemPoolRemovalReason::BLOCK);
+        }
+        removeConflicts(tx);
+        ClearPrioritisation(tx.GetHash());
+    }
+    /** RVN END */
+
     lastRollingFeeUpdate = GetTime();
     blockSinceLastRollingFeeBump = true;
 }
@@ -757,6 +814,8 @@ void CTxMemPool::_clear()
     blockSinceLastRollingFeeBump = false;
     rollingMinimumFeeRate = 0;
     ++nTransactionsUpdated;
+    mapAssetToHash.clear();
+    mapHashToAsset.clear();
 }
 
 void CTxMemPool::clear()
@@ -771,7 +830,8 @@ static void CheckInputsAndUpdateCoins(const CTransaction& tx, CCoinsViewCache& m
     bool fCheckResult = tx.IsCoinBase() || Consensus::CheckTxInputs(tx, state, mempoolDuplicate, spendheight, txfee);
     /** RVN START */
     if (AreAssetsDeployed()) {
-        bool fCheckAssets = Consensus::CheckTxAssets(tx, state, mempoolDuplicate);
+        std::vector<std::pair<std::string, uint256>> vReissueAssets;
+        bool fCheckAssets = Consensus::CheckTxAssets(tx, state, mempoolDuplicate, vReissueAssets);
         assert(fCheckResult && fCheckAssets);
     } else
         assert(fCheckResult);

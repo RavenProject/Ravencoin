@@ -26,9 +26,21 @@ logger = logging.getLogger("TestFramework.utils")
 # Assert functions
 ##################
 
+def assert_contains(val, arr):
+    if not (val in arr):
+        raise AssertionError("val %s not in arr" % (val))
+
+def assert_does_not_contain(val, arr):
+    if (val in arr):
+        raise AssertionError("val %s is in arr" % (val))
+
 def assert_contains_pair(key, val, dict):
     if not (key in dict and val == dict[key]):
         raise AssertionError("k/v pair (%s,%s) not in dict" % (key, val))
+
+def assert_does_not_contain_key(key, dict):
+    if (key in dict):
+        raise AssertionError("key %s is in dict" % (key))
 
 def assert_fee_amount(fee, tx_size, fee_per_kB):
     """Assert the fee was in range"""
@@ -322,7 +334,7 @@ def get_auth_cookie(datadir):
                     assert password is None  # Ensure that there is only one rpcpassword line
                     password = line.split("=")[1].strip("\n")
     if os.path.isfile(os.path.join(datadir, "regtest", ".cookie")):
-        with open(os.path.join(datadir, "regtest", ".cookie"), 'r') as f:
+        with open(os.path.join(datadir, "regtest", ".cookie"), 'r', encoding="ascii") as f:
             userpass = f.read()
             split_userpass = userpass.split(':')
             user = split_userpass[0]
@@ -353,6 +365,11 @@ def disconnect_nodes(from_connection, node_num):
     else:
         raise AssertionError("timed out waiting for disconnect")
 
+def disconnect_all_nodes(nodes):
+    for i in range(0, len(nodes)):
+        for j in range(i+1, len(nodes)):
+            disconnect_nodes(nodes[i], j)
+
 def connect_nodes(from_connection, node_num):
     ip_port = "127.0.0.1:" + str(p2p_port(node_num))
     from_connection.addnode(ip_port, "onetry")
@@ -364,6 +381,11 @@ def connect_nodes(from_connection, node_num):
 def connect_nodes_bi(nodes, a, b):
     connect_nodes(nodes[a], b)
     connect_nodes(nodes[b], a)
+
+def connect_all_nodes_bi(nodes):
+    for i in range(0, len(nodes)):
+        for j in range(i+1, len(nodes)):
+            connect_nodes_bi(nodes, i, j)
 
 def sync_blocks(rpc_connections, *, wait=1, timeout=60):
     """

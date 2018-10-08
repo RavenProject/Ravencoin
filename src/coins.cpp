@@ -93,7 +93,7 @@ void CCoinsViewCache::AddCoin(const COutPoint &outpoint, Coin&& coin, bool possi
     cachedCoinsUsage += it->second.coin.DynamicMemoryUsage();
 }
 
-void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, bool check, CAssetsCache* assetsCache, std::pair<std::string, std::string>* undoIPFSHash) {
+void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint256 blockHash, bool check, CAssetsCache* assetsCache, std::pair<std::string, CBlockAssetUndo>* undoAssetData) {
     bool fCoinbase = tx.IsCoinBase();
     const uint256& txid = tx.GetHash();
 
@@ -110,7 +110,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, bool 
                 OwnerFromTransaction(tx, ownerName, ownerAddress);
 
                 // Add the new asset to cache
-                if (!assetsCache->AddNewAsset(asset, strAddress))
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
                     error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
                           asset.strName);
 
@@ -138,22 +138,24 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, bool 
                 std::string strAddress;
                 ReissueAssetFromTransaction(tx, reissue, strAddress);
 
+                int reissueIndex = tx.vout.size() - 1;
+
+
                 // Get the asset before we change it
                 CNewAsset asset;
-                if (!assetsCache->GetAssetIfExists(reissue.strName, asset))
+                if (!assetsCache->GetAssetMetaDataIfExists(reissue.strName, asset))
                     error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
                           __func__, reissue.strName);
-
-                int reissueIndex = tx.vout.size() - 1;
 
                 if (!assetsCache->AddReissueAsset(reissue, strAddress, COutPoint(txid, reissueIndex)))
                     error("%s: Failed to reissue an asset. Asset Name : %s", __func__, reissue.strName);
 
                 // Set the old IPFSHash for the blockundo
-                if (reissue.strIPFSHash != "") {
-                    auto pair = std::make_pair(reissue.strName, asset.strIPFSHash);
-                    undoIPFSHash->first = reissue.strName; // Asset Name
-                    undoIPFSHash->second = asset.strIPFSHash; // Old Assets IPFSHash
+                bool fIPFSChanged = !reissue.strIPFSHash.empty();
+                bool fUnitsChanged = reissue.nUnits != -1;
+                if (fIPFSChanged || fUnitsChanged) {
+                    undoAssetData->first = reissue.strName; // Asset Name
+                    undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, asset.strIPFSHash, asset.units}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
                 }
 
                 CAssetCachePossibleMine possibleMine(reissue.strName, COutPoint(tx.GetHash(), reissueIndex),
@@ -161,6 +163,27 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, bool 
                 if (!assetsCache->AddPossibleOutPoint(possibleMine))
                     error("%s: Failed to add an reissued asset I own to my Unspent Asset Cache. Asset Name : %s",
                           __func__, reissue.strName);
+            } else if (tx.IsNewUniqueAsset()) {
+                for (int n = 0; n < (int)tx.vout.size(); n++) {
+                    auto out = tx.vout[n];
+
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
+                        AssetFromScript(out.scriptPubKey, asset, strAddress);
+
+                        // Add the new asset to cache
+                        if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                            error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
+                                  asset.strName);
+
+                        CAssetCachePossibleMine possibleMine(asset.strName, COutPoint(tx.GetHash(), n), out);
+                        if (!assetsCache->AddPossibleOutPoint(possibleMine))
+                            error("%s: Failed to add an asset I own to my Unspent Asset Cache. Asset Name : %s",
+                                  __func__, asset.strName);
+                    }
+                }
             }
         }
     }

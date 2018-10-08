@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>560</width>
+    <width>617</width>
     <height>440</height>
    </rect>
   </property>
@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -150,6 +150,13 @@
             </property>
             <property name="text">
              <string>Enable coin &amp;control features</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="customFeeFeatures">
+            <property name="text">
+             <string>Enable fee control features</string>
             </property>
            </widget>
           </item>

@@ -137,6 +137,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->labelTransactionsStatus->setIcon(icon);
     ui->labelWalletStatus->setIcon(icon);
     ui->labelAssetStatus->setIcon(icon);
+    ui->labelAssetAdministrator->setPixmap(QPixmap::fromImage(QImage(":/icons/asset_administrator")));
 
     // Recent transactions
     ui->listTransactions->setItemDelegate(txdelegate);
@@ -299,10 +300,18 @@ void OverviewPage::showAssets()
         ui->listAssets->show();
         ui->assetBalanceLabel->show();
         ui->labelAssetStatus->show();
+        ui->labelAssetAdministrator->show();
+
+        // Disable the vertical space so that listAssets goes to the bottom of the screen
+        ui->assetVeriticalSpaceWidget->hide();
     } else {
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
         ui->listAssets->hide();
+        ui->labelAssetAdministrator->hide();
+
+        // This keeps the RVN balance grid from expanding and looking terrible when asset balance is hidden
+        ui->assetVeriticalSpaceWidget->show();
     }
 
     displayAssetInfo();
@@ -328,8 +337,12 @@ void OverviewPage::displayAssetInfo()
         case THRESHOLD_DEFINED:
             if (currentTime < startTime)
                 status = tr("Waiting until ") + date;
-            else
-                status = tr("Waiting");
+            else {
+                auto cycleWidth = Params().GetConsensus().nMinerConfirmationWindow;
+                QString currentCount;
+                currentCount.sprintf("%d of %d blocks", chainActive.Height() % cycleWidth, cycleWidth);
+                status = tr("Waiting - ") +  currentCount;
+            }
             break;
         case THRESHOLD_STARTED:
             status = tr("Voting Started");

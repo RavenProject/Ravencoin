@@ -6,10 +6,13 @@
 #ifndef RAVEN_QT_CREATEASSETDIALOG_H
 #define RAVEN_QT_CREATEASSETDIALOG_H
 
+#include "walletmodel.h"
+
 #include <QDialog>
 
 class PlatformStyle;
 class WalletModel;
+class ClientModel;
 
 namespace Ui {
     class CreateAssetDialog;
@@ -25,16 +28,23 @@ class CreateAssetDialog : public QDialog
 Q_OBJECT
 
 public:
-    explicit CreateAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0, WalletModel *model = NULL);
+    explicit CreateAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0, WalletModel *model = NULL, ClientModel *client = NULL);
     ~CreateAssetDialog();
+
+    void setClientModel(ClientModel *clientModel);
+    void setModel(WalletModel *model);
+
+    int type;
+    QString format;
 
 private:
     Ui::CreateAssetDialog *ui;
+    ClientModel *clientModel;
     WalletModel *model;
+    bool fFeeMinimized;
     const PlatformStyle *platformStyle;
 
     bool checkedAvailablity = false;
-
 
     void toggleIPFSText();
     void setUpValues();
@@ -44,6 +54,24 @@ private:
     void disableCreateButton();
     void enableCreateButton();
     void CheckFormState();
+    void updatePresentedAssetName(QString name);
+    QString GetSpecialCharacter();
+    QString GetAssetName();
+    void UpdateAssetNameMaxSize();
+    void UpdateAssetNameToUpper();
+    void setUniqueSelected();
+    void clearSelected();
+
+    //CoinControl
+    // Update the passed in CCoinControl with state from the GUI
+    void updateCoinControlState(CCoinControl& ctrl);
+
+    //Fee
+    void updateFeeMinimizedLabel();
+    void minimizeFeeSection(bool fMinimize);
+
+    //Validation
+    bool checkIPFSHash(QString hash);
 
 private Q_SLOTS:
     void ipfsStateChanged();
@@ -54,8 +82,35 @@ private Q_SLOTS:
     void onCloseClicked();
     void onCreateAssetClicked();
     void onUnitChanged(int value);
-    void onCustomAddressClicked();
     void onChangeAddressChanged(QString changeAddress);
+    void onAssetTypeActivated(int index);
+    void onAssetListActivated(int index);
+
+    //CoinControl
+    void coinControlFeatureChanged(bool);
+    void coinControlButtonClicked();
+    void coinControlChangeChecked(int);
+    void coinControlChangeEdited(const QString &);
+    void coinControlClipboardQuantity();
+    void coinControlClipboardAmount();
+    void coinControlClipboardFee();
+    void coinControlClipboardAfterFee();
+    void coinControlClipboardBytes();
+    void coinControlClipboardLowOutput();
+    void coinControlClipboardChange();
+    void coinControlUpdateLabels();
+
+    //Fee
+    void on_buttonChooseFee_clicked();
+    void on_buttonMinimizeFee_clicked();
+    void setMinimumFee();
+    void updateFeeSectionControls();
+    void updateMinFeeLabel();
+    void updateSmartFeeLabel();
+
+    void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
+                    const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void updateDisplayUnit();
 };
 
 #endif // RAVEN_QT_CREATEASSETDIALOG_H

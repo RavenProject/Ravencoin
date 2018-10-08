@@ -467,6 +467,9 @@ public:
     mutable CCriticalSection cs;
     indexed_transaction_set mapTx;
 
+    std::map<std::string, uint256> mapAssetToHash;
+    std::map<uint256, std::string> mapHashToAsset;
+
     typedef indexed_transaction_set::nth_index<0>::type::iterator txiter;
     std::vector<std::pair<uint256, txiter> > vTxHashes; //!< All tx witness hashes/entries in mapTx, in random order
 
@@ -543,6 +546,7 @@ public:
     void removeRecursive(const CTransaction &tx, MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);
     void removeForReorg(const CCoinsViewCache *pcoins, unsigned int nMemPoolHeight, int flags);
     void removeConflicts(const CTransaction &tx);
+    void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, std::set<CAssetCacheNewAsset>& setNewAssets );
     void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight);
 
     void clear();
