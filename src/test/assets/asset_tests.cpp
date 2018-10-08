@@ -7,6 +7,7 @@
 #include <test/test_raven.h>
 
 #include <boost/test/unit_test.hpp>
+#include "core_write.cpp"
 
 #include <amount.h>
 #include <base58.h>
@@ -50,9 +51,6 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(!IsAssetNameValid("RVN", type));
         BOOST_CHECK(!IsAssetNameValid("RAVEN", type));
         BOOST_CHECK(!IsAssetNameValid("RAVENCOIN", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVENC0IN", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVENCO1N", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVENC01N", type));
 
         //- Versions of RAVENCOIN ALLOWED
         BOOST_CHECK(IsAssetNameValid("RAVEN.COIN", type));
@@ -90,9 +88,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         // unique
         BOOST_CHECK(IsAssetNameValid("ABC#AZaz09", type));
         BOOST_CHECK(type == AssetType::UNIQUE);
-        BOOST_CHECK(IsAssetNameValid("ABC#@$%&*()[]{}<>-_.;?\\:", type));
+        BOOST_CHECK(IsAssetNameValid("ABC#abc123ABC@$%&*()[]{}-_.?:", type));
         BOOST_CHECK(!IsAssetNameValid("ABC#no!bangs", type));
-        BOOST_CHECK(IsAssetNameValid("ABC/THING#_STILL_30_MAX------_", type));
+        BOOST_CHECK(IsAssetNameValid("ABC/THING#_STILL_31_MAX-------_", type));
 
         BOOST_CHECK(!IsAssetNameValid("MIN#", type));
         BOOST_CHECK(!IsAssetNameValid("ABC#NO#HASH", type));
@@ -103,8 +101,11 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // channel
         BOOST_CHECK(IsAssetNameValid("ABC~1", type));
-        BOOST_CHECK(type == AssetType::CHANNEL);
-        BOOST_CHECK(IsAssetNameValid("ABC~STILL_MAX_OF_30.CHARS_1234", type));
+        BOOST_CHECK(type == AssetType::MSGCHANNEL);
+        BOOST_CHECK(IsAssetNameValid("ABC~MAX_OF_12_CR", type));
+        BOOST_CHECK(!IsAssetNameValid("ABC~MAX_OF_12_CHR", type));
+        BOOST_CHECK(IsAssetNameValid("TEST/TEST~CHANNEL", type));
+        BOOST_CHECK(type == AssetType::MSGCHANNEL);
 
         BOOST_CHECK(!IsAssetNameValid("MIN~", type));
         BOOST_CHECK(!IsAssetNameValid("ABC~NO~TILDE", type));
@@ -129,7 +130,44 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(IsAssetNameValid("ABC!", type));
         BOOST_CHECK(type == AssetType::OWNER);
 
+        // vote
+        BOOST_CHECK(IsAssetNameValid("ABC^VOTE"));
+        BOOST_CHECK(!IsAssetNameValid("ABC^"));
+        BOOST_CHECK(IsAssetNameValid("ABC^VOTING"));
+        BOOST_CHECK(IsAssetNameValid("ABC^VOTING_IS_30_CHARACTERS_LN"));
+        BOOST_CHECK(!IsAssetNameValid("ABC^VOTING_IS_31_CHARACTERS_LN!"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB/SUB/SUB^VOTE"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB/SUB/SUB/SUB/30^VOT"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB/SUB/SUB/SUB/31^VOTE"));
+        BOOST_CHECK(!IsAssetNameValid("ABC/SUB/SUB/SUB/SUB/SUB/32X^VOTE"));
+        BOOST_CHECK(IsAssetNameValid("ABC/SUB/SUB^VOTE", type));
+        BOOST_CHECK(type == AssetType::VOTE);
 
+        // Check type for different type of sub assets
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH#UNIQUE", type));
+        BOOST_CHECK(type == AssetType::UNIQUE);
+
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH/SUB#UNIQUE", type));
+        BOOST_CHECK(type == AssetType::UNIQUE);
+
+        BOOST_CHECK(IsAssetNameValid("TEST/UYTH/SUB~CHANNEL", type));
+        BOOST_CHECK(type == AssetType::MSGCHANNEL);
+
+        BOOST_CHECK(!IsAssetNameValid("TEST/UYTH/SUB#UNIQUE^VOTE", type));
+        BOOST_CHECK(!IsAssetNameValid("TEST/UYTH/SUB#UNIQUE#UNIQUE", type));
+        BOOST_CHECK(!IsAssetNameValid("TEST/UYTH/SUB~CHANNEL^VOTE", type));
+        BOOST_CHECK(!IsAssetNameValid("TEST/UYTH/SUB~CHANNEL^UNIQUE", type));
+        BOOST_CHECK(!IsAssetNameValid("TEST/UYTH/SUB~CHANNEL!", type));
+        BOOST_CHECK(!IsAssetNameValid("TEST/UYTH/SUB^VOTE!", type));
+
+        // Check ParentName function
+        BOOST_CHECK(GetParentName("TEST!") == "TEST!");
+        BOOST_CHECK(GetParentName("TEST") == "TEST");
+        BOOST_CHECK(GetParentName("TEST/SUB") == "TEST");
+        BOOST_CHECK(GetParentName("TEST/SUB#UNIQUE") == "TEST/SUB");
+        BOOST_CHECK(GetParentName("TEST/TEST/SUB/SUB") == "TEST/TEST/SUB");
+        BOOST_CHECK(GetParentName("TEST/SUB^VOTE") == "TEST/SUB");
+        BOOST_CHECK(GetParentName("TEST/SUB/SUB~CHANNEL") == "TEST/SUB/SUB");
     }
 
     BOOST_AUTO_TEST_CASE(transfer_asset_coin_check) {
@@ -167,6 +205,42 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         Coin coin(txOut, 0, 0);
 
         BOOST_CHECK_MESSAGE(coin.IsAsset(), "New Asset Coin isn't as asset");
+    }
+
+    BOOST_AUTO_TEST_CASE(dwg_version_check) {
+
+
+        int32_t version = 0x30000000;
+        int32_t mask = 0xF0000000;
+        int32_t new_version = version & mask;
+        int32_t shifted = new_version >> 28;
+
+        BOOST_CHECK_MESSAGE(shifted == 3, "New version didn't equal 3");
+    }
+
+    BOOST_AUTO_TEST_CASE(asset_formatting) {
+
+        CAmount amount = 50000010000;
+        BOOST_CHECK(ValueFromAmountString(amount, 4) == "500.0001");
+
+        amount = 100;
+        BOOST_CHECK(ValueFromAmountString(amount, 6) == "0.000001");
+
+        amount = 1000;
+        BOOST_CHECK(ValueFromAmountString(amount, 6) == "0.000010");
+
+        amount = 50010101010;
+        BOOST_CHECK(ValueFromAmountString(amount, 8) == "500.10101010");
+
+        amount = 111111111;
+        BOOST_CHECK(ValueFromAmountString(amount, 8) == "1.11111111");
+
+        amount = 1;
+        BOOST_CHECK(ValueFromAmountString(amount, 8) == "0.00000001");
+
+        amount = 40000000;
+        BOOST_CHECK(ValueFromAmountString(amount, 8) == "0.40000000");
+
     }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -1,20 +1,69 @@
-//
+// Copyright (c) 2018 The Raven Core developers
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 // Created by Jeremy Anderson on 5/15/18.
-//
 
 #ifndef RAVENCOIN_NEWASSET_H
 #define RAVENCOIN_NEWASSET_H
 
-#include <amount.h>
 #include <string>
+#include <sstream>
+#include <list>
 #include <unordered_map>
-#include "serialize.h"
+#include "amount.h"
+#include "primitives/transaction.h"
 
 #define MAX_UNIT 8
+#define MIN_UNIT 0
 
 class CAssetsCache;
 
-class CNewAsset {
+enum class AssetType
+{
+    ROOT = 0,
+    SUB = 1,
+    UNIQUE = 2,
+    OWNER = 3,
+    MSGCHANNEL = 4,
+    VOTE = 5,
+    REISSUE = 6,
+    INVALID = 7
+};
+
+int IntFromAssetType(AssetType type);
+AssetType AssetTypeFromInt(int nType);
+
+const char IPFS_SHA2_256 = 0x12;
+const char IPFS_SHA2_256_LEN = 0x20;
+
+template <typename Stream, typename Operation>
+void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash)
+{
+    // assuming 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, 32 more bytes)
+    if (ser_action.ForRead())
+    {
+        strIPFSHash = "";
+        if (!s.empty() and s.size() >= 34) {
+            char _sha2_256;
+            ::Unserialize(s, _sha2_256);
+            std::basic_string<char> hash;
+            ::Unserialize(s, hash);
+            std::ostringstream os;
+            os << IPFS_SHA2_256 << IPFS_SHA2_256_LEN << hash.substr(0, 32);
+            strIPFSHash = os.str();
+        }
+    }
+    else
+    {
+        if (strIPFSHash.length() == 34) {
+            ::Serialize(s, IPFS_SHA2_256);
+            ::Serialize(s, strIPFSHash.substr(2));
+        }
+    }
+};
+
+class CNewAsset
+{
 public:
     std::string strName; // MAX 31 Bytes
     CAmount nAmount;     // 8 Bytes
@@ -29,6 +78,7 @@ public:
     }
 
     CNewAsset(const std::string& strName, const CAmount& nAmount, const int& units, const int& nReissuable, const int& nHasIPFS, const std::string& strIPFSHash);
+    CNewAsset(const std::string& strName, const CAmount& nAmount);
 
     CNewAsset(const CNewAsset& asset);
     CNewAsset& operator=(const CNewAsset& asset);
@@ -45,7 +95,7 @@ public:
 
     bool IsNull() const;
 
-    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool = false, bool fCheckDuplicateInputs = true) const;
+    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool = false, bool fCheckDuplicateInputs = true, bool fForceDuplicateCheck = true) const;
 
     std::string ToString();
 
@@ -55,13 +105,16 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(strName);
         READWRITE(nAmount);
         READWRITE(units);
         READWRITE(nReissuable);
         READWRITE(nHasIPFS);
-        READWRITE(strIPFSHash);
+        if (nHasIPFS == 1) {
+            ReadWriteIPFSHash(s, ser_action, strIPFSHash);
+        }
     }
 };
 
@@ -74,7 +127,36 @@ public:
     }
 };
 
-class CAssetTransfer {
+class CDatabasedAssetData
+{
+public:
+    CNewAsset asset;
+    int nHeight;
+    uint256 blockHash;
+
+    CDatabasedAssetData(const CNewAsset& asset, const int& nHeight, const uint256& blockHash);
+    CDatabasedAssetData();
+
+    void SetNull()
+    {
+        asset.SetNull();
+        nHeight = -1;
+        blockHash = uint256();
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(asset);
+        READWRITE(nHeight);
+        READWRITE(blockHash);
+    }
+};
+
+class CAssetTransfer
+{
 public:
     std::string strName;
     CAmount nAmount;
@@ -94,7 +176,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(strName);
         READWRITE(nAmount);
     }
@@ -104,10 +187,12 @@ public:
     void ConstructTransaction(CScript& script) const;
 };
 
-class CReissueAsset {
+class CReissueAsset
+{
 public:
     std::string strName;
     CAmount nAmount;
+    int8_t nUnits;
     int8_t nReissuable;
     std::string strIPFSHash;
 
@@ -120,6 +205,7 @@ public:
     {
         nAmount = 0;
         strName = "";
+        nUnits = 0;
         nReissuable = 1;
         strIPFSHash = "";
     }
@@ -127,14 +213,16 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(strName);
         READWRITE(nAmount);
+        READWRITE(nUnits);
         READWRITE(nReissuable);
-        READWRITE(strIPFSHash);
+        ReadWriteIPFSHash(s, ser_action, strIPFSHash);
     }
 
-    CReissueAsset(const std::string& strAssetName, const CAmount& nAmount, const int& nReissuable, const std::string& strIPFSHash);
+    CReissueAsset(const std::string& strAssetName, const CAmount& nAmount, const int& nUnits, const int& nReissuable, const std::string& strIPFSHash);
     bool IsValid(std::string& strError, CAssetsCache& assetCache) const;
     void ConstructTransaction(CScript& script) const;
     bool IsNull() const;
@@ -146,14 +234,19 @@ struct CAssetCacheNewAsset
 {
     CNewAsset asset;
     std::string address;
+    uint256 blockHash;
+    int blockHeight;
 
-    CAssetCacheNewAsset(const CNewAsset& asset, const std::string& address)
+    CAssetCacheNewAsset(const CNewAsset& asset, const std::string& address, const int& blockHeight, const uint256& blockHash)
     {
         this->asset = asset;
         this->address = address;
+        this->blockHash = blockHash;
+        this->blockHeight = blockHeight;
     }
 
-    bool operator<(const CAssetCacheNewAsset& rhs) const {
+    bool operator<(const CAssetCacheNewAsset& rhs) const
+    {
         return asset.strName < rhs.asset.strName;
     }
 };
@@ -163,15 +256,21 @@ struct CAssetCacheReissueAsset
     CReissueAsset reissue;
     std::string address;
     COutPoint out;
+    uint256 blockHash;
+    int blockHeight;
 
-    CAssetCacheReissueAsset(const CReissueAsset& reissue, const std::string& address, const COutPoint& out)
+
+    CAssetCacheReissueAsset(const CReissueAsset& reissue, const std::string& address, const COutPoint& out, const int& blockHeight, const uint256& blockHash)
     {
         this->reissue = reissue;
         this->address = address;
         this->out = out;
+        this->blockHash = blockHash;
+        this->blockHeight = blockHeight;
     }
 
-    bool operator<(const CAssetCacheReissueAsset& rhs) const {
+    bool operator<(const CAssetCacheReissueAsset& rhs) const
+    {
         return out < rhs.out;
     }
 
@@ -192,17 +291,7 @@ struct CAssetCacheNewTransfer
 
     bool operator<(const CAssetCacheNewTransfer& rhs ) const
     {
-
         return out < rhs.out;
-//        if (transfer.strName < rhs.transfer.strName)
-//            return true;
-//
-//        if (rhs.transfer.strName == transfer.strName && address == rhs.address && transfer.nAmount == rhs.transfer.nAmount && out == rhs.out) {
-//            return false;
-//        } else if (rhs.transfer.strName == transfer.strName && (address != rhs.address || transfer.nAmount != rhs.transfer.nAmount || out == rhs.out))
-//            return true;
-//
-//        return false;
     }
 };
 
@@ -217,11 +306,10 @@ struct CAssetCacheNewOwner
         this->address = address;
     }
 
-    bool operator<(const CAssetCacheNewOwner& rhs) const {
+    bool operator<(const CAssetCacheNewOwner& rhs) const
+    {
 
         return assetName < rhs.assetName;
-//        if (assetName < rhs.assetName)
-//            return true;
     }
 };
 
@@ -274,12 +362,14 @@ struct CAssetCachePossibleMine
 
 // Least Recently Used Cache
 template<typename cache_key_t, typename cache_value_t>
-class CLRUCache {
+class CLRUCache
+{
 public:
     typedef typename std::pair<cache_key_t, cache_value_t> key_value_pair_t;
     typedef typename std::list<key_value_pair_t>::iterator list_iterator_t;
 
-    CLRUCache(size_t max_size) : maxSize(max_size) {
+    CLRUCache(size_t max_size) : maxSize(max_size)
+    {
     }
     CLRUCache()
     {
@@ -290,13 +380,15 @@ public:
     {
         auto it = cacheItemsMap.find(key);
         cacheItemsList.push_front(key_value_pair_t(key, value));
-        if (it != cacheItemsMap.end()) {
+        if (it != cacheItemsMap.end())
+        {
             cacheItemsList.erase(it->second);
             cacheItemsMap.erase(it);
         }
         cacheItemsMap[key] = cacheItemsList.begin();
 
-        if (cacheItemsMap.size() > maxSize) {
+        if (cacheItemsMap.size() > maxSize)
+        {
             auto last = cacheItemsList.end();
             last--;
             cacheItemsMap.erase(last->first);
@@ -307,7 +399,8 @@ public:
     void Erase(const cache_key_t& key)
     {
         auto it = cacheItemsMap.find(key);
-        if (it != cacheItemsMap.end()) {
+        if (it != cacheItemsMap.end())
+        {
             cacheItemsList.erase(it->second);
             cacheItemsMap.erase(it);
         }
@@ -316,9 +409,12 @@ public:
     const cache_value_t& Get(const cache_key_t& key)
     {
         auto it = cacheItemsMap.find(key);
-        if (it == cacheItemsMap.end()) {
+        if (it == cacheItemsMap.end())
+        {
             throw std::range_error("There is no such key in cache");
-        } else {
+        }
+        else
+        {
             cacheItemsList.splice(cacheItemsList.begin(), cacheItemsList, it->second);
             return it->second->second;
         }

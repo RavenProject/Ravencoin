@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <assets/assets.h>
+#include <assets/assetdb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -67,13 +68,13 @@ static const CAmount HIGH_TX_FEE_PER_KB = 0.01 * COIN;
 //! -maxtxfee will warn if called with a higher fee than this amount (in satoshis)
 static const CAmount HIGH_MAX_TX_FEE = 100 * HIGH_TX_FEE_PER_KB;
 /** Default for -limitancestorcount, max number of in-mempool ancestors */
-static const unsigned int DEFAULT_ANCESTOR_LIMIT = 25;
+static const unsigned int DEFAULT_ANCESTOR_LIMIT = 200;
 /** Default for -limitancestorsize, maximum kilobytes of tx + all in-mempool ancestors */
-static const unsigned int DEFAULT_ANCESTOR_SIZE_LIMIT = 101;
+static const unsigned int DEFAULT_ANCESTOR_SIZE_LIMIT = 202;
 /** Default for -limitdescendantcount, max number of in-mempool descendants */
-static const unsigned int DEFAULT_DESCENDANT_LIMIT = 25;
+static const unsigned int DEFAULT_DESCENDANT_LIMIT = 200;
 /** Default for -limitdescendantsize, maximum kilobytes of in-mempool descendants */
-static const unsigned int DEFAULT_DESCENDANT_SIZE_LIMIT = 101;
+static const unsigned int DEFAULT_DESCENDANT_SIZE_LIMIT = 202;
 /** Default for -mempoolexpiry, expiration time for mempool transactions in hours */
 static const unsigned int DEFAULT_MEMPOOL_EXPIRY = 336;
 /** Maximum kilobytes for transactions to store for processing during reorg */
@@ -149,7 +150,7 @@ static const unsigned int DEFAULT_BANSCORE_THRESHOLD = 100;
 /** Default for -persistmempool */
 static const bool DEFAULT_PERSIST_MEMPOOL = true;
 /** Default for -mempoolreplacement */
-static const bool DEFAULT_ENABLE_REPLACEMENT = true;
+static const bool DEFAULT_ENABLE_REPLACEMENT = false;
 /** Default for using fee filter */
 static const bool DEFAULT_FEEFILTER = true;
 
@@ -342,7 +343,7 @@ int VersionBitsTipStateSinceHeight(const Consensus::Params& params, Consensus::D
 /** Apply the effects of this transaction on the UTXO set represented by view */
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
 
-void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight, CAssetsCache* assetCache = nullptr, std::pair<std::string, std::string>* undoIPFSHash = nullptr);
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight, uint256 blockHash, CAssetsCache* assetCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
 
 /** Transaction validation functions */
 
@@ -427,7 +428,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 /** Functions for validating blocks and updating the block tree */
 
 /** Context-independent validity checks */
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fCheckAssetDuplicate = true, bool fForceDuplicateCheck = true);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */
 bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
@@ -485,7 +486,7 @@ extern CAssetsDB *passetsdb;
 /** Global variable that point to the active assets (protexted by cs_main) */
 extern CAssetsCache *passets;
 /** Global variable that point to the assets LRU Cache (protexted by cs_main) */
-extern CLRUCache<std::string, CNewAsset> *passetsCache;
+extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
 /** RVN END */
 
 /**
@@ -521,6 +522,8 @@ bool LoadMempool();
 
 /** RVN START */
 bool AreAssetsDeployed();
+
+bool IsDGWActive(unsigned int nBlockNumber);
 /** RVN END */
 
 #endif // RAVEN_VALIDATION_H

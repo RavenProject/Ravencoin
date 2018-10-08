@@ -2,9 +2,9 @@
 
 This issue tracker is only for technical issues related to bitcoin-core.
 
-General bitcoin questions and/or support requests and are best directed to the [Bitcoin StackExchange](https://bitcoin.stackexchange.com).
+General ravencoin questions and/or support requests and are best directed to the [Ravencoin Discord](https://discord.gg/GwtXdyc).
 
-For reporting security issues, please read instructions at [https://bitcoincore.org/en/contact/](https://bitcoincore.org/en/contact/).
+For reporting security issues, please direct message one of the core developers in discord.
 
 ### Describe the issue
 

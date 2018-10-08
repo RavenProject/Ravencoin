@@ -214,6 +214,7 @@ libraven_server_a_SOURCES = \
   noui.cpp \
   assets/assets.cpp \
   assets/assetdb.cpp \
+  assets/assettypes.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   policy/rbf.cpp \
@@ -356,6 +357,8 @@ libraven_consensus_a_SOURCES = \
   script/script_error.cpp \
   script/script_error.h \
   serialize.h \
+  support/cleanse.h \
+  support/cleanse.cpp \
   tinyformat.h \
   uint256.cpp \
   uint256.h \
