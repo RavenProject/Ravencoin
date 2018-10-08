@@ -11,3 +11,14 @@ Issue assets from a .csv file.
 Check for assets that have signed documents.
 * Set the constants at the top of signed_promises.py
 * ```python signed_promises.py```
+
+### Block Facts
+Loops through blocks and prints out block information.
+* Set the constants at the top of blockfacts.py
+* ```python blockfacts.py```
+
+### Transaction Facts
+Loops through blocks and transactions and prints out tx information.
+* Uncomment out print lines to print out more facts
+* Set the constants at the top of txfacts.py
+* ```python txfacts.py```

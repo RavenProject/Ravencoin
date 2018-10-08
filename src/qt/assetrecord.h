@@ -18,12 +18,12 @@ class AssetRecord
 public:
 
     AssetRecord():
-            name(""), quantity(0), units(0)
+            name(""), quantity(0), units(0), fIsAdministrator(false)
     {
     }
 
-    AssetRecord(const std::string _name, const CAmount& _quantity, const int _units):
-            name(_name), quantity(_quantity), units(_units)
+    AssetRecord(const std::string _name, const CAmount& _quantity, const int _units, const bool _fIsAdministrator):
+            name(_name), quantity(_quantity), units(_units), fIsAdministrator(_fIsAdministrator)
     {
     }
 
@@ -47,6 +47,7 @@ public:
     std::string name;
     CAmount quantity;
     int units;
+    bool fIsAdministrator;
     /**@}*/
 
 };

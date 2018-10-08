@@ -3,7 +3,8 @@
 // Copyright (c) 2017 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+#include "streams.h"
+#include "version.h"
 #include "assets/assets.h"
 #include "script.h"
 
@@ -273,9 +274,6 @@ bool CScript::IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) con
                 } else if ((*this)[index] == RVN_R) {
                     nType = TX_REISSUE_ASSET;
                     return true;
-                } else {
-                    nType = TX_RESERVED_ASSET;
-                    return false;
                 }
             }
         }
@@ -321,16 +319,6 @@ bool CScript::IsTransferAsset() const
     bool fIsOwner = false;
     if (IsAssetScript(nType, fIsOwner))
         return nType == TX_TRANSFER_ASSET;
-
-    return false;
-}
-
-bool CScript::IsReservedAsset() const
-{
-    int nType = 0;
-    bool fIsOwner = false;
-    if (!IsAssetScript(nType, fIsOwner))
-        return nType == TX_RESERVED_ASSET;
 
     return false;
 }
@@ -423,3 +411,153 @@ bool CScript::HasValidOps() const
     }
     return true;
 }
+
+bool CScript::IsUnspendable() const
+{
+    CAmount nAmount;
+    return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE) || (GetAssetAmountFromScript(*this, nAmount) && nAmount == 0);
+}
+
+//!--------------------------------------------------------------------------------------------------------------------------!//
+//! These are needed because script.h and script.cpp do not have access to asset.h and asset.cpp functions. This is
+//! because the make file compiles them at different times. The script files are compiled with other
+//! consensus files, and asset files are compiled with core files.
+
+//! Used to check if an asset script contains zero assets. Is so, it should be unspendable
+bool GetAssetAmountFromScript(const CScript& script, CAmount& nAmount)
+{
+    // Placeholder strings that will get set if you successfully get the transfer or asset from the script
+    std::string address = "";
+    std::string assetName = "";
+
+    int nType = 0;
+    bool fIsOwner = false;
+    if (!script.IsAssetScript(nType, fIsOwner)) {
+        return false;
+    }
+
+    txnouttype type = txnouttype(nType);
+
+    // Get the New Asset or Transfer Asset from the scriptPubKey
+    if (type == TX_NEW_ASSET && !fIsOwner) {
+        if (AmountFromNewAssetScript(script, nAmount)) {
+            return true;
+        }
+    } else if (type == TX_TRANSFER_ASSET) {
+        if (AmountFromTransferScript(script, nAmount)) {
+            return true;
+        }
+    } else if (type == TX_NEW_ASSET && fIsOwner) {
+            nAmount = OWNER_ASSET_AMOUNT;
+            return true;
+    } else if (type == TX_REISSUE_ASSET) {
+        if (AmountFromReissueScript(script, nAmount)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex)
+{
+    int nType = 0;
+    bool fIsOwner =false;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+        return nType == TX_NEW_ASSET && !fIsOwner;
+    }
+
+    return false;
+}
+
+bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex)
+{
+    int nType = 0;
+    bool fIsOwner =false;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+        return nType == TX_TRANSFER_ASSET;
+    }
+
+    return false;
+}
+
+bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex)
+{
+    int nType = 0;
+    bool fIsOwner =false;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+        return nType == TX_REISSUE_ASSET;
+    }
+
+    return false;
+}
+
+
+bool AmountFromNewAssetScript(const CScript& scriptPubKey, CAmount& nAmount)
+{
+    int nStartingIndex = 0;
+    if (!ScriptNewAsset(scriptPubKey, nStartingIndex))
+        return false;
+
+    std::vector<unsigned char> vchNewAsset;
+    vchNewAsset.insert(vchNewAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    CDataStream ssAsset(vchNewAsset, SER_NETWORK, PROTOCOL_VERSION);
+
+    CNewAsset assetNew;
+    try {
+        ssAsset >> assetNew;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    nAmount = assetNew.nAmount;
+    return true;
+}
+
+bool AmountFromTransferScript(const CScript& scriptPubKey, CAmount& nAmount)
+{
+    int nStartingIndex = 0;
+    if (!ScriptTransferAsset(scriptPubKey, nStartingIndex))
+        return false;
+
+    std::vector<unsigned char> vchAsset;
+    vchAsset.insert(vchAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    CDataStream ssAsset(vchAsset, SER_NETWORK, PROTOCOL_VERSION);
+
+    CAssetTransfer asset;
+    try {
+        ssAsset >> asset;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    nAmount = asset.nAmount;
+    return true;
+}
+
+bool AmountFromReissueScript(const CScript& scriptPubKey, CAmount& nAmount)
+{
+    int nStartingIndex = 0;
+    if (!ScriptReissueAsset(scriptPubKey, nStartingIndex))
+        return false;
+
+    std::vector<unsigned char> vchNewAsset;
+    vchNewAsset.insert(vchNewAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    CDataStream ssAsset(vchNewAsset, SER_NETWORK, PROTOCOL_VERSION);
+
+    CReissueAsset asset;
+    try {
+        ssAsset >> asset;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    nAmount = asset.nAmount;
+    return true;
+}
+//!--------------------------------------------------------------------------------------------------------------------------!//
+
+

@@ -128,15 +128,14 @@ public:
         consensus.nPowTargetSpacing = 1 * 60;
 		consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 1632; // Approx 80% of 2018
+        consensus.nRuleChangeActivationThreshold = 1814; // Approx 90% of 2016
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;  //Assets (RIP2)
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1604102400; // TODO Update for october 31st 2018 build
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1604108400; // TODO Update for october 31st 2018 build
-
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  //Assets (RIP2)
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1540944000; // Oct 31, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1572480000; // Oct 31, 2019
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -173,8 +172,9 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0000006b444bc2f2ffe627be9d9e7e7a0730000870ef6eb6da46c8eae389df90"));
         assert(genesis.hashMerkleRoot == uint256S("28ff00a867739a352523808d301f504bc4547699398d70faf2266a8bae5f3516"));
 
-        vSeeds.emplace_back("seed-raven.ravencoin.org", false);
         vSeeds.emplace_back("seed-raven.bitactivate.com", false);
+        vSeeds.emplace_back("seed-raven.ravencoin.com", false);
+        vSeeds.emplace_back("seed-raven.ravencoin.org", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,60);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,122);
@@ -221,12 +221,16 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 338778;
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
+        nMinReorganizationPeers = 4;
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** RVN End **/
     }
 };
 
 /**
- * Testnet (v4)
+ * Testnet (v6)
  */
 class CTestNetParams : public CChainParams {
 public:
@@ -251,7 +255,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1533924000; // GMT: Friday, August 10, 2018 6:00:00 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1536516000; // GMT: Sunday, September 9, 2018 6:00:00 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1538351999; // GMT: Sunday, September 30, 2018 11:59:59 PM
 
 
         // The best chain should have at least this much work.
@@ -265,8 +269,10 @@ public:
         pchMessageStart[1] = 0x56;
         pchMessageStart[2] = 0x4E;
         pchMessageStart[3] = 0x54;
-        nDefaultPort = 18768;
+        nDefaultPort = 18770;
         nPruneAfterHeight = 1000;
+
+        uint32_t nGenesisTime = 1537466400;  // Thursday, September 20, 2018 12:00:00 PM GMT-06:00
 
         // This is used inorder to mine the genesis block. Once found, we can use the nonce and block hash found to create a valid genesis block
 //        /////////////////////////////////////////////////////////////////
@@ -282,7 +288,7 @@ public:
 //        uint256 TempHashHolding = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
 //        uint256 BestBlockHash = uint256S("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 //        for (int i=0;i<40000000;i++) {
-//            genesis = CreateGenesisBlock(1533751200, i, 0x1e00ffff, 2, 5000 * COIN);
+//            genesis = CreateGenesisBlock(nGenesisTime, i, 0x1e00ffff, 2, 5000 * COIN);
 //            //genesis.hashPrevBlock = TempHashHolding;
 //            consensus.hashGenesisBlock = genesis.GetHash();
 //
@@ -328,18 +334,19 @@ public:
 
 //        /////////////////////////////////////////////////////////////////
 
-        genesis = CreateGenesisBlock(1533751200, 555705, 0x1e00ffff, 2, 5000 * COIN);
+        genesis = CreateGenesisBlock(nGenesisTime, 15615880, 0x1e00ffff, 2, 5000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
         //Test MerkleRoot and GenesisBlock
-        assert(consensus.hashGenesisBlock == uint256S("0x0000006ebc14cb6777bedda407702dfbc6b273f1af956bcfd6f4f98a2eb14433"));
-        assert(genesis.hashMerkleRoot == uint256S("0x28ff00a867739a352523808d301f504bc4547699398d70faf2266a8bae5f3516"));
+        assert(consensus.hashGenesisBlock == uint256S("0x000000ecfc5e6324a079542221d00e10362bdc894d56500c414060eea8a3ad5a"));
+        assert(genesis.hashMerkleRoot == uint256S("28ff00a867739a352523808d301f504bc4547699398d70faf2266a8bae5f3516"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
 
-        vSeeds.emplace_back("seed-testnet-raven.ravencoin.org", false);
         vSeeds.emplace_back("seed-testnet-raven.bitactivate.com", false);
+        vSeeds.emplace_back("seed-testnet-raven.ravencoin.com", false);
+        vSeeds.emplace_back("seed-testnet-raven.ravencoin.org", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
@@ -384,8 +391,13 @@ public:
         strGlobalBurnAddress = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
 
         // DGW Activation
-        nDGWActivationBlock = 1440;
+        nDGWActivationBlock = 200;
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
+        nMinReorganizationPeers = 4;
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** RVN End **/
+
     }
 };
 
@@ -412,7 +424,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 999999999999ULL;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 999999999999ULL;
 
@@ -539,6 +551,10 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
+
+        nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
+        nMinReorganizationPeers = 4;
+        nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** RVN End **/
     }
 };

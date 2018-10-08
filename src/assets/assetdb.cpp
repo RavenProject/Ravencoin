@@ -16,13 +16,15 @@ static const char ASSET_FLAG = 'A';
 static const char ASSET_ADDRESS_QUANTITY_FLAG = 'B';
 static const char MY_ASSET_FLAG = 'M';
 static const char BLOCK_ASSET_UNDO_DATA = 'U';
+static const char MEMPOOL_REISSUED_TX = 'Z';
 
 CAssetsDB::CAssetsDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "assets", nCacheSize, fMemory, fWipe) {
 }
 
-bool CAssetsDB::WriteAssetData(const CNewAsset &asset)
+bool CAssetsDB::WriteAssetData(const CNewAsset &asset, const int nHeight, const uint256& blockHash)
 {
-    return Write(std::make_pair(ASSET_FLAG, asset.strName), asset);
+    CDatabasedAssetData data(asset, nHeight, blockHash);
+    return Write(std::make_pair(ASSET_FLAG, asset.strName), data);
 }
 
 bool CAssetsDB::WriteMyAssetsData(const std::string &strName, const std::set<COutPoint>& setOuts)
@@ -35,9 +37,19 @@ bool CAssetsDB::WriteAssetAddressQuantity(const std::string &assetName, const st
     return Write(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, address)), quantity);
 }
 
-bool CAssetsDB::ReadAssetData(const std::string& strName, CNewAsset& asset)
+bool CAssetsDB::ReadAssetData(const std::string& strName, CNewAsset& asset, int& nHeight, uint256& blockHash)
 {
-    return Read(std::make_pair(ASSET_FLAG, strName), asset);
+
+    CDatabasedAssetData data;
+    bool ret =  Read(std::make_pair(ASSET_FLAG, strName), data);
+
+    if (ret) {
+        asset = data.asset;
+        nHeight = data.nHeight;
+        blockHash = data.blockHash;
+    }
+
+    return ret;
 }
 
 bool CAssetsDB::ReadMyAssetsData(const std::string &strName, std::set<COutPoint>& setOuts)
@@ -72,20 +84,37 @@ bool CAssetsDB::EraseMyOutPoints(const std::string& assetName)
     return true;
 }
 
-bool CAssetsDB::WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, std::string> >& vIPFSHashes)
+bool CAssetsDB::WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData)
 {
-    return Write(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), vIPFSHashes);
+    return Write(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), assetUndoData);
 }
 
-bool CAssetsDB::ReadBlockUndoAssetData(const uint256 &blockhash,
-                                       std::vector<std::pair<std::string, std::string> > &vIPFSHashes) {
-
+bool CAssetsDB::ReadBlockUndoAssetData(const uint256 &blockhash, std::vector<std::pair<std::string, CBlockAssetUndo> > &assetUndoData)
+{
     // If it exists, return the read value.
     if (Exists(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash)))
-        return Read(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), vIPFSHashes);
+           return Read(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), assetUndoData);
 
     // If it doesn't exist, we just return true because we don't want to fail just because it didn't exist in the db
     return true;
+}
+
+bool CAssetsDB::WriteReissuedMempoolState()
+{
+    return Write(MEMPOOL_REISSUED_TX, mapReissuedAssets);
+}
+
+bool CAssetsDB::ReadReissuedMempoolState()
+{
+    mapReissuedAssets.clear();
+    mapReissuedTx.clear();
+    // If it exists, return the read value.
+    bool rv = Read(MEMPOOL_REISSUED_TX, mapReissuedAssets);
+    if (rv) {
+        for (auto pair : mapReissuedAssets)
+            mapReissuedTx.insert(std::make_pair(pair.second, pair.first));
+    }
+    return rv;
 }
 
 bool CAssetsDB::LoadAssets()
@@ -99,9 +128,9 @@ bool CAssetsDB::LoadAssets()
         boost::this_thread::interruption_point();
         std::pair<char, std::string> key;
         if (pcursor->GetKey(key) && key.first == ASSET_FLAG) {
-            CNewAsset asset;
-            if (pcursor->GetValue(asset)) {
-                passetsCache->Put(asset.strName, asset);
+            CDatabasedAssetData data;
+            if (pcursor->GetValue(data)) {
+                passetsCache->Put(data.asset.strName, data);
                 pcursor->Next();
             } else {
                 return error("%s: failed to read asset", __func__);
@@ -158,7 +187,7 @@ bool CAssetsDB::LoadAssets()
     return true;
 }
 
-bool CAssetsDB::AssetDir(std::vector<CNewAsset>& assets, const std::string filter, const size_t count, const long start)
+bool CAssetsDB::AssetDir(std::vector<CDatabasedAssetData>& assets, const std::string filter, const size_t count, const long start)
 {
     FlushStateToDisk();
 
@@ -211,9 +240,9 @@ bool CAssetsDB::AssetDir(std::vector<CNewAsset>& assets, const std::string filte
                     offset += 1;
                 }
                 else {
-                    CNewAsset asset;
-                    if (pcursor->GetValue(asset)) {
-                        assets.push_back(asset);
+                    CDatabasedAssetData data;
+                    if (pcursor->GetValue(data)) {
+                        assets.push_back(data);
                         loaded += 1;
                     } else {
                         return error("%s: failed to read asset", __func__);
@@ -229,7 +258,7 @@ bool CAssetsDB::AssetDir(std::vector<CNewAsset>& assets, const std::string filte
     return true;
 }
 
-bool CAssetsDB::AssetDir(std::vector<CNewAsset>& assets)
+bool CAssetsDB::AssetDir(std::vector<CDatabasedAssetData>& assets)
 {
     return CAssetsDB::AssetDir(assets, "*", MAX_SIZE, 0);
 }

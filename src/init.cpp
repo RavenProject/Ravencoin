@@ -358,6 +358,9 @@ std::string HelpMessage(HelpMessageMode mode)
     if (showDebug)
         strUsage += HelpMessageOpt("-feefilter", strprintf("Tell other nodes to filter invs to us by our mempool min fee (default: %u)", DEFAULT_FEEFILTER));
     strUsage += HelpMessageOpt("-loadblock=<file>", _("Imports blocks from external blk000??.dat file on startup"));
+    strUsage += HelpMessageOpt("-maxreorg=<n>", strprintf(_("Set the Maximum reorg depth (default: %u)"), defaultChainParams->MaxReorganizationDepth()));
+    strUsage += HelpMessageOpt("-minreorgpeers=<n>", strprintf(_("Set the Minimum amount of peers required to disallow reorg of chains of depth >= maxreorg. Peers must be greater than. (default: %u)"), defaultChainParams->MinReorganizationPeers()));
+    strUsage += HelpMessageOpt("-minreorgage=<n>", strprintf(_("Set the Minimum tip age (in seconds) required to allow reorg of a chain of depth >= maxreorg on a node with more than minreorgpeers peers. (default: %u)"), defaultChainParams->MinReorganizationAge()));
     strUsage += HelpMessageOpt("-maxorphantx=<n>", strprintf(_("Keep at most <n> unconnectable transactions in memory (default: %u)"), DEFAULT_MAX_ORPHAN_TRANSACTIONS));
     strUsage += HelpMessageOpt("-maxmempool=<n>", strprintf(_("Keep the transaction memory pool below <n> megabytes (default: %u)"), DEFAULT_MAX_MEMPOOL_SIZE));
     strUsage += HelpMessageOpt("-mempoolexpiry=<n>", strprintf(_("Do not keep transactions in the mempool longer than <n> hours (default: %u)"), DEFAULT_MEMPOOL_EXPIRY));
@@ -500,7 +503,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-whitelistforcerelay", strprintf(_("Force relay of transactions from whitelisted peers even if they violate local relay policy (default: %d)"), DEFAULT_WHITELISTFORCERELAY));
 
     strUsage += HelpMessageGroup(_("Block creation options:"));
-    strUsage += HelpMessageOpt("-blockmaxweight=<n>", strprintf(_("Set maximum BIP141 block weight (default: %d)"), GetMaxBlockWeight() - 4000));
+    strUsage += HelpMessageOpt("-blockmaxweight=<n>", strprintf(_("Set maximum BIP141 block weight (default: %d)"), MAX_BLOCK_WEIGHT - 4000));
     strUsage += HelpMessageOpt("-blockmaxsize=<n>", _("Set maximum BIP141 block weight to this * 4. Deprecated, use blockmaxweight"));
     strUsage += HelpMessageOpt("-blockmintxfee=<amt>", strprintf(_("Set lowest fee rate (in %s/kB) for transactions to be included in block creation. (default: %s)"), CURRENCY_UNIT, FormatMoney(DEFAULT_BLOCK_MIN_TX_FEE)));
     if (showDebug)
@@ -1447,7 +1450,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete passetsCache;
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
-                passetsCache = new CLRUCache<std::string, CNewAsset>(MAX_CACHE_ASSETS_SIZE);
+                passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
 
 
                 // Need to load assets before we verify the database
@@ -1455,6 +1458,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     strLoadError = _("Failed to load Assets Database");
                     break;
                 }
+
+                if (!passetsdb->ReadReissuedMempoolState())
+                    LogPrintf("Database failed to load last Reissued Mempool State. Will have to start from empty state");
 
                 LogPrintf("Loaded Assets from database without error\nCache of assets size: %d\nNumber of assets I have: %d\n", passetsCache->Size(), passets->mapMyUnspentAssets.size());
 
