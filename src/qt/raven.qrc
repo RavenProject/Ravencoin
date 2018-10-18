@@ -57,6 +57,10 @@
         <file alias="network_disabled">res/icons/network_disabled.png</file>
         <file alias="refresh">res/icons/refresh.png</file>
         <file alias="asset_administrator">res/icons/asset_administrator.png</file>
+        <file alias="rectangle">res/icons/rectangle.png</file>
+        <file alias="bluerectangle">res/icons/bluerectangle.png</file>
+        <file alias="svgrectangle">res/icons/rectanglesvg.svg</file>
+        <file alias="ravencointext">res/icons/ravencointext.svg</file>
     </qresource>
     <qresource prefix="/movies">
         <file alias="spinner-000">res/movies/spinner-000.png</file>
@@ -95,5 +99,31 @@
         <file alias="spinner-033">res/movies/spinner-033.png</file>
         <file alias="spinner-034">res/movies/spinner-034.png</file>
         <file alias="spinner-035">res/movies/spinner-035.png</file>
+    </qresource>
+    <qresource prefix="/darkstyle">
+        <file alias="qss">res/darkstyle/darkstyle.qss</file>
+        <file alias="close">res/darkstyle/icon_close.png</file>
+        <file alias="restore">res/darkstyle/icon_restore.png</file>
+        <file alias="undock">res/darkstyle/icon_undock.png</file>
+        <file alias="branch-closed">res/darkstyle/icon_branch_closed.png</file>
+        <file alias="branch-end">res/darkstyle/icon_branch_end.png</file>
+        <file alias="branch-more">res/darkstyle/icon_branch_more.png</file>
+        <file alias="branch-open">res/darkstyle/icon_branch_open.png</file>
+        <file alias="vline">res/darkstyle/icon_vline.png</file>
+        <file alias="checkbox-checked">res/darkstyle/icon_checkbox_checked.png</file>
+        <file alias="checkbox-indeterminate">res/darkstyle/icon_checkbox_indeterminate.png</file>
+        <file alias="checkbox-unchecked">res/darkstyle/icon_checkbox_unchecked.png</file>
+        <file alias="checkbox-checked-pressed">res/darkstyle/icon_checkbox_checked_pressed.png</file>
+        <file alias="checkbox-indeterminate-pressed">res/darkstyle/icon_checkbox_indeterminate_pressed.png</file>
+        <file alias="checkbox-unchecked-pressed">res/darkstyle/icon_checkbox_unchecked_pressed.png</file>
+        <file alias="checkbox-checked-disabled">res/darkstyle/icon_checkbox_checked_disabled.png</file>
+        <file alias="checkbox-indeterminate-disabled">res/darkstyle/icon_checkbox_indeterminate_disabled.png</file>
+        <file alias="checkbox-unchecked-disabled">res/darkstyle/icon_checkbox_unchecked_disabled.png</file>
+        <file alias="radio-checked">res/darkstyle/icon_radiobutton_checked.png</file>
+        <file alias="radio-unchecked">res/darkstyle/icon_radiobutton_unchecked.png</file>
+        <file alias="radio-checked-press">res/darkstyle/icon_radiobutton_checked_pressed.png</file>
+        <file alias="radio-unchecked-press">res/darkstyle/icon_radiobutton_unchecked_pressed.png</file>
+        <file alias="radio-checked-disabled">res/darkstyle/icon_radiobutton_checked_disabled.png</file>
+        <file alias="radio-unchecked-disabled">res/darkstyle/icon_radiobutton_unchecked_disabled.png</file>
     </qresource>
 </RCC>

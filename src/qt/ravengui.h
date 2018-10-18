@@ -36,6 +36,8 @@ QT_BEGIN_NAMESPACE
 class QAction;
 class QProgressBar;
 class QProgressDialog;
+class QNetworkAccessManager;
+class QNetworkRequest;
 QT_END_NAMESPACE
 
 /**
@@ -114,7 +116,17 @@ private:
     QAction *showHelpMessageAction;
 
     /** RVN START */
-    QAction *assetAction;
+    QAction *transferAssetAction;
+    QAction *createAssetAction;
+    QAction *manageAssetAction;
+    QAction *messagingAction;
+    QAction *votingAction;
+    QWidget *headerWidget;
+    QLabel *labelCurrentMarket;
+    QLabel *labelCurrentPrice;
+    QTimer *pricingTimer;
+    QNetworkAccessManager* networkManager;
+    QNetworkRequest* request;
     /** RVN END */
 
     QSystemTrayIcon *trayIcon;
@@ -175,6 +187,8 @@ public Q_SLOTS:
     */
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
 
+    void getPriceInfo();
+
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status
@@ -219,6 +233,8 @@ private Q_SLOTS:
     /** RVN START */
     /** Switch to assets page */
     void gotoAssetsPage();
+    void gotoCreateAssetsPage();
+    void gotoManageAssetsPage();
     /** RVN END */
 
 #endif // ENABLE_WALLET
@@ -277,7 +293,7 @@ private:
     /** Shows context menu with Display Unit options by the mouse coordinates */
     void onDisplayUnitsClicked(const QPoint& point);
     /** Creates context menu, its actions, and wires up all the relevant signals for mouse events. */
-    void createContextMenu();
+    void createContextMenu(const PlatformStyle *platformStyle);
 
 private Q_SLOTS:
     /** When Display Units are changed on OptionsModel it will refresh the display text of the control on the status bar */

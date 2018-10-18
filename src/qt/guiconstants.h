@@ -18,7 +18,10 @@ static const int STATUSBAR_ICONSIZE = 16;
 static const bool DEFAULT_SPLASHSCREEN = true;
 
 /* Invalid field background style */
-#define STYLE_INVALID "background:#FF8080"
+#define STYLE_INVALID "background:#FF8080; border: 1px solid lightgray; padding: 0px;"
+#define STYLE_VALID "border: 1px solid lightgray; padding: 0px;"
+
+
 
 /* Transaction list -- unconfirmed transaction */
 #define COLOR_UNCONFIRMED QColor(128, 128, 128)
@@ -34,6 +37,45 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TX_STATUS_DANGER QColor(200, 100, 100)
 /* Transaction list -- TX status decoration - default color */
 #define COLOR_BLACK QColor(0, 0, 0)
+/* Widget Background color - default color */
+#define COLOR_WHITE QColor(255, 255, 255)
+
+/* Background color, very light gray */
+#define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
+/* Ravencoin dark orange */
+#define COLOR_DARK_ORANGE QColor(240, 83, 57)
+/* Ravencoin light orange */
+#define COLOR_LIGHT_ORANGE QColor(247, 148, 51)
+/* Ravencoin dark blue */
+#define COLOR_DARK_BLUE QColor(46, 62, 128)
+/* Ravencoin light blue */
+#define COLOR_LIGHT_BLUE QColor(81, 107, 194)
+/* Ravencoin asset text */
+#define COLOR_ASSET_TEXT QColor(255, 255, 255)
+/* Ravencoin shadow color - light mode */
+#define COLOR_SHADOW_LIGHT QColor(0, 0, 0, 46)
+/* Ravencoin label color */
+#define COLOR_LABEL_STRING "color: #4960ad"
+
+
+/** DARK MODE */
+/* Widget background color, dark mode */
+#define COLOR_WIDGET_BACKGROUND_DARK QColor("#1c2535")
+/* Ravencoin shadow color - dark mode */
+#define COLOR_SHADOW_DARK QColor(33,80,181)
+/* Ravencoin Light blue - dark mode - dark mode */
+#define COLOR_LIGHT_BLUE_DARK QColor("#2b374b")
+/* Ravencoin Dark blue - dark mode - dark mode */
+#define COLOR_DARK_BLUE_DARK QColor("#1c2535")
+/* Pricing widget background color */
+#define COLOR_PRICING_WIDGET QColor("#171f2d")
+
+
+
+
+
+
+
 
 /* Tooltips longer than this (in characters) are converted into rich text,
    so that they can be word-wrapped.

@@ -19,6 +19,7 @@
 #include "netbase.h"
 #include "txdb.h" // for -dbcache defaults
 #include "intro.h" 
+#include "platformstyle.h"
 
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -85,6 +86,10 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("fCustomFeeFeatures"))
         settings.setValue("fCustomFeeFeatures", false);
     fCustomFeeFeatures = settings.value("fCustomFeeFeatures", false).toBool();
+
+    if (!settings.contains("fDarkModeEnabled"))
+        settings.setValue("fDarkModeEnabled", false);
+    fDarkModeEnabled = settings.value("fDarkModeEnabled", false).toBool();
 
     // These are shared with the core or have a command-line parameter
     // and we want command-line parameters to overwrite the GUI settings.
@@ -276,6 +281,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return settings.value("fListen");
         case CustomFeeFeatures:
             return fCustomFeeFeatures;
+        case DarkModeEnabled:
+            return fDarkModeEnabled;
         default:
             return QVariant();
         }
@@ -425,9 +432,13 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             }
             break;
         case CustomFeeFeatures:
-            fCustomFeeFeatures = value.toBool();
-            settings.setValue("fCustomFeeFeatures", fCustomFeeFeatures);
-            Q_EMIT customFeeFeaturesChanged(fCustomFeeFeatures);
+                fCustomFeeFeatures = value.toBool();
+                settings.setValue("fCustomFeeFeatures", fCustomFeeFeatures);
+                Q_EMIT customFeeFeaturesChanged(fCustomFeeFeatures);
+                break;
+        case DarkModeEnabled:
+            fDarkModeEnabled = value.toBool();
+            settings.setValue("fDarkModeEnabled", fDarkModeEnabled);
             break;
         default:
             break;

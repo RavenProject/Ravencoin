@@ -15,6 +15,7 @@
 #include "platformstyle.h"
 #include "sendcoinsentry.h"
 #include "walletmodel.h"
+#include "guiconstants.h"
 
 #include "base58.h"
 #include "chainparams.h"
@@ -25,6 +26,7 @@
 #include "policy/fees.h"
 #include "wallet/fees.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QFontMetrics>
 #include <QMessageBox>
 #include <QScrollBar>
@@ -108,6 +110,11 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle, QWidget *p
     ui->customFee->setValue(settings.value("nTransactionFee").toLongLong());
     ui->checkBoxMinimumFee->setChecked(settings.value("fPayOnlyMinFee").toBool());
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
+
+    // Setup the coin control visuals and labels
+    setupCoinControl(platformStyle);
+    setupScrollView(platformStyle);
+    setupFeeControl(platformStyle);
 }
 
 void SendCoinsDialog::setClientModel(ClientModel *_clientModel)
@@ -195,6 +202,76 @@ SendCoinsDialog::~SendCoinsDialog()
     settings.setValue("fPayOnlyMinFee", ui->checkBoxMinimumFee->isChecked());
 
     delete ui;
+}
+
+void SendCoinsDialog::setupCoinControl(const PlatformStyle *platformStyle)
+{
+    /** Update the coincontrol frame */
+    ui->frameCoinControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
+    ui->widgetCoinControl->setStyleSheet(".QWidget {background-color: transparent;}");
+    /** Create the shadow effects on the frames */
+
+    ui->frameCoinControl->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->labelCoinControlFeatures->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlFeatures->setFont(GUIUtil::getTopLabelFont());
+
+    ui->labelCoinControlQuantityText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlQuantityText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlAmountText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAmountText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlFeeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlFeeText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlAfterFeeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAfterFeeText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlBytesText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlBytesText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlLowOutputText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlLowOutputText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlChangeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlChangeText->setFont(GUIUtil::getSubLabelFont());
+
+    // Align the other labels next to the input buttons to the text in the same height
+    ui->labelCoinControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
+
+    // Align the Custom change address checkbox
+    ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
+}
+
+void SendCoinsDialog::setupScrollView(const PlatformStyle *platformStyle)
+{
+    /** Update the scrollview*/
+    ui->scrollArea->setStyleSheet(QString(".QScrollArea{background-color: %1; border: none}").arg(platformStyle->WidgetBackGroundColor().name()));
+    ui->scrollArea->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    // Add some spacing so we can see the whole card
+    ui->entries->setContentsMargins(10,10,20,0);
+    ui->scrollAreaWidgetContents->setStyleSheet(QString(".QWidget{ background-color: %1;}").arg(platformStyle->WidgetBackGroundColor().name()));
+}
+
+void SendCoinsDialog::setupFeeControl(const PlatformStyle *platformStyle)
+{
+    /** Update the coincontrol frame */
+    ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
+    /** Create the shadow effects on the frames */
+
+    ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->labelFeeHeadline->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
+    ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
+
 }
 
 void SendCoinsDialog::on_sendButton_clicked()

@@ -67,5 +67,4 @@ private:
     int limitRows;
     bool showInactive;
 };
-
 #endif // RAVEN_QT_TRANSACTIONFILTERPROXY_H

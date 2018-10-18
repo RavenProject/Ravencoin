@@ -12,6 +12,9 @@
 
 class WalletModel;
 class PlatformStyle;
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 
 namespace Ui {
     class SendAssetsEntry;
@@ -49,12 +52,17 @@ public:
     QWidget *setupTabChain(QWidget *prev);
 
     void setFocus();
+    void setFocusAssetListBox();
 
     bool fUsingAssetControl;
     bool fShowAdministratorList;
 
     void refreshAssetList();
     void switchAdministratorList(bool fSwitchStatus = true);
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 
 public Q_SLOTS:

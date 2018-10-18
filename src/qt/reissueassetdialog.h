@@ -14,6 +14,9 @@ class PlatformStyle;
 class WalletModel;
 class ClientModel;
 class CNewAsset;
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 
 namespace Ui {
     class ReissueAssetDialog;
@@ -29,7 +32,7 @@ class ReissueAssetDialog : public QDialog
 Q_OBJECT
 
 public:
-    explicit ReissueAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0, WalletModel *model = NULL, ClientModel *client = NULL);
+    explicit ReissueAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
     ~ReissueAssetDialog();
 
     void setClientModel(ClientModel *clientModel);
@@ -37,6 +40,17 @@ public:
 
     QString formatGreen;
     QString formatBlack;
+
+    void setupCoinControlFrame(const PlatformStyle *platformStyle);
+    void setupAssetDataView(const PlatformStyle *platformStyle);
+    void setupFeeControl(const PlatformStyle *platformStyle);
+    void updateAssetsList();
+
+    void clear();
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 private:
     Ui::ReissueAssetDialog *ui;
@@ -72,7 +86,6 @@ private:
     bool checkIPFSHash(QString hash);
 
 private Q_SLOTS:
-    void onCloseClicked();
     void onAssetSelected(int index);
     void onQuantityChanged(double qty);
     void onIPFSStateChanged();
@@ -81,6 +94,7 @@ private Q_SLOTS:
     void onReissueAssetClicked();
     void onReissueBoxChanged();
     void onUnitChanged(int value);
+    void onClearButtonClicked();
 
     //CoinControl
     void coinControlFeatureChanged(bool);
@@ -103,10 +117,15 @@ private Q_SLOTS:
     void updateFeeSectionControls();
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
+    void feeControlFeatureChanged(bool);
 
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     void updateDisplayUnit();
+
+Q_SIGNALS:
+    // Fired when a message should be reported to the user
+    void message(const QString &title, const QString &message, unsigned int style);
 };
 
 #endif // RAVEN_QT_REISSUEASSETDIALOG_H

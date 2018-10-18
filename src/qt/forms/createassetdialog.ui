@@ -745,7 +745,7 @@
           <item>
            <widget class="QLabel" name="unitExampleLabel">
             <property name="text">
-             <string>e.g. 1.00000000</string>
+             <string>e.g. 1</string>
             </property>
            </widget>
           </item>
@@ -799,7 +799,7 @@
              <number>46</number>
             </property>
             <property name="placeholderText">
-             <string>The IPFS Hash that is associated with the asset being created (e.g 6D3Ef76Sl10HQ....)</string>
+             <string>The IPFS Hash that is associated with the asset being created (e.g Qm3Ef76Sl10HQ....)</string>
             </property>
            </widget>
           </item>
@@ -1327,9 +1327,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="closeButton">
+      <widget class="QPushButton" name="clearButton">
        <property name="text">
-        <string>Close</string>
+        <string>Clear</string>
        </property>
       </widget>
      </item>
@@ -1375,15 +1375,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QValidatedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qvalidatedlineedit.h</header>
+  </customwidget>
+  <customwidget>
    <class>RavenAmountField</class>
    <extends>QLineEdit</extends>
    <header>ravenamountfield.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QValidatedLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>qvalidatedlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

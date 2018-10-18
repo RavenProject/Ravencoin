@@ -37,6 +37,9 @@ public:
 
     void setClientModel(ClientModel *clientModel);
     void setModel(WalletModel *model);
+    void setupAssetControlFrame(const PlatformStyle *platformStyle);
+    void setupScrollView(const PlatformStyle *platformStyle);
+    void setupFeeControl(const PlatformStyle *platformStyle);
 
     /** Set up the tab chain manually, as Qt messes up the tab chain by default in some cases (issue https://bugreports.qt-project.org/browse/QTBUG-10907).
      */
@@ -55,6 +58,7 @@ public Q_SLOTS:
     void updateTabsAndLabels();
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+    void focusAssetListBox();
 
 private:
     Ui::AssetsDialog *ui;
@@ -99,10 +103,9 @@ private Q_SLOTS:
     void customFeeFeatureChanged(bool);
 
     /** RVN START */
-    void createAssetButtonClicked();
-    void reissueAssetButtonClicked();
     void mineButtonClicked();
     void assetControlUpdateSendCoinsDialog();
+    void focusAsset(const QModelIndex& index);
     /** RVN END */
 
     Q_SIGNALS:

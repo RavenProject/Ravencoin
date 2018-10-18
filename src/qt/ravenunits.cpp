@@ -70,6 +70,23 @@ qint64 RavenUnits::factor(int unit)
     }
 }
 
+qint64 RavenUnits::factorAsset(int unit)
+{
+    switch(unit)
+    {
+        case 0:  return 1;
+        case 1: return 10;
+        case 2: return 100;
+        case 3: return 1000;
+        case 4: return 10000;
+        case 5: return 100000;
+        case 6: return 1000000;
+        case 7: return 10000000;
+        case 8: return 100000000;
+        default:   return 100000000;
+    }
+}
+
 int RavenUnits::decimals(int unit)
 {
     switch(unit)
@@ -85,10 +102,10 @@ QString RavenUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorSt
 {
     // Note: not using straight sprintf here because we do NOT want
     // localized number formatting.
-    if(nAssetUnit < 0 && !valid(unit))
+    if((nAssetUnit < 0 || nAssetUnit > 8) && !valid(unit))
         return QString(); // Refuse to format invalid unit
     qint64 n = (qint64)nIn;
-    qint64 coin = factor(unit);
+    qint64 coin = nAssetUnit >= 0 ? factorAsset(nAssetUnit) : factor(unit);
     int num_decimals = nAssetUnit >= 0 ? nAssetUnit : decimals(unit);
     qint64 n_abs = (n > 0 ? n : -n);
     qint64 quotient = n_abs / coin;
@@ -96,7 +113,8 @@ QString RavenUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorSt
     QString quotient_str = QString::number(quotient);
     QString remainder_str = QString::number(remainder).rightJustified(num_decimals, '0');
 
-    // Use SI-style thin space separators as these are locale independent and can't be
+    // Use SI-style thi
+    // n space separators as these are locale independent and can't be
     // confused with the decimal marker.
     QChar thin_sp(THIN_SP_CP);
     int q_size = quotient_str.size();
@@ -111,6 +129,7 @@ QString RavenUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorSt
 
     if (nAssetUnit == MIN_ASSET_UNITS)
         return quotient_str;
+
 
     return quotient_str + QString(".") + remainder_str;
 }
@@ -131,7 +150,7 @@ QString RavenUnits::formatWithUnit(int unit, const CAmount& amount, bool plussig
 
 QString RavenUnits::formatWithCustomName(QString customName, const CAmount& amount, int unit, bool plussign, SeparatorStyle separators)
 {
-    return format(RVN, amount, plussign, separators, unit) + QString(" ") + customName;
+    return format(RVN, amount / factorAsset(MAX_ASSET_UNITS - unit), plussign, separators, unit) + QString(" ") + customName;
 }
 
 QString RavenUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
@@ -147,6 +166,45 @@ bool RavenUnits::parse(int unit, const QString &value, CAmount *val_out)
     if(!valid(unit) || value.isEmpty())
         return false; // Refuse to parse invalid unit or empty string
     int num_decimals = decimals(unit);
+
+    // Ignore spaces and thin spaces when parsing
+    QStringList parts = removeSpaces(value).split(".");
+
+    if(parts.size() > 2)
+    {
+        return false; // More than one dot
+    }
+    QString whole = parts[0];
+    QString decimals;
+
+    if(parts.size() > 1)
+    {
+        decimals = parts[1];
+    }
+    if(decimals.size() > num_decimals)
+    {
+        return false; // Exceeds max precision
+    }
+    bool ok = false;
+    QString str = whole + decimals.leftJustified(num_decimals, '0');
+
+    if(str.size() > 18)
+    {
+        return false; // Longer numbers will exceed 63 bits
+    }
+    CAmount retvalue(str.toLongLong(&ok));
+    if(val_out)
+    {
+        *val_out = retvalue;
+    }
+    return ok;
+}
+
+bool RavenUnits::assetParse(int assetUnit, const QString &value, CAmount *val_out)
+{
+    if(!(assetUnit >= 0 && assetUnit <= 8) || value.isEmpty())
+        return false; // Refuse to parse invalid unit or empty string
+    int num_decimals = assetUnit;
 
     // Ignore spaces and thin spaces when parsing
     QStringList parts = removeSpaces(value).split(".");

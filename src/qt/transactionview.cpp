@@ -19,6 +19,7 @@
 #include "transactiontablemodel.h"
 #include "validation.h"
 #include "walletmodel.h"
+#include "guiconstants.h"
 
 #include "ui_interface.h"
 
@@ -38,6 +39,7 @@
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
+#include <QGraphicsDropShadowEffect>
 
 TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
@@ -161,9 +163,11 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     view->setContextMenuPolicy(Qt::CustomContextMenu);
 
     view->installEventFilter(this);
+    view->setStyleSheet(".QTableView { border: none;}");
 
     transactionView = view;
     transactionView->setObjectName("transactionView");
+
 
     // Actions
     abandonAction = new QAction(tr("Abandon transaction"), this);
