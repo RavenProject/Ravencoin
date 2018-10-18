@@ -57,6 +57,10 @@
         <file alias="network_disabled">res/icons/network_disabled.png</file>
         <file alias="refresh">res/icons/refresh.png</file>
         <file alias="asset_administrator">res/icons/asset_administrator.png</file>
+        <file alias="rectangle">res/icons/rectangle.png</file>
+        <file alias="bluerectangle">res/icons/bluerectangle.png</file>
+        <file alias="svgrectangle">res/icons/rectanglesvg.svg</file>
+        <file alias="ravencointext">res/icons/ravencointext.svg</file>
     </qresource>
     <qresource prefix="/movies">
         <file alias="spinner-000">res/movies/spinner-000.png</file>

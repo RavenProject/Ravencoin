@@ -28,12 +28,21 @@ class QFont;
 class QLineEdit;
 class QUrl;
 class QWidget;
+class QGraphicsDropShadowEffect;
 QT_END_NAMESPACE
 
 /** Utility functions used by the Raven Qt UI.
  */
 namespace GUIUtil
 {
+    // Get the font for the sub labels
+    QFont getSubLabelFont();
+
+    // Get the font for the main labels
+    QFont getTopLabelFont();
+
+    QGraphicsDropShadowEffect* getShadowEffect();
+
     // Create human-readable string from date
     QString dateTimeStr(const QDateTime &datetime);
     QString dateTimeStr(qint64 nTime);

@@ -14,6 +14,7 @@
 #include "ravenunits.h"
 #include "clientmodel.h"
 #include "optionsmodel.h"
+#include "guiconstants.h"
 
 #include "wallet/coincontrol.h"
 #include "policy/fees.h"
@@ -27,19 +28,18 @@
 #include <policy/policy.h>
 #include "assets/assettypes.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QModelIndex>
 #include <QDebug>
 #include <QMessageBox>
 #include <QClipboard>
 #include <QSettings>
 
-CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidget *parent, WalletModel* model, ClientModel *client) :
+CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
         QDialog(parent, Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
         ui(new Ui::CreateAssetDialog),
         platformStyle(_platformStyle)
 {
-    this->model = model;
-    this->clientModel = client;
     ui->setupUi(this);
     setWindowTitle("Create Assets");
     connect(ui->ipfsBox, SIGNAL(clicked()), this, SLOT(ipfsStateChanged()));
@@ -47,11 +47,11 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     connect(ui->nameText, SIGNAL(textChanged(QString)), this, SLOT(onNameChanged(QString)));
     connect(ui->addressText, SIGNAL(textChanged(QString)), this, SLOT(onAddressNameChanged(QString)));
     connect(ui->ipfsText, SIGNAL(textChanged(QString)), this, SLOT(onIPFSHashChanged(QString)));
-    connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(onCloseClicked()));
     connect(ui->createAssetButton, SIGNAL(clicked()), this, SLOT(onCreateAssetClicked()));
     connect(ui->unitBox, SIGNAL(valueChanged(int)), this, SLOT(onUnitChanged(int)));
     connect(ui->assetType, SIGNAL(activated(int)), this, SLOT(onAssetTypeActivated(int)));
     connect(ui->assetList, SIGNAL(activated(int)), this, SLOT(onAssetListActivated(int)));
+    connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(onClearButtonClicked()));
 
     GUIUtil::setupAddressWidget(ui->lineEditCoinControlChange, this);
 
@@ -104,11 +104,11 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     ui->checkBoxMinimumFee->setChecked(settings.value("fPayOnlyMinFee").toBool());
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
 
-
-    // Setup the default values
-    setUpValues();
-
     format = "%1<font color=green>%2%3</font>";
+
+    setupCoinControlFrame();
+    setupAssetDataView();
+    setupFeeControl();
 
     adjustSize();
 }
@@ -142,6 +142,7 @@ void CreateAssetDialog::setModel(WalletModel *_model)
 
         // Custom Fee Control
         ui->frameFee->setVisible(_model->getOptionsModel()->getCustomFeeFeatures());
+        connect(_model->getOptionsModel(), SIGNAL(customFeeFeaturesChanged(bool)), this, SLOT(feeControlFeatureChanged(bool)));
 
         // fee section
         for (const int &n : confTargets) {
@@ -180,6 +181,10 @@ void CreateAssetDialog::setModel(WalletModel *_model)
         else
             ui->confTargetSelector->setCurrentIndex(getIndexForConfTarget(settings.value("nConfTarget").toInt()));
 
+
+        // Setup the default values
+        setUpValues();
+
         adjustSize();
     }
 }
@@ -213,17 +218,99 @@ void CreateAssetDialog::setUpValues()
 
     // Setup the asset list
     ui->assetList->hide();
-    std::vector<std::string> names;
-    GetAllAdministrativeAssets(model->getWallet(), names, 0);
-    for (auto item : names) {
-        std::string name = QString::fromStdString(item).split("!").first().toStdString();
-        if (name.size() != 30)
-            ui->assetList->addItem(QString::fromStdString(name));
-    }
+    updateAssetList();
+
     ui->assetFullName->setTextFormat(Qt::RichText);
     ui->assetFullName->setStyleSheet("font-weight: bold");
 
     ui->assetType->setStyleSheet("font-weight: bold");
+
+}
+
+void CreateAssetDialog::setupCoinControlFrame()
+{
+    /** Update the assetcontrol frame */
+    ui->frameCoinControl->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->widgetCoinControl->setStyleSheet(".QWidget {background-color: transparent;}");
+    /** Create the shadow effects on the frames */
+
+    ui->frameCoinControl->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->labelCoinControlFeatures->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlFeatures->setFont(GUIUtil::getTopLabelFont());
+
+    ui->labelCoinControlQuantityText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlQuantityText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlAmountText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAmountText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlFeeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlFeeText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlAfterFeeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAfterFeeText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlBytesText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlBytesText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlLowOutputText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlLowOutputText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelCoinControlChangeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlChangeText->setFont(GUIUtil::getSubLabelFont());
+
+    // Align the other labels next to the input buttons to the text in the same height
+    ui->labelCoinControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
+
+    // Align the Custom change address checkbox
+    ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
+
+}
+
+void CreateAssetDialog::setupAssetDataView()
+{
+    /** Update the scrollview*/
+    ui->frameAssetData->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameAssetData->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->assetTypeLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->assetTypeLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->assetNameLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->assetNameLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->addressLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->addressLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->quantityLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->quantityLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->unitsLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->unitsLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->reissuableBox->setStyleSheet(COLOR_LABEL_STRING);
+
+    ui->ipfsBox->setStyleSheet(COLOR_LABEL_STRING);
+
+}
+
+void CreateAssetDialog::setupFeeControl()
+{
+    /** Update the coincontrol frame */
+    ui->frameFee->setStyleSheet(" .QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    /** Create the shadow effects on the frames */
+
+    ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->labelFeeHeadline->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
+    ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
 
 }
 
@@ -465,11 +552,6 @@ void CreateAssetDialog::onIPFSHashChanged(QString hash)
         CheckFormState();
 }
 
-void CreateAssetDialog::onCloseClicked()
-{
-    this->close();
-}
-
 void CreateAssetDialog::onCreateAssetClicked()
 {
     QString address;
@@ -597,7 +679,10 @@ void CreateAssetDialog::onCreateAssetClicked()
         msgBox.exec();
 
         if (msgBox.clickedButton() == okayButton) {
-            close();
+            clear();
+
+            CoinControlDialog::coinControl->UnSelectAll();
+            coinControlUpdateLabels();
         }
     }
 }
@@ -818,6 +903,12 @@ void CreateAssetDialog::coinControlFeatureChanged(bool checked)
     coinControlUpdateLabels();
 }
 
+// Coin Control: settings menu - coin control enabled/disabled by user
+void CreateAssetDialog::feeControlFeatureChanged(bool checked)
+{
+    ui->frameFee->setVisible(checked);
+}
+
 // Coin Control: button inputs -> show actual coin control dialog
 void CreateAssetDialog::coinControlButtonClicked()
 {
@@ -1004,4 +1095,42 @@ void CreateAssetDialog::clearSelected()
     ui->quantitySpinBox->setDisabled(false);
     ui->reissuableBox->setChecked(true);
     ui->unitBox->setValue(8);
+}
+
+void CreateAssetDialog::updateAssetList()
+{
+    ui->assetList->clear();
+
+    std::vector<std::string> names;
+    GetAllAdministrativeAssets(model->getWallet(), names, 0);
+    for (auto item : names) {
+        std::string name = QString::fromStdString(item).split("!").first().toStdString();
+        if (name.size() != 30)
+            ui->assetList->addItem(QString::fromStdString(name));
+    }
+}
+
+void CreateAssetDialog::clear()
+{
+    ui->assetType->setCurrentIndex(0);
+    ui->nameText->clear();
+    ui->addressText->clear();
+    ui->quantitySpinBox->setValue(1);
+    ui->unitBox->setValue(8);
+    ui->reissuableBox->setChecked(true);
+    ui->ipfsBox->setChecked(false);
+    ui->ipfsText->hide();
+    ui->assetList->hide();
+    ui->assetList->setCurrentIndex(0);
+    type = 0;
+    ui->assetFullName->clear();
+    ui->unitBox->setDisabled(false);
+    ui->quantitySpinBox->setDisabled(false);
+    hideMessage();
+    disableCreateButton();
+}
+
+void CreateAssetDialog::onClearButtonClicked()
+{
+    clear();
 }
