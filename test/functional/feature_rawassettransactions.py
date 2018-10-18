@@ -132,7 +132,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_hex_bad = bytes_to_hex_str(tx.serialize())
         tx_signed = n0.signrawtransaction(tx_hex_bad)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-reissue-asset-bad-owner-asset", n0.sendrawtransaction, tx_signed)
+        assert_raises_rpc_error(-26, "bad-txns-reissue-owner-outpoint-not-found", n0.sendrawtransaction, tx_signed)
 
         ########################################
         # try tampering to remove owner output
@@ -145,7 +145,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.vout = bad_vout
         tx_hex_bad = bytes_to_hex_str(tx.serialize())
         tx_signed = n0.signrawtransaction(tx_hex_bad)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-reissue-asset-bad-owner-asset",
+        assert_raises_rpc_error(-26, "bad-txns-reissue-owner-outpoint-not-found",
                                 n0.sendrawtransaction, tx_signed)
 
         ########################################
@@ -195,7 +195,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.vout.insert(-1, owner_vout)
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+        assert_raises_rpc_error(-26, "bad-txns-failed-issue-asset-formatting-check",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -235,7 +235,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+        assert_raises_rpc_error(-26, "bad-txns-issue-owner-name-doesn't-match",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -264,7 +264,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         n0.generate(1)
         assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used",
                                 get_tx_issue_hex, n0, asset_name, 55)
-        assert_raises_rpc_error(-26, f"bad-txns-Invalid parameter: asset_name '{asset_name}' has already been used",
+        assert_raises_rpc_error(-26, f"bad-txns-issue-Invalid parameter: asset_name '{asset_name}' has already been used",
                                 n0.sendrawtransaction, tx_duplicate_issue_hex)
 
 

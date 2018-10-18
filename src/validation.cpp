@@ -2237,7 +2237,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!AreAssetsDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-asset-when-assets-is-not-active");
 
-                if (!tx.VerifyNewAsset())
+                std::string strError = "";
+                if (!tx.VerifyNewAsset(strError))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-failed-verify");
 
                 CNewAsset asset;
@@ -2245,7 +2246,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!AssetFromTransaction(tx, asset, strAddress))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-serialization");
 
-                std::string strError = "";
+
                 if(!IsNewOwnerTxValid(tx, asset.strName, strAddress, strError))
                     return state.DoS(100, false, REJECT_INVALID, strError);
 
@@ -2258,15 +2259,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!AreAssetsDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-when-assets-is-not-active");
 
-                if (!tx.VerifyReissueAsset(view))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-failed-verify");
+                std::string strError;
+                if (!tx.VerifyReissueAsset(strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
                 
                 CReissueAsset reissue;
                 std::string strAddress;
                 if (!ReissueAssetFromTransaction(tx, reissue, strAddress))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-serialization");
 
-                std::string strError = "";
                 if (!reissue.IsValid(strError, *assetsCache))
                     return state.DoS(100, false, REJECT_INVALID, strError);
             }
@@ -2275,7 +2276,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!AreAssetsDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-when-assets-is-not-active");
 
-                if (!tx.VerifyNewUniqueAsset(view))
+                std::string error;
+                if (!tx.VerifyNewUniqueAsset(error))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-failed-verify");
 
                 for (auto out : tx.vout)
@@ -2285,7 +2287,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         CNewAsset asset;
                         std::string strAddress;
                         if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-serialization");
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-connect-block-issue-unique-asset-serialization");
 
                         std::string strError = "";
                         if (!asset.IsValid(strError, *assetsCache))
