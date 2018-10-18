@@ -231,7 +231,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
             }
         }
     }
-        /** RVN END */
+    /** RVN END */
 
     if (fCheckDuplicateInputs) {
         std::set<COutPoint> vInOutPoints;
@@ -258,87 +258,59 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
     if (AreAssetsDeployed()) {
         if (assetCache) {
             if (tx.IsNewAsset()) {
-                if(!tx.VerifyNewAsset())
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-verifying-issue-asset");
+
+                /** Verify the reissue assets data */
+                std::string strError = "";
+                if(!tx.VerifyNewAsset(strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
 
                 CNewAsset asset;
                 std::string strAddress;
                 if (!AssetFromTransaction(tx, asset, strAddress))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset");
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-from-transaction");
 
                 // Validate the new assets information
-                std::string strError = "";
                 if (!IsNewOwnerTxValid(tx, asset.strName, strAddress, strError))
                     return state.DoS(100, false, REJECT_INVALID, strError);
 
                 if (!asset.IsValid(strError, *assetCache, fMemPoolCheck, fCheckAssetDuplicate, fForceDuplicateCheck))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-" + strError);
+                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-" + strError);
 
             } else if (tx.IsReissueAsset()) {
+                /** Verify the reissue assets data */
+                std::string strError;
+                if (!tx.VerifyReissueAsset(strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
 
                 CReissueAsset reissue;
                 std::string strAddress;
                 if (!ReissueAssetFromTransaction(tx, reissue, strAddress))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset");
 
-                bool foundOwnerAsset = false;
-                for (auto out : tx.vout) {
-                    CAssetTransfer transfer;
-                    std::string transferAddress;
-                    if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
-                        if (reissue.strName + OWNER_TAG == transfer.strName) {
-                            foundOwnerAsset = true;
-                            break;
-                        }
-                    }
-                }
+                if (!reissue.IsValid(strError, *assetCache))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-" + strError);
 
-                if (!foundOwnerAsset)
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-bad-owner-asset");
             } else if (tx.IsNewUniqueAsset()) {
 
-                std::string assetRoot = "";
-                int assetCount = 0;
+                /** Verify the unique assets data */
+                std::string strError = "";
+                if (!tx.VerifyNewUniqueAsset(strError)) {
+                    return state.DoS(100, false, REJECT_INVALID, strError);
+                }
 
-                for (auto out : tx.vout) {
-                    CNewAsset asset;
-                    std::string strAddress;
-
-                    if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
+                for (auto out : tx.vout)
+                {
+                    if (IsScriptNewUniqueAsset(out.scriptPubKey))
+                    {
+                        CNewAsset asset;
+                        std::string strAddress;
                         if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset");
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-check-transaction-issue-unique-asset-serialization");
 
-                        std::string strError = "";
                         if (!asset.IsValid(strError, *assetCache, fMemPoolCheck, fCheckAssetDuplicate, fForceDuplicateCheck))
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-" + strError);
-
-                        std::string root = GetParentName(asset.strName);
-                        if (assetRoot.compare("") == 0)
-                            assetRoot = root;
-                        if (assetRoot.compare(root) != 0)
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-mismatched-root");
-
-                        assetCount += 1;
                     }
                 }
-
-                if (assetCount < 1)
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-no-outputs");
-
-                bool foundOwnerAsset = false;
-                for (auto out : tx.vout) {
-                    CAssetTransfer transfer;
-                    std::string transferAddress;
-                    if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
-                        if (assetRoot + OWNER_TAG == transfer.strName) {
-                            foundOwnerAsset = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!foundOwnerAsset)
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-bad-owner-asset");
             } else {
                 // Fail if transaction contains any non-transfer asset scripts and hasn't conformed to one of the
                 // above transaction types.  Also fail if it contains OP_RVN_ASSET opcode but wasn't a valid script.
