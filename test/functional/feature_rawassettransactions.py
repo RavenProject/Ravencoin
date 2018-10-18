@@ -519,6 +519,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
         self.log.info("Testing unique assets...")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
+        bad_burn = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP"
+        unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
+
         root = "RINGU"
         owner = f"{root}!"
         n0.issue(root)
@@ -538,8 +541,10 @@ class RawAssetTransactionsTest(RavenTestFramework):
         ]
 
         burn = 5 * len(asset_tags)
+
+        # try first with bad burn address
         outputs = {
-            'n1issueUniqueAssetXXXXXXXXXXS4695i': burn,
+            bad_burn: burn,
             change_address: float(unspent['amount']) - (burn + 0.0001),
             to_address: {
                 'issue_unique': {
@@ -549,7 +554,23 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-unique-asset-burn-outpoints-not-found", \
+                                n0.sendrawtransaction, signed_hex)
 
+        # switch to proper burn address
+        outputs = {
+            unique_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue_unique': {
+                    'root_name':    root,
+                    'asset_tags':   asset_tags,
+                    'ipfs_hashes':  ipfs_hashes,
+                }
+            }
+        }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
         tx_hash = n0.sendrawtransaction(signed_hex)
