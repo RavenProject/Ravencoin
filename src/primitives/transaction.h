@@ -328,11 +328,11 @@ public:
 
     /** RVN START */
     bool IsNewAsset() const;
-    bool VerifyNewAsset() const;
+    bool VerifyNewAsset(std::string& strError) const;
     bool IsNewUniqueAsset() const;
-    bool VerifyNewUniqueAsset(CCoinsViewCache& view) const;
+    bool VerifyNewUniqueAsset(std::string& strError) const;
     bool IsReissueAsset() const;
-    bool VerifyReissueAsset(CCoinsViewCache& view) const;
+    bool VerifyReissueAsset(std::string& strError) const;
     /** RVN END */
 
     /**

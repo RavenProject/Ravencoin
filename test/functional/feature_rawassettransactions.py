@@ -132,7 +132,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_hex_bad = bytes_to_hex_str(tx.serialize())
         tx_signed = n0.signrawtransaction(tx_hex_bad)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-reissue-asset-bad-owner-asset", n0.sendrawtransaction, tx_signed)
+        assert_raises_rpc_error(-26, "bad-txns-reissue-owner-outpoint-not-found", n0.sendrawtransaction, tx_signed)
 
         ########################################
         # try tampering to remove owner output
@@ -145,7 +145,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.vout = bad_vout
         tx_hex_bad = bytes_to_hex_str(tx.serialize())
         tx_signed = n0.signrawtransaction(tx_hex_bad)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-reissue-asset-bad-owner-asset",
+        assert_raises_rpc_error(-26, "bad-txns-reissue-owner-outpoint-not-found",
                                 n0.sendrawtransaction, tx_signed)
 
         ########################################
@@ -195,7 +195,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.vout.insert(-1, owner_vout)
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+        assert_raises_rpc_error(-26, "bad-txns-failed-issue-asset-formatting-check",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -235,7 +235,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-verifying-issue-asset",
+        assert_raises_rpc_error(-26, "bad-txns-issue-owner-name-doesn't-match",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -264,7 +264,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         n0.generate(1)
         assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used",
                                 get_tx_issue_hex, n0, asset_name, 55)
-        assert_raises_rpc_error(-26, f"bad-txns-Invalid parameter: asset_name '{asset_name}' has already been used",
+        assert_raises_rpc_error(-26, f"bad-txns-issue-Invalid parameter: asset_name '{asset_name}' has already been used",
                                 n0.sendrawtransaction, tx_duplicate_issue_hex)
 
 
@@ -519,6 +519,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
         self.log.info("Testing unique assets...")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
+        bad_burn = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP"
+        unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
+
         root = "RINGU"
         owner = f"{root}!"
         n0.issue(root)
@@ -538,8 +541,10 @@ class RawAssetTransactionsTest(RavenTestFramework):
         ]
 
         burn = 5 * len(asset_tags)
+
+        # try first with bad burn address
         outputs = {
-            'n1issueUniqueAssetXXXXXXXXXXS4695i': burn,
+            bad_burn: burn,
             change_address: float(unspent['amount']) - (burn + 0.0001),
             to_address: {
                 'issue_unique': {
@@ -549,7 +554,23 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-unique-asset-burn-outpoints-not-found", \
+                                n0.sendrawtransaction, signed_hex)
 
+        # switch to proper burn address
+        outputs = {
+            unique_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue_unique': {
+                    'root_name':    root,
+                    'asset_tags':   asset_tags,
+                    'ipfs_hashes':  ipfs_hashes,
+                }
+            }
+        }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
         tx_hash = n0.sendrawtransaction(signed_hex)
