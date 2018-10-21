@@ -249,7 +249,7 @@ UniValue issueunique(const JSONRPCRequest& request)
 
                 "\nExamples:\n"
                 + HelpExampleCli("issueunique", "\"MY_ASSET\" \'[\"primo\",\"secundo\"]\'")
-                + HelpExampleCli("issueunique", "\"MY_ASSET\" \'[\"primo\",\"secundo\"\'] \'[\"first_hash\",\"second_hash\"]\'")
+                + HelpExampleCli("issueunique", "\"MY_ASSET\" \'[\"primo\",\"secundo\"]\' \'[\"first_hash\",\"second_hash\"]\'")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
