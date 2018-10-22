@@ -753,8 +753,10 @@ bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
     }
 
     // check for (and count) new unique asset outpoints.  make sure they share a root.
+    std::set<std::string> setUniqueAssets;
     std::string assetRoot = "";
     int assetOutpointCount = 0;
+
     for (auto out : vout) {
         if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
             CNewAsset asset;
@@ -770,6 +772,14 @@ bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
                 strError = "bad-txns-issue-unique-asset-compare-failed";
                 return false;
             }
+
+            // Check for duplicate unique assets in the same transaction
+            if (setUniqueAssets.count(asset.strName)) {
+                strError = "bad-txns-issue-unique-duplicate-name-in-same-tx";
+                return false;
+            }
+
+            setUniqueAssets.insert(asset.strName);
             assetOutpointCount += 1;
         }
     }
