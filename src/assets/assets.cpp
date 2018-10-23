@@ -659,11 +659,61 @@ bool CTransaction::IsNewAsset() const
 }
 
 //! To be called on CTransactions where IsNewAsset returns true
-bool CTransaction::VerifyNewAsset() const
+bool CTransaction::VerifyNewAsset(std::string& strError) const
 {
     // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
-    if (vout.size() < 3)
+    if (vout.size() < 3) {
+        strError  = "bad-txns-issue-vout-size-to-small";
         return false;
+    }
+
+    // Check for the assets data CTxOut. This will always be the last output in the transaction
+    if (!CheckIssueDataTx(vout[vout.size() - 1])) {
+        strError  = "bad-txns-issue-data-not-found";
+        return false;
+    }
+
+    // Check to make sure the owner asset is created
+    if (!CheckOwnerDataTx(vout[vout.size() - 2])) {
+        strError  = "bad-txns-issue-owner-data-not-found";
+        return false;
+    }
+
+    // Get the asset type
+    CNewAsset asset;
+    std::string address;
+    if (!AssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
+        strError = "bad-txns-issue-serialzation-failed";
+        return error("%s : Failed to get new asset from transaction: %s", __func__, this->GetHash().GetHex());
+    }
+
+    AssetType assetType;
+    IsAssetNameValid(asset.strName, assetType);
+
+    std::string strOwnerName;
+    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address)) {
+        strError = "bad-txns-issue-owner-serialzation-failed";
+        return false;
+    }
+
+    if (strOwnerName != asset.strName + OWNER_TAG) {
+        strError = "bad-txns-issue-owner-name-doesn't-match";
+        return false;
+    }
+
+    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
+    bool fFoundIssueBurnTx = false;
+    for (auto out : vout) {
+        if (CheckIssueBurnTx(out, assetType)) {
+            fFoundIssueBurnTx = true;
+            break;
+        }
+    }
+
+    if (!fFoundIssueBurnTx) {
+        strError = "bad-txns-issue-owner-burn-not-found";
+        return false;
+    }
 
     // Loop through all of the vouts and make sure only the expected asset creations are taking place
     int nTransfers = 0;
@@ -672,39 +722,12 @@ bool CTransaction::VerifyNewAsset() const
     int nReissues = 0;
     GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
 
-    if (nOwners != 1 || nIssues != 1 || nReissues > 0)
+    if (nOwners != 1 || nIssues != 1 || nReissues > 0) {
+        strError = "bad-txns-failed-issue-asset-formatting-check";
         return false;
+    }
 
-    // Check for the assets data CTxOut. This will always be the last output in the transaction
-    if (!CheckIssueDataTx(vout[vout.size() - 1]))
-        return false;
-
-    // Check to make sure the owner asset is created
-    if (!CheckOwnerDataTx(vout[vout.size() - 2]))
-        return false;
-
-    // Get the asset type
-    CNewAsset asset;
-    std::string address;
-    if (!AssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address))
-        return error("%s : Failed to get new asset from transaction: %s", __func__, this->GetHash().GetHex());
-
-    AssetType assetType;
-    IsAssetNameValid(asset.strName, assetType);
-
-    std::string strOwnerName;
-    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address))
-        return false;
-
-    if (strOwnerName != asset.strName + OWNER_TAG)
-        return false;
-
-    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
-    for (auto out : vout)
-        if (CheckIssueBurnTx(out, assetType))
-            return true;
-
-    return false;
+    return true;
 }
 
 //! Make sure to call VerifyNewUniqueAsset if this call returns true
@@ -721,79 +744,82 @@ bool CTransaction::IsNewUniqueAsset() const
 }
 
 //! Call this function after IsNewUniqueAsset
-bool CTransaction::VerifyNewUniqueAsset(CCoinsViewCache& view) const
+bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
 {
     // Must contain at least 3 outpoints (RVN burn, owner change and one or more new unique assets that share a root (should be in trailing position))
-    if (vout.size() < 3)
+    if (vout.size() < 3) {
+        strError  = "bad-txns-unique-vout-size-to-small";
         return false;
+    }
 
     // check for (and count) new unique asset outpoints.  make sure they share a root.
+    std::set<std::string> setUniqueAssets;
     std::string assetRoot = "";
     int assetOutpointCount = 0;
+
     for (auto out : vout) {
         if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
             CNewAsset asset;
             std::string address;
-            if (!AssetFromScript(out.scriptPubKey, asset, address))
+            if (!AssetFromScript(out.scriptPubKey, asset, address)) {
+                strError = "bad-txns-issue-unique-asset-from-script";
                 return false;
+            }
             std::string root = GetParentName(asset.strName);
             if (assetRoot.compare("") == 0)
                 assetRoot = root;
-            if (assetRoot.compare(root) != 0)
+            if (assetRoot.compare(root) != 0) {
+                strError = "bad-txns-issue-unique-asset-compare-failed";
                 return false;
+            }
+
+            // Check for duplicate unique assets in the same transaction
+            if (setUniqueAssets.count(asset.strName)) {
+                strError = "bad-txns-issue-unique-duplicate-name-in-same-tx";
+                return false;
+            }
+
+            setUniqueAssets.insert(asset.strName);
             assetOutpointCount += 1;
         }
     }
-    if (assetOutpointCount == 0)
+
+    if (assetOutpointCount == 0) {
+        strError = "bad-txns-issue-unique-asset-bad-outpoint-count";
         return false;
+    }
 
     // check for burn outpoint (must account for each new asset)
     bool fBurnOutpointFound = false;
-    for (auto out : vout)
+    for (auto out : vout) {
         if (CheckIssueBurnTx(out, AssetType::UNIQUE, assetOutpointCount)) {
             fBurnOutpointFound = true;
             break;
         }
-    if (!fBurnOutpointFound)
+    }
+
+    if (!fBurnOutpointFound) {
+        strError = "bad-txns-issue-unique-asset-burn-outpoints-not-found";
         return false;
+    }
 
     // check for owner change outpoint that matches root
     bool fOwnerOutFound = false;
     for (auto out : vout) {
-        if (CheckTransferOwnerTx(out)) {
-            fOwnerOutFound = true;
-            break;
-        }
-    }
-
-    if (!fOwnerOutFound)
-        return false;
-
-    // The owner change output must match a corresponding owner input
-    bool fFoundCorrectInput = false;
-    for (unsigned int i = 0; i < vin.size(); ++i) {
-        const COutPoint &prevout = vin[i].prevout;
-        const Coin& coin = view.AccessCoin(prevout);
-        assert(!coin.IsSpent());
-
-        int nType = -1;
-        bool fOwner = false;
-        if (coin.out.scriptPubKey.IsAssetScript(nType, fOwner)) {
-            std::string strAssetName;
-            CAmount nAssetAmount;
-            if (!GetAssetInfoFromCoin(coin, strAssetName, nAssetAmount))
-                continue;
-            if (IsAssetNameAnOwner(strAssetName)) {
-                if (strAssetName == assetRoot + OWNER_TAG) {
-                    fFoundCorrectInput = true;
-                    break;
-                }
+        CAssetTransfer transfer;
+        std::string transferAddress;
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (assetRoot + OWNER_TAG == transfer.strName) {
+                fOwnerOutFound = true;
+                break;
             }
         }
     }
 
-    if (!fFoundCorrectInput)
+    if (!fOwnerOutFound) {
+        strError = "bad-txns-issue-unique-asset-bad-owner-asset";
         return false;
+    }
 
     // Loop through all of the vouts and make sure only the expected asset creations are taking place
     int nTransfers = 0;
@@ -803,9 +829,9 @@ bool CTransaction::VerifyNewUniqueAsset(CCoinsViewCache& view) const
     GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
 
     if (nOwners > 0 || nReissues > 0 || nIssues != assetOutpointCount) {
+        strError = "bad-txns-failed-unique-asset-formatting-check";
         return false;
     }
-
 
     return true;
 }
@@ -820,63 +846,58 @@ bool CTransaction::IsReissueAsset() const
 }
 
 //! To be called on CTransactions where IsReissueAsset returns true
-bool CTransaction::VerifyReissueAsset(CCoinsViewCache& view) const
+bool CTransaction::VerifyReissueAsset(std::string& strError) const
 {
     // Reissuing an Asset must contain at least 3 CTxOut ( Raven Burn Tx, Any Number of other Outputs ..., Reissue Asset Tx, Owner Asset Change Tx)
-    if (vout.size() < 3)
+    if (vout.size() < 3) {
+        strError  = "bad-txns-vout-size-to-small";
         return false;
+    }
 
     // Check for the reissue asset data CTxOut. This will always be the last output in the transaction
-    if (!CheckReissueDataTx(vout[vout.size() - 1]))
+    if (!CheckReissueDataTx(vout[vout.size() - 1])) {
+        strError  = "bad-txns-reissue-data-not-found";
         return false;
+    }
+
+    CReissueAsset reissue;
+    std::string address;
+    if (!ReissueAssetFromScript(vout[vout.size() - 1].scriptPubKey, reissue, address)) {
+        strError  = "bad-txns-reissue-serialization-failed";
+        return false;
+    }
 
     // Check that there is an asset transfer, this will be the owner asset change
     bool fOwnerOutFound = false;
     for (auto out : vout) {
-        if (CheckTransferOwnerTx(out)) {
-            fOwnerOutFound = true;
-            break;
-        }
-    }
-
-    if (!fOwnerOutFound)
-        return false;
-
-    CReissueAsset reissue;
-    std::string address;
-    if (!ReissueAssetFromScript(vout[vout.size() - 1].scriptPubKey, reissue, address))
-        return false;
-
-    bool fFoundCorrectInput = false;
-    for (unsigned int i = 0; i < vin.size(); ++i) {
-        const COutPoint &prevout = vin[i].prevout;
-        const Coin& coin = view.AccessCoin(prevout);
-        assert(!coin.IsSpent());
-
-        int nType = -1;
-        bool fOwner = false;
-        if (coin.out.scriptPubKey.IsAssetScript(nType, fOwner)) {
-            std::string strAssetName;
-            CAmount nAssetAmount;
-            if (!GetAssetInfoFromCoin(coin, strAssetName, nAssetAmount))
-                continue;
-            if (IsAssetNameAnOwner(strAssetName)) {
-                if (strAssetName == reissue.strName + OWNER_TAG) {
-                    fFoundCorrectInput = true;
-                    break;
-                }
+        CAssetTransfer transfer;
+        std::string transferAddress;
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (reissue.strName + OWNER_TAG == transfer.strName) {
+                fOwnerOutFound = true;
+                break;
             }
         }
     }
 
-    if (!fFoundCorrectInput)
+    if (!fOwnerOutFound) {
+        strError  = "bad-txns-reissue-owner-outpoint-not-found";
         return false;
+    }
 
     // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is placed in a random position in the CWalletTx
-    for (auto out : vout)
-        if (CheckReissueBurnTx(out))
-            return true;
+    bool fFoundReissueBurnTx = false;
+    for (auto out : vout) {
+        if (CheckReissueBurnTx(out)) {
+            fFoundReissueBurnTx = true;
+            break;
+        }
+    }
 
+    if (!fFoundReissueBurnTx) {
+        strError = "bad-txns-reissue-burn-outpoint-not-found";
+        return false;
+    }
 
     // Loop through all of the vouts and make sure only the expected asset creations are taking place
     int nTransfers = 0;
@@ -885,10 +906,12 @@ bool CTransaction::VerifyReissueAsset(CCoinsViewCache& view) const
     int nReissues = 0;
     GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
 
-    if (nOwners > 0 || nReissues != 1 || nIssues > 0)
+    if (nOwners > 0 || nReissues != 1 || nIssues > 0) {
+        strError = "bad-txns-failed-reissue-asset-formatting-check";
         return false;
+    }
 
-    return false;
+    return true;
 }
 
 CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount)
