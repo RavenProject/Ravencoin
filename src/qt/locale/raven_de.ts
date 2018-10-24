@@ -35,7 +35,7 @@
     </message>
     <message>
         <source>&amp;Export</source>
-        <translation>E&amp;xportieren</translation>
+        <translation>&amp;Exportieren</translation>
     </message>
     <message>
         <source>&amp;Delete</source>
@@ -71,7 +71,7 @@
     </message>
     <message>
         <source>&amp;Copy Address</source>
-        <translation>Adresse &amp;kopieren</translation>
+        <translation>&amp;Adresse kopieren</translation>
     </message>
     <message>
         <source>Copy &amp;Label</source>
@@ -133,7 +133,7 @@
     </message>
     <message>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;ten or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
-        <translation>Geben Sie die neue Passphrase für die Brieftasche ein.&lt;br&gt;Bitte benutzen Sie eine Passphrase bestehend aus &lt;b&gt;zehn oder mehr zufälligen Zeichen&lt;/b&gt; oder &lt;b&gt;acht oder mehr Wörtern&lt;/b&gt;.</translation>
+        <translation>Geben Sie die neue Passphrase für die Wallet ein.&lt;br&gt;Bitte benutzen Sie eine Passphrase bestehend aus &lt;b&gt;zehn oder mehr zufälligen Zeichen&lt;/b&gt; oder &lt;b&gt;acht oder mehr Wörtern&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>Encrypt wallet</source>
@@ -141,7 +141,7 @@
     </message>
     <message>
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
-        <translation>Dieser Vorgang benötigt ihre Passphrase, um die Brieftasche zu entsperren.</translation>
+        <translation>Dieser Vorgang benötigt ihre Passphrase, um die Wallet zu entsperren.</translation>
     </message>
     <message>
         <source>Unlock wallet</source>
@@ -149,11 +149,11 @@
     </message>
     <message>
         <source>This operation needs your wallet passphrase to decrypt the wallet.</source>
-        <translation>Dieser Vorgang benötigt Ihre Passphrase, um die Brieftasche zu entschlüsseln.</translation>
+        <translation>Dieser Vorgang benötigt Ihre Passphrase, um die Wallet zu entschlüsseln.</translation>
     </message>
     <message>
         <source>Decrypt wallet</source>
-        <translation>Brieftasche entschlüsseln</translation>
+        <translation>Wallet entschlüsseln</translation>
     </message>
     <message>
         <source>Change passphrase</source>
@@ -161,59 +161,59 @@
     </message>
     <message>
         <source>Enter the old passphrase and new passphrase to the wallet.</source>
-        <translation>Geben Sie die alte und neue Brieftschen-Passphrase ein.</translation>
+        <translation>Geben Sie die alte und neue Wallet-Passphrase ein.</translation>
     </message>
     <message>
         <source>Confirm wallet encryption</source>
-        <translation>Brieftaschen-Verschlüsselung bestätigen</translation>
+        <translation>Wallet-Verschlüsselung bestätigen</translation>
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR RAVENS&lt;/b&gt;!</source>
-        <translation>Warnung: Wenn Sie Ihre Brieftasche verschlüsseln und Ihre Passphrase verlieren, werden Sie &lt;b&gt;alle Ihre Ravens verlieren&lt;/b&gt;!</translation>
+        <translation>Warnung: Wenn Sie Ihre Wallet verschlüsseln und Ihre Passphrase verlieren, werden Sie &lt;b&gt;alle Ihre Ravens verlieren&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
-        <translation>Sind Sie sich sicher, dass Sie Ihre Brieftasche verschlüsseln möchten?</translation>
+        <translation>Sind Sie sich sicher, dass Sie Ihre Wallet verschlüsseln möchten?</translation>
     </message>
     <message>
         <source>Wallet encrypted</source>
-        <translation>Brieftasche verschlüsselt</translation>
+        <translation>Wallet verschlüsselt</translation>
     </message>
     <message>
         <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your ravens from being stolen by malware infecting your computer.</source>
-        <translation>%1 wird jetzt beendet, um den Verschlüsselungsprozess abzuschließen. Bitte beachten Sie, dass die Brieftaschen-Verschlüsselung nicht vollständig vor Diebstahl Ihrer Ravens durch Schadprogramme schützt, die Ihren Computer befällt.</translation>
+        <translation>%1 wird jetzt beendet, um den Verschlüsselungsprozess abzuschließen. Bitte beachten Sie, dass die Wallet-Verschlüsselung nicht vollständig vor Diebstahl Ihrer Ravens durch Schadprogramme schützt, die Ihren Computer befällt.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
-        <translation>WICHTIG: Alle vorherigen Brieftaschen-Sicherungen sollten durch die neu erzeugte, verschlüsselte Brieftasche ersetzt werden. Aus Sicherheitsgründen werden vorherige Sicherungen der unverschlüsselten Brieftasche nutzlos, sobald Sie die neue, verschlüsselte Brieftasche verwenden.</translation>
+        <translation>WICHTIG: Alle vorherigen Wallet-Sicherungen sollten durch die neu erzeugte, verschlüsselte Wallet ersetzt werden. Aus Sicherheitsgründen werden vorherige Sicherungen der unverschlüsselten Wallet nutzlos, sobald Sie die neue, verschlüsselte Wallet verwenden.</translation>
     </message>
     <message>
         <source>Wallet encryption failed</source>
-        <translation>Brieftaschen-Verschlüsselung fehlgeschlagen</translation>
+        <translation>Wallet-Verschlüsselung fehlgeschlagen</translation>
     </message>
     <message>
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
-        <translation>Die Brieftaschen-Verschlüsselung ist aufgrund eines internen Fehlers fehlgeschlagen. Ihre Brieftasche wurde nicht verschlüsselt.</translation>
+        <translation>Die Wallet-Verschlüsselung ist aufgrund eines internen Fehlers fehlgeschlagen. Ihre Wallet wurde nicht verschlüsselt.</translation>
     </message>
     <message>
-        <source>The supplied passphrases do not match.</source>
-        <translation>Die eingegebenen Passphrasen stimmen nicht überein.</translation>
+        <source>The supplied passphrase does not match.</source>
+        <translation>Die eingegebene Passphrase stimmt nicht überein.</translation>
     </message>
     <message>
         <source>Wallet unlock failed</source>
-        <translation>Brieftaschen-Entsperrung fehlgeschlagen</translation>
+        <translation>Wallet-Entsperrung fehlgeschlagen</translation>
     </message>
     <message>
         <source>The passphrase entered for the wallet decryption was incorrect.</source>
-        <translation>Die eingegebene Passphrase zur Brieftaschen-Entschlüsselung war nicht korrekt.</translation>
+        <translation>Die eingegebene Passphrase zur Wallet-Entschlüsselung war nicht korrekt.</translation>
     </message>
     <message>
         <source>Wallet decryption failed</source>
-        <translation>Brieftaschen-Entschlüsselung fehlgeschlagen</translation>
+        <translation>Wallet-Entschlüsselung fehlgeschlagen</translation>
     </message>
     <message>
         <source>Wallet passphrase was successfully changed.</source>
-        <translation>Die Brieftaschen-Passphrase wurde erfolgreich geändert.</translation>
+        <translation>Die Wallet-Passphrase wurde erfolgreich geändert.</translation>
     </message>
     <message>
         <source>Warning: The Caps Lock key is on!</source>
@@ -331,7 +331,7 @@
     </message>
     <message>
         <source>Syncing Headers (%1%)...</source>
-        <translation>Kopfdaten werden synchronisiert (%1%)...</translation>
+        <translation>Header werden synchronisiert (%1%)...</translation>
     </message>
     <message>
         <source>Reindexing blocks on disk...</source>
@@ -751,7 +751,7 @@
     </message>
     <message>
         <source>Could not unlock wallet.</source>
-        <translation>Brieftasche konnte nicht entsperrt werden.</translation>
+        <translation>Wallet konnte nicht entsperrt werden.</translation>
     </message>
     <message>
         <source>New key generation failed.</source>
@@ -852,7 +852,7 @@
     </message>
     <message>
         <source>%1 will download and store a copy of the Raven block chain. At least %2GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>%1 wird eine Kopie der Blockkette herunterladen und speichern. Mindestens %2GB Daten werden in diesem Verzeichnis abgelegt und die Datenmenge wächst über die Zeit an. Auch die Wallet wird in diesem Verzeichnis abgelegt.</translation>
+        <translation>%1 wird eine Kopie der Raven Blockchain herunterladen und speichern. Mindestens %2GB Daten werden in diesem Verzeichnis abgelegt und die Datenmenge wächst über die Zeit an. Auch die Wallet wird in diesem Verzeichnis abgelegt.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -887,7 +887,7 @@
     </message>
     <message>
         <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the raven network, as detailed below.</source>
-        <translation>Neueste Transaktionen werden eventuell noch nicht angezeigt, daher könnte Ihr Kontostand veraltet sein. Er wird korrigiert, sobald Ihr Wallet die Synchronisation mit dem Raven-Netzwerk erfolgreich abgeschlossen. Details dazu finden sich weiter unten.</translation>
+        <translation>Neueste Transaktionen werden eventuell noch nicht angezeigt, daher könnte Ihr Kontostand veraltet sein. Er wird korrigiert, sobald Ihre Wallet die Synchronisation mit dem Raven-Netzwerk erfolgreich abgeschlossen hat. Details dazu finden sich weiter unten.</translation>
     </message>
     <message>
         <source>Attempting to spend ravens that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
@@ -1097,7 +1097,7 @@
     </message>
     <message>
         <source>Connect to the Raven network through a separate SOCKS5 proxy for Tor hidden services.</source>
-        <translation>Über einen separaten SOCKS5 Proxy für Tor Services mit dem Ravent Netzwerk verbinden.</translation>
+        <translation>Über einen separaten SOCKS5 Proxy für Tor Services mit dem Raven Netzwerk verbinden.</translation>
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
@@ -1109,11 +1109,11 @@
     </message>
     <message>
         <source>&amp;Hide the icon from the system tray.</source>
-        <translation>&amp;Das Icon im System Tray verstecken.</translation>
+        <translation>&amp;Das Icon im Infobereich verstecken.</translation>
     </message>
     <message>
         <source>Hide tray icon</source>
-        <translation>Tray Icon verstecken</translation>
+        <translation>Icon verstecken</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1267,7 +1267,7 @@
     <name>PaymentServer</name>
     <message>
         <source>Payment request error</source>
-        <translation>fehlerhafte Zahlungsanforderung</translation>
+        <translation>Fehlerhafte Zahlungsanforderung</translation>
     </message>
     <message>
         <source>Cannot start raven: click-to-pay handler</source>
@@ -1347,7 +1347,7 @@
     </message>
     <message>
         <source>Network request error</source>
-        <translation>fehlerhafte Netzwerkanfrage</translation>
+        <translation>Fehlerhafte Netzwerkanfrage</translation>
     </message>
     <message>
         <source>Payment acknowledged</source>
@@ -1413,11 +1413,11 @@
     </message>
     <message numerus="yes">
         <source>%n second(s)</source>
-        <translation><numerusform>%n Sekunde</numerusform><numerusform>%n Sekunde(n)</numerusform></translation>
+        <translation><numerusform>%n Sekunde</numerusform><numerusform>%n Sekunden</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n minute(s)</source>
-        <translation><numerusform>%n Minute</numerusform><numerusform>%n Minute(n)</numerusform></translation>
+        <translation><numerusform>%n Minute</numerusform><numerusform>%n Minuten</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
@@ -1518,15 +1518,15 @@
     </message>
     <message>
         <source>Number of connections</source>
-        <translation>Anzahl Verbindungen</translation>
+        <translation>Anzahl der erbindungen</translation>
     </message>
     <message>
-        <source>Block chain</source>
-        <translation>Blockkette</translation>
+        <source>Blockchain</source>
+        <translation>Blockchain</translation>
     </message>
     <message>
         <source>Current number of blocks</source>
-        <translation>Aktuelle Anzahl Blöcke</translation>
+        <translation>Aktuelle Anzahl der Blöcke</translation>
     </message>
     <message>
         <source>Memory Pool</source>
@@ -1550,7 +1550,7 @@
     </message>
     <message>
         <source>&amp;Peers</source>
-        <translation>&amp;Gegenstellen</translation>
+        <translation>&amp;Peers</translation>
     </message>
     <message>
         <source>Banned peers</source>
@@ -1558,7 +1558,7 @@
     </message>
     <message>
         <source>Select a peer to view detailed information.</source>
-        <translation>Gegenstelle auswählen, um detaillierte Informationen zu erhalten.</translation>
+        <translation>Peer auswählen, um detaillierte Informationen zu erhalten.</translation>
     </message>
     <message>
         <source>Whitelisted</source>
@@ -1574,11 +1574,11 @@
     </message>
     <message>
         <source>Starting Block</source>
-        <translation>Start Block</translation>
+        <translation>Start-Block</translation>
     </message>
     <message>
         <source>Synced Headers</source>
-        <translation>Synchronisierte Kopfdaten</translation>
+        <translation>Synchronisierte Header</translation>
     </message>
     <message>
         <source>Synced Blocks</source>
@@ -1666,11 +1666,11 @@
     </message>
     <message>
         <source>In:</source>
-        <translation>eingehend:</translation>
+        <translation>Eingehend:</translation>
     </message>
     <message>
         <source>Out:</source>
-        <translation>ausgehend:</translation>
+        <translation>Ausgehend:</translation>
     </message>
     <message>
         <source>Debug log file</source>
@@ -1758,11 +1758,11 @@
     </message>
     <message>
         <source>Inbound</source>
-        <translation>eingehend</translation>
+        <translation>Eingehend</translation>
     </message>
     <message>
         <source>Outbound</source>
-        <translation>ausgehend</translation>
+        <translation>Ausgehend</translation>
     </message>
     <message>
         <source>Yes</source>
@@ -1793,7 +1793,7 @@
     </message>
     <message>
         <source>Reuse one of the previously used receiving addresses. Reusing addresses has security and privacy issues. Do not use this unless re-generating a payment request made before.</source>
-        <translation>Eine der bereits verwendeten Empfangsadressen wiederverwenden. Addressen wiederzuverwenden birgt Sicherheits- und Datenschutzrisiken. Außer zum Neuerstellen einer bereits erzeugten Zahlungsanforderung sollten Sie dies nicht nutzen.</translation>
+        <translation>Eine der bereits verwendeten Empfangsadressen wiederverwenden. Adressen wiederzuverwenden birgt Sicherheits- und Datenschutzrisiken. Außer zum Neuerstellen einer bereits erzeugten Zahlungsanforderung sollten Sie dies nicht nutzen.</translation>
     </message>
     <message>
         <source>R&amp;euse an existing receiving address (not recommended)</source>
@@ -1813,7 +1813,7 @@
     </message>
     <message>
         <source>An optional amount to request. Leave this empty or zero to not request a specific amount.</source>
-        <translation>Ein optional angeforderte Betrag. Lassen Sie dieses Feld leer oder setzen Sie es auf 0, um keinen spezifischen Betrag anzufordern.</translation>
+        <translation>Ein optional angeforderter Betrag. Lassen Sie dieses Feld leer oder setzen Sie es auf 0, um keinen spezifischen Betrag anzufordern.</translation>
     </message>
     <message>
         <source>Clear all fields of the form.</source>
@@ -1876,7 +1876,7 @@
     </message>
     <message>
         <source>Copy &amp;Address</source>
-        <translation>&amp;Addresse kopieren</translation>
+        <translation>&amp;Adresse kopieren</translation>
     </message>
     <message>
         <source>&amp;Save Image...</source>
@@ -2022,7 +2022,7 @@
     </message>
     <message>
         <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
-        <translation>Wenn die benutzerdefinierte Gebühr 1000 Satoshis beträgt und die Transaktion nur 250 Byte groß ist, wird bei Auswahl von "pro Kilobyte" eine Gebühr in Höhe von 250 Satoshis, bei Auswahl von "Mindestbetrag" eine Gebühr in Höhe von 1000 Satoshis bezahlt. Bei Transaktionen die Größer als ein Kilobyte sind, werden bei beiden Optionen die Gebühren pro Kilobyte bezahlt.</translation>
+        <translation>Wenn die benutzerdefinierte Gebühr 1000 Satoshis beträgt und die Transaktion nur 250 Byte groß ist, wird bei Auswahl von "pro Kilobyte" eine Gebühr in Höhe von 250 Satoshis, bei Auswahl von "Mindestbetrag" eine Gebühr in Höhe von 1000 Satoshis bezahlt. Bei Transaktionen die größer als ein Kilobyte sind, werden bei beiden Optionen die Gebühren pro Kilobyte bezahlt.</translation>
     </message>
     <message>
         <source>Hide</source>
@@ -2082,7 +2082,7 @@
     </message>
     <message>
         <source>Clear &amp;All</source>
-        <translation>&amp;Zurücksetzen</translation>
+        <translation>Alles &amp;zurücksetzen</translation>
     </message>
     <message>
         <source>Balance:</source>
@@ -2386,7 +2386,7 @@
     </message>
     <message>
         <source>Enter the receiver's address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack. Note that this only proves the signing party receives with the address, it cannot prove sendership of any transaction!</source>
-        <translation>Geben Sie die Zahlungsadresse des Empfängers, Nachricht (achten Sie darauf Zeilenumbrüche, Leerzeichen, Tabulatoren usw. exakt zu kopieren) und Signatur unten ein, um die Nachricht zu verifizieren. Vorsicht, interpretieren Sie nicht mehr in die Signatur hinein, als in der signierten Nachricht selber enthalten ist, um nicht von einem Man-in-the-middle-Angriff hinters Licht geführt zu werden. Beachten Sie dass dies nur beweißt, dass die signierende Partei über diese Adresse Überweisungen empfangen kann.</translation>
+        <translation>Geben Sie die Zahlungsadresse des Empfängers, Nachricht (achten Sie darauf Zeilenumbrüche, Leerzeichen, Tabulatoren usw. exakt zu kopieren) und Signatur unten ein, um die Nachricht zu verifizieren. Vorsicht, interpretieren Sie nicht mehr in die Signatur hinein, als in der signierten Nachricht selber enthalten ist, um nicht von einem Man-in-the-middle-Angriff hinters Licht geführt zu werden. Beachten Sie dass dies nur beweist, dass die signierende Partei über diese Adresse Überweisungen empfangen kann.</translation>
     </message>
     <message>
         <source>The Raven address the message was signed with</source>
@@ -2619,7 +2619,7 @@
     </message>
     <message>
         <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to "not accepted" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation>Erzeugte Ravens müssen %1 Blöcke lang reifen, bevor sie ausgegeben werden können. Als Sie diesen Block erzeugten, wurde er an das Netzwerk übertragen, um ihn der Blockkette hinzuzufügen. Falls dies fehlschlägt wird der Status in "nicht angenommen" geändert und Sie werden keine Ravens gutgeschrieben bekommen. Das kann gelegentlich passieren, wenn ein anderer Knoten einen Block fast zeitgleich erzeugt.</translation>
+        <translation>Erzeugte Ravens müssen %1 Blöcke lang reifen, bevor sie ausgegeben werden können. Als Sie diesen Block erzeugt haben, wurde er an das Netzwerk übertragen, um ihn der Blockchain hinzuzufügen. Falls dies fehlschlägt, wird der Status in "nicht angenommen" geändert und Sie werden keine Ravens gutgeschrieben bekommen. Das kann gelegentlich passieren, wenn ein anderer Knoten einen Block fast zeitgleich erzeugt.</translation>
     </message>
     <message>
         <source>Debug information</source>
@@ -3015,7 +3015,7 @@
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file %s or %s</source>
-        <translation>Veröffentlicht unter der MIT-Softwarelizenz, siehe beiligende Datei %s oder %s.</translation>
+        <translation>Veröffentlicht unter der MIT-Softwarelizenz, siehe beiliegende Datei %s oder %s.</translation>
     </message>
     <message>
         <source>If &lt;category&gt; is not supplied or if &lt;category&gt; = 1, output all debugging information.</source>
@@ -3027,11 +3027,11 @@
     </message>
     <message>
         <source>Prune: last wallet synchronisation goes beyond pruned data. You need to -reindex (download the whole blockchain again in case of pruned node)</source>
-        <translation>Prune (Kürzung): Die letzte Syncronisation der Wallet liegt vor gekürzten (gelöschten) Blöcken. Es ist ein -reindex (download der gesamten Blockkette) notwendig.</translation>
+        <translation>Prune (Kürzung): Die letzte Synchronisation der Wallet liegt vor gekürzten (gelöschten) Blöcken. Es ist ein -reindex (Download der gesamten Blockchain) notwendig.</translation>
     </message>
     <message>
         <source>Rescans are not possible in pruned mode. You will need to use -reindex which will download the whole blockchain again.</source>
-        <translation>Rescans sind im pruned mode nicht möglich. Ein -reindex ist notwendig, welcher die gesmate Blockkette erneut herunterlädt.</translation>
+        <translation>Rescans sind im pruned mode nicht möglich. Ein -reindex ist notwendig, welcher die gesmate Blockchain erneut herunterlädt.</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occurred, see debug.log for details</source>
@@ -3063,7 +3063,7 @@
     </message>
     <message>
         <source>A fee rate (in %s/kB) that will be used when fee estimation has insufficient data (default: %s)</source>
-        <translation>Eine Transaktionsgebühr (in %s/kB) wird genutzt, wenn für die Gebührenschützung zu wenig Daten vorliegen (Standardwert: %s)</translation>
+        <translation>Eine Transaktionsgebühr (in %s/kB) wird genutzt, wenn für die Gebührenschätzung zu wenig Daten vorliegen (Standardwert: %s)</translation>
     </message>
     <message>
         <source>Accept relayed transactions received from whitelisted peers even when not relaying transactions (default: %d)</source>
@@ -3079,7 +3079,7 @@
     </message>
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
-        <translation>Alle Wallet-Transaktionen löschen und nur diese Teilbereiche der Blockkette durch -rescan beim Starten wiederherstellen</translation>
+        <translation>Alle Wallet-Transaktionen löschen und nur diese Teilbereiche der Blockchain durch -rescan beim Starten wiederherstellen</translation>
     </message>
     <message>
         <source>Error loading %s: You can't enable HD on a already existing non-HD wallet</source>
@@ -3107,7 +3107,7 @@
     </message>
     <message>
         <source>Maximum total fees (in %s) to use in a single wallet transaction or raw transaction; setting this too low may abort large transactions (default: %s)</source>
-        <translation>Maximale Gesamtgebühr (in %s) in einer Börsentransaktion; wird dies zu niedrig gesetzten können große Transaktionen abgebrochen werden (Standard: %s)</translation>
+        <translation>Maximale Gesamtgebühr (in %s) für eine Wallet- oder Roh-Transaktion; wird diese zu niedrig gesetzt können große Transaktionen abgebrochen werden (Standard: %s)</translation>
     </message>
     <message>
         <source>Please check that your computer's date and time are correct! If your clock is wrong, %s will not work properly.</source>
@@ -3119,7 +3119,7 @@
     </message>
     <message>
         <source>Reduce storage requirements by enabling pruning (deleting) of old blocks. This allows the pruneblockchain RPC to be called to delete specific blocks, and enables automatic pruning of old blocks if a target size in MiB is provided. This mode is incompatible with -txindex and -rescan. Warning: Reverting this setting requires re-downloading the entire blockchain. (default: 0 = disable pruning blocks, 1 = allow manual pruning via RPC, &gt;%u = automatically prune block files to stay under the specified target size in MiB)</source>
-        <translation>Speicherplatzanforderung durch Kürzen (Pruning) alter Blöcke reduzieren. Dies erlaubt das Aufrufen des sogenannten Pruneblockchain RPC zum Löschen spezifischer Blöcke und und aktiviert das automatische Pruning alter Blöcke, sofern eine Zielgröße in MIB angegeben wird. Dieser Modus ist nicht mit -txindex und -resacan kompatibel. Warnung: Das Rücksetzen dieser Einstellung erfordert das erneute Herunterladen der gesamten Blockchain. (Standard: 0 = deaktiviert das Pruning, 1 = erlaubt manuelles Pruning via RPC, &gt;%u = automatisches Pruning der Blockdateien, um angegebene Maximalgröße nicht zu überschreiten)</translation>
+        <translation>Speicherplatzanforderung durch Kürzen (Pruning) alter Blöcke reduzieren. Dies erlaubt das Aufrufen des sogenannten Pruneblockchain RPC zum Löschen spezifischer Blöcke und aktiviert das automatische Pruning alter Blöcke, sofern eine Zielgröße in MIB angegeben wird. Dieser Modus ist nicht mit -txindex und -rescan kompatibel. Warnung: Das Rücksetzen dieser Einstellung erfordert das erneute Herunterladen der gesamten Blockchain. (Standard: 0 = deaktiviert das Pruning, 1 = erlaubt manuelles Pruning via RPC, &gt;%u = automatisches Pruning der Blockdateien, um angegebene Maximalgröße in MiB nicht zu überschreiten)</translation>
     </message>
     <message>
         <source>Set lowest fee rate (in %s/kB) for transactions to be included in block creation. (default: %s)</source>
@@ -3159,7 +3159,7 @@
     </message>
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
-        <translation>Warnung: Wir scheinen nicht vollständig mit unseren Gegenstellen übereinzustimmen! Sie oder die anderen Knoten müssen unter Umständen Ihre Client-Software aktualisieren.</translation>
+        <translation>Warnung: Wir scheinen nicht vollständig mit unseren Peers übereinzustimmen! Sie oder die anderen Knoten müssen unter Umständen Ihre Client-Software aktualisieren.</translation>
     </message>
     <message>
         <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
@@ -3183,7 +3183,7 @@
     </message>
     <message>
         <source>Attempt to recover private keys from a corrupt wallet on startup</source>
-        <translation>Es wird versucht, private Schlüssel beim Starten aus einem beschädigtem Wallet wiederherzustellen</translation>
+        <translation>Es wird versucht, private Schlüssel beim Starten aus einer beschädigten Wallet wiederherzustellen</translation>
     </message>
     <message>
         <source>Block creation options:</source>
@@ -3243,7 +3243,7 @@
     </message>
     <message>
         <source>Enable transaction replacement in the memory pool (default: %u)</source>
-        <translation>Maximal &lt;n&gt; nicht-verbindbare Transaktionen im Speicher halten (Standard: %u)</translation>
+        <translation>Transaktionsersetzung im Speicherpool aktivieren (Standard: %u)</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
@@ -3259,11 +3259,11 @@
     </message>
     <message>
         <source>Error loading %s: Wallet corrupted</source>
-        <translation>Fehler beim Laden von %s: Das Wallet ist beschädigt</translation>
+        <translation>Fehler beim Laden von %s: Die Wallet ist beschädigt</translation>
     </message>
     <message>
         <source>Error loading %s: Wallet requires newer version of %s</source>
-        <translation>Fehler beim Laden von %s: Das Wallet benötigt eine neuere Version von %s</translation>
+        <translation>Fehler beim Laden von %s: Die Wallet benötigt eine neuere Version von %s</translation>
     </message>
     <message>
         <source>Error loading %s: You can't disable HD on a already existing HD wallet</source>
@@ -3331,11 +3331,11 @@
     </message>
     <message>
         <source>Print this help message and exit</source>
-        <translation>Drucke diese Hilfemeldung und beende</translation>
+        <translation>Diese Hilfe-Meldung drucken und beenden</translation>
     </message>
     <message>
         <source>Print version and exit</source>
-        <translation>Gibt die Versionsnummer aus und beendet das Programm</translation>
+        <translation>Versionsnummer drucken und beenden</translation>
     </message>
     <message>
         <source>Prune cannot be configured with a negative value.</source>
@@ -3347,11 +3347,11 @@
     </message>
     <message>
         <source>Rebuild chain state and block index from the blk*.dat files on disk</source>
-        <translation>Blockkettenindex aus aktuellen Dateien blk000??.dat beim Starten wiederaufbauen</translation>
+        <translation>Wiederherstellen des Blockchain-Zustands aus den blk*.dat Dateien auf der Festplatte</translation>
     </message>
     <message>
         <source>Rebuild chain state from the currently indexed blocks</source>
-        <translation>Blockkettenzustand aus aktuelle indizierten Blöcken wiederaufbauen</translation>
+        <translation>Wiederherstellen des Blockchain-Zustands aus aktuellen indizierten Blöcken</translation>
     </message>
     <message>
         <source>Rewinding blocks...</source>
@@ -3399,7 +3399,7 @@
     </message>
     <message>
         <source>User Agent comment (%s) contains unsafe characters.</source>
-        <translation>Der User Agent Kommentar  (%s) enthält unsichere Zeichen.</translation>
+        <translation>Der User Agent Kommentar (%s) enthält unsichere Zeichen.</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
@@ -3431,7 +3431,7 @@
     </message>
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
-        <translation>An die angegebene Adresse binden und Gegenstellen, die sich dorthin verbinden, immer zulassen. Für IPv6 "[Host]:Port"-Notation verwenden</translation>
+        <translation>An die angegebene Adresse binden und Peers, die sich dorthin verbinden, immer zulassen. Für IPv6 "[Host]:Port"-Notation verwenden</translation>
     </message>
     <message>
         <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
@@ -3479,19 +3479,19 @@
     </message>
     <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
-        <translation>Der Transaktionsbetrag ist zum senden zu niedrig, nachdem die Gebühr abgezogen wurde.</translation>
+        <translation>Der Transaktionsbetrag ist zum Senden zu niedrig, nachdem die Gebühr abgezogen wurde.</translation>
     </message>
     <message>
         <source>Use hierarchical deterministic key generation (HD) after BIP32. Only has effect during wallet creation/first start</source>
-        <translation>Verwende hierarchisch deterministische Schlüsselgenerierung (HD) nach BIP32. Funktioniert nur bei der Erstellung (erster Start) von einer Brieftasche.</translation>
+        <translation>Verwende hierarchisch deterministische Schlüsselgenerierung (HD) nach BIP32. Funktioniert nur bei Erstellung (erstem Start) einer Wallet.</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
-        <translation>Erlaubte Gegenstellen werden nicht für DoS-Attacken gesperrt und ihre Transkationen werden immer weitergeleitet, auch wenn sie sich bereits im Speicherpool befinden, was z.B. für Gateways sinnvoll ist.</translation>
+        <translation>Erlaubte Peers werden nicht für DoS-Attacken gesperrt und ihre Transkationen werden immer weitergeleitet, auch wenn sie sich bereits im Speicherpool befinden, was z.B. für Gateways sinnvoll ist.</translation>
     </message>
     <message>
         <source>You need to rebuild the database using -reindex to go back to unpruned mode.  This will redownload the entire blockchain</source>
-        <translation>Sie müssen die Datenbank mit Hilfe von -reindex neu aufbauen, um zum ungekürzten Modus zurückzukehren. Dies erfordert, dass die gesamte Blockkette erneut heruntergeladen wird.</translation>
+        <translation>Sie müssen die Datenbank mit Hilfe von -reindex neu aufbauen, um zum ungekürzten Modus zurückzukehren. Dies erfordert, dass die gesamte Blockchain erneut heruntergeladen wird.</translation>
     </message>
     <message>
         <source>(default: %u)</source>
@@ -3551,7 +3551,7 @@
     </message>
     <message>
         <source>Rescan the block chain for missing wallet transactions on startup</source>
-        <translation>Blockkette beim Starten erneut nach fehlenden Wallet-Transaktionen durchsuchen</translation>
+        <translation>Blockchain beim Starten erneut nach fehlenden Wallet-Transaktionen durchsuchen</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
@@ -3563,7 +3563,7 @@
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
-        <translation>Zeige alle Debuggingoptionen (Benutzung: --help -help-debug)</translation>
+        <translation>Alle Debuggingoptionen anzeigen (Benutzung: --help -help-debug)</translation>
     </message>
     <message>
         <source>Shrink debug.log file on client startup (default: 1 when no -debug)</source>
@@ -3587,7 +3587,7 @@
     </message>
     <message>
         <source>Tor control port to use if onion listening enabled (default: %s)</source>
-        <translation>Zu benutzender TOR Kontrollport wenn Onion Auflistung aktiv ist (Standard: %s)</translation>
+        <translation>Zu benutzender TOR Kontrollport wenn Onion Abhörung aktiv ist (Standard: %s)</translation>
     </message>
     <message>
         <source>Transaction amount too small</source>
@@ -3623,11 +3623,11 @@
     </message>
     <message>
         <source>Whether to operate in a blocks only mode (default: %u)</source>
-        <translation>Legt fest ob nur Blöcke Modus aktiv sein soll (Standard: %u)</translation>
+        <translation>Legt fest ob "Nur Blöcke" Modus aktiv sein soll (Standard: %u)</translation>
     </message>
     <message>
         <source>Zapping all transactions from wallet...</source>
-        <translation>Lösche alle Transaktionen aus Wallet...</translation>
+        <translation>Lösche alle Transaktionen aus der Wallet...</translation>
     </message>
     <message>
         <source>ZeroMQ notification options:</source>
@@ -3671,7 +3671,7 @@
     </message>
     <message>
         <source>Force relay of transactions from whitelisted peers even if they violate local relay policy (default: %d)</source>
-        <translation>Leite Transaktionen von Peers auf der Positivliste auf jeden Fall weiter, auch wenn sie die lokale Weiterleitungsregeln verletzen (Standardeinstellung: %d)</translation>
+        <translation>Leite Transaktionen von Peers auf der Positivliste auf jeden Fall weiter, auch wenn sie die lokalen Weiterleitungsregeln verletzen (Standard: %d)</translation>
     </message>
     <message>
         <source>How thorough the block verification of -checkblocks is (0-4, default: %u)</source>
@@ -3683,15 +3683,15 @@
     </message>
     <message>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: %u)</source>
-        <translation>Anzahl Sekunden, während denen sich nicht konform verhaltenden Gegenstellen die Wiederverbindung verweigert wird (Standard: %u)</translation>
+        <translation>Anzahl der Sekunden, während denen sich nicht konform verhaltenden Peers die Wiederverbindung verweigert wird (Standard: %u)</translation>
     </message>
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
-        <translation>Debugginginformationen ausgeben (Standard: %u, &lt;category&gt; anzugeben ist optional)</translation>
+        <translation>Debugging-Informationen ausgeben (Standard: %u, &lt;category&gt; anzugeben ist optional)</translation>
     </message>
     <message>
         <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
-        <translation>Adressen von Gegenstellen via DNS-Namensauflösung finden, falls zu wenige Adressen verfügbar sind (Standard: 1, außer bei -connect/-noconnect)</translation>
+        <translation>Adressen von Peers via DNS-Namensauflösung finden, falls zu wenige Adressen verfügbar sind (Standard: 1, außer bei -connect/-noconnect)</translation>
     </message>
     <message>
         <source>Sets the serialization of raw transaction or block hex returned in non-verbose mode, non-segwit(0) or segwit(1) (default: %d)</source>
@@ -3699,11 +3699,11 @@
     </message>
     <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
-        <translation>Unterstütze Blöcke und Transaktionen mit  Bloomfiltern zu filtern (default: %u)</translation>
+        <translation>Unterstütze das Filtern von Blöcken und Transaktionen mit Bloomfiltern (default: %u)</translation>
     </message>
     <message>
         <source>This is the transaction fee you may pay when fee estimates are not available.</source>
-        <translation>Das ist die Transaktionsgebühr, welche du zahlen müsstest, wenn die Gebührenschätzungen nicht verfügbar sind.</translation>
+        <translation>Das ist die Transaktionsgebühr, die gezahlt werden müsste, wenn die Gebührenschätzungen nicht verfügbar sind.</translation>
     </message>
     <message>
         <source>Total length of network version string (%i) exceeds maximum length (%i). Reduce the number or size of uacomments.</source>
@@ -3711,7 +3711,7 @@
     </message>
     <message>
         <source>Tries to keep outbound traffic under the given target (in MiB per 24h), 0 = no limit (default: %d)</source>
-        <translation>Versucht ausgehenden Datenverkehr unter dem gegebenen Wert zu halten (in MiB pro 24h), 0 = kein Limit (default: %d)</translation>
+        <translation>Versucht ausgehenden Datenverkehr unter dem gegebenen Wert zu halten (in MiB pro 24h), 0 = kein Limit (Standard: %d)</translation>
     </message>
     <message>
         <source>Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
@@ -3723,7 +3723,7 @@
     </message>
     <message>
         <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
-        <translation>Separaten SOCKS5-Proxy verwenden, um Gegenstellen über versteckte Tor-Dienste zu erreichen (Standard: %s)</translation>
+        <translation>Separaten SOCKS5-Proxy verwenden, um Peers über versteckte Tor-Dienste zu erreichen (Standard: %s)</translation>
     </message>
     <message>
         <source>Warning: Unknown block versions being mined! It's possible unknown rules are in effect</source>
@@ -3731,7 +3731,7 @@
     </message>
     <message>
         <source>Whitelist peers connecting from the given IP address (e.g. 1.2.3.4) or CIDR notated network (e.g. 1.2.3.0/24). Can be specified multiple times.</source>
-        <translation>Gegenstellen die sich von der angegebenen IP-Adresse (e.g. 1.2.3.4) oder CIDR Notation (eg. 1.2.3.0/24) aus verbinden immer zulassen. Kann mehrmals angegeben werden.</translation>
+        <translation>Peers die sich von der angegebenen IP-Adresse (e.g. 1.2.3.4) oder CIDR Notation (eg. 1.2.3.0/24) aus verbinden immer zulassen. Kann mehrmals angegeben werden.</translation>
     </message>
     <message>
         <source>%s is set very high!</source>
@@ -3743,7 +3743,7 @@
     </message>
     <message>
         <source>Always query for peer addresses via DNS lookup (default: %u)</source>
-        <translation>Adressen von Gegenstellen immer über DNS-Namensauflösung abfragen (Standard: %u)</translation>
+        <translation>Peer-Adressen immer über DNS-Namensauflösung abfragen (Standard: %u)</translation>
     </message>
     <message>
         <source>How many blocks to check at startup (default: %u, 0 = all)</source>
@@ -3771,7 +3771,7 @@
     </message>
     <message>
         <source>Maintain at most &lt;n&gt; connections to peers (default: %u)</source>
-        <translation>Maximal &lt;n&gt; Verbindungen zu Gegenstellen aufrechterhalten (Standard: %u)</translation>
+        <translation>Maximal &lt;n&gt; Verbindungen zu Peers aufrechterhalten (Standard: %u)</translation>
     </message>
     <message>
         <source>Make the wallet broadcast transactions</source>
@@ -3835,7 +3835,7 @@
     </message>
     <message>
         <source>The wallet will avoid paying less than the minimum relay fee.</source>
-        <translation>Das Wallet verhindert Zahlungen, die die Mindesttransaktionsgebühr nicht berücksichtigen.</translation>
+        <translation>Die Wallet verhindert Zahlungen, die die Mindesttransaktionsgebühr nicht berücksichtigen.</translation>
     </message>
     <message>
         <source>This is the minimum transaction fee you pay on every transaction.</source>
@@ -3847,7 +3847,7 @@
     </message>
     <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
-        <translation>Schwellenwert, um Verbindungen zu sich nicht konform verhaltenden Gegenstellen zu beenden (Standard: %u)</translation>
+        <translation>Schwellenwert, um Verbindungen zu sich nicht konform verhaltenden Peers zu beenden (Standard: %u)</translation>
     </message>
     <message>
         <source>Transaction amounts must not be negative</source>
@@ -3855,7 +3855,7 @@
     </message>
     <message>
         <source>Transaction has too long of a mempool chain</source>
-        <translation>Die Speicherpoolkette der Transaktion ist zu lang.</translation>
+        <translation>Die Mempool Chain der Transaktion ist zu lang.</translation>
     </message>
     <message>
         <source>Transaction must have at least one recipient</source>
@@ -3863,7 +3863,7 @@
     </message>
     <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
-        <translation>Unbekannter Netztyp in -onlynet angegeben: '%s'</translation>
+        <translation>Unbekanntes Netzwerk in -onlynet angegeben: '%s'</translation>
     </message>
     <message>
         <source>Insufficient funds</source>
