@@ -122,8 +122,9 @@ UniValue issue(const JSONRPCRequest& request)
     // Check asset name and infer assetType
     std::string assetName = request.params[0].get_str();
     AssetType assetType;
-    if (!IsAssetNameValid(assetName, assetType)) {
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName);
+    std::string assetError = "";
+    if (!IsAssetNameValid(assetName, assetType, assetError)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName + std::string("\nError: ") + assetError);
     }
 
     // Check assetType supported
@@ -265,8 +266,9 @@ UniValue issueunique(const JSONRPCRequest& request)
 
     const std::string rootName = request.params[0].get_str();
     AssetType assetType;
-    if (!IsAssetNameValid(rootName, assetType)) {
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + rootName);
+    std::string assetError = "";
+    if (!IsAssetNameValid(rootName, assetType, assetError)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + rootName  + std::string("\nError: ") + assetError);
     }
     if (assetType != AssetType::ROOT && assetType != AssetType::SUB) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Root asset must be a regular top-level or sub-asset."));
