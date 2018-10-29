@@ -799,7 +799,7 @@
              <number>46</number>
             </property>
             <property name="placeholderText">
-             <string>The IPFS Hash that is associated with the asset being created (e.g Qm3Ef76Sl10HQ....)</string>
+             <string>The IPFS Hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</string>
             </property>
            </widget>
           </item>
