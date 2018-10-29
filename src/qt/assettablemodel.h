@@ -31,6 +31,22 @@ public:
         Quantity = 1
     };
 
+    /** Roles to get specific information from a transaction row.
+        These are independent of column.
+    */
+    enum RoleIndex {
+        /** Net amount of transaction */
+            AmountRole = 100,
+        /** RVN or name of an asset */
+            AssetNameRole = 101,
+        /** Formatted amount, without brackets when unconfirmed */
+            FormattedAmountRole = 102,
+        /** Background image */
+            BackgroundRole = 103,
+        /** AdministratorRole */
+            AdministratorRole = 104
+    };
+
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;

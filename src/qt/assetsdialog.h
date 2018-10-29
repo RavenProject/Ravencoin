@@ -37,6 +37,9 @@ public:
 
     void setClientModel(ClientModel *clientModel);
     void setModel(WalletModel *model);
+    void setupAssetControlFrame();
+    void setupScrollView();
+    void setupFeeControl();
 
     /** Set up the tab chain manually, as Qt messes up the tab chain by default in some cases (issue https://bugreports.qt-project.org/browse/QTBUG-10907).
      */
@@ -99,10 +102,9 @@ private Q_SLOTS:
     void customFeeFeatureChanged(bool);
 
     /** RVN START */
-    void createAssetButtonClicked();
-    void reissueAssetButtonClicked();
     void mineButtonClicked();
     void assetControlUpdateSendCoinsDialog();
+    void focusAsset(const QModelIndex& index);
     /** RVN END */
 
     Q_SIGNALS:

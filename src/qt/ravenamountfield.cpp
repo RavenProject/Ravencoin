@@ -202,7 +202,7 @@ RavenAmountField::RavenAmountField(QWidget *parent) :
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->addWidget(amount);
-    unit = new QValueComboBox(this);
+    unit = new QValueComboBox();
     unit->setModel(new RavenUnits(this));
     layout->addWidget(unit);
     layout->addStretch(1);
@@ -219,6 +219,7 @@ RavenAmountField::RavenAmountField(QWidget *parent) :
 
     // Set default based on configuration
     unitChanged(unit->currentIndex());
+
 }
 
 void RavenAmountField::clear()

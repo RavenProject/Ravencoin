@@ -23,20 +23,6 @@
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
      <item>
-      <widget class="QPushButton" name="createAssetButton">
-       <property name="text">
-        <string>Create Assets</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="reissueAssetButton">
-       <property name="text">
-        <string>Manage Owned Assets</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="mineButton">
        <property name="text">
         <string>Mine Block</string>
@@ -1322,15 +1308,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QValidatedLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qvalidatedlineedit.h</header>
+  </customwidget>
+  <customwidget>
    <class>RavenAmountField</class>
    <extends>QLineEdit</extends>
    <header>ravenamountfield.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QValidatedLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>qvalidatedlineedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -76,7 +76,39 @@ extern double NSAppKitVersionNumber;
 #endif
 #endif
 
+#include <QGraphicsDropShadowEffect>
+#include "guiconstants.h"
+
 namespace GUIUtil {
+
+QFont getSubLabelFont()
+{
+    QFont labelSubFont;
+    labelSubFont.setFamily("Arial");
+    labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelSubFont.setPixelSize(14);
+    labelSubFont.setBold(false);
+    return labelSubFont;
+}
+
+QFont getTopLabelFont()
+{
+    QFont labelTopFont;
+    labelTopFont.setFamily("Arial");
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, 0.3);
+    labelTopFont.setPixelSize(18);
+    labelTopFont.setBold(true);
+    return labelTopFont;
+}
+
+QGraphicsDropShadowEffect* getShadowEffect()
+{
+    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect;
+    shadow->setBlurRadius(9.0);
+    shadow->setColor(COLOR_SHADOW);
+    shadow->setOffset(4.0);
+    return shadow;
+}
 
 QString dateTimeStr(const QDateTime &date)
 {
@@ -608,7 +640,7 @@ TableViewLastColumnResizingFixer::TableViewLastColumnResizingFixer(QTableView* t
     lastColumnIndex = columnCount - 1;
     secondToLastColumnIndex = columnCount - 2;
     tableView->horizontalHeader()->setMinimumSectionSize(allColumnsMinimumWidth);
-    setViewHeaderResizeMode(secondToLastColumnIndex, QHeaderView::Interactive);
+//    setViewHeaderResizeMode(secondToLastColumnIndex, QHeaderView::Interactive);
     setViewHeaderResizeMode(lastColumnIndex, QHeaderView::Interactive);
 }
 

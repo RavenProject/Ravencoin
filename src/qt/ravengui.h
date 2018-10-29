@@ -33,9 +33,12 @@ class HelpMessageDialog;
 class ModalOverlay;
 
 QT_BEGIN_NAMESPACE
+class QWidgetAction;
 class QAction;
 class QProgressBar;
 class QProgressDialog;
+class QNetworkAccessManager;
+class QNetworkRequest;
 QT_END_NAMESPACE
 
 /**
@@ -114,7 +117,17 @@ private:
     QAction *showHelpMessageAction;
 
     /** RVN START */
-    QAction *assetAction;
+    QAction *transferAssetAction;
+    QAction *createAssetAction;
+    QAction *manageAssetAction;
+    QAction *messagingAction;
+    QAction *votingAction;
+    QWidget *headerWidget;
+    QLabel *labelCurrentMarket;
+    QLabel *labelCurrentPrice;
+    QTimer *pricingTimer;
+    QNetworkAccessManager* networkManager;
+    QNetworkRequest* request;
     /** RVN END */
 
     QSystemTrayIcon *trayIcon;
@@ -175,6 +188,8 @@ public Q_SLOTS:
     */
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
 
+    void getPriceInfo();
+
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.
        @param[in] status            current encryption status
@@ -219,6 +234,8 @@ private Q_SLOTS:
     /** RVN START */
     /** Switch to assets page */
     void gotoAssetsPage();
+    void gotoCreateAssetsPage();
+    void gotoManageAssetsPage();
     /** RVN END */
 
 #endif // ENABLE_WALLET

@@ -14,9 +14,11 @@
 #include "platformstyle.h"
 #include "walletmodel.h"
 #include "assetcontroldialog.h"
+#include "guiconstants.h"
 
 #include "wallet/coincontrol.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QApplication>
 #include <QClipboard>
 #include <validation.h>
@@ -67,6 +69,26 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     ui->ownershipWarningMessage->hide();
 
     fShowAdministratorList = false;
+
+    this->setStyleSheet(".SendAssetsEntry {background-color: #faf9f6; padding-top: 10px; padding-right: 30px; border: none;}");
+
+    this->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->assetBoxLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->assetBoxLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->payToLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->payToLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labellLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labellLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->amountLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->amountLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->messageLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 SendAssetsEntry::~SendAssetsEntry()
@@ -223,6 +245,12 @@ void SendAssetsEntry::setValue(const SendAssetsRecipient &value)
             ui->addAsLabel->setText(recipient.label);
 
         ui->payAmount->setValue(recipient.amount / COIN);
+    }
+
+    if (recipient.assetName != "") {
+        int index = ui->assetSelectionBox->findText(recipient.assetName);
+        ui->assetSelectionBox->setCurrentIndex(index);
+        onAssetSelected(index);
     }
 }
 
