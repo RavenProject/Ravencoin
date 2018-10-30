@@ -125,6 +125,7 @@ QT_MOC_CPP = \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_assetcontroldialog.cpp \
   qt/moc_assetcontroltreewidget.cpp \
+  qt/moc_assetfilterproxy.cpp \
   qt/moc_bantablemodel.cpp \
   qt/moc_ravenaddressvalidator.cpp \
   qt/moc_ravenamountfield.cpp \
@@ -201,6 +202,7 @@ RAVEN_QT_H = \
   qt/askpassphrasedialog.h \
   qt/assetcontroldialog.h \
   qt/assetcontroltreewidget.h \
+  qt/assetfilterproxy.h \
   qt/assetsdialog.h \
   qt/createassetdialog.h \
   qt/bantablemodel.h \
@@ -355,6 +357,7 @@ RAVEN_QT_WALLET_CPP = \
   qt/askpassphrasedialog.cpp \
   qt/assetcontroldialog.cpp \
   qt/assetcontroltreewidget.cpp \
+  qt/assetfilterproxy.cpp \
   qt/assetsdialog.cpp \
   qt/createassetdialog.cpp \
   qt/coincontroldialog.cpp \

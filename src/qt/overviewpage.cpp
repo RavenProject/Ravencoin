@@ -14,6 +14,7 @@
 #include "platformstyle.h"
 #include "transactionfilterproxy.h"
 #include "transactiontablemodel.h"
+#include "assetfilterproxy.h"
 #include "assettablemodel.h"
 #include "walletmodel.h"
 #include "assetrecord.h"
@@ -27,6 +28,7 @@
 #define NUM_ITEMS 5
 
 #include <QDebug>
+#include <QTimer>
 #include <QGraphicsDropShadowEffect>
 #include <QScrollBar>
 
@@ -269,6 +271,16 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->listAssets->viewport()->setAutoFillBackground(false);
 
 
+    // Delay before filtering assetes in ms
+    static const int input_filter_delay = 200;
+
+    QTimer *asset_typing_delay;
+    asset_typing_delay = new QTimer(this);
+    asset_typing_delay->setSingleShot(true);
+    asset_typing_delay->setInterval(input_filter_delay);
+    connect(ui->assetSearch, SIGNAL(textChanged(QString)), asset_typing_delay, SLOT(start()));
+    connect(asset_typing_delay, SIGNAL(timeout()), this, SLOT(assetSearchChanged()));
+
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
     connect(ui->listAssets, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAssetClicked(QModelIndex)));
 
@@ -456,8 +468,9 @@ void OverviewPage::setWalletModel(WalletModel *model)
         ui->listTransactions->setModel(filter.get());
         ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
 
-        assetFilter.reset(new QSortFilterProxyModel());
+        assetFilter.reset(new AssetFilterProxy());
         assetFilter->setSourceModel(model->getAssetTableModel());
+        assetFilter->sort(AssetTableModel::AssetNameRole, Qt::DescendingOrder);
         ui->listAssets->setModel(assetFilter.get());
         ui->listAssets->setAutoFillBackground(false);
 
@@ -648,4 +661,11 @@ void OverviewPage::hideAssetInfo()
     ui->assetInfoPercentageLabel->hide();
     ui->assetInfoPossibleLabel->hide();
     ui->assetInfoBlocksLeftLabel->hide();
+}
+
+void OverviewPage::assetSearchChanged()
+{
+    if (!assetFilter)
+        return;
+    assetFilter->setAssetNamePrefix(ui->assetSearch->text());
 }
