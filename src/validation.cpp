@@ -1004,6 +1004,18 @@ bool HashOnchainActive(const uint256 &hash)
     return true;
 }
 
+bool GetAddressIndex(uint160 addressHash, int type, std::string assetName,
+                     std::vector<std::pair<CAddressIndexKey, CAmount> > &addressIndex, int start, int end)
+{
+    if (!fAddressIndex)
+        return error("address index not enabled");
+
+    if (!pblocktree->ReadAddressIndex(addressHash, type, assetName, addressIndex, start, end))
+        return error("unable to get txids for address");
+
+    return true;
+}
+
 bool GetAddressIndex(uint160 addressHash, int type,
                      std::vector<std::pair<CAddressIndexKey, CAmount> > &addressIndex, int start, int end)
 {
@@ -2177,28 +2189,99 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).out;
                     uint160 hashBytes;
                     int addressType;
+                    bool isAsset = false;
+                    std::string assetName;
+                    CAmount assetAmount;
 
                     if (prevout.scriptPubKey.IsPayToScriptHash()) {
                         hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+2, prevout.scriptPubKey.begin()+22));
                         addressType = 2;
+                        std::cout << "Found PayToScriptHash..." << std::endl;
                     } else if (prevout.scriptPubKey.IsPayToPublicKeyHash()) {
                         hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
                         addressType = 1;
+                        std::cout << "Found PayToPublicKeyHash..." << std::endl;
                     } else if (prevout.scriptPubKey.IsPayToPublicKey()) {
-                        hashBytes = Hash160(prevout.scriptPubKey.begin()+1, prevout.scriptPubKey.end()-1);
+                        hashBytes = Hash160(prevout.scriptPubKey.begin() + 1, prevout.scriptPubKey.end() - 1);
                         addressType = 1;
+                        std::cout << "Found PayToPublicKey..." << std::endl;
+                    /** RVN START */
                     } else {
                         hashBytes.SetNull();
                         addressType = 0;
+                        int nType;
+                        bool fIsOwner;
+                        int _nStartingPoint;
+                        std::string _strAddress;
+                        if (prevout.scriptPubKey.IsAssetScript(nType, fIsOwner, _nStartingPoint)) {
+                            addressType = 1;
+                            if (nType == TX_NEW_ASSET) {
+                                if (fIsOwner) {
+                                    if (OwnerAssetFromScript(prevout.scriptPubKey, assetName, _strAddress)) {
+                                        assetAmount = OWNER_ASSET_AMOUNT;
+                                        isAsset = true;
+                                    } else {
+                                        std::cout << "Couldn't get new owner asset from script!" << std::endl;
+                                    }
+                                } else {
+                                    CNewAsset asset;
+                                    if (AssetFromScript(prevout.scriptPubKey, asset, _strAddress)) {
+                                        assetName = asset.strName;
+                                        assetAmount = asset.nAmount;
+                                        isAsset = true;
+                                    } else {
+                                        std::cout << "Couldn't get new asset from script!" << std::endl;
+                                    }
+                                }
+                            } else if (nType == TX_REISSUE_ASSET) {
+                                CReissueAsset asset;
+                                if (ReissueAssetFromScript(prevout.scriptPubKey, asset, _strAddress)) {
+                                    assetName = asset.strName;
+                                    assetAmount = asset.nAmount;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get reissue asset from script!" << std::endl;
+                                }
+                            } else if (nType == TX_TRANSFER_ASSET) {
+                                CAssetTransfer asset;
+                                if (TransferAssetFromScript(prevout.scriptPubKey, asset, _strAddress)) {
+                                    assetName = asset.strName;
+                                    assetAmount = asset.nAmount;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get transfer asset from script!" << std::endl;
+                                }
+                            } else {
+                                std::cout << "Unsupported asset type: " << nType << std::endl;
+                            }
+                        } else {
+                            std::cout << "Found NO pay to script..." << std::endl;
+                        }
+                        if (isAsset) {
+                            std::cout << "Found assets in prevout at address " << _strAddress << ": " << assetName << "(" << assetAmount * -1 << ")" << std::endl;
+                            hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+                        }
                     }
 
                     if (fAddressIndex && addressType > 0) {
-                        // record spending activity
-                        addressIndex.push_back(std::make_pair(CAddressIndexKey(addressType, hashBytes, pindex->nHeight, i, txhash, j, true), prevout.nValue * -1));
+                        if (isAsset) {
+                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << addressType << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+                                      << ", " << i << ", " << txhash.GetHex() << ", " << j << ", " << "true" << std::endl;
 
-                        // remove address from unspent index
-                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(addressType, hashBytes, input.prevout.hash, input.prevout.n), CAddressUnspentValue()));
+                            // record spending activity
+                            addressIndex.push_back(std::make_pair(CAddressIndexKey(addressType, hashBytes, assetName, pindex->nHeight, i, txhash, j, true), assetAmount * -1));
+
+                            // remove address from unspent index
+                            addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(addressType, hashBytes, assetName, input.prevout.hash, input.prevout.n), CAddressUnspentValue()));
+                        } else {
+                            // record spending activity
+                            addressIndex.push_back(std::make_pair(CAddressIndexKey(addressType, hashBytes, pindex->nHeight, i, txhash, j, true), prevout.nValue * -1));
+
+                            // remove address from unspent index
+                            addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(addressType, hashBytes, input.prevout.hash, input.prevout.n), CAddressUnspentValue()));
+                        }
                     }
+                    /** RVN END */
 
                     if (fSpentIndex) {
                         // add the spent index to determine the txid and input that spent an output
@@ -2320,13 +2403,82 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
 
                 } else if (out.scriptPubKey.IsPayToPublicKey()) {
-                    uint160 hashBytes(Hash160(out.scriptPubKey.begin()+1, out.scriptPubKey.end()-1));
-                    addressIndex.push_back(std::make_pair(CAddressIndexKey(1, hashBytes, pindex->nHeight, i, txhash, k, false), out.nValue));
-                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
+                    uint160 hashBytes(Hash160(out.scriptPubKey.begin() + 1, out.scriptPubKey.end() - 1));
+                    addressIndex.push_back(
+                            std::make_pair(CAddressIndexKey(1, hashBytes, pindex->nHeight, i, txhash, k, false),
+                                           out.nValue));
+                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, txhash, k),
+                                                                 CAddressUnspentValue(out.nValue, out.scriptPubKey,
+                                                                                      pindex->nHeight)));
                 } else {
-                    continue;
-                }
+                    /** RVN START */
+                    bool isAsset = false;
+                    int nType;
+                    bool fIsOwner;
+                    int _nStartingPoint;
+                    std::string _strAddress;
+                    std::string assetName;
+                    CAmount assetAmount;
+                    if (out.scriptPubKey.IsAssetScript(nType, fIsOwner, _nStartingPoint)) {
+                        if (nType == TX_NEW_ASSET) {
+                            if (fIsOwner) {
+                                if (OwnerAssetFromScript(out.scriptPubKey, assetName, _strAddress)) {
+                                    assetAmount = OWNER_ASSET_AMOUNT;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get new owner asset from script!" << std::endl;
+                                }
+                            } else {
+                                CNewAsset asset;
+                                if (AssetFromScript(out.scriptPubKey, asset, _strAddress)) {
+                                    assetName = asset.strName;
+                                    assetAmount = asset.nAmount;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get new asset from script!" << std::endl;
+                                }
+                            }
+                        } else if (nType == TX_REISSUE_ASSET) {
+                            CReissueAsset asset;
+                            if (ReissueAssetFromScript(out.scriptPubKey, asset, _strAddress)) {
+                                assetName = asset.strName;
+                                assetAmount = asset.nAmount;
+                                isAsset = true;
+                            } else {
+                                std::cout << "Couldn't get reissue asset from script!" << std::endl;
+                            }
+                        } else if (nType == TX_TRANSFER_ASSET) {
+                            CAssetTransfer asset;
+                            if (TransferAssetFromScript(out.scriptPubKey, asset, _strAddress)) {
+                                assetName = asset.strName;
+                                assetAmount = asset.nAmount;
+                                isAsset = true;
+                            } else {
+                                std::cout << "Couldn't get transfer asset from script!" << std::endl;
+                            }
+                        } else {
+                            std::cout << "Unsupported asset type: " << nType << std::endl;
+                        }
+                    }
+                    if (isAsset) {
+                        std::cout << "Found assets in out at address " << _strAddress << ": " << assetName << "(" << assetAmount << ")" << std::endl;
+                        uint160 hashBytes = uint160(std::vector <unsigned char>(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23));
 
+                        std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << 1 << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+                                  << ", " << i << ", " << txhash.GetHex() << ", " << k << ", " << "false" << ", " << assetAmount << std::endl;
+
+                        // record receiving activity
+                        addressIndex.push_back(std::make_pair(CAddressIndexKey(1, hashBytes, assetName, pindex->nHeight, i, txhash, k, false),
+                                                              assetAmount));
+
+                        // record unspent output
+                        addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, assetName, txhash, k),
+                                                                     CAddressUnspentValue(assetAmount, out.scriptPubKey, pindex->nHeight)));
+                    /** RVN END */
+                    } else {
+                        continue;
+                    }
+                }
             }
         }
 
