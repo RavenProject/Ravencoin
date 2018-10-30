@@ -1518,7 +1518,7 @@
     </message>
     <message>
         <source>Number of connections</source>
-        <translation>Anzahl der erbindungen</translation>
+        <translation>Anzahl der Verbindungen</translation>
     </message>
     <message>
         <source>Blockchain</source>
