@@ -23,6 +23,9 @@
 #include <QClipboard>
 #include <validation.h>
 #include <core_io.h>
+#include <QStringListModel>
+#include <QSortFilterProxyModel>
+#include <QCompleter>
 
 SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStringList myAssetsNames, QWidget *parent) :
     QStackedWidget(parent),
@@ -61,9 +64,34 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
 
     ui->administratorToolButton->setToolTip(tr("Select to view administrator assets to transfer"));
 
-    ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
-    ui->assetSelectionBox->addItems(myAssetsNames);
+    /** Setup the asset list combobox */
+    stringModel = new QStringListModel;
+    stringModel->insertRow(stringModel->rowCount());
+    stringModel->setData(stringModel->index(stringModel->rowCount() - 1, 0), "", Qt::DisplayRole);
 
+    for (auto name : myAssetsNames)
+    {
+        stringModel->insertRow(stringModel->rowCount());
+        stringModel->setData(stringModel->index(stringModel->rowCount() - 1, 0), name, Qt::DisplayRole);
+    }
+
+    proxy = new QSortFilterProxyModel;
+    proxy->setSourceModel(stringModel);
+    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->assetSelectionBox->setModel(proxy);
+    ui->assetSelectionBox->setEditable(true);
+
+    completer = new QCompleter(proxy,this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    ui->assetSelectionBox->setCompleter(completer);
+
+    ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an asset to transfer");
+
+    QObject::connect(completer, SIGNAL(activated(const QString &)), this, SLOT(onCompleterActivated(const QString &)));
+
+    /** Setup the amount box */
     ui->payAmount->setValue(0.00000000);
     ui->payAmount->setDisabled(true);
     ui->ownershipWarningMessage->hide();
@@ -88,7 +116,6 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
 
     ui->messageLabel->setStyleSheet(COLOR_LABEL_STRING);
     ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
-
 }
 
 SendAssetsEntry::~SendAssetsEntry()
@@ -270,6 +297,11 @@ void SendAssetsEntry::setFocus()
     ui->payTo->setFocus();
 }
 
+void SendAssetsEntry::setFocusAssetListBox()
+{
+    ui->assetSelectionBox->setFocus();
+}
+
 bool SendAssetsEntry::updateLabel(const QString &address)
 {
     if(!model)
@@ -408,19 +440,22 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
         fShowAdministratorList = !fShowAdministratorList;
 
     if (fShowAdministratorList) {
-        ui->administratorToolButton->setStyleSheet(QString("background-color: lawngreen"));
+        ui->administratorToolButton->setStyleSheet(QString("background-color: lightgray"));
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllAdministrativeAssets(model->getWallet(), names, 0);
 
             QStringList list;
+            list << "";
             for (auto name: names)
                 list << QString::fromStdString(name);
 
-            ui->assetSelectionBox->clear();
-            ui->assetSelectionBox->addItem(tr("Select an administrator asset to transfer"));
-            ui->assetSelectionBox->addItems(list);
-            ui->assetSelectionBox->setCurrentIndex(0);
+            stringModel->setStringList(list);
+
+            ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an administrator asset to transfer");
+            ui->assetSelectionBox->setFocus();
+        } else {
+            ui->payTo->setFocus();
         }
 
         ui->payAmount->setValue(OWNER_ASSET_AMOUNT / COIN);
@@ -437,17 +472,23 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
             std::vector<std::string> names;
             GetAllMyAssets(model->getWallet(), names, 0);
             QStringList list;
+            list << "";
             for (auto name : names) {
                 if (!IsAssetNameAnOwner(name))
                     list << QString::fromStdString(name);
             }
-            ui->assetSelectionBox->clear();
 
-            ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
-            ui->assetSelectionBox->addItems(list);
-            ui->assetSelectionBox->setCurrentIndex(0);
+            stringModel->setStringList(list);
+            ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an asset to transfer");
             ui->payAmount->clear();
+            ui->assetAmountLabel->clear();
+            ui->assetSelectionBox->setFocus();
+        } else {
+            ui->payTo->setFocus();
         }
         ui->ownershipWarningMessage->hide();
+
     }
+
+
 }

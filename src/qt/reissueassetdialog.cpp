@@ -36,6 +36,9 @@
 #include <QMessageBox>
 #include <QClipboard>
 #include <QSettings>
+#include <QStringListModel>
+#include <QSortFilterProxyModel>
+#include <QCompleter>
 
 
 ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
@@ -114,6 +117,25 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
     setupCoinControlFrame();
     setupAssetDataView();
     setupFeeControl();
+
+    /** Setup the asset list combobox */
+    stringModel = new QStringListModel;
+
+    proxy = new QSortFilterProxyModel;
+    proxy->setSourceModel(stringModel);
+    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->comboBox->setModel(proxy);
+    ui->comboBox->setEditable(true);
+    ui->comboBox->lineEdit()->setPlaceholderText("Select an asset");
+
+    completer = new QCompleter(proxy,this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    ui->comboBox->setCompleter(completer);
+
+    QObject::connect(completer, SIGNAL(activated(const QString &)), this, SLOT(onCompleterActivated(const QString &)));
+
     adjustSize();
 }
 
@@ -1087,13 +1109,12 @@ void ReissueAssetDialog::onUnitChanged(int value)
 
 void ReissueAssetDialog::updateAssetsList()
 {
-    ui->comboBox->clear();
-
     LOCK(cs_main);
     std::vector<std::string> assets;
     GetAllAdministrativeAssets(model->getWallet(), assets, 0);
 
-    ui->comboBox->addItem("Select an asset");
+    QStringList list;
+    list << "";
 
     // Load the assets that are reissuable
     for (auto item : assets) {
@@ -1101,9 +1122,11 @@ void ReissueAssetDialog::updateAssetsList()
         CNewAsset asset;
         if (passets->GetAssetMetaDataIfExists(name, asset)) {
             if (asset.nReissuable)
-                ui->comboBox->addItem(QString::fromStdString(asset.strName));
+                list << QString::fromStdString(asset.strName);
         }
     }
+
+    stringModel->setStringList(list);
 }
 
 void ReissueAssetDialog::clear()

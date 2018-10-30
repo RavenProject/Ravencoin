@@ -14,6 +14,9 @@ class PlatformStyle;
 class WalletModel;
 class ClientModel;
 class CNewAsset;
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 
 namespace Ui {
     class ReissueAssetDialog;
@@ -44,6 +47,10 @@ public:
     void updateAssetsList();
 
     void clear();
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 private:
     Ui::ReissueAssetDialog *ui;

@@ -14,12 +14,16 @@ class PlatformStyle;
 class WalletModel;
 class ClientModel;
 
+
 namespace Ui {
     class CreateAssetDialog;
 }
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 QT_END_NAMESPACE
 
 /** Dialog showing transaction details. */
@@ -45,6 +49,10 @@ public:
     void updateAssetList();
 
     void clear();
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 private:
     Ui::CreateAssetDialog *ui;

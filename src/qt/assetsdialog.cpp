@@ -502,7 +502,7 @@ SendAssetsEntry *AssetsDialog::addEntry()
 
     // Focus the field, so that entry can start immediately
     entry->clear();
-    entry->setFocus();
+    entry->setFocusAssetListBox();
     ui->scrollAreaWidgetContents->resize(ui->scrollAreaWidgetContents->sizeHint());
     qApp->processEvents();
     QScrollBar* bar = ui->scrollArea->verticalScrollBar();
@@ -1024,6 +1024,18 @@ void AssetsDialog::focusAsset(const QModelIndex &idx)
 
         entry->setValue(recipient);
         entry->setFocus();
+    }
+}
+
+void AssetsDialog::focusAssetListBox()
+{
+    SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(0)->widget());
+    if (entry)
+    {
+        entry->setFocusAssetListBox();
+
+        if (entry->getValue().assetName != "")
+            entry->setFocus();
     }
 }
 /** RVN END */

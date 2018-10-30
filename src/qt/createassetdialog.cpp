@@ -34,6 +34,9 @@
 #include <QMessageBox>
 #include <QClipboard>
 #include <QSettings>
+#include <QStringListModel>
+#include <QSortFilterProxyModel>
+#include <QCompleter>
 
 CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
         QDialog(parent, Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
@@ -109,6 +112,24 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     setupCoinControlFrame();
     setupAssetDataView();
     setupFeeControl();
+
+    /** Setup the asset list combobox */
+    stringModel = new QStringListModel;
+
+    proxy = new QSortFilterProxyModel;
+    proxy->setSourceModel(stringModel);
+    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->assetList->setModel(proxy);
+    ui->assetList->setEditable(true);
+    ui->assetList->lineEdit()->setPlaceholderText("Select an asset");
+
+    completer = new QCompleter(proxy,this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    ui->assetList->setCompleter(completer);
+
+    QObject::connect(completer, SIGNAL(activated(const QString &)), this, SLOT(onCompleterActivated(const QString &)));
 
     adjustSize();
 }
@@ -201,9 +222,9 @@ void CreateAssetDialog::setUpValues()
     ui->unitBox->setValue(8);
     ui->reissuableBox->setCheckState(Qt::CheckState::Checked);
     ui->ipfsText->hide();
-    ui->availabilityButton->setDisabled(true);
     hideMessage();
     CheckFormState();
+    ui->availabilityButton->setDisabled(true);
 
     ui->unitExampleLabel->setStyleSheet("font-weight: bold");
 
@@ -224,7 +245,6 @@ void CreateAssetDialog::setUpValues()
     ui->assetFullName->setStyleSheet("font-weight: bold");
 
     ui->assetType->setStyleSheet("font-weight: bold");
-
 }
 
 void CreateAssetDialog::setupCoinControlFrame()
@@ -1099,15 +1119,18 @@ void CreateAssetDialog::clearSelected()
 
 void CreateAssetDialog::updateAssetList()
 {
-    ui->assetList->clear();
+    QStringList list;
+    list << "";
 
     std::vector<std::string> names;
     GetAllAdministrativeAssets(model->getWallet(), names, 0);
     for (auto item : names) {
         std::string name = QString::fromStdString(item).split("!").first().toStdString();
         if (name.size() != 30)
-            ui->assetList->addItem(QString::fromStdString(name));
+            list << QString::fromStdString(name);
     }
+
+    stringModel->setStringList(list);
 }
 
 void CreateAssetDialog::clear()
