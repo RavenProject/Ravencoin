@@ -292,7 +292,8 @@ bool CBlockTreeDB::ReadAddressUnspentIndex(uint160 addressHash, int type, std::s
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
         std::pair<char,CAddressUnspentKey> key;
-        if (pcursor->GetKey(key) && key.first == DB_ADDRESSUNSPENTINDEX && key.second.hashBytes == addressHash) {
+        if (pcursor->GetKey(key) && key.first == DB_ADDRESSUNSPENTINDEX && key.second.hashBytes == addressHash
+                && (assetName.empty() || key.second.asset == assetName)) {
             CAddressUnspentValue nValue;
             if (pcursor->GetValue(nValue)) {
                 unspentOutputs.push_back(std::make_pair(key.second, nValue));
@@ -346,7 +347,8 @@ bool CBlockTreeDB::ReadAddressIndex(uint160 addressHash, int type, std::string a
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
         std::pair<char,CAddressIndexKey> key;
-        if (pcursor->GetKey(key) && key.first == DB_ADDRESSINDEX && key.second.hashBytes == addressHash) {
+        if (pcursor->GetKey(key) && key.first == DB_ADDRESSINDEX && key.second.hashBytes == addressHash
+                && (assetName.empty() || key.second.asset == assetName)) {
             if (end > 0 && key.second.blockHeight > end) {
                 break;
             }
