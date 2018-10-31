@@ -142,7 +142,7 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
     switch (role)
     {
         case AmountRole:
-            return rec->quantity;
+            return (unsigned long long) rec->quantity;
         case AssetNameRole:
             return QString::fromStdString(rec->name);
         case FormattedAmountRole:
