@@ -37,9 +37,9 @@ public:
 
     void setClientModel(ClientModel *clientModel);
     void setModel(WalletModel *model);
-    void setupAssetControlFrame();
-    void setupScrollView();
-    void setupFeeControl();
+    void setupAssetControlFrame(const PlatformStyle *platformStyle);
+    void setupScrollView(const PlatformStyle *platformStyle);
+    void setupFeeControl(const PlatformStyle *platformStyle);
 
     /** Set up the tab chain manually, as Qt messes up the tab chain by default in some cases (issue https://bugreports.qt-project.org/browse/QTBUG-10907).
      */

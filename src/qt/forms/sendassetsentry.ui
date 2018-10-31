@@ -75,19 +75,13 @@
        <widget class="QComboBox" name="assetSelectionBox"/>
       </item>
       <item>
-       <widget class="QToolButton" name="administratorToolButton">
+       <widget class="QPushButton" name="administratorToolButton">
         <property name="text">
-         <string>...</string>
+         <string>Transfer Admin Asset</string>
         </property>
         <property name="icon">
-         <iconset resource="../raven.qrc">
-          <normaloff>:/icons/asset_administrator</normaloff>:/icons/asset_administrator</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>22</width>
-          <height>22</height>
-         </size>
+         <iconset>
+          <normaloff>../res/icons/asset_administrator.png</normaloff>../res/icons/asset_administrator.png</iconset>
         </property>
        </widget>
       </item>

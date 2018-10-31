@@ -98,7 +98,7 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
 
     fShowAdministratorList = false;
 
-    this->setStyleSheet(".SendAssetsEntry {background-color: #faf9f6; padding-top: 10px; padding-right: 30px; border: none;}");
+    this->setStyleSheet(QString(".SendAssetsEntry {background-color: %1; padding-top: 10px; padding-right: 30px; border: none;}").arg(platformStyle->SendEntriesBackGroundColor().name()));
 
     this->setGraphicsEffect(GUIUtil::getShadowEffect());
 

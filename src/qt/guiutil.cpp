@@ -78,6 +78,7 @@ extern double NSAppKitVersionNumber;
 
 #include <QGraphicsDropShadowEffect>
 #include "guiconstants.h"
+#include "platformstyle.h"
 
 namespace GUIUtil {
 
@@ -105,7 +106,7 @@ QGraphicsDropShadowEffect* getShadowEffect()
 {
     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect;
     shadow->setBlurRadius(9.0);
-    shadow->setColor(COLOR_SHADOW);
+    shadow->setColor(darkModeEnabled ? COLOR_SHADOW_DARK : COLOR_SHADOW_LIGHT);
     shadow->setOffset(4.0);
     return shadow;
 }

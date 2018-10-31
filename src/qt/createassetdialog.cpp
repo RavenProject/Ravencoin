@@ -109,9 +109,9 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
 
     format = "%1<font color=green>%2%3</font>";
 
-    setupCoinControlFrame();
-    setupAssetDataView();
-    setupFeeControl();
+    setupCoinControlFrame(platformStyle);
+    setupAssetDataView(platformStyle);
+    setupFeeControl(platformStyle);
 
     /** Setup the asset list combobox */
     stringModel = new QStringListModel;
@@ -247,10 +247,10 @@ void CreateAssetDialog::setUpValues()
     ui->assetType->setStyleSheet("font-weight: bold");
 }
 
-void CreateAssetDialog::setupCoinControlFrame()
+void CreateAssetDialog::setupCoinControlFrame(const PlatformStyle *platformStyle)
 {
     /** Update the assetcontrol frame */
-    ui->frameCoinControl->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameCoinControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->widgetCoinControl->setStyleSheet(".QWidget {background-color: transparent;}");
     /** Create the shadow effects on the frames */
 
@@ -288,10 +288,11 @@ void CreateAssetDialog::setupCoinControlFrame()
 
 }
 
-void CreateAssetDialog::setupAssetDataView()
+void CreateAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
 {
     /** Update the scrollview*/
-    ui->frameAssetData->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+
+    ui->frameAssetData->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frameAssetData->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->assetTypeLabel->setStyleSheet(COLOR_LABEL_STRING);
@@ -315,10 +316,10 @@ void CreateAssetDialog::setupAssetDataView()
 
 }
 
-void CreateAssetDialog::setupFeeControl()
+void CreateAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frameFee->setStyleSheet(" .QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     /** Create the shadow effects on the frames */
 
     ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());

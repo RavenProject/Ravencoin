@@ -8,7 +8,9 @@
 #include "ravenunits.h"
 #include "guiconstants.h"
 #include "qvaluecombobox.h"
+#include "platformstyle.h"
 
+#include <QDebug>
 #include <QApplication>
 #include <QAbstractSpinBox>
 #include <QHBoxLayout>
@@ -219,7 +221,6 @@ RavenAmountField::RavenAmountField(QWidget *parent) :
 
     // Set default based on configuration
     unitChanged(unit->currentIndex());
-
 }
 
 void RavenAmountField::clear()
@@ -244,10 +245,11 @@ bool RavenAmountField::validate()
 
 void RavenAmountField::setValid(bool valid)
 {
-    if (valid)
-        amount->setStyleSheet("");
-    else
-        amount->setStyleSheet(STYLE_INVALID);
+    if (valid) {
+            amount->setStyleSheet("");
+    } else {
+            amount->setStyleSheet(STYLE_INVALID);
+    }
 }
 
 bool RavenAmountField::eventFilter(QObject *object, QEvent *event)

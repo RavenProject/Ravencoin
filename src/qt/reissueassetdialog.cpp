@@ -113,10 +113,12 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
 
     formatGreen = "%1%2 <font color=green><b>%3</b></font>";
     formatBlack = "%1%2 <font color=black><b>%3</b></font>";
+    if (darkModeEnabled)
+        formatBlack = "%1%2 <font color=white><b>%3</b></font>";
 
-    setupCoinControlFrame();
-    setupAssetDataView();
-    setupFeeControl();
+    setupCoinControlFrame(platformStyle);
+    setupAssetDataView(platformStyle);
+    setupFeeControl(platformStyle);
 
     /** Setup the asset list combobox */
     stringModel = new QStringListModel;
@@ -250,10 +252,10 @@ void ReissueAssetDialog::setUpValues()
     disableAll();
 }
 
-void ReissueAssetDialog::setupCoinControlFrame()
+void ReissueAssetDialog::setupCoinControlFrame(const PlatformStyle *platformStyle)
 {
     /** Update the assetcontrol frame */
-    ui->frameCoinControl->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameCoinControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->widgetCoinControl->setStyleSheet(".QWidget {background-color: transparent;}");
     /** Create the shadow effects on the frames */
 
@@ -291,10 +293,10 @@ void ReissueAssetDialog::setupCoinControlFrame()
 
 }
 
-void ReissueAssetDialog::setupAssetDataView()
+void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
 {
     /** Update the scrollview*/
-    ui->frame->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->assetNameLabel->setStyleSheet(COLOR_LABEL_STRING);
@@ -313,10 +315,10 @@ void ReissueAssetDialog::setupAssetDataView()
 
     ui->ipfsBox->setStyleSheet(COLOR_LABEL_STRING);
 
-    ui->frame_3->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frame_3->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame_3->setGraphicsEffect(GUIUtil::getShadowEffect());
 
-    ui->frame_2->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frame_2->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame_2->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->currentDataLabel->setStyleSheet(COLOR_LABEL_STRING);
@@ -327,10 +329,10 @@ void ReissueAssetDialog::setupAssetDataView()
 
 }
 
-void ReissueAssetDialog::setupFeeControl()
+void ReissueAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frameFee->setStyleSheet(" .QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     /** Create the shadow effects on the frames */
 
     ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());

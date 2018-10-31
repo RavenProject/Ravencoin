@@ -41,9 +41,9 @@ public:
     QString formatGreen;
     QString formatBlack;
 
-    void setupCoinControlFrame();
-    void setupAssetDataView();
-    void setupFeeControl();
+    void setupCoinControlFrame(const PlatformStyle *platformStyle);
+    void setupAssetDataView(const PlatformStyle *platformStyle);
+    void setupFeeControl(const PlatformStyle *platformStyle);
     void updateAssetsList();
 
     void clear();

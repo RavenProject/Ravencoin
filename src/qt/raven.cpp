@@ -41,6 +41,7 @@
 #include <stdint.h>
 
 #include <boost/thread.hpp>
+#include "darkstyle.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -566,6 +567,7 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(raven_locale);
 
     RavenApplication app(argc, argv);
+    app.setStyle(new DarkStyle());
 #if QT_VERSION > 0x050100
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);

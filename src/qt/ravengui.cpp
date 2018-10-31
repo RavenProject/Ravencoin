@@ -37,6 +37,7 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "core_io.h"
+#include "darkstyle.h"
 
 #include <iostream>
 
@@ -256,6 +257,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     // Progress bar and label for blocks download
     progressBarLabel = new QLabel();
     progressBarLabel->setVisible(false);
+    progressBarLabel->setStyleSheet(QString(".QLabel { color : %1; }").arg(platformStyle->TextColor().name()));
     progressBar = new GUIUtil::ProgressBar();
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(false);
@@ -272,6 +274,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     statusBar()->addWidget(progressBarLabel);
     statusBar()->addWidget(progressBar);
     statusBar()->addPermanentWidget(frameBlocks);
+    statusBar()->setStyleSheet(QString(".QStatusBar{background-color: %1; border-top: 1px solid %2;}").arg(platformStyle->TopWidgetBackGroundColor().name(), platformStyle->TextColor().name()));
 
     // Install event filter to be able to catch status tip events (QEvent::StatusTip)
     this->installEventFilter(this);
@@ -559,7 +562,7 @@ void RavenGUI::createToolBars()
 
         QString widgetStyleSheet = "QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
 
-        toolbarWidget->setStyleSheet(widgetStyleSheet.arg(COLOR_LIGHT_BLUE.name(), COLOR_DARK_BLUE.name()));
+        toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightBlueColor().name(), platformStyle->DarkBlueColor().name()));
 
         QLabel* label = new QLabel();
         label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
@@ -588,7 +591,7 @@ void RavenGUI::createToolBars()
                              ".QToolTip {background-color: white; border: none; }"
                              ".QToolButton:checked {background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %1, stop: 1 %2); border: none;}";
 
-        toolbar->setStyleSheet(tbStyleSheet.arg(COLOR_DARK_ORANGE.name(), COLOR_LIGHT_ORANGE.name()));
+        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->DarkOrangeColor().name(), platformStyle->LightOrangeColor().name()));
 
         toolbar->setOrientation(Qt::Vertical);
         toolbar->setIconSize(QSize(40, 40));
@@ -605,27 +608,24 @@ void RavenGUI::createToolBars()
         ravenLabelLayout->setDirection(QBoxLayout::TopToBottom);
         ravenLabelLayout->addStretch(1);
 
-        /** Create the shadow effects on the top header */
-        QGraphicsDropShadowEffect *topHeaderShadow = new QGraphicsDropShadowEffect;
-        topHeaderShadow->setBlurRadius(8.0);
-        topHeaderShadow->setColor(COLOR_SHADOW);
-        topHeaderShadow->setOffset(4.0);
-
+        QString mainWalletWidgetStyle = QString(".QWidget{background-color: %1}").arg(platformStyle->MainBackGroundColor().name());
         QWidget* mainWalletWidget = new QWidget();
-        mainWalletWidget->setStyleSheet(".QWidget{background-color: #fbfbfe}");
+        mainWalletWidget->setStyleSheet(mainWalletWidgetStyle);
 
-        /** Create the shadow effects for the main wallet frame. Make it so it puts a shawdow on the tool bar */
+        /** Create the shadow effects for the main wallet frame. Make it so it puts a shadow on the tool bar */
         QGraphicsDropShadowEffect *walletFrameShadow = new QGraphicsDropShadowEffect;
         walletFrameShadow->setBlurRadius(8.0);
-        walletFrameShadow->setColor(COLOR_SHADOW);
+        walletFrameShadow->setColor(platformStyle->ShadowColor());
         walletFrameShadow->setXOffset(-9.0);
         walletFrameShadow->setYOffset(0);
         mainWalletWidget->setGraphicsEffect(walletFrameShadow);
 
+        QString widgetBackgroundSytleSheet = QString(".QWidget{background-color: %1}").arg(platformStyle->TopWidgetBackGroundColor().name());
+
         // Set the headers widget options
         headerWidget->setContentsMargins(0,0,0,50);
-        headerWidget->setStyleSheet(".QWidget{background-color: white;}");
-        headerWidget->setGraphicsEffect(topHeaderShadow);
+        headerWidget->setStyleSheet(widgetBackgroundSytleSheet);
+        headerWidget->setGraphicsEffect(GUIUtil::getShadowEffect());
         headerWidget->setFixedHeight(75);
 
         QFont currentMarketFont;
@@ -1526,7 +1526,7 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     optionsModel(0),
     menu(0)
 {
-    createContextMenu();
+    createContextMenu(platformStyle);
     setToolTip(tr("Unit to show amounts in. Click to select another unit."));
     QList<RavenUnits::Unit> units = RavenUnits::availableUnits();
     int max_width = 0;
@@ -1537,7 +1537,7 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setStyleSheet(QString("QLabel { color : %1 }").arg(platformStyle->SingleColor().name()));
+    setStyleSheet(QString("QLabel { color : %1; } QToolTip { background-color: white; }").arg(platformStyle->DarkOrangeColor().name()));
 }
 
 /** So that it responds to button clicks */
@@ -1547,7 +1547,7 @@ void UnitDisplayStatusBarControl::mousePressEvent(QMouseEvent *event)
 }
 
 /** Creates context menu, its actions, and wires up all the relevant signals for mouse events. */
-void UnitDisplayStatusBarControl::createContextMenu()
+void UnitDisplayStatusBarControl::createContextMenu(const PlatformStyle *platformStyle)
 {
     menu = new QMenu(this);
     for (RavenUnits::Unit u : RavenUnits::availableUnits())
@@ -1556,6 +1556,7 @@ void UnitDisplayStatusBarControl::createContextMenu()
         menuAction->setData(QVariant(u));
         menu->addAction(menuAction);
     }
+    menu->setStyleSheet(QString("QMenu::item{ color: %1; } QMenu::item:selected{ color: %2;}").arg(platformStyle->DarkOrangeColor().name(), platformStyle->TextColor().name()));
     connect(menu,SIGNAL(triggered(QAction*)),this,SLOT(onMenuSelection(QAction*)));
 }
 
