@@ -1683,7 +1683,66 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     addressIndex.push_back(std::make_pair(CAddressIndexKey(1, hashBytes, pindex->nHeight, i, hash, k, false), out.nValue));
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, hash, k), CAddressUnspentValue()));
                 } else {
-                    continue;
+                    int nType;
+                    bool fIsOwner;
+                    int _nStartingPoint;
+                    std::string assetName;
+                    CAmount assetAmount;
+                    std::string _strAddress;
+                    bool isAsset = false;
+                    if (out.scriptPubKey.IsAssetScript(nType, fIsOwner, _nStartingPoint)) {
+                        if (nType == TX_NEW_ASSET) {
+                            if (fIsOwner) {
+                                if (OwnerAssetFromScript(out.scriptPubKey, assetName, _strAddress)) {
+                                    assetAmount = OWNER_ASSET_AMOUNT;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get new owner asset from script!" << std::endl;
+                                }
+                            } else {
+                                CNewAsset asset;
+                                if (AssetFromScript(out.scriptPubKey, asset, _strAddress)) {
+                                    assetName = asset.strName;
+                                    assetAmount = asset.nAmount;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get new asset from script!" << std::endl;
+                                }
+                            }
+                        } else if (nType == TX_REISSUE_ASSET) {
+                            CReissueAsset asset;
+                            if (ReissueAssetFromScript(out.scriptPubKey, asset, _strAddress)) {
+                                assetName = asset.strName;
+                                assetAmount = asset.nAmount;
+                                isAsset = true;
+                            } else {
+                                std::cout << "Couldn't get reissue asset from script!" << std::endl;
+                            }
+                        } else if (nType == TX_TRANSFER_ASSET) {
+                            CAssetTransfer asset;
+                            if (TransferAssetFromScript(out.scriptPubKey, asset, _strAddress)) {
+                                assetName = asset.strName;
+                                assetAmount = asset.nAmount;
+                                isAsset = true;
+                            } else {
+                                std::cout << "Couldn't get transfer asset from script!" << std::endl;
+                            }
+                        } else {
+                            std::cout << "Unsupported asset type: " << nType << std::endl;
+                        }
+                        if (isAsset) {
+                            std::cout << "Found assets in out at address " << _strAddress << ": " << assetName << "(" << assetAmount * -1 << ")" << std::endl;
+                            uint160 hashBytes = uint160(std::vector <unsigned char>(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23));
+
+                            // undo receiving activity
+                            addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, k, false), assetAmount));
+
+                            // undo unspent index
+                            addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), assetName, hash, k), CAddressUnspentValue()));
+                        }
+                    } else {
+                        continue;
+                    }
                 }
 
             }
@@ -1851,7 +1910,66 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         addressIndex.push_back(std::make_pair(CAddressIndexKey(1, hashBytes, pindex->nHeight, i, hash, j, false), prevout.nValue));
                         addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, hash, j), CAddressUnspentValue()));
                     } else {
-                        continue;
+                        int nType;
+                        bool fIsOwner;
+                        int _nStartingPoint;
+                        std::string assetName;
+                        CAmount assetAmount;
+                        std::string _strAddress;
+                        bool isAsset = false;
+                        if (prevout.scriptPubKey.IsAssetScript(nType, fIsOwner, _nStartingPoint)) {
+                            if (nType == TX_NEW_ASSET) {
+                                if (fIsOwner) {
+                                    if (OwnerAssetFromScript(prevout.scriptPubKey, assetName, _strAddress)) {
+                                        assetAmount = OWNER_ASSET_AMOUNT;
+                                        isAsset = true;
+                                    } else {
+                                        std::cout << "Couldn't get new owner asset from script!" << std::endl;
+                                    }
+                                } else {
+                                    CNewAsset asset;
+                                    if (AssetFromScript(prevout.scriptPubKey, asset, _strAddress)) {
+                                        assetName = asset.strName;
+                                        assetAmount = asset.nAmount;
+                                        isAsset = true;
+                                    } else {
+                                        std::cout << "Couldn't get new asset from script!" << std::endl;
+                                    }
+                                }
+                            } else if (nType == TX_REISSUE_ASSET) {
+                                CReissueAsset asset;
+                                if (ReissueAssetFromScript(prevout.scriptPubKey, asset, _strAddress)) {
+                                    assetName = asset.strName;
+                                    assetAmount = asset.nAmount;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get reissue asset from script!" << std::endl;
+                                }
+                            } else if (nType == TX_TRANSFER_ASSET) {
+                                CAssetTransfer asset;
+                                if (TransferAssetFromScript(prevout.scriptPubKey, asset, _strAddress)) {
+                                    assetName = asset.strName;
+                                    assetAmount = asset.nAmount;
+                                    isAsset = true;
+                                } else {
+                                    std::cout << "Couldn't get transfer asset from script!" << std::endl;
+                                }
+                            } else {
+                                std::cout << "Unsupported asset type: " << nType << std::endl;
+                            }
+                            if (isAsset) {
+                                std::cout << "Found assets in prevout at address " << _strAddress << ": " << assetName << "(" << assetAmount * -1 << ")" << std::endl;
+                                uint160 hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+
+                                // undo spending activity
+                                addressIndex.push_back(std::make_pair(CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, j, true), assetAmount * -1));
+
+                                // restore unspent index
+                                addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), assetName, input.prevout.hash, input.prevout.n), CAddressUnspentValue(assetAmount, prevout.scriptPubKey, undo.nHeight)));
+                            }
+                        } else {
+                            continue;
+                        }
                     }
                 }
             }
