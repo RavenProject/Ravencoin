@@ -914,10 +914,12 @@ UniValue getaddressdeltas(const JSONRPCRequest& request)
             "  \"start\" (number) The start block height\n"
             "  \"end\" (number) The end block height\n"
             "  \"chainInfo\" (boolean) Include chain info in results, only applies if start and end specified\n"
+            "  \"assetName\"   (string, optional) Get deltas for a particular asset instead of RVN.\n"
             "}\n"
             "\nResult:\n"
             "[\n"
             "  {\n"
+            "    \"assetName\"  (string) The asset associated with the deltas (RVN for Ravencoin)\n"
             "    \"satoshis\"  (number) The difference of satoshis\n"
             "    \"txid\"  (string) The related txid\n"
             "    \"index\"  (number) The related input or output index\n"
@@ -928,6 +930,8 @@ UniValue getaddressdeltas(const JSONRPCRequest& request)
             "\nExamples:\n"
             + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
             + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
+            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"],\"assetName\":\"MY_ASSET\"}'")
+            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"],\"assetName\":\"MY_ASSET\"}")
         );
 
 
@@ -938,6 +942,14 @@ UniValue getaddressdeltas(const JSONRPCRequest& request)
     bool includeChainInfo = false;
     if (chainInfo.isBool()) {
         includeChainInfo = chainInfo.get_bool();
+    }
+
+    std::string assetName = RVN;
+    UniValue assetNameParam = find_value(request.params[0].get_obj(), "assetName");
+    if (assetNameParam.isStr()) {
+        if (!AreAssetsDeployed())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Assets aren't active.  assetName can't be specified.");
+        assetName = assetNameParam.get_str();
     }
 
     int start = 0;
@@ -964,11 +976,11 @@ UniValue getaddressdeltas(const JSONRPCRequest& request)
 
     for (std::vector<std::pair<uint160, int> >::iterator it = addresses.begin(); it != addresses.end(); it++) {
         if (start > 0 && end > 0) {
-            if (!GetAddressIndex((*it).first, (*it).second, RVN, addressIndex, start, end)) {
+            if (!GetAddressIndex((*it).first, (*it).second, assetName, addressIndex, start, end)) {
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
             }
         } else {
-            if (!GetAddressIndex((*it).first, (*it).second, RVN, addressIndex)) {
+            if (!GetAddressIndex((*it).first, (*it).second, assetName, addressIndex)) {
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
             }
         }
@@ -983,6 +995,7 @@ UniValue getaddressdeltas(const JSONRPCRequest& request)
         }
 
         UniValue delta(UniValue::VOBJ);
+        delta.push_back(Pair("assetName", it->first.asset));
         delta.push_back(Pair("satoshis", it->second));
         delta.push_back(Pair("txid", it->first.txhash.GetHex()));
         delta.push_back(Pair("index", (int)it->first.index));
@@ -1307,7 +1320,7 @@ static const CRPCCommand commands[] =
     /* Address index */
     { "addressindex",       "getaddressmempool",      &getaddressmempool,      {"addresses","includeAssets"} },
     { "addressindex",       "getaddressutxos",        &getaddressutxos,        {"addresses"} },
-    { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       {} },
+    { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       {"addresses"} },
     { "addressindex",       "getaddresstxids",        &getaddresstxids,        {"addresses","includeAssets"} },
     { "addressindex",       "getaddressbalance",      &getaddressbalance,      {"addresses","includeAssets"} },
 
