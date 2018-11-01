@@ -1028,6 +1028,18 @@ bool GetAddressIndex(uint160 addressHash, int type,
     return true;
 }
 
+bool GetAddressUnspent(uint160 addressHash, int type, std::string assetName,
+                       std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > &unspentOutputs)
+{
+    if (!fAddressIndex)
+        return error("address index not enabled");
+
+    if (!pblocktree->ReadAddressUnspentIndex(addressHash, type, assetName, unspentOutputs))
+        return error("unable to get txids for address");
+
+    return true;
+}
+
 bool GetAddressUnspent(uint160 addressHash, int type,
                        std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > &unspentOutputs)
 {
