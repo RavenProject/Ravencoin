@@ -711,7 +711,7 @@ bool timestampSort(std::pair<CMempoolAddressDeltaKey, CMempoolAddressDelta> a,
 
 UniValue getaddressmempool(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 1)
+    if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
             "getaddressmempool\n"
             "\nReturns all mempool deltas for an address (requires addressindex to be enabled).\n"
@@ -722,11 +722,13 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
             "      \"address\"  (string) The base58check encoded address\n"
             "      ,...\n"
             "    ]\n"
-            "}\n"
+            "},\n"
+            "\"includeAssets\" (boolean, optional, default false)  If true this will return an expanded result which includes asset deltas\n"
             "\nResult:\n"
             "[\n"
             "  {\n"
             "    \"address\"  (string) The base58check encoded address\n"
+            "    \"assetName\"  (string) The name of the associated asset (RVN for Ravencoin)\n"
             "    \"txid\"  (string) The related txid\n"
             "    \"index\"  (number) The related input or output index\n"
             "    \"satoshis\"  (number) The difference of satoshis\n"
@@ -738,6 +740,8 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
             "\nExamples:\n"
             + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
             + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
+            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}', true")
+            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}, true")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -746,10 +750,25 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
     }
 
+    bool includeAssets = false;
+    if (request.params.size() > 1) {
+        includeAssets = request.params[1].get_bool();
+    }
+
+    if (includeAssets)
+        if (!AreAssetsDeployed())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Assets aren't active.  includeAssets can't be true.");
+
     std::vector<std::pair<CMempoolAddressDeltaKey, CMempoolAddressDelta> > indexes;
 
-    if (!mempool.getAddressIndex(addresses, indexes)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+    if (includeAssets) {
+        if (!mempool.getAddressIndex(addresses, indexes)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+        }
+    } else {
+        if (!mempool.getAddressIndex(addresses, RVN, indexes)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+        }
     }
 
     std::sort(indexes.begin(), indexes.end(), timestampSort);
@@ -766,6 +785,7 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
 
         UniValue delta(UniValue::VOBJ);
         delta.push_back(Pair("address", address));
+        delta.push_back(Pair("assetName", it->first.asset));
         delta.push_back(Pair("txid", it->first.txhash.GetHex()));
         delta.push_back(Pair("index", (int)it->first.index));
         delta.push_back(Pair("satoshis", it->second.amount));
@@ -1285,7 +1305,7 @@ static const CRPCCommand commands[] =
     { "util",               "signmessagewithprivkey", &signmessagewithprivkey, {"privkey","message"} },
 
     /* Address index */
-    { "addressindex",       "getaddressmempool",      &getaddressmempool,      {} },
+    { "addressindex",       "getaddressmempool",      &getaddressmempool,      {"addresses","includeAssets"} },
     { "addressindex",       "getaddressutxos",        &getaddressutxos,        {"addresses"} },
     { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       {} },
     { "addressindex",       "getaddresstxids",        &getaddresstxids,        {"addresses","includeAssets"} },
