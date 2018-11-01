@@ -201,6 +201,7 @@ RAVEN_QT_H = \
   qt/askpassphrasedialog.h \
   qt/assetcontroldialog.h \
   qt/assetcontroltreewidget.h \
+  qt/assetrecord.h \
   qt/assetsdialog.h \
   qt/createassetdialog.h \
   qt/bantablemodel.h \
