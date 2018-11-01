@@ -360,6 +360,15 @@ struct CMempoolAddressDeltaKey
         spending = s;
     }
 
+    CMempoolAddressDeltaKey(int addressType, uint160 addressHash, std::string assetName) {
+        type = addressType;
+        addressBytes = addressHash;
+        asset = assetName;
+        txhash.SetNull();
+        index = 0;
+        spending = 0;
+    }
+
     CMempoolAddressDeltaKey(int addressType, uint160 addressHash) {
         type = addressType;
         addressBytes = addressHash;
