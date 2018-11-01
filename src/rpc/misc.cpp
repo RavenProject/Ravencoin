@@ -1121,7 +1121,7 @@ UniValue getaddressbalance(const JSONRPCRequest& request)
 
 UniValue getaddresstxids(const JSONRPCRequest& request)
 {
-    if (request.fHelp || request.params.size() != 1)
+    if (request.fHelp || request.params.size() > 2)
         throw std::runtime_error(
             "getaddresstxids\n"
             "\nReturns the txids for an address(es) (requires addressindex to be enabled).\n"
@@ -1132,9 +1132,10 @@ UniValue getaddresstxids(const JSONRPCRequest& request)
             "      \"address\"  (string) The base58check encoded address\n"
             "      ,...\n"
             "    ]\n"
-            "  \"start\" (number) The start block height\n"
-            "  \"end\" (number) The end block height\n"
-            "}\n"
+            "  \"start\" (number, optional) The start block height\n"
+            "  \"end\" (number, optional) The end block height\n"
+            "},\n"
+            "\"includeAssets\" (boolean, optional, default false)  If true this will return an expanded result which includes asset transactions\n"
             "\nResult:\n"
             "[\n"
             "  \"transactionid\"  (string) The transaction id\n"
@@ -1143,6 +1144,8 @@ UniValue getaddresstxids(const JSONRPCRequest& request)
             "\nExamples:\n"
             + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
             + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
+            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}', true")
+            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}, true")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -1162,16 +1165,37 @@ UniValue getaddresstxids(const JSONRPCRequest& request)
         }
     }
 
+    bool includeAssets = false;
+    if (request.params.size() > 1) {
+        includeAssets = request.params[1].get_bool();
+    }
+
+    if (includeAssets)
+        if (!AreAssetsDeployed())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Assets aren't active.  includeAssets can't be true.");
+
     std::vector<std::pair<CAddressIndexKey, CAmount> > addressIndex;
 
     for (std::vector<std::pair<uint160, int> >::iterator it = addresses.begin(); it != addresses.end(); it++) {
-        if (start > 0 && end > 0) {
-            if (!GetAddressIndex((*it).first, (*it).second, RVN, addressIndex, start, end)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+        if (includeAssets) {
+            if (start > 0 && end > 0) {
+                if (!GetAddressIndex((*it).first, (*it).second, addressIndex, start, end)) {
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+                }
+            } else {
+                if (!GetAddressIndex((*it).first, (*it).second, addressIndex)) {
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+                }
             }
         } else {
-            if (!GetAddressIndex((*it).first, (*it).second, RVN, addressIndex)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+            if (start > 0 && end > 0) {
+                if (!GetAddressIndex((*it).first, (*it).second, RVN, addressIndex, start, end)) {
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+                }
+            } else {
+                if (!GetAddressIndex((*it).first, (*it).second, RVN, addressIndex)) {
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+                }
             }
         }
     }
@@ -1262,9 +1286,9 @@ static const CRPCCommand commands[] =
 
     /* Address index */
     { "addressindex",       "getaddressmempool",      &getaddressmempool,      {} },
-    { "addressindex",       "getaddressutxos",        &getaddressutxos,        {} },
+    { "addressindex",       "getaddressutxos",        &getaddressutxos,        {"addresses"} },
     { "addressindex",       "getaddressdeltas",       &getaddressdeltas,       {} },
-    { "addressindex",       "getaddresstxids",        &getaddresstxids,        {} },
+    { "addressindex",       "getaddresstxids",        &getaddresstxids,        {"addresses","includeAssets"} },
     { "addressindex",       "getaddressbalance",      &getaddressbalance,      {"addresses","includeAssets"} },
 
     /* Blockchain */
