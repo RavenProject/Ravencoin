@@ -846,6 +846,7 @@ void RavenGUI::setWalletActionsEnabled(bool enabled)
     /** RVN START */
     transferAssetAction->setEnabled(false);
     createAssetAction->setEnabled(false);
+    manageAssetAction->setEnabled(false);
     messagingAction->setEnabled(false);
     votingAction->setEnabled(false);
     /** RVN END */
