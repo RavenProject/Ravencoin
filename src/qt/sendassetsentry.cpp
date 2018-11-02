@@ -60,9 +60,9 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->assetSelectionBox, SIGNAL(activated(int)), this, SLOT(onAssetSelected(int)));
-    connect(ui->administratorToolButton, SIGNAL(clicked()), this, SLOT(onSendOwnershipChanged()));
+    connect(ui->administratorCheckbox, SIGNAL(clicked()), this, SLOT(onSendOwnershipChanged()));
 
-    ui->administratorToolButton->setToolTip(tr("Select to view administrator assets to transfer"));
+    ui->administratorCheckbox->setToolTip(tr("Select to view administrator assets to transfer"));
 
     /** Setup the asset list combobox */
     stringModel = new QStringListModel;
@@ -88,8 +88,7 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     ui->assetSelectionBox->setCompleter(completer);
 
     ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an asset to transfer");
-
-    QObject::connect(completer, SIGNAL(activated(const QString &)), this, SLOT(onCompleterActivated(const QString &)));
+    ui->assetSelectionBox->setMinimumWidth(32);
 
     /** Setup the amount box */
     ui->payAmount->setValue(0.00000000);
@@ -413,7 +412,7 @@ void SendAssetsEntry::IsAssetControl(bool fIsAssetControl, bool fIsOwner)
         CheckOwnerBox();
     }
     if (fIsAssetControl) {
-        ui->administratorToolButton->setDisabled(true);
+        ui->administratorCheckbox->setDisabled(true);
         fUsingAssetControl = true;
     }
 }
@@ -440,7 +439,7 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
         fShowAdministratorList = !fShowAdministratorList;
 
     if (fShowAdministratorList) {
-        ui->administratorToolButton->setStyleSheet(QString("background-color: lightgray"));
+        ui->administratorCheckbox->setChecked(true);
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllAdministrativeAssets(model->getWallet(), names, 0);
@@ -467,7 +466,7 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
         ui->ownershipWarningMessage->setStyleSheet("color: red");
         ui->ownershipWarningMessage->show();
     } else {
-        ui->administratorToolButton->setStyleSheet("");
+        ui->administratorCheckbox->setChecked(false);
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllMyAssets(model->getWallet(), names, 0);

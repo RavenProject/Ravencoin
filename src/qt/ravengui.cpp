@@ -274,7 +274,9 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     statusBar()->addWidget(progressBarLabel);
     statusBar()->addWidget(progressBar);
     statusBar()->addPermanentWidget(frameBlocks);
-    statusBar()->setStyleSheet(QString(".QStatusBar{background-color: %1; border-top: 1px solid %2;}").arg(platformStyle->TopWidgetBackGroundColor().name(), platformStyle->TextColor().name()));
+
+    if(darkModeEnabled)
+        statusBar()->setStyleSheet(QString(".QStatusBar{background-color: %1; border-top: 1px solid %2;}").arg(platformStyle->TopWidgetBackGroundColor().name(), platformStyle->TextColor().name()));
 
     // Install event filter to be able to catch status tip events (QEvent::StatusTip)
     this->installEventFilter(this);
@@ -589,7 +591,8 @@ void RavenGUI::createToolBars()
         QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
                              ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: white} "
                              ".QToolTip {background-color: white; border: none; }"
-                             ".QToolButton:checked {background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %1, stop: 1 %2); border: none;}";
+                             ".QToolButton:checked {background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %1, stop: 1 %2); border: none;}"
+                             ".QToolButton:disabled {color: gray;}";
 
         toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->DarkOrangeColor().name(), platformStyle->LightOrangeColor().name()));
 

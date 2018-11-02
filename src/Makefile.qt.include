@@ -191,9 +191,7 @@ QT_MOC = \
 QT_QRC_CPP = qt/qrc_raven.cpp
 QT_QRC = qt/raven.qrc
 QT_QRC_LOCALE_CPP = qt/qrc_raven_locale.cpp
-QT_QRC_LOCALE = \
-  qt/raven_locale.qrc \
-  qt/darkstyle.qrc
+QT_QRC_LOCALE = qt/raven_locale.qrc
 
 PROTOBUF_CC = qt/paymentrequest.pb.cc
 PROTOBUF_H = qt/paymentrequest.pb.h
@@ -327,29 +325,29 @@ RES_ICONS = \
   qt/res/icons/tx_asset_output.png \
   qt/res/icons/warning.png \
   qt/res/icons/verify.png \
-  qt/darkstyle/icon_close.png \
-  qt/darkstyle/icon_restore.png \
-  qt/darkstyle/icon_undock.png \
-  qt/darkstyle/icon_branch_closed.png \
-  qt/darkstyle/icon_branch_end.png \
-  qt/darkstyle/icon_branch_more.png \
-  qt/darkstyle/icon_branch_open.png \
-  qt/darkstyle/icon_vline.png \
-  qt/darkstyle/icon_checkbox_checked.png \
-  qt/darkstyle/icon_checkbox_indeterminate.png \
-  qt/darkstyle/icon_checkbox_unchecked.png \
-  qt/darkstyle/icon_checkbox_checked_pressed.png \
-  qt/darkstyle/icon_checkbox_indeterminate_pressed.png \
-  qt/darkstyle/icon_checkbox_unchecked_pressed.png \
-  qt/darkstyle/icon_checkbox_checked_disabled.png \
-  qt/darkstyle/icon_checkbox_indeterminate_disabled.png \
-  qt/darkstyle/icon_checkbox_unchecked_disabled.png \
-  qt/darkstyle/icon_radiobutton_checked.png \
-  qt/darkstyle/icon_radiobutton_unchecked.png \
-  qt/darkstyle/icon_radiobutton_checked_pressed.png \
-  qt/darkstyle/icon_radiobutton_unchecked_pressed.png \
-  qt/darkstyle/icon_radiobutton_checked_disabled.png \
-  qt/darkstyle/icon_radiobutton_unchecked_disabled.png
+  qt/res/darkstyle/icon_close.png \
+  qt/res/darkstyle/icon_restore.png \
+  qt/res/darkstyle/icon_undock.png \
+  qt/res/darkstyle/icon_branch_closed.png \
+  qt/res/darkstyle/icon_branch_end.png \
+  qt/res/darkstyle/icon_branch_more.png \
+  qt/res/darkstyle/icon_branch_open.png \
+  qt/res/darkstyle/icon_vline.png \
+  qt/res/darkstyle/icon_checkbox_checked.png \
+  qt/res/darkstyle/icon_checkbox_indeterminate.png \
+  qt/res/darkstyle/icon_checkbox_unchecked.png \
+  qt/res/darkstyle/icon_checkbox_checked_pressed.png \
+  qt/res/darkstyle/icon_checkbox_indeterminate_pressed.png \
+  qt/res/darkstyle/icon_checkbox_unchecked_pressed.png \
+  qt/res/darkstyle/icon_checkbox_checked_disabled.png \
+  qt/res/darkstyle/icon_checkbox_indeterminate_disabled.png \
+  qt/res/darkstyle/icon_checkbox_unchecked_disabled.png \
+  qt/res/darkstyle/icon_radiobutton_checked.png \
+  qt/res/darkstyle/icon_radiobutton_unchecked.png \
+  qt/res/darkstyle/icon_radiobutton_checked_pressed.png \
+  qt/res/darkstyle/icon_radiobutton_unchecked_pressed.png \
+  qt/res/darkstyle/icon_radiobutton_checked_disabled.png \
+  qt/res/darkstyle/icon_radiobutton_unchecked_disabled.png
 
 RAVEN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \

@@ -53,6 +53,7 @@
 #include <QTimer>
 #include <QTranslator>
 #include <QSslConfiguration>
+#include <QDir>
 
 #if defined(QT_STATICPLUGIN)
 #include <QtPlugin>
@@ -233,6 +234,8 @@ public:
 
     /// Get window identifier of QMainWindow (RavenGUI)
     WId getMainWinId() const;
+
+    OptionsModel* getOptionsModel() const { return optionsModel; }
 
 public Q_SLOTS:
     void initializeResult(bool success);
@@ -567,7 +570,6 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(raven_locale);
 
     RavenApplication app(argc, argv);
-    app.setStyle(new DarkStyle());
 #if QT_VERSION > 0x050100
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -696,6 +698,11 @@ int main(int argc, char *argv[])
     // Load GUI settings from QSettings
     app.createOptionsModel(gArgs.IsArgSet("-resetguisettings"));
 
+    if (app.getOptionsModel()->getDarkModeEnabled()) {
+        app.setStyle(new DarkStyle);
+        darkModeEnabled = true;
+
+    }
     // Subscribe to global signals from core
     uiInterface.InitMessage.connect(InitMessage);
 

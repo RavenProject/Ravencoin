@@ -14,7 +14,7 @@
 #include <QPalette>
 #include <QPixmap>
 
-bool darkModeEnabled = true;
+bool darkModeEnabled = false;
 
 static const struct {
     const char *platformId;

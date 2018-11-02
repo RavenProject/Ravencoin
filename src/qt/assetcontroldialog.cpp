@@ -171,8 +171,6 @@ AssetControlDialog::AssetControlDialog(const PlatformStyle *_platformStyle, QWid
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->assetList->setCompleter(completer);
-
-    QObject::connect(completer, SIGNAL(activated(const QString &)), this, SLOT(onCompleterActivated(const QString &)));
 }
 
 AssetControlDialog::~AssetControlDialog()

@@ -11,6 +11,7 @@
 ###############################################################################
 */
 
+#include <QDebug>
 #include "darkstyle.h"
 
 DarkStyle::DarkStyle():
@@ -78,7 +79,7 @@ void DarkStyle::polish(QApplication *app)
   app->setFont(defaultFont);
 
   // loadstylesheet
-  QFile qfDarkstyle(QStringLiteral(":/darkstyle/darkstyle.qss"));
+  QFile qfDarkstyle(QStringLiteral(":/darkstyle/qss"));
   if (qfDarkstyle.open(QIODevice::ReadOnly | QIODevice::Text))
   {
     // set stylesheet
