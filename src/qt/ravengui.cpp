@@ -1317,14 +1317,15 @@ void RavenGUI::checkAssets()
         transferAssetAction->setToolTip(tr("Transfer assets to RVN addresses"));
         createAssetAction->setDisabled(false);
         createAssetAction->setToolTip(tr("Create new main/sub/unique assets"));
+        manageAssetAction->setDisabled(false);
         }
     else {
         transferAssetAction->setDisabled(true);
         transferAssetAction->setToolTip(tr("Assets not yet active"));
         createAssetAction->setDisabled(true);
         createAssetAction->setToolTip(tr("Assets not yet active"));
+        manageAssetAction->setDisabled(true);
         }
-
 }
 #endif // ENABLE_WALLET
 
