@@ -12,7 +12,9 @@
 #include "optionsmodel.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
+#include "guiconstants.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QApplication>
 #include <QClipboard>
 
@@ -49,6 +51,25 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     connect(ui->deleteButton, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
+
+    this->setStyleSheet(".SendCoinsEntry {background-color: #faf9f6; padding-top: 10px; padding-right: 30px; border: none;}");
+
+    this->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->payToLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->payToLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labellLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labellLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->amountLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->amountLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->messageLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->checkboxSubtractFeeFromAmount->setStyleSheet(COLOR_LABEL_STRING);
+
 }
 
 SendCoinsEntry::~SendCoinsEntry()

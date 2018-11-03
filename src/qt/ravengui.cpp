@@ -40,6 +40,14 @@
 
 #include <iostream>
 
+#include <QDebug>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QGraphicsDropShadowEffect>
+#include <QToolButton>
+#include <QPushButton>
+#include <QPainter>
+#include <QWidgetAction>
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
@@ -118,7 +126,17 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     openRPCConsoleAction(0),
     openAction(0),
     showHelpMessageAction(0),
-    assetAction(0),
+    transferAssetAction(0),
+    createAssetAction(0),
+    manageAssetAction(0),
+    messagingAction(0),
+    votingAction(0),
+    headerWidget(0),
+    labelCurrentMarket(0),
+    labelCurrentPrice(0),
+    pricingTimer(0),
+    networkManager(0),
+    request(0),
     trayIcon(0),
     trayIconMenu(0),
     notificator(0),
@@ -177,6 +195,15 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
          */
         setCentralWidget(rpcConsole);
     }
+
+    /** RVN START */
+    labelCurrentMarket = new QLabel();
+    labelCurrentPrice = new QLabel();
+    headerWidget = new QWidget();
+    pricingTimer = new QTimer();
+    networkManager = new QNetworkAccessManager();
+    request = new QNetworkRequest();
+    /** RVN END */
 
     // Accept D&D of URIs
     setAcceptDrops(true);
@@ -286,6 +313,12 @@ RavenGUI::~RavenGUI()
 
 void RavenGUI::createActions()
 {
+    QFont font = QFont();
+    font.setPixelSize(25);
+    font.setWeight(400);
+    font.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.8);
+    font.setFamily("Arial");
+
     QActionGroup *tabGroup = new QActionGroup(this);
 
     overviewAction = new QAction(platformStyle->SingleColorIcon(":/icons/overview"), tr("&Overview"), this);
@@ -293,6 +326,7 @@ void RavenGUI::createActions()
     overviewAction->setToolTip(overviewAction->statusTip());
     overviewAction->setCheckable(true);
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    overviewAction->setFont(font);
     tabGroup->addAction(overviewAction);
 
     sendCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Send"), this);
@@ -300,6 +334,7 @@ void RavenGUI::createActions()
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
+    sendCoinsAction->setFont(font);
     tabGroup->addAction(sendCoinsAction);
 
     sendCoinsMenuAction = new QAction(platformStyle->TextColorIcon(":/icons/send"), sendCoinsAction->text(), this);
@@ -311,6 +346,7 @@ void RavenGUI::createActions()
     receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
+    receiveCoinsAction->setFont(font);
     tabGroup->addAction(receiveCoinsAction);
 
     receiveCoinsMenuAction = new QAction(platformStyle->TextColorIcon(":/icons/receiving_addresses"), receiveCoinsAction->text(), this);
@@ -322,15 +358,50 @@ void RavenGUI::createActions()
     historyAction->setToolTip(historyAction->statusTip());
     historyAction->setCheckable(true);
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
+    historyAction->setFont(font);
     tabGroup->addAction(historyAction);
 
     /** RVN START */
-    assetAction = new QAction(platformStyle->SingleColorIcon(":/icons/open"), tr("&Assets"), this);
-    assetAction->setStatusTip(tr("Manage Assets"));
-    assetAction->setToolTip(assetAction->statusTip());
-    assetAction->setCheckable(true);
-    assetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
-    tabGroup->addAction(assetAction);
+    transferAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Transfer Assets"), this);
+    transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
+    transferAssetAction->setToolTip(transferAssetAction->statusTip());
+    transferAssetAction->setCheckable(true);
+    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    transferAssetAction->setFont(font);
+    tabGroup->addAction(transferAssetAction);
+
+    createAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/open"), tr("&Create Assets"), this);
+    createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
+    createAssetAction->setToolTip(createAssetAction->statusTip());
+    createAssetAction->setCheckable(true);
+    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    createAssetAction->setFont(font);
+    tabGroup->addAction(createAssetAction);
+
+    manageAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/editpaste"), tr("&Manage Assets"), this);
+    manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
+    manageAssetAction->setToolTip(manageAssetAction->statusTip());
+    manageAssetAction->setCheckable(true);
+    manageAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    manageAssetAction->setFont(font);
+    tabGroup->addAction(manageAssetAction);
+
+    messagingAction = new QAction(platformStyle->SingleColorIcon(":/icons/editcopy"), tr("&Messaging"), this);
+    messagingAction->setStatusTip(tr("Coming Soon"));
+    messagingAction->setToolTip(messagingAction->statusTip());
+    messagingAction->setCheckable(true);
+    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+    messagingAction->setFont(font);
+    tabGroup->addAction(messagingAction);
+
+    votingAction = new QAction(platformStyle->SingleColorIcon(":/icons/edit"), tr("&Voting"), this);
+    votingAction->setStatusTip(tr("Coming Soon"));
+    votingAction->setToolTip(votingAction->statusTip());
+    votingAction->setCheckable(true);
+    votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    votingAction->setFont(font);
+    tabGroup->addAction(votingAction);
+
     /** RVN END */
 
 #ifdef ENABLE_WALLET
@@ -348,8 +419,14 @@ void RavenGUI::createActions()
     connect(receiveCoinsMenuAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
-    connect(assetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(assetAction, SIGNAL(triggered()), this, SLOT(gotoAssetsPage()));
+    connect(transferAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(transferAssetAction, SIGNAL(triggered()), this, SLOT(gotoAssetsPage()));
+    connect(createAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(createAssetAction, SIGNAL(triggered()), this, SLOT(gotoCreateAssetsPage()));
+    connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(gotoManageAssetsPage()));
+    // TODO add messaging actions to go to messaging page when clicked
+    // TODO add voting actions to go to voting page when clicked
 #endif // ENABLE_WALLET
 
     quitAction = new QAction(platformStyle->TextColorIcon(":/icons/quit"), tr("E&xit"), this);
@@ -442,7 +519,6 @@ void RavenGUI::createMenuBar()
     if(walletFrame)
     {
         file->addAction(openAction);
-        file->addAction(backupWalletAction);
         file->addAction(signMessageAction);
         file->addAction(verifyMessageAction);
         file->addSeparator();
@@ -452,10 +528,11 @@ void RavenGUI::createMenuBar()
     }
     file->addAction(quitAction);
 
-    QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
+    QMenu *settings = appMenuBar->addMenu(tr("&Wallet"));
     if(walletFrame)
     {
         settings->addAction(encryptWalletAction);
+        settings->addAction(backupWalletAction);
         settings->addAction(changePassphraseAction);
         settings->addSeparator();
     }
@@ -476,7 +553,22 @@ void RavenGUI::createToolBars()
 {
     if(walletFrame)
     {
-        QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
+        /** RVN START */
+        // Create the orange background and the vertical tool bar
+        QWidget* toolbarWidget = new QWidget();
+
+        QString widgetStyleSheet = "QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
+
+        toolbarWidget->setStyleSheet(widgetStyleSheet.arg(COLOR_LIGHT_BLUE.name(), COLOR_DARK_BLUE.name()));
+
+        QLabel* label = new QLabel();
+        label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
+        label->setContentsMargins(0,0,0,50);
+        label->setStyleSheet("QLabel{background-color: transparent;}");
+        /** RVN END */
+
+        QToolBar *toolbar = new QToolBar();
+        toolbar->setMinimumWidth(label->width());
         toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
         toolbar->setMovable(false);
         toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -484,11 +576,163 @@ void RavenGUI::createToolBars()
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
         toolbar->addAction(historyAction);
+        toolbar->addAction(createAssetAction);
+        toolbar->addAction(transferAssetAction);
+        toolbar->addAction(manageAssetAction);
+        toolbar->addAction(messagingAction);
+        toolbar->addAction(votingAction);
 
         /** RVN START */
-        toolbar->addAction(assetAction);
-        /** RVN END */
+        QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
+                             ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: white} "
+                             ".QToolTip {background-color: white; border: none; }"
+                             ".QToolButton:checked {background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %1, stop: 1 %2); border: none;}";
+
+        toolbar->setStyleSheet(tbStyleSheet.arg(COLOR_DARK_ORANGE.name(), COLOR_LIGHT_ORANGE.name()));
+
+        toolbar->setOrientation(Qt::Vertical);
+        toolbar->setIconSize(QSize(40, 40));
+
+        QLayout* lay = toolbar->layout();
+        for(int i = 0; i < lay->count(); ++i)
+            lay->itemAt(i)->setAlignment(Qt::AlignLeft);
+
         overviewAction->setChecked(true);
+
+        QVBoxLayout* ravenLabelLayout = new QVBoxLayout(toolbarWidget);
+        ravenLabelLayout->addWidget(label);
+        ravenLabelLayout->addWidget(toolbar);
+        ravenLabelLayout->setDirection(QBoxLayout::TopToBottom);
+        ravenLabelLayout->addStretch(1);
+
+        /** Create the shadow effects on the top header */
+        QGraphicsDropShadowEffect *topHeaderShadow = new QGraphicsDropShadowEffect;
+        topHeaderShadow->setBlurRadius(8.0);
+        topHeaderShadow->setColor(COLOR_SHADOW);
+        topHeaderShadow->setOffset(4.0);
+
+        QWidget* mainWalletWidget = new QWidget();
+        mainWalletWidget->setStyleSheet(".QWidget{background-color: #fbfbfe}");
+
+        /** Create the shadow effects for the main wallet frame. Make it so it puts a shawdow on the tool bar */
+        QGraphicsDropShadowEffect *walletFrameShadow = new QGraphicsDropShadowEffect;
+        walletFrameShadow->setBlurRadius(8.0);
+        walletFrameShadow->setColor(COLOR_SHADOW);
+        walletFrameShadow->setXOffset(-9.0);
+        walletFrameShadow->setYOffset(0);
+        mainWalletWidget->setGraphicsEffect(walletFrameShadow);
+
+        // Set the headers widget options
+        headerWidget->setContentsMargins(0,0,0,50);
+        headerWidget->setStyleSheet(".QWidget{background-color: white;}");
+        headerWidget->setGraphicsEffect(topHeaderShadow);
+        headerWidget->setFixedHeight(75);
+
+        QFont currentMarketFont;
+        currentMarketFont.setFamily("Arial");
+        currentMarketFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+        currentMarketFont.setPixelSize(18);
+
+        // Set the pricing information
+        QHBoxLayout* priceLayout = new QHBoxLayout(headerWidget);
+        priceLayout->setContentsMargins(QMargins());
+        priceLayout->setDirection(QBoxLayout::LeftToRight);
+        priceLayout->setAlignment(Qt::AlignVCenter);
+        labelCurrentMarket->setContentsMargins(50,0,0,0);
+        labelCurrentMarket->setFixedHeight(75);
+        labelCurrentMarket->setAlignment(Qt::AlignVCenter);
+        labelCurrentMarket->setStyleSheet(COLOR_LABEL_STRING);
+        labelCurrentMarket->setFont(currentMarketFont);
+        labelCurrentMarket->setText(tr("Market Price"));
+
+        QString currentPriceStyleSheet = ".QLabel{color: %1;} QToolTip {color: black; background-color: white; border: none; }";
+        labelCurrentPrice->setContentsMargins(25,0,0,0);
+        labelCurrentPrice->setFixedHeight(75);
+        labelCurrentPrice->setAlignment(Qt::AlignVCenter);
+        labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("#4960ad"));
+        labelCurrentPrice->setFont(currentMarketFont);
+
+        QLabel* labelBtcRvn = new QLabel();
+        labelBtcRvn->setText("BTC / RVN");
+        labelBtcRvn->setContentsMargins(15,0,0,0);
+        labelBtcRvn->setFixedHeight(75);
+        labelBtcRvn->setAlignment(Qt::AlignVCenter);
+        labelBtcRvn->setStyleSheet(COLOR_LABEL_STRING);
+        labelBtcRvn->setFont(currentMarketFont);
+
+        priceLayout->setGeometry(headerWidget->rect());
+        priceLayout->addWidget(labelCurrentMarket, 0, Qt::AlignVCenter | Qt::AlignLeft);
+        priceLayout->addWidget(labelCurrentPrice, 0,  Qt::AlignVCenter | Qt::AlignLeft);
+        priceLayout->addWidget(labelBtcRvn, 0 , Qt::AlignVCenter | Qt::AlignLeft);
+        priceLayout->addStretch();
+
+        // Create the layout for widget to the right of the tool bar
+        QVBoxLayout* mainFrameLayout = new QVBoxLayout(mainWalletWidget);
+        mainFrameLayout->addWidget(headerWidget);
+        mainFrameLayout->addWidget(walletFrame);
+        mainFrameLayout->setDirection(QBoxLayout::TopToBottom);
+        mainFrameLayout->setContentsMargins(QMargins());
+
+        QVBoxLayout* layout = new QVBoxLayout();
+        layout->addWidget(toolbarWidget);
+        layout->addWidget(mainWalletWidget);
+        layout->setSpacing(0);
+        layout->setContentsMargins(QMargins());
+        layout->setDirection(QBoxLayout::LeftToRight);
+        QWidget* containerWidget = new QWidget();
+        containerWidget->setLayout(layout);
+        setCentralWidget(containerWidget);
+
+        // Network request code for the header widget
+        QObject::connect(networkManager, &QNetworkAccessManager::finished,
+                         this, [=](QNetworkReply *reply) {
+                    if (reply->error()) {
+                        labelCurrentPrice->setText("");
+                        qDebug() << reply->errorString();
+                        return;
+                    }
+                    // Get the data from the network request
+                    QString answer = reply->readAll();
+
+                    // Create regex expression to find the value with 8 decimals
+                    QRegExp rx("\\d*.\\d\\d\\d\\d\\d\\d\\d\\d");
+                    rx.indexIn(answer);
+
+                    // List the found values
+                    QStringList list = rx.capturedTexts();
+
+                    QString currentPriceStyleSheet = ".QLabel{color: %1;} QToolTip {color: black; background-color: white; border: none; }";
+                    // Evaluate the current and next numbers and assign a color (green for positive, red for negative)
+                    bool ok;
+                    if (!list.isEmpty()) {
+                        double next = list.first().toDouble(&ok);
+                        if (!ok) {
+                            labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("#4960ad"));
+                            labelCurrentPrice->setText("");
+                        } else {
+                            double current = labelCurrentPrice->text().toDouble(&ok);
+                            if (!ok) {
+                                current = 0.00000000;
+                            } else {
+                                if (next < current)
+                                    labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("red"));
+                                else if (next > current)
+                                    labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("green"));
+                                else
+                                    labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("#4960ad"));
+                            }
+                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', 8)));
+                            labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));
+                        }
+                    }
+                }
+        );
+
+        // Create the timer
+        connect(pricingTimer, SIGNAL(timeout()), this, SLOT(getPriceInfo()));
+        pricingTimer->start(10000);
+        getPriceInfo();
+        /** RVN END */
     }
 }
 
@@ -597,7 +841,10 @@ void RavenGUI::setWalletActionsEnabled(bool enabled)
     openAction->setEnabled(enabled);
 
     /** RVN START */
-    assetAction->setEnabled(false);
+    transferAssetAction->setEnabled(false);
+    createAssetAction->setEnabled(false);
+    messagingAction->setEnabled(false);
+    votingAction->setEnabled(false);
     /** RVN END */
 }
 
@@ -746,8 +993,20 @@ void RavenGUI::gotoVerifyMessageTab(QString addr)
 /** RVN START */
 void RavenGUI::gotoAssetsPage()
 {
-    assetAction->setChecked(true);
+    transferAssetAction->setChecked(true);
     if (walletFrame) walletFrame->gotoAssetsPage();
+};
+
+void RavenGUI::gotoCreateAssetsPage()
+{
+    createAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoCreateAssetsPage();
+};
+
+void RavenGUI::gotoManageAssetsPage()
+{
+    manageAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoManageAssetsPage();
 };
 /** RVN END */
 #endif // ENABLE_WALLET
@@ -1050,12 +1309,16 @@ void RavenGUI::checkAssets()
 {
     // Check that status of RIP2 and activate the assets icon if it is active
     if(AreAssetsDeployed()) {
-        assetAction->setDisabled(false);
-        assetAction->setToolTip(tr("Manage Assets"));
+        transferAssetAction->setDisabled(false);
+        transferAssetAction->setToolTip(tr("Transfer assets to RVN addresses"));
+        createAssetAction->setDisabled(false);
+        createAssetAction->setToolTip(tr("Create new main/sub/unique assets"));
         }
     else {
-        assetAction->setDisabled(true);
-        assetAction->setToolTip(tr("Assets not yet active"));
+        transferAssetAction->setDisabled(true);
+        transferAssetAction->setToolTip(tr("Assets not yet active"));
+        createAssetAction->setDisabled(true);
+        createAssetAction->setToolTip(tr("Assets not yet active"));
         }
 
 }
@@ -1331,4 +1594,10 @@ void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
     {
         optionsModel->setDisplayUnit(action->data());
     }
+}
+
+void RavenGUI::getPriceInfo()
+{
+    request->setUrl(QUrl("https://api.binance.com/api/v1/ticker/price?symbol=RVNBTC"));
+    networkManager->get(*request);
 }

@@ -29,7 +29,7 @@ class ReissueAssetDialog : public QDialog
 Q_OBJECT
 
 public:
-    explicit ReissueAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0, WalletModel *model = NULL, ClientModel *client = NULL);
+    explicit ReissueAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
     ~ReissueAssetDialog();
 
     void setClientModel(ClientModel *clientModel);
@@ -37,6 +37,13 @@ public:
 
     QString formatGreen;
     QString formatBlack;
+
+    void setupCoinControlFrame();
+    void setupAssetDataView();
+    void setupFeeControl();
+    void updateAssetsList();
+
+    void clear();
 
 private:
     Ui::ReissueAssetDialog *ui;
@@ -72,7 +79,6 @@ private:
     bool checkIPFSHash(QString hash);
 
 private Q_SLOTS:
-    void onCloseClicked();
     void onAssetSelected(int index);
     void onQuantityChanged(double qty);
     void onIPFSStateChanged();
@@ -81,6 +87,7 @@ private Q_SLOTS:
     void onReissueAssetClicked();
     void onReissueBoxChanged();
     void onUnitChanged(int value);
+    void onClearButtonClicked();
 
     //CoinControl
     void coinControlFeatureChanged(bool);
@@ -103,6 +110,7 @@ private Q_SLOTS:
     void updateFeeSectionControls();
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
+    void feeControlFeatureChanged(bool);
 
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);

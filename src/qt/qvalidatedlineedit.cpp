@@ -25,7 +25,7 @@ void QValidatedLineEdit::setValid(bool _valid)
 
     if(_valid)
     {
-        setStyleSheet("");
+        setStyleSheet(STYLE_VALID);
     }
     else
     {

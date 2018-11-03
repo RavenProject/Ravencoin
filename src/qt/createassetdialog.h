@@ -28,7 +28,7 @@ class CreateAssetDialog : public QDialog
 Q_OBJECT
 
 public:
-    explicit CreateAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0, WalletModel *model = NULL, ClientModel *client = NULL);
+    explicit CreateAssetDialog(const PlatformStyle *platformStyle, QWidget *parent = 0);
     ~CreateAssetDialog();
 
     void setClientModel(ClientModel *clientModel);
@@ -36,6 +36,15 @@ public:
 
     int type;
     QString format;
+
+
+    void setupCoinControlFrame();
+    void setupAssetDataView();
+    void setupFeeControl();
+
+    void updateAssetList();
+
+    void clear();
 
 private:
     Ui::CreateAssetDialog *ui;
@@ -79,12 +88,12 @@ private Q_SLOTS:
     void onNameChanged(QString name);
     void onAddressNameChanged(QString address);
     void onIPFSHashChanged(QString hash);
-    void onCloseClicked();
     void onCreateAssetClicked();
     void onUnitChanged(int value);
     void onChangeAddressChanged(QString changeAddress);
     void onAssetTypeActivated(int index);
     void onAssetListActivated(int index);
+    void onClearButtonClicked();
 
     //CoinControl
     void coinControlFeatureChanged(bool);
@@ -107,6 +116,7 @@ private Q_SLOTS:
     void updateFeeSectionControls();
     void updateMinFeeLabel();
     void updateSmartFeeLabel();
+    void feeControlFeatureChanged(bool);
 
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);

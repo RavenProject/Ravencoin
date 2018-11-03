@@ -44,6 +44,8 @@ public:
     ~ReceiveCoinsDialog();
 
     void setModel(WalletModel *model);
+    void setupRequestFrame();
+    void setupHistoryFrame();
 
 public Q_SLOTS:
     void clear();

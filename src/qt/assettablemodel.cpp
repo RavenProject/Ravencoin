@@ -139,6 +139,31 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
         return QVariant();
     AssetRecord *rec = static_cast<AssetRecord*>(index.internalPointer());
 
+    switch (role)
+    {
+        case AmountRole:
+            return (unsigned long long) rec->quantity;
+        case AssetNameRole:
+            return QString::fromStdString(rec->name);
+        case FormattedAmountRole:
+            return QString::fromStdString(rec->formattedQuantity());
+        case BackgroundRole:
+        {
+            if (rec->fIsAdministrator)
+                return QPixmap::fromImage(QImage(":/icons/rectangle"));
+            else
+                return QPixmap::fromImage(QImage(":/icons/bluerectangle"));
+        }
+        case AdministratorRole:
+        {
+            return rec->fIsAdministrator;
+        }
+        case Qt::DecorationRole:
+        {
+            QPixmap pixmap = QPixmap::fromImage(QImage(":/icons/asset_administrator"));
+            return rec->fIsAdministrator ? pixmap : QVariant();
+        }
+    }
     switch (index.column())
     {
         case Name:

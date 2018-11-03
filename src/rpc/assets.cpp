@@ -858,9 +858,8 @@ UniValue listassets(const JSONRPCRequest& request)
         throw std::runtime_error(
                 "listassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
                 + AssetActivationWarning() +
-                "\nReturns a list of all asset that are owned by this wallet\n"
+                "\nReturns a list of all assets\n"
                 "\nThis could be a slow/expensive operation as it reads from the database\n"
-                "\nAssets come back in timestamp order (oldest to newest)\n"
 
                 "\nArguments:\n"
                 "1. \"asset\"                    (string, optional, default=\"*\") filters results -- must be an asset name or a partial asset name followed by '*' ('*' matches all trailing characters)\n"
