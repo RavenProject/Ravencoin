@@ -227,7 +227,7 @@ UniValue issue(const JSONRPCRequest& request)
 
 UniValue issueunique(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 2 || request.params.size() > 5)
         throw std::runtime_error(
                 "issueunique \"root_name\" [asset_tags] ( [ipfs_hashes] ) \"( to_address )\" \"( change_address )\"\n"
                 + AssetActivationWarning() +
