@@ -220,7 +220,7 @@ CreateAssetDialog::~CreateAssetDialog()
 /** Helper Methods */
 void CreateAssetDialog::setUpValues()
 {
-    ui->unitBox->setValue(8);
+    ui->unitBox->setValue(0);
     ui->reissuableBox->setCheckState(Qt::CheckState::Checked);
     ui->ipfsText->hide();
     hideMessage();
@@ -1118,7 +1118,7 @@ void CreateAssetDialog::clearSelected()
     ui->unitBox->setDisabled(false);
     ui->quantitySpinBox->setDisabled(false);
     ui->reissuableBox->setChecked(true);
-    ui->unitBox->setValue(8);
+    ui->unitBox->setValue(0);
 }
 
 void CreateAssetDialog::updateAssetList()
