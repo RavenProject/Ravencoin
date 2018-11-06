@@ -52,7 +52,11 @@ CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)
 
 bool IsDust(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)
 {
-    return (txout.nValue < GetDustThreshold(txout, dustRelayFeeIn));
+
+    if (txout.scriptPubKey.IsAssetScript())
+        return false;
+    else
+        return (txout.nValue < GetDustThreshold(txout, dustRelayFeeIn));
 }
 
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType, const bool witnessEnabled)
@@ -73,11 +77,12 @@ bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType, const bool w
     } else if (whichType == TX_NULL_DATA &&
                (!fAcceptDatacarrier || scriptPubKey.size() > nMaxDatacarrierBytes))
           return false;
-
     else if (!witnessEnabled && (whichType == TX_WITNESS_V0_KEYHASH || whichType == TX_WITNESS_V0_SCRIPTHASH))
         return false;
+    else if (whichType == TX_TRANSFER_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_NEW_ASSET)
+        return true;
 
-    return whichType != TX_NONSTANDARD;
+    return whichType != TX_NONSTANDARD ;
 }
 
 bool IsStandardTx(const CTransaction& tx, std::string& reason, const bool witnessEnabled)
