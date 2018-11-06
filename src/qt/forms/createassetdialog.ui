@@ -745,7 +745,7 @@
           <item>
            <widget class="QLabel" name="unitExampleLabel">
             <property name="text">
-             <string>e.g. 1.00000000</string>
+             <string>e.g. 1</string>
             </property>
            </widget>
           </item>
