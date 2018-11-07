@@ -441,9 +441,9 @@ void AssetsDialog::on_sendButton_clicked()
 
     if (sendStatus.status == WalletModel::OK)
     {
-        accept();
         AssetControlDialog::assetControl->UnSelectAll();
         assetControlUpdateLabels();
+        accept();
     }
     fNewRecipientAllowed = true;
 }
