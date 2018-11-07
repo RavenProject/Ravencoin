@@ -137,7 +137,10 @@ void CreateAssetDialog::setModel(WalletModel *_model)
         // Coin Control
         connect(_model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(coinControlUpdateLabels()));
         connect(_model->getOptionsModel(), SIGNAL(coinControlFeaturesChanged(bool)), this, SLOT(coinControlFeatureChanged(bool)));
-        ui->frameCoinControl->setVisible(_model->getOptionsModel()->getCoinControlFeatures());
+        bool fCoinControlEnabled = _model->getOptionsModel()->getCoinControlFeatures();
+        ui->frameCoinControl->setVisible(fCoinControlEnabled);
+        ui->addressText->setVisible(fCoinControlEnabled);
+        ui->addressLabel->setVisible(fCoinControlEnabled);
         coinControlUpdateLabels();
 
         // Custom Fee Control
@@ -811,6 +814,8 @@ void CreateAssetDialog::coinControlClipboardChange()
 void CreateAssetDialog::coinControlFeatureChanged(bool checked)
 {
     ui->frameCoinControl->setVisible(checked);
+    ui->addressText->setVisible(checked);
+    ui->addressLabel->setVisible(checked);
 
     if (!checked && model) // coin control features disabled
         CoinControlDialog::coinControl->SetNull();
