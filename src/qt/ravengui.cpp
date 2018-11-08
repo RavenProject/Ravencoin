@@ -648,7 +648,7 @@ void RavenGUI::createToolBars()
         labelCurrentMarket->setFont(currentMarketFont);
         labelCurrentMarket->setText(tr("Market Price"));
 
-        QString currentPriceStyleSheet = ".QLabel{color: %1;} QToolTip {color: black; background-color: white; border: none; }";
+        QString currentPriceStyleSheet = ".QLabel{color: %1;}";
         labelCurrentPrice->setContentsMargins(25,0,0,0);
         labelCurrentPrice->setFixedHeight(75);
         labelCurrentPrice->setAlignment(Qt::AlignVCenter);
@@ -704,7 +704,7 @@ void RavenGUI::createToolBars()
                     // List the found values
                     QStringList list = rx.capturedTexts();
 
-                    QString currentPriceStyleSheet = ".QLabel{color: %1;} QToolTip {color: black; background-color: white; border: none; }";
+                    QString currentPriceStyleSheet = ".QLabel{color: %1;}";
                     // Evaluate the current and next numbers and assign a color (green for positive, red for negative)
                     bool ok;
                     if (!list.isEmpty()) {
@@ -1542,7 +1542,7 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    setStyleSheet(QString("QLabel { color : %1; } QToolTip { background-color: white; }").arg(platformStyle->DarkOrangeColor().name()));
+    setStyleSheet(QString("QLabel { color : %1; }").arg(platformStyle->DarkOrangeColor().name()));
 }
 
 /** So that it responds to button clicks */
