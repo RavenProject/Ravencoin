@@ -129,7 +129,8 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->assetList->setCompleter(completer);
 
-    adjustSize();
+    ui->nameText->installEventFilter(this);
+    ui->assetList->installEventFilter(this);
 }
 
 void CreateAssetDialog::setClientModel(ClientModel *_clientModel)
@@ -217,6 +218,25 @@ CreateAssetDialog::~CreateAssetDialog()
     delete ui;
 }
 
+bool CreateAssetDialog::eventFilter(QObject *sender, QEvent *event)
+{
+    if (sender == ui->nameText)
+    {
+        if(event->type()== QEvent::FocusIn)
+        {
+            ui->nameText->setStyleSheet("");
+        }
+    }
+    else if (sender == ui->assetList)
+    {
+        if(event->type()== QEvent::FocusIn)
+        {
+            ui->assetList->lineEdit()->setStyleSheet("");
+        }
+    }
+    return QWidget::eventFilter(sender,event);
+}
+
 /** Helper Methods */
 void CreateAssetDialog::setUpValues()
 {
@@ -285,7 +305,7 @@ void CreateAssetDialog::setupCoinControlFrame(const PlatformStyle *platformStyle
     ui->labelCoinControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
 
     // Align the Custom change address checkbox
-    ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxCoinControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -311,9 +331,8 @@ void CreateAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
     ui->unitsLabel->setStyleSheet(COLOR_LABEL_STRING);
     ui->unitsLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->reissuableBox->setStyleSheet(COLOR_LABEL_STRING);
-
-    ui->ipfsBox->setStyleSheet(COLOR_LABEL_STRING);
+    ui->reissuableBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+    ui->ipfsBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -329,10 +348,10 @@ void CreateAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
 
     ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCustomPerKilobyte->setStyleSheet(QString(".QLabel{ %1; }").arg(COLOR_LABEL_STRING));
     ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
-    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -447,15 +466,24 @@ void CreateAssetDialog::CheckFormState()
     std::string error;
     bool assetNameValid = IsTypeCheckNameValid(AssetTypeFromInt(type), name.toStdString(), error);
 
+    if (type != IntFromAssetType(AssetType::ROOT)) {
+        if (ui->assetList->currentText() == "")
+        {
+            ui->assetList->lineEdit()->setStyleSheet(STYLE_INVALID);
+            ui->availabilityButton->setDisabled(true);
+            return;
+        }
+    }
+
     if (!assetNameValid && name.size() != 0) {
-        ui->nameText->setStyleSheet("border: 1px solid red");
-        showMessage(tr(error.c_str()));
+        ui->nameText->setStyleSheet(STYLE_INVALID);
+        showMessage(error.c_str());
         ui->availabilityButton->setDisabled(true);
         return;
     }
 
-    if (!(IsValidDestination(dest) || ui->addressText->text().isEmpty()) && assetNameValid) {
-        ui->addressText->setStyleSheet("border: 1px solid red");
+    if (!(ui->addressText->text().isEmpty() || IsValidDestination(dest)) && assetNameValid) {
+        ui->addressText->setStyleSheet(STYLE_INVALID);
         showMessage(tr("Warning: Invalid Raven address"));
         return;
     }
@@ -488,14 +516,14 @@ void CreateAssetDialog::checkAvailabilityClicked()
     if (passets) {
         CNewAsset asset;
         if (passets->GetAssetMetaDataIfExists(name.toStdString(), asset)) {
-            ui->nameText->setStyleSheet("border: 1px solid red");
+            ui->nameText->setStyleSheet(STYLE_INVALID);
             showMessage(tr("Invalid: Asset name already in use"));
             disableCreateButton();
             checkedAvailablity = false;
             return;
         } else {
             checkedAvailablity = true;
-            ui->nameText->setStyleSheet("border: 1px solid green");
+            ui->nameText->setStyleSheet(STYLE_VALID);
         }
     } else {
         checkedAvailablity = false;
@@ -532,13 +560,20 @@ void CreateAssetDialog::onNameChanged(QString name)
             hideMessage();
             ui->availabilityButton->setDisabled(false);
         } else {
-            ui->nameText->setStyleSheet("border: 1px solid red");
+            ui->nameText->setStyleSheet(STYLE_INVALID);
             showMessage(tr(error.c_str()));
             ui->availabilityButton->setDisabled(true);
         }
     } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE)) {
         if (name.size() == 0) {
             hideMessage();
+            ui->availabilityButton->setDisabled(true);
+        }
+
+        // If an asset isn't selected. Mark the lineedit with invalid style sheet
+        if (ui->assetList->currentText() == "")
+        {
+            ui->assetList->lineEdit()->setStyleSheet(STYLE_INVALID);
             ui->availabilityButton->setDisabled(true);
             return;
         }
@@ -550,7 +585,7 @@ void CreateAssetDialog::onNameChanged(QString name)
             hideMessage();
             ui->availabilityButton->setDisabled(false);
         } else {
-            ui->nameText->setStyleSheet("border: 1px solid red");
+            ui->nameText->setStyleSheet(STYLE_INVALID);
             showMessage(tr(error.c_str()));
             ui->availabilityButton->setDisabled(true);
         }
@@ -576,14 +611,14 @@ void CreateAssetDialog::onIPFSHashChanged(QString hash)
 
 void CreateAssetDialog::onCreateAssetClicked()
 {
-    QString address;
-    if (ui->addressText->text().isEmpty()) {
-        address = model->getAddressTableModel()->addRow(AddressTableModel::Receive, "", "");
-    } else {
-        address = ui->addressText->text();
+    WalletModel::UnlockContext ctx(model->requestUnlock());
+    if(!ctx.isValid())
+    {
+        // Unlock wallet was cancelled
+        return;
     }
-    QString name = GetAssetName();
 
+    QString name = GetAssetName();
     CAmount quantity = ui->quantitySpinBox->value() * COIN;
     int units = ui->unitBox->value();
     bool reissuable = ui->reissuableBox->isChecked();
@@ -606,6 +641,13 @@ void CreateAssetDialog::onCreateAssetClicked()
         ctrl = *CoinControlDialog::coinControl;
 
     updateCoinControlState(ctrl);
+
+    QString address;
+    if (ui->addressText->text().isEmpty()) {
+        address = model->getAddressTableModel()->addRow(AddressTableModel::Receive, "", "");
+    } else {
+        address = ui->addressText->text();
+    }
 
     // Create the transaction
     if (!CreateAssetTransaction(model->getWallet(), ctrl, asset, address.toStdString(), error, tx, reservekey, nFeeRequired)) {
@@ -732,6 +774,9 @@ void CreateAssetDialog::onChangeAddressChanged(QString changeAddress)
 
 void CreateAssetDialog::onAssetTypeActivated(int index)
 {
+    disableCreateButton();
+    checkedAvailablity = false;
+
     // Update the selected type
     type = index;
 

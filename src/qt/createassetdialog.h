@@ -130,6 +130,9 @@ private Q_SLOTS:
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     void updateDisplayUnit();
 
+protected:
+    bool eventFilter( QObject* sender, QEvent* event);
+
 
 Q_SIGNALS:
     // Fired when a message should be reported to the user

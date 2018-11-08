@@ -267,7 +267,7 @@ void AssetsDialog::setupAssetControlFrame(const PlatformStyle *platformStyle)
     ui->labelAssetControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
 
     // Align the Custom change address checkbox
-    ui->checkBoxAssetControlChange->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxAssetControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -294,10 +294,10 @@ void AssetsDialog::setupFeeControl(const PlatformStyle *platformStyle)
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
 
     ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCustomPerKilobyte->setStyleSheet(QString(".QLabel{ %1; }").arg(COLOR_LABEL_STRING));
     ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
-    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 

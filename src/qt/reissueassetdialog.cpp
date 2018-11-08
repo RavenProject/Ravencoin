@@ -290,7 +290,7 @@ void ReissueAssetDialog::setupCoinControlFrame(const PlatformStyle *platformStyl
     ui->labelCoinControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
 
     // Align the Custom change address checkbox
-    ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxCoinControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -312,9 +312,9 @@ void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
     ui->unitLabel->setStyleSheet(COLOR_LABEL_STRING);
     ui->unitLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->reissuableBox->setStyleSheet(COLOR_LABEL_STRING);
+    ui->reissuableBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
-    ui->ipfsBox->setStyleSheet(COLOR_LABEL_STRING);
+    ui->ipfsBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
     ui->frame_3->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame_3->setGraphicsEffect(GUIUtil::getShadowEffect());
@@ -342,10 +342,10 @@ void ReissueAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
 
     ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCustomPerKilobyte->setStyleSheet(QString(".QLabel{ %1; }").arg(COLOR_LABEL_STRING));
     ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
-    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -662,8 +662,16 @@ void ReissueAssetDialog::onAddressNameChanged(QString address)
 
 void ReissueAssetDialog::onReissueAssetClicked()
 {
-    if (!model || !asset)
+    if (!model || !asset) {
         return;
+    }
+
+    WalletModel::UnlockContext ctx(model->requestUnlock());
+    if(!ctx.isValid())
+    {
+        // Unlock wallet was cancelled
+        return;
+    }
 
     QString address;
     if (ui->addressText->text().isEmpty()) {
@@ -691,8 +699,6 @@ void ReissueAssetDialog::onReissueAssetClicked()
     std::string ipfsDecoded = "";
     if (hasIPFS)
         ipfsDecoded = DecodeIPFS(ui->ipfsText->text().toStdString());
-
-    // TODO Get the units and replace -1 with it
 
     CReissueAsset reissueAsset(name.toStdString(), quantity, unit, reissuable ? 1 : 0, ipfsDecoded);
 
