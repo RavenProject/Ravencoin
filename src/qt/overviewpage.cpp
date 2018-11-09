@@ -71,6 +71,15 @@ public:
             foreground = brush.color();
         }
 
+        QString amountText = index.data(TransactionTableModel::FormattedAmountRole).toString();
+        if(!confirmed)
+        {
+            amountText = QString("[") + amountText + QString("]");
+        }
+
+        // Concatenate the strings if needed before painting
+        GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
+
         painter->setPen(foreground);
         QRect boundingRect;
         painter->drawText(addressRect, Qt::AlignLeft|Qt::AlignVCenter, address, &boundingRect);
@@ -94,15 +103,15 @@ public:
         {
             foreground = platformStyle->TextColor();
         }
+
         painter->setPen(foreground);
-        QString amountText = index.data(TransactionTableModel::FormattedAmountRole).toString();
-        if(!confirmed)
-        {
-            amountText = QString("[") + amountText + QString("]");
-        }
         painter->drawText(addressRect, Qt::AlignRight|Qt::AlignVCenter, amountText);
 
         QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
+
+        // Concatenate the strings if needed before painting
+        GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+
         painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
 
         painter->setPen(platformStyle->TextColor());
@@ -211,44 +220,17 @@ public:
         QPen penAssetName(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
 
         /** Start Concatenation of Asset Name */
-        // Get the starting sections of the rectangles
-        int name_left = assetNameRect.left(); // Get the left pixel of the name rectangle
-        int amount_right = amountRect.right();// Get the right pixel of the amount rectangle
-
-        // Get the width in pixels that the amount takes up
+        // Get the width in pixels that the amount takes up (because they are different font,
+        // we need to do this before we call the concatenate function
         painter->setFont(amountFont);
         painter->setPen(penAmount);
         int amount_width = painter->fontMetrics().width(amountText);
 
-        // Set the painter up for painting the asset name
+        // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
         painter->setFont(nameFont);
         painter->setPen(penAssetName);
 
-        // Starting length of the name
-        int start_name_length = name.size();
-
-        // Get the length of the dots
-        int dots_width = painter->fontMetrics().width("...");
-
-        // Add the dots width to the amount width
-        amount_width += dots_width;
-
-        // Start concatenation loop, end loop if name is at three characters
-        while (name.size() > 3) {
-            // Get the text width of the current name
-            int text_width = painter->fontMetrics().width(name);
-
-            // Check to see if the text width is going to overlap the amount width if it doesn't break the loop
-            if (name_left + text_width < amount_right - amount_width)
-                break;
-
-            // substring the name minus the last character of it and continue the loop
-            name = name.left(name.size() - 1);
-        }
-
-        // Add the ... if the name was concatenated
-        if (name.size() != start_name_length)
-            name.append("...");
+        GUIUtil::concatenate(painter, name, amount_width, assetNameRect.left(), amountRect.right());
 
         /** Paint the asset name */
         painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name);
