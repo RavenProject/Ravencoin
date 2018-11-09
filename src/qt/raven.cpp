@@ -394,7 +394,7 @@ void RavenApplication::createOptionsModel(bool resetSettings)
 void RavenApplication::createWindow(const NetworkStyle *networkStyle)
 {
     window = new RavenGUI(platformStyle, networkStyle, 0);
-    window->setMinimumSize(100,100); // Allow the GUI to be resized to as small as the user would like
+    window->setMinimumSize(800,600); // Allow the GUI to be resized to as small as the user would like
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window, SLOT(detectShutdown()));

@@ -206,15 +206,54 @@ public:
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
         QString amountText = index.data(AssetTableModel::FormattedAmountRole).toString();
 
-        /** Paint the asset name */
-        QRect boundingRect;
+        // Setup the pens
+        QPen penAmount(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
         QPen penAssetName(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
-        painter->setPen(penAssetName);
+
+        /** Start Concatenation of Asset Name */
+        // Get the starting sections of the rectangles
+        int name_left = assetNameRect.left(); // Get the left pixel of the name rectangle
+        int amount_right = amountRect.right();// Get the right pixel of the amount rectangle
+
+        // Get the width in pixels that the amount takes up
+        painter->setFont(amountFont);
+        painter->setPen(penAmount);
+        int amount_width = painter->fontMetrics().width(amountText);
+
+        // Set the painter up for painting the asset name
         painter->setFont(nameFont);
-        painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name, &boundingRect);
+        painter->setPen(penAssetName);
+
+        // Starting length of the name
+        int start_name_length = name.size();
+
+        // Get the length of the dots
+        int dots_width = painter->fontMetrics().width("...");
+
+        // Add the dots width to the amount width
+        amount_width += dots_width;
+
+        // Start concatenation loop, end loop if name is at three characters
+        while (name.size() > 3) {
+            // Get the text width of the current name
+            int text_width = painter->fontMetrics().width(name);
+
+            // Check to see if the text width is going to overlap the amount width if it doesn't break the loop
+            if (name_left + text_width < amount_right - amount_width)
+                break;
+
+            // substring the name minus the last character of it and continue the loop
+            name = name.left(name.size() - 1);
+        }
+
+        // Add the ... if the name was concatenated
+        if (name.size() != start_name_length)
+            name.append("...");
+
+        /** Paint the asset name */
+        painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name);
 
         /** Paint the amount */
-        QPen penAmount(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
         painter->setPen(penAmount);
         painter->setFont(amountFont);
         painter->setOpacity(0.65);
