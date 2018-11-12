@@ -41,6 +41,7 @@
 #include <stdint.h>
 
 #include <boost/thread.hpp>
+#include "darkstyle.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -52,6 +53,7 @@
 #include <QTimer>
 #include <QTranslator>
 #include <QSslConfiguration>
+#include <QDir>
 
 #if defined(QT_STATICPLUGIN)
 #include <QtPlugin>
@@ -233,6 +235,8 @@ public:
     /// Get window identifier of QMainWindow (RavenGUI)
     WId getMainWinId() const;
 
+    OptionsModel* getOptionsModel() const { return optionsModel; }
+
 public Q_SLOTS:
     void initializeResult(bool success);
     void shutdownResult();
@@ -390,6 +394,7 @@ void RavenApplication::createOptionsModel(bool resetSettings)
 void RavenApplication::createWindow(const NetworkStyle *networkStyle)
 {
     window = new RavenGUI(platformStyle, networkStyle, 0);
+    window->setMinimumSize(900,600); // Allow the GUI to be resized to as small as the user would like
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window, SLOT(detectShutdown()));
@@ -694,6 +699,11 @@ int main(int argc, char *argv[])
     // Load GUI settings from QSettings
     app.createOptionsModel(gArgs.IsArgSet("-resetguisettings"));
 
+    if (app.getOptionsModel()->getDarkModeEnabled()) {
+        app.setStyle(new DarkStyle);
+        darkModeEnabled = true;
+
+    }
     // Subscribe to global signals from core
     uiInterface.InitMessage.connect(InitMessage);
 

@@ -14,6 +14,9 @@ class PlatformStyle;
 class WalletModel;
 class ClientModel;
 class CNewAsset;
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 
 namespace Ui {
     class ReissueAssetDialog;
@@ -38,12 +41,16 @@ public:
     QString formatGreen;
     QString formatBlack;
 
-    void setupCoinControlFrame();
-    void setupAssetDataView();
-    void setupFeeControl();
+    void setupCoinControlFrame(const PlatformStyle *platformStyle);
+    void setupAssetDataView(const PlatformStyle *platformStyle);
+    void setupFeeControl(const PlatformStyle *platformStyle);
     void updateAssetsList();
 
     void clear();
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 private:
     Ui::ReissueAssetDialog *ui;
@@ -115,6 +122,10 @@ private Q_SLOTS:
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     void updateDisplayUnit();
+
+Q_SIGNALS:
+    // Fired when a message should be reported to the user
+    void message(const QString &title, const QString &message, unsigned int style);
 };
 
 #endif // RAVEN_QT_REISSUEASSETDIALOG_H

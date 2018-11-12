@@ -112,9 +112,9 @@ SendCoinsDialog::SendCoinsDialog(const PlatformStyle *_platformStyle, QWidget *p
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
 
     // Setup the coin control visuals and labels
-    setupCoinControl();
-    setupScrollView();
-    setupFeeControl();
+    setupCoinControl(platformStyle);
+    setupScrollView(platformStyle);
+    setupFeeControl(platformStyle);
 }
 
 void SendCoinsDialog::setClientModel(ClientModel *_clientModel)
@@ -204,10 +204,10 @@ SendCoinsDialog::~SendCoinsDialog()
     delete ui;
 }
 
-void SendCoinsDialog::setupCoinControl()
+void SendCoinsDialog::setupCoinControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frameCoinControl->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameCoinControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->widgetCoinControl->setStyleSheet(".QWidget {background-color: transparent;}");
     /** Create the shadow effects on the frames */
 
@@ -244,21 +244,21 @@ void SendCoinsDialog::setupCoinControl()
     ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
 }
 
-void SendCoinsDialog::setupScrollView()
+void SendCoinsDialog::setupScrollView(const PlatformStyle *platformStyle)
 {
     /** Update the scrollview*/
-    ui->scrollArea->setStyleSheet(".QScrollArea{background-color: white; border: none}");
+    ui->scrollArea->setStyleSheet(QString(".QScrollArea{background-color: %1; border: none}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->scrollArea->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     // Add some spacing so we can see the whole card
     ui->entries->setContentsMargins(10,10,20,0);
-    ui->scrollAreaWidgetContents->setStyleSheet(".QWidget{ background-color: white;}");
+    ui->scrollAreaWidgetContents->setStyleSheet(QString(".QWidget{ background-color: %1;}").arg(platformStyle->WidgetBackGroundColor().name()));
 }
 
-void SendCoinsDialog::setupFeeControl()
+void SendCoinsDialog::setupFeeControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frameFee->setStyleSheet(" .QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     /** Create the shadow effects on the frames */
 
     ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());

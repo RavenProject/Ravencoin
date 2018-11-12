@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -632,6 +632,13 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="darkModeCheckBox">
+         <property name="text">
+          <string>Enable Dark Mode</string>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer_Display">
