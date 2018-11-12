@@ -73,8 +73,6 @@ private:
 
     AssetViewDelegate *assetdelegate;
 
-    AssetViewDelegate *assetdelegate;
-
 private Q_SLOTS:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);

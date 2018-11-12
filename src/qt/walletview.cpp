@@ -402,16 +402,6 @@ void WalletView::gotoManageAssetsPage()
     setCurrentWidget(manageAssetsPage);
 }
 
-void WalletView::gotoCreateAssetsPage()
-{
-    setCurrentWidget(createAssetsPage);
-}
-
-void WalletView::gotoManageAssetsPage()
-{
-    setCurrentWidget(manageAssetsPage);
-}
-
 void WalletView::displayAssetInfo()
 {
     overviewPage->displayAssetInfo();
