@@ -3465,9 +3465,12 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
                 /** RVN END */
 
+                // Add the new asset inputs into the tempSet so the dummysigntx will add the correct amount of sigsß
+                std::set<CInputCoin> tempSet = setCoins;
+                tempSet.insert(setAssets.begin(), setAssets.end());
 
                 // Fill in dummy signatures for fee calculation.
-                if (!DummySignTx(txNew, setCoins)) {
+                if (!DummySignTx(txNew, tempSet)) {
                     strFailReason = _("Signing transaction for fee calculation failed");
                     return false;
                 }
