@@ -13,6 +13,7 @@
 #include "platformstyle.h"
 #include "walletmodel.h"
 #include "guiconstants.h"
+#include "darkstyle.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QApplication>
@@ -52,7 +53,7 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
 
-    this->setStyleSheet(".SendCoinsEntry {background-color: #faf9f6; padding-top: 10px; padding-right: 30px; border: none;}");
+    this->setStyleSheet(QString(".SendCoinsEntry {background-color: %1; padding-top: 10px; padding-right: 30px; border: none;}").arg(platformStyle->SendEntriesBackGroundColor().name()));
 
     this->setGraphicsEffect(GUIUtil::getShadowEffect());
 
@@ -69,7 +70,6 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
 
     ui->checkboxSubtractFeeFromAmount->setStyleSheet(COLOR_LABEL_STRING);
-
 }
 
 SendCoinsEntry::~SendCoinsEntry()

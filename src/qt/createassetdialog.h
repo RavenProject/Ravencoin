@@ -20,6 +20,9 @@ namespace Ui {
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 QT_END_NAMESPACE
 
 /** Dialog showing transaction details. */
@@ -38,13 +41,17 @@ public:
     QString format;
 
 
-    void setupCoinControlFrame();
-    void setupAssetDataView();
-    void setupFeeControl();
+    void setupCoinControlFrame(const PlatformStyle *platformStyle);
+    void setupAssetDataView(const PlatformStyle *platformStyle);
+    void setupFeeControl(const PlatformStyle *platformStyle);
 
     void updateAssetList();
 
     void clear();
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 private:
     Ui::CreateAssetDialog *ui;
@@ -121,6 +128,14 @@ private Q_SLOTS:
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     void updateDisplayUnit();
+
+protected:
+    bool eventFilter( QObject* sender, QEvent* event);
+
+
+Q_SIGNALS:
+    // Fired when a message should be reported to the user
+    void message(const QString &title, const QString &message, unsigned int style);
 };
 
 #endif // RAVEN_QT_CREATEASSETDIALOG_H

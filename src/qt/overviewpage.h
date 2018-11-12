@@ -17,6 +17,9 @@ class TransactionFilterProxy;
 class TxViewDelegate;
 class PlatformStyle;
 class WalletModel;
+class AssetFilterProxy;
+
+class AssetViewDelegate;
 
 class AssetViewDelegate;
 
@@ -66,7 +69,9 @@ private:
 
     TxViewDelegate *txdelegate;
     std::unique_ptr<TransactionFilterProxy> filter;
-    std::unique_ptr<QSortFilterProxyModel> assetFilter;
+    std::unique_ptr<AssetFilterProxy> assetFilter;
+
+    AssetViewDelegate *assetdelegate;
 
     AssetViewDelegate *assetdelegate;
 
@@ -77,6 +82,7 @@ private Q_SLOTS:
     void updateAlerts(const QString &warnings);
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
+    void assetSearchChanged();
 };
 
 #endif // RAVEN_QT_OVERVIEWPAGE_H

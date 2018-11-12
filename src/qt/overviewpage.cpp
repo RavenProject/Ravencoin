@@ -14,6 +14,7 @@
 #include "platformstyle.h"
 #include "transactionfilterproxy.h"
 #include "transactiontablemodel.h"
+#include "assetfilterproxy.h"
 #include "assettablemodel.h"
 #include "walletmodel.h"
 #include "assetrecord.h"
@@ -27,6 +28,7 @@
 #define NUM_ITEMS 5
 
 #include <QDebug>
+#include <QTimer>
 #include <QGraphicsDropShadowEffect>
 #include <QScrollBar>
 
@@ -62,12 +64,21 @@ public:
         qint64 amount = index.data(TransactionTableModel::AmountRole).toLongLong();
         bool confirmed = index.data(TransactionTableModel::ConfirmedRole).toBool();
         QVariant value = index.data(Qt::ForegroundRole);
-        QColor foreground = option.palette.color(QPalette::Text);
+        QColor foreground = platformStyle->TextColor();
         if(value.canConvert<QBrush>())
         {
             QBrush brush = qvariant_cast<QBrush>(value);
             foreground = brush.color();
         }
+
+        QString amountText = index.data(TransactionTableModel::FormattedAmountRole).toString();
+        if(!confirmed)
+        {
+            amountText = QString("[") + amountText + QString("]");
+        }
+
+        // Concatenate the strings if needed before painting
+        GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
 
         painter->setPen(foreground);
         QRect boundingRect;
@@ -90,20 +101,20 @@ public:
         }
         else
         {
-            foreground = option.palette.color(QPalette::Text);
+            foreground = platformStyle->TextColor();
         }
+
         painter->setPen(foreground);
-        QString amountText = index.data(TransactionTableModel::FormattedAmountRole).toString();
-        if(!confirmed)
-        {
-            amountText = QString("[") + amountText + QString("]");
-        }
         painter->drawText(addressRect, Qt::AlignRight|Qt::AlignVCenter, amountText);
 
         QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
+
+        // Concatenate the strings if needed before painting
+        GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+
         painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
 
-        painter->setPen(option.palette.color(QPalette::Text));
+        painter->setPen(platformStyle->TextColor());
         painter->drawText(amountRect, Qt::AlignLeft|Qt::AlignVCenter, GUIUtil::dateTimeStr(date));
 
         painter->restore();
@@ -204,15 +215,27 @@ public:
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
         QString amountText = index.data(AssetTableModel::FormattedAmountRole).toString();
 
-        /** Paint the asset name */
-        QRect boundingRect;
+        // Setup the pens
+        QPen penAmount(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
         QPen penAssetName(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
-        painter->setPen(penAssetName);
+
+        /** Start Concatenation of Asset Name */
+        // Get the width in pixels that the amount takes up (because they are different font,
+        // we need to do this before we call the concatenate function
+        painter->setFont(amountFont);
+        painter->setPen(penAmount);
+        int amount_width = painter->fontMetrics().width(amountText);
+
+        // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
         painter->setFont(nameFont);
-        painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name, &boundingRect);
+        painter->setPen(penAssetName);
+
+        GUIUtil::concatenate(painter, name, amount_width, assetNameRect.left(), amountRect.right());
+
+        /** Paint the asset name */
+        painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name);
 
         /** Paint the amount */
-        QPen penAmount(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
         painter->setPen(penAmount);
         painter->setFont(amountFont);
         painter->setOpacity(0.65);
@@ -269,6 +292,16 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->listAssets->viewport()->setAutoFillBackground(false);
 
 
+    // Delay before filtering assetes in ms
+    static const int input_filter_delay = 200;
+
+    QTimer *asset_typing_delay;
+    asset_typing_delay = new QTimer(this);
+    asset_typing_delay->setSingleShot(true);
+    asset_typing_delay->setInterval(input_filter_delay);
+    connect(ui->assetSearch, SIGNAL(textChanged(QString)), asset_typing_delay, SLOT(start()));
+    connect(asset_typing_delay, SIGNAL(timeout()), this, SLOT(assetSearchChanged()));
+
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
     connect(ui->listAssets, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAssetClicked(QModelIndex)));
 
@@ -279,37 +312,17 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     connect(ui->labelTransactionsStatus, SIGNAL(clicked()), this, SLOT(handleOutOfSyncWarningClicks()));
 
     /** Set the overview page background colors, and the frames colors and padding */
-    ui->assetFrame->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px;}");
-    ui->frame->setStyleSheet(".QFrame {background-color: white; padding-bottom: 10px; padding-right: 5px;}");
-    ui->frame_2->setStyleSheet(".QFrame {background-color: white; padding-left: 5px;}");
+    ui->assetFrame->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
+    ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; padding-bottom: 10px; padding-right: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
+    ui->frame_2->setStyleSheet(QString(".QFrame {background-color: %1; padding-left: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
 
     ui->verticalLayout_2->setSpacing(10);
     ui->verticalLayout_3->setSpacing(10);
 
     /** Create the shadow effects on the frames */
-    QGraphicsDropShadowEffect *bodyShadow = new QGraphicsDropShadowEffect;
-    bodyShadow->setBlurRadius(9.0);
-    bodyShadow->setColor(QColor(0, 0, 0, 46));
-    bodyShadow->setOffset(4.0);
-
-    QGraphicsDropShadowEffect *bodyShadow2 = new QGraphicsDropShadowEffect;
-    bodyShadow2->setBlurRadius(9.0);
-    bodyShadow2->setColor(QColor(0, 0, 0, 46));
-    bodyShadow2->setOffset(4.0);
-
-    QGraphicsDropShadowEffect *bodyShadow3 = new QGraphicsDropShadowEffect;
-    bodyShadow3->setBlurRadius(9.0);
-    bodyShadow3->setColor(QColor(0, 0, 0, 46));
-    bodyShadow3->setOffset(4.0);
-
-    QFont mainLabelFont;
-    mainLabelFont.setFamily("Arial");
-    mainLabelFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
-    mainLabelFont.setPixelSize(18);
-
-    ui->assetFrame->setGraphicsEffect(bodyShadow);
-    ui->frame->setGraphicsEffect(bodyShadow2);
-    ui->frame_2->setGraphicsEffect(bodyShadow3);
+    ui->assetFrame->setGraphicsEffect(GUIUtil::getShadowEffect());
+    ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());
+    ui->frame_2->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     /** Update the labels colors */
     ui->assetBalanceLabel->setStyleSheet(COLOR_LABEL_STRING);
@@ -323,9 +336,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->recentTransactionsLabel->setStyleSheet(COLOR_LABEL_STRING);
 
     /** Update the labels font */
-    ui->rvnBalancesLabel->setFont(mainLabelFont);
-    ui->assetBalanceLabel->setFont(mainLabelFont);
-    ui->recentTransactionsLabel->setFont(mainLabelFont);
+    ui->rvnBalancesLabel->setFont(GUIUtil::getTopLabelFont());
+    ui->assetBalanceLabel->setFont(GUIUtil::getTopLabelFont());
+    ui->recentTransactionsLabel->setFont(GUIUtil::getTopLabelFont());
 
     /** Create the search bar for assets */
     ui->assetSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -358,6 +371,17 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->assetInfoBlockValue->setStyleSheet("background-color: transparent");
     ui->assetInfoPossibleValue->setStyleSheet("background-color: transparent");
     ui->assetInfoBlocksLeftValue->setStyleSheet("background-color: transparent");
+
+    /** Setup the RVN Balance Colors for darkmode */
+    QString labelColor = QString(".QLabel { color: %1 }").arg(platformStyle->TextColor().name());
+    ui->labelBalance->setStyleSheet(labelColor);
+    ui->labelUnconfirmed->setStyleSheet(labelColor);
+    ui->labelImmature->setStyleSheet(labelColor);
+    ui->labelTotal->setStyleSheet(labelColor);
+    ui->labelWatchAvailable->setStyleSheet(labelColor);
+    ui->labelWatchPending->setStyleSheet(labelColor);
+    ui->labelWatchImmature->setStyleSheet(labelColor);
+    ui->labelWatchTotal->setStyleSheet(labelColor);
 
     // Trigger the call to show the assets table if assets are active
     showAssets();
@@ -456,8 +480,9 @@ void OverviewPage::setWalletModel(WalletModel *model)
         ui->listTransactions->setModel(filter.get());
         ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
 
-        assetFilter.reset(new QSortFilterProxyModel());
+        assetFilter.reset(new AssetFilterProxy());
         assetFilter->setSourceModel(model->getAssetTableModel());
+        assetFilter->sort(AssetTableModel::AssetNameRole, Qt::DescendingOrder);
         ui->listAssets->setModel(assetFilter.get());
         ui->listAssets->setAutoFillBackground(false);
 
@@ -648,4 +673,11 @@ void OverviewPage::hideAssetInfo()
     ui->assetInfoPercentageLabel->hide();
     ui->assetInfoPossibleLabel->hide();
     ui->assetInfoBlocksLeftLabel->hide();
+}
+
+void OverviewPage::assetSearchChanged()
+{
+    if (!assetFilter)
+        return;
+    assetFilter->setAssetNamePrefix(ui->assetSearch->text());
 }

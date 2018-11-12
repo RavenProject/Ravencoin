@@ -32,6 +32,10 @@
 #include <QString>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
+#include <QStringListModel>
+#include <QSortFilterProxyModel>
+#include <QCompleter>
+#include <QLineEdit>
 
 QList<CAmount> AssetControlDialog::payAmounts;
 CCoinControl* AssetControlDialog::assetControl = new CCoinControl();
@@ -151,6 +155,22 @@ AssetControlDialog::AssetControlDialog(const PlatformStyle *_platformStyle, QWid
     // Add the assets into the dropdown menu
     connect(ui->viewAdministrator, SIGNAL(clicked()), this, SLOT(viewAdministratorClicked()));
     connect(ui->assetList, SIGNAL(currentIndexChanged(QString)), this, SLOT(onAssetSelected(QString)));
+
+    /** Setup the asset list combobox */
+    stringModel = new QStringListModel;
+
+    proxy = new QSortFilterProxyModel;
+    proxy->setSourceModel(stringModel);
+    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->assetList->setModel(proxy);
+    ui->assetList->setEditable(true);
+    ui->assetList->lineEdit()->setPlaceholderText("Select an asset");
+
+    completer = new QCompleter(proxy,this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    ui->assetList->setCompleter(completer);
 }
 
 AssetControlDialog::~AssetControlDialog()
@@ -778,19 +798,17 @@ void AssetControlDialog::updateAssetList(bool fSetOnStart)
         GetAllMyAssets(model->getWallet(), assets, 0);
 
     QStringList list;
+    list << "";
     for (auto name : assets) {
         list << QString::fromStdString(name);
     }
-    ui->assetList->clear();
 
-    // Add the assets into the dropdown menu
-    ui->assetList->addItem("Select as asset to view");
-    ui->assetList->addItems(list);
+    stringModel->setStringList(list);
 
     int index = ui->assetList->findText(QString::fromStdString(assetControl->strAssetSelected));
-    if ( index != -1 ) { // -1 for not found
+    if (index != -1 ) { // -1 for not found
         fOnStartUp = fSetOnStart;
-        ui->assetList->setCurrentText(QString::fromStdString(assetControl->strAssetSelected));
+        ui->assetList->setCurrentIndex(index);
     }
 
     updateView();
