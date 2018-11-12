@@ -28,6 +28,7 @@ struct MainSignalsInstance {
     boost::signals2::signal<void (const CBlock&, const CValidationState&)> BlockChecked;
     boost::signals2::signal<void (const CBlockIndex *, const std::shared_ptr<const CBlock>&)> NewPoWValidBlock;
     boost::signals2::signal<void (const uint256 &)> BlockFound;
+    boost::signals2::signal<void (const std::string &)> AssetInventory;
 //    boost::signals2::signal<void (std::shared_ptr<CReserveScript>&)> ScriptForMining;
     
     // We are not allowed to assume the scheduler only runs in one thread,

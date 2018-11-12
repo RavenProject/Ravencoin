@@ -40,6 +40,8 @@ const char *SENDCMPCT="sendcmpct";
 const char *CMPCTBLOCK="cmpctblock";
 const char *GETBLOCKTXN="getblocktxn";
 const char *BLOCKTXN="blocktxn";
+const char *GETASSETDATA="getassetdata";
+const char *ASSETDATA="assetdata";
 } // namespace NetMsgType
 
 /** All known message types. Keep this in the same order as the list of
@@ -72,6 +74,8 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::CMPCTBLOCK,
     NetMsgType::GETBLOCKTXN,
     NetMsgType::BLOCKTXN,
+    NetMsgType::GETASSETDATA,
+    NetMsgType::ASSETDATA
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 
@@ -189,3 +193,21 @@ const std::vector<std::string> &getAllNetMessageTypes()
 {
     return allNetMessageTypesVec;
 }
+
+CInvAsset::CInvAsset()
+{
+    name = "";
+}
+
+CInvAsset::CInvAsset(std::string strName) : name(strName){}
+
+bool operator<(const CInvAsset& a, const CInvAsset& b)
+{
+    return a.name < b.name;
+}
+
+std::string CInvAsset::ToString() const
+{
+    return strprintf("%s %s", "CInvAsset for asset: ", name);
+}
+
