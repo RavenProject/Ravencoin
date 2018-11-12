@@ -21,8 +21,6 @@ class AssetFilterProxy;
 
 class AssetViewDelegate;
 
-class AssetViewDelegate;
-
 namespace Ui {
     class OverviewPage;
 }
