@@ -163,31 +163,8 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
             QPixmap pixmap = QPixmap::fromImage(QImage(":/icons/asset_administrator"));
             return rec->fIsAdministrator ? pixmap : QVariant();
         }
-    }
-    switch (index.column())
-    {
-        case Name:
-            if (role == Qt::TextAlignmentRole) {
-                return Qt::AlignLeft + Qt::AlignVCenter;
-            } else if (role == Qt::DisplayRole) {
-                return QString::fromStdString(rec->name);
-            } else if (role == Qt::DecorationRole) {
-                QPixmap pixmap = QPixmap::fromImage(QImage(":/icons/asset_administrator"));
-                return rec->fIsAdministrator ? pixmap : QVariant();
-            } else if (role == Qt::SizeHintRole) {
-                QPixmap pixmap = QPixmap::fromImage(QImage(":/icons/asset_administrator"));
-                return pixmap.size();
-            } else {
-                return QVariant();
-            }
-        case Quantity:
-            if (role == Qt::TextAlignmentRole) {
-                return Qt::AlignHCenter + Qt::AlignVCenter;
-            } else if (role == Qt::DisplayRole) {
-                return QString::fromStdString(rec->formattedQuantity());
-            } else {
-                return QVariant();
-            }
+        case Qt::ToolTipRole:
+            return formatTooltip(rec);
         default:
             return QVariant();
     }
@@ -222,4 +199,20 @@ QModelIndex AssetTableModel::index(int row, int column, const QModelIndex &paren
     }
 
     return QModelIndex();
+}
+
+QString AssetTableModel::formatTooltip(const AssetRecord *rec) const
+{
+    QString tooltip = formatAssetName(rec) + QString("\n") + formatAssetQuantity(rec);
+    return tooltip;
+}
+
+QString AssetTableModel::formatAssetName(const AssetRecord *wtx) const
+{
+    return tr("Asset Name: ") + QString::fromStdString(wtx->name);
+}
+
+QString AssetTableModel::formatAssetQuantity(const AssetRecord *wtx) const
+{
+    return tr("Asset Quantity: ") + QString::fromStdString(wtx->formattedQuantity());
 }

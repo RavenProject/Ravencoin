@@ -68,8 +68,8 @@ ReceiveCoinsDialog::ReceiveCoinsDialog(const PlatformStyle *_platformStyle, QWid
 
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(clear()));
 
-    setupRequestFrame();
-    setupHistoryFrame();
+    setupRequestFrame(platformStyle);
+    setupHistoryFrame(platformStyle);
 }
 
 void ReceiveCoinsDialog::setModel(WalletModel *_model)
@@ -126,10 +126,10 @@ void ReceiveCoinsDialog::accept()
     clear();
 }
 
-void ReceiveCoinsDialog::setupRequestFrame()
+void ReceiveCoinsDialog::setupRequestFrame(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frame2->setStyleSheet(" .QFrame {background-color: white; border: none;}");
+    ui->frame2->setStyleSheet(QString(".QFrame {background-color: %1; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     /** Create the shadow effects on the frames */
 
     ui->frame2->setGraphicsEffect(GUIUtil::getShadowEffect());
@@ -154,10 +154,10 @@ void ReceiveCoinsDialog::setupRequestFrame()
     ui->reuseAddress->setStyleSheet(COLOR_LABEL_STRING);
 }
 
-void ReceiveCoinsDialog::setupHistoryFrame()
+void ReceiveCoinsDialog::setupHistoryFrame(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frame->setStyleSheet(" .QFrame {background-color: white; border: none;}");
+    ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     /** Create the shadow effects on the frames */
 
     ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());

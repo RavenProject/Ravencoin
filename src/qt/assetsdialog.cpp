@@ -130,9 +130,9 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
         connect(ui->mineButton, SIGNAL(clicked()), this, SLOT(mineButtonClicked()));
     }
 
-    setupAssetControlFrame();
-    setupScrollView();
-    setupFeeControl();
+    setupAssetControlFrame(platformStyle);
+    setupScrollView(platformStyle);
+    setupFeeControl(platformStyle);
     /** RVN END */
 }
 
@@ -230,10 +230,10 @@ AssetsDialog::~AssetsDialog()
     delete ui;
 }
 
-void AssetsDialog::setupAssetControlFrame()
+void AssetsDialog::setupAssetControlFrame(const PlatformStyle *platformStyle)
 {
     /** Update the assetcontrol frame */
-    ui->frameAssetControl->setStyleSheet(".QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameAssetControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->widgetAssetControl->setStyleSheet(".QWidget {background-color: transparent;}");
     /** Create the shadow effects on the frames */
 
@@ -267,25 +267,25 @@ void AssetsDialog::setupAssetControlFrame()
     ui->labelAssetControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
 
     // Align the Custom change address checkbox
-    ui->checkBoxAssetControlChange->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxAssetControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
-void AssetsDialog::setupScrollView()
+void AssetsDialog::setupScrollView(const PlatformStyle *platformStyle)
 {
     /** Update the scrollview*/
-    ui->scrollArea->setStyleSheet(".QScrollArea{background-color: white; border: none}");
+    ui->scrollArea->setStyleSheet(QString(".QScrollArea{background-color: %1; border: none}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->scrollArea->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     // Add some spacing so we can see the whole card
     ui->entries->setContentsMargins(10,10,20,0);
-    ui->scrollAreaWidgetContents->setStyleSheet(".QWidget{ background-color: white;}");
+    ui->scrollAreaWidgetContents->setStyleSheet(QString(".QWidget{ background-color: %1;}").arg(platformStyle->WidgetBackGroundColor().name()));
 }
 
-void AssetsDialog::setupFeeControl()
+void AssetsDialog::setupFeeControl(const PlatformStyle *platformStyle)
 {
     /** Update the coincontrol frame */
-    ui->frameFee->setStyleSheet(" .QFrame {background-color: white; padding-top: 10px; padding-right: 5px; border: none;}");
+    ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
     /** Create the shadow effects on the frames */
 
     ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
@@ -294,10 +294,10 @@ void AssetsDialog::setupFeeControl()
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
 
     ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCustomPerKilobyte->setStyleSheet(QString(".QLabel{ %1; }").arg(COLOR_LABEL_STRING));
     ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
-    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
 }
 
@@ -441,9 +441,9 @@ void AssetsDialog::on_sendButton_clicked()
 
     if (sendStatus.status == WalletModel::OK)
     {
-        accept();
         AssetControlDialog::assetControl->UnSelectAll();
         assetControlUpdateLabels();
+        accept();
     }
     fNewRecipientAllowed = true;
 }
@@ -502,7 +502,7 @@ SendAssetsEntry *AssetsDialog::addEntry()
 
     // Focus the field, so that entry can start immediately
     entry->clear();
-    entry->setFocus();
+    entry->setFocusAssetListBox();
     ui->scrollAreaWidgetContents->resize(ui->scrollAreaWidgetContents->sizeHint());
     qApp->processEvents();
     QScrollBar* bar = ui->scrollArea->verticalScrollBar();
@@ -1024,6 +1024,18 @@ void AssetsDialog::focusAsset(const QModelIndex &idx)
 
         entry->setValue(recipient);
         entry->setFocus();
+    }
+}
+
+void AssetsDialog::focusAssetListBox()
+{
+    SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(0)->widget());
+    if (entry)
+    {
+        entry->setFocusAssetListBox();
+
+        if (entry->getValue().assetName != "")
+            entry->setFocus();
     }
 }
 /** RVN END */

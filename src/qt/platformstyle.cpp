@@ -14,6 +14,8 @@
 #include <QPalette>
 #include <QPixmap>
 
+bool darkModeEnabled = false;
+
 static const struct {
     const char *platformId;
     /** Show images on push buttons */
@@ -23,8 +25,8 @@ static const struct {
     /** Extra padding/spacing in transactionview */
     const bool useExtraSpacing;
 } platform_styles[] = {
-    {"macosx", false, false, true},
-    {"windows", true, false, false},
+    {"macosx", false, true, true},
+    {"windows", true, true, false},
     /* Other: linux, unix, ... */
     {"other", true, true, false}
 };
@@ -119,6 +121,21 @@ QIcon PlatformStyle::SingleColorIcon(const QIcon& icon) const
     return ColorizeIcon(icon, SingleColor());
 }
 
+QIcon PlatformStyle::OrangeColorIcon(const QString& filename) const
+{
+    if (!colorizeIcons)
+        return QIcon(filename);
+    return ColorizeIcon(filename, DarkOrangeColor());
+}
+
+QIcon PlatformStyle::OrangeColorIcon(const QIcon& icon) const
+{
+    if (!colorizeIcons)
+        return icon;
+    return ColorizeIcon(icon, DarkOrangeColor());
+}
+
+
 QIcon PlatformStyle::TextColorIcon(const QString& filename) const
 {
     return ColorizeIcon(filename, TextColor());
@@ -128,6 +145,89 @@ QIcon PlatformStyle::TextColorIcon(const QIcon& icon) const
 {
     return ColorizeIcon(icon, TextColor());
 }
+
+QColor PlatformStyle::TextColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_ASSET_TEXT;
+    else
+        return textColor;
+}
+
+QColor PlatformStyle::MainBackGroundColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_BLACK;
+    else
+        return COLOR_BACKGROUND_LIGHT;
+}
+
+QColor PlatformStyle::TopWidgetBackGroundColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_PRICING_WIDGET;
+    else
+        return COLOR_BACKGROUND_LIGHT;
+}
+
+QColor PlatformStyle::WidgetBackGroundColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_WIDGET_BACKGROUND_DARK;
+    else
+        return COLOR_WHITE;
+}
+
+QColor PlatformStyle::SendEntriesBackGroundColor() const
+{
+    if (darkModeEnabled)
+        return QColor(21,20,17);
+    else
+        return QColor("#faf9f6");
+}
+
+QColor PlatformStyle::ShadowColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_SHADOW_DARK;
+    else
+        return COLOR_SHADOW_LIGHT;
+}
+
+QColor PlatformStyle::LightBlueColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_LIGHT_BLUE_DARK;
+    else
+        return COLOR_LIGHT_BLUE;
+}
+
+QColor PlatformStyle::DarkBlueColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_DARK_BLUE_DARK;
+    else
+        return COLOR_DARK_BLUE;
+}
+
+QColor PlatformStyle::LightOrangeColor() const
+{
+        return COLOR_LIGHT_ORANGE;
+}
+
+QColor PlatformStyle::DarkOrangeColor() const
+{
+    return COLOR_DARK_ORANGE;
+}
+
+QColor PlatformStyle::SingleColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_ASSET_TEXT; // WHITE (black -> white)
+    else
+        return singleColor;
+}
+
 
 const PlatformStyle *PlatformStyle::instantiate(const QString &platformId)
 {

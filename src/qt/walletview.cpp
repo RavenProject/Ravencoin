@@ -389,6 +389,7 @@ void WalletView::requestedSyncWarningInfo()
 void WalletView::gotoAssetsPage()
 {
     setCurrentWidget(assetsPage);
+    assetsPage->focusAssetListBox();
 }
 
 void WalletView::gotoCreateAssetsPage()
