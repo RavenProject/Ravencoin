@@ -52,8 +52,8 @@ struct CAssetOutputEntry;
 class CCoinControl;
 struct CBlockAssetUndo;
 
-// 50000 * 82 Bytes == 4.1 Mb
-#define MAX_CACHE_ASSETS_SIZE 50000
+// 2500 * 82 Bytes == 205 KB (kilobytes) of memory
+#define MAX_CACHE_ASSETS_SIZE 2500
 
 // Create map that store that state of current reissued transaction that the mempool as accepted.
 // If an asset name is in this map, any other reissue transactions wont be accepted into the mempool

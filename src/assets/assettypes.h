@@ -454,6 +454,11 @@ public:
         return cacheItemsMap;
     };
 
+    const std::list<key_value_pair_t>& GetItemsList()
+    {
+        return cacheItemsList;
+    };
+
 
     CLRUCache(const CLRUCache& cache)
     {

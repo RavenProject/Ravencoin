@@ -949,6 +949,65 @@ UniValue listassets(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue getcacheinfo(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size())
+        throw std::runtime_error(
+                "getcacheinfo \n"
+                + AssetActivationWarning() +
+
+                "\nResult:\n"
+                "[\n"
+                "  uxto cache size:\n"
+                "  asset total (exclude dirty):\n"
+                "  asset address map:\n"
+                "  asset address balance:\n"
+                "  my unspent asset:\n"
+                "  reissue data:\n"
+                "  asset metadata map:\n"
+                "  asset metadata list (est):\n"
+                "  dirty cache (est):\n"
+
+
+                "]\n"
+
+                "\nExamples:\n"
+                + HelpExampleRpc("getcacheinfo", "")
+                + HelpExampleCli("getcacheinfo", "")
+        );
+
+
+    if (!passets)
+        throw JSONRPCError(RPC_VERIFY_ERROR, "asset cache is null");
+
+    if (!pcoinsTip)
+        throw JSONRPCError(RPC_VERIFY_ERROR, "coins tip cache is null");
+
+    if (!passetsCache)
+        throw JSONRPCError(RPC_VERIFY_ERROR, "asset metadata cache is nul");
+
+
+    UniValue result(UniValue::VARR);
+
+    UniValue coinstip(UniValue::VOBJ);
+    coinstip.push_back(Pair("uxto cache size", (int)pcoinsTip->DynamicMemoryUsage()));
+    coinstip.push_back(Pair("asset total (exclude dirty)", (int)passets->DynamicMemoryUsage()));
+    
+    UniValue descendants(UniValue::VOBJ);
+    descendants.push_back(Pair("asset address map",  (int)memusage::DynamicUsage(passets->mapAssetsAddresses)));
+    descendants.push_back(Pair("asset address balance",   (int)memusage::DynamicUsage(passets->mapAssetsAddressAmount)));
+    descendants.push_back(Pair("my unspent asset",   (int)memusage::DynamicUsage(passets->mapMyUnspentAssets)));
+    descendants.push_back(Pair("reissue data",   (int)memusage::DynamicUsage(passets->mapReissuedAssetData)));
+
+    coinstip.push_back(Pair("asset data", descendants));
+    coinstip.push_back(Pair("asset metadata map",  (int)memusage::DynamicUsage(passetsCache->GetItemsMap())));
+    coinstip.push_back(Pair("asset metadata list (est)",  (int)passetsCache->GetItemsList().size() * (32 + 80))); // Max 32 bytes for asset name, 80 bytes max for asset data
+    coinstip.push_back(Pair("dirty cache (est)",  (int)passets->GetCacheSize()));
+
+    result.push_back(coinstip);
+    return result;
+}
+
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
   //  ----------- ------------------------      -----------------------      ----------
@@ -960,7 +1019,8 @@ static const CRPCCommand commands[] =
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
-    { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}}
+    { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
+    { "assets",   "getcacheinfo",               &getcacheinfo,               {}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

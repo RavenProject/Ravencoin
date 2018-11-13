@@ -1855,20 +1855,43 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
 size_t CAssetsCache::DynamicMemoryUsage() const
 {
     // TODO make sure this is accurate
-    return memusage::DynamicUsage(mapAssetsAddresses) + memusage::DynamicUsage(mapAssetsAddressAmount) + memusage::DynamicUsage(mapMyUnspentAssets);
+    return memusage::DynamicUsage(mapAssetsAddresses) + memusage::DynamicUsage(mapAssetsAddressAmount) + memusage::DynamicUsage(mapMyUnspentAssets) + memusage::DynamicUsage(mapReissuedAssetData) ;
 }
 
 //! Get an estimated size of the cache in bytes that will be needed inorder to save to database
 size_t CAssetsCache::GetCacheSize() const
 {
+    // COutPoint: 32 bytes
+    // CNewAsset: Max 80 bytes
+    // CAssetTransfer: Asset Name, CAmount ( 40 bytes)
+    // CReissueAsset: Max 80 bytes
+    // CAmount: 8 bytes
+    // Asset Name: Max 32 bytes
+    // Address: 40 bytes
+    // Block hash: 32 bytes
+    // CTxOut: CAmount + CScript (105 + 8 = 113 bytes)
+
     size_t size = 0;
-    size += 32 * setChangeOwnedOutPoints.size(); // COutPoint is 32 bytes
-    size += 80 * setNewOwnerAssetsToAdd.size(); // CNewAsset is max 80 bytes
-    size -= 80 * setNewOwnerAssetsToRemove.size(); // CNewAsset is max 80 bytes
-    size += (1 + 32 + 40) * vUndoAssetAmount.size(); // 8 bit CAmount, 32 byte assetName, 40 bytes address
-    size += (1 + 32 + 40) * setNewTransferAssetsToRemove.size(); // 8 bit CAmount, 32 byte assetName, 40 bytes address
-    size += (32 + 40) * setNewTransferAssetsToAdd.size();
-    size -= (32 + 40) * vSpentAssets.size();
+    size += 32 * setChangeOwnedOutPoints.size(); // COutPoint
+
+    size += (32 + 40 + 8) * vUndoAssetAmount.size(); // Asset Name, Address, CAmount
+
+    size += (40 + 40 + 32) * setNewTransferAssetsToRemove.size(); // CAssetTrasnfer, Address, COutPoint
+    size += (40 + 40 + 32) * setNewTransferAssetsToAdd.size(); // CAssetTrasnfer, Address, COutPoint
+
+    size += 72 * setNewOwnerAssetsToAdd.size(); // Asset Name, Address
+    size += 72 * setNewOwnerAssetsToRemove.size(); // Asset Name, Address
+
+    size += (32 + 40 + 8) * vSpentAssets.size(); // Asset Name, Address, CAmount
+
+    size += (80 + 40 + 32 + sizeof(int)) * setNewAssetsToAdd.size(); // CNewAsset, Address, Block hash, int
+    size += (80 + 40 + 32 + sizeof(int)) * setNewAssetsToRemove.size(); // CNewAsset, Address, Block hash, int
+
+    size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToAdd.size(); // CReissueAsset, Address, COutPoint, Block hash, int
+    size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToRemove.size(); // CReissueAsset, Address, COutPoint, Block hash, int
+
+    size += (32 + 113) * setPossiblyMineAdd.size(); // Asset Name, COutPoint, CTxOut
+    size += (32 + 113) * setPossiblyMineRemove.size(); // Asset Name, COutPoint, CTxOut
 
     return size;
 }
