@@ -1184,6 +1184,67 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
     }
 }
 
+void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensusParams, CConnman* connman, const std::atomic<bool>& interruptMsgProc)
+{
+    std::deque<CInvAsset>::iterator it = pfrom->vRecvAssetGetData.begin();
+    std::vector<CInvAsset> vNotFound;
+    const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
+    LOCK(cs_main);
+
+    while (it != pfrom->vRecvAssetGetData.end()) {
+        // Don't bother if send buffer is too full to respond anyway
+        if (pfrom->fPauseSend)
+            break;
+
+        const CInvAsset &inv = *it;
+        {
+            if (interruptMsgProc)
+                return;
+
+            it++;
+
+            if (!IsAssetNameValid(inv.name)) {
+                vNotFound.push_back(inv);
+                continue;
+            }
+
+            bool push = false;
+            if (passetsCache && passetsCache->Exists(inv.name)) {
+                auto data = passetsCache->Get(inv.name);
+                connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+                push = true;
+            } else if (passetsdb) {
+                CNewAsset asset;
+                int height;
+                uint256 hash;
+                if (passetsdb->ReadAssetData(inv.name, asset, height, hash)) {
+                    auto data = CDatabasedAssetData(asset, height, hash);
+                    passetsCache->Put(inv.name, data);
+                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
+                    push = true;
+                }
+            }
+
+            if (!push) {
+                vNotFound.push_back(inv);
+            }
+        }
+    }
+
+    pfrom->vRecvAssetGetData.erase(pfrom->vRecvAssetGetData.begin(), it);
+
+    if (!vNotFound.empty()) {
+        // Let the peer know that we didn't find what it asked for, so it doesn't
+        // have to wait around forever. Currently only SPV clients actually care
+        // about this message: it's needed when they are recursively walking the
+        // dependencies of relevant unconfirmed transactions. SPV clients want to
+        // do that because they want to know about (and store and rebroadcast and
+        // risk analyze) the dependencies of transactions relevant to them, without
+        // having to download the entire memory pool.
+        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::NOTFOUND, vNotFound));
+    }
+}
+
 uint32_t GetFetchFlags(CNode* pfrom) {
     uint32_t nFetchFlags = 0;
     if ((pfrom->GetLocalServices() & NODE_WITNESS) && State(pfrom->GetId())->fHaveWitness) {
@@ -1649,6 +1710,32 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         ProcessGetData(pfrom, chainparams.GetConsensus(), connman, interruptMsgProc);
     }
 
+    else if (strCommand == NetMsgType::GETASSETDATA)
+    {
+        if (IsInitialBlockDownload()) {
+            LogPrint(BCLog::NET, "Ignoring getassetdata from peer=%d because node is in initial block download\n", pfrom->GetId());
+            return true;
+        }
+
+        std::vector<CInvAsset> vInvAsset;
+        vRecv >> vInvAsset;
+
+        if (vInvAsset.size() > MAX_INV_SZ)
+        {
+            LOCK(cs_main);
+            Misbehaving(pfrom->GetId(), 20);
+            return error("message getdata size() = %u", vInvAsset.size());
+        }
+
+        LogPrint(BCLog::NET, "received getassetdata (%u invassetsz) peer=%d\n", vInvAsset.size(), pfrom->GetId());
+
+        if (vInvAsset.size() > 0) {
+            LogPrint(BCLog::NET, "received getdata for: %s peer=%d\n", vInvAsset[0].ToString(), pfrom->GetId());
+        }
+
+        pfrom->vRecvAssetGetData.insert(pfrom->vRecvAssetGetData.end(), vInvAsset.begin(), vInvAsset.end());
+        ProcessAssetGetData(pfrom, chainparams.GetConsensus(), connman, interruptMsgProc);
+    }
 
     else if (strCommand == NetMsgType::GETBLOCKS)
     {
@@ -3023,6 +3110,33 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
             // we only send the big addr message once
             if (pto->vAddrToSend.capacity() > 40)
                 pto->vAddrToSend.shrink_to_fit();
+        }
+
+        //
+        // Message: getassetdata
+        //
+        if (pto->nVersion >= ASSETDATA_VERSION && pto->fGetAssetData) {
+            LogPrintf("Got to getassetdata net_processing\n");
+            LOCK(pto->cs_inventory);
+
+            pto->fGetAssetData = false;
+
+            // Produce a vector with all candidates for sending
+            std::vector<CInvAsset> vInvAssets;
+            vInvAssets.reserve(std::max<size_t>(pto->setInventoryAssetsSend.size(), INVENTORY_BROADCAST_MAX));
+
+            // Add asset inv
+            for (auto& it : pto->setInventoryAssetsSend) {
+                vInvAssets.push_back(CInvAsset(it));
+                if (vInvAssets.size() == MAX_INV_SZ) {
+                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
+                    vInvAssets.clear();
+                }
+            }
+            pto->setInventoryAssetsSend.clear();
+
+            if (!vInvAssets.empty())
+                connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
         }
 
         // Start block sync

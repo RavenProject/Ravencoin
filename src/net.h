@@ -595,6 +595,7 @@ public:
     CCriticalSection cs_sendProcessing;
 
     std::deque<CInv> vRecvGetData;
+    std::deque<CInvAsset> vRecvAssetGetData;
     uint64_t nRecvBytes;
     std::atomic<int> nRecvVersion;
 
@@ -651,6 +652,9 @@ public:
     std::set<uint256> setKnown;
     int64_t nNextAddrSend;
     int64_t nNextLocalAddrSend;
+
+    bool fGetAssetData;
+    std::set<std::string> setInventoryAssetsSend;
 
     // inventory based relay
     CRollingBloomFilter filterInventoryKnown;
@@ -803,6 +807,12 @@ public:
         } else if (inv.type == MSG_BLOCK) {
             vInventoryBlockToSend.push_back(inv.hash);
         }
+    }
+
+    void PushAssetInventory(const std::string& name)
+    {
+        LOCK(cs_inventory);
+        setInventoryAssetsSend.insert(name);
     }
 
     void PushBlockHash(const uint256 &hash)

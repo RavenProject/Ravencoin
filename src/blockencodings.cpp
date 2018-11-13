@@ -217,3 +217,15 @@ ReadStatus PartiallyDownloadedBlock::FillBlock(CBlock& block, const std::vector<
 
     return READ_STATUS_OK;
 }
+
+SerializedAssetData::SerializedAssetData(const CDatabasedAssetData &assetData)
+{
+    name = assetData.asset.strName;
+    amount = assetData.asset.nAmount;
+    units = assetData.asset.units;
+    reissuable = assetData.asset.nReissuable;
+    hasIPFS = assetData.asset.nHasIPFS;
+    ipfs = assetData.asset.strIPFSHash;
+    nHeight = assetData.nHeight;
+    hash = assetData.blockHash;
+}
