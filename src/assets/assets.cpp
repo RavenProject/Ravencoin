@@ -711,7 +711,7 @@ bool CTransaction::VerifyNewAsset(std::string& strError) const
     }
 
     if (!fFoundIssueBurnTx) {
-        strError = "bad-txns-issue-owner-burn-not-found";
+        strError = "bad-txns-issue-burn-not-found";
         return false;
     }
 
