@@ -1,10 +1,9 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2018 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "test_raven.h"
-
 #include "chainparams.h"
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
@@ -29,38 +28,39 @@
 uint256 insecure_rand_seed = GetRandHash();
 FastRandomContext insecure_rand_ctx(insecure_rand_seed);
 
-extern bool fPrintToConsole;
+
 extern void noui_connect();
 
-BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
+BasicTestingSetup::BasicTestingSetup(const std::string &chainName)
 {
-        SHA256AutoDetect();
-        RandomInit();
-        ECC_Start();
-        SetupEnvironment();
-        SetupNetworking();
-        InitSignatureCache();
-        InitScriptExecutionCache();
-        fPrintToDebugLog = false; // don't want to write to debug.log file
-        fCheckBlockIndex = true;
-        SelectParams(chainName);
-        noui_connect();
+    SHA256AutoDetect();
+    RandomInit();
+    ECC_Start();
+    SetupEnvironment();
+    SetupNetworking();
+    InitSignatureCache();
+    InitScriptExecutionCache();
+    //  If additional debug information is desired, uncomment 'cout' section in VerifyScript method in the script/interpreter.cpp file (warning - this will cause the logger window to spew messages).
+    fPrintToConsole = false;
+    fPrintToDebugLog = false; // don't want to write to debug.log file
+    fCheckBlockIndex = true;
+    SelectParams(chainName);
+    noui_connect();
 }
 
 BasicTestingSetup::~BasicTestingSetup()
 {
-        ECC_Stop();
+    ECC_Stop();
 }
 
-TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
+TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(chainName)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams &chainparams = Params();
     // Ideally we'd move all the RPC tests to the functional testing framework
     // instead of unit tests, but for now we need these here.
-
     RegisterAllCoreRPCCommands(tableRPC);
     ClearDatadirCache();
-    pathTemp = fs::temp_directory_path() / strprintf("test_raven_%lu_%i", (unsigned long)GetTime(), (int)(InsecureRandRange(100000)));
+    pathTemp = fs::temp_directory_path() / strprintf("test_raven_%lu_%i", (unsigned long) GetTime(), (int) (InsecureRandRange(100000)));
     fs::create_directories(pathTemp);
     gArgs.ForceSetArg("-datadir", pathTemp.string());
 
@@ -73,19 +73,21 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
     pblocktree = new CBlockTreeDB(1 << 20, true);
     pcoinsdbview = new CCoinsViewDB(1 << 23, true);
     pcoinsTip = new CCoinsViewCache(pcoinsdbview);
-    if (!LoadGenesisBlock(chainparams)) {
+    if (!LoadGenesisBlock(chainparams))
+    {
         throw std::runtime_error("LoadGenesisBlock failed.");
     }
 
     passets = new CAssetsCache();
     {
         CValidationState state;
-        if (!ActivateBestChain(state, chainparams)) {
+        if (!ActivateBestChain(state, chainparams))
+        {
             throw std::runtime_error("ActivateBestChain failed.");
         }
     }
     nScriptCheckThreads = 3;
-    for (int i=0; i < nScriptCheckThreads-1; i++)
+    for (int i = 0; i < nScriptCheckThreads - 1; i++)
         threadGroup.create_thread(&ThreadScriptCheck);
     g_connman = std::unique_ptr<CConnman>(new CConnman(0x1337, 0x1337)); // Deterministic randomness for tests.
     connman = g_connman.get();
@@ -94,24 +96,24 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
 
 TestingSetup::~TestingSetup()
 {
-        threadGroup.interrupt_all();
-        threadGroup.join_all();
-        GetMainSignals().FlushBackgroundCallbacks();
-        GetMainSignals().UnregisterBackgroundSignalScheduler();
-        g_connman.reset();
-        peerLogic.reset();
-        UnloadBlockIndex();
-        delete pcoinsTip;
-        delete pcoinsdbview;
-        delete pblocktree;
-        fs::remove_all(pathTemp);
+    threadGroup.interrupt_all();
+    threadGroup.join_all();
+    GetMainSignals().FlushBackgroundCallbacks();
+    GetMainSignals().UnregisterBackgroundSignalScheduler();
+    g_connman.reset();
+    peerLogic.reset();
+    UnloadBlockIndex();
+    delete pcoinsTip;
+    delete pcoinsdbview;
+    delete pblocktree;
+    fs::remove_all(pathTemp);
 }
 
 TestChain100Setup::TestChain100Setup() : TestingSetup(CBaseChainParams::REGTEST)
 {
     // Generate a 100-block chain:
     coinbaseKey.MakeNewKey(true);
-    CScript scriptPubKey = CScript() <<  ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
     for (int i = 0; i < COINBASE_MATURITY; i++)
     {
         std::vector<CMutableTransaction> noTxns;
@@ -125,15 +127,15 @@ TestChain100Setup::TestChain100Setup() : TestingSetup(CBaseChainParams::REGTEST)
 // scriptPubKey, and try to add it to the current chain.
 //
 CBlock
-TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, const CScript& scriptPubKey)
+TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction> &txns, const CScript &scriptPubKey)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams &chainparams = Params();
     std::unique_ptr<CBlockTemplate> pblocktemplate = BlockAssembler(chainparams).CreateNewBlock(scriptPubKey);
-    CBlock& block = pblocktemplate->block;
+    CBlock &block = pblocktemplate->block;
 
     // Replace mempool-selected txns with just coinbase plus passed-in txns:
     block.vtx.resize(1);
-    for (const CMutableTransaction& tx : txns)
+    for (const CMutableTransaction &tx : txns)
         block.vtx.push_back(MakeTransactionRef(tx));
     // IncrementExtraNonce creates a valid coinbase and merkleRoot
     unsigned int extraNonce = 0;
@@ -153,12 +155,14 @@ TestChain100Setup::~TestChain100Setup()
 }
 
 
-CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CMutableTransaction &tx) {
+CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CMutableTransaction &tx)
+{
     CTransaction txn(tx);
     return FromTx(txn);
 }
 
-CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CTransaction &txn) {
+CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CTransaction &txn)
+{
     return CTxMemPoolEntry(MakeTransactionRef(txn), nFee, nTime, nHeight,
                            spendsCoinbase, sigOpCost, lp);
 }

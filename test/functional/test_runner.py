@@ -256,7 +256,7 @@ def main():
         # Run all base tests, and optionally run extended tests.
         test_list = BASE_SCRIPTS
         if args.extended:
-            # place the EXTENDED_SCRIPTS first since the three longest ones
+            # place the EXTENDED_SCRIPTS first since the longest ones
             # are there and the list is shorter
             test_list = EXTENDED_SCRIPTS + test_list
         elif args.onlyextended:
