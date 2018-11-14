@@ -14,7 +14,10 @@
 
 BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
-    BOOST_AUTO_TEST_CASE(issue_asset_serialization) {
+    BOOST_AUTO_TEST_CASE(issue_asset_serialization_test)
+    {
+        BOOST_TEST_MESSAGE("Running Issue Asset Serialization Test");
+
         SelectParams("test");
 
         // Create asset
@@ -39,7 +42,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset.nReissuable == 0, "Reissuable wasn't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nHasIPFS == 1, "HasIPFS wasn't equal");
         BOOST_CHECK_MESSAGE(EncodeIPFS(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
-        
+
         // Bare asset
         CNewAsset asset2("SERIALIZATION", 100000000);
         scriptPubKey = GetScriptForDestination(dest);
@@ -55,7 +58,10 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset2.strIPFSHash == "", "IPFSHash wasn't equal");
     }
 
-    BOOST_AUTO_TEST_CASE(reissue_asset_serialization) {
+    BOOST_AUTO_TEST_CASE(reissue_asset_serialization_test)
+    {
+        BOOST_TEST_MESSAGE("Running Reissue Asset Serialization Test");
+
         SelectParams("test");
 
         // Create asset
@@ -91,7 +97,10 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset2.strIPFSHash == "", "IPFSHash wasn't equal");
     }
 
-    BOOST_AUTO_TEST_CASE(owner_asset_serialization) {
+    BOOST_AUTO_TEST_CASE(owner_asset_serialization_test)
+    {
+        BOOST_TEST_MESSAGE("Running Owner ASset Serialization Test");
+
         SelectParams("test");
 
         // Create asset
