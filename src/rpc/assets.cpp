@@ -404,6 +404,13 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
     if (!passets)
         return NullUniValue;
 
+    // Call get the best address amount on all assets that contain that address ( this update mapAssetsAddressAmount)
+    for (auto it : passets->mapAssetsAddresses) {
+        if (it.second.count(address))
+            GetBestAssetAddressAmount(*passets, it.first, address);
+    }
+
+    // Loop through the updated map, and get the results
     for (auto it : passets->mapAssetsAddressAmount) {
         if (address.compare(it.first.second) == 0) {
             result.push_back(Pair(it.first.first, UnitValueFromAmount(it.second, it.first.first)));
@@ -989,22 +996,22 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
 
     UniValue result(UniValue::VARR);
 
-    UniValue coinstip(UniValue::VOBJ);
-    coinstip.push_back(Pair("uxto cache size", (int)pcoinsTip->DynamicMemoryUsage()));
-    coinstip.push_back(Pair("asset total (exclude dirty)", (int)passets->DynamicMemoryUsage()));
-    
+    UniValue info(UniValue::VOBJ);
+    info.push_back(Pair("uxto cache size", (int)pcoinsTip->DynamicMemoryUsage()));
+    info.push_back(Pair("asset total (exclude dirty)", (int)passets->DynamicMemoryUsage()));
+
     UniValue descendants(UniValue::VOBJ);
     descendants.push_back(Pair("asset address map",  (int)memusage::DynamicUsage(passets->mapAssetsAddresses)));
     descendants.push_back(Pair("asset address balance",   (int)memusage::DynamicUsage(passets->mapAssetsAddressAmount)));
     descendants.push_back(Pair("my unspent asset",   (int)memusage::DynamicUsage(passets->mapMyUnspentAssets)));
     descendants.push_back(Pair("reissue data",   (int)memusage::DynamicUsage(passets->mapReissuedAssetData)));
 
-    coinstip.push_back(Pair("asset data", descendants));
-    coinstip.push_back(Pair("asset metadata map",  (int)memusage::DynamicUsage(passetsCache->GetItemsMap())));
-    coinstip.push_back(Pair("asset metadata list (est)",  (int)passetsCache->GetItemsList().size() * (32 + 80))); // Max 32 bytes for asset name, 80 bytes max for asset data
-    coinstip.push_back(Pair("dirty cache (est)",  (int)passets->GetCacheSize()));
+    info.push_back(Pair("asset data", descendants));
+    info.push_back(Pair("asset metadata map",  (int)memusage::DynamicUsage(passetsCache->GetItemsMap())));
+    info.push_back(Pair("asset metadata list (est)",  (int)passetsCache->GetItemsList().size() * (32 + 80))); // Max 32 bytes for asset name, 80 bytes max for asset data
+    info.push_back(Pair("dirty cache (est)",  (int)passets->GetCacheSize()));
 
-    result.push_back(coinstip);
+    result.push_back(info);
     return result;
 }
 

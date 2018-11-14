@@ -62,6 +62,7 @@ extern std::map<std::string, uint256> mapReissuedAssets;
 
 class CAssets {
 public:
+
     std::map<std::string, std::set<COutPoint> > mapMyUnspentAssets; // Asset Name -> COutPoint
 
 
