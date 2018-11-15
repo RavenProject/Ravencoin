@@ -11,6 +11,7 @@
 #include <list>
 #include <unordered_map>
 #include "amount.h"
+#include "script/standard.h"
 #include "primitives/transaction.h"
 
 #define MAX_UNIT 8
