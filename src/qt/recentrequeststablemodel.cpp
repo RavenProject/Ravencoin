@@ -203,6 +203,8 @@ void RecentRequestsTableModel::addNewRequest(RecentRequestEntry &recipient)
     beginInsertRows(QModelIndex(), 0, 0);
     list.prepend(recipient);
     endInsertRows();
+
+
 }
 
 void RecentRequestsTableModel::sort(int column, Qt::SortOrder order)

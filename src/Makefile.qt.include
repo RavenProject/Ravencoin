@@ -268,10 +268,13 @@ RES_ICONS = \
   qt/res/icons/about.png \
   qt/res/icons/about_qt.png \
   qt/res/icons/asset_administrator.png \
-  qt/res/icons/rectangle.png \
-  qt/res/icons/rectanglesvg.svg \
-  qt/res/icons/bluerectangle.png \
-  qt/res/icons/ravencointext.svg \
+  qt/res/icons/asset_create.png \
+  qt/res/icons/asset_create_selected.png \
+  qt/res/icons/asset_manage.png \
+  qt/res/icons/asset_manage_selected.png \
+  qt/res/icons/asset_transfer.png \
+  qt/res/icons/asset_transfer_selected.png \
+  qt/res/icons/ravencointext.png \
   qt/res/icons/raven.ico \
   qt/res/icons/raven_testnet.ico \
   qt/res/icons/raven.png \
@@ -301,6 +304,7 @@ RES_ICONS = \
   qt/res/icons/hd_disabled.png \
   qt/res/icons/hd_enabled.png \
   qt/res/icons/history.png \
+  qt/res/icons/history_selected.png \
   qt/res/icons/info.png \
   qt/res/icons/key.png \
   qt/res/icons/lock_closed.png \
@@ -308,11 +312,14 @@ RES_ICONS = \
   qt/res/icons/network_disabled.png \
   qt/res/icons/open.png \
   qt/res/icons/overview.png \
+  qt/res/icons/overview_selected.png \
   qt/res/icons/quit.png \
   qt/res/icons/receive.png \
+  qt/res/icons/receive_selected.png \
   qt/res/icons/refresh.png \
   qt/res/icons/remove.png \
   qt/res/icons/send.png \
+  qt/res/icons/send_selected.png \
   qt/res/icons/synced.png \
   qt/res/icons/transaction0.png \
   qt/res/icons/transaction2.png \

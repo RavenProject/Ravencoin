@@ -42,10 +42,8 @@ public:
             AssetNameRole = 101,
         /** Formatted amount, without brackets when unconfirmed */
             FormattedAmountRole = 102,
-        /** Background image */
-            BackgroundRole = 103,
         /** AdministratorRole */
-            AdministratorRole = 104
+            AdministratorRole = 103
     };
 
     int rowCount(const QModelIndex &parent) const;

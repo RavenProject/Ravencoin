@@ -178,11 +178,21 @@ public:
 
         // Select the color of the gradient
         if (index.data(AssetTableModel::AdministratorRole).toBool()) {
-            gradient.setColorAt(0, COLOR_DARK_ORANGE);
-            gradient.setColorAt(1, COLOR_LIGHT_ORANGE);
+            if (darkModeEnabled) {
+                gradient.setColorAt(0, COLOR_ADMIN_CARD_DARK);
+                gradient.setColorAt(1, COLOR_ADMIN_CARD_DARK);
+            } else {
+                gradient.setColorAt(0, COLOR_DARK_ORANGE);
+                gradient.setColorAt(1, COLOR_LIGHT_ORANGE);
+            }
         } else {
-            gradient.setColorAt(0, COLOR_LIGHT_BLUE);
-            gradient.setColorAt(1, COLOR_DARK_BLUE);
+            if (darkModeEnabled) {
+                gradient.setColorAt(0, COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE);
+                gradient.setColorAt(1, COLOR_REGULAR_CARD_DARK_BLUE_DARK_MODE);
+            } else {
+                gradient.setColorAt(0, COLOR_LIGHT_BLUE);
+                gradient.setColorAt(1, COLOR_DARK_BLUE);
+            }
         }
 
         // Using 4 are the radius because the pixels are solid
