@@ -87,7 +87,7 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->assetSelectionBox->setCompleter(completer);
 
-    ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an asset to transfer");
+    ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an asset to transfer"));
     ui->assetSelectionBox->setMinimumWidth(32);
 
     /** Setup the amount box */
@@ -430,20 +430,20 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
 
             stringModel->setStringList(list);
 
-            ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an administrator asset to transfer");
+            ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an administrator asset to transfer"));
             ui->assetSelectionBox->setFocus();
         } else {
             ui->payTo->setFocus();
         }
 
-        ui->payAssetAmount->setUnit(MIN_UNIT);
-        ui->payAssetAmount->setValue(OWNER_ASSET_AMOUNT);
+        ui->payAssetAmount->setUnit(MIN_UNIT); // Min unit because this is an administrator asset
+        ui->payAssetAmount->setValue(1); // When using AssetAmountField, you must use 1 instead of 1 * COIN, because of the way that AssetAmountField uses the unit and value to display the amount
         ui->payAssetAmount->setDisabled(true);
 
 
         ui->assetAmountLabel->clear();
 
-        ui->ownershipWarningMessage->setText(tr("Warning: This asset transfer contains an administrator asset. You will no longer be the administrator of this asset. Make sure this is what you want to do"));
+        ui->ownershipWarningMessage->setText(tr("Warning: Transferring administrator asset"));
         ui->ownershipWarningMessage->setStyleSheet("color: red");
         ui->ownershipWarningMessage->show();
     } else {
@@ -459,7 +459,7 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
             }
 
             stringModel->setStringList(list);
-            ui->assetSelectionBox->lineEdit()->setPlaceholderText("Select an asset to transfer");
+            ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an asset to transfer"));
             ui->payAssetAmount->clear();
             ui->payAssetAmount->setUnit(MAX_UNIT);
             ui->assetAmountLabel->clear();

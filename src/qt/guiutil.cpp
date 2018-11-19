@@ -106,9 +106,9 @@ QFont getTopLabelFont()
 QGraphicsDropShadowEffect* getShadowEffect()
 {
     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect;
-    shadow->setBlurRadius(9.0);
+    shadow->setBlurRadius(50);
     shadow->setColor(darkModeEnabled ? COLOR_SHADOW_DARK : COLOR_SHADOW_LIGHT);
-    shadow->setOffset(4.0);
+    shadow->setOffset(8.0);
     return shadow;
 }
 

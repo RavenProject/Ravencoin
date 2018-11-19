@@ -114,6 +114,14 @@ QIcon PlatformStyle::SingleColorIcon(const QString& filename) const
     return ColorizeIcon(filename, SingleColor());
 }
 
+QIcon PlatformStyle::SingleColorIconOnOff(const QString& filenameOn, const QString& filenameOff) const
+{
+    QIcon icon;
+    icon.addPixmap(QPixmap(filenameOn), QIcon::Normal, QIcon::On);
+    icon.addPixmap(QPixmap(filenameOff), QIcon::Normal, QIcon::Off);
+    return icon;
+}
+
 QIcon PlatformStyle::SingleColorIcon(const QIcon& icon) const
 {
     if (!colorizeIcons)
@@ -150,64 +158,80 @@ QColor PlatformStyle::TextColor() const
 {
     if (darkModeEnabled)
         return COLOR_ASSET_TEXT;
-    else
-        return textColor;
+
+    return textColor;
+}
+
+QColor PlatformStyle::ToolBarSelectedTextColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE;
+
+    return COLOR_TOOLBAR_SELECTED_TEXT;
+}
+
+QColor PlatformStyle::ToolBarNotSelectedTextColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE;
+
+    return COLOR_TOOLBAR_NOT_SELECTED_TEXT;
 }
 
 QColor PlatformStyle::MainBackGroundColor() const
 {
     if (darkModeEnabled)
         return COLOR_BLACK;
-    else
-        return COLOR_BACKGROUND_LIGHT;
+
+    return COLOR_BACKGROUND_LIGHT;
 }
 
 QColor PlatformStyle::TopWidgetBackGroundColor() const
 {
     if (darkModeEnabled)
         return COLOR_PRICING_WIDGET;
-    else
-        return COLOR_BACKGROUND_LIGHT;
+
+    return COLOR_BACKGROUND_LIGHT;
 }
 
 QColor PlatformStyle::WidgetBackGroundColor() const
 {
     if (darkModeEnabled)
         return COLOR_WIDGET_BACKGROUND_DARK;
-    else
-        return COLOR_WHITE;
+
+    return COLOR_WHITE;
 }
 
 QColor PlatformStyle::SendEntriesBackGroundColor() const
 {
     if (darkModeEnabled)
         return QColor(21,20,17);
-    else
-        return QColor("#faf9f6");
+
+    return QColor("#faf9f6");
 }
 
 QColor PlatformStyle::ShadowColor() const
 {
     if (darkModeEnabled)
         return COLOR_SHADOW_DARK;
-    else
-        return COLOR_SHADOW_LIGHT;
+
+    return COLOR_SHADOW_LIGHT;
 }
 
 QColor PlatformStyle::LightBlueColor() const
 {
     if (darkModeEnabled)
         return COLOR_LIGHT_BLUE_DARK;
-    else
-        return COLOR_LIGHT_BLUE;
+
+    return COLOR_LIGHT_BLUE;
 }
 
 QColor PlatformStyle::DarkBlueColor() const
 {
     if (darkModeEnabled)
         return COLOR_DARK_BLUE_DARK;
-    else
-        return COLOR_DARK_BLUE;
+
+    return COLOR_DARK_BLUE;
 }
 
 QColor PlatformStyle::LightOrangeColor() const
@@ -224,8 +248,8 @@ QColor PlatformStyle::SingleColor() const
 {
     if (darkModeEnabled)
         return COLOR_ASSET_TEXT; // WHITE (black -> white)
-    else
-        return singleColor;
+
+    return singleColor;
 }
 
 

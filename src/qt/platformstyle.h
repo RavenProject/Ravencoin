@@ -25,6 +25,8 @@ public:
     bool getUseExtraSpacing() const { return useExtraSpacing; }
 
     QColor TextColor() const;
+    QColor ToolBarSelectedTextColor() const;
+    QColor ToolBarNotSelectedTextColor() const;
     QColor SingleColor() const;
     QColor MainBackGroundColor() const;
     QColor TopWidgetBackGroundColor() const;
@@ -45,6 +47,9 @@ public:
 
     /** Colorize an icon (given object) with the icon color */
     QIcon SingleColorIcon(const QIcon& icon) const;
+
+    /** Set icon with two states on and off */
+    QIcon SingleColorIconOnOff(const QString& filenameOn, const QString& filenameOff) const;
 
     /** Colorize an icon (given filename) with the text color */
     QIcon TextColorIcon(const QString& filename) const;

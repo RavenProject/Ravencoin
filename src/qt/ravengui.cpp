@@ -326,7 +326,7 @@ void RavenGUI::createActions()
 
     QActionGroup *tabGroup = new QActionGroup(this);
 
-    overviewAction = new QAction(platformStyle->SingleColorIcon(":/icons/overview"), tr("&Overview"), this);
+    overviewAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/overview_selected", ":/icons/overview"), tr("&Overview"), this);
     overviewAction->setStatusTip(tr("Show general overview of wallet"));
     overviewAction->setToolTip(overviewAction->statusTip());
     overviewAction->setCheckable(true);
@@ -334,7 +334,7 @@ void RavenGUI::createActions()
     overviewAction->setFont(font);
     tabGroup->addAction(overviewAction);
 
-    sendCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Send"), this);
+    sendCoinsAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/send_selected", ":/icons/send"), tr("&Send"), this);
     sendCoinsAction->setStatusTip(tr("Send coins to a Raven address"));
     sendCoinsAction->setToolTip(sendCoinsAction->statusTip());
     sendCoinsAction->setCheckable(true);
@@ -346,7 +346,7 @@ void RavenGUI::createActions()
     sendCoinsMenuAction->setStatusTip(sendCoinsAction->statusTip());
     sendCoinsMenuAction->setToolTip(sendCoinsMenuAction->statusTip());
 
-    receiveCoinsAction = new QAction(platformStyle->SingleColorIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
+    receiveCoinsAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/receiving_addresses_selected", ":/icons/receiving_addresses"), tr("&Receive"), this);
     receiveCoinsAction->setStatusTip(tr("Request payments (generates QR codes and raven: URIs)"));
     receiveCoinsAction->setToolTip(receiveCoinsAction->statusTip());
     receiveCoinsAction->setCheckable(true);
@@ -358,7 +358,7 @@ void RavenGUI::createActions()
     receiveCoinsMenuAction->setStatusTip(receiveCoinsAction->statusTip());
     receiveCoinsMenuAction->setToolTip(receiveCoinsMenuAction->statusTip());
 
-    historyAction = new QAction(platformStyle->SingleColorIcon(":/icons/history"), tr("&Transactions"), this);
+    historyAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/history_selected", ":/icons/history"), tr("&Transactions"), this);
     historyAction->setStatusTip(tr("Browse transaction history"));
     historyAction->setToolTip(historyAction->statusTip());
     historyAction->setCheckable(true);
@@ -367,7 +367,7 @@ void RavenGUI::createActions()
     tabGroup->addAction(historyAction);
 
     /** RVN START */
-    transferAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/send"), tr("&Transfer Assets"), this);
+    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
     transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
     transferAssetAction->setToolTip(transferAssetAction->statusTip());
     transferAssetAction->setCheckable(true);
@@ -375,7 +375,7 @@ void RavenGUI::createActions()
     transferAssetAction->setFont(font);
     tabGroup->addAction(transferAssetAction);
 
-    createAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/open"), tr("&Create Assets"), this);
+    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
     createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
     createAssetAction->setToolTip(createAssetAction->statusTip());
     createAssetAction->setCheckable(true);
@@ -383,7 +383,7 @@ void RavenGUI::createActions()
     createAssetAction->setFont(font);
     tabGroup->addAction(createAssetAction);
 
-    manageAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/editpaste"), tr("&Manage Assets"), this);
+    manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_manage_selected", ":/icons/asset_manage"), tr("&Manage Assets"), this);
     manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
     manageAssetAction->setToolTip(manageAssetAction->statusTip());
     manageAssetAction->setCheckable(true);
@@ -562,17 +562,18 @@ void RavenGUI::createToolBars()
         // Create the orange background and the vertical tool bar
         QWidget* toolbarWidget = new QWidget();
 
-        QString widgetStyleSheet = "QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
+        QString widgetStyleSheet = ".QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
 
         toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightBlueColor().name(), platformStyle->DarkBlueColor().name()));
 
         QLabel* label = new QLabel();
         label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
         label->setContentsMargins(0,0,0,50);
-        label->setStyleSheet("QLabel{background-color: transparent;}");
+        label->setStyleSheet(".QLabel{background-color: transparent;}");
         /** RVN END */
 
         QToolBar *toolbar = new QToolBar();
+        toolbar->setStyle(style());
         toolbar->setMinimumWidth(label->width());
         toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
         toolbar->setMovable(false);
@@ -584,17 +585,19 @@ void RavenGUI::createToolBars()
         toolbar->addAction(createAssetAction);
         toolbar->addAction(transferAssetAction);
         toolbar->addAction(manageAssetAction);
-        toolbar->addAction(messagingAction);
-        toolbar->addAction(votingAction);
+//        toolbar->addAction(messagingAction);
+//        toolbar->addAction(votingAction);
 
         /** RVN START */
         QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
-                             ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: white} "
-                             ".QToolTip {background-color: white; border: none; }"
-                             ".QToolButton:checked {background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 %1, stop: 1 %2); border: none;}"
-                             ".QToolButton:disabled {color: gray;}";
+                               ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1; border: none;} "
+                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none;} "
+                               ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
+                               ".QToolButton:disabled {color: gray;}";
 
-        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->DarkOrangeColor().name(), platformStyle->LightOrangeColor().name()));
+        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
+                                                platformStyle->ToolBarSelectedTextColor().name(),
+                                                platformStyle->DarkOrangeColor().name()));
 
         toolbar->setOrientation(Qt::Vertical);
         toolbar->setIconSize(QSize(40, 40));

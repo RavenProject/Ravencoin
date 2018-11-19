@@ -230,7 +230,7 @@ void ReissueAssetDialog::setUpValues()
         return;
 
     ui->reissuableBox->setCheckState(Qt::CheckState::Checked);
-    ui->ipfsText->hide();
+    ui->ipfsText->setDisabled(true);
     hideMessage();
 
     ui->unitExampleLabel->setStyleSheet("font-weight: bold");
@@ -375,10 +375,9 @@ void ReissueAssetDialog::updateDisplayUnit()
 void ReissueAssetDialog::toggleIPFSText()
 {
     if (ui->ipfsBox->isChecked()) {
-        ui->ipfsText->show();
+        ui->ipfsText->setDisabled(false);
     } else {
-        ui->ipfsText->hide();
-        ui->ipfsText->clear();
+        ui->ipfsText->setDisabled(true);
     }
 
     buildUpdatedData();
@@ -605,17 +604,18 @@ bool ReissueAssetDialog::checkIPFSHash(QString hash)
     if (!hash.isEmpty()) {
         std::string error;
         if (!CheckEncodedIPFS(hash.toStdString(), error)) {
-            ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must start with 'Qm'");
+            ui->ipfsText->setStyleSheet(STYLE_INVALID);
+            showMessage(tr("IPFS Hash must start with 'Qm'"));
             disableReissueButton();
             return false;
         } else if (hash.size() != 46) {
-            ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must have size of 46 characters");
+            ui->ipfsText->setStyleSheet(STYLE_INVALID);
+            showMessage(tr("IPFS Hash must have size of 46 characters"));
             disableReissueButton();
             return false;
         } else if (DecodeIPFS(ui->ipfsText->text().toStdString()).empty()) {
-            showMessage("IPFS hash is not valid. Please use a valid IPFS hash");
+            ui->ipfsText->setStyleSheet(STYLE_INVALID);
+            showMessage(tr("IPFS hash is not valid. Please use a valid IPFS hash"));
             disableReissueButton();
             return false;
         }
@@ -1150,7 +1150,7 @@ void ReissueAssetDialog::clear()
     onUnitChanged(0);
     ui->reissuableBox->setChecked(true);
     ui->ipfsBox->setChecked(false);
-    ui->ipfsText->hide();
+    ui->ipfsText->setDisabled(true);
     ui->ipfsText->clear();
     hideMessage();
 

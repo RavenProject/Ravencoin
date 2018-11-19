@@ -147,13 +147,6 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
             return QString::fromStdString(rec->name);
         case FormattedAmountRole:
             return QString::fromStdString(rec->formattedQuantity());
-        case BackgroundRole:
-        {
-            if (rec->fIsAdministrator)
-                return QPixmap::fromImage(QImage(":/icons/rectangle"));
-            else
-                return QPixmap::fromImage(QImage(":/icons/bluerectangle"));
-        }
         case AdministratorRole:
         {
             return rec->fIsAdministrator;

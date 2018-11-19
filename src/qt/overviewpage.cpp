@@ -178,11 +178,21 @@ public:
 
         // Select the color of the gradient
         if (index.data(AssetTableModel::AdministratorRole).toBool()) {
-            gradient.setColorAt(0, COLOR_DARK_ORANGE);
-            gradient.setColorAt(1, COLOR_LIGHT_ORANGE);
+            if (darkModeEnabled) {
+                gradient.setColorAt(0, COLOR_ADMIN_CARD_DARK);
+                gradient.setColorAt(1, COLOR_ADMIN_CARD_DARK);
+            } else {
+                gradient.setColorAt(0, COLOR_DARK_ORANGE);
+                gradient.setColorAt(1, COLOR_LIGHT_ORANGE);
+            }
         } else {
-            gradient.setColorAt(0, COLOR_LIGHT_BLUE);
-            gradient.setColorAt(1, COLOR_DARK_BLUE);
+            if (darkModeEnabled) {
+                gradient.setColorAt(0, COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE);
+                gradient.setColorAt(1, COLOR_REGULAR_CARD_DARK_BLUE_DARK_MODE);
+            } else {
+                gradient.setColorAt(0, COLOR_LIGHT_BLUE);
+                gradient.setColorAt(1, COLOR_DARK_BLUE);
+            }
         }
 
         // Using 4 are the radius because the pixels are solid
@@ -316,8 +326,8 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; padding-bottom: 10px; padding-right: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame_2->setStyleSheet(QString(".QFrame {background-color: %1; padding-left: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
 
-    ui->verticalLayout_2->setSpacing(10);
-    ui->verticalLayout_3->setSpacing(10);
+//    ui->verticalLayout_2->setSpacing(10);
+//    ui->verticalLayout_3->setSpacing(10);
 
     /** Create the shadow effects on the frames */
     ui->assetFrame->setGraphicsEffect(GUIUtil::getShadowEffect());

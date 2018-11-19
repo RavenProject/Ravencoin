@@ -21,8 +21,6 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define STYLE_INVALID "background:#FF8080; border: 1px solid lightgray; padding: 0px;"
 #define STYLE_VALID "border: 1px solid lightgray; padding: 0px;"
 
-
-
 /* Transaction list -- unconfirmed transaction */
 #define COLOR_UNCONFIRMED QColor(128, 128, 128)
 /* Transaction list -- negative amount */
@@ -40,35 +38,48 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /* Widget Background color - default color */
 #define COLOR_WHITE QColor(255, 255, 255)
 
+/** LIGHT MODE */
 /* Background color, very light gray */
 #define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
 /* Ravencoin dark orange */
-#define COLOR_DARK_ORANGE QColor(240, 83, 57)
+#define COLOR_DARK_ORANGE QColor("#f05339")
 /* Ravencoin light orange */
-#define COLOR_LIGHT_ORANGE QColor(247, 148, 51)
+#define COLOR_LIGHT_ORANGE QColor("#f79433")
 /* Ravencoin dark blue */
-#define COLOR_DARK_BLUE QColor(46, 62, 128)
+#define COLOR_DARK_BLUE QColor("#475eaa")
 /* Ravencoin light blue */
-#define COLOR_LIGHT_BLUE QColor(81, 107, 194)
+#define COLOR_LIGHT_BLUE QColor("#5874cf")
 /* Ravencoin asset text */
 #define COLOR_ASSET_TEXT QColor(255, 255, 255)
 /* Ravencoin shadow color - light mode */
 #define COLOR_SHADOW_LIGHT QColor(0, 0, 0, 46)
 /* Ravencoin label color */
 #define COLOR_LABEL_STRING "color: #4960ad"
-
+#define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
+/* Toolbar selected text color */
+#define COLOR_TOOLBAR_SELECTED_TEXT COLOR_WHITE
 
 /** DARK MODE */
 /* Widget background color, dark mode */
 #define COLOR_WIDGET_BACKGROUND_DARK QColor("#1c2535")
 /* Ravencoin shadow color - dark mode */
-#define COLOR_SHADOW_DARK QColor(33,80,181)
+#define COLOR_SHADOW_DARK QColor("#0c1b3d")
 /* Ravencoin Light blue - dark mode - dark mode */
-#define COLOR_LIGHT_BLUE_DARK QColor("#2b374b")
+#define COLOR_LIGHT_BLUE_DARK QColor("#1e2636")
 /* Ravencoin Dark blue - dark mode - dark mode */
-#define COLOR_DARK_BLUE_DARK QColor("#1c2535")
+#define COLOR_DARK_BLUE_DARK QColor("#0b1018")
 /* Pricing widget background color */
-#define COLOR_PRICING_WIDGET QColor("#171f2d")
+#define COLOR_PRICING_WIDGET QColor("#161e2d")
+/* Ravencoin dark mode administrator background color */
+#define COLOR_ADMIN_CARD_DARK COLOR_BLACK
+/* Ravencoin dark mode regular asset background color */
+#define COLOR_REGULAR_CARD_DARK_BLUE_DARK_MODE QColor("#06132a")
+/* Ravencoin dark mode regular asset background color */
+#define COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE QColor("#0e1b3b")
+/* Toolbar not selected text color */
+#define COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE QColor("#6c80c5")
+/* Toolbar selected text color */
+#define COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE QColor("#c5ccdf")
 
 
 
