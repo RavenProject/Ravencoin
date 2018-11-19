@@ -326,8 +326,8 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; padding-bottom: 10px; padding-right: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame_2->setStyleSheet(QString(".QFrame {background-color: %1; padding-left: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
 
-    ui->verticalLayout_2->setSpacing(10);
-    ui->verticalLayout_3->setSpacing(10);
+//    ui->verticalLayout_2->setSpacing(10);
+//    ui->verticalLayout_3->setSpacing(10);
 
     /** Create the shadow effects on the frames */
     ui->assetFrame->setGraphicsEffect(GUIUtil::getShadowEffect());

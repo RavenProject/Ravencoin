@@ -562,17 +562,18 @@ void RavenGUI::createToolBars()
         // Create the orange background and the vertical tool bar
         QWidget* toolbarWidget = new QWidget();
 
-        QString widgetStyleSheet = "QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
+        QString widgetStyleSheet = ".QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
 
         toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightBlueColor().name(), platformStyle->DarkBlueColor().name()));
 
         QLabel* label = new QLabel();
         label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
         label->setContentsMargins(0,0,0,50);
-        label->setStyleSheet("QLabel{background-color: transparent;}");
+        label->setStyleSheet(".QLabel{background-color: transparent;}");
         /** RVN END */
 
         QToolBar *toolbar = new QToolBar();
+        toolbar->setStyle(style());
         toolbar->setMinimumWidth(label->width());
         toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
         toolbar->setMovable(false);
@@ -584,17 +585,19 @@ void RavenGUI::createToolBars()
         toolbar->addAction(createAssetAction);
         toolbar->addAction(transferAssetAction);
         toolbar->addAction(manageAssetAction);
-        toolbar->addAction(messagingAction);
-        toolbar->addAction(votingAction);
+//        toolbar->addAction(messagingAction);
+//        toolbar->addAction(votingAction);
 
         /** RVN START */
         QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
-                             ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1;} "
-                             ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none;} "
-                             ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
-                             ".QToolButton:disabled {color: gray;}";
+                               ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1; border: none;} "
+                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none;} "
+                               ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
+                               ".QToolButton:disabled {color: gray;}";
 
-        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(), platformStyle->ToolBarSelectedTextColor().name(), platformStyle->DarkOrangeColor().name()));
+        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
+                                                platformStyle->ToolBarSelectedTextColor().name(),
+                                                platformStyle->DarkOrangeColor().name()));
 
         toolbar->setOrientation(Qt::Vertical);
         toolbar->setIconSize(QSize(40, 40));

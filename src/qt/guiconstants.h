@@ -55,6 +55,9 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_SHADOW_LIGHT QColor(0, 0, 0, 46)
 /* Ravencoin label color */
 #define COLOR_LABEL_STRING "color: #4960ad"
+#define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
+/* Toolbar selected text color */
+#define COLOR_TOOLBAR_SELECTED_TEXT COLOR_WHITE
 
 /** DARK MODE */
 /* Widget background color, dark mode */
@@ -74,9 +77,9 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /* Ravencoin dark mode regular asset background color */
 #define COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE QColor("#0e1b3b")
 /* Toolbar not selected text color */
-#define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#6c80c5");
+#define COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE QColor("#6c80c5")
 /* Toolbar selected text color */
-#define COLOR_TOOLBAR_SELECTED_TEXT QColor("#c5ccdf");
+#define COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE QColor("#c5ccdf")
 
 
 

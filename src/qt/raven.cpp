@@ -703,7 +703,8 @@ int main(int argc, char *argv[])
     if (app.getOptionsModel()->getDarkModeEnabled()) {
         app.setStyle(new DarkStyle);
         darkModeEnabled = true;
-
+    } else {
+        app.setStyle("");
     }
     // Subscribe to global signals from core
     uiInterface.InitMessage.connect(InitMessage);

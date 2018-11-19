@@ -25,10 +25,10 @@ static const struct {
     /** Extra padding/spacing in transactionview */
     const bool useExtraSpacing;
 } platform_styles[] = {
-    {"macosx", false, false, true},
-    {"windows", true, false, false},
+    {"macosx", false, true, true},
+    {"windows", true, true, false},
     /* Other: linux, unix, ... */
-    {"other", true, false, false}
+    {"other", true, true, false}
 };
 static const unsigned platform_styles_count = sizeof(platform_styles)/sizeof(*platform_styles);
 
@@ -116,14 +116,10 @@ QIcon PlatformStyle::SingleColorIcon(const QString& filename) const
 
 QIcon PlatformStyle::SingleColorIconOnOff(const QString& filenameOn, const QString& filenameOff) const
 {
-    if (!colorizeIcons) {
-        QIcon icon;
-        icon.addPixmap(QPixmap(filenameOn), QIcon::Normal, QIcon::On);
-        icon.addPixmap(QPixmap(filenameOff), QIcon::Normal, QIcon::Off);
-        return icon;
-    }
-
-    return ColorizeIcon(filenameOn, SingleColor());
+    QIcon icon;
+    icon.addPixmap(QPixmap(filenameOn), QIcon::Normal, QIcon::On);
+    icon.addPixmap(QPixmap(filenameOff), QIcon::Normal, QIcon::Off);
+    return icon;
 }
 
 QIcon PlatformStyle::SingleColorIcon(const QIcon& icon) const
@@ -169,33 +165,33 @@ QColor PlatformStyle::TextColor() const
 QColor PlatformStyle::ToolBarSelectedTextColor() const
 {
     if (darkModeEnabled)
-        return COLOR_TOOLBAR_SELECTED_TEXT;
+        return COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE;
 
-    return textColor;
+    return COLOR_TOOLBAR_SELECTED_TEXT;
 }
 
 QColor PlatformStyle::ToolBarNotSelectedTextColor() const
 {
     if (darkModeEnabled)
-        return COLOR_TOOLBAR_NOT_SELECTED_TEXT;
+        return COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE;
 
-    return textColor;
+    return COLOR_TOOLBAR_NOT_SELECTED_TEXT;
 }
 
 QColor PlatformStyle::MainBackGroundColor() const
 {
     if (darkModeEnabled)
         return COLOR_BLACK;
-    else
-        return COLOR_BACKGROUND_LIGHT;
+
+    return COLOR_BACKGROUND_LIGHT;
 }
 
 QColor PlatformStyle::TopWidgetBackGroundColor() const
 {
     if (darkModeEnabled)
         return COLOR_PRICING_WIDGET;
-    else
-        return COLOR_BACKGROUND_LIGHT;
+
+    return COLOR_BACKGROUND_LIGHT;
 }
 
 QColor PlatformStyle::WidgetBackGroundColor() const
