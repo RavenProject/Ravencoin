@@ -42,8 +42,6 @@ public:
     void setWalletModel(WalletModel *walletModel);
     void showOutOfSyncWarning(bool fShow);
     void showAssets();
-    void displayAssetInfo();
-    void hideAssetInfo();
 
 public Q_SLOTS:
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
@@ -79,6 +77,8 @@ private Q_SLOTS:
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
     void assetSearchChanged();
+    void totalRVNClicked();
+    void totalBackRVNClicked();
 };
 
 #endif // RAVEN_QT_OVERVIEWPAGE_H

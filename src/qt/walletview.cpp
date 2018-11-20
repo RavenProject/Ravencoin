@@ -401,10 +401,4 @@ void WalletView::gotoManageAssetsPage()
 {
     setCurrentWidget(manageAssetsPage);
 }
-
-void WalletView::displayAssetInfo()
-{
-    overviewPage->displayAssetInfo();
-    Q_EMIT checkAssets();
-}
 /** RVN END */

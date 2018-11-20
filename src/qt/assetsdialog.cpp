@@ -269,6 +269,18 @@ void AssetsDialog::setupAssetControlFrame(const PlatformStyle *platformStyle)
     // Align the Custom change address checkbox
     ui->checkBoxAssetControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
+    ui->labelAssetControlQuantity->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlAfterFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlBytes->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlLowOutput->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->checkBoxAssetControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->lineEditAssetControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlInsuffFunds->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlAutomaticallySelected->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 void AssetsDialog::setupScrollView(const PlatformStyle *platformStyle)

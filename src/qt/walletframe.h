@@ -46,8 +46,6 @@ public:
 
     void showOutOfSyncWarning(bool fShow);
 
-    void displayAssetInfo();
-
 Q_SIGNALS:
     /** Notify that the user has requested more information about the out-of-sync warning */
     void requestedSyncWarningInfo();

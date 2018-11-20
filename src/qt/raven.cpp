@@ -54,6 +54,7 @@
 #include <QTranslator>
 #include <QSslConfiguration>
 #include <QDir>
+#include <QFontDatabase>
 
 #if defined(QT_STATICPLUGIN)
 #include <QtPlugin>
@@ -394,8 +395,8 @@ void RavenApplication::createOptionsModel(bool resetSettings)
 void RavenApplication::createWindow(const NetworkStyle *networkStyle)
 {
     window = new RavenGUI(platformStyle, networkStyle, 0);
-    window->setMinimumSize(900,900);
-    window->setBaseSize(900,900);
+    window->setMinimumSize(200,200);
+    window->setBaseSize(640,640);
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window, SLOT(detectShutdown()));
@@ -706,6 +707,7 @@ int main(int argc, char *argv[])
     } else {
         app.setStyle("");
     }
+
     // Subscribe to global signals from core
     uiInterface.InitMessage.connect(InitMessage);
 

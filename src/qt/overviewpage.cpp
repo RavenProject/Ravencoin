@@ -209,16 +209,16 @@ public:
 
         /** Create the font that is used for painting the asset name */
         QFont nameFont;
-        nameFont.setFamily("Arial");
+        nameFont.setFamily("Open Sans");
         nameFont.setPixelSize(18);
-        nameFont.setWeight(400);
+        nameFont.setWeight(QFont::Weight::Normal);
         nameFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.4);
 
         /** Create the font that is used for painting the asset amount */
         QFont amountFont;
-        amountFont.setFamily("Arial");
+        amountFont.setFamily("Open Sans");
         amountFont.setPixelSize(14);
-        amountFont.setWeight(600);
+        amountFont.setWeight(QFont::Weight::Normal);
         amountFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.3);
 
         /** Get the name and formatted amount from the data */
@@ -226,29 +226,30 @@ public:
         QString amountText = index.data(AssetTableModel::FormattedAmountRole).toString();
 
         // Setup the pens
-        QPen penAmount(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
-        QPen penAssetName(COLOR_ASSET_TEXT, 10, Qt::SolidLine, Qt::FlatCap, Qt::RoundJoin);
+        QColor textColor = COLOR_WHITE;
+        if (darkModeEnabled)
+            textColor = COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE;
+
+        QPen penName(textColor);
 
         /** Start Concatenation of Asset Name */
         // Get the width in pixels that the amount takes up (because they are different font,
         // we need to do this before we call the concatenate function
         painter->setFont(amountFont);
-        painter->setPen(penAmount);
         int amount_width = painter->fontMetrics().width(amountText);
 
         // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
         painter->setFont(nameFont);
-        painter->setPen(penAssetName);
 
         GUIUtil::concatenate(painter, name, amount_width, assetNameRect.left(), amountRect.right());
 
         /** Paint the asset name */
+        painter->setPen(penName);
         painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name);
 
+
         /** Paint the amount */
-        painter->setPen(penAmount);
         painter->setFont(amountFont);
-        painter->setOpacity(0.65);
         painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, amountText);
 
         painter->restore();
@@ -265,6 +266,7 @@ public:
 };
 #include "overviewpage.moc"
 #include "ravengui.h"
+#include <QFontDatabase>
 
 OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent),
@@ -301,7 +303,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->listAssets->setMinimumHeight(5 * (42 + 2));
     ui->listAssets->viewport()->setAutoFillBackground(false);
 
-
     // Delay before filtering assetes in ms
     static const int input_filter_delay = 200;
 
@@ -314,6 +315,8 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
     connect(ui->listAssets, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAssetClicked(QModelIndex)));
+    connect(ui->testTotalRaven, SIGNAL(clicked()), this, SLOT(totalRVNClicked()));
+    connect(ui->rvnBalanceBack, SIGNAL(clicked()), this, SLOT(totalBackRVNClicked()));
 
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
@@ -350,6 +353,25 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->assetBalanceLabel->setFont(GUIUtil::getTopLabelFont());
     ui->recentTransactionsLabel->setFont(GUIUtil::getTopLabelFont());
 
+    /** Update the sub labels font */
+    ui->labelBalanceText->setFont(GUIUtil::getSubLabelFont());
+    ui->labelPendingText->setFont(GUIUtil::getSubLabelFont());
+    ui->labelImmatureText->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSpendable->setFont(GUIUtil::getSubLabelFont());
+    ui->labelWatchonly->setFont(GUIUtil::getSubLabelFont());
+    ui->labelBalance->setFont(GUIUtil::getSubLabelFont());
+    ui->labelUnconfirmed->setFont(GUIUtil::getSubLabelFont());
+    ui->labelImmature->setFont(GUIUtil::getSubLabelFont());
+    ui->labelWatchAvailable->setFont(GUIUtil::getSubLabelFont());
+    ui->labelWatchPending->setFont(GUIUtil::getSubLabelFont());
+    ui->labelWatchImmature->setFont(GUIUtil::getSubLabelFont());
+    ui->labelTotalText->setFont(GUIUtil::getSubLabelFont());
+    ui->labelTotal->setFont(GUIUtil::getTopLabelFontBolded());
+    ui->labelWatchTotal->setFont(GUIUtil::getTopLabelFontBolded());
+
+    /** Hide the asset total frame */
+    ui->frame->hide();
+
     /** Create the search bar for assets */
     ui->assetSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
     ui->assetSearch->setStyleSheet(".QLineEdit {border: 1px solid #4960ad; border-radius: 5px;}");
@@ -360,38 +382,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 
     QFontMetrics fm = QFontMetrics(ui->assetSearch->font());
     ui->assetSearch->setFixedHeight(fm.height()+ 5);
-
-    /** Setup the asset info grid labels and values */
-    ui->assetInfoTitleLabel->setText("<b>" + tr("Asset Activation Status") + "</b>");
-    ui->assetInfoPercentageLabel->setText(tr("Current Percentage") + ":");
-    ui->assetInfoStatusLabel->setText(tr("Status") + ":");
-    ui->assetInfoBlockLabel->setText(tr("Target Percentage") + ":");
-    ui->assetInfoPossibleLabel->setText(tr("Could Vote Pass") + ":");
-    ui->assetInfoBlocksLeftLabel->setText(tr("Voting Block Cycle") + ":");
-
-    ui->assetInfoTitleLabel->setStyleSheet("background-color: transparent");
-    ui->assetInfoPercentageLabel->setStyleSheet("background-color: transparent");
-    ui->assetInfoStatusLabel->setStyleSheet("background-color: transparent");
-    ui->assetInfoBlockLabel->setStyleSheet("background-color: transparent");
-    ui->assetInfoPossibleLabel->setStyleSheet("background-color: transparent");
-    ui->assetInfoBlocksLeftLabel->setStyleSheet("background-color: transparent");
-
-    ui->assetInfoPercentageValue->setStyleSheet("background-color: transparent");
-    ui->assetInfoStatusValue->setStyleSheet("background-color: transparent");
-    ui->assetInfoBlockValue->setStyleSheet("background-color: transparent");
-    ui->assetInfoPossibleValue->setStyleSheet("background-color: transparent");
-    ui->assetInfoBlocksLeftValue->setStyleSheet("background-color: transparent");
-
-    /** Setup the RVN Balance Colors for darkmode */
-    QString labelColor = QString(".QLabel { color: %1 }").arg(platformStyle->TextColor().name());
-    ui->labelBalance->setStyleSheet(labelColor);
-    ui->labelUnconfirmed->setStyleSheet(labelColor);
-    ui->labelImmature->setStyleSheet(labelColor);
-    ui->labelTotal->setStyleSheet(labelColor);
-    ui->labelWatchAvailable->setStyleSheet(labelColor);
-    ui->labelWatchPending->setStyleSheet(labelColor);
-    ui->labelWatchImmature->setStyleSheet(labelColor);
-    ui->labelWatchTotal->setStyleSheet(labelColor);
 
     // Trigger the call to show the assets table if assets are active
     showAssets();
@@ -436,6 +426,9 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     ui->labelWatchPending->setText(RavenUnits::formatWithUnit(unit, watchUnconfBalance, false, RavenUnits::separatorAlways));
     ui->labelWatchImmature->setText(RavenUnits::formatWithUnit(unit, watchImmatureBalance, false, RavenUnits::separatorAlways));
     ui->labelWatchTotal->setText(RavenUnits::formatWithUnit(unit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, RavenUnits::separatorAlways));
+
+    ui->testTotalRaven->setText(RavenUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance, false, RavenUnits::separatorAlways));
+    ui->testTotalRaven->setFont(GUIUtil::getTopLabelFont(QFont::Weight::Bold, 26));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
@@ -564,125 +557,6 @@ void OverviewPage::showAssets()
         ui->assetVerticalSpaceWidget->show();
         ui->assetVerticalSpaceWidget2->show();
     }
-
-    displayAssetInfo();
-}
-
-void OverviewPage::displayAssetInfo()
-{
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(),
-                                                              Consensus::DeploymentPos::DEPLOYMENT_ASSETS);
-    auto startTime = Params().GetConsensus().vDeployments[Consensus::DeploymentPos::DEPLOYMENT_ASSETS].nStartTime * 1000;
-    auto currentTime = GetTimeMillis();
-    auto date = GUIUtil::dateTimeStr(startTime / 1000);
-
-    QString status;
-    switch (thresholdState) {
-        case THRESHOLD_DEFINED:
-            if (currentTime < startTime)
-                status = tr("Waiting until ") + date;
-            else {
-                auto cycleWidth = Params().GetConsensus().nMinerConfirmationWindow;
-                QString currentCount;
-                currentCount.sprintf("%d of %d blocks", chainActive.Height() % cycleWidth, cycleWidth);
-                status = tr("Waiting - ") +  currentCount;
-            }
-            break;
-        case THRESHOLD_STARTED:
-            status = tr("Voting Started");
-            break;
-        case THRESHOLD_LOCKED_IN:
-            status = tr("Locked in - Not Active");
-            break;
-        case THRESHOLD_ACTIVE:
-            status = tr("Active");
-            break;
-        case THRESHOLD_FAILED:
-            status = tr("Failed");
-            break;
-    }
-
-    if (thresholdState == THRESHOLD_ACTIVE) {
-        hideAssetInfo();
-        return;
-    }
-
-    ui->assetInfoStatusValue->setText(status);
-
-    // Get the current height of the chain
-    auto currentheight = chainActive.Height();
-
-    auto heightLockedIn = VersionBitsTipStateSinceHeight(Params().GetConsensus(),
-                                                         Consensus::DeploymentPos::DEPLOYMENT_ASSETS);
-    auto cycleWidth = Params().GetConsensus().nMinerConfirmationWindow;
-    auto difference = (currentheight - heightLockedIn + 1) % cycleWidth;
-    QString currentCount;
-    currentCount.sprintf("%d/%d blocks", difference, cycleWidth);
-
-    if (thresholdState == THRESHOLD_STARTED) {
-        BIP9Stats statsStruct = VersionBitsTipStatistics(Params().GetConsensus(),
-                                                         Consensus::DeploymentPos::DEPLOYMENT_ASSETS);
-
-        double targetDouble = double(statsStruct.threshold) / double(statsStruct.period);
-        QString targetPercentage;
-        targetPercentage.sprintf("%0.2f%%", targetDouble * 100);
-        ui->assetInfoBlockValue->setText(targetPercentage);
-
-        double currentDouble = double(statsStruct.count) / double(statsStruct.period);
-        QString currentPercentage;
-        currentPercentage.sprintf("%0.2f%%", currentDouble * 100);
-        ui->assetInfoPercentageValue->setText(currentPercentage);
-
-        QString possible = statsStruct.possible ? tr("yes") : tr("no");
-        ui->assetInfoPossibleValue->setText(possible);
-
-        ui->assetInfoBlocksLeftValue->setText(currentCount);
-
-        ui->assetInfoPercentageValue->show();
-        ui->assetInfoBlockValue->show();
-        ui->assetInfoPercentageLabel->show();
-        ui->assetInfoBlockLabel->show();
-        ui->assetInfoPossibleLabel->show();
-        ui->assetInfoPossibleValue->show();
-        ui->assetInfoBlocksLeftLabel->show();
-        ui->assetInfoBlocksLeftValue->show();
-    } else if (thresholdState == THRESHOLD_LOCKED_IN) {
-
-        ui->assetInfoBlockLabel->setText(tr("Active in") + ":");
-        ui->assetInfoBlockValue->setText(currentCount);
-
-        ui->assetInfoPercentageValue->hide();
-        ui->assetInfoPercentageLabel->hide();
-        ui->assetInfoPossibleLabel->hide();
-        ui->assetInfoPossibleValue->hide();
-        ui->assetInfoBlocksLeftLabel->hide();
-        ui->assetInfoBlocksLeftValue->hide();
-    } else {
-        ui->assetInfoPercentageValue->hide();
-        ui->assetInfoBlockValue->hide();
-        ui->assetInfoPercentageLabel->hide();
-        ui->assetInfoBlockLabel->hide();
-        ui->assetInfoPossibleLabel->hide();
-        ui->assetInfoPossibleValue->hide();
-        ui->assetInfoBlocksLeftLabel->hide();
-        ui->assetInfoBlocksLeftValue->hide();
-    }
-}
-
-void OverviewPage::hideAssetInfo()
-{
-    ui->assetInfoPercentageValue->hide();
-    ui->assetInfoBlockValue->hide();
-    ui->assetInfoStatusValue->hide();
-    ui->assetInfoPossibleValue->hide();
-    ui->assetInfoBlocksLeftValue->hide();
-
-    ui->assetInfoTitleLabel->hide();
-    ui->assetInfoBlockLabel->hide();
-    ui->assetInfoStatusLabel->hide();
-    ui->assetInfoPercentageLabel->hide();
-    ui->assetInfoPossibleLabel->hide();
-    ui->assetInfoBlocksLeftLabel->hide();
 }
 
 void OverviewPage::assetSearchChanged()
@@ -690,4 +564,16 @@ void OverviewPage::assetSearchChanged()
     if (!assetFilter)
         return;
     assetFilter->setAssetNamePrefix(ui->assetSearch->text());
+}
+
+void OverviewPage::totalRVNClicked()
+{
+    ui->frame->show();
+    ui->testTotalRaven->hide();
+}
+
+void OverviewPage::totalBackRVNClicked()
+{
+    ui->frame->hide();
+    ui->testTotalRaven->show();
 }

@@ -292,6 +292,17 @@ void ReissueAssetDialog::setupCoinControlFrame(const PlatformStyle *platformStyl
     // Align the Custom change address checkbox
     ui->checkBoxCoinControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
+    ui->labelCoinControlQuantity->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlAfterFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlBytes->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlLowOutput->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->checkBoxCoinControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->lineEditCoinControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlInsuffFunds->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlAutomaticallySelected->setFont(GUIUtil::getSubLabelFont());
 }
 
 void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)

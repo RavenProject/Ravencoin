@@ -242,6 +242,19 @@ void SendCoinsDialog::setupCoinControl(const PlatformStyle *platformStyle)
 
     // Align the Custom change address checkbox
     ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
+
+    ui->labelCoinControlQuantity->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlAfterFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlBytes->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlLowOutput->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->checkBoxCoinControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->lineEditCoinControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlInsuffFunds->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlAutomaticallySelected->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCoinControlChangeLabel->setFont(GUIUtil::getSubLabelFontBolded());
 }
 
 void SendCoinsDialog::setupScrollView(const PlatformStyle *platformStyle)

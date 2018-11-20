@@ -44,7 +44,7 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     // normal raven address field
     GUIUtil::setupAddressWidget(ui->payTo, this);
     // just a label for displaying raven address(es)
-    ui->payTo_is->setFont(GUIUtil::fixedPitchFont());
+    ui->payTo_is->setFont(GUIUtil::getSubLabelFont());
 
     // Connect signals
     connect(ui->payAmount, SIGNAL(valueChanged()), this, SIGNAL(payAmountChanged()));
