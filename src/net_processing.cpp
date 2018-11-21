@@ -1209,15 +1209,11 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
             }
 
             bool push = false;
-            if (passetsCache && passetsCache->Exists(inv.name)) {
-                auto data = passetsCache->Get(inv.name);
-                connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
-                push = true;
-            } else if (passetsdb) {
+            if (passets) {
                 CNewAsset asset;
                 int height;
                 uint256 hash;
-                if (passetsdb->ReadAssetData(inv.name, asset, height, hash)) {
+                if (passets->GetAssetMetaDataIfExists(inv.name, asset, height, hash)) {
                     auto data = CDatabasedAssetData(asset, height, hash);
                     passetsCache->Put(inv.name, data);
                     connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));
@@ -1687,7 +1683,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             GetMainSignals().Inventory(inv.hash);
         }
     }
-
 
     else if (strCommand == NetMsgType::GETDATA)
     {
@@ -3116,7 +3111,6 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
         // Message: getassetdata
         //
         if (pto->nVersion >= ASSETDATA_VERSION && pto->fGetAssetData) {
-            LogPrintf("Got to getassetdata net_processing\n");
             LOCK(pto->cs_inventory);
 
             pto->fGetAssetData = false;
