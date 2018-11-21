@@ -27,6 +27,7 @@
 #include <core_io.h>
 #include <policy/policy.h>
 #include "assets/assettypes.h"
+#include "assettablemodel.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QModelIndex>
@@ -353,6 +354,24 @@ void CreateAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
     ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
 
+    ui->buttonChooseFee->setFont(GUIUtil::getSubLabelFont());
+    ui->fallbackFeeWarningLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->buttonMinimizeFee->setFont(GUIUtil::getSubLabelFont());
+    ui->radioSmartFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee2->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee3->setFont(GUIUtil::getSubLabelFont());
+    ui->confTargetSelector->setFont(GUIUtil::getSubLabelFont());
+    ui->radioCustomFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCustomPerKilobyte->setFont(GUIUtil::getSubLabelFont());
+    ui->customFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelMinFeeWarning->setFont(GUIUtil::getSubLabelFont());
+    ui->optInRBF->setFont(GUIUtil::getSubLabelFont());
+    ui->createAssetButton->setFont(GUIUtil::getSubLabelFont());
+    ui->clearButton->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelFeeEstimation->setFont(GUIUtil::getSubLabelFont());
+    ui->labelFeeMinimized->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 void CreateAssetDialog::setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
@@ -363,6 +382,9 @@ void CreateAssetDialog::setBalance(const CAmount& balance, const CAmount& unconf
     Q_UNUSED(watchBalance);
     Q_UNUSED(watchUnconfirmedBalance);
     Q_UNUSED(watchImmatureBalance);
+
+    ui->labelBalance->setFont(GUIUtil::getSubLabelFont());
+    ui->label->setFont(GUIUtil::getSubLabelFont());
 
     if(model && model->getOptionsModel())
     {
@@ -1205,4 +1227,30 @@ void CreateAssetDialog::clear()
 void CreateAssetDialog::onClearButtonClicked()
 {
     clear();
+}
+
+void CreateAssetDialog::focusSubAsset(const QModelIndex &index)
+{
+    selectTypeName(1,index.data(AssetTableModel::AssetNameRole).toString());
+}
+
+void CreateAssetDialog::focusUniqueAsset(const QModelIndex &index)
+{
+    selectTypeName(2,index.data(AssetTableModel::AssetNameRole).toString());
+}
+
+void CreateAssetDialog::selectTypeName(int type, QString name)
+{
+    clear();
+
+    if (IsAssetNameAnOwner(name.toStdString()))
+        name = name.left(name.size() - 1);
+
+    ui->assetType->setCurrentIndex(type);
+    onAssetTypeActivated(type);
+
+    ui->assetList->setCurrentIndex(ui->assetList->findText(name));
+    onAssetListActivated(ui->assetList->currentIndex());
+
+    ui->nameText->setFocus();
 }

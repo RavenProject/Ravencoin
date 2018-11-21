@@ -142,6 +142,8 @@ private:
 
     const PlatformStyle *platformStyle;
 
+    /** Load the custome open sans fonts into the font database */
+    void loadFonts();
     /** Create the main UI actions. */
     void createActions();
     /** Create the menu bar and sub-menus. */

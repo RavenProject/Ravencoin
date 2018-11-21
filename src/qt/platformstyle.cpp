@@ -157,7 +157,7 @@ QIcon PlatformStyle::TextColorIcon(const QIcon& icon) const
 QColor PlatformStyle::TextColor() const
 {
     if (darkModeEnabled)
-        return COLOR_ASSET_TEXT;
+        return COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE;
 
     return textColor;
 }

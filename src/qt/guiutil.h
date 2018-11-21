@@ -37,9 +37,12 @@ namespace GUIUtil
 {
     // Get the font for the sub labels
     QFont getSubLabelFont();
+    QFont getSubLabelFontBolded();
 
     // Get the font for the main labels
     QFont getTopLabelFont();
+    QFont getTopLabelFontBolded();
+    QFont getTopLabelFont(int weight, int pxsize);
 
     QGraphicsDropShadowEffect* getShadowEffect();
 

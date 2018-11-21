@@ -151,7 +151,18 @@ void ReceiveCoinsDialog::setupRequestFrame(const PlatformStyle *platformStyle)
     ui->label_7->setStyleSheet(COLOR_LABEL_STRING);
     ui->label_7->setFont(GUIUtil::getSubLabelFont());
 
-    ui->reuseAddress->setStyleSheet(COLOR_LABEL_STRING);
+    ui->reuseAddress->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+    ui->reqLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->reqAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->reqMessage->setFont(GUIUtil::getSubLabelFont());
+    ui->receiveButton->setFont(GUIUtil::getSubLabelFont());
+    ui->clearButton->setFont(GUIUtil::getSubLabelFont());
+    ui->recentRequestsView->setFont(GUIUtil::getSubLabelFont());
+    ui->showRequestButton->setFont(GUIUtil::getSubLabelFont());
+    ui->removeRequestButton->setFont(GUIUtil::getSubLabelFont());
+    ui->label_5->setFont(GUIUtil::getSubLabelFont());
+
+    ui->label_6->setFont(GUIUtil::getSubLabelFontBolded());
 }
 
 void ReceiveCoinsDialog::setupHistoryFrame(const PlatformStyle *platformStyle)
@@ -166,6 +177,8 @@ void ReceiveCoinsDialog::setupHistoryFrame(const PlatformStyle *platformStyle)
 
     ui->recentRequestsView->setGraphicsEffect(GUIUtil::getShadowEffect());
     ui->recentRequestsView->setStyleSheet(".QTableView {border: none;}");
+
+    contextMenu->setFont(GUIUtil::getSubLabelFont());
 
 }
 

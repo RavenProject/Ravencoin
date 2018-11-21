@@ -8,6 +8,7 @@
 
 #include "transactiontablemodel.h"
 
+#include "guiutil.h"
 #include <QModelIndex>
 
 TransactionDescDialog::TransactionDescDialog(const QModelIndex &idx, QWidget *parent) :
@@ -18,6 +19,8 @@ TransactionDescDialog::TransactionDescDialog(const QModelIndex &idx, QWidget *pa
     setWindowTitle(tr("Details for %1").arg(idx.data(TransactionTableModel::TxIDRole).toString()));
     QString desc = idx.data(TransactionTableModel::LongDescriptionRole).toString();
     ui->detailText->setHtml(desc);
+
+    ui->detailText->setFont(GUIUtil::getSubLabelFont());
 }
 
 TransactionDescDialog::~TransactionDescDialog()

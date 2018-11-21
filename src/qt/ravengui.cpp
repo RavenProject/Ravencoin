@@ -75,6 +75,7 @@
 #include <QUrlQuery>
 #include <validation.h>
 #include <tinyformat.h>
+#include <QFontDatabase>
 
 #endif
 
@@ -209,6 +210,10 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     // Accept D&D of URIs
     setAcceptDrops(true);
 
+    loadFonts();
+
+    this->setFont(QFont("Open Sans"));
+
     // Create actions for the toolbar, menu bar and tray/dock icon
     // Needs walletFrame to be initialized
     createActions();
@@ -316,13 +321,28 @@ RavenGUI::~RavenGUI()
     delete rpcConsole;
 }
 
+void RavenGUI::loadFonts()
+{
+    QFontDatabase::addApplicationFont(":/fonts/opensans-bold");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-bolditalic");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-extrabold");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-extrabolditalic");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-italic");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-light");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-lightitalic");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-regular");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-semibold");
+    QFontDatabase::addApplicationFont(":/fonts/opensans-semibolditalic");
+}
+
+
 void RavenGUI::createActions()
 {
     QFont font = QFont();
-    font.setPixelSize(25);
-    font.setWeight(400);
-    font.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.8);
-    font.setFamily("Arial");
+    font.setPixelSize(22);
+    font.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.43);
+    font.setFamily("Open Sans");
+    font.setWeight(QFont::Weight::ExtraLight);
 
     QActionGroup *tabGroup = new QActionGroup(this);
 
@@ -591,7 +611,7 @@ void RavenGUI::createToolBars()
         /** RVN START */
         QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
                                ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1; border: none;} "
-                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none;} "
+                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none; font: normal 22pt \"Open Sans\";} "
                                ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
                                ".QToolButton:disabled {color: gray;}";
 
@@ -620,9 +640,9 @@ void RavenGUI::createToolBars()
 
         /** Create the shadow effects for the main wallet frame. Make it so it puts a shadow on the tool bar */
         QGraphicsDropShadowEffect *walletFrameShadow = new QGraphicsDropShadowEffect;
-        walletFrameShadow->setBlurRadius(8.0);
-        walletFrameShadow->setColor(platformStyle->ShadowColor());
-        walletFrameShadow->setXOffset(-9.0);
+        walletFrameShadow->setBlurRadius(50);
+        walletFrameShadow->setColor(darkModeEnabled ? QColor("8E8E8E") : COLOR_SHADOW_LIGHT);
+        walletFrameShadow->setXOffset(-8.0);
         walletFrameShadow->setYOffset(0);
         mainWalletWidget->setGraphicsEffect(walletFrameShadow);
 
@@ -635,7 +655,8 @@ void RavenGUI::createToolBars()
         headerWidget->setFixedHeight(75);
 
         QFont currentMarketFont;
-        currentMarketFont.setFamily("Arial");
+        currentMarketFont.setFamily("Open Sans");
+        currentMarketFont.setWeight(QFont::Weight::Normal);
         currentMarketFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
         currentMarketFont.setPixelSize(18);
 
@@ -649,7 +670,7 @@ void RavenGUI::createToolBars()
         labelCurrentMarket->setAlignment(Qt::AlignVCenter);
         labelCurrentMarket->setStyleSheet(COLOR_LABEL_STRING);
         labelCurrentMarket->setFont(currentMarketFont);
-        labelCurrentMarket->setText(tr("Market Price"));
+        labelCurrentMarket->setText(tr("Ravencoin Market Price "));
 
         QString currentPriceStyleSheet = ".QLabel{color: %1;}";
         labelCurrentPrice->setContentsMargins(25,0,0,0);
@@ -1076,12 +1097,6 @@ void RavenGUI::setNumBlocks(int count, const QDateTime& blockDate, double nVerif
             modalOverlay->tipUpdate(count, blockDate, nVerificationProgress);
     }
 
-#ifdef ENABLE_WALLET
-    if(walletFrame)
-        {
-            walletFrame->displayAssetInfo();
-        }
-#endif // ENABLE_WALLET
     if (!clientModel)
         return;
 

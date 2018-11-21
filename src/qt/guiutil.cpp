@@ -86,20 +86,50 @@ namespace GUIUtil {
 QFont getSubLabelFont()
 {
     QFont labelSubFont;
-    labelSubFont.setFamily("Arial");
+    labelSubFont.setFamily("Open Sans");
+    labelSubFont.setWeight(QFont::Weight::ExtraLight);
     labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelSubFont.setPixelSize(14);
-    labelSubFont.setBold(false);
     return labelSubFont;
+}
+
+QFont getSubLabelFontBolded()
+{
+    QFont labelSubFont;
+    labelSubFont.setFamily("Open Sans");
+    labelSubFont.setWeight(QFont::Weight::Bold);
+    labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelSubFont.setPixelSize(14);
+    return labelSubFont;
+}
+
+QFont getTopLabelFontBolded()
+{
+    QFont labelTopFont;
+    labelTopFont.setFamily("Open Sans");
+    labelTopFont.setWeight(QFont::Weight::Bold);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(18);
+    return labelTopFont;
+}
+
+QFont getTopLabelFont(int weight, int pxsize)
+{
+    QFont labelTopFont;
+    labelTopFont.setFamily("Open Sans");
+    labelTopFont.setWeight(weight);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(pxsize);
+    return labelTopFont;
 }
 
 QFont getTopLabelFont()
 {
     QFont labelTopFont;
-    labelTopFont.setFamily("Arial");
-    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, 0.3);
+    labelTopFont.setFamily("Open Sans");
+    labelTopFont.setWeight(QFont::Weight::Light);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelTopFont.setPixelSize(18);
-    labelTopFont.setBold(true);
     return labelTopFont;
 }
 
@@ -159,7 +189,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 {
     parent->setFocusProxy(widget);
 
-    widget->setFont(fixedPitchFont());
+    widget->setFont(getSubLabelFont());
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
@@ -642,8 +672,9 @@ TableViewLastColumnResizingFixer::TableViewLastColumnResizingFixer(QTableView* t
     lastColumnIndex = columnCount - 1;
     secondToLastColumnIndex = columnCount - 2;
     tableView->horizontalHeader()->setMinimumSectionSize(allColumnsMinimumWidth);
-    setViewHeaderResizeMode(secondToLastColumnIndex, QHeaderView::Interactive);
-    setViewHeaderResizeMode(lastColumnIndex, QHeaderView::Interactive);
+    setViewHeaderResizeMode(columnCount - 3, QHeaderView::ResizeToContents);
+    setViewHeaderResizeMode(secondToLastColumnIndex, QHeaderView::ResizeToContents);
+    setViewHeaderResizeMode(lastColumnIndex, QHeaderView::Stretch);
 }
 
 #ifdef WIN32

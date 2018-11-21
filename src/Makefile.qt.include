@@ -355,7 +355,18 @@ RES_ICONS = \
   qt/res/darkstyle/icon_radiobutton_checked_pressed.png \
   qt/res/darkstyle/icon_radiobutton_unchecked_pressed.png \
   qt/res/darkstyle/icon_radiobutton_checked_disabled.png \
-  qt/res/darkstyle/icon_radiobutton_unchecked_disabled.png
+  qt/res/darkstyle/icon_radiobutton_unchecked_disabled.png \
+  qt/res/fonts/OpenSans-Bold.ttf \
+  qt/res/fonts/OpenSans-BoldItalic.ttf \
+  qt/res/fonts/OpenSans-ExtraBold.ttf \
+  qt/res/fonts/OpenSans-ExtraBoldItalic.ttf \
+  qt/res/fonts/OpenSans-Italic.ttf \
+  qt/res/fonts/OpenSans-Light.ttf \
+  qt/res/fonts/OpenSans-LightItalic.ttf \
+  qt/res/fonts/OpenSans-Regular.ttf \
+  qt/res/fonts/OpenSans-SemiBold.ttf \
+  qt/res/fonts/OpenSans-SemiBoldItalic.ttf
+
 
 RAVEN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \
