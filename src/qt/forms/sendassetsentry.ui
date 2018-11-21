@@ -21,7 +21,7 @@
   </property>
   <widget class="QFrame" name="SendCoins">
    <property name="toolTip">
-    <string>This is a normal payment.</string>
+    <string>This is an asset payment</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::NoFrame</enum>
@@ -39,23 +39,13 @@
     <property name="verticalSpacing">
      <number>8</number>
     </property>
-    <item row="4" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0">
-      <item>
-       <widget class="AssetAmountField" name="payAssetAmount"/>
-      </item>
-     </layout>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="labellLabel">
+    <item row="6" column="1">
+     <widget class="QLabel" name="assetAmountLabel">
       <property name="text">
-       <string>&amp;Label:</string>
+       <string/>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-      <property name="buddy">
-       <cstring>addAsLabel</cstring>
       </property>
      </widget>
     </item>
@@ -63,6 +53,16 @@
      <widget class="QLabel" name="ownershipWarningMessage">
       <property name="text">
        <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="assetBoxLabel">
+      <property name="text">
+       <string>Asset:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
@@ -89,20 +89,30 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="1">
-     <widget class="QLabel" name="assetAmountLabel">
+    <item row="4" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0">
+      <item>
+       <widget class="AssetAmountField" name="payAssetAmount"/>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="labellLabel">
       <property name="text">
-       <string/>
+       <string>&amp;Label:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
+      <property name="buddy">
+       <cstring>addAsLabel</cstring>
+      </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="assetBoxLabel">
+    <item row="9" column="0">
+     <widget class="QLabel" name="messageLabel">
       <property name="text">
-       <string>Asset:</string>
+       <string>Message:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -142,26 +152,6 @@
        </spacer>
       </item>
      </layout>
-    </item>
-    <item row="8" column="1">
-     <widget class="QLabel" name="messageTextLabel">
-      <property name="toolTip">
-       <string>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
-     <widget class="QLabel" name="messageLabel">
-      <property name="text">
-       <string>Message:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
     </item>
     <item row="2" column="1">
      <layout class="QHBoxLayout" name="payToLayout">
@@ -247,6 +237,16 @@
      <widget class="QLineEdit" name="addAsLabel">
       <property name="toolTip">
        <string>Enter a label for this address to add it to the list of used addresses</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QLabel" name="messageTextLabel">
+      <property name="toolTip">
+       <string>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::PlainText</enum>
       </property>
      </widget>
     </item>

@@ -10,6 +10,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QWidget>
+#include <QMenu>
 #include <memory>
 
 class ClientModel;
@@ -49,7 +50,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void transactionClicked(const QModelIndex &index);
-    void assetClicked(const QModelIndex &index);
+    void assetSendClicked(const QModelIndex &index);
+    void assetIssueSubClicked(const QModelIndex &index);
+    void assetIssueUniqueClicked(const QModelIndex &index);
+    void assetReissueClicked(const QModelIndex &index);
     void outOfSyncWarningClicked();
 
 private:
@@ -68,6 +72,12 @@ private:
     std::unique_ptr<AssetFilterProxy> assetFilter;
 
     AssetViewDelegate *assetdelegate;
+    QMenu *contextMenu;
+    QAction *sendAction;
+    QAction *issueSub;
+    QAction *issueUnique;
+    QAction *reissue;
+
 
 private Q_SLOTS:
     void updateDisplayUnit();

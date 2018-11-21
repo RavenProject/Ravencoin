@@ -116,6 +116,17 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
 
     ui->payAssetAmount->setUnit(MAX_UNIT);
     ui->payAssetAmount->setDisabled(false);
+
+    ui->administratorCheckbox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+
+    ui->assetSelectionBox->setFont(GUIUtil::getSubLabelFont());
+    ui->administratorCheckbox->setFont(GUIUtil::getSubLabelFont());
+    ui->payTo->setFont(GUIUtil::getSubLabelFont());
+    ui->addAsLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->payAssetAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->messageTextLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->assetAmountLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->ownershipWarningMessage->setFont(GUIUtil::getSubLabelFont());
 }
 
 SendAssetsEntry::~SendAssetsEntry()

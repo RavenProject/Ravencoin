@@ -48,6 +48,7 @@ public:
     void updateAssetList();
 
     void clear();
+    void selectTypeName(int type, QString name);
 
     QStringListModel* stringModel;
     QSortFilterProxyModel* proxy;
@@ -128,6 +129,10 @@ private Q_SLOTS:
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
     void updateDisplayUnit();
+
+
+    void focusSubAsset(const QModelIndex& index);
+    void focusUniqueAsset(const QModelIndex& index);
 
 protected:
     bool eventFilter( QObject* sender, QEvent* event);

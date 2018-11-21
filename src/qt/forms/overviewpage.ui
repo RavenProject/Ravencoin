@@ -584,19 +584,6 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <spacer name="horizontalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
               <item alignment="Qt::AlignBottom">
                <widget class="QLineEdit" name="assetSearch">
                 <property name="sizePolicy">
@@ -618,6 +605,12 @@
                  </size>
                 </property>
                 <property name="sizeIncrement">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="baseSize">
                  <size>
                   <width>0</width>
                   <height>0</height>

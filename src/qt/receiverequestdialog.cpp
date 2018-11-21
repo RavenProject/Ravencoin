@@ -103,6 +103,12 @@ ReceiveRequestDialog::ReceiveRequestDialog(QWidget *parent) :
 #endif
 
     connect(ui->btnSaveAs, SIGNAL(clicked()), ui->lblQRCode, SLOT(saveImage()));
+
+    ui->outUri->setFont(GUIUtil::getSubLabelFont());
+    ui->btnCopyURI->setFont(GUIUtil::getSubLabelFont());
+    ui->btnCopyAddress->setFont(GUIUtil::getSubLabelFont());
+    ui->btnSaveAs->setFont(GUIUtil::getSubLabelFont());
+    ui->buttonBox->setFont(GUIUtil::getSubLabelFont());
 }
 
 ReceiveRequestDialog::~ReceiveRequestDialog()

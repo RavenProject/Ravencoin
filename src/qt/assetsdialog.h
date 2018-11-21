@@ -103,7 +103,6 @@ private Q_SLOTS:
     void customFeeFeatureChanged(bool);
 
     /** RVN START */
-    void mineButtonClicked();
     void assetControlUpdateSendCoinsDialog();
     void focusAsset(const QModelIndex& index);
     /** RVN END */

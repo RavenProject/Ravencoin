@@ -69,7 +69,11 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     ui->messageLabel->setStyleSheet(COLOR_LABEL_STRING);
     ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->checkboxSubtractFeeFromAmount->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkboxSubtractFeeFromAmount->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+    ui->payTo->setFont(GUIUtil::getSubLabelFont());
+    ui->addAsLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->payAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->messageTextLabel->setFont(GUIUtil::getSubLabelFont());
 }
 
 SendCoinsEntry::~SendCoinsEntry()

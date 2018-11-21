@@ -228,6 +228,15 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     // Trigger the call to show the assets table if assets are active
     showingAssets = false;
     showAssets();
+
+    dateWidget->setFont(GUIUtil::getSubLabelFont());
+    typeWidget->setFont(GUIUtil::getSubLabelFont());
+    addressWidget->setFont(GUIUtil::getSubLabelFont());
+    amountWidget->setFont(GUIUtil::getSubLabelFont());
+    assetNameWidget->setFont(GUIUtil::getSubLabelFont());
+    contextMenu->setFont(GUIUtil::getSubLabelFont());
+    transactionView->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 void TransactionView::setModel(WalletModel *_model)
@@ -257,6 +266,7 @@ void TransactionView::setModel(WalletModel *_model)
         transactionView->setColumnWidth(TransactionTableModel::Date, DATE_COLUMN_WIDTH);
         transactionView->setColumnWidth(TransactionTableModel::Type, TYPE_COLUMN_WIDTH);
         transactionView->setColumnWidth(TransactionTableModel::Amount, AMOUNT_MINIMUM_COLUMN_WIDTH);
+        transactionView->setColumnWidth(TransactionTableModel::AssetName, AMOUNT_MINIMUM_COLUMN_WIDTH);
 
         columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(transactionView, AMOUNT_MINIMUM_COLUMN_WIDTH, MINIMUM_COLUMN_WIDTH, this);
 

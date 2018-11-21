@@ -640,9 +640,9 @@ void RavenGUI::createToolBars()
 
         /** Create the shadow effects for the main wallet frame. Make it so it puts a shadow on the tool bar */
         QGraphicsDropShadowEffect *walletFrameShadow = new QGraphicsDropShadowEffect;
-        walletFrameShadow->setBlurRadius(8.0);
-        walletFrameShadow->setColor(platformStyle->ShadowColor());
-        walletFrameShadow->setXOffset(-9.0);
+        walletFrameShadow->setBlurRadius(50);
+        walletFrameShadow->setColor(darkModeEnabled ? QColor("8E8E8E") : COLOR_SHADOW_LIGHT);
+        walletFrameShadow->setXOffset(-8.0);
         walletFrameShadow->setYOffset(0);
         mainWalletWidget->setGraphicsEffect(walletFrameShadow);
 

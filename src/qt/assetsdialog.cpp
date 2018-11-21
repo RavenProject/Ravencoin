@@ -119,17 +119,6 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
 
     /** RVN START */
-    // If the network is regtest. Add some helper buttons to the asset GUI
-    if (Params().NetworkIDString() != "regtest") {
-        ui->mineButton->hide();
-        ui->mineBlocksCount->hide();
-    } else {
-        ui->mineButton->setText(tr("Mine Block(s)"));
-        ui->mineButton->setToolTip(tr("Mine some number of blocks"));
-        ui->mineBlocksCount->setToolTip(tr("The number of blocks to mine"));
-        connect(ui->mineButton, SIGNAL(clicked()), this, SLOT(mineButtonClicked()));
-    }
-
     setupAssetControlFrame(platformStyle);
     setupScrollView(platformStyle);
     setupFeeControl(platformStyle);
@@ -310,6 +299,25 @@ void AssetsDialog::setupFeeControl(const PlatformStyle *platformStyle)
     ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
     ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+
+    ui->buttonChooseFee->setFont(GUIUtil::getSubLabelFont());
+    ui->fallbackFeeWarningLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->buttonMinimizeFee->setFont(GUIUtil::getSubLabelFont());
+    ui->radioSmartFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee2->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee3->setFont(GUIUtil::getSubLabelFont());
+    ui->confTargetSelector->setFont(GUIUtil::getSubLabelFont());
+    ui->radioCustomFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCustomPerKilobyte->setFont(GUIUtil::getSubLabelFont());
+    ui->customFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelMinFeeWarning->setFont(GUIUtil::getSubLabelFont());
+    ui->optInRBF->setFont(GUIUtil::getSubLabelFont());
+    ui->sendButton->setFont(GUIUtil::getSubLabelFont());
+    ui->clearButton->setFont(GUIUtil::getSubLabelFont());
+    ui->addButton->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelFeeEstimation->setFont(GUIUtil::getSubLabelFont());
+    ui->labelFeeMinimized->setFont(GUIUtil::getSubLabelFont());
 
 }
 
@@ -626,6 +634,9 @@ void AssetsDialog::setBalance(const CAmount& balance, const CAmount& unconfirmed
     Q_UNUSED(watchBalance);
     Q_UNUSED(watchUnconfirmedBalance);
     Q_UNUSED(watchImmatureBalance);
+
+    ui->labelBalance->setFont(GUIUtil::getSubLabelFont());
+    ui->label->setFont(GUIUtil::getSubLabelFont());
 
     if(model && model->getOptionsModel())
     {
@@ -974,28 +985,6 @@ void AssetsDialog::assetControlUpdateLabels()
 }
 
 /** RVN START */
-void AssetsDialog::mineButtonClicked()
-{
-
-    int num_generate = ui->mineBlocksCount->value();
-    uint64_t max_tries = 1000000;
-
-    std::shared_ptr<CReserveScript> coinbase_script;
-    model->getWallet()->GetScriptForMining(coinbase_script);
-
-    // If the keypool is exhausted, no script is returned at all.  Catch this.
-    if (!coinbase_script) {
-        return;
-    }
-
-    //throw an error if no script was provided
-    if (coinbase_script->reserveScript.empty()) {
-        return;
-    }
-
-    generateBlocks(coinbase_script, num_generate, max_tries, true);
-}
-
 void AssetsDialog::assetControlUpdateSendCoinsDialog()
 {
     for(int i = 0; i < ui->entries->count(); ++i)

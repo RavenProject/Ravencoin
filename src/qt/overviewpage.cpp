@@ -77,6 +77,7 @@ public:
             amountText = QString("[") + amountText + QString("]");
         }
 
+        painter->setFont(GUIUtil::getSubLabelFont());
         // Concatenate the strings if needed before painting
         GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
 
@@ -329,9 +330,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->frame->setStyleSheet(QString(".QFrame {background-color: %1; padding-bottom: 10px; padding-right: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
     ui->frame_2->setStyleSheet(QString(".QFrame {background-color: %1; padding-left: 5px;}").arg(platformStyle->WidgetBackGroundColor().name()));
 
-//    ui->verticalLayout_2->setSpacing(10);
-//    ui->verticalLayout_3->setSpacing(10);
-
     /** Create the shadow effects on the frames */
     ui->assetFrame->setGraphicsEffect(GUIUtil::getShadowEffect());
     ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());
@@ -385,6 +383,34 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 
     // Trigger the call to show the assets table if assets are active
     showAssets();
+
+
+    // context menu actions
+    sendAction = new QAction(tr("Send Asset"), this);
+    QAction *copyAmountAction = new QAction(tr("Copy Amount"), this);
+    QAction *copyNameAction = new QAction(tr("Copy Name"), this);
+    issueSub = new QAction(tr("Issue Sub Asset"), this);
+    issueUnique = new QAction(tr("Issue Unique Asset"), this);
+    reissue = new QAction(tr("Reissue Asset"), this);
+
+
+    sendAction->setObjectName("Send");
+    issueSub->setObjectName("Sub");
+    issueUnique->setObjectName("Unique");
+    reissue->setObjectName("Reissue");
+    copyNameAction->setObjectName("Copy Name");
+    copyAmountAction->setObjectName("Copy Amount");
+
+    // context menu
+    contextMenu = new QMenu(this);
+    contextMenu->addAction(sendAction);
+    contextMenu->addAction(issueSub);
+    contextMenu->addAction(issueUnique);
+    contextMenu->addAction(reissue);
+    contextMenu->addSeparator();
+    contextMenu->addAction(copyNameAction);
+    contextMenu->addAction(copyAmountAction);
+    // context menu signals
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
@@ -395,8 +421,52 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 
 void OverviewPage::handleAssetClicked(const QModelIndex &index)
 {
-    if(assetFilter)
-            Q_EMIT assetClicked(assetFilter->mapToSource(index));
+    if(assetFilter) {
+
+
+        QString name = index.data(AssetTableModel::AssetNameRole).toString();
+        bool fOwner = false;
+        if (IsAssetNameAnOwner(name.toStdString())) {
+            fOwner = true;
+            name = name.left(name.size() - 1);
+            sendAction->setDisabled(true);
+        } else {
+            sendAction->setDisabled(false);
+        }
+
+        if (!index.data(AssetTableModel::AdministratorRole).toBool()) {
+            issueSub->setDisabled(true);
+            issueUnique->setDisabled(true);
+            reissue->setDisabled(true);
+        } else {
+            issueSub->setDisabled(false);
+            issueUnique->setDisabled(false);
+            reissue->setDisabled(true);
+            CNewAsset asset;
+            if (passets && passets->GetAssetMetaDataIfExists(name.toStdString(), asset))
+                if (asset.nReissuable)
+                    reissue->setDisabled(false);
+
+        }
+
+        QAction* action = contextMenu->exec(QCursor::pos());
+
+        if (action) {
+            if (action->objectName() == "Send")
+                    Q_EMIT assetSendClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Sub")
+                    Q_EMIT assetIssueSubClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Unique")
+                    Q_EMIT assetIssueUniqueClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Reissue")
+                    Q_EMIT assetReissueClicked(assetFilter->mapToSource(index));
+            else if (action->objectName() == "Copy Name")
+                GUIUtil::setClipboard(index.data(AssetTableModel::AssetNameRole).toString());
+            else if (action->objectName() == "Copy Amount")
+                GUIUtil::setClipboard(index.data(AssetTableModel::FormattedAmountRole).toString());
+        }
+    }
+
 }
 
 void OverviewPage::handleOutOfSyncWarningClicks()
