@@ -129,6 +129,13 @@ QIcon PlatformStyle::SingleColorIcon(const QIcon& icon) const
     return ColorizeIcon(icon, SingleColor());
 }
 
+QIcon PlatformStyle::SingleColorIcon(const QIcon& icon, const QColor& color) const
+{
+    if (!colorizeIcons)
+        return icon;
+    return ColorizeIcon(icon, color);
+}
+
 QIcon PlatformStyle::OrangeColorIcon(const QString& filename) const
 {
     if (!colorizeIcons)

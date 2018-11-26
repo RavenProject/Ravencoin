@@ -61,6 +61,7 @@
         <file alias="network_disabled">res/icons/network_disabled.png</file>
         <file alias="refresh">res/icons/refresh.png</file>
         <file alias="asset_administrator">res/icons/asset_administrator.png</file>
+        <file alias="asset_administrator_dark">res/icons/asset_administrator_dark.png</file>
         <file alias="asset_create">res/icons/asset_create.png</file>
         <file alias="asset_create_selected">res/icons/asset_create_selected.png</file>
         <file alias="asset_manage">res/icons/asset_manage.png</file>

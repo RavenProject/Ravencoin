@@ -48,6 +48,9 @@ public:
     /** Colorize an icon (given object) with the icon color */
     QIcon SingleColorIcon(const QIcon& icon) const;
 
+    /** Colorize an icon (given object) with the (given color) */
+    QIcon SingleColorIcon(const QIcon& icon, const QColor& color) const;
+
     /** Set icon with two states on and off */
     QIcon SingleColorIconOnOff(const QString& filenameOn, const QString& filenameOff) const;
 

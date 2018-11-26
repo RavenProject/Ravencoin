@@ -87,8 +87,6 @@ private Q_SLOTS:
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
     void assetSearchChanged();
-    void totalRVNClicked();
-    void totalBackRVNClicked();
 };
 
 #endif // RAVEN_QT_OVERVIEWPAGE_H

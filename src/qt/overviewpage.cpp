@@ -56,7 +56,11 @@ public:
         int halfheight = (mainRect.height() - 2*ypad)/2;
         QRect amountRect(mainRect.left() + xspace, mainRect.top()+ypad, mainRect.width() - xspace, halfheight);
         QRect addressRect(mainRect.left() + xspace, mainRect.top()+ypad+halfheight, mainRect.width() - xspace, halfheight);
-        icon = platformStyle->SingleColorIcon(icon);
+
+        if (darkModeEnabled)
+            icon = platformStyle->SingleColorIcon(icon, COLOR_TOOLBAR_NOT_SELECTED_TEXT);
+        else
+            icon = platformStyle->SingleColorIcon(icon, COLOR_LABELS);
         icon.paint(painter, decorationRect);
 
         QDateTime date = index.data(TransactionTableModel::DateRole).toDateTime();
@@ -316,8 +320,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
     connect(ui->listAssets, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAssetClicked(QModelIndex)));
-    connect(ui->testTotalRaven, SIGNAL(clicked()), this, SLOT(totalRVNClicked()));
-    connect(ui->rvnBalanceBack, SIGNAL(clicked()), this, SLOT(totalBackRVNClicked()));
 
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
@@ -366,9 +368,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->labelTotalText->setFont(GUIUtil::getSubLabelFont());
     ui->labelTotal->setFont(GUIUtil::getTopLabelFontBolded());
     ui->labelWatchTotal->setFont(GUIUtil::getTopLabelFontBolded());
-
-    /** Hide the asset total frame */
-    ui->frame->hide();
 
     /** Create the search bar for assets */
     ui->assetSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
@@ -496,9 +495,6 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     ui->labelWatchPending->setText(RavenUnits::formatWithUnit(unit, watchUnconfBalance, false, RavenUnits::separatorAlways));
     ui->labelWatchImmature->setText(RavenUnits::formatWithUnit(unit, watchImmatureBalance, false, RavenUnits::separatorAlways));
     ui->labelWatchTotal->setText(RavenUnits::formatWithUnit(unit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, RavenUnits::separatorAlways));
-
-    ui->testTotalRaven->setText(RavenUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance, false, RavenUnits::separatorAlways));
-    ui->testTotalRaven->setFont(GUIUtil::getTopLabelFont(QFont::Weight::Bold, 26));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
@@ -634,16 +630,4 @@ void OverviewPage::assetSearchChanged()
     if (!assetFilter)
         return;
     assetFilter->setAssetNamePrefix(ui->assetSearch->text());
-}
-
-void OverviewPage::totalRVNClicked()
-{
-    ui->frame->show();
-    ui->testTotalRaven->hide();
-}
-
-void OverviewPage::totalBackRVNClicked()
-{
-    ui->frame->hide();
-    ui->testTotalRaven->show();
 }
