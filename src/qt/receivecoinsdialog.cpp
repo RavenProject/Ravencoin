@@ -134,24 +134,24 @@ void ReceiveCoinsDialog::setupRequestFrame(const PlatformStyle *platformStyle)
 
     ui->frame2->setGraphicsEffect(GUIUtil::getShadowEffect());
 
-    ui->label_5->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label_5->setStyleSheet(STRING_LABEL_COLOR);
 
-    ui->label_2->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label_2->setStyleSheet(STRING_LABEL_COLOR);
     ui->label_2->setFont(GUIUtil::getSubLabelFont());
 
-    ui->label->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label->setStyleSheet(STRING_LABEL_COLOR);
     ui->label->setFont(GUIUtil::getSubLabelFont());
 
-    ui->label_3->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label_3->setStyleSheet(STRING_LABEL_COLOR);
     ui->label_3->setFont(GUIUtil::getSubLabelFont());
 
-    ui->label_4->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label_4->setStyleSheet(STRING_LABEL_COLOR);
     ui->label_4->setFont(GUIUtil::getSubLabelFont());
 
-    ui->label_7->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label_7->setStyleSheet(STRING_LABEL_COLOR);
     ui->label_7->setFont(GUIUtil::getSubLabelFont());
 
-    ui->reuseAddress->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+    ui->reuseAddress->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
     ui->reqLabel->setFont(GUIUtil::getSubLabelFont());
     ui->reqAmount->setFont(GUIUtil::getSubLabelFont());
     ui->reqMessage->setFont(GUIUtil::getSubLabelFont());
@@ -173,7 +173,7 @@ void ReceiveCoinsDialog::setupHistoryFrame(const PlatformStyle *platformStyle)
 
     ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());
 
-    ui->label_6->setStyleSheet(COLOR_LABEL_STRING);
+    ui->label_6->setStyleSheet(STRING_LABEL_COLOR);
 
     ui->recentRequestsView->setGraphicsEffect(GUIUtil::getShadowEffect());
     ui->recentRequestsView->setStyleSheet(".QTableView {border: none;}");

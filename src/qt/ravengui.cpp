@@ -641,7 +641,7 @@ void RavenGUI::createToolBars()
         /** Create the shadow effects for the main wallet frame. Make it so it puts a shadow on the tool bar */
         QGraphicsDropShadowEffect *walletFrameShadow = new QGraphicsDropShadowEffect;
         walletFrameShadow->setBlurRadius(50);
-        walletFrameShadow->setColor(darkModeEnabled ? QColor("8E8E8E") : COLOR_SHADOW_LIGHT);
+        walletFrameShadow->setColor(COLOR_WALLETFRAME_SHADOW);
         walletFrameShadow->setXOffset(-8.0);
         walletFrameShadow->setYOffset(0);
         mainWalletWidget->setGraphicsEffect(walletFrameShadow);
@@ -668,15 +668,15 @@ void RavenGUI::createToolBars()
         labelCurrentMarket->setContentsMargins(50,0,0,0);
         labelCurrentMarket->setFixedHeight(75);
         labelCurrentMarket->setAlignment(Qt::AlignVCenter);
-        labelCurrentMarket->setStyleSheet(COLOR_LABEL_STRING);
+        labelCurrentMarket->setStyleSheet(STRING_LABEL_COLOR);
         labelCurrentMarket->setFont(currentMarketFont);
-        labelCurrentMarket->setText(tr("Ravencoin Market Price "));
+        labelCurrentMarket->setText(tr("Ravencoin Market Price"));
 
         QString currentPriceStyleSheet = ".QLabel{color: %1;}";
         labelCurrentPrice->setContentsMargins(25,0,0,0);
         labelCurrentPrice->setFixedHeight(75);
         labelCurrentPrice->setAlignment(Qt::AlignVCenter);
-        labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("#4960ad"));
+        labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
         labelCurrentPrice->setFont(currentMarketFont);
 
         QLabel* labelBtcRvn = new QLabel();
@@ -684,7 +684,7 @@ void RavenGUI::createToolBars()
         labelBtcRvn->setContentsMargins(15,0,0,0);
         labelBtcRvn->setFixedHeight(75);
         labelBtcRvn->setAlignment(Qt::AlignVCenter);
-        labelBtcRvn->setStyleSheet(COLOR_LABEL_STRING);
+        labelBtcRvn->setStyleSheet(STRING_LABEL_COLOR);
         labelBtcRvn->setFont(currentMarketFont);
 
         priceLayout->setGeometry(headerWidget->rect());
@@ -734,7 +734,7 @@ void RavenGUI::createToolBars()
                     if (!list.isEmpty()) {
                         double next = list.first().toDouble(&ok);
                         if (!ok) {
-                            labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("#4960ad"));
+                            labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             labelCurrentPrice->setText("");
                         } else {
                             double current = labelCurrentPrice->text().toDouble(&ok);
@@ -746,7 +746,7 @@ void RavenGUI::createToolBars()
                                 else if (next > current)
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("green"));
                                 else
-                                    labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("#4960ad"));
+                                    labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             }
                             labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', 8)));
                             labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));

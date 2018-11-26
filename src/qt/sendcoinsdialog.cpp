@@ -213,35 +213,35 @@ void SendCoinsDialog::setupCoinControl(const PlatformStyle *platformStyle)
 
     ui->frameCoinControl->setGraphicsEffect(GUIUtil::getShadowEffect());
 
-    ui->labelCoinControlFeatures->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlFeatures->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlFeatures->setFont(GUIUtil::getTopLabelFont());
 
-    ui->labelCoinControlQuantityText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlQuantityText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlQuantityText->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelCoinControlAmountText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAmountText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlAmountText->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelCoinControlFeeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlFeeText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlFeeText->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelCoinControlAfterFeeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAfterFeeText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlAfterFeeText->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelCoinControlBytesText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlBytesText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlBytesText->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelCoinControlLowOutputText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlLowOutputText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlLowOutputText->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelCoinControlChangeText->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlChangeText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelCoinControlChangeText->setFont(GUIUtil::getSubLabelFont());
 
     // Align the other labels next to the input buttons to the text in the same height
-    ui->labelCoinControlAutomaticallySelected->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelCoinControlAutomaticallySelected->setStyleSheet(STRING_LABEL_COLOR);
 
     // Align the Custom change address checkbox
-    ui->checkBoxCoinControlChange->setStyleSheet(COLOR_LABEL_STRING);
+    ui->checkBoxCoinControlChange->setStyleSheet(STRING_LABEL_COLOR);
 
     ui->labelCoinControlQuantity->setFont(GUIUtil::getSubLabelFont());
     ui->labelCoinControlAmount->setFont(GUIUtil::getSubLabelFont());
@@ -276,14 +276,14 @@ void SendCoinsDialog::setupFeeControl(const PlatformStyle *platformStyle)
 
     ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
 
-    ui->labelFeeHeadline->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelFeeHeadline->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labelSmartFee3->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelCustomPerKilobyte->setStyleSheet(COLOR_LABEL_STRING);
-    ui->radioSmartFee->setStyleSheet(COLOR_LABEL_STRING);
-    ui->radioCustomFee->setStyleSheet(COLOR_LABEL_STRING);
-    ui->checkBoxMinimumFee->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labelSmartFee3->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelCustomPerKilobyte->setStyleSheet(STRING_LABEL_COLOR);
+    ui->radioSmartFee->setStyleSheet(STRING_LABEL_COLOR);
+    ui->radioCustomFee->setStyleSheet(STRING_LABEL_COLOR);
+    ui->checkBoxMinimumFee->setStyleSheet(STRING_LABEL_COLOR);
 
 
     ui->buttonChooseFee->setFont(GUIUtil::getSubLabelFont());
