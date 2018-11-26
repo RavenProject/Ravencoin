@@ -38,6 +38,11 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /* Widget Background color - default color */
 #define COLOR_WHITE QColor(255, 255, 255)
 
+#define COLOR_WALLETFRAME_SHADOW QColor(0,0,0,71)
+
+/* Color of labels */
+#define COLOR_LABELS QColor("#4960ad")
+
 /** LIGHT MODE */
 /* Background color, very light gray */
 #define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
@@ -52,9 +57,8 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /* Ravencoin asset text */
 #define COLOR_ASSET_TEXT QColor(255, 255, 255)
 /* Ravencoin shadow color - light mode */
-#define COLOR_SHADOW_LIGHT QColor(0, 0, 0, 46)
-/* Ravencoin label color */
-#define COLOR_LABEL_STRING "color: #4960ad"
+#define COLOR_SHADOW_LIGHT QColor("#e1e6f3")
+/* Toolbar not selected text color */
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
 /* Toolbar selected text color */
 #define COLOR_TOOLBAR_SELECTED_TEXT COLOR_WHITE
@@ -80,6 +84,10 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE QColor("#6c80c5")
 /* Toolbar selected text color */
 #define COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE QColor("#c5ccdf")
+
+
+/* Ravencoin label color as a string */
+#define STRING_LABEL_COLOR "color: #4960ad"
 
 
 

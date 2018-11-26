@@ -99,25 +99,25 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
 
     this->setGraphicsEffect(GUIUtil::getShadowEffect());
 
-    ui->assetBoxLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->assetBoxLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->assetBoxLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->payToLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->payToLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->payToLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->labellLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->labellLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->labellLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->amountLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->amountLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->amountLabel->setFont(GUIUtil::getSubLabelFont());
 
-    ui->messageLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->messageLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
 
     ui->payAssetAmount->setUnit(MAX_UNIT);
     ui->payAssetAmount->setDisabled(false);
 
-    ui->administratorCheckbox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(COLOR_LABEL_STRING));
+    ui->administratorCheckbox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
 
     ui->assetSelectionBox->setFont(GUIUtil::getSubLabelFont());
     ui->administratorCheckbox->setFont(GUIUtil::getSubLabelFont());

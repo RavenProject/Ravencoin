@@ -336,15 +336,15 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->frame_2->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     /** Update the labels colors */
-    ui->assetBalanceLabel->setStyleSheet(COLOR_LABEL_STRING);
-    ui->rvnBalancesLabel->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelBalanceText->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelPendingText->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelImmatureText->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelTotalText->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelSpendable->setStyleSheet(COLOR_LABEL_STRING);
-    ui->labelWatchonly->setStyleSheet(COLOR_LABEL_STRING);
-    ui->recentTransactionsLabel->setStyleSheet(COLOR_LABEL_STRING);
+    ui->assetBalanceLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->rvnBalancesLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelBalanceText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelPendingText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelImmatureText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelTotalText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelSpendable->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelWatchonly->setStyleSheet(STRING_LABEL_COLOR);
+    ui->recentTransactionsLabel->setStyleSheet(STRING_LABEL_COLOR);
 
     /** Update the labels font */
     ui->rvnBalancesLabel->setFont(GUIUtil::getTopLabelFont());
@@ -372,7 +372,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 
     /** Create the search bar for assets */
     ui->assetSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
-    ui->assetSearch->setStyleSheet(".QLineEdit {border: 1px solid #4960ad; border-radius: 5px;}");
+    ui->assetSearch->setStyleSheet(QString(".QLineEdit {border: 1px solid %1; border-radius: 5px;}").arg(COLOR_LABELS.name()));
     ui->assetSearch->setAlignment(Qt::AlignVCenter);
     QFont font = ui->assetSearch->font();
     font.setPointSize(12);
