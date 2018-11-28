@@ -814,7 +814,7 @@ UniValue getaddressutxos(const JSONRPCRequest& request)
             "      ,...\n"
             "    ],\n"
             "  \"chainInfo\",  (boolean, optional, default false) Include chain info with results\n"
-            "  \"assetName\"   (string, optional) Get UTXOs for a particular asset instead of RVN.\n"
+            "  \"assetName\"   (string, optional) Get UTXOs for a particular asset instead of RVN ('*' for all assets).\n"
             "}\n"
             "\nResult\n"
             "[\n"
@@ -859,8 +859,14 @@ UniValue getaddressutxos(const JSONRPCRequest& request)
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > unspentOutputs;
 
     for (std::vector<std::pair<uint160, int> >::iterator it = addresses.begin(); it != addresses.end(); it++) {
-        if (!GetAddressUnspent((*it).first, (*it).second, assetName, unspentOutputs)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+        if (assetName == "*") {
+            if (!GetAddressUnspent((*it).first, (*it).second, unspentOutputs)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+            }
+        } else {
+            if (!GetAddressUnspent((*it).first, (*it).second, assetName, unspentOutputs)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "No information available for address");
+            }
         }
     }
 
@@ -875,8 +881,16 @@ UniValue getaddressutxos(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Unknown address type");
         }
 
+        std::string assetNameOut = "RVN";
+        if (assetName != "RVN") {
+            CAmount _amount;
+            if (!GetAssetInfoFromScript(it->second.script, assetNameOut, _amount)) {
+                throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't decode asset script");
+            }
+        }
+
         output.push_back(Pair("address", address));
-        output.push_back(Pair("assetName", assetName));
+        output.push_back(Pair("assetName", assetNameOut));
         output.push_back(Pair("txid", it->first.txhash.GetHex()));
         output.push_back(Pair("outputIndex", (int)it->first.index));
         output.push_back(Pair("script", HexStr(it->second.script.begin(), it->second.script.end())));
