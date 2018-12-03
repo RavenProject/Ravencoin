@@ -1165,7 +1165,7 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
     return true;
 }
 
-bool CAssetsCache::AddToMyUpspentOutPoints(const std::string& strName, const COutPoint& out)
+bool CAssetsCache::AddToMyUnspentOutPoints(const std::string& strName, const COutPoint& out)
 {
     if (!mapMyUnspentAssets.count(strName)) {
         std::set<COutPoint> setOuts;
@@ -1173,7 +1173,7 @@ bool CAssetsCache::AddToMyUpspentOutPoints(const std::string& strName, const COu
         mapMyUnspentAssets.insert(std::make_pair(strName, setOuts));
     } else {
         if (!mapMyUnspentAssets[strName].insert(out).second)
-            return error("%s: Tried adding an asset to my map of upspent assets, but it already existed in the set of assets: %s, COutPoint: %s", __func__, strName, out.ToString());
+            return error("%s: Tried adding an asset to my map of unspent assets, but it already existed in the set of assets: %s, COutPoint: %s", __func__, strName, out.ToString());
     }
 
     // Add the outpoint to the set so we know what we need to database
@@ -1201,7 +1201,7 @@ bool CAssetsCache::AddPossibleOutPoint(const CAssetCachePossibleMine& possibleMi
 
     // If asset is in an CTxOut that I own add it to my cache
     if (vpwallets[0]->IsMine(possibleMine.txOut) == ISMINE_SPENDABLE) {
-        if (!AddToMyUpspentOutPoints(possibleMine.assetName, possibleMine.out))
+        if (!AddToMyUnspentOutPoints(possibleMine.assetName, possibleMine.out))
             return error("%s: Failed to add an asset I own to my Unspent Asset Cache. asset %s",
                                         __func__, possibleMine.assetName);
     }
@@ -2116,7 +2116,7 @@ void UpdatePossibleAssets()
         for (auto item : passets->setPossiblyMineAdd) {
             // If the CTxOut is mine add it to the list of unspent outpoints
             if (vpwallets[0]->IsMine(item.txOut) == ISMINE_SPENDABLE) {
-                if (!passets->AddToMyUpspentOutPoints(item.assetName, item.out)) // Boolean true means only change the in memory data. We will want to save at the same time that RVN coin saves its cache
+                if (!passets->AddToMyUnspentOutPoints(item.assetName, item.out)) // Boolean true means only change the in memory data. We will want to save at the same time that RVN coin saves its cache
                     error("%s: Failed to add an asset I own to my Unspent Asset Database. asset %s",
                                  __func__, item.assetName);
             }
