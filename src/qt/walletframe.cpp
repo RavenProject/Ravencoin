@@ -213,9 +213,16 @@ void WalletFrame::gotoAssetsPage()
         i.value()->gotoAssetsPage();
 }
 
-void WalletFrame::displayAssetInfo()
+void WalletFrame::gotoCreateAssetsPage()
 {
     QMap<QString, WalletView*>::const_iterator i;
     for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
-        i.value()->displayAssetInfo();
+        i.value()->gotoCreateAssetsPage();
+}
+
+void WalletFrame::gotoManageAssetsPage()
+{
+    QMap<QString, WalletView*>::const_iterator i;
+    for (i = mapWalletViews.constBegin(); i != mapWalletViews.constEnd(); ++i)
+        i.value()->gotoManageAssetsPage();
 }

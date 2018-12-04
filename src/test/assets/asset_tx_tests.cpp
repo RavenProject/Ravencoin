@@ -16,7 +16,9 @@
 
 BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
-    BOOST_AUTO_TEST_CASE(asset_tx_valid) {
+    BOOST_AUTO_TEST_CASE(asset_tx_valid_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Valid Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -60,7 +62,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(Consensus::CheckTxAssets(tx, state, coins, vReissueAssets, true), "CheckTxAssets Failed");
     }
 
-    BOOST_AUTO_TEST_CASE(asset_tx_not_valid) {
+    BOOST_AUTO_TEST_CASE(asset_tx_not_valid_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Not Valid Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -114,7 +118,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx, state, coins, vReissueAssets, true), "CheckTxAssets should of failed");
     }
 
-    BOOST_AUTO_TEST_CASE(asset_tx_valid_multiple_outs) {
+    BOOST_AUTO_TEST_CASE(asset_tx_valid_multiple_outs_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Valid Multiple Outs Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -145,7 +151,8 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         in.prevout = outpoint;
 
         // Create CTxOut that will only send 100 of the asset 10 times total = 1000
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++)
+        {
             CAssetTransfer asset2("RAVEN", 100);
             CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             asset2.ConstructTransaction(scriptPubKey2);
@@ -171,7 +178,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(Consensus::CheckTxAssets(tx, state, coins, vReissueAssets, true), "CheckTxAssets failed");
     }
 
-    BOOST_AUTO_TEST_CASE(asset_tx_multiple_outs_invalid) {
+    BOOST_AUTO_TEST_CASE(asset_tx_multiple_outs_invalid_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Multiple Outs Invalid Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -202,7 +211,8 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         in.prevout = outpoint;
 
         // Create CTxOut that will only send 100 of the asset 12 times, total = 1200
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 12; i++)
+        {
             CAssetTransfer asset2("RAVEN", 100);
             CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             asset2.ConstructTransaction(scriptPubKey2);
@@ -228,7 +238,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx, state, coins, vReissueAssets, true), "CheckTxAssets passed when it should of failed");
     }
 
-    BOOST_AUTO_TEST_CASE(asset_tx_multiple_assets) {
+    BOOST_AUTO_TEST_CASE(asset_tx_multiple_assets_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Multiple Assets Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -294,7 +306,8 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         in3.prevout = outpoint3;
 
         // Create CTxOut for each asset that spends 100 assets 10 time = 1000 asset in total
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++)
+        {
             // Add the first asset
             CAssetTransfer outAsset("RAVEN", 100);
             CScript outScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
@@ -348,7 +361,8 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         CMutableTransaction mutTx2;
 
         // Create CTxOut for each asset that spends 100 assets 9 time = 900 asset in total
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 9; i++)
+        {
             // Add the first asset
             CAssetTransfer outAsset("RAVEN", 100);
             CScript outScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
@@ -396,7 +410,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx2, state, coins, vReissueAssets, true), "CheckTxAssets should of failed");
     }
 
-    BOOST_AUTO_TEST_CASE(asset_tx_issue_units) {
+    BOOST_AUTO_TEST_CASE(asset_tx_issue_units_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Issue Units Test");
 
         std::string error;
         CAssetsCache cache;
@@ -442,7 +458,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(asset.IsValid(error, cache, false, false), "Test10: " + error);
 
         // Amount = 0.00000001
-        asset = CNewAsset("ASSET", CAmount(1), 7 , false, false, "");
+        asset = CNewAsset("ASSET", CAmount(1), 7, false, false, "");
         BOOST_CHECK_MESSAGE(!asset.IsValid(error, cache, false, false), "Test11: " + error);
 
         // Amount = 0.00000100

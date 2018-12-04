@@ -36,14 +36,17 @@ from .util import (
     sync_mempools,
 )
 
+
 class TestStatus(Enum):
     PASSED = 1
     FAILED = 2
     SKIPPED = 3
 
+
 TEST_EXIT_PASSED = 0
 TEST_EXIT_FAILED = 1
 TEST_EXIT_SKIPPED = 77
+
 
 class RavenTestFramework():
     """Base class for a raven test script.
@@ -78,9 +81,11 @@ class RavenTestFramework():
                           help="Leave ravends and test.* datadir on exit or error")
         parser.add_option("--noshutdown", dest="noshutdown", default=False, action="store_true",
                           help="Don't stop ravends after the test execution")
-        parser.add_option("--srcdir", dest="srcdir", default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../../src"),
+        parser.add_option("--srcdir", dest="srcdir",
+                          default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../../src"),
                           help="Source directory containing ravend/raven-cli (default: %default)")
-        parser.add_option("--cachedir", dest="cachedir", default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../cache"),
+        parser.add_option("--cachedir", dest="cachedir",
+                          default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../cache"),
                           help="Directory for caching pregenerated datadirs")
         parser.add_option("--tmpdir", dest="tmpdir", help="Root directory for datadirs")
         parser.add_option("-l", "--loglevel", dest="loglevel", default="INFO",
@@ -219,7 +224,9 @@ class RavenTestFramework():
         assert_equal(len(extra_args), num_nodes)
         assert_equal(len(binary), num_nodes)
         for i in range(num_nodes):
-            self.nodes.append(TestNode(i, self.options.tmpdir, extra_args[i], rpchost, timewait=timewait, binary=binary[i], stderr=None, mocktime=self.mocktime, coverage_dir=self.options.coveragedir))
+            self.nodes.append(
+                TestNode(i, self.options.tmpdir, extra_args[i], rpchost, timewait=timewait, binary=binary[i],
+                         stderr=None, mocktime=self.mocktime, coverage_dir=self.options.coveragedir))
 
     def start_node(self, i, extra_args=None, stderr=None):
         """Start a ravend"""
@@ -273,7 +280,7 @@ class RavenTestFramework():
         self.start_node(i, extra_args)
 
     def assert_start_raises_init_error(self, i, extra_args=None, expected_msg=None):
-        with tempfile.SpooledTemporaryFile(max_size=2**16) as log_stderr:
+        with tempfile.SpooledTemporaryFile(max_size=2 ** 16) as log_stderr:
             try:
                 self.start_node(i, extra_args, stderr=log_stderr)
                 self.stop_node(i)
@@ -352,7 +359,8 @@ class RavenTestFramework():
         ll = int(self.options.loglevel) if self.options.loglevel.isdigit() else self.options.loglevel.upper()
         ch.setLevel(ll)
         # Format logs the same as ravend's debug.log with microprecision (so log files can be concatenated and sorted)
-        formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d000 %(name)s (%(levelname)s): %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        formatter = logging.Formatter(fmt='%(asctime)s.%(msecs)03d000 %(name)s (%(levelname)s): %(message)s',
+                                      datefmt='%Y-%m-%d %H:%M:%S')
         formatter.converter = time.gmtime
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
@@ -394,7 +402,9 @@ class RavenTestFramework():
                 args = [os.getenv("RAVEND", "ravend"), "-server", "-keypool=1", "-datadir=" + datadir, "-discover=0"]
                 if i > 0:
                     args.append("-connect=127.0.0.1:" + str(p2p_port(0)))
-                self.nodes.append(TestNode(i, self.options.cachedir, extra_args=[], rpchost=None, timewait=None, binary=None, stderr=None, mocktime=self.mocktime, coverage_dir=None))
+                self.nodes.append(
+                    TestNode(i, self.options.cachedir, extra_args=[], rpchost=None, timewait=None, binary=None,
+                             stderr=None, mocktime=self.mocktime, coverage_dir=None))
                 self.nodes[i].args = args
                 self.start_node(i)
 
@@ -444,6 +454,7 @@ class RavenTestFramework():
         for i in range(self.num_nodes):
             initialize_datadir(self.options.tmpdir, i)
 
+
 class ComparisonTestFramework(RavenTestFramework):
     """Test framework for doing p2p comparison testing
 
@@ -470,10 +481,12 @@ class ComparisonTestFramework(RavenTestFramework):
             extra_args = self.extra_args
         self.add_nodes(self.num_nodes, extra_args,
                        binary=[self.options.testbinary] +
-                       [self.options.refbinary] * (self.num_nodes - 1))
+                              [self.options.refbinary] * (self.num_nodes - 1))
         self.start_nodes()
+
 
 class SkipTest(Exception):
     """This exception is raised to skip a test"""
+
     def __init__(self, message):
         self.message = message

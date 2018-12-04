@@ -88,6 +88,8 @@ public:
     static QString description(int unit);
     //! Number of Satoshis (1e-8) per unit
     static qint64 factor(int unit);
+    //! Number of Satoshis (1e-8) per unit for assets
+    static qint64 factorAsset(int unit);
     //! Number of decimals left
     static int decimals(int unit);
     //! Format as string
@@ -100,6 +102,7 @@ public:
     static QString formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign=false, SeparatorStyle separators=separatorStandard);
     //! Parse string to coin amount
     static bool parse(int unit, const QString &value, CAmount *val_out);
+    static bool assetParse(int assetUnit, const QString &value, CAmount *val_out);
     //! Gets title for amount column including current display unit if optionsModel reference available */
     static QString getAmountColumnTitle(int unit);
     ///@}

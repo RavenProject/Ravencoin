@@ -19,6 +19,7 @@
 #include "transactiontablemodel.h"
 #include "validation.h"
 #include "walletmodel.h"
+#include "guiconstants.h"
 
 #include "ui_interface.h"
 
@@ -38,6 +39,7 @@
 #include <QTimer>
 #include <QUrl>
 #include <QVBoxLayout>
+#include <QGraphicsDropShadowEffect>
 
 TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
@@ -161,9 +163,11 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     view->setContextMenuPolicy(Qt::CustomContextMenu);
 
     view->installEventFilter(this);
+    view->setStyleSheet(".QTableView { border: none;}");
 
     transactionView = view;
     transactionView->setObjectName("transactionView");
+
 
     // Actions
     abandonAction = new QAction(tr("Abandon transaction"), this);
@@ -224,6 +228,15 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     // Trigger the call to show the assets table if assets are active
     showingAssets = false;
     showAssets();
+
+    dateWidget->setFont(GUIUtil::getSubLabelFont());
+    typeWidget->setFont(GUIUtil::getSubLabelFont());
+    addressWidget->setFont(GUIUtil::getSubLabelFont());
+    amountWidget->setFont(GUIUtil::getSubLabelFont());
+    assetNameWidget->setFont(GUIUtil::getSubLabelFont());
+    contextMenu->setFont(GUIUtil::getSubLabelFont());
+    transactionView->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 void TransactionView::setModel(WalletModel *_model)
@@ -253,6 +266,7 @@ void TransactionView::setModel(WalletModel *_model)
         transactionView->setColumnWidth(TransactionTableModel::Date, DATE_COLUMN_WIDTH);
         transactionView->setColumnWidth(TransactionTableModel::Type, TYPE_COLUMN_WIDTH);
         transactionView->setColumnWidth(TransactionTableModel::Amount, AMOUNT_MINIMUM_COLUMN_WIDTH);
+        transactionView->setColumnWidth(TransactionTableModel::AssetName, AMOUNT_MINIMUM_COLUMN_WIDTH);
 
         columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(transactionView, AMOUNT_MINIMUM_COLUMN_WIDTH, MINIMUM_COLUMN_WIDTH, this);
 

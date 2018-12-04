@@ -15,14 +15,20 @@
 
 BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
-    BOOST_AUTO_TEST_CASE(unit_validation_tests) {
+    BOOST_AUTO_TEST_CASE(unit_validation_tests)
+    {
+        BOOST_TEST_MESSAGE("Running Unit Validation Test");
+
         BOOST_CHECK(IsAssetUnitsValid(COIN));
         BOOST_CHECK(IsAssetUnitsValid(CENT));
     }
 
-    BOOST_AUTO_TEST_CASE(name_validation_tests) {
+    BOOST_AUTO_TEST_CASE(name_validation_tests)
+    {
+        BOOST_TEST_MESSAGE("Running Name Validation Test");
+
         AssetType type;
-    
+
         // regular
         BOOST_CHECK(IsAssetNameValid("MIN", type));
         BOOST_CHECK(type == AssetType::ROOT);
@@ -170,7 +176,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(GetParentName("TEST/SUB/SUB~CHANNEL") == "TEST/SUB/SUB");
     }
 
-    BOOST_AUTO_TEST_CASE(transfer_asset_coin_check) {
+    BOOST_AUTO_TEST_CASE(transfer_asset_coin_test)
+    {
+        BOOST_TEST_MESSAGE("Running Transfer Asset Coin Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -189,7 +197,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(coin.IsAsset(), "Transfer Asset Coin isn't as asset");
     }
 
-    BOOST_AUTO_TEST_CASE(new_asset_coin_check) {
+    BOOST_AUTO_TEST_CASE(new_asset_coin_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset Coin Test");
 
         SelectParams(CBaseChainParams::MAIN);
 
@@ -207,8 +217,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(coin.IsAsset(), "New Asset Coin isn't as asset");
     }
 
-    BOOST_AUTO_TEST_CASE(dwg_version_check) {
-
+    BOOST_AUTO_TEST_CASE(dwg_version_test)
+    {
+        BOOST_TEST_MESSAGE("Running DWG Version Test");
 
         int32_t version = 0x30000000;
         int32_t mask = 0xF0000000;
@@ -218,7 +229,9 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(shifted == 3, "New version didn't equal 3");
     }
 
-    BOOST_AUTO_TEST_CASE(asset_formatting) {
+    BOOST_AUTO_TEST_CASE(asset_formatting_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset Formatting Test");
 
         CAmount amount = 50000010000;
         BOOST_CHECK(ValueFromAmountString(amount, 4) == "500.0001");

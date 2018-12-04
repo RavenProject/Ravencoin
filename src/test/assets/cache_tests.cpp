@@ -10,7 +10,8 @@ BOOST_FIXTURE_TEST_SUITE(cache_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(cache_test)
 {
-    std::cout << "Testing cache test" << std::endl;
+    BOOST_TEST_MESSAGE("Running Cache Test");
+
     CLRUCache<std::string, CNewAsset> cache(NUM_OF_ASSETS1);
 
     std::string assetName = "TEST";

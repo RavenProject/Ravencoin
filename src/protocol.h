@@ -241,6 +241,20 @@ extern const char *GETBLOCKTXN;
  * @since protocol version 70014 as described by BIP 152
  */
 extern const char *BLOCKTXN;
+
+/**
+ * Contains a AssetDataRequest.
+ * Peer should respond with assetdata
+ * @since protocol version 70017
+ */
+extern const char *GETASSETDATA;
+
+/**
+ * Contains a AssetData
+ * Sent in response to a "getassetdata" message.
+ * @since protocol version 70017
+ */
+extern const char *ASSETDATA;
 };
 
 /* Get a vector of all valid message types (see above) */
@@ -397,6 +411,29 @@ public:
 public:
     int type;
     uint256 hash;
+};
+
+/** inv message data */
+class CInvAsset
+{
+public:
+    CInvAsset();
+    CInvAsset(std::string name);
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(name);
+    }
+
+    friend bool operator<(const CInvAsset& a, const CInvAsset& b);
+
+    std::string ToString() const;
+
+public:
+    std::string name; // block height that asset data should come from
 };
 
 #endif // RAVEN_PROTOCOL_H

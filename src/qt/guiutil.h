@@ -28,12 +28,24 @@ class QFont;
 class QLineEdit;
 class QUrl;
 class QWidget;
+class QGraphicsDropShadowEffect;
 QT_END_NAMESPACE
 
 /** Utility functions used by the Raven Qt UI.
  */
 namespace GUIUtil
 {
+    // Get the font for the sub labels
+    QFont getSubLabelFont();
+    QFont getSubLabelFontBolded();
+
+    // Get the font for the main labels
+    QFont getTopLabelFont();
+    QFont getTopLabelFontBolded();
+    QFont getTopLabelFont(int weight, int pxsize);
+
+    QGraphicsDropShadowEffect* getShadowEffect();
+
     // Create human-readable string from date
     QString dateTimeStr(const QDateTime &datetime);
     QString dateTimeStr(qint64 nTime);
@@ -119,6 +131,10 @@ namespace GUIUtil
 
     // Replace invalid default fonts with known good ones
     void SubstituteFonts(const QString& language);
+
+    // Concatenate a string given the painter, static text width, left side of rect, and right side of rect
+    // and which side the concatenated string is on (default left)
+    void concatenate(QPainter* painter, QString& strToCon, int static_width, int left_side, int right_size);
 
     /** Qt event filter that intercepts ToolTipChange events, and replaces the tooltip with a rich text
       representation if needed. This assures that Qt can word-wrap long tooltip messages.

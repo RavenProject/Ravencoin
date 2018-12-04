@@ -12,7 +12,10 @@
 #include "optionsmodel.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
+#include "guiconstants.h"
+#include "darkstyle.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QApplication>
 #include <QClipboard>
 
@@ -41,7 +44,7 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     // normal raven address field
     GUIUtil::setupAddressWidget(ui->payTo, this);
     // just a label for displaying raven address(es)
-    ui->payTo_is->setFont(GUIUtil::fixedPitchFont());
+    ui->payTo_is->setFont(GUIUtil::getSubLabelFont());
 
     // Connect signals
     connect(ui->payAmount, SIGNAL(valueChanged()), this, SIGNAL(payAmountChanged()));
@@ -49,6 +52,28 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *_platformStyle, QWidget *par
     connect(ui->deleteButton, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
+
+    this->setStyleSheet(QString(".SendCoinsEntry {background-color: %1; padding-top: 10px; padding-right: 30px; border: none;}").arg(platformStyle->SendEntriesBackGroundColor().name()));
+
+    this->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->payToLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->payToLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labellLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labellLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->amountLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->amountLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->messageLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->checkboxSubtractFeeFromAmount->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
+    ui->payTo->setFont(GUIUtil::getSubLabelFont());
+    ui->addAsLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->payAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->messageTextLabel->setFont(GUIUtil::getSubLabelFont());
 }
 
 SendCoinsEntry::~SendCoinsEntry()
