@@ -750,7 +750,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-owner-burn-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -772,7 +772,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-owner-burn-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -794,7 +794,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-owner-burn-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1679,6 +1679,74 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_equal(unspent_asset_amount2 - amount, n2.listmyassets()[anduin])
 
 
+    def getrawtransaction(self):
+        self.log.info("Testing asset info in getrawtransaction...")
+        n0 = self.nodes[0]
+
+        asset_name = "RAW"
+        asset_amount = 1000
+        units = 2
+        units2 = 4
+        reissuable = True
+        ipfs_hash = "QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E"
+        ipfs_hash2 = "QmQ7DysAQmy92cyQrkb5y1M96pGG1fKxnRkiB19qWSmH75"
+
+        tx_id = n0.issue(asset_name, asset_amount, "", "", units, reissuable, True, ipfs_hash)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][-1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+        assert_equal(units, asset_section['units']);
+        assert_equal(reissuable, asset_section['reissuable'])
+        assert_equal(ipfs_hash, asset_section['ipfs_hash'])
+
+        asset_out_script = raw_json['vout'][-2]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name + "!", asset_section['name'])
+        assert_equal(1, asset_section['amount'])
+        assert_does_not_contain_key('units', asset_section)
+        assert_does_not_contain_key('reissuable', asset_section)
+        assert_does_not_contain_key('ipfs_hash', asset_section)
+
+        address = n0.getnewaddress()
+        tx_id = n0.reissue(asset_name, asset_amount, address, "", True, -1, ipfs_hash2)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][-1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+        assert_does_not_contain_key('units', asset_section)
+        assert_equal(ipfs_hash2, asset_section['ipfs_hash'])
+
+        address = n0.getnewaddress()
+        tx_id = n0.reissue(asset_name, asset_amount, address, "", False, units2)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][-1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+        assert_equal(units2, asset_section['units'])
+        assert_does_not_contain_key('ipfs_hash', asset_section)
+
+        address = n0.getnewaddress()
+        tx_id = n0.transfer(asset_name, asset_amount, address)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+
+
     def run_test(self):
         self.activate_assets()
         self.issue_reissue_transfer_test()
@@ -1694,6 +1762,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
         self.issue_sub_invalid_address_test()
         self.issue_multiple_outputs_test()
         self.issue_sub_multiple_outputs_test()
+        self.getrawtransaction()
+
 
 
 if __name__ == '__main__':
