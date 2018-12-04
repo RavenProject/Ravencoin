@@ -99,6 +99,8 @@ void ReceiveCoinsDialog::setModel(WalletModel *_model)
             SLOT(recentRequestsView_selectionChanged(QItemSelection, QItemSelection)));
         // Last 2 columns are set by the columnResizingFixer, when the table geometry is ready.
         columnResizingFixer = new GUIUtil::TableViewLastColumnResizingFixer(tableView, AMOUNT_MINIMUM_COLUMN_WIDTH, DATE_COLUMN_WIDTH, this);
+
+        tableView->show();
     }
 }
 
@@ -174,9 +176,6 @@ void ReceiveCoinsDialog::setupHistoryFrame(const PlatformStyle *platformStyle)
     ui->frame->setGraphicsEffect(GUIUtil::getShadowEffect());
 
     ui->label_6->setStyleSheet(STRING_LABEL_COLOR);
-
-    ui->recentRequestsView->setGraphicsEffect(GUIUtil::getShadowEffect());
-    ui->recentRequestsView->setStyleSheet(".QTableView {border: none;}");
 
     contextMenu->setFont(GUIUtil::getSubLabelFont());
 
