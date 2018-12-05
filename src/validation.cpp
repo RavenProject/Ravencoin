@@ -2432,6 +2432,23 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     }
                 }
             }
+            else if (tx.IsNewMsgChannelAsset())
+            {
+                if (!AreAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-msgchannel-when-assets-is-not-active");
+
+                std::string strError = "";
+                if (!tx.VerifyNewMsgChannelAsset(strError))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-failed-verify");
+
+                CNewAsset asset;
+                std::string strAddress;
+                if (!MsgChannelAssetFromTransaction(tx, asset, strAddress))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-serialization");
+
+                if (!asset.IsValid(strError, *assetsCache))
+                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-msgchannel");
+            }
         }
         /** RVN END */
         if (fAddressIndex) {

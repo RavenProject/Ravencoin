@@ -131,7 +131,7 @@ UniValue issue(const JSONRPCRequest& request)
     }
 
     // Check assetType supported
-    if (!(assetType == AssetType::ROOT || assetType == AssetType::SUB || assetType == AssetType::UNIQUE)) {
+    if (!(assetType == AssetType::ROOT || assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
@@ -183,7 +183,7 @@ UniValue issue(const JSONRPCRequest& request)
     if (request.params.size() > 4)
         units = request.params[4].get_int();
 
-    bool reissuable = assetType != AssetType::UNIQUE;
+    bool reissuable = assetType != AssetType::UNIQUE && assetType != AssetType::MSGCHANNEL;
     if (request.params.size() > 5)
         reissuable = request.params[5].get_bool();
 
@@ -201,7 +201,7 @@ UniValue issue(const JSONRPCRequest& request)
     }
 
     // check for required unique asset params
-    if (assetType == AssetType::UNIQUE && (nAmount != COIN || units != 0 || reissuable)) {
+    if ((assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) && (nAmount != COIN || units != 0 || reissuable)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a unique asset."));
     }
 

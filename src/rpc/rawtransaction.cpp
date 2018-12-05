@@ -595,7 +595,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     AssetType type;
                     if (IsAssetNameValid(asset.strName, type)) {
-                        if (type != AssetType::UNIQUE) {
+                        if (type != AssetType::UNIQUE && type != AssetType::MSGCHANNEL) {
                             asset.ConstructOwnerTransaction(ownerPubKey);
 
                             // Push the scriptPubKey into the vouts.

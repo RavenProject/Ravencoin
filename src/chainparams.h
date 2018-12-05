@@ -94,11 +94,13 @@ public:
     const CAmount& ReissueAssetBurnAmount() const { return nReissueAssetBurnAmount; }
     const CAmount& IssueSubAssetBurnAmount() const { return nIssueSubAssetBurnAmount; }
     const CAmount& IssueUniqueAssetBurnAmount() const { return nIssueUniqueAssetBurnAmount; }
+    const CAmount& IssueMsgChannelAssetBurnAmount() const { return nIssueMsgChannelAssetBurnAmount; }
 
     const std::string& IssueAssetBurnAddress() const { return strIssueAssetBurnAddress; }
     const std::string& ReissueAssetBurnAddress() const { return strReissueAssetBurnAddress; }
     const std::string& IssueSubAssetBurnAddress() const { return strIssueSubAssetBurnAddress; }
     const std::string& IssueUniqueAssetBurnAddress() const { return strIssueUniqueAssetBurnAddress; }
+    const std::string& IssueMsgChannelAssetBurnAddress() const { return strIssueMsgChannelAssetBurnAddress; }
     const std::string& GlobalBurnAddress() const { return strGlobalBurnAddress; }
 
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
@@ -133,12 +135,14 @@ protected:
     CAmount nReissueAssetBurnAmount;
     CAmount nIssueSubAssetBurnAmount;
     CAmount nIssueUniqueAssetBurnAmount;
+    CAmount nIssueMsgChannelAssetBurnAmount;
 
     // Burn Addresses
     std::string strIssueAssetBurnAddress;
     std::string strReissueAssetBurnAddress;
     std::string strIssueSubAssetBurnAddress;
     std::string strIssueUniqueAssetBurnAddress;
+    std::string strIssueMsgChannelAssetBurnAddress;
 
     // Global Burn Address
     std::string strGlobalBurnAddress;

@@ -159,6 +159,23 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                                   asset.strName);
                     }
                 }
+            } else if (tx.IsNewMsgChannelAsset()) {
+                CNewAsset asset;
+                std::string strAddress;
+                MsgChannelAssetFromTransaction(tx, asset, strAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
+                          asset.strName);
+
+                int assetIndex = tx.vout.size() - 1;
+
+                CAssetCachePossibleMine possibleMine(asset.strName, COutPoint(tx.GetHash(), assetIndex),
+                                                     tx.vout[assetIndex]);
+                if (!assetsCache->AddPossibleOutPoint(possibleMine))
+                    error("%s: Failed to add an asset I own to my Unspent Asset Cache. Asset Name : %s",
+                          __func__, asset.strName);
             }
         }
     }

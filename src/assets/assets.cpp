@@ -40,7 +40,7 @@ static const auto MAX_CHANNEL_NAME_LENGTH = 12;
 static const std::regex ROOT_NAME_CHARACTERS("^[A-Z0-9._]{3,}$");
 static const std::regex SUB_NAME_CHARACTERS("^[A-Z0-9._]+$");
 static const std::regex UNIQUE_TAG_CHARACTERS("^[-A-Za-z0-9@$%&*()[\\]{}_.?:]+$");
-static const std::regex CHANNEL_TAG_CHARACTERS("^[A-Z0-9._]+$");
+static const std::regex MSGCHANNEL_TAG_CHARACTERS("^[A-Za-z0-9._]+$");
 static const std::regex VOTE_TAG_CHARACTERS("^[A-Z0-9._]+$");
 
 static const std::regex DOUBLE_PUNCTUATION("^.*[._]{2,}.*$");
@@ -49,11 +49,11 @@ static const std::regex TRAILING_PUNCTUATION("^.*[._]$");
 
 static const std::string SUB_NAME_DELIMITER = "/";
 static const std::string UNIQUE_TAG_DELIMITER = "#";
-static const std::string CHANNEL_TAG_DELIMITER = "~";
+static const std::string MSGCHANNEL_TAG_DELIMITER = "~";
 static const std::string VOTE_TAG_DELIMITER = "^";
 
 static const std::regex UNIQUE_INDICATOR(R"(^[^^~#!]+#[^~#!\/]+$)");
-static const std::regex CHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");
+static const std::regex MSGCHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");
 static const std::regex OWNER_INDICATOR(R"(^[^^~#!]+!$)");
 static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 
@@ -86,9 +86,9 @@ bool IsVoteTagValid(const std::string& tag)
     return std::regex_match(tag, VOTE_TAG_CHARACTERS);
 }
 
-bool IsChannelTagValid(const std::string& tag)
+bool IsMsgChannelTagValid(const std::string &tag)
 {
-    return std::regex_match(tag, CHANNEL_TAG_CHARACTERS)
+    return std::regex_match(tag, MSGCHANNEL_TAG_CHARACTERS)
         && !std::regex_match(tag, DOUBLE_PUNCTUATION)
         && !std::regex_match(tag, LEADING_PUNCTUATION)
         && !std::regex_match(tag, TRAILING_PUNCTUATION);
@@ -133,7 +133,7 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string
 
         return ret;
     }
-    else if (std::regex_match(name, CHANNEL_INDICATOR))
+    else if (std::regex_match(name, MSGCHANNEL_INDICATOR))
     {
         bool ret = IsTypeCheckNameValid(AssetType::MSGCHANNEL, name, error);
         if (ret)
@@ -199,8 +199,8 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
     } else if (type == AssetType::MSGCHANNEL) {
         if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
         std::vector<std::string> parts;
-        boost::split(parts, name, boost::is_any_of(CHANNEL_TAG_DELIMITER));
-        bool valid = IsNameValidBeforeTag(parts.front()) && IsChannelTagValid(parts.back());
+        boost::split(parts, name, boost::is_any_of(MSGCHANNEL_TAG_DELIMITER));
+        bool valid = IsNameValidBeforeTag(parts.front()) && IsMsgChannelTagValid(parts.back());
         if (parts.back().size() > MAX_CHANNEL_NAME_LENGTH) { error = "Channel name is greater than max length of " + std::to_string(MAX_CHANNEL_NAME_LENGTH); return false; }
         if (!valid) { error = "Message Channel name contains invalid characters (Valid characters are: A-Z 0-9 _ .) (special characters can't be the first or last characters)";  return false; }
         return true;
@@ -238,7 +238,7 @@ std::string GetParentName(const std::string& name)
     } else if (type == AssetType::UNIQUE) {
         index = name.find_last_of(UNIQUE_TAG_DELIMITER);
     } else if (type == AssetType::MSGCHANNEL) {
-        index = name.find_last_of(CHANNEL_TAG_DELIMITER);
+        index = name.find_last_of(MSGCHANNEL_TAG_DELIMITER);
     } else if (type == AssetType::VOTE) {
         index = name.find_last_of(VOTE_TAG_DELIMITER);
     } else if (type == AssetType::ROOT)
@@ -293,7 +293,7 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
         return false;
     }
 
-    if (assetType == AssetType::UNIQUE) {
+    if (assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         if (units != UNIQUE_ASSET_UNITS) {
             strError = _("Invalid parameter: units must be ") + std::to_string(UNIQUE_ASSET_UNITS / COIN);
             return false;
@@ -474,6 +474,18 @@ bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string&
     return AssetFromScript(scriptPubKey, asset, strAddress);
 }
 
+bool MsgChannelAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
+{
+    // Check to see if the transaction is an new asset issue tx
+    if (!tx.IsNewMsgChannelAsset())
+        return false;
+
+    // Get the scriptPubKey from the last tx in vout
+    CScript scriptPubKey = tx.vout[tx.vout.size() - 1].scriptPubKey;
+
+    return MsgChannelAssetFromScript(scriptPubKey, asset, strAddress);
+}
+
 bool ReissueAssetFromTransaction(const CTransaction& tx, CReissueAsset& reissue, std::string& strAddress)
 {
     // Check to see if the transaction is a reissue tx
@@ -589,6 +601,33 @@ bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew, std::stri
 
     return true;
 }
+
+bool MsgChannelAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew, std::string& strAddress)
+{
+    int nStartingIndex = 0;
+    if (!IsScriptNewMsgChannelAsset(scriptPubKey, nStartingIndex))
+        return false;
+
+    CTxDestination destination;
+    ExtractDestination(scriptPubKey, destination);
+
+    strAddress = EncodeDestination(destination);
+
+    std::vector<unsigned char> vchNewAsset;
+    vchNewAsset.insert(vchNewAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    CDataStream ssAsset(vchNewAsset, SER_NETWORK, PROTOCOL_VERSION);
+
+    try {
+        ssAsset >> assetNew;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the msg channel asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+
 
 bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, std::string& strAddress)
 {
@@ -835,6 +874,76 @@ bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
 
     return true;
 }
+
+//! Make sure to call VerifyNewUniqueAsset if this call returns true
+bool CTransaction::IsNewMsgChannelAsset() const
+{
+    // Check trailing outpoint for issue data with unique asset name
+    if (!CheckIssueDataTx(vout[vout.size() - 1]))
+        return false;
+
+    if (!IsScriptNewMsgChannelAsset(vout[vout.size() - 1].scriptPubKey))
+        return false;
+
+    return true;
+}
+
+//! To be called on CTransactions where IsNewAsset returns true
+bool CTransaction::VerifyNewMsgChannelAsset(std::string &strError) const
+{
+    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
+    if (vout.size() < 3) {
+        strError  = "bad-txns-issue-msgchannel-vout-size-to-small";
+        return false;
+    }
+
+    // Check for the assets data CTxOut. This will always be the last output in the transaction
+    if (!CheckIssueDataTx(vout[vout.size() - 1])) {
+        strError  = "bad-txns-issue-data-not-found";
+        return false;
+    }
+
+    // Get the asset type
+    CNewAsset asset;
+    std::string address;
+    if (!MsgChannelAssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
+        strError = "bad-txns-issue-msgchannel-serialzation-failed";
+        return error("%s : Failed to get new msgchannel asset from transaction: %s", __func__, this->GetHash().GetHex());
+    }
+
+    AssetType assetType;
+    IsAssetNameValid(asset.strName, assetType);
+
+    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
+    bool fFoundIssueBurnTx = false;
+    for (auto out : vout) {
+        if (CheckIssueBurnTx(out, AssetType::MSGCHANNEL)) {
+            fFoundIssueBurnTx = true;
+            break;
+        }
+    }
+
+    if (!fFoundIssueBurnTx) {
+        strError = "bad-txns-issue-msgchannel-burn-not-found";
+        return false;
+    }
+
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners != 0 || nIssues != 1 || nReissues > 0) {
+        strError = "bad-txns-failed-issue-msgchannel-asset-formatting-check";
+        return false;
+    }
+
+    return true;
+}
+
+
 
 bool CTransaction::IsReissueAsset() const
 {
@@ -1945,21 +2054,15 @@ bool IsAssetUnitsValid(const CAmount& units)
 
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued)
 {
+    if (type == AssetType::REISSUE || type == AssetType::VOTE || type == AssetType::OWNER || type == AssetType::INVALID)
+        return false;
+
     CAmount burnAmount = 0;
     std::string burnAddress = "";
 
-    if (type == AssetType::SUB) {
-        burnAmount = GetIssueSubAssetBurnAmount();
-        burnAddress = Params().IssueSubAssetBurnAddress();
-    } else if (type == AssetType::ROOT) {
-        burnAmount = GetIssueAssetBurnAmount();
-        burnAddress = Params().IssueAssetBurnAddress();
-    } else if (type == AssetType::UNIQUE) {
-        burnAmount = GetIssueUniqueAssetBurnAmount();
-        burnAddress = Params().IssueUniqueAssetBurnAddress();
-    } else {
-        return false;
-    }
+    // Get the burn address and amount for the type of asset
+    burnAmount = GetBurnAmount(type);
+    burnAddress = GetBurnAddress(type);
 
     // If issuing multiple (unique) assets need to burn for each
     burnAmount *= numberIssued;
@@ -2067,7 +2170,7 @@ bool IsScriptNewUniqueAsset(const CScript& scriptPubKey)
     return IsScriptNewUniqueAsset(scriptPubKey, index);
 }
 
-bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex)
+bool IsScriptNewUniqueAsset(const CScript &scriptPubKey, int &nStartingIndex)
 {
     int nType = 0;
     bool fIsOwner = false;
@@ -2084,6 +2187,31 @@ bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex)
         return false;
 
     return AssetType::UNIQUE == assetType;
+}
+
+bool IsScriptNewMsgChannelAsset(const CScript& scriptPubKey)
+{
+    int index = 0;
+    return IsScriptNewMsgChannelAsset(scriptPubKey, index);
+}
+
+bool IsScriptNewMsgChannelAsset(const CScript &scriptPubKey, int &nStartingIndex)
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+        return false;
+
+    CNewAsset asset;
+    std::string address;
+    if (!AssetFromScript(scriptPubKey, asset, address))
+        return false;
+
+    AssetType assetType;
+    if (!IsAssetNameValid(asset.strName, assetType))
+        return false;
+
+    return AssetType::MSGCHANNEL == assetType;
 }
 
 bool IsScriptOwnerAsset(const CScript& scriptPubKey)
@@ -2406,6 +2534,11 @@ CAmount GetIssueUniqueAssetBurnAmount()
     return Params().IssueUniqueAssetBurnAmount();
 }
 
+CAmount GetIssueMsgChannelAssetBurnAmount()
+{
+    return Params().IssueMsgChannelAssetBurnAmount();
+}
+
 CAmount GetBurnAmount(const int nType)
 {
     return GetBurnAmount((AssetType(nType)));
@@ -2419,7 +2552,7 @@ CAmount GetBurnAmount(const AssetType type)
         case AssetType::SUB:
             return GetIssueSubAssetBurnAmount();
         case AssetType::MSGCHANNEL:
-            return 0;
+            return GetIssueMsgChannelAssetBurnAmount();
         case AssetType::OWNER:
             return 0;
         case AssetType::UNIQUE:
@@ -2446,7 +2579,7 @@ std::string GetBurnAddress(const AssetType type)
         case AssetType::SUB:
             return Params().IssueSubAssetBurnAddress();
         case AssetType::MSGCHANNEL:
-            return "";
+            return Params().IssueMsgChannelAssetBurnAddress();
         case AssetType::OWNER:
             return "";
         case AssetType::UNIQUE:
@@ -2620,7 +2753,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     vecSend.push_back(recipient);
 
     // If the asset is a subasset or unique asset. We need to send the ownertoken change back to ourselfs
-    if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE) {
+    if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         // Get the script for the destination address for the assets
         CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
 
@@ -2631,7 +2764,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     }
 
     // Get the owner outpoints if this is a subasset or unique asset
-    if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE) {
+    if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
         for (auto asset : assets) {
             if (!VerifyWalletHasAsset(parentName + OWNER_TAG, error)) {
