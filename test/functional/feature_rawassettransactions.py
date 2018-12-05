@@ -750,7 +750,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-owner-burn-not-found", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -772,7 +772,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-owner-burn-not-found", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -794,7 +794,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-owner-burn-not-found", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
