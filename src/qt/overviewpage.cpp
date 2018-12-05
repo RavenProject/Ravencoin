@@ -154,8 +154,10 @@ public:
         /** Get the icon for the administrator of the asset */
         QPixmap pixmap = qvariant_cast<QPixmap>(index.data(Qt::DecorationRole));
 
+        bool admin = index.data(AssetTableModel::AdministratorRole).toBool();
+
         /** Need to know the heigh to the pixmap. If it is 0 we don't we dont own this asset so dont have room for the icon */
-        int nIconSize = pixmap.height();
+        int nIconSize = admin ? pixmap.height() : 0;
         int extraNameSpacing = 12;
         if (nIconSize)
             extraNameSpacing = 0;
@@ -182,7 +184,7 @@ public:
         QLinearGradient gradient(mainRect.topLeft(), mainRect.bottomRight());
 
         // Select the color of the gradient
-        if (index.data(AssetTableModel::AdministratorRole).toBool()) {
+        if (admin) {
             if (darkModeEnabled) {
                 gradient.setColorAt(0, COLOR_ADMIN_CARD_DARK);
                 gradient.setColorAt(1, COLOR_ADMIN_CARD_DARK);
