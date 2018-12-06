@@ -194,6 +194,7 @@ struct CAssetOutputEntry
     std::string assetName;
     CTxDestination destination;
     CAmount nAmount;
+    std::string message;
     int vout;
 };
 /** RVN END */

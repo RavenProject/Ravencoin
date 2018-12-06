@@ -545,7 +545,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                 if (assetKey_ == "issue")
                 {
-
                     if (asset_[0].type() != UniValue::VOBJ)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"issue\": {\"key\": value}, ...}"));
 
@@ -613,7 +612,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                 }
                 else if (assetKey_ == "issue_unique")
                 {
-
                     if (asset_[0].type() != UniValue::VOBJ)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"issue_unique\": {\"root_name\": value}, ...}"));
 

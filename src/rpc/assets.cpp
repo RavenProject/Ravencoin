@@ -753,15 +753,15 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
         result.push_back(Pair(pair.first, UnitValueFromAmount(pair.second, asset_name)));
     }
 
-    
+
     return result;
 }
 
 UniValue transfer(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() != 3)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 4)
         throw std::runtime_error(
-                "transfer \"asset_name\" qty \"to_address\"\n"
+                "transfer \"asset_name\" qty \"to_address\" \"message\"\n"
                 + AssetActivationWarning() +
                 "\nTransfers a quantity of an owned asset to a given address"
 
@@ -769,6 +769,7 @@ UniValue transfer(const JSONRPCRequest& request)
                 "1. \"asset_name\"               (string, required) name of asset\n"
                 "2. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
+                "3. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash to send along with the transfer\n"
 
                 "\nResult:\n"
                 "txid"
@@ -777,8 +778,8 @@ UniValue transfer(const JSONRPCRequest& request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\"")
-                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\"")
+                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\"")
+                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\"")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -797,10 +798,25 @@ UniValue transfer(const JSONRPCRequest& request)
 
     std::string address = request.params[2].get_str();
 
+    if (request.params.size() > 3) {
+        if (!AreMessagingDeployed()) {
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Unable to send messages until Messaging RIP5 is enabled"));
+        }
+    }
+
+    std::string message = "";
+    if (request.params.size() > 3) {
+        message = request.params[3].get_str();
+        if (message.length() != 46)
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
+        if (message.substr(0, 2) != "Qm")
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
+    }
+
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount), address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeIPFS(message)), address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -1079,7 +1095,7 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
-    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
+    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}}

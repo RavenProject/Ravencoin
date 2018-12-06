@@ -35,6 +35,7 @@ static const size_t MIN_SERIALIZABLE_TRANSACTION_WEIGHT = WITNESS_SCALE_FACTOR *
 //! This variable needs to in this class because undo.h uses it. However because it is in this class
 //! it causes unused variable warnings when compiling. This UNUSED_VAR removes the unused warnings
 UNUSED_VAR static bool fAssetsIsActive = false;
+UNUSED_VAR static bool fMessagesIsActive = false;
 
 unsigned int GetMaxBlockWeight();
 unsigned int GetMaxBlockSerializedSize();

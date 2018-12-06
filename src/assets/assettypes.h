@@ -161,7 +161,7 @@ class CAssetTransfer
 public:
     std::string strName;
     CAmount nAmount;
-
+    std::string message;
 
     CAssetTransfer()
     {
@@ -172,6 +172,7 @@ public:
     {
         nAmount = 0;
         strName = "";
+        message = "";
     }
 
     ADD_SERIALIZE_METHODS;
@@ -181,9 +182,10 @@ public:
     {
         READWRITE(strName);
         READWRITE(nAmount);
+        ReadWriteIPFSHash(s, ser_action, message);
     }
 
-    CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount);
+    CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message = "");
     bool IsValid(std::string& strError) const;
     void ConstructTransaction(CScript& script) const;
 };

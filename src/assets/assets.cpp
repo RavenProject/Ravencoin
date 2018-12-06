@@ -295,7 +295,7 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
 
     if (assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         if (units != UNIQUE_ASSET_UNITS) {
-            strError = _("Invalid parameter: units must be ") + std::to_string(UNIQUE_ASSET_UNITS / COIN);
+            strError = _("Invalid parameter: units must be ") + std::to_string(UNIQUE_ASSET_UNITS);
             return false;
         }
         if (nAmount != UNIQUE_ASSET_AMOUNT) {
@@ -1023,10 +1023,11 @@ bool CTransaction::VerifyReissueAsset(std::string& strError) const
     return true;
 }
 
-CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount)
+CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message)
 {
     this->strName = strAssetName;
     this->nAmount = nAmount;
+    this->message = message;
 }
 
 bool CAssetTransfer::IsValid(std::string& strError) const
@@ -2460,6 +2461,7 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
             data.nAmount = transfer.nAmount;
             data.destination = DecodeDestination(address);
             data.assetName = transfer.strName;
+            data.message = transfer.message;
             return true;
         }
     } else if (type == TX_NEW_ASSET && fIsOwner) {
@@ -2916,6 +2918,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
     for (auto transfer : vTransfers) {
         std::string address = transfer.second;
         std::string asset_name = transfer.first.strName;
+        std::string message = transfer.first.message;
         CAmount nAmount = transfer.first.nAmount;
 
         if (!IsValidDestinationString(address)) {
@@ -2944,7 +2947,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(address));
 
         // Update the scriptPubKey with the transfer asset information
-        CAssetTransfer assetTransfer(asset_name, nAmount);
+        CAssetTransfer assetTransfer(asset_name, nAmount, message);
         assetTransfer.ConstructTransaction(scriptPubKey);
 
         CRecipient recipient = {scriptPubKey, 0, fSubtractFeeFromAmount};

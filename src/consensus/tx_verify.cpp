@@ -209,6 +209,13 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
 
+                    // Check to make sure that messages are not sent before the RIP5 is active
+                    if (!transfer.message.empty()) {
+                        if (!AreMessagingDeployed()) {
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-included-message-before-messaging-is-active");
+                        }
+                    }
+
                     // Check asset name validity and get type
                     AssetType assetType;
                     if (!IsAssetNameValid(transfer.strName, assetType)) {
@@ -227,12 +234,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-unique-amount-was-not-1");
                     }
 
-                    // If the transfer is a unique asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
+                    // If the transfer is a message channel asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
                     if (assetType == AssetType::MSGCHANNEL) {
+                        if (!AreMessagingDeployed())
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-msgchannel-before-messaging-is-active");
+
                         if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-msgchannel-amount-was-not-1");
                     }
-
                 }
             }
         }
@@ -283,6 +292,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-" + strError);
 
             } else if (tx.IsReissueAsset()) {
+
                 /** Verify the reissue assets data */
                 std::string strError;
                 if (!tx.VerifyReissueAsset(strError))
@@ -319,6 +329,10 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     }
                 }
             } else if (tx.IsNewMsgChannelAsset()) {
+
+                if (!AreMessagingDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-before-messaging-is-active");
+
                 /** Verify the msg channel assets data */
                 std::string strError = "";
                 if(!tx.VerifyNewMsgChannelAsset(strError))
