@@ -35,6 +35,8 @@
 #include <atomic>
 #include <assets/assets.h>
 #include <assets/assetdb.h>
+#include <assets/messages.h>
+#include <assets/messagedb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -497,6 +499,8 @@ extern CAssetsDB *passetsdb;
 extern CAssetsCache *passets;
 /** Global variable that point to the assets LRU Cache (protexted by cs_main) */
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
+
+extern CLRUCache<std::string, CMessage> *pMessagesCache;
 /** RVN END */
 
 /**

@@ -202,6 +202,7 @@ CAssetsCache *passets = nullptr;
 
 CAssetsCache *tmpAssetCache = nullptr;
 CLRUCache<std::string, CDatabasedAssetData> *passetsCache = nullptr;
+CLRUCache<std::string, CMessage> *pMessagesCache = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,

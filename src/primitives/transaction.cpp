@@ -4,6 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <streams.h>
+#include <util.h>
 #include "primitives/transaction.h"
 
 #include "hash.h"
@@ -13,6 +15,14 @@
 std::string COutPoint::ToString() const
 {
     return strprintf("COutPoint(%s, %u)", hash.ToString().substr(0,10), n);
+}
+
+std::string COutPoint::ToSerializedString() const
+{
+    CDataStream stream(PROTOCOL_VERSION, SER_DISK);
+    stream << *this;
+    LogPrintf("Got a string COutPoint: %s\n", stream.str());
+    return stream.str();
 }
 
 CTxIn::CTxIn(COutPoint prevoutIn, CScript scriptSigIn, uint32_t nSequenceIn)

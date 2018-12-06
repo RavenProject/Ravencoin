@@ -256,6 +256,8 @@ void Shutdown()
         passetsdb = nullptr;
         delete passetsCache;
         passetsCache = nullptr;
+        delete pMessagesCache;
+        pMessagesCache = nullptr;
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -1451,6 +1453,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
                 passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
+                pMessagesCache = new CLRUCache<std::string, CMessage>(1000);
+
 
                 // Read for fAssetIndex to make sure that we only load asset address balances if it if true
                 pblocktree->ReadFlag("assetindex", fAssetIndex);
