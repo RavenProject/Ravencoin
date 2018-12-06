@@ -137,6 +137,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  //Assets (RIP2)
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1540944000; // Oct 31, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1572480000; // Oct 31, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 7;  //Messaging (RIP5)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 5544116233; // TODO Update when ready
+        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 5544116233; //TODO Update when ready
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
