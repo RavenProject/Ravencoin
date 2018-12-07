@@ -10,6 +10,17 @@
 std::set<COutPoint> setMyMessageOutPoints;
 std::set<CMessage> setMyMessages;
 
+
+int IntFromMessageStatus(MessageStatus status)
+{
+    return (int)status;
+}
+
+MessageStatus MessageStatusFromInt(int nStatus)
+{
+    return (MessageStatus)nStatus;
+}
+
 CMessage::CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const bool fExpired, const int64_t& time)
 {
     this->out = out;
@@ -21,7 +32,9 @@ CMessage::CMessage(const COutPoint& out, const std::string& strName, const std::
 
 void GetMyMessages()
 {
-    CMessageDB messageDB(10000);
+
+    if (!pmessagedb)
+        return;
 
     for (auto out : setMyMessageOutPoints) {
         // if we already have the message is our set of messages
@@ -35,7 +48,7 @@ void GetMyMessages()
         CMessage messageTmp;
         if (pMessagesCache->Exists(out.ToSerializedString())) {
             setMyMessages.insert(pMessagesCache->Get(out.ToSerializedString()));
-        } else if (messageDB.ReadMessage(out, messageTmp)) {
+        } else if (pmessagedb->ReadMessage(out, messageTmp)) {
             setMyMessages.insert(messageTmp);
             pMessagesCache->Put(out.ToSerializedString(), messageTmp);
         } else {

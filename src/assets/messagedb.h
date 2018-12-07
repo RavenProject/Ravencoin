@@ -30,6 +30,16 @@ public:
     bool WriteMyMessageOutPoint(const COutPoint &out);
     bool EraseMyMessageOutPoint(const COutPoint &out);
     bool LoadMyMessageOutPoints();
+
+    // My message channels
+    bool WriteMyMessageChannel(const std::string& channelname);
+    bool ReadMyMessageChannel(const std::string& channelname);
+    bool EraseMyMessageChannel(const std::string& channelname);
+    bool LoadMyMessageChannels();
+
+    // Write / Read Database flags
+    bool WriteFlag(const std::string &name, bool fValue);
+    bool ReadFlag(const std::string &name, bool &fValue);
 };
 
 

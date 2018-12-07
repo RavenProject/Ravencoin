@@ -258,6 +258,10 @@ void Shutdown()
         passetsCache = nullptr;
         delete pMessagesCache;
         pMessagesCache = nullptr;
+        delete pMessagesChannelsCache;
+        pMessagesChannelsCache = nullptr;
+        delete pmessagedb;
+        pmessagedb = nullptr;
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -1403,6 +1407,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // ********************************************************* Step 7: load block chain
 
     fReindex = gArgs.GetBoolArg("-reindex", false);
+    fMessagingDisabled = gArgs.GetBoolArg("-disablemessaging", false);
     bool fReindexChainState = gArgs.GetBoolArg("-reindex-chainstate", false);
 
     // block tree db settings
@@ -1446,14 +1451,16 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReset, dbMaxFileSize);
 
-
                 delete passets;
                 delete passetsdb;
                 delete passetsCache;
+                delete pmessagedb;
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
                 passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
                 pMessagesCache = new CLRUCache<std::string, CMessage>(1000);
+                pMessagesChannelsCache = new CLRUCache<std::string, int>(1000);
+                pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
 
 
                 // Read for fAssetIndex to make sure that we only load asset address balances if it if true
@@ -1468,6 +1475,20 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     LogPrintf("Database failed to load last Reissued Mempool State. Will have to start from empty state");
 
                 LogPrintf("Loaded Assets from database without error\nCache of assets size: %d\n", passetsCache->Size());
+
+                if (pmessagedb->ReadFlag("disablemessaging", fMessagingDisabled)) {
+                    LogPrintf("%s: Asset Messaging %s\n", __func__, fMessagingDisabled ? "disabled" : "enabled");
+                } else {
+                    pmessagedb->WriteFlag("disablemessaging", fMessagingDisabled);
+                }
+
+                // Check for changed -txindex state
+                if (fMessagingDisabled != gArgs.GetBoolArg("-disablemessaging", fMessagingDisabled)) {
+                    LogPrintf("%s: Turning %s Asset Messaging\n", __func__, fMessagingDisabled ? "on" : "off");
+                    // Use the provided setting for -txindex in the new database
+                    fMessagingDisabled = gArgs.GetBoolArg("-disablemessaging", false);
+                    pmessagedb->WriteFlag("disablemessaging", fMessagingDisabled);
+                }
 
                 if (fReset) {
                     pblocktree->WriteReindexing(true);

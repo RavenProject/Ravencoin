@@ -29,6 +29,8 @@
 #include "coins.h"
 #include "wallet/wallet.h"
 
+#define SIX_MONTHS 15780000 // Six months worth of seconds
+
 std::map<uint256, std::string> mapReissuedTx;
 std::map<std::string, uint256> mapReissuedAssets;
 
@@ -1023,11 +1025,20 @@ bool CTransaction::VerifyReissueAsset(std::string& strError) const
     return true;
 }
 
-CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message)
+CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message, const int64_t& nExpireTime)
 {
+    int64_t time = GetTime();
+
     this->strName = strAssetName;
     this->nAmount = nAmount;
     this->message = message;
+    if (!message.empty()) {
+        if (nExpireTime) {
+            this->nExpireTime = nExpireTime;
+        } else {
+            this->nExpireTime = 0;
+        }
+    }
 }
 
 bool CAssetTransfer::IsValid(std::string& strError) const
@@ -2462,6 +2473,7 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
             data.destination = DecodeDestination(address);
             data.assetName = transfer.strName;
             data.message = transfer.message;
+            data.expireTime = transfer.nExpireTime;
             return true;
         }
     } else if (type == TX_NEW_ASSET && fIsOwner) {

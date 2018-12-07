@@ -38,7 +38,7 @@ const char IPFS_SHA2_256 = 0x12;
 const char IPFS_SHA2_256_LEN = 0x20;
 
 template <typename Stream, typename Operation>
-void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash)
+bool ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash)
 {
     // assuming 34-byte IPFS SHA2-256 decoded hash (0x12, 0x20, 32 more bytes)
     if (ser_action.ForRead())
@@ -52,6 +52,7 @@ void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash
             std::ostringstream os;
             os << IPFS_SHA2_256 << IPFS_SHA2_256_LEN << hash.substr(0, 32);
             strIPFSHash = os.str();
+            return true;
         }
     }
     else
@@ -59,8 +60,10 @@ void ReadWriteIPFSHash(Stream& s, Operation ser_action, std::string& strIPFSHash
         if (strIPFSHash.length() == 34) {
             ::Serialize(s, IPFS_SHA2_256);
             ::Serialize(s, strIPFSHash.substr(2));
+            return true;
         }
     }
+    return false;
 };
 
 class CNewAsset
@@ -162,6 +165,7 @@ public:
     std::string strName;
     CAmount nAmount;
     std::string message;
+    int64_t nExpireTime;
 
     CAssetTransfer()
     {
@@ -173,6 +177,7 @@ public:
         nAmount = 0;
         strName = "";
         message = "";
+        nExpireTime = 0;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -182,10 +187,22 @@ public:
     {
         READWRITE(strName);
         READWRITE(nAmount);
-        ReadWriteIPFSHash(s, ser_action, message);
+        bool validIPFS = ReadWriteIPFSHash(s, ser_action, message);
+        if (validIPFS) {
+            if (ser_action.ForRead()) {
+                if (!s.empty() && s.size() >= sizeof(int64_t)) {
+                    ::Unserialize(s, nExpireTime);
+                }
+            } else {
+                if (nExpireTime != 0) {
+                    ::Serialize(s, nExpireTime);
+                }
+            }
+        }
+
     }
 
-    CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message = "");
+    CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message = "", const int64_t& nExpireTime = 0);
     bool IsValid(std::string& strError) const;
     void ConstructTransaction(CScript& script) const;
 };

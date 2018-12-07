@@ -195,6 +195,7 @@ struct CAssetOutputEntry
     CTxDestination destination;
     CAmount nAmount;
     std::string message;
+    int64_t expireTime;
     int vout;
 };
 /** RVN END */

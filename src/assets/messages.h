@@ -16,6 +16,20 @@ class CMessage;
 
 extern std::set<COutPoint> setMyMessageOutPoints;
 
+enum class MessageStatus {
+    READ = 0,
+    UNREAD = 1,
+    EXPIRED = 2,
+    SPAM = 2,
+    HIDDEN = 3,
+    ERROR = 4
+};
+
+int IntFromMessageStatus(MessageStatus status);
+MessageStatus MessageStatusFromInt(int nStatus);
+
+
+
 class CMessage {
 public:
 
@@ -24,6 +38,7 @@ public:
     std::string ipfsHash;
     int64_t time;
     bool fExpired;
+    MessageStatus status;
 
     CMessage() {
         SetNull();
@@ -35,15 +50,15 @@ public:
         strName = "";
         ipfsHash = "";
         time = 0;
+        status = MessageStatus::ERROR;
     }
 
     CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const bool fExpired, const int64_t& time);
 
     bool operator<(const CMessage& rhs) const
     {
-        return out< rhs.out;
+        return out < rhs.out;
     }
-
 
     ADD_SERIALIZE_METHODS;
 
@@ -55,6 +70,13 @@ public:
         READWRITE(ipfsHash);
         READWRITE(time);
         READWRITE(fExpired);
+        if (ser_action.ForRead()) {
+            ::Serialize(s, IntFromMessageStatus(status));
+        } else {
+            int nStatus;
+            ::Unserialize(s, nStatus);
+            status = MessageStatusFromInt(nStatus);
+        }
     }
 };
 

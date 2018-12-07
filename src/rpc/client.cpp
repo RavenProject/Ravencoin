@@ -36,6 +36,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "issueunique", 1, "asset_tags"},
     { "issueunique", 2, "ipfs_hashes"},
     { "transfer", 1, "qty"},
+    { "transfer", 4, "expire_time"},
     { "reissue", 1, "qty"},
     { "reissue", 4, "reissuable"},
     { "reissue", 5, "new_unit"},

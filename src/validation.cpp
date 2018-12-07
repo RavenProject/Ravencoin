@@ -78,6 +78,7 @@ CConditionVariable cvBlockChange;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 std::atomic_bool fReindex(false);
+bool fMessagingDisabled = false;
 bool fTxIndex = false;
 bool fAssetIndex = false;
 bool fAddressIndex = false;
@@ -203,6 +204,8 @@ CAssetsCache *passets = nullptr;
 CAssetsCache *tmpAssetCache = nullptr;
 CLRUCache<std::string, CDatabasedAssetData> *passetsCache = nullptr;
 CLRUCache<std::string, CMessage> *pMessagesCache = nullptr;
+CLRUCache<std::string, int> *pMessagesChannelsCache = nullptr;
+CMessageDB *pmessagedb = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
