@@ -22,3 +22,36 @@ Loops through blocks and transactions and prints out tx information.
 * Uncomment out print lines to print out more facts
 * Set the constants at the top of txfacts.py
 * ```python txfacts.py```
+
+### IPFS Pinner
+Loops through blocks and transactions and pins asset issuance meta-data.
+* Requires ipfs daemon to be running
+
+* Install pip3 (if not there)
+*   sudo apt-get install python3-pip
+
+* Install zmq with 
+*   pip3 install pyzmq
+
+* Install bitcoinrpc with 
+*   pip3 install python-bitcoinrpc
+
+* Install ipfsapi with 
+*   pip3 install ipfsapi
+
+* Set the constants at the top of txfacts.py
+* ```python ipfs_pinner.py```
+
+* Optional Arguments
+* ```  
+  -h, --help            show this help message and exit
+  -n, --noblockscan     Do not scan though blocks.
+  -z, --nozmqwatch      Do not watch zero message queue.
+  -s, --safemode        Only store JSON files of limited size.
+  -b BLOCK, --block BLOCK
+                        Start at this block number.
+  -f FOLDER, --folder FOLDER
+                        Store files in a different folder.
+  -d, --debug           Print debug info.
+ ```
+
