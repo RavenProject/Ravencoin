@@ -25,7 +25,7 @@ Loops through blocks and transactions and prints out tx information.
 
 ### IPFS Pinner
 Loops through blocks and transactions and pins asset issuance meta-data.
-* Requires ipfs daemon to be running
+* Requires ipfs daemon to be running ```ipfs daemon```
 
 * Install pip3 (if not there) ```sudo apt-get install python3-pip```
 
