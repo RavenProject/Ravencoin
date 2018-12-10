@@ -99,6 +99,7 @@ def decode_rawtx_cli(txdata):
 
 def decode_script(script):
     scriptinfo_str = rpc_call('decodescript', script)
+    scriptinfo_str = scriptinfo_str.decode('ascii')    #Needed for Python version 3.5 compat.  3.6 works fine without it.
     return(json.loads(scriptinfo_str))
 
 
