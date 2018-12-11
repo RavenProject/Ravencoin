@@ -212,7 +212,9 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
 
     loadFonts();
 
+#if !defined(Q_OS_MAC)
     this->setFont(QFont("Open Sans"));
+#endif
 
     // Create actions for the toolbar, menu bar and tray/dock icon
     // Needs walletFrame to be initialized
@@ -341,7 +343,9 @@ void RavenGUI::createActions()
     QFont font = QFont();
     font.setPixelSize(22);
     font.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.43);
+#if !defined(Q_OS_MAC)
     font.setFamily("Open Sans");
+#endif
     font.setWeight(QFont::Weight::ExtraLight);
 
     QActionGroup *tabGroup = new QActionGroup(this);
@@ -608,16 +612,26 @@ void RavenGUI::createToolBars()
 //        toolbar->addAction(messagingAction);
 //        toolbar->addAction(votingAction);
 
+        QString openSansFontString = "font: normal 22pt \"Open Sans\";";
+        QString normalString = "font: normal 22pt \"Arial\";";
+        QString stringToUse = "";
+
+#if !defined(Q_OS_MAC)
+        stringToUse = openSansFontString;
+#else
+        stringToUse = normalString;
+#endif
+
         /** RVN START */
         QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
                                ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1; border: none;} "
-                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none; font: normal 22pt \"Open Sans\";} "
+                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none; font: %4} "
                                ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
                                ".QToolButton:disabled {color: gray;}";
 
         toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
                                                 platformStyle->ToolBarSelectedTextColor().name(),
-                                                platformStyle->DarkOrangeColor().name()));
+                                                platformStyle->DarkOrangeColor().name(), stringToUse));
 
         toolbar->setOrientation(Qt::Vertical);
         toolbar->setIconSize(QSize(40, 40));

@@ -86,7 +86,9 @@ namespace GUIUtil {
 QFont getSubLabelFont()
 {
     QFont labelSubFont;
+#if !defined(Q_OS_MAC)
     labelSubFont.setFamily("Open Sans");
+#endif
     labelSubFont.setWeight(QFont::Weight::ExtraLight);
     labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelSubFont.setPixelSize(14);
@@ -96,7 +98,9 @@ QFont getSubLabelFont()
 QFont getSubLabelFontBolded()
 {
     QFont labelSubFont;
+#if !defined(Q_OS_MAC)
     labelSubFont.setFamily("Open Sans");
+#endif
     labelSubFont.setWeight(QFont::Weight::Bold);
     labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelSubFont.setPixelSize(14);
@@ -106,7 +110,9 @@ QFont getSubLabelFontBolded()
 QFont getTopLabelFontBolded()
 {
     QFont labelTopFont;
+#if !defined(Q_OS_MAC)
     labelTopFont.setFamily("Open Sans");
+#endif
     labelTopFont.setWeight(QFont::Weight::Bold);
     labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelTopFont.setPixelSize(18);
@@ -116,7 +122,9 @@ QFont getTopLabelFontBolded()
 QFont getTopLabelFont(int weight, int pxsize)
 {
     QFont labelTopFont;
+#if !defined(Q_OS_MAC)
     labelTopFont.setFamily("Open Sans");
+#endif
     labelTopFont.setWeight(weight);
     labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelTopFont.setPixelSize(pxsize);
@@ -126,7 +134,9 @@ QFont getTopLabelFont(int weight, int pxsize)
 QFont getTopLabelFont()
 {
     QFont labelTopFont;
+#if !defined(Q_OS_MAC)
     labelTopFont.setFamily("Open Sans");
+#endif
     labelTopFont.setWeight(QFont::Weight::Light);
     labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
     labelTopFont.setPixelSize(18);

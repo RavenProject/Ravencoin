@@ -216,14 +216,18 @@ public:
 
         /** Create the font that is used for painting the asset name */
         QFont nameFont;
+#if !defined(Q_OS_MAC)
         nameFont.setFamily("Open Sans");
+#endif
         nameFont.setPixelSize(18);
         nameFont.setWeight(QFont::Weight::Normal);
         nameFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.4);
 
         /** Create the font that is used for painting the asset amount */
         QFont amountFont;
+#if !defined(Q_OS_MAC)
         amountFont.setFamily("Open Sans");
+#endif
         amountFont.setPixelSize(14);
         amountFont.setWeight(QFont::Weight::Normal);
         amountFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.3);
