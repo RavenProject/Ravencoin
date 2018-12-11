@@ -1581,7 +1581,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("asset_name", data.assetName));
                 entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
                 entry.push_back(Pair("message", EncodeIPFS(data.message)));
-                if (!data.message.empty())
+                if (!data.message.empty() && data.expireTime > 0)
                     entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
@@ -1598,7 +1598,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("asset_name", data.assetName));
                 entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
                 entry.push_back(Pair("message", EncodeIPFS(data.message)));
-                if (!data.message.empty())
+                if (!data.message.empty() && data.expireTime > 0)
                     entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
