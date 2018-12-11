@@ -32,7 +32,6 @@ CMessage::CMessage(const COutPoint& out, const std::string& strName, const std::
 
 void GetMyMessages()
 {
-
     if (!pmessagedb)
         return;
 

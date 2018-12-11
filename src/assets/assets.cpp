@@ -1027,8 +1027,6 @@ bool CTransaction::VerifyReissueAsset(std::string& strError) const
 
 CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message, const int64_t& nExpireTime)
 {
-    int64_t time = GetTime();
-
     this->strName = strAssetName;
     this->nAmount = nAmount;
     this->message = message;
@@ -1161,7 +1159,7 @@ bool CAssetsCache::AddTransferAsset(const CAssetTransfer& transferAsset, const s
     AddToAssetBalance(transferAsset.strName, address, transferAsset.nAmount);
 
     // Add to cache so we can save to database
-    CAssetCacheNewTransfer newTransfer(CAssetTransfer(transferAsset.strName, transferAsset.nAmount), address, out);
+    CAssetCacheNewTransfer newTransfer(transferAsset, address, out);
 
     if (setNewTransferAssetsToRemove.count(newTransfer))
         setNewTransferAssetsToRemove.erase(newTransfer);
@@ -2932,6 +2930,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         std::string asset_name = transfer.first.strName;
         std::string message = transfer.first.message;
         CAmount nAmount = transfer.first.nAmount;
+        int64_t expireTime = transfer.first.nExpireTime;
 
         if (!IsValidDestinationString(address)) {
             error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
@@ -2959,7 +2958,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(address));
 
         // Update the scriptPubKey with the transfer asset information
-        CAssetTransfer assetTransfer(asset_name, nAmount, message);
+        CAssetTransfer assetTransfer(asset_name, nAmount, message, expireTime);
         assetTransfer.ConstructTransaction(scriptPubKey);
 
         CRecipient recipient = {scriptPubKey, 0, fSubtractFeeFromAmount};

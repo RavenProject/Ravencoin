@@ -78,7 +78,7 @@ CConditionVariable cvBlockChange;
 int nScriptCheckThreads = 0;
 std::atomic_bool fImporting(false);
 std::atomic_bool fReindex(false);
-bool fMessagingDisabled = false;
+bool fMessaging = true;
 bool fTxIndex = false;
 bool fAssetIndex = false;
 bool fAddressIndex = false;
