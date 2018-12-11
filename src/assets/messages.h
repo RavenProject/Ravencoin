@@ -37,7 +37,7 @@ public:
     std::string strName;
     std::string ipfsHash;
     int64_t time;
-    bool fExpired;
+    int64_t nExpiredTime;
     MessageStatus status;
 
     CMessage() {
@@ -45,7 +45,7 @@ public:
     }
 
     void SetNull(){
-        fExpired = false;
+        nExpiredTime = 0;
         out = COutPoint();
         strName = "";
         ipfsHash = "";
@@ -53,7 +53,11 @@ public:
         status = MessageStatus::ERROR;
     }
 
-    CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const bool fExpired, const int64_t& time);
+    std::string   ToString() {
+        return strprintf("CMessage(%s, Name=%s, Message=%s, Expires=%u, Time=%u)", out.ToString(), strName, EncodeIPFS(ipfsHash), nExpiredTime, time);
+    }
+
+    CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const int64_t& nExpiredTime, const int64_t& time);
 
     bool operator<(const CMessage& rhs) const
     {
@@ -69,7 +73,7 @@ public:
         READWRITE(strName);
         READWRITE(ipfsHash);
         READWRITE(time);
-        READWRITE(fExpired);
+        READWRITE(nExpiredTime);
         if (ser_action.ForRead()) {
             ::Serialize(s, IntFromMessageStatus(status));
         } else {
@@ -79,8 +83,6 @@ public:
         }
     }
 };
-
-void GetMyMessages();
 
 
 #endif //RAVENCOIN_MESSAGES_H

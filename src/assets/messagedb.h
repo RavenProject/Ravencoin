@@ -20,16 +20,11 @@ public:
     CMessageDB(const CMessageDB&) = delete;
     CMessageDB& operator=(const CMessageDB&) = delete;
 
-    // Full database of messages
+    // Database of messages
     bool WriteMessage(const CMessage& message);
     bool ReadMessage(const COutPoint& out, CMessage& message);
     bool EraseMessage(const COutPoint& out);
     bool LoadMessages(std::set<CMessage>& setMessages);
-
-    // My messages to show
-    bool WriteMyMessageOutPoint(const COutPoint &out);
-    bool EraseMyMessageOutPoint(const COutPoint &out);
-    bool LoadMyMessageOutPoints();
 
     // My message channels
     bool WriteMyMessageChannel(const std::string& channelname);

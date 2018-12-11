@@ -6,7 +6,6 @@
 #include "messages.h"
 
 static const char MESSAGE_FLAG = 'M'; // Message
-static const char MY_MESSAGE_OUTPOINT_FLAG = 'O'; // Outpoints of messages we need to show
 static const char MY_MESSAGE_CHANNEL = 'C'; // My followed Channels
 static const char DB_FLAG = 'D'; // Database Flags
 
@@ -50,43 +49,8 @@ bool CMessageDB::LoadMessages(std::set<CMessage>& setMessages)
             break;
         }
     }
-
     return true;
 }
-
-bool CMessageDB::WriteMyMessageOutPoint(const COutPoint &out)
-{
-    return Write(std::make_pair(MY_MESSAGE_OUTPOINT_FLAG, out), 0);
-}
-
-bool CMessageDB::EraseMyMessageOutPoint(const COutPoint &out)
-{
-    return Erase(std::make_pair(MY_MESSAGE_OUTPOINT_FLAG, out));
-}
-
-bool CMessageDB::LoadMyMessageOutPoints()
-{
-    setMyMessageOutPoints.clear();
-
-    std::unique_ptr<CDBIterator> pcursor(NewIterator());
-
-    pcursor->Seek(std::make_pair(MY_MESSAGE_OUTPOINT_FLAG, COutPoint()));
-
-    // Load messages
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        std::pair<char, COutPoint> key;
-        if (pcursor->GetKey(key) && key.first == MY_MESSAGE_OUTPOINT_FLAG) {
-            setMyMessageOutPoints.insert(key.second);
-            pcursor->Next();
-        } else {
-            break;
-        }
-    }
-
-    return true;
-}
-
 
 bool CMessageDB::WriteMyMessageChannel(const std::string& channelname)
 {
@@ -127,11 +91,13 @@ bool CMessageDB::LoadMyMessageChannels()
     return true;
 }
 
-bool CMessageDB::WriteFlag(const std::string &name, bool fValue) {
+bool CMessageDB::WriteFlag(const std::string &name, bool fValue)
+{
     return Write(std::make_pair(DB_FLAG, name), fValue ? '1' : '0');
 }
 
-bool CMessageDB::ReadFlag(const std::string &name, bool &fValue) {
+bool CMessageDB::ReadFlag(const std::string &name, bool &fValue)
+{
     char ch;
     if (!Read(std::make_pair(DB_FLAG, name), ch))
         return false;

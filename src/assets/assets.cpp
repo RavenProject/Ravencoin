@@ -188,6 +188,11 @@ bool IsAssetNameAnOwner(const std::string& name)
     return IsAssetNameValid(name) && std::regex_match(name, OWNER_INDICATOR);
 }
 
+bool IsAssetNameAnMsgChannel(const std::string& name)
+{
+    return IsAssetNameValid(name) && std::regex_match(name, MSGCHANNEL_INDICATOR);
+}
+
 // TODO get the string translated below
 bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::string& error)
 {

@@ -14,6 +14,8 @@
 #include "script/interpreter.h"
 #include "validation.h"
 #include <cmath>
+#include <wallet/wallet.h>
+#include <base58.h>
 
 // TODO remove the following dependencies
 #include "chain.h"
@@ -415,7 +417,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
 }
 
 //! Check to make sure that the inputs and outputs CAmount match exactly.
-bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests)
+bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime)
 {
     // are the actual inputs available?
     if (!inputs.HaveInputs(tx)) {
@@ -426,29 +428,34 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
     // Create map that stores the amount of an asset transaction input. Used to verify no assets are burned
     std::map<std::string, CAmount> totalInputs;
 
+    std::vector<std::string> inputAddresses;
+
     for (unsigned int i = 0; i < tx.vin.size(); ++i) {
         const COutPoint &prevout = tx.vin[i].prevout;
         const Coin& coin = inputs.AccessCoin(prevout);
         assert(!coin.IsSpent());
 
         if (coin.IsAsset()) {
-            std::string strName;
-            CAmount nAmount;
-
-            if (!GetAssetInfoFromCoin(coin, strName, nAmount))
+            CAssetOutputEntry data;
+            if (!GetAssetData(coin.out.scriptPubKey, data))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-failed-to-get-asset-from-script");
 
             // Add to the total value of assets in the inputs
-            if (totalInputs.count(strName))
-                totalInputs.at(strName) += nAmount;
+            if (totalInputs.count(data.assetName))
+                totalInputs.at(data.assetName) += data.nAmount;
             else
-                totalInputs.insert(make_pair(strName, nAmount));
+                totalInputs.insert(make_pair(data.assetName, data.nAmount));
+
+            if (AreMessagingDeployed()) {
+                inputAddresses.push_back(EncodeDestination(data.destination));
+            }
         }
     }
 
     // Create map that stores the amount of an asset transaction output. Used to verify no assets are burned
     std::map<std::string, CAmount> totalOutputs;
-
+    int index = 0;
+    int64_t currentTime = GetTime();
     for (const auto& txout : tx.vout) {
         if (txout.scriptPubKey.IsTransferAsset()) {
             CAssetTransfer transfer;
@@ -480,6 +487,31 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-amount-not-match-units");
                 }
             }
+
+            /** Get messages from the transaction, only used when getting called from ConnectBlock **/
+            // Get the messages from the Tx unless they are expired
+            if (AreMessagingDeployed() && fMessaging && setMessages) {
+                LogPrintf("Messaging 1\n");
+                if (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName)) {
+                    LogPrintf("Messaging 2\n");
+                    if (!transfer.message.empty()) {
+                        if (transfer.nExpireTime == 0 || transfer.nExpireTime > currentTime) {
+                            LogPrintf("Messaging 3\n");
+                            if ((int) inputAddresses.size() > index && inputAddresses[index] == address) {
+                                LogPrintf("Messaging 4\n");
+                                COutPoint out(tx.GetHash(), index);
+                                CMessage message(out, transfer.strName, transfer.message,
+                                                 transfer.nExpireTime, nBlocktime);
+                                setMessages->insert(message);
+                                LogPrintf("Got message: %s\n", message.ToString());
+                            }
+                        } else {
+                            if(transfer.nExpireTime < currentTime)
+                                LogPrintf("Found expired message\n");
+                        }
+                    }
+                }
+            }
         } else if (txout.scriptPubKey.IsReissueAsset()) {
             CReissueAsset reissue;
             std::string address;
@@ -502,6 +534,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                 vPairReissueAssets.emplace_back(std::make_pair(reissue.strName, tx.GetHash()));
             }
         }
+        index++;
     }
 
     for (const auto& outValue : totalOutputs) {

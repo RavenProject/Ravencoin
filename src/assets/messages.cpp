@@ -21,37 +21,12 @@ MessageStatus MessageStatusFromInt(int nStatus)
     return (MessageStatus)nStatus;
 }
 
-CMessage::CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const bool fExpired, const int64_t& time)
+CMessage::CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const int64_t& nExpiredTime, const int64_t& time)
 {
     this->out = out;
     this->strName = strName;
     this->ipfsHash = ipfsHash;
-    this->fExpired = fExpired;
+    this->nExpiredTime = nExpiredTime;
     this->time = time;
-}
-
-void GetMyMessages()
-{
-    if (!pmessagedb)
-        return;
-
-    for (auto out : setMyMessageOutPoints) {
-        // if we already have the message is our set of messages
-        CMessage finder;
-        finder.out = out;
-        if (setMyMessages.count(finder)) {
-            continue;
-        }
-
-        // Try to find it, either in the cache, or database
-        CMessage messageTmp;
-        if (pMessagesCache->Exists(out.ToSerializedString())) {
-            setMyMessages.insert(pMessagesCache->Get(out.ToSerializedString()));
-        } else if (pmessagedb->ReadMessage(out, messageTmp)) {
-            setMyMessages.insert(messageTmp);
-            pMessagesCache->Put(out.ToSerializedString(), messageTmp);
-        } else {
-            LogPrintf("Can't find message with COutPoint: %s\n", out.ToString());
-        }
-    }
+    status = MessageStatus::UNREAD;
 }
