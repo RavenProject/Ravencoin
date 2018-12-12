@@ -1237,7 +1237,7 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
         // do that because they want to know about (and store and rebroadcast and
         // risk analyze) the dependencies of transactions relevant to them, without
         // having to download the entire memory pool.
-        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::NOTFOUND, vNotFound));
+        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETNOTFOUND, vNotFound));
     }
 }
 
@@ -1715,17 +1715,25 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         std::vector<CInvAsset> vInvAsset;
         vRecv >> vInvAsset;
 
-        if (vInvAsset.size() > MAX_INV_SZ)
+        if (vInvAsset.size() > MAX_ASSET_INV_SZ)
         {
             LOCK(cs_main);
             Misbehaving(pfrom->GetId(), 20);
-            return error("message getdata size() = %u", vInvAsset.size());
+            return error("message getassetdata size() = %u", vInvAsset.size());
+        }
+
+        for (auto item : vInvAsset) {
+            if (item.name.size() > MAX_ASSET_LENGTH) {
+                LOCK(cs_main);
+                Misbehaving(pfrom->GetId(), 100);
+                return error("message getassetdata assetname size() = %u", item.name.size());
+            }
         }
 
         LogPrint(BCLog::NET, "received getassetdata (%u invassetsz) peer=%d\n", vInvAsset.size(), pfrom->GetId());
 
         if (vInvAsset.size() > 0) {
-            LogPrint(BCLog::NET, "received getdata for: %s peer=%d\n", vInvAsset[0].ToString(), pfrom->GetId());
+            LogPrint(BCLog::NET, "received getassetdata for: %s peer=%d\n", vInvAsset[0].ToString(), pfrom->GetId());
         }
 
         pfrom->vRecvAssetGetData.insert(pfrom->vRecvAssetGetData.end(), vInvAsset.begin(), vInvAsset.end());
@@ -3122,7 +3130,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
             // Add asset inv
             for (auto& it : pto->setInventoryAssetsSend) {
                 vInvAssets.push_back(CInvAsset(it));
-                if (vInvAssets.size() == MAX_INV_SZ) {
+                if (vInvAssets.size() == MAX_ASSET_INV_SZ) {
                     connman->PushMessage(pto, msgMaker.Make(NetMsgType::GETASSETDATA, vInvAssets));
                     vInvAssets.clear();
                 }
