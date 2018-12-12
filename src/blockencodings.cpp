@@ -227,5 +227,4 @@ SerializedAssetData::SerializedAssetData(const CDatabasedAssetData &assetData)
     hasIPFS = assetData.asset.nHasIPFS;
     ipfs = assetData.asset.strIPFSHash;
     nHeight = assetData.nHeight;
-    hash = assetData.blockHash;
 }

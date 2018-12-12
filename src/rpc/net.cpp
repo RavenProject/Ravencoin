@@ -66,6 +66,29 @@ UniValue ping(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+//// Used for testing only
+//UniValue testgetassetdata(const JSONRPCRequest& request)
+//{
+//    if (request.fHelp || request.params.size() != 1)
+//        throw std::runtime_error(
+//                "testgetassetdata\n"
+//                "\nHelper RPC CALL, dont use\n"
+//        );
+//
+//    if(!g_connman)
+//        throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
+//
+//    std::string assetName = request.params[0].get_str();
+//
+//    // Request that each node send a ping during next message processing pass
+//    g_connman->ForEachNode([assetName](CNode* pnode) {
+//        pnode->setInventoryAssetsSend.insert(assetName);
+//        pnode->fGetAssetData = true;
+//    });
+//    return NullUniValue;
+//}
+
+
 UniValue getpeerinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
@@ -640,6 +663,7 @@ static const CRPCCommand commands[] =
     { "network",            "listbanned",             &listbanned,             {} },
     { "network",            "clearbanned",            &clearbanned,            {} },
     { "network",            "setnetworkactive",       &setnetworkactive,       {"state"} },
+//    { "network",            "testgetassetdata",       &testgetassetdata,       {"assetName"} }, // Used for testing only
 };
 
 void RegisterNetRPCCommands(CRPCTable &t)

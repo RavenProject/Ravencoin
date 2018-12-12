@@ -28,6 +28,7 @@
 #define DEFAULT_HAS_IPFS 0
 #define DEFAULT_IPFS ""
 #define MIN_ASSET_LENGTH 3
+#define MAX_ASSET_LENGTH 32
 #define OWNER_TAG "!"
 #define OWNER_LENGTH 1
 #define OWNER_UNITS 0
