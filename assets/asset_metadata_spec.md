@@ -16,12 +16,14 @@ Additional fields may be added, but will be ignored by Ravencoin.
    "symbol": "LEMONADE",
 
    "name": "Lemonade Gift",
-
+   
    "issuer": "Lemonade Stands, Inc.",
 
    "description": "This coin is worth one lemonade.",
 
    "description_mime": "text/x-markdown; charset=UTF-8",
+   
+   "keywords": "Lemonade, Lemonade Stand, Gift, Cold Drink",
 
    "type": "Points",
 
@@ -67,6 +69,8 @@ All fields are optional. Clients, explorers, and wallets are not obligated to di
 **description** - The description of what the symbol represents.
 
 **description_mime** - The mime type of the description.  This may or may not be honored, depending on the client, explorer, etc.
+
+**keywords** - helps describe an asset and allows it to be found easily Examples: "Lemonade, Cold Drink, Drinks" this will most likely be used by third party search engines. seperate keywords with commmas
 
 **type** - The type that the qty of the token represents.  Examples: (Tokens, Points, Shares, Tickets).  This may or may not be displayed by the client.
 

@@ -21,6 +21,8 @@ class TransactionView;
 class WalletModel;
 class AddressBookPage;
 class AssetsDialog;
+class CreateAssetDialog;
+class ReissueAssetDialog;
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -56,8 +58,6 @@ public:
 
     void showOutOfSyncWarning(bool fShow);
 
-    void displayAssetInfo();
-
 private:
     ClientModel *clientModel;
     WalletModel *walletModel;
@@ -77,6 +77,8 @@ private:
 
     /** RVN START */
     AssetsDialog *assetsPage;
+    CreateAssetDialog *createAssetsPage;
+    ReissueAssetDialog *manageAssetsPage;
     /** RVN END */
 
 public Q_SLOTS:
@@ -126,6 +128,8 @@ public Q_SLOTS:
     /** RVN START */
     /** Switch to assets page */
     void gotoAssetsPage();
+    void gotoCreateAssetsPage();
+    void gotoManageAssetsPage();
     /** RVN END */
 
 Q_SIGNALS:

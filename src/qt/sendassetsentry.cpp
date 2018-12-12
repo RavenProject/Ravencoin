@@ -14,13 +14,18 @@
 #include "platformstyle.h"
 #include "walletmodel.h"
 #include "assetcontroldialog.h"
+#include "guiconstants.h"
 
 #include "wallet/coincontrol.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QApplication>
 #include <QClipboard>
 #include <validation.h>
 #include <core_io.h>
+#include <QStringListModel>
+#include <QSortFilterProxyModel>
+#include <QCompleter>
 
 SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStringList myAssetsNames, QWidget *parent) :
     QStackedWidget(parent),
@@ -50,23 +55,78 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     ui->payTo_is->setFont(GUIUtil::fixedPitchFont());
 
     // Connect signals
-    connect(ui->payAmount, SIGNAL(valueChanged(double)), this, SIGNAL(payAmountChanged()));
+    connect(ui->payAssetAmount, SIGNAL(valueChanged()), this, SIGNAL(payAmountChanged()));
     connect(ui->deleteButton, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->assetSelectionBox, SIGNAL(activated(int)), this, SLOT(onAssetSelected(int)));
-    connect(ui->administratorToolButton, SIGNAL(clicked()), this, SLOT(onSendOwnershipChanged()));
+    connect(ui->administratorCheckbox, SIGNAL(clicked()), this, SLOT(onSendOwnershipChanged()));
 
-    ui->administratorToolButton->setToolTip(tr("Select to view administrator assets to transfer"));
+    ui->administratorCheckbox->setToolTip(tr("Select to view administrator assets to transfer"));
 
-    ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
-    ui->assetSelectionBox->addItems(myAssetsNames);
+    /** Setup the asset list combobox */
+    stringModel = new QStringListModel;
+    stringModel->insertRow(stringModel->rowCount());
+    stringModel->setData(stringModel->index(stringModel->rowCount() - 1, 0), "", Qt::DisplayRole);
 
-    ui->payAmount->setValue(0.00000000);
-    ui->payAmount->setDisabled(true);
+    for (auto name : myAssetsNames)
+    {
+        stringModel->insertRow(stringModel->rowCount());
+        stringModel->setData(stringModel->index(stringModel->rowCount() - 1, 0), name, Qt::DisplayRole);
+    }
+
+    proxy = new QSortFilterProxyModel;
+    proxy->setSourceModel(stringModel);
+    proxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    ui->assetSelectionBox->setModel(proxy);
+    ui->assetSelectionBox->setEditable(true);
+
+    completer = new QCompleter(proxy,this);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    ui->assetSelectionBox->setCompleter(completer);
+
+    ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an asset to transfer"));
+    ui->assetSelectionBox->setMinimumWidth(32);
+
+    /** Setup the amount box */
     ui->ownershipWarningMessage->hide();
 
     fShowAdministratorList = false;
+
+    this->setStyleSheet(QString(".SendAssetsEntry {background-color: %1; padding-top: 10px; padding-right: 30px; border: none;}").arg(platformStyle->SendEntriesBackGroundColor().name()));
+
+    this->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->assetBoxLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->assetBoxLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->payToLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->payToLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labellLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labellLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->amountLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->amountLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->messageLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->messageLabel->setFont(GUIUtil::getSubLabelFont());
+
+    ui->payAssetAmount->setUnit(MAX_UNIT);
+    ui->payAssetAmount->setDisabled(false);
+
+    ui->administratorCheckbox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
+
+    ui->assetSelectionBox->setFont(GUIUtil::getSubLabelFont());
+    ui->administratorCheckbox->setFont(GUIUtil::getSubLabelFont());
+    ui->payTo->setFont(GUIUtil::getSubLabelFont());
+    ui->addAsLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->payAssetAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->messageTextLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->assetAmountLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->ownershipWarningMessage->setFont(GUIUtil::getSubLabelFont());
 }
 
 SendAssetsEntry::~SendAssetsEntry()
@@ -89,7 +149,7 @@ void SendAssetsEntry::on_addressBookButton_clicked()
     if(dlg.exec())
     {
         ui->payTo->setText(dlg.getReturnValue());
-        ui->payAmount->setFocus();
+        ui->payAssetAmount->setFocus();
     }
 }
 
@@ -113,18 +173,16 @@ void SendAssetsEntry::clear()
     // clear UI elements for normal payment
     ui->payTo->clear();
     ui->addAsLabel->clear();
-    ui->payAmount->clear();
     ui->messageTextLabel->clear();
     ui->messageTextLabel->hide();
     ui->messageLabel->hide();
     // clear UI elements for unauthenticated payment request
-    ui->payTo_is->clear();
     ui->memoTextLabel_is->clear();
-    ui->payAmount_is->clear();
     // clear UI elements for authenticated payment request
     ui->payTo_s->clear();
     ui->memoTextLabel_s->clear();
-    ui->payAmount_s->clear();
+
+    ui->payAssetAmount->clear();
 
     // Reset the selected asset
     ui->assetSelectionBox->setCurrentIndex(0);
@@ -153,9 +211,19 @@ bool SendAssetsEntry::validate()
         retval = false;
     }
 
-    if (ui->payAmount->value() <= 0)
+    if (ui->assetSelectionBox->currentIndex() == 0) {
+        ui->assetSelectionBox->lineEdit()->setStyleSheet(STYLE_INVALID);
+        retval = false;
+    }
+
+    if (!ui->payAssetAmount->validate())
     {
-        ui->payAmount->setStyleSheet("border: 1px red");
+        retval = false;
+    }
+
+    if (ui->payAssetAmount->value(0) <= 0)
+    {
+        ui->payAssetAmount->setValid(false);
         retval = false;
     }
 
@@ -174,7 +242,7 @@ SendAssetsRecipient SendAssetsEntry::getValue()
     recipient.assetName = ui->assetSelectionBox->currentText();
     recipient.address = ui->payTo->text();
     recipient.label = ui->addAsLabel->text();
-    recipient.amount = ui->payAmount->value() * COIN;
+    recipient.amount = ui->payAssetAmount->value();
     recipient.message = ui->messageTextLabel->text();
 
     return recipient;
@@ -193,43 +261,17 @@ void SendAssetsEntry::setValue(const SendAssetsRecipient &value)
 {
     recipient = value;
 
-    if (recipient.paymentRequest.IsInitialized()) // payment request
-    {
-        if (recipient.authenticatedMerchant.isEmpty()) // unauthenticated
-        {
-            ui->payTo_is->setText(recipient.address);
-            ui->memoTextLabel_is->setText(recipient.message);
-            setCurrentWidget(ui->SendCoins_UnauthenticatedPaymentRequest);
-        }
-        else // authenticated
-        {
-            ui->payTo_s->setText(recipient.authenticatedMerchant);
-            ui->memoTextLabel_s->setText(recipient.message);
-            ui->payAmount_s->setValue(recipient.amount);
-            ui->payAmount_s->setReadOnly(true);
-            setCurrentWidget(ui->SendCoins_AuthenticatedPaymentRequest);
-        }
-    }
-    else // normal payment
-    {
-        // message
-        ui->messageTextLabel->setText(recipient.message);
-        ui->messageTextLabel->setVisible(!recipient.message.isEmpty());
-        ui->messageLabel->setVisible(!recipient.message.isEmpty());
-
-        ui->addAsLabel->clear();
-        ui->payTo->setText(recipient.address); // this may set a label from addressbook
-        if (!recipient.label.isEmpty()) // if a label had been set from the addressbook, don't overwrite with an empty label
-            ui->addAsLabel->setText(recipient.label);
-
-        ui->payAmount->setValue(recipient.amount / COIN);
+    if (recipient.assetName != "") {
+        int index = ui->assetSelectionBox->findText(recipient.assetName);
+        ui->assetSelectionBox->setCurrentIndex(index);
+        onAssetSelected(index);
     }
 }
 
 void SendAssetsEntry::setAddress(const QString &address)
 {
     ui->payTo->setText(address);
-    ui->payAmount->setFocus();
+    ui->payAssetAmount->setFocus();
 }
 
 bool SendAssetsEntry::isClear()
@@ -240,6 +282,11 @@ bool SendAssetsEntry::isClear()
 void SendAssetsEntry::setFocus()
 {
     ui->payTo->setFocus();
+}
+
+void SendAssetsEntry::setFocusAssetListBox()
+{
+    ui->assetSelectionBox->setFocus();
 }
 
 bool SendAssetsEntry::updateLabel(const QString &address)
@@ -260,12 +307,14 @@ bool SendAssetsEntry::updateLabel(const QString &address)
 
 void SendAssetsEntry::onAssetSelected(int index)
 {
+    ui->assetSelectionBox->lineEdit()->setStyleSheet("");
     QString name = ui->assetSelectionBox->currentText();
     // If the name
     if (index == 0) {
-        ui->payAmount->clear();
-        ui->payAmount->setDisabled(false);
         ui->assetAmountLabel->clear();
+        if(!ui->administratorCheckbox->isChecked())
+            ui->payAssetAmount->setDisabled(false);
+        ui->payAssetAmount->clear();
         return;
     }
 
@@ -332,8 +381,8 @@ void SendAssetsEntry::onAssetSelected(int index)
 
     // If it is an ownership asset lock the amount
     if (!fIsOwnerAsset) {
-        ui->payAmount->setDecimals(asset.units);
-        ui->payAmount->setDisabled(false);
+        ui->payAssetAmount->setUnit(asset.units);
+        ui->payAssetAmount->setDisabled(false);
     }
 }
 
@@ -353,7 +402,7 @@ void SendAssetsEntry::IsAssetControl(bool fIsAssetControl, bool fIsOwner)
         CheckOwnerBox();
     }
     if (fIsAssetControl) {
-        ui->administratorToolButton->setDisabled(true);
+        ui->administratorCheckbox->setDisabled(true);
         fUsingAssetControl = true;
     }
 }
@@ -380,45 +429,54 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
         fShowAdministratorList = !fShowAdministratorList;
 
     if (fShowAdministratorList) {
-        ui->administratorToolButton->setStyleSheet(QString("background-color: lawngreen"));
+        ui->administratorCheckbox->setChecked(true);
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllAdministrativeAssets(model->getWallet(), names, 0);
 
             QStringList list;
+            list << "";
             for (auto name: names)
                 list << QString::fromStdString(name);
 
-            ui->assetSelectionBox->clear();
-            ui->assetSelectionBox->addItem(tr("Select an administrator asset to transfer"));
-            ui->assetSelectionBox->addItems(list);
-            ui->assetSelectionBox->setCurrentIndex(0);
+            stringModel->setStringList(list);
+
+            ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an administrator asset to transfer"));
+            ui->assetSelectionBox->setFocus();
+        } else {
+            ui->payTo->setFocus();
         }
 
-        ui->payAmount->setValue(OWNER_ASSET_AMOUNT / COIN);
-        ui->payAmount->setDecimals(MAX_UNIT);
-        ui->payAmount->setDisabled(true);
+        ui->payAssetAmount->setUnit(MIN_UNIT); // Min unit because this is an administrator asset
+        ui->payAssetAmount->setValue(1); // When using AssetAmountField, you must use 1 instead of 1 * COIN, because of the way that AssetAmountField uses the unit and value to display the amount
+        ui->payAssetAmount->setDisabled(true);
+
+
         ui->assetAmountLabel->clear();
 
-        ui->ownershipWarningMessage->setText(tr("Warning: This asset transfer contains an administrator asset. You will no longer be the administrator of this asset. Make sure this is what you want to do"));
+        ui->ownershipWarningMessage->setText(tr("Warning: Transferring administrator asset"));
         ui->ownershipWarningMessage->setStyleSheet("color: red");
         ui->ownershipWarningMessage->show();
     } else {
-        ui->administratorToolButton->setStyleSheet("");
+        ui->administratorCheckbox->setChecked(false);
         if (!AssetControlDialog::assetControl->HasAssetSelected()) {
             std::vector<std::string> names;
             GetAllMyAssets(model->getWallet(), names, 0);
             QStringList list;
+            list << "";
             for (auto name : names) {
                 if (!IsAssetNameAnOwner(name))
                     list << QString::fromStdString(name);
             }
-            ui->assetSelectionBox->clear();
 
-            ui->assetSelectionBox->addItem(tr("Select an asset to transfer"));
-            ui->assetSelectionBox->addItems(list);
-            ui->assetSelectionBox->setCurrentIndex(0);
-            ui->payAmount->clear();
+            stringModel->setStringList(list);
+            ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an asset to transfer"));
+            ui->payAssetAmount->clear();
+            ui->payAssetAmount->setUnit(MAX_UNIT);
+            ui->assetAmountLabel->clear();
+            ui->assetSelectionBox->setFocus();
+        } else {
+            ui->payTo->setFocus();
         }
         ui->ownershipWarningMessage->hide();
     }

@@ -17,6 +17,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
+#include "assets/assets.h"
 
 std::string ValueFromAmountString(const CAmount& amount, const int8_t units)
 {
@@ -164,6 +165,54 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
 
     out.pushKV("reqSigs", nRequired);
     out.pushKV("type", GetTxnOutputType(type));
+
+    /** RVN START */
+    if (type == TX_NEW_ASSET || type == TX_TRANSFER_ASSET || type == TX_REISSUE_ASSET) {
+        UniValue assetInfo(UniValue::VOBJ);
+
+        std::string name;
+        CAmount amount;
+        std::string _assetAddress;
+
+        if (GetAssetInfoFromScript(scriptPubKey, name, amount)) {
+            assetInfo.pushKV("name", name);
+            assetInfo.pushKV("amount", ValueFromAmount(amount));
+
+            switch (type) {
+                case TX_NEW_ASSET:
+                    if (IsAssetNameAnOwner(name)) {
+                        // pwnd n00b
+                    } else {
+                        CNewAsset asset;
+                        if (AssetFromScript(scriptPubKey, asset, _assetAddress)) {
+                            assetInfo.pushKV("units", asset.units);
+                            assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
+                            if (asset.nHasIPFS > 0) {
+                                assetInfo.pushKV("ipfs_hash", EncodeIPFS(asset.strIPFSHash));
+                            }
+                        }
+                    }
+                    break;
+                case TX_TRANSFER_ASSET:
+                    break;
+                case TX_REISSUE_ASSET:
+                    CReissueAsset asset;
+                    if (ReissueAssetFromScript(scriptPubKey, asset, _assetAddress)) {
+                        if (asset.nUnits >= 0) {
+                            assetInfo.pushKV("units", asset.nUnits);
+                        }
+                        assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
+                        if (!asset.strIPFSHash.empty()) {
+                            assetInfo.pushKV("ipfs_hash", EncodeIPFS(asset.strIPFSHash));
+                        }
+                    }
+                    break;
+            }
+        }
+
+        out.pushKV("asset", assetInfo);
+    }
+     /** RVN END */
 
     UniValue a(UniValue::VARR);
     for (const CTxDestination& addr : addresses) {

@@ -19,18 +19,47 @@ To run the raven-qt tests manually, launch `src/qt/test/test_raven-qt`
 To add more raven-qt tests, add them to the `src/qt/test/` directory and
 the `src/qt/test/test_main.cpp` file.
 
+To display progress information the unit tests should be run as follows:
+
+`test_runner --show_progress=true --colour_output=true`
+
+Additional optional parameters are available. To display all optional parameters run:
+
+`test_runner --help`
+
+### Debugging unit tests
+
+To display what individual tests are running (as they are running) use the
+`--log_level=message` parameter.  
+
+By default the log messages from the Raven Core application are not echoed 
+when running the unit tests.  If it is desired to print this log data change 
+the following from 'false' to 'true' in the `test_raven.cpp` file and uncomment
+three lines in the `script\interpreter.cpp\ VerifyScript` method and recompile:
+
+    src\test\test_raven.cpp:
+    fPrintToConsole = false;  <-to->  fPrintToConsole = true;
+
+    script\interpreter.cpp\ VerifyScript method, uncomment:
+    //std::string str;
+    //str.assign(ScriptErrorString(*serror));
+    //std::cout << str << std::endl;
+
+Previously several individual tests had the 'fPrintToConsole' parameter defaulted to 
+'true' causingthe unit test log window to be filled with superfluous log-data making 
+it appear that the tests were failing.
+
 ### Running individual tests
 
-test_raven has some built-in command-line arguments; for
-example, to run just the getarg_tests verbosely:
+Run `test_raven --list_content` to get a full list of available unit tests.
 
-    test_raven --log_level=all --run_test=getarg_tests
+To run just the 'getarg_tests' (verbosely):
+
+    test_raven --run_test=getarg_tests
 
 ... or to run just the doubledash test:
 
-    test_raven --run_test=getarg_tests/doubledash
-
-Run `test_raven --help` for the full list.
+    test_raven --run_test=getarg_tests/doubledash_test
 
 ### Note on adding test cases
 

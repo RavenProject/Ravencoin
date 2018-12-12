@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "bench.h"
-
 #include "crypto/sha256.h"
 #include "key.h"
 #include "validation.h"
@@ -12,7 +11,7 @@
 #include "random.h"
 
 int
-main(int argc, char** argv)
+main(int argc, char **argv)
 {
     SHA256AutoDetect();
     RandomInit();

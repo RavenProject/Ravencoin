@@ -542,6 +542,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         burn = 5 * len(asset_tags)
 
+
+        ############################################
         # try first with bad burn address
         outputs = {
             bad_burn: burn,
@@ -559,6 +561,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_raises_rpc_error(-26, "bad-txns-issue-unique-asset-burn-outpoints-not-found", \
                                 n0.sendrawtransaction, signed_hex)
 
+        ############################################
         # switch to proper burn address
         outputs = {
             unique_burn: burn,
@@ -656,7 +659,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_equal(1, n0.listmyassets()[owner])
 
 
-    def bad_ipfs_hash(self):
+    def bad_ipfs_hash_test(self):
         self.log.info("Testing bad ipfs_hash...")
         n0 = self.nodes[0]
 
@@ -710,7 +713,774 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_raises_rpc_error(-8, "Invalid parameter: ipfs_hash must start with 'Qm'.", n0.createrawtransaction, inputs, outputs)
 
 
-    def atomic_swaps(self):
+    def issue_invalid_address_test(self):
+        self.log.info("Testing issue with invalid burn and address...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
+        issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
+        sub_burn = "n1issueSubAssetXXXXXXXXXXXXXbNiH6v"
+
+        asset_name = "BURN_TEST"
+
+        to_address = n0.getnewaddress()
+        change_address = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+        ]
+
+        ############################################
+        # start with invalid burn amount and valid address
+        burn = 499
+        outputs = {
+            issue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch to invalid burn amount again
+        burn = 501
+        outputs = {
+            issue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch to valid burn amount, but sending it to the sub asset burn address
+        burn = 500
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch burn address to unique address
+        outputs = {
+            unique_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch to valid burn address, and valid burn amount
+        outputs = {
+            issue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.generate(1)
+        self.sync_all()
+
+
+    def issue_sub_invalid_address_test(self):
+        self.log.info("Testing issue sub invalid amount and address...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+
+        unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
+        issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
+        reissue_burn = "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd"
+        sub_burn = "n1issueSubAssetXXXXXXXXXXXXXbNiH6v"
+
+        asset_name = "ISSUE_SUB_INVALID"
+        owner = f"{asset_name}!"
+        n0.issue(asset_name)
+        n0.generate(1)
+        self.sync_all()
+
+        to_address = n0.getnewaddress()
+        change_address = n0.getnewaddress()
+        owner_change_address = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+        unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+            {k: unspent_asset_owner[k] for k in ['txid', 'vout']},
+        ]
+
+        burn = 99
+        asset_name_sub = asset_name + '/SUB1'
+
+        ############################################
+        # try first with bad burn amount
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch to invalid burn amount again
+        burn = 101
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch to valid burn amount, but sending it to the issue asset burn address
+        burn = 100
+        outputs = {
+            issue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch burn address to reissue address, should be invalid because it needs to be sub asset burn address
+        outputs = {
+            reissue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch burn address to unique address, should be invalid because it needs to be sub asset burn address
+        outputs = {
+            unique_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # switch to valid burn address, and valid burn amount
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.generate(1)
+        self.sync_all()
+
+
+    def issue_multiple_outputs_test(self):
+        self.log.info("Testing issue with extra issues in the tx...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
+
+        asset_name = "ISSUE_MULTIPLE_TEST"
+        asset_name_multiple = "ISSUE_MULTIPLE_TEST_2"
+
+        to_address = n0.getnewaddress()
+        change_address = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+
+        multiple_to_address = n0.getnewaddress()
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+        ]
+
+        ############################################
+        # Try tampering with an asset by adding another issue
+        burn = 500
+        outputs = {
+            issue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-failed-issue-asset-formatting-check", \
+                                n0.sendrawtransaction, signed_hex)
+
+    def issue_sub_multiple_outputs_test(self):
+        self.log.info("Testing issue with an extra sub asset issue in the tx...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
+        sub_burn = "n1issueSubAssetXXXXXXXXXXXXXbNiH6v"
+
+        # create the root asset that the sub asset will try to be created from
+        root = "ISSUE_SUB_MULTIPLE_TEST"
+        asset_name_multiple_sub = root + '/SUB'
+        owner = f"{root}!"
+        n0.issue(root)
+        n0.generate(1)
+        self.sync_all()
+
+        asset_name = "ISSUE_MULTIPLE_TEST"
+
+        to_address = n0.getnewaddress()
+        sub_multiple_to_address = n0.getnewaddress()
+        change_address = n0.getnewaddress()
+        owner_change_address = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+        unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+            {k: unspent_asset_owner[k] for k in ['txid', 'vout']},
+        ]
+
+        ############################################
+        # Try tampering with an asset transaction by having a sub asset issue hidden in the transaction
+        burn = 500
+        outputs = {
+            issue_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            },
+            to_address: {
+                'issue': {
+                    'asset_name':       asset_name,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-failed-issue-asset-formatting-check", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # Try tampering with an issue sub asset transaction by having another owner token transfer
+        burn = 100
+        second_owner_change_address = n0.getnewaddress()
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            second_owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-tx-inputs-outputs-mismatch Bad Transaction - Assets would be burnt ISSUE_SUB_MULTIPLE_TEST!", \
+                                n0.sendrawtransaction, signed_hex)
+
+
+        ############################################
+        # Try tampering with an issue sub asset transaction by not having any owner change
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-tx-asset-inputs-size-does-not-match-outputs-size", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # Try tampering with an issue sub asset transaction by not having any owner change
+        self.log.info("Testing issue sub asset and tampering with the owner change...")
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-tx-asset-inputs-size-does-not-match-outputs-size", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # Try tampering with an issue by changing the owner amount transferred to 2
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 2,
+                }
+            },
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        hex = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-transfer-owner-amount-was-not-1", \
+                                n0.sendrawtransaction, signed_hex)
+
+        ############################################
+        # Try tampering with an issue by changing the owner amount transferred to 0
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 0,
+                }
+            },
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+        assert_raises_rpc_error(-8, "Invalid parameter: asset amount can't be equal to or less than zero.", \
+                                n0.createrawtransaction, inputs, outputs)
+
+        # Create the valid sub asset and broadcast the transaction
+        outputs = {
+            sub_burn: burn,
+            change_address: float(unspent['amount']) - (burn + 0.0001),
+            owner_change_address: {
+                'transfer': {
+                    owner: 1,
+                }
+            },
+            sub_multiple_to_address: {
+                'issue': {
+                    'asset_name':       asset_name_multiple_sub,
+                    'asset_quantity':   1,
+                    'units':            0,
+                    'reissuable':       1,
+                    'has_ipfs':         1,
+                    'ipfs_hash':        "QmWWQSuPMS6aXCbZKpEjPHPUZN2NjB3YrhJTHsV4X3vb2t"
+                }
+            }
+        }
+
+
+        tx_issue_sub_hex = n0.createrawtransaction(inputs, outputs)
+
+        ############################################
+        # try tampering to issue sub asset a mismatched the transfer amount to 0
+        self.log.info("Testing issue sub asset tamper with the owner change transfer amount...")
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_issue_sub_hex))
+        tx.deserialize(f)
+        rvnt = '72766e74' #rvnt
+        op_drop = '75'
+        # change the transfer amount
+        for n in range(0, len(tx.vout)):
+            out = tx.vout[n]
+            if rvnt in bytes_to_hex_str(out.scriptPubKey):
+                transfer_out = out
+                transfer_script_hex = bytes_to_hex_str(transfer_out.scriptPubKey)
+                asset_script_hex = transfer_script_hex[transfer_script_hex.index(rvnt) + len(rvnt):-len(op_drop)]
+                f = BytesIO(hex_str_to_bytes(asset_script_hex))
+                transfer = CScriptTransfer()
+                transfer.deserialize(f)
+                transfer.amount = 0
+                tampered_transfer = bytes_to_hex_str(transfer.serialize())
+                tampered_script = transfer_script_hex[:transfer_script_hex.index(rvnt)] + rvnt + tampered_transfer + op_drop
+                tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
+        tx_bad_transfer = bytes_to_hex_str(tx.serialize())
+        tx_bad_transfer_signed = n0.signrawtransaction(tx_bad_transfer)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-transfer-owner-amount-was-not-1",
+                                n0.sendrawtransaction, tx_bad_transfer_signed)
+
+        # Sign and create the valid sub asset transaction
+        signed_hex = n0.signrawtransaction(tx_issue_sub_hex)['hex']
+        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.generate(1)
+        self.sync_all()
+
+        assert_equal(1, n0.listmyassets()[root])
+        assert_equal(1, n0.listmyassets()[asset_name_multiple_sub])
+        assert_equal(1, n0.listmyassets()[asset_name_multiple_sub + '!'])
+        assert_equal(1, n0.listmyassets()[owner])
+
+    def transfer_asset_tampering_test(self):
+        self.log.info("Testing trasnfer of asset transaction tampering...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        ########################################
+        # create the root asset that the sub asset will try to be created from
+        root = "TRANSFER_TX_TAMPERING"
+        n0.issue(root, 10)
+        n0.generate(1)
+        self.sync_all()
+
+        to_address = n1.getnewaddress()
+        change_address = n0.getnewaddress()
+        asset_change = n0.getnewaddress()
+        unspent = n0.listunspent()[0]
+        unspent_asset = n0.listmyassets(root, True)[root]['outpoints'][0]
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+            {k: unspent_asset[k] for k in ['txid', 'vout']},
+        ]
+
+        ########################################
+        # Create the valid transfer outputs
+        outputs = {
+            change_address: float(unspent['amount']) - 0.00001,
+            to_address: {
+                'transfer': {
+                    root: 4,
+                }
+            },
+            asset_change: {
+                'transfer': {
+                    root: 6,
+                }
+            }
+        }
+
+        tx_transfer_hex = n0.createrawtransaction(inputs, outputs)
+
+        ########################################
+        # try tampering to issue sub asset a mismatched the transfer amount to 0
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_transfer_hex))
+        tx.deserialize(f)
+        rvnt = '72766e74' #rvnt
+        op_drop = '75'
+        # change the transfer amounts = 0
+        for n in range(0, len(tx.vout)):
+            out = tx.vout[n]
+            if rvnt in bytes_to_hex_str(out.scriptPubKey):
+                transfer_out = out
+                transfer_script_hex = bytes_to_hex_str(transfer_out.scriptPubKey)
+                asset_script_hex = transfer_script_hex[transfer_script_hex.index(rvnt) + len(rvnt):-len(op_drop)]
+                f = BytesIO(hex_str_to_bytes(asset_script_hex))
+                transfer = CScriptTransfer()
+                transfer.deserialize(f)
+                transfer.amount = 0
+                tampered_transfer = bytes_to_hex_str(transfer.serialize())
+                tampered_script = transfer_script_hex[:transfer_script_hex.index(rvnt)] + rvnt + tampered_transfer + op_drop
+                tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
+        tx_bad_transfer = bytes_to_hex_str(tx.serialize())
+        tx_bad_transfer_signed = n0.signrawtransaction(tx_bad_transfer)['hex']
+        assert_raises_rpc_error(-26, "bad-tx-inputs-outputs-mismatch Bad Transaction - Assets would be burnt TRANSFER_TX_TAMPERING",
+                                n0.sendrawtransaction, tx_bad_transfer_signed)
+
+        signed_hex = n0.signrawtransaction(tx_transfer_hex)['hex']
+        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.generate(1)
+        self.sync_all()
+
+        assert_equal(6, n0.listmyassets()[root])
+        assert_equal(4, n1.listmyassets()[root])
+        assert_equal(1, n0.listmyassets()[root + '!'])
+
+
+    def transfer_asset_inserting_tampering_test(self):
+        self.log.info("Testing of asset issue inserting tampering...")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        # create the root asset that the sub asset will try to be created from
+        root = "TRANSFER_ASSET_INSERTING"
+        n0.issue(root, 10)
+        n0.generate(1)
+        self.sync_all()
+
+        change_address = n0.getnewaddress()
+        to_address = n0.getnewaddress() # back to n0 from n0
+        unspent = n0.listunspent()[0]
+        unspent_asset = n0.listmyassets(root, True)[root]['outpoints'][0]
+
+        inputs = [
+            {k: unspent[k] for k in ['txid', 'vout']},
+            {k: unspent_asset[k] for k in ['txid', 'vout']},
+        ]
+
+        # Create the valid transfer and broadcast the transaction
+        outputs = {
+            change_address: float(unspent['amount']) - 0.00001,
+            to_address: {
+                'transfer': {
+                    root: 10,
+                }
+            }
+        }
+
+        tx_transfer_hex = n0.createrawtransaction(inputs, outputs)
+
+        # try tampering to issue sub asset a mismatched the transfer amount to 0
+        tx = CTransaction()
+        f = BytesIO(hex_str_to_bytes(tx_transfer_hex))
+        tx.deserialize(f)
+        rvnt = '72766e74' #rvnt
+        op_drop = '75'
+
+        # create a new issue CTxOut
+        issue_out = CTxOut()
+        issue_out.nValue = 0
+
+        # create a new issue script
+        issue_script = CScriptIssue()
+        issue_script.name = b'BYTE_ISSUE'
+        issue_script.amount = 1
+        issue_serialized = bytes_to_hex_str(issue_script.serialize())
+        rvnq = '72766e71' #rvnq
+
+        for n in range(0, len(tx.vout)):
+            out = tx.vout[n]
+            if rvnt in bytes_to_hex_str(out.scriptPubKey):
+                transfer_out = out
+                transfer_script_hex = bytes_to_hex_str(transfer_out.scriptPubKey)
+
+                # Generate a script that has a valid destination address but switch it with rvnq and the issue_serialized data
+                issue_out.scriptPubKey = hex_str_to_bytes(transfer_script_hex[:transfer_script_hex.index(rvnt)] + rvnq + issue_serialized + op_drop)
+
+
+        tx.vout.insert(0, issue_out) # Insert the issue transaction at the begin on the vouts
+
+        tx_inserted_issue = bytes_to_hex_str(tx.serialize())
+        tx_bad_transfer_signed = n0.signrawtransaction(tx_inserted_issue)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-bad-asset-transaction",
+                                n0.sendrawtransaction, tx_bad_transfer_signed)
+
+    def atomic_swaps_test(self):
         self.log.info("Testing atomic swaps...")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
@@ -909,15 +1679,92 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_equal(unspent_asset_amount2 - amount, n2.listmyassets()[anduin])
 
 
+    def getrawtransaction(self):
+        self.log.info("Testing asset info in getrawtransaction...")
+        n0 = self.nodes[0]
+
+        asset_name = "RAW"
+        asset_amount = 1000
+        units = 2
+        units2 = 4
+        reissuable = True
+        ipfs_hash = "QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E"
+        ipfs_hash2 = "QmQ7DysAQmy92cyQrkb5y1M96pGG1fKxnRkiB19qWSmH75"
+
+        tx_id = n0.issue(asset_name, asset_amount, "", "", units, reissuable, True, ipfs_hash)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][-1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+        assert_equal(units, asset_section['units']);
+        assert_equal(reissuable, asset_section['reissuable'])
+        assert_equal(ipfs_hash, asset_section['ipfs_hash'])
+
+        asset_out_script = raw_json['vout'][-2]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name + "!", asset_section['name'])
+        assert_equal(1, asset_section['amount'])
+        assert_does_not_contain_key('units', asset_section)
+        assert_does_not_contain_key('reissuable', asset_section)
+        assert_does_not_contain_key('ipfs_hash', asset_section)
+
+        address = n0.getnewaddress()
+        tx_id = n0.reissue(asset_name, asset_amount, address, "", True, -1, ipfs_hash2)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][-1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+        assert_does_not_contain_key('units', asset_section)
+        assert_equal(ipfs_hash2, asset_section['ipfs_hash'])
+
+        address = n0.getnewaddress()
+        tx_id = n0.reissue(asset_name, asset_amount, address, "", False, units2)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][-1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+        assert_equal(units2, asset_section['units'])
+        assert_does_not_contain_key('ipfs_hash', asset_section)
+
+        address = n0.getnewaddress()
+        tx_id = n0.transfer(asset_name, asset_amount, address)[0]
+        n0.generate(1)
+        raw_json = n0.getrawtransaction(tx_id, True)
+        asset_out_script = raw_json['vout'][1]['scriptPubKey']
+        assert_contains_key('asset', asset_out_script)
+        asset_section = asset_out_script['asset']
+        assert_equal(asset_name, asset_section['name'])
+        assert_equal(asset_amount, asset_section['amount'])
+
+
     def run_test(self):
         self.activate_assets()
         self.issue_reissue_transfer_test()
         self.unique_assets_test()
         self.issue_tampering_test()
         self.reissue_tampering_test()
+        self.transfer_asset_tampering_test()
+        self.transfer_asset_inserting_tampering_test()
         self.unique_assets_via_issue_test()
-        self.bad_ipfs_hash()
-        self.atomic_swaps()
+        self.bad_ipfs_hash_test()
+        self.atomic_swaps_test()
+        self.issue_invalid_address_test()
+        self.issue_sub_invalid_address_test()
+        self.issue_multiple_outputs_test()
+        self.issue_sub_multiple_outputs_test()
+        self.getrawtransaction()
+
+
 
 if __name__ == '__main__':
     RawAssetTransactionsTest().main()

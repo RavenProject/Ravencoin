@@ -52,8 +52,8 @@ struct CAssetOutputEntry;
 class CCoinControl;
 struct CBlockAssetUndo;
 
-// 50000 * 82 Bytes == 4.1 Mb
-#define MAX_CACHE_ASSETS_SIZE 50000
+// 2500 * 82 Bytes == 205 KB (kilobytes) of memory
+#define MAX_CACHE_ASSETS_SIZE 2500
 
 // Create map that store that state of current reissued transaction that the mempool as accepted.
 // If an asset name is in this map, any other reissue transactions wont be accepted into the mempool
@@ -62,6 +62,7 @@ extern std::map<std::string, uint256> mapReissuedAssets;
 
 class CAssets {
 public:
+
     std::map<std::string, std::set<COutPoint> > mapMyUnspentAssets; // Asset Name -> COutPoint
 
 
@@ -246,7 +247,7 @@ public :
     bool AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash);
     bool AddTransferAsset(const CAssetTransfer& transferAsset, const std::string& address, const COutPoint& out, const CTxOut& txOut);
     bool AddOwnerAsset(const std::string& assetsName, const std::string address);
-    bool AddToMyUpspentOutPoints(const std::string& strName, const COutPoint& out);
+    bool AddToMyUnspentOutPoints(const std::string& strName, const COutPoint& out);
     bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out);
 
     // Cache only validation functions
@@ -396,4 +397,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
 bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey& reserveKey, std::pair<int, std::string>& error, std::string& txid);
+
+/** Helper method for extracting address bytes, asset name and amount from an asset script */
+bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount);
 #endif //RAVENCOIN_ASSET_PROTOCOL_H

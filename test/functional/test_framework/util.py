@@ -38,6 +38,10 @@ def assert_contains_pair(key, val, dict):
     if not (key in dict and val == dict[key]):
         raise AssertionError("k/v pair (%s,%s) not in dict" % (key, val))
 
+def assert_contains_key(key, dict):
+    if not (key in dict):
+        raise AssertionError("key %s is not in dict" % (key))
+
 def assert_does_not_contain_key(key, dict):
     if (key in dict):
         raise AssertionError("key %s is in dict" % (key))

@@ -711,7 +711,7 @@ bool CTransaction::VerifyNewAsset(std::string& strError) const
     }
 
     if (!fFoundIssueBurnTx) {
-        strError = "bad-txns-issue-owner-burn-not-found";
+        strError = "bad-txns-issue-burn-not-found";
         return false;
     }
 
@@ -1165,7 +1165,7 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
     return true;
 }
 
-bool CAssetsCache::AddToMyUpspentOutPoints(const std::string& strName, const COutPoint& out)
+bool CAssetsCache::AddToMyUnspentOutPoints(const std::string& strName, const COutPoint& out)
 {
     if (!mapMyUnspentAssets.count(strName)) {
         std::set<COutPoint> setOuts;
@@ -1173,7 +1173,7 @@ bool CAssetsCache::AddToMyUpspentOutPoints(const std::string& strName, const COu
         mapMyUnspentAssets.insert(std::make_pair(strName, setOuts));
     } else {
         if (!mapMyUnspentAssets[strName].insert(out).second)
-            return error("%s: Tried adding an asset to my map of upspent assets, but it already existed in the set of assets: %s, COutPoint: %s", __func__, strName, out.ToString());
+            return error("%s: Tried adding an asset to my map of unspent assets, but it already existed in the set of assets: %s, COutPoint: %s", __func__, strName, out.ToString());
     }
 
     // Add the outpoint to the set so we know what we need to database
@@ -1201,7 +1201,7 @@ bool CAssetsCache::AddPossibleOutPoint(const CAssetCachePossibleMine& possibleMi
 
     // If asset is in an CTxOut that I own add it to my cache
     if (vpwallets[0]->IsMine(possibleMine.txOut) == ISMINE_SPENDABLE) {
-        if (!AddToMyUpspentOutPoints(possibleMine.assetName, possibleMine.out))
+        if (!AddToMyUnspentOutPoints(possibleMine.assetName, possibleMine.out))
             return error("%s: Failed to add an asset I own to my Unspent Asset Cache. asset %s",
                                         __func__, possibleMine.assetName);
     }
@@ -1855,20 +1855,43 @@ bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
 size_t CAssetsCache::DynamicMemoryUsage() const
 {
     // TODO make sure this is accurate
-    return memusage::DynamicUsage(mapAssetsAddresses) + memusage::DynamicUsage(mapAssetsAddressAmount) + memusage::DynamicUsage(mapMyUnspentAssets);
+    return memusage::DynamicUsage(mapAssetsAddresses) + memusage::DynamicUsage(mapAssetsAddressAmount) + memusage::DynamicUsage(mapMyUnspentAssets) + memusage::DynamicUsage(mapReissuedAssetData) ;
 }
 
 //! Get an estimated size of the cache in bytes that will be needed inorder to save to database
 size_t CAssetsCache::GetCacheSize() const
 {
+    // COutPoint: 32 bytes
+    // CNewAsset: Max 80 bytes
+    // CAssetTransfer: Asset Name, CAmount ( 40 bytes)
+    // CReissueAsset: Max 80 bytes
+    // CAmount: 8 bytes
+    // Asset Name: Max 32 bytes
+    // Address: 40 bytes
+    // Block hash: 32 bytes
+    // CTxOut: CAmount + CScript (105 + 8 = 113 bytes)
+
     size_t size = 0;
-    size += 32 * setChangeOwnedOutPoints.size(); // COutPoint is 32 bytes
-    size += 80 * setNewOwnerAssetsToAdd.size(); // CNewAsset is max 80 bytes
-    size -= 80 * setNewOwnerAssetsToRemove.size(); // CNewAsset is max 80 bytes
-    size += (1 + 32 + 40) * vUndoAssetAmount.size(); // 8 bit CAmount, 32 byte assetName, 40 bytes address
-    size += (1 + 32 + 40) * setNewTransferAssetsToRemove.size(); // 8 bit CAmount, 32 byte assetName, 40 bytes address
-    size += (32 + 40) * setNewTransferAssetsToAdd.size();
-    size -= (32 + 40) * vSpentAssets.size();
+    size += 32 * setChangeOwnedOutPoints.size(); // COutPoint
+
+    size += (32 + 40 + 8) * vUndoAssetAmount.size(); // Asset Name, Address, CAmount
+
+    size += (40 + 40 + 32) * setNewTransferAssetsToRemove.size(); // CAssetTrasnfer, Address, COutPoint
+    size += (40 + 40 + 32) * setNewTransferAssetsToAdd.size(); // CAssetTrasnfer, Address, COutPoint
+
+    size += 72 * setNewOwnerAssetsToAdd.size(); // Asset Name, Address
+    size += 72 * setNewOwnerAssetsToRemove.size(); // Asset Name, Address
+
+    size += (32 + 40 + 8) * vSpentAssets.size(); // Asset Name, Address, CAmount
+
+    size += (80 + 40 + 32 + sizeof(int)) * setNewAssetsToAdd.size(); // CNewAsset, Address, Block hash, int
+    size += (80 + 40 + 32 + sizeof(int)) * setNewAssetsToRemove.size(); // CNewAsset, Address, Block hash, int
+
+    size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToAdd.size(); // CReissueAsset, Address, COutPoint, Block hash, int
+    size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToRemove.size(); // CReissueAsset, Address, COutPoint, Block hash, int
+
+    size += (32 + 113) * setPossiblyMineAdd.size(); // Asset Name, COutPoint, CTxOut
+    size += (32 + 113) * setPossiblyMineRemove.size(); // Asset Name, COutPoint, CTxOut
 
     return size;
 }
@@ -2093,7 +2116,7 @@ void UpdatePossibleAssets()
         for (auto item : passets->setPossiblyMineAdd) {
             // If the CTxOut is mine add it to the list of unspent outpoints
             if (vpwallets[0]->IsMine(item.txOut) == ISMINE_SPENDABLE) {
-                if (!passets->AddToMyUpspentOutPoints(item.assetName, item.out)) // Boolean true means only change the in memory data. We will want to save at the same time that RVN coin saves its cache
+                if (!passets->AddToMyUnspentOutPoints(item.assetName, item.out)) // Boolean true means only change the in memory data. We will want to save at the same time that RVN coin saves its cache
                     error("%s: Failed to add an asset I own to my Unspent Asset Database. asset %s",
                                  __func__, item.assetName);
             }
@@ -2876,4 +2899,61 @@ void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reiss
                 reissues++;
         }
     }
+}
+
+bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount) {
+    int nType;
+    bool fIsOwner;
+    int _nStartingPoint;
+    std::string _strAddress;
+    bool isAsset = false;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner, _nStartingPoint)) {
+        if (nType == TX_NEW_ASSET) {
+            if (fIsOwner) {
+                if (OwnerAssetFromScript(scriptPubKey, assetName, _strAddress)) {
+                    assetAmount = OWNER_ASSET_AMOUNT;
+                    isAsset = true;
+                } else {
+                    LogPrintf("%s : Couldn't get new owner asset from script: %s", __func__, HexStr(scriptPubKey));
+                }
+            } else {
+                CNewAsset asset;
+                if (AssetFromScript(scriptPubKey, asset, _strAddress)) {
+                    assetName = asset.strName;
+                    assetAmount = asset.nAmount;
+                    isAsset = true;
+                } else {
+                    LogPrintf("%s : Couldn't get new asset from script: %s", __func__, HexStr(scriptPubKey));
+                }
+            }
+        } else if (nType == TX_REISSUE_ASSET) {
+            CReissueAsset asset;
+            if (ReissueAssetFromScript(scriptPubKey, asset, _strAddress)) {
+                assetName = asset.strName;
+                assetAmount = asset.nAmount;
+                isAsset = true;
+            } else {
+                LogPrintf("%s : Couldn't get reissue asset from script: %s", __func__, HexStr(scriptPubKey));
+            }
+        } else if (nType == TX_TRANSFER_ASSET) {
+            CAssetTransfer asset;
+            if (TransferAssetFromScript(scriptPubKey, asset, _strAddress)) {
+                assetName = asset.strName;
+                assetAmount = asset.nAmount;
+                isAsset = true;
+            } else {
+                LogPrintf("%s : Couldn't get transfer asset from script: %s", __func__, HexStr(scriptPubKey));
+            }
+        } else {
+            LogPrintf("%s : Unsupported asset type: %s", __func__, nType);
+        }
+    } else {
+//        LogPrintf("%s : Found no asset in script: %s", __func__, HexStr(scriptPubKey));
+    }
+    if (isAsset) {
+//        LogPrintf("%s : Found assets in script at address %s : %s (%s)", __func__, _strAddress, assetName, assetAmount);
+        hashBytes = uint160(std::vector <unsigned char>(scriptPubKey.begin()+3, scriptPubKey.begin()+23));
+        return true;
+    }
+    return false;
 }

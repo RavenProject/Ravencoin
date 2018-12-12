@@ -13,6 +13,7 @@
 
 class AssetTablePriv;
 class WalletModel;
+class AssetRecord;
 
 class CAssets;
 
@@ -31,11 +32,28 @@ public:
         Quantity = 1
     };
 
+    /** Roles to get specific information from a transaction row.
+        These are independent of column.
+    */
+    enum RoleIndex {
+        /** Net amount of transaction */
+            AmountRole = 100,
+        /** RVN or name of an asset */
+            AssetNameRole = 101,
+        /** Formatted amount, without brackets when unconfirmed */
+            FormattedAmountRole = 102,
+        /** AdministratorRole */
+            AdministratorRole = 103
+    };
+
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
+    QString formatTooltip(const AssetRecord *rec) const;
+    QString formatAssetName(const AssetRecord *wtx) const;
+    QString formatAssetQuantity(const AssetRecord *wtx) const;
 
     void checkBalanceChanged();
 

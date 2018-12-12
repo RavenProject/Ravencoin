@@ -10,6 +10,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QWidget>
+#include <QMenu>
 #include <memory>
 
 class ClientModel;
@@ -17,6 +18,9 @@ class TransactionFilterProxy;
 class TxViewDelegate;
 class PlatformStyle;
 class WalletModel;
+class AssetFilterProxy;
+
+class AssetViewDelegate;
 
 namespace Ui {
     class OverviewPage;
@@ -39,8 +43,6 @@ public:
     void setWalletModel(WalletModel *walletModel);
     void showOutOfSyncWarning(bool fShow);
     void showAssets();
-    void displayAssetInfo();
-    void hideAssetInfo();
 
 public Q_SLOTS:
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
@@ -48,6 +50,10 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void transactionClicked(const QModelIndex &index);
+    void assetSendClicked(const QModelIndex &index);
+    void assetIssueSubClicked(const QModelIndex &index);
+    void assetIssueUniqueClicked(const QModelIndex &index);
+    void assetReissueClicked(const QModelIndex &index);
     void outOfSyncWarningClicked();
 
 private:
@@ -63,14 +69,24 @@ private:
 
     TxViewDelegate *txdelegate;
     std::unique_ptr<TransactionFilterProxy> filter;
-    std::unique_ptr<QSortFilterProxyModel> assetFilter;
+    std::unique_ptr<AssetFilterProxy> assetFilter;
+
+    AssetViewDelegate *assetdelegate;
+    QMenu *contextMenu;
+    QAction *sendAction;
+    QAction *issueSub;
+    QAction *issueUnique;
+    QAction *reissue;
+
 
 private Q_SLOTS:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
+    void handleAssetClicked(const QModelIndex &index);
     void updateAlerts(const QString &warnings);
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
+    void assetSearchChanged();
 };
 
 #endif // RAVEN_QT_OVERVIEWPAGE_H

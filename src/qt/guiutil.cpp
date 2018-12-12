@@ -53,6 +53,7 @@
 #include <QTextDocument> // for Qt::mightBeRichText
 #include <QThread>
 #include <QMouseEvent>
+#include <QPainter>
 
 #if QT_VERSION < 0x050000
 #include <QUrl>
@@ -76,7 +77,80 @@ extern double NSAppKitVersionNumber;
 #endif
 #endif
 
+#include <QGraphicsDropShadowEffect>
+#include "guiconstants.h"
+#include "platformstyle.h"
+
 namespace GUIUtil {
+
+QFont getSubLabelFont()
+{
+    QFont labelSubFont;
+#if !defined(Q_OS_MAC)
+    labelSubFont.setFamily("Open Sans");
+#endif
+    labelSubFont.setWeight(QFont::Weight::ExtraLight);
+    labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelSubFont.setPixelSize(14);
+    return labelSubFont;
+}
+
+QFont getSubLabelFontBolded()
+{
+    QFont labelSubFont;
+#if !defined(Q_OS_MAC)
+    labelSubFont.setFamily("Open Sans");
+#endif
+    labelSubFont.setWeight(QFont::Weight::Bold);
+    labelSubFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelSubFont.setPixelSize(14);
+    return labelSubFont;
+}
+
+QFont getTopLabelFontBolded()
+{
+    QFont labelTopFont;
+#if !defined(Q_OS_MAC)
+    labelTopFont.setFamily("Open Sans");
+#endif
+    labelTopFont.setWeight(QFont::Weight::Bold);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(18);
+    return labelTopFont;
+}
+
+QFont getTopLabelFont(int weight, int pxsize)
+{
+    QFont labelTopFont;
+#if !defined(Q_OS_MAC)
+    labelTopFont.setFamily("Open Sans");
+#endif
+    labelTopFont.setWeight(weight);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(pxsize);
+    return labelTopFont;
+}
+
+QFont getTopLabelFont()
+{
+    QFont labelTopFont;
+#if !defined(Q_OS_MAC)
+    labelTopFont.setFamily("Open Sans");
+#endif
+    labelTopFont.setWeight(QFont::Weight::Light);
+    labelTopFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.6);
+    labelTopFont.setPixelSize(18);
+    return labelTopFont;
+}
+
+QGraphicsDropShadowEffect* getShadowEffect()
+{
+    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect;
+    shadow->setBlurRadius(50);
+    shadow->setColor(darkModeEnabled ? COLOR_SHADOW_DARK : COLOR_SHADOW_LIGHT);
+    shadow->setOffset(8.0);
+    return shadow;
+}
 
 QString dateTimeStr(const QDateTime &date)
 {
@@ -125,7 +199,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 {
     parent->setFocusProxy(widget);
 
-    widget->setFont(fixedPitchFont());
+    widget->setFont(getSubLabelFont());
 #if QT_VERSION >= 0x040700
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
@@ -608,8 +682,9 @@ TableViewLastColumnResizingFixer::TableViewLastColumnResizingFixer(QTableView* t
     lastColumnIndex = columnCount - 1;
     secondToLastColumnIndex = columnCount - 2;
     tableView->horizontalHeader()->setMinimumSectionSize(allColumnsMinimumWidth);
-    setViewHeaderResizeMode(secondToLastColumnIndex, QHeaderView::Interactive);
-    setViewHeaderResizeMode(lastColumnIndex, QHeaderView::Interactive);
+    setViewHeaderResizeMode(columnCount - 3, QHeaderView::ResizeToContents);
+    setViewHeaderResizeMode(secondToLastColumnIndex, QHeaderView::ResizeToContents);
+    setViewHeaderResizeMode(lastColumnIndex, QHeaderView::Stretch);
 }
 
 #ifdef WIN32
@@ -1005,6 +1080,35 @@ void ClickableLabel::mouseReleaseEvent(QMouseEvent *event)
 void ClickableProgressBar::mouseReleaseEvent(QMouseEvent *event)
 {
     Q_EMIT clicked(event->pos());
+}
+
+void concatenate(QPainter* painter, QString& catString, int static_width, int left_side, int right_size)
+{
+    // Starting length of the name
+    int start_name_length = catString.size();
+
+    // Get the length of the dots
+    int dots_width = painter->fontMetrics().width("...");
+
+    // Add the dots width to the amount width
+    static_width += dots_width;
+
+    // Start concatenation loop, end loop if name is at three characters
+    while (catString.size() > 3) {
+        // Get the text width of the current name
+        int text_width = painter->fontMetrics().width(catString);
+
+        // Check to see if the text width is going to overlap the amount width if it doesn't break the loop
+        if (left_side + text_width < right_size - static_width)
+            break;
+
+        // substring the name minus the last character of it and continue the loop
+        catString = catString.left(catString.size() - 1);
+    }
+
+    // Add the ... if the name was concatenated
+    if (catString.size() != start_name_length)
+        catString.append("...");
 }
 
 } // namespace GUIUtil

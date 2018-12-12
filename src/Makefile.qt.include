@@ -125,6 +125,7 @@ QT_MOC_CPP = \
   qt/moc_askpassphrasedialog.cpp \
   qt/moc_assetcontroldialog.cpp \
   qt/moc_assetcontroltreewidget.cpp \
+  qt/moc_assetfilterproxy.cpp \
   qt/moc_bantablemodel.cpp \
   qt/moc_ravenaddressvalidator.cpp \
   qt/moc_ravenamountfield.cpp \
@@ -135,6 +136,7 @@ QT_MOC_CPP = \
   qt/moc_coincontroldialog.cpp \
   qt/moc_coincontroltreewidget.cpp \
   qt/moc_csvmodelwriter.cpp \
+  qt/moc_darkstyle.cpp \
   qt/moc_editaddressdialog.cpp \
   qt/moc_guiutil.cpp \
   qt/moc_intro.cpp \
@@ -201,6 +203,8 @@ RAVEN_QT_H = \
   qt/askpassphrasedialog.h \
   qt/assetcontroldialog.h \
   qt/assetcontroltreewidget.h \
+  qt/assetfilterproxy.h \
+  qt/assetrecord.h \
   qt/assetsdialog.h \
   qt/createassetdialog.h \
   qt/bantablemodel.h \
@@ -213,6 +217,7 @@ RAVEN_QT_H = \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
   qt/csvmodelwriter.h \
+  qt/darkstyle.h \
   qt/editaddressdialog.h \
   qt/guiconstants.h \
   qt/guiutil.h \
@@ -263,6 +268,14 @@ RES_ICONS = \
   qt/res/icons/about.png \
   qt/res/icons/about_qt.png \
   qt/res/icons/asset_administrator.png \
+  qt/res/icons/asset_administrator_dark.png \
+  qt/res/icons/asset_create.png \
+  qt/res/icons/asset_create_selected.png \
+  qt/res/icons/asset_manage.png \
+  qt/res/icons/asset_manage_selected.png \
+  qt/res/icons/asset_transfer.png \
+  qt/res/icons/asset_transfer_selected.png \
+  qt/res/icons/ravencointext.png \
   qt/res/icons/raven.ico \
   qt/res/icons/raven_testnet.ico \
   qt/res/icons/raven.png \
@@ -292,6 +305,7 @@ RES_ICONS = \
   qt/res/icons/hd_disabled.png \
   qt/res/icons/hd_enabled.png \
   qt/res/icons/history.png \
+  qt/res/icons/history_selected.png \
   qt/res/icons/info.png \
   qt/res/icons/key.png \
   qt/res/icons/lock_closed.png \
@@ -299,11 +313,14 @@ RES_ICONS = \
   qt/res/icons/network_disabled.png \
   qt/res/icons/open.png \
   qt/res/icons/overview.png \
+  qt/res/icons/overview_selected.png \
   qt/res/icons/quit.png \
   qt/res/icons/receive.png \
+  qt/res/icons/receive_selected.png \
   qt/res/icons/refresh.png \
   qt/res/icons/remove.png \
   qt/res/icons/send.png \
+  qt/res/icons/send_selected.png \
   qt/res/icons/synced.png \
   qt/res/icons/transaction0.png \
   qt/res/icons/transaction2.png \
@@ -316,7 +333,41 @@ RES_ICONS = \
   qt/res/icons/tx_asset_input.png \
   qt/res/icons/tx_asset_output.png \
   qt/res/icons/warning.png \
-  qt/res/icons/verify.png
+  qt/res/icons/verify.png \
+  qt/res/darkstyle/icon_close.png \
+  qt/res/darkstyle/icon_restore.png \
+  qt/res/darkstyle/icon_undock.png \
+  qt/res/darkstyle/icon_branch_closed.png \
+  qt/res/darkstyle/icon_branch_end.png \
+  qt/res/darkstyle/icon_branch_more.png \
+  qt/res/darkstyle/icon_branch_open.png \
+  qt/res/darkstyle/icon_vline.png \
+  qt/res/darkstyle/icon_checkbox_checked.png \
+  qt/res/darkstyle/icon_checkbox_indeterminate.png \
+  qt/res/darkstyle/icon_checkbox_unchecked.png \
+  qt/res/darkstyle/icon_checkbox_checked_pressed.png \
+  qt/res/darkstyle/icon_checkbox_indeterminate_pressed.png \
+  qt/res/darkstyle/icon_checkbox_unchecked_pressed.png \
+  qt/res/darkstyle/icon_checkbox_checked_disabled.png \
+  qt/res/darkstyle/icon_checkbox_indeterminate_disabled.png \
+  qt/res/darkstyle/icon_checkbox_unchecked_disabled.png \
+  qt/res/darkstyle/icon_radiobutton_checked.png \
+  qt/res/darkstyle/icon_radiobutton_unchecked.png \
+  qt/res/darkstyle/icon_radiobutton_checked_pressed.png \
+  qt/res/darkstyle/icon_radiobutton_unchecked_pressed.png \
+  qt/res/darkstyle/icon_radiobutton_checked_disabled.png \
+  qt/res/darkstyle/icon_radiobutton_unchecked_disabled.png \
+  qt/res/fonts/OpenSans-Bold.ttf \
+  qt/res/fonts/OpenSans-BoldItalic.ttf \
+  qt/res/fonts/OpenSans-ExtraBold.ttf \
+  qt/res/fonts/OpenSans-ExtraBoldItalic.ttf \
+  qt/res/fonts/OpenSans-Italic.ttf \
+  qt/res/fonts/OpenSans-Light.ttf \
+  qt/res/fonts/OpenSans-LightItalic.ttf \
+  qt/res/fonts/OpenSans-Regular.ttf \
+  qt/res/fonts/OpenSans-SemiBold.ttf \
+  qt/res/fonts/OpenSans-SemiBoldItalic.ttf
+
 
 RAVEN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \
@@ -326,6 +377,7 @@ RAVEN_QT_BASE_CPP = \
   qt/ravenunits.cpp \
   qt/clientmodel.cpp \
   qt/csvmodelwriter.cpp \
+  qt/darkstyle.cpp \
   qt/guiutil.cpp \
   qt/intro.cpp \
   qt/modaloverlay.cpp \
@@ -351,6 +403,7 @@ RAVEN_QT_WALLET_CPP = \
   qt/askpassphrasedialog.cpp \
   qt/assetcontroldialog.cpp \
   qt/assetcontroltreewidget.cpp \
+  qt/assetfilterproxy.cpp \
   qt/assetsdialog.cpp \
   qt/createassetdialog.cpp \
   qt/coincontroldialog.cpp \

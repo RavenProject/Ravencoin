@@ -17,10 +17,15 @@
 #include <QString>
 #include <QTreeWidgetItem>
 
+
 class PlatformStyle;
 class WalletModel;
 
 class CCoinControl;
+
+class QStringListModel;
+class QSortFilterProxyModel;
+class QCompleter;
 
 namespace Ui {
     class AssetControlDialog;
@@ -58,6 +63,10 @@ public:
     static CCoinControl *assetControl;
     static bool fSubtractFeeFromAmount;
     bool fOnStartUp;
+
+    QStringListModel* stringModel;
+    QSortFilterProxyModel* proxy;
+    QCompleter* completer;
 
 private:
     Ui::AssetControlDialog *ui;

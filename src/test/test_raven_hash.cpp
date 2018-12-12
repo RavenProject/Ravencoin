@@ -19,8 +19,7 @@ int main(int argc, char **argv)
         uint256 hashPrevBlock(rawHashPrevBlock);
 
         std::cout << HashX16R(rawHeader.data(), rawHeader.data() + 80, hashPrevBlock).GetHex();
-    }
-    else
+    } else
     {
         std::cerr << "Usage: test_raven_hash blockHex" << std::endl;
         return 1;

@@ -7,6 +7,7 @@
 
 #include "ravenaddressvalidator.h"
 #include "guiconstants.h"
+#include "platformstyle.h"
 
 QValidatedLineEdit::QValidatedLineEdit(QWidget *parent) :
     QLineEdit(parent),
@@ -25,7 +26,10 @@ void QValidatedLineEdit::setValid(bool _valid)
 
     if(_valid)
     {
-        setStyleSheet("");
+        if (darkModeEnabled)
+            setStyleSheet("");
+        else
+            setStyleSheet(STYLE_VALID);
     }
     else
     {

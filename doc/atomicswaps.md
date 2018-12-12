@@ -114,6 +114,9 @@ createrawtransaction '[{"txid":"631cf1566165803f0b89fbfb169d8f0c89129ec3f8536a48
 Ok, the structure of the transaction is set.  Now each party needs to sign it in order to unlock the inputs.  Here are the steps:
 
 * Andy signs it using `signrawtransaction`.  This will alter the hex, using his wallet to insert the signatures.
+
+> **Note:** Since Andy doesn't have the keys for all of the inputs he will see an error: `"Unable to sign input, invalid stack size (possibly missing key)" This is normal and expected.`
+
 * Andy sends the signed hex to Barb.
 * Barb uses `signrawtransaction` to sign the rest of the inputs.  Again capture the hex output.
 

@@ -16,6 +16,7 @@
 #include "platformstyle.h"
 #include "sendassetsentry.h"
 #include "walletmodel.h"
+#include "assettablemodel.h"
 
 #include "base58.h"
 #include "chainparams.h"
@@ -27,7 +28,9 @@
 #include "wallet/fees.h"
 #include "createassetdialog.h"
 #include "reissueassetdialog.h"
+#include "guiconstants.h"
 
+#include <QGraphicsDropShadowEffect>
 #include <QFontMetrics>
 #include <QMessageBox>
 #include <QScrollBar>
@@ -116,19 +119,9 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
     minimizeFeeSection(settings.value("fFeeSectionMinimized").toBool());
 
     /** RVN START */
-    connect(ui->createAssetButton, SIGNAL(clicked()), this, SLOT(createAssetButtonClicked()));
-    connect(ui->reissueAssetButton, SIGNAL(clicked()), this, SLOT(reissueAssetButtonClicked()));
-
-    // If the network is regtest. Add some helper buttons to the asset GUI
-    if (Params().NetworkIDString() != "regtest") {
-        ui->mineButton->hide();
-        ui->mineBlocksCount->hide();
-    } else {
-        ui->mineButton->setText(tr("Mine Block(s)"));
-        ui->mineButton->setToolTip(tr("Mine some number of blocks"));
-        ui->mineBlocksCount->setToolTip(tr("The number of blocks to mine"));
-        connect(ui->mineButton, SIGNAL(clicked()), this, SLOT(mineButtonClicked()));
-    }
+    setupAssetControlFrame(platformStyle);
+    setupScrollView(platformStyle);
+    setupFeeControl(platformStyle);
     /** RVN END */
 }
 
@@ -224,6 +217,108 @@ AssetsDialog::~AssetsDialog()
     settings.setValue("fPayOnlyMinFee", ui->checkBoxMinimumFee->isChecked());
 
     delete ui;
+}
+
+void AssetsDialog::setupAssetControlFrame(const PlatformStyle *platformStyle)
+{
+    /** Update the assetcontrol frame */
+    ui->frameAssetControl->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
+    ui->widgetAssetControl->setStyleSheet(".QWidget {background-color: transparent;}");
+    /** Create the shadow effects on the frames */
+
+    ui->frameAssetControl->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->labelAssetControlFeatures->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlFeatures->setFont(GUIUtil::getTopLabelFont());
+
+    ui->labelAssetControlQuantityText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlQuantityText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelAssetControlAmountText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlAmountText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelAssetControlFeeText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlFeeText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelAssetControlAfterFeeText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlAfterFeeText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelAssetControlBytesText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlBytesText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelAssetControlLowOutputText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlLowOutputText->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelAssetControlChangeText->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetControlChangeText->setFont(GUIUtil::getSubLabelFont());
+
+    // Align the other labels next to the input buttons to the text in the same height
+    ui->labelAssetControlAutomaticallySelected->setStyleSheet(STRING_LABEL_COLOR);
+
+    // Align the Custom change address checkbox
+    ui->checkBoxAssetControlChange->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
+
+    ui->labelAssetControlQuantity->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlAmount->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlAfterFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlBytes->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlLowOutput->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->checkBoxAssetControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->lineEditAssetControlChange->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlInsuffFunds->setFont(GUIUtil::getSubLabelFont());
+    ui->labelAssetControlAutomaticallySelected->setFont(GUIUtil::getSubLabelFont());
+
+}
+
+void AssetsDialog::setupScrollView(const PlatformStyle *platformStyle)
+{
+    /** Update the scrollview*/
+    ui->scrollArea->setStyleSheet(QString(".QScrollArea{background-color: %1; border: none}").arg(platformStyle->WidgetBackGroundColor().name()));
+    ui->scrollArea->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    // Add some spacing so we can see the whole card
+    ui->entries->setContentsMargins(10,10,20,0);
+    ui->scrollAreaWidgetContents->setStyleSheet(QString(".QWidget{ background-color: %1;}").arg(platformStyle->WidgetBackGroundColor().name()));
+}
+
+void AssetsDialog::setupFeeControl(const PlatformStyle *platformStyle)
+{
+    /** Update the coincontrol frame */
+    ui->frameFee->setStyleSheet(QString(".QFrame {background-color: %1; padding-top: 10px; padding-right: 5px; border: none;}").arg(platformStyle->WidgetBackGroundColor().name()));
+    /** Create the shadow effects on the frames */
+
+    ui->frameFee->setGraphicsEffect(GUIUtil::getShadowEffect());
+
+    ui->labelFeeHeadline->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelFeeHeadline->setFont(GUIUtil::getSubLabelFont());
+
+    ui->labelSmartFee3->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelCustomPerKilobyte->setStyleSheet(QString(".QLabel{ %1; }").arg(STRING_LABEL_COLOR));
+    ui->radioSmartFee->setStyleSheet(STRING_LABEL_COLOR);
+    ui->radioCustomFee->setStyleSheet(STRING_LABEL_COLOR);
+    ui->checkBoxMinimumFee->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
+
+    ui->buttonChooseFee->setFont(GUIUtil::getSubLabelFont());
+    ui->fallbackFeeWarningLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->buttonMinimizeFee->setFont(GUIUtil::getSubLabelFont());
+    ui->radioSmartFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee2->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee3->setFont(GUIUtil::getSubLabelFont());
+    ui->confTargetSelector->setFont(GUIUtil::getSubLabelFont());
+    ui->radioCustomFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelCustomPerKilobyte->setFont(GUIUtil::getSubLabelFont());
+    ui->customFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelMinFeeWarning->setFont(GUIUtil::getSubLabelFont());
+    ui->optInRBF->setFont(GUIUtil::getSubLabelFont());
+    ui->sendButton->setFont(GUIUtil::getSubLabelFont());
+    ui->clearButton->setFont(GUIUtil::getSubLabelFont());
+    ui->addButton->setFont(GUIUtil::getSubLabelFont());
+    ui->labelSmartFee->setFont(GUIUtil::getSubLabelFont());
+    ui->labelFeeEstimation->setFont(GUIUtil::getSubLabelFont());
+    ui->labelFeeMinimized->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 void AssetsDialog::on_sendButton_clicked()
@@ -366,9 +461,9 @@ void AssetsDialog::on_sendButton_clicked()
 
     if (sendStatus.status == WalletModel::OK)
     {
-        accept();
         AssetControlDialog::assetControl->UnSelectAll();
         assetControlUpdateLabels();
+        accept();
     }
     fNewRecipientAllowed = true;
 }
@@ -427,7 +522,7 @@ SendAssetsEntry *AssetsDialog::addEntry()
 
     // Focus the field, so that entry can start immediately
     entry->clear();
-    entry->setFocus();
+    entry->setFocusAssetListBox();
     ui->scrollAreaWidgetContents->resize(ui->scrollAreaWidgetContents->sizeHint());
     qApp->processEvents();
     QScrollBar* bar = ui->scrollArea->verticalScrollBar();
@@ -539,6 +634,9 @@ void AssetsDialog::setBalance(const CAmount& balance, const CAmount& unconfirmed
     Q_UNUSED(watchBalance);
     Q_UNUSED(watchUnconfirmedBalance);
     Q_UNUSED(watchImmatureBalance);
+
+    ui->labelBalance->setFont(GUIUtil::getSubLabelFont());
+    ui->label->setFont(GUIUtil::getSubLabelFont());
 
     if(model && model->getOptionsModel())
     {
@@ -887,58 +985,6 @@ void AssetsDialog::assetControlUpdateLabels()
 }
 
 /** RVN START */
-void AssetsDialog::createAssetButtonClicked()
-{
-    WalletModel::UnlockContext ctx(model->requestUnlock());
-    if(!ctx.isValid())
-    {
-        // Unlock wallet was cancelled
-        return;
-    }
-
-    CreateAssetDialog dlg(platformStyle, 0, model, clientModel);
-    dlg.setModel(model);
-    dlg.setClientModel(clientModel);
-    dlg.exec();
-}
-
-void AssetsDialog::reissueAssetButtonClicked()
-{
-    WalletModel::UnlockContext ctx(model->requestUnlock());
-    if(!ctx.isValid())
-    {
-        // Unlock wallet was cancelled
-        return;
-    }
-
-    ReissueAssetDialog dlg(platformStyle, 0, model, clientModel);
-    dlg.setModel(model);
-    dlg.setClientModel(clientModel);
-    dlg.exec();
-}
-
-void AssetsDialog::mineButtonClicked()
-{
-
-    int num_generate = ui->mineBlocksCount->value();
-    uint64_t max_tries = 1000000;
-
-    std::shared_ptr<CReserveScript> coinbase_script;
-    model->getWallet()->GetScriptForMining(coinbase_script);
-
-    // If the keypool is exhausted, no script is returned at all.  Catch this.
-    if (!coinbase_script) {
-        return;
-    }
-
-    //throw an error if no script was provided
-    if (coinbase_script->reserveScript.empty()) {
-        return;
-    }
-
-    generateBlocks(coinbase_script, num_generate, max_tries, true);
-}
-
 void AssetsDialog::assetControlUpdateSendCoinsDialog()
 {
     for(int i = 0; i < ui->entries->count(); ++i)
@@ -963,6 +1009,34 @@ void AssetsDialog::processNewTransaction()
         {
             entry->refreshAssetList();
         }
+    }
+}
+
+void AssetsDialog::focusAsset(const QModelIndex &idx)
+{
+
+    clear();
+
+    SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(0)->widget());
+    if(entry)
+    {
+        SendAssetsRecipient recipient;
+        recipient.assetName = idx.data(AssetTableModel::AssetNameRole).toString();
+
+        entry->setValue(recipient);
+        entry->setFocus();
+    }
+}
+
+void AssetsDialog::focusAssetListBox()
+{
+    SendAssetsEntry *entry = qobject_cast<SendAssetsEntry*>(ui->entries->itemAt(0)->widget());
+    if (entry)
+    {
+        entry->setFocusAssetListBox();
+
+        if (entry->getValue().assetName != "")
+            entry->setFocus();
     }
 }
 /** RVN END */

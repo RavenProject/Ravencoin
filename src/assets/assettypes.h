@@ -11,6 +11,7 @@
 #include <list>
 #include <unordered_map>
 #include "amount.h"
+#include "script/standard.h"
 #include "primitives/transaction.h"
 
 #define MAX_UNIT 8
@@ -452,6 +453,11 @@ public:
    const std::unordered_map<cache_key_t, list_iterator_t>& GetItemsMap()
     {
         return cacheItemsMap;
+    };
+
+    const std::list<key_value_pair_t>& GetItemsList()
+    {
+        return cacheItemsList;
     };
 
 
