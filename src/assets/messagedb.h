@@ -26,6 +26,20 @@ public:
     bool EraseMessage(const COutPoint& out);
     bool LoadMessages(std::set<CMessage>& setMessages);
 
+    // Write / Read Database flags
+    bool WriteFlag(const std::string &name, bool fValue);
+    bool ReadFlag(const std::string &name, bool &fValue);
+
+    bool Flush();
+};
+
+class CMessageChannelDB  : public CDBWrapper {
+public:
+    explicit CMessageChannelDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+
+    CMessageChannelDB(const CMessageChannelDB&) = delete;
+    CMessageChannelDB& operator=(const CMessageChannelDB&) = delete;
+
     // My message channels
     bool WriteMyMessageChannel(const std::string& channelname);
     bool ReadMyMessageChannel(const std::string& channelname);

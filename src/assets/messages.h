@@ -10,25 +10,55 @@
 #include <uint256.h>
 #include <serialize.h>
 #include <primitives/transaction.h>
+#include <validation.h>
 #include "assettypes.h"
 
 class CMessage;
+class COutPoint;
 
-extern std::set<COutPoint> setMyMessageOutPoints;
+// Message Database caches
+extern std::set<COutPoint> setDirtyMessagesRemove;
+extern std::map<COutPoint, CMessage> mapDirtyMessagesAdd;
+extern std::map<COutPoint, CMessage> mapDirtyMessagesOrphaned;
+
+// Message Channel Database caches
+extern std::set<std::string> setDirtyChannelsAdd;
+extern std::set<std::string> setDirtyChannelsRemove;
+extern std::set<std::string> setChannelsAskedForFalse;
+
+// Lock for messaging
+extern CCriticalSection cs_messaging;
+
+bool IsChannelWatched(const std::string &name);
+
+bool GetMessage(const COutPoint &out, CMessage &message);
+
+void AddChannel(const std::string &name);
+
+void RemoveChannel(const std::string &name);
+
+void AddMessage(const CMessage &message);
+
+void RemoveMessage(const CMessage &message);
+void RemoveMessage(const COutPoint &out);
+
+void OrphanMessage(const CMessage &message);
+void OrphanMessage(const COutPoint &out);
 
 enum class MessageStatus {
     READ = 0,
     UNREAD = 1,
     EXPIRED = 2,
-    SPAM = 2,
-    HIDDEN = 3,
-    ERROR = 4
+    SPAM = 3,
+    HIDDEN = 4,
+    ORPHAN = 5,
+    ERROR = 6
 };
 
-int IntFromMessageStatus(MessageStatus status);
-MessageStatus MessageStatusFromInt(int nStatus);
+int8_t IntFromMessageStatus(MessageStatus status);
+MessageStatus MessageStatusFromInt(int8_t nStatus);
 
-
+std::string MessageStatusToString(MessageStatus status);
 
 class CMessage {
 public:
@@ -39,50 +69,51 @@ public:
     int64_t time;
     int64_t nExpiredTime;
     MessageStatus status;
+    int nBlockHeight;
 
-    CMessage() {
-        SetNull();
-    }
+    CMessage();
 
-    void SetNull(){
+    void SetNull() {
         nExpiredTime = 0;
         out = COutPoint();
         strName = "";
         ipfsHash = "";
         time = 0;
         status = MessageStatus::ERROR;
+        nBlockHeight = 0;
     }
 
-    std::string   ToString() {
-        return strprintf("CMessage(%s, Name=%s, Message=%s, Expires=%u, Time=%u)", out.ToString(), strName, EncodeIPFS(ipfsHash), nExpiredTime, time);
+    std::string ToString() {
+        return strprintf("CMessage(%s, Name=%s, Message=%s, Expires=%u, Time=%u, BlockHeight=%u)", out.ToString(), strName,
+                         EncodeIPFS(ipfsHash), nExpiredTime, time, nBlockHeight);
     }
 
-    CMessage(const COutPoint& out, const std::string& strName, const std::string& ipfsHash, const int64_t& nExpiredTime, const int64_t& time);
+    CMessage(const COutPoint &out, const std::string &strName, const std::string &ipfsHash, const int64_t &nExpiredTime,
+             const int64_t &time);
 
-    bool operator<(const CMessage& rhs) const
-    {
+    bool operator<(const CMessage &rhs) const {
         return out < rhs.out;
     }
 
     ADD_SERIALIZE_METHODS;
 
-    template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action)
-    {
+    template<typename Stream, typename Operation>
+    inline void SerializationOp(Stream &s, Operation ser_action) {
         READWRITE(out);
         READWRITE(strName);
         READWRITE(ipfsHash);
         READWRITE(time);
         READWRITE(nExpiredTime);
+        READWRITE(nBlockHeight);
+
         if (ser_action.ForRead()) {
-            ::Serialize(s, IntFromMessageStatus(status));
-        } else {
-            int nStatus;
+            int8_t nStatus = 6;
             ::Unserialize(s, nStatus);
             status = MessageStatusFromInt(nStatus);
+        } else {
+            ::Serialize(s, IntFromMessageStatus(status));
         }
     }
 };
-
 
 #endif //RAVENCOIN_MESSAGES_H

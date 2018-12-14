@@ -504,6 +504,7 @@ extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
 extern CLRUCache<std::string, CMessage> *pMessagesCache;
 extern CLRUCache<std::string, int> *pMessagesChannelsCache;
 extern CMessageDB *pmessagedb;
+extern CMessageChannelDB *pmessagechanneldb;
 /** RVN END */
 
 /**

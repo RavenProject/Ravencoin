@@ -206,6 +206,7 @@ CLRUCache<std::string, CDatabasedAssetData> *passetsCache = nullptr;
 CLRUCache<std::string, CMessage> *pMessagesCache = nullptr;
 CLRUCache<std::string, int> *pMessagesChannelsCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
+CMessageChannelDB *pmessagechanneldb = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
@@ -1674,7 +1675,7 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
 
 /** Undo the effects of this block (with given index) on the UTXO set represented by coins.
  *  When FAILED is returned, view is left in an indeterminate state. */
-static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* pindex, CCoinsViewCache& view, CAssetsCache* assetsCache = nullptr, bool ignoreAddressIndex = false)
+static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* pindex, CCoinsViewCache& view, CAssetsCache* assetsCache = nullptr, bool ignoreAddressIndex = false, bool databaseMessaging = true)
 {
     bool fClean = true;
 
@@ -1876,6 +1877,16 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                               __func__,
                               transfer.strName, out.ToString());
                         return DISCONNECT_FAILED;
+                    }
+
+                    // Undo messages
+                    if (AreMessagingDeployed() && fMessaging && databaseMessaging && !transfer.message.empty() &&
+                        (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName))) {
+
+                        LOCK(cs_messaging);
+                        if (IsChannelWatched(transfer.strName)) {
+                            OrphanMessage(COutPoint(hash, index));
+                        }
                     }
                 }
             }
@@ -2236,6 +2247,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
 
+    std::set<CMessage> setMessages;
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
         const CTransaction &tx = *(block.vtx[i]);
@@ -2262,7 +2274,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         return state.DoS(100, error("%s : Received Block with tx that contained an asset when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-assets-not-active");
             }
 
-            std::set<CMessage> setMessages;
             if (AreAssetsDeployed()) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
                 if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets, false, &setMessages, block.nTime)) {
@@ -2622,6 +2633,20 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         if (!pblocktree->WriteTimestampBlockIndex(CTimestampBlockIndexKey(pindex->GetBlockHash()), CTimestampBlockIndexValue(logicalTS)))
             return AbortNode(state, "Failed to write blockhash index");
     }
+
+    if (AreMessagingDeployed() && fMessaging && setMessages.size()) {
+        LOCK(cs_messaging);
+        for (auto message : setMessages) {
+            if (IsChannelWatched(message.strName)) {
+                int nHeight = 0;
+                if (pindex)
+                    nHeight = pindex->nHeight;
+                message.nBlockHeight = nHeight;
+                AddMessage(message);
+            }
+        }
+    }
+
     assert(pindex->phashBlock);
     // add this block to the view's block chain
     view.SetBestBlock(pindex->GetBlockHash());
@@ -2776,6 +2801,14 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
             // Write the reissue mempool data to database
             if (passetsdb)
                 passetsdb->WriteReissuedMempoolState();
+
+            if (AreMessagingDeployed()) {
+                if (pMessagesCache && pmessagedb) {
+                    LOCK(cs_messaging);
+                    if (!pmessagedb->Flush())
+                        return AbortNode(state, "Failed to Flush the message database");
+                }
+            }
             /** RVN END */
 
             nLastFlush = nNow;
@@ -4588,7 +4621,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
         // check level 3: check for inconsistencies during memory-only disconnect of tip blocks
         if (nCheckLevel >= 3 && pindex == pindexState && (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <= nCoinCacheUsage) {
             assert(coins.GetBestBlock() == pindex->GetBlockHash());
-            DisconnectResult res = DisconnectBlock(block, pindex, coins, &assetCache, true);
+            DisconnectResult res = DisconnectBlock(block, pindex, coins, &assetCache, true, false);
             if (res == DISCONNECT_FAILED) {
                 return error("VerifyDB(): *** irrecoverable inconsistency in block data at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
             }

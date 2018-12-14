@@ -226,6 +226,7 @@ libraven_server_a_SOURCES = \
   rest.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
+  rpc/messages.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
   rpc/net.cpp \

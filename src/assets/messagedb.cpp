@@ -5,11 +5,11 @@
 #include "messagedb.h"
 #include "messages.h"
 
-static const char MESSAGE_FLAG = 'M'; // Message
+static const char MESSAGE_FLAG = 'Z'; // Message
 static const char MY_MESSAGE_CHANNEL = 'C'; // My followed Channels
 static const char DB_FLAG = 'D'; // Database Flags
 
-CMessageDB::CMessageDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages", nCacheSize, fMemory, fWipe) {
+CMessageDB::CMessageDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "messages", nCacheSize, fMemory, fWipe) {
 }
 
 bool CMessageDB::WriteMessage(const CMessage &message)
@@ -43,7 +43,8 @@ bool CMessageDB::LoadMessages(std::set<CMessage>& setMessages)
                 setMessages.insert(message);
                 pcursor->Next();
             } else {
-                return error("%s: failed to read message", __func__);
+                LogPrintf("%s: failed to read message\n", __func__);
+                pcursor->Next();
             }
         } else {
             break;
@@ -52,26 +53,63 @@ bool CMessageDB::LoadMessages(std::set<CMessage>& setMessages)
     return true;
 }
 
-bool CMessageDB::WriteMyMessageChannel(const std::string& channelname)
+bool CMessageDB::Flush() {
+    try {
+        LogPrintf("%s: Flushing messages to database removeSize:%u, addSize:%u, orphanSize:%u\n", __func__, setDirtyMessagesRemove.size(), mapDirtyMessagesAdd.size(), mapDirtyMessagesOrphaned.size());
+        for (auto messageRemove : setDirtyMessagesRemove) {
+            if (!EraseMessage(messageRemove))
+                return error("%s: failed to erase message %s", __func__, messageRemove.ToString());
+        }
+
+        for (auto messageAdd : mapDirtyMessagesAdd) {
+            if (!WriteMessage(messageAdd.second))
+                return error("%s: failed to write message %s", __func__, messageAdd.second.ToString());
+
+            mapDirtyMessagesOrphaned.erase(messageAdd.first);
+        }
+
+        for (auto orphans : mapDirtyMessagesOrphaned) {
+            CMessage msg = orphans.second;
+            msg.status = MessageStatus::ORPHAN;
+            if (!WriteMessage(msg))
+                return error("%s: failed to write message orphan %s", __func__, msg.ToString());
+        }
+
+        setDirtyMessagesRemove.clear();
+        mapDirtyMessagesAdd.clear();
+        mapDirtyMessagesOrphaned.clear();
+    } catch (const std::runtime_error& e) {
+        return error("%s : %s ", __func__, std::string("System error while flushing messages: ") + e.what());
+    }
+
+    return true;
+}
+
+
+
+
+CMessageChannelDB::CMessageChannelDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "channels", nCacheSize, fMemory, fWipe) {
+}
+
+bool CMessageChannelDB::WriteMyMessageChannel(const std::string& channelname)
 {
     return Write(std::make_pair(MY_MESSAGE_CHANNEL, channelname), 1);
 }
 
-bool CMessageDB::ReadMyMessageChannel(const std::string& channelname)
+bool CMessageChannelDB::ReadMyMessageChannel(const std::string& channelname)
 {
     int i = 1;
     return Read(std::make_pair(MY_MESSAGE_CHANNEL, channelname), i);
 }
 
-bool CMessageDB::EraseMyMessageChannel(const std::string& channelname)
+bool CMessageChannelDB::EraseMyMessageChannel(const std::string& channelname)
 {
     return Erase(std::make_pair(MY_MESSAGE_CHANNEL, channelname));
 }
 
-bool CMessageDB::LoadMyMessageChannels()
+bool CMessageChannelDB::LoadMyMessageChannels()
 {
-    setMyMessageOutPoints.clear();
-
+    pMessagesChannelsCache->Clear();
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
     pcursor->Seek(std::make_pair(MY_MESSAGE_CHANNEL, std::string()));

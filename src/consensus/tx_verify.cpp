@@ -491,23 +491,16 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             /** Get messages from the transaction, only used when getting called from ConnectBlock **/
             // Get the messages from the Tx unless they are expired
             if (AreMessagingDeployed() && fMessaging && setMessages) {
-                LogPrintf("Messaging 1\n");
                 if (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName)) {
-                    LogPrintf("Messaging 2\n");
                     if (!transfer.message.empty()) {
                         if (transfer.nExpireTime == 0 || transfer.nExpireTime > currentTime) {
-                            LogPrintf("Messaging 3\n");
                             if ((int) inputAddresses.size() > index && inputAddresses[index] == address) {
-                                LogPrintf("Messaging 4\n");
                                 COutPoint out(tx.GetHash(), index);
                                 CMessage message(out, transfer.strName, transfer.message,
                                                  transfer.nExpireTime, nBlocktime);
                                 setMessages->insert(message);
                                 LogPrintf("Got message: %s\n", message.ToString());
                             }
-                        } else {
-                            if(transfer.nExpireTime < currentTime)
-                                LogPrintf("Found expired message\n");
                         }
                     }
                 }
