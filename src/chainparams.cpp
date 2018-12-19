@@ -232,6 +232,9 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
+
+
+        nAssetActivationHeight = 435456; // Asset activated block height
         /** RVN End **/
     }
 };
@@ -409,6 +412,8 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
+
+        nAssetActivationHeight = 6048; // Asset activated block height
         /** RVN End **/
 
     }
@@ -573,6 +578,8 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
+
+        nAssetActivationHeight = 0; // Asset activated block height
         /** RVN End **/
     }
 };

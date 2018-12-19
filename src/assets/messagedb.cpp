@@ -7,6 +7,7 @@
 
 static const char MESSAGE_FLAG = 'Z'; // Message
 static const char MY_MESSAGE_CHANNEL = 'C'; // My followed Channels
+static const char MY_SEEN_ADDRESSES = 'S'; // Addresses that have been seen on the chain
 static const char DB_FLAG = 'D'; // Database Flags
 
 CMessageDB::CMessageDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "messages", nCacheSize, fMemory, fWipe) {
@@ -85,9 +86,6 @@ bool CMessageDB::Flush() {
     return true;
 }
 
-
-
-
 CMessageChannelDB::CMessageChannelDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "channels", nCacheSize, fMemory, fWipe) {
 }
 
@@ -107,9 +105,9 @@ bool CMessageChannelDB::EraseMyMessageChannel(const std::string& channelname)
     return Erase(std::make_pair(MY_MESSAGE_CHANNEL, channelname));
 }
 
-bool CMessageChannelDB::LoadMyMessageChannels()
+bool CMessageChannelDB::LoadMyMessageChannels(std::set<std::string>& setChannels)
 {
-    pMessagesChannelsCache->Clear();
+    setChannels.clear();
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
     pcursor->Seek(std::make_pair(MY_MESSAGE_CHANNEL, std::string()));
@@ -119,7 +117,7 @@ bool CMessageChannelDB::LoadMyMessageChannels()
         boost::this_thread::interruption_point();
         std::pair<char, std::string> key;
         if (pcursor->GetKey(key) && key.first == MY_MESSAGE_CHANNEL) {
-            pMessagesChannelsCache->Put(key.second, 1);
+            setChannels.insert(key.second);
             pcursor->Next();
         } else {
             break;
@@ -140,5 +138,65 @@ bool CMessageDB::ReadFlag(const std::string &name, bool &fValue)
     if (!Read(std::make_pair(DB_FLAG, name), ch))
         return false;
     fValue = ch == '1';
+    return true;
+}
+
+
+bool CMessageChannelDB::WriteUsedAddress(const std::string& address)
+{
+    return Write(std::make_pair(MY_SEEN_ADDRESSES, address), 1);
+}
+bool CMessageChannelDB::ReadUsedAddress(const std::string& address)
+{
+    int i;
+    return Read(std::make_pair(MY_SEEN_ADDRESSES, address), i);
+}
+bool CMessageChannelDB::EraseUsedAddress(const std::string& address)
+{
+    return Erase(std::make_pair(MY_SEEN_ADDRESSES, address));
+}
+
+bool CMessageChannelDB::WriteFlag(const std::string &name, bool fValue)
+{
+    return Write(std::make_pair(DB_FLAG, name), fValue ? '1' : '0');
+}
+
+bool CMessageChannelDB::ReadFlag(const std::string &name, bool &fValue)
+{
+    char ch;
+    if (!Read(std::make_pair(DB_FLAG, name), ch))
+        return false;
+    fValue = ch == '1';
+    return true;
+}
+
+bool CMessageChannelDB::Flush() {
+    try {
+        LogPrintf("%s: Flushing messagechannelsdb addSize:%u, removeSize:%u, seenAddressSize:%u\n", __func__, setDirtyChannelsAdd.size(), setDirtyChannelsRemove.size(), setDirtySeenAddressAdd.size());
+
+        for (auto channelRemove : setDirtyChannelsRemove) {
+            if (!EraseMyMessageChannel(channelRemove))
+                return error("%s: failed to erase messagechannel %s", __func__, channelRemove);
+        }
+
+        for (auto channelAdd : setDirtyChannelsAdd) {
+            if (!WriteMyMessageChannel(channelAdd))
+                return error("%s: failed to write messagechannel %s", __func__, channelAdd);
+        }
+
+        for (auto seenAddress : setDirtySeenAddressAdd) {
+            if (!WriteUsedAddress(seenAddress))
+                return error("%s: failed to write seenaddress %s", __func__, seenAddress);
+        }
+
+        setDirtyChannelsRemove.clear();
+        setDirtyChannelsAdd.clear();
+        setDirtySeenAddressAdd.clear();
+        setSubscribedChannelsAskedForFalse.clear();
+        setAddressAskedForFalse.clear();
+    } catch (const std::runtime_error& e) {
+        return error("%s : %s ", __func__, std::string("System error while flushing messagechannels: ") + e.what());
+    }
+
     return true;
 }

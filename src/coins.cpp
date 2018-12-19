@@ -11,6 +11,7 @@
 #include "util.h"
 #include "validation.h"
 #include "tinyformat.h"
+#include "base58.h"
 
 #include <assert.h>
 #include <assets/assets.h>
@@ -190,17 +191,65 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
         /** RVN START */
         if (AreAssetsDeployed()) {
             if (assetsCache) {
-                if (tx.vout[i].scriptPubKey.IsTransferAsset() && !tx.vout[i].scriptPubKey.IsUnspendable()) {
-                    CAssetTransfer assetTransfer;
-                    std::string address;
-                    if (!TransferAssetFromScript(tx.vout[i].scriptPubKey, assetTransfer, address))
-                        LogPrintf(
-                                "%s : ERROR - Received a coin that was a Transfer Asset but failed to get the transfer object from the scriptPubKey. CTxOut: %s\n",
-                                __func__, tx.vout[i].ToString());
+                CAssetOutputEntry assetData;
+                if (GetAssetData(tx.vout[i].scriptPubKey, assetData)) {
+                    if (assetData.type == TX_TRANSFER_ASSET && !tx.vout[i].scriptPubKey.IsUnspendable()) {
+                        CAssetTransfer assetTransfer;
+                        std::string address;
+                        if (!TransferAssetFromScript(tx.vout[i].scriptPubKey, assetTransfer, address))
+                            LogPrintf(
+                                    "%s : ERROR - Received a coin that was a Transfer Asset but failed to get the transfer object from the scriptPubKey. CTxOut: %s\n",
+                                    __func__, tx.vout[i].ToString());
 
-                    if (!assetsCache->AddTransferAsset(assetTransfer, address, COutPoint(txid, i), tx.vout[i]))
-                        LogPrintf("%s : ERROR - Failed to add transfer asset CTxOut: %s\n", __func__,
-                                  tx.vout[i].ToString());
+                        if (!assetsCache->AddTransferAsset(assetTransfer, address, COutPoint(txid, i), tx.vout[i]))
+                            LogPrintf("%s : ERROR - Failed to add transfer asset CTxOut: %s\n", __func__,
+                                      tx.vout[i].ToString());
+
+                        /** Subscribe to new message channels if they are sent to a new address, or they are the owner token or message channel */
+                        if (fMessaging && pMessageSubscribedChannelsCache) {
+                            LOCK(cs_messaging);
+                            if (vpwallets.size() && vpwallets[0]->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
+                                AssetType aType;
+                                IsAssetNameValid(assetTransfer.strName, aType);
+
+                                if (aType == AssetType::ROOT || aType == AssetType::SUB) {
+                                    if (!IsChannelSubscribed(GetParentName(assetTransfer.strName) + OWNER_TAG)) {
+                                        if (!IsAddressSeen(address)) {
+                                            AddChannel(GetParentName(assetTransfer.strName) + OWNER_TAG);
+                                            AddAddressSeen(address);
+                                        }
+                                    }
+                                } else if (aType == AssetType::OWNER || aType == AssetType::MSGCHANNEL) {
+                                    AddChannel(assetTransfer.strName);
+                                    AddAddressSeen(address);
+                                }
+                            }
+                        }
+                    } else if (assetData.type == TX_NEW_ASSET) {
+                        /** Subscribe to new message channels if they are assets you created, or are new msgchannels of channels already being watched */
+                        if (fMessaging && pMessageSubscribedChannelsCache) {
+                            LOCK(cs_messaging);
+                            if (vpwallets.size()) {
+                                AssetType aType;
+                                IsAssetNameValid(assetData.assetName, aType);
+                                if (vpwallets[0]->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
+                                    if (aType == AssetType::ROOT || aType == AssetType::SUB) {
+                                        AddChannel(assetData.assetName + OWNER_TAG);
+                                        AddAddressSeen(EncodeDestination(assetData.destination));
+                                    } else if (aType == AssetType::OWNER || aType == AssetType::MSGCHANNEL) {
+                                        AddChannel(assetData.assetName);
+                                        AddAddressSeen(EncodeDestination(assetData.destination));
+                                    }
+                                } else {
+                                    if (aType == AssetType::MSGCHANNEL) {
+                                        if (IsChannelSubscribed(GetParentName(assetData.assetName) + OWNER_TAG)) {
+                                            AddChannel(assetData.assetName);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

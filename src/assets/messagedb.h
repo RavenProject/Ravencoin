@@ -44,11 +44,17 @@ public:
     bool WriteMyMessageChannel(const std::string& channelname);
     bool ReadMyMessageChannel(const std::string& channelname);
     bool EraseMyMessageChannel(const std::string& channelname);
-    bool LoadMyMessageChannels();
+    bool LoadMyMessageChannels(std::set<std::string>& setChannels);
+
+    bool WriteUsedAddress(const std::string& address);
+    bool ReadUsedAddress(const std::string& address);
+    bool EraseUsedAddress(const std::string& address);
 
     // Write / Read Database flags
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
+
+    bool Flush();
 };
 
 

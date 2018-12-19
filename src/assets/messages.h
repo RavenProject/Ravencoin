@@ -24,12 +24,17 @@ extern std::map<COutPoint, CMessage> mapDirtyMessagesOrphaned;
 // Message Channel Database caches
 extern std::set<std::string> setDirtyChannelsAdd;
 extern std::set<std::string> setDirtyChannelsRemove;
-extern std::set<std::string> setChannelsAskedForFalse;
+extern std::set<std::string> setSubscribedChannelsAskedForFalse;
+
+// Spam prevention address index
+extern std::set<std::string> setDirtySeenAddressAdd;
+extern std::set<std::string> setAddressAskedForFalse;
 
 // Lock for messaging
 extern CCriticalSection cs_messaging;
 
-bool IsChannelWatched(const std::string &name);
+size_t GetMessageDirtyCacheSize();
+bool IsChannelSubscribed(const std::string &name); // Is this channel marked as spamA
 
 bool GetMessage(const COutPoint &out, CMessage &message);
 
@@ -44,6 +49,10 @@ void RemoveMessage(const COutPoint &out);
 
 void OrphanMessage(const CMessage &message);
 void OrphanMessage(const COutPoint &out);
+
+bool ScanForMessageChannels(std::string& strError);
+bool IsAddressSeen(const std::string &address); // Has this address already been sent an asset before
+void AddAddressSeen(const std::string &address);
 
 enum class MessageStatus {
     READ = 0,

@@ -38,39 +38,6 @@ std::string MessageActivationWarning()
     return AreMessagingDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/RavenProject/rips/blob/master/rip-0005.mediawiki\n";
 }
 
-//std::string AssetTypeToString(AssetType& assetType)
-//{
-//    switch (assetType)
-//    {
-//        case AssetType::ROOT:          return "ROOT";
-//        case AssetType::SUB:           return "SUB";
-//        case AssetType::UNIQUE:        return "UNIQUE";
-//        case AssetType::OWNER:         return "OWNER";
-//        case AssetType::MSGCHANNEL:    return "MSGCHANNEL";
-//        case AssetType::VOTE:          return "VOTE";
-//        case AssetType::REISSUE:       return "REISSUE";
-//        case AssetType::INVALID:       return "INVALID";
-//        default:            return "UNKNOWN";
-//    }
-//}
-
-//UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name)
-//{
-//    if (!passets)
-//        throw JSONRPCError(RPC_INTERNAL_ERROR, "Asset cache isn't available.");
-//
-//    uint8_t units = OWNER_UNITS;
-//    if (!IsAssetNameAnOwner(asset_name)) {
-//        CNewAsset assetData;
-//        if (!passets->GetAssetMetaDataIfExists(asset_name, assetData))
-//            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't load asset from cache: " + asset_name);
-//
-//        units = assetData.units;
-//    }
-//
-//    return ValueFromAmount(amount, units);
-//}
-
 UniValue viewallmessages(const JSONRPCRequest& request) {
     if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 0)
         throw std::runtime_error(
@@ -79,10 +46,16 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
                 "\nView all Messages that the wallet contains\n"
 
                 "\nResult:\n"
-                "\"message\"                     (string) The transaction id\n"
+                "\"Asset Name:\"                     (string) The name of the asset the message was sent on\n"
+                "\"Message:\"                        (string) The IPFS hash that is the message\n"
+                "\"Time:\"                           (Date) The time as a date in the format (YY-mm-dd Hour-minute-second)\n"
+                "\"Block Height:\"                   (number) The height of the block the message was included in\n"
+                "\"Status:\"                         (string) Status of the message (READ, UNREAD, ORPHAN, EXPIRED, SPAM, HIDDEN, ERROR)\n"
+                "\"Expire Time:\"                    (Date, optional) If the message had an expiration date assigned, it will be shown hear in the format (YY-mm-dd Hour-minute-second)\n"
 
                 "\nExamples:\n"
                 + HelpExampleCli("viewallmessages", "")
+                + HelpExampleRpc("viewallmessages", "")
         );
 
     if (!fMessaging) {
@@ -100,9 +73,6 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
     std::set<CMessage> setMessages;
 
     pmessagedb->LoadMessages(setMessages);
-
-    LogPrintf("%s: Checking caches removeSize:%u, addSize:%u, orphanSize:%u\n", __func__, setDirtyMessagesRemove.size(), mapDirtyMessagesAdd.size(), mapDirtyMessagesOrphaned.size());
-
 
     for (auto pair : mapDirtyMessagesOrphaned) {
         CMessage message = pair.second;
@@ -122,8 +92,6 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
         setMessages.erase(pair.second);
         setMessages.insert(pair.second);
     }
-
-
 
     UniValue messages(UniValue::VARR);
 
@@ -145,11 +113,147 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
     return messages;
 }
 
+UniValue viewallmessagechannels(const JSONRPCRequest& request) {
+    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 0)
+        throw std::runtime_error(
+                "viewallmessagechannels \n"
+                + MessageActivationWarning() +
+                "\nView all Message Channel the wallet is subscribed to\n"
+
+                "\nResult:[\n"
+                "\"Asset Name:\"                     (string) The asset channel name\n"
+                "\n]\n"
+                "\nExamples:\n"
+                + HelpExampleCli("viewallmessagechannels", "")
+                + HelpExampleRpc("viewallmessagechannels", "")
+        );
+
+    if (!fMessaging) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+        return ret;
+    }
+
+    if (!pMessageSubscribedChannelsCache || !pmessagechanneldb) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Messaging channel database and cache are having problems (a wallet restart might fix this issue)");
+        return ret;
+    }
+
+    std::set<std::string> setChannels;
+
+    pmessagechanneldb->LoadMyMessageChannels(setChannels);
+
+    LogPrintf("%s: Checking caches removeSize:%u, addSize:%u\n", __func__, setDirtyChannelsRemove.size(), setDirtyChannelsAdd.size());
+
+    for (auto name : setDirtyChannelsRemove) {
+        setChannels.erase(name);
+    }
+
+    for (auto name : setDirtyChannelsAdd) {
+        setChannels.insert(name);
+    }
+
+    UniValue channels(UniValue::VARR);
+
+    for (auto name : setChannels) {
+        channels.push_back(name);
+    }
+
+    return channels;
+}
+
+UniValue subscribetochannel(const JSONRPCRequest& request) {
+    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 1)
+        throw std::runtime_error(
+                "subscribetochannel \n"
+                + MessageActivationWarning() +
+                "\nSubscribe to a certain messagechannel\n"
+
+                "\nArguments:\n"
+                "1. \"channel_name\"            (string, required) The channel name to subscribe to, it must end with '!' or have an '~' in the name\n"
+
+                "\nResult:[\n"
+                "\n]\n"
+                "\nExamples:\n"
+                + HelpExampleCli("subscribetochannel", "\"ASSET_NAME!\"")
+                + HelpExampleRpc("subscribetochannel", "\"ASSET_NAME!\"")
+        );
+
+    if (!fMessaging) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+    }
+
+    if (!pMessageSubscribedChannelsCache || !pmessagechanneldb) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Message database isn't setup");
+    }
+
+    std::string channel_name = request.params[0].get_str();
+
+    AssetType type;
+    if (!IsAssetNameValid(channel_name, type))
+        throw JSONRPCError(
+                RPC_INVALID_PARAMETER, "Channel Name is not valid.");
+
+    if (type != AssetType::OWNER && type != AssetType::MSGCHANNEL)
+        throw JSONRPCError(
+                RPC_INVALID_PARAMETER, "Channel Name must must a owner asset, or a message channel asset e.g OWNER!, MSG_CHANNEL~123.");
+
+    AddChannel(channel_name);
+
+    return NullUniValue;
+}
+
+
+UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
+    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 1)
+        throw std::runtime_error(
+                "unsubscribefromchannel \n"
+                + MessageActivationWarning() +
+                "\nUnsubscribe from a certain messagechannel\n"
+
+                "\nArguments:\n"
+                "1. \"channel_name\"            (string, required) The channel name to unscribe from, must end with '!' or have an '~' in the name\n"
+
+                "\nResult:[\n"
+                "\n]\n"
+                "\nExamples:\n"
+                + HelpExampleCli("unsubscribefromchannel", "\"ASSET_NAME!\"")
+                + HelpExampleRpc("unsubscribefromchannel", "\"ASSET_NAME!\"")
+        );
+
+    if (!fMessaging) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+    }
+
+    if (!pMessageSubscribedChannelsCache || !pmessagechanneldb) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Message database isn't setup");
+    }
+
+    std::string channel_name = request.params[0].get_str();
+
+    AssetType type;
+    if (!IsAssetNameValid(channel_name, type))
+        throw JSONRPCError(
+                RPC_INVALID_PARAMETER, "Channel Name is not valid.");
+
+    if (type != AssetType::OWNER && type != AssetType::MSGCHANNEL)
+        throw JSONRPCError(
+                RPC_INVALID_PARAMETER, "Channel Name must must a owner asset, or a message channel asset e.g OWNER!, MSG_CHANNEL~123.");
+
+    RemoveChannel(channel_name);
+
+    return NullUniValue;
+}
+
 
 static const CRPCCommand commands[] =
-        { //  category    name                          actor (function)             argNames
+    {           //  category    name                          actor (function)             argNames
                 //  ----------- ------------------------      -----------------------      ----------
-            { "messages",   "viewallmessages",                &viewallmessages,            {}}
+            { "messages",   "viewallmessages",                &viewallmessages,            {}},
+            { "messages",   "viewallmessagechannels",         &viewallmessagechannels,     {}},
+            { "messages",   "subscribetochannel",             &subscribetochannel,         {"channel_name"}},
+            { "messages",   "unsubscribefromchannel",         &unsubscribefromchannel,     {"channel_name"}}
         };
 
 void RegisterMessageRPCCommands(CRPCTable &t)

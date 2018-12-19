@@ -258,8 +258,11 @@ void Shutdown()
         passetsCache = nullptr;
         delete pMessagesCache;
         pMessagesCache = nullptr;
-        delete pMessagesChannelsCache;
-        pMessagesChannelsCache = nullptr;
+        delete pMessageSubscribedChannelsCache;
+        pMessageSubscribedChannelsCache = nullptr;
+        delete pMessagesSeenAddressCache;
+        pMessagesSeenAddressCache = nullptr;
+        pmessagechanneldb = nullptr;
         delete pmessagedb;
         pmessagedb = nullptr;
         delete pmessagechanneldb;
@@ -1462,7 +1465,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 passets = new CAssetsCache();
                 passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
                 pMessagesCache = new CLRUCache<std::string, CMessage>(1000);
-                pMessagesChannelsCache = new CLRUCache<std::string, int>(1000);
+                pMessageSubscribedChannelsCache = new CLRUCache<std::string, int>(1000);
+                pMessagesSeenAddressCache = new CLRUCache<std::string, int>(1000);
                 pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
                 pmessagechanneldb = new CMessageChannelDB(nBlockTreeDBCache, false, false);
 
@@ -1806,14 +1810,31 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         return false;
     }
 
-    // ********************************************************* Step 12: finished
+
+
+
+
 
     SetRPCWarmupFinished();
-    uiInterface.InitMessage(_("Done loading"));
 
 #ifdef ENABLE_WALLET
     StartWallets(scheduler);
 #endif
+
+    // ********************************************************* Step 12: Init Msg Channel list
+    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb) {
+        bool found;
+        if (!pmessagechanneldb->ReadFlag("init", found)) {
+            uiInterface.InitMessage(_("Init Message Channels - Scanning Asset Transactions"));
+            std::string strLoadError;
+            if (!ScanForMessageChannels(strLoadError))
+                return InitError(strLoadError);
+            pmessagechanneldb->WriteFlag("init", true);
+        }
+    }
+
+    // ********************************************************* Step 13: finished
+    uiInterface.InitMessage(_("Done Loading"));
 
     return !fRequestShutdown;
 }

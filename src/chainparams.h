@@ -108,6 +108,8 @@ public:
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
     int MinReorganizationAge() const { return nMinReorganizationAge; }
+
+    int GetAssetActivationHeight() const { return nAssetActivationHeight; }
     /** RVN End **/
 
 protected:
@@ -152,6 +154,8 @@ protected:
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;
     int nMinReorganizationAge;
+
+    int nAssetActivationHeight;
     /** RVN End **/
 };
 

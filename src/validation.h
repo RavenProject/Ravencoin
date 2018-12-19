@@ -502,7 +502,8 @@ extern CAssetsCache *passets;
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
 
 extern CLRUCache<std::string, CMessage> *pMessagesCache;
-extern CLRUCache<std::string, int> *pMessagesChannelsCache;
+extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
+extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
 extern CMessageDB *pmessagedb;
 extern CMessageChannelDB *pmessagechanneldb;
 /** RVN END */
