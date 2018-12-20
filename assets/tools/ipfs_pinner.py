@@ -165,12 +165,12 @@ def asset_handler(asset_script):
 				size = FILESIZE_THRESHOLD + 1
 		#size = check_ipfs_file_size(asset_script.get('ipfs_hash'))
 		#size=1
+		full_path_with_asset = asset_file + "=" + ipfs_hash
+		if not args.folder == None:
+			full_path_with_asset = add_sep(args.folder) + full_path_with_asset
 		if (size <= FILESIZE_THRESHOLD):
 			with timeout(seconds=20):
 				try:
-					full_path_with_asset = asset_file + "=" + ipfs_hash
-					if not args.folder == None:
-						full_path_with_asset = add_sep(args.folder) + full_path_with_asset
 					if not os.path.isfile(full_path_with_asset):
 						if JSON_ONLY_CHECK:
 							a_str = ipfs_cat(ipfs_hash)
@@ -188,7 +188,48 @@ def asset_handler(asset_script):
 				except:
 					print("Unable to fetch IPFS file for asset: " + asset_script.get('asset_name'))
 		else:
-			print("Too large at %d bytes" % size)
+			print_debug("Failed to get " + ipfs_hash + ' via ipfs get <hash>  Trying http...')
+			result = get_ipfs_file_wget(full_path_with_asset, ipfs_hash)
+			if not result == 1:
+				print("Unable to get file for asset " + asset_file)
+			output_missing(full_path_with_asset + '.MISSING')
+			#print("Too large at %d bytes" % size)
+
+
+def output_missing(file):
+	outf = open(file, 'w')
+	outf.write("MISSING")
+	outf.close()	
+
+def get_ipfs_file_wget(filename, hash):
+    try:
+        import urllib.request as urllib2
+    except ImportError:
+        import urllib2
+
+
+    print("Downloading: " + hash + " as " + filename)
+    try:
+        filedata = urllib2.urlopen('https://ipfs.io/ipfs/' + hash, timeout=20)  
+        datatowrite = filedata.read()
+
+        datatowrite.strip()
+        if (datatowrite[0] != '{'):
+            print("Not a valid metadata file")
+            return
+
+
+        with open(filename, 'wb') as f:  
+            f.write(datatowrite)
+        print("Saving metadata file")
+    except urllib2.URLError as e:
+        print(type(e))
+        return 0
+    except:
+        print("Uncaught error while downloading")    #not catch
+        return 0
+
+    return 1
 
 
 
@@ -404,3 +445,4 @@ def main(argv):
 
 if __name__ == "__main__":
    main(sys.argv[1:])
+
