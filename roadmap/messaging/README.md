@@ -37,9 +37,23 @@ You must hold the owner token for TOKEN.
 
 #### Message Queue
 
-The ZMQ message adds an additional queue for messaging.
+The ZMQ message adds an additional queue for messaging 'pubmessage'
 
-The ZMQ will return the hash of the message.
+Only broadcast messages should be published via zmq.
+
+Transaction messages can be obtained by watching zmq message queue 'pubrawtx' and decoding to get the ipfshash.
+
+The ZMQ will return a json reponse.
+```
+{
+  'asset': 'TRONCO',
+  'block_height':483294,
+  'txid': '8851dcf27271721f7eb5712eb49e092acfc4866e76a8e85fe6a33bb237501f9a',
+  'vout': 2
+  'ipfs_hash':'QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E',
+  'expires': 1545343682
+}
+```
 
 #### DevKit
 
