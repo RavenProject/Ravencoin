@@ -11,7 +11,9 @@ A message is "broadcast" if an owner token or channel token is sent in a transac
 #### Channels
 Channels are special Ravencoin unique asset tokens that are created by asset owners.  The channel tokens are similar to unique assets in that there is only one with a given name.  They can be uniquely identified by having a ~ (tilde) in the name.  They are limited to twelve characters, and can use uppercase, lowercase, and digits. Example: TRONCO~Alert
 
-Sending these tokens to the same address will "broadcast" a message on the channel, which is named the same as the token.
+Sending these special channel tokens from one address to the same address will "broadcast" a message on the channel, which is named the same as the token.
+
+Users can mute channels.  Some channels will be automatically muted by the anti-spam system.
 
 #### GUI - Desktop
 
