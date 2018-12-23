@@ -519,8 +519,8 @@ BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
 
         // subsidy changing
         int nHeight = chainActive.Height();
-        // Create an actual 209999-long block chain (without valid blocks).
-        while (chainActive.Tip()->nHeight < 209999)
+        // Create an actual 2099999-long block chain (without valid blocks).
+        while (chainActive.Tip()->nHeight < 2099999)
         {
             CBlockIndex *prev = chainActive.Tip();
             CBlockIndex *next = new CBlockIndex();
@@ -532,8 +532,8 @@ BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
             chainActive.SetTip(next);
         }
         BOOST_CHECK(pblocktemplate = AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey));
-        // Extend to a 210000-long block chain.
-        while (chainActive.Tip()->nHeight < 210000)
+        // Extend to a 2100000-long block chain.
+        while (chainActive.Tip()->nHeight < 2100000)
         {
             CBlockIndex *prev = chainActive.Tip();
             CBlockIndex *next = new CBlockIndex();
