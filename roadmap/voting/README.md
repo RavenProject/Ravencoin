@@ -29,9 +29,9 @@ Vote tokens will be distributed in exact amounts to holders of BASETOKEN.
 {
 "subject":"Vote for membership expansion",
 "message": "Members of our community have requested that we increase membership.  To this end, we are holding a vote.  You have until Thursday to register your vote.",
-"ballot": {"RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H":"Yes, expand membership.",
-           "RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD":"No, do not expand membership."
-		  }
+"ballot": { "RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H":"Yes, expand membership.",
+            "RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD":"No, do not expand membership."
+          }
 }
 ```
 
