@@ -1,6 +1,6 @@
 # Rewards
 
-Rewards, also sometimes called dividends, is a way to send tokenized assets or RVN to token holders.  This can be used to reward shareholders with profits (denominated in RVN), or reward membership holders, or reward those that contributed the most and earned special tokens.  
+Rewards, also sometimes called dividends, provides a way to send tokenized assets or RVN to token holders.  This can be used to reward shareholders with profits (denominated in RVN), or to reward membership holders, or to reward those that contributed the most to a shared project and earned special tokens.  
 
 Rewards do not require a consensus protocol change, and the rpc calls exist to be able do rewards already.
 
@@ -48,4 +48,46 @@ Mobile will not initially have the rewards feature.
 These rpc calls are added in support of rewards:
 
 reward QTY [RVN|TOKEN] TARGET_TOKEN [exception address list]
+
+#### Examples
+
+Example 1 (simple):
+```
+4 holders of TRONCO (unit 0) (100 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H   10 TRONCO
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV   20 TRONCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   30 TRONCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   40 TRONCO
+
+reward 100 RVN TRONCO
+
+Takes 100 RVN (10,000,000,000 sats)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H gets 10 RVN (10,000,000,000 RVN sats)
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV gets 20 RVN (20,000,000,000 RVN sats)
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 30 RVN (30,000,000,000 RVN sats)
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 40 RVN (40,000,000,000 RVN sats)
+```
+
+Example 2 (simple with 2 exception addresses)
+```
+4 holders of TRONCO (unit 0) (10000 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 9900 TRONCO (exception)
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 40 TRONCO (exception) 
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV    5 TRONCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   15 TRONCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   30 TRONCO
+
+reward 1000 RVN TRONCO ['RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H','RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD']
+
+Takes 1000 RVN (100,000,000,000 sats)
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV gets 100 RVN (10,000,000,000 RVN sats)
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 300 RVN (30,000,000,000 RVN sats)
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 600 RVN (60,000,000,000 RVN sats)
+```
+
+
+
+
+
+
 
