@@ -85,10 +85,8 @@ RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 300 RVN (30,000,000,000 RVN sats)
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 600 RVN (60,000,000,000 RVN sats)
 ```
 
-Example 3 (Payment of BLACKCO to TRONCO holders with 2 exception addresses)
-
-TRONCO and BLACKCO is set to units 0.
-
+Example 3 (Payment of BLACKCO to TRONCO holders with 2 exception addresses)  
+TRONCO and BLACKCO is set to units 0.  
 Note: Can only make this call if you hold TRONCO! -- the ownership token.
 ```
 5 holders of TRONCO (unit 0) (10000 Issued)
@@ -106,10 +104,8 @@ RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 300 BLACKCO
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 600 BLACKCO
 ```
 
-Example 4 (Payment of DOLLARTOKEN to TRONCO holders with 1 exception address)
-
-DOLLARTOKEN - a fictional stablecoin is set to units 2.
-
+Example 4 (Payment of DOLLARTOKEN to TRONCO holders with 1 exception address)  
+DOLLARTOKEN - a fictional stablecoin is set to units 2.  
 Note: Can only make this call if you hold TRONCO! -- the ownership token.
 ```
 5 holders of TRONCO (unit 0) (10000 Issued)
@@ -128,12 +124,9 @@ RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 150.00 DOLLARTOKEN
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 300.00 DOLLARTOKEN
 ```
 
-Example 5 (Payment of INDIVISIBLE to TRONCO holders)
-
-INDIVISIBLE - a token with units set to 0 (therefore indivisible).
-
-Note: Can only make this call if you hold TRONCO! -- the ownership token.
-
+Example 5 (Payment of INDIVISIBLE to TRONCO holders)  
+INDIVISIBLE - a token with units set to 0 (therefore indivisible).  
+Note: Can only make this call if you hold TRONCO! -- the ownership token.  
 Note: Failure occurs because of indivisibility of INDIVISIBLE token.  Unable to reward equally.
 ```
 5 holders of TRONCO (unit 0) (10000 Issued)
@@ -150,12 +143,9 @@ Takes 9999 INDIVISIBLE and attempts to distribute equally according to TRONCO ho
 Results in FAILURE - Error "Unable to reward evenly"
 ```
 
-Example 6 (Payment of INDIVISIBLE to TRONCO holders)
-
-INDIVISIBLE - a token with units set to 0 (therefore indivisible).
-
-Note: Can only make this call if you hold TRONCO! -- the ownership token.
-
+Example 6 (Payment of INDIVISIBLE to TRONCO holders)  
+INDIVISIBLE - a token with units set to 0 (therefore indivisible).  
+Note: Can only make this call if you hold TRONCO! -- the ownership token.  
 Note: Remainder is sent back to sending address.
 ```
 5 holders of TRONCO (unit 0) (10000 Issued)
@@ -176,12 +166,9 @@ RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets   30 INDIVISIBLE
 Remaining 1 INDIVISIBLE sent back to the first sending address.
 ```
 
-Example 7 (Payment of VERYDIVISIBLE to TRONCO holders)
-
-VERYDIVISIBLE - a token with units set to 8 (therefore divisible to 8 decimal places).
-
-Note: Can only make this call if you hold TRONCO! -- the ownership token.
-
+Example 7 (Payment of VERYDIVISIBLE to TRONCO holders)  
+VERYDIVISIBLE - a token with units set to 8 (therefore divisible to 8 decimal places).  
+Note: Can only make this call if you hold TRONCO! -- the ownership token.  
 Note: Remainder is sent back to sending address.  
 ```
 2 holders of TRONCO (unit 0) (3 Issued)
