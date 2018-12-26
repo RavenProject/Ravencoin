@@ -70,9 +70,9 @@ RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 40 RVN (40,000,000,000 RVN sats)
 
 Example 2 (simple with 2 exception addresses)
 ```
-4 holders of TRONCO (unit 0) (10000 Issued)
+5 holders of TRONCO (unit 0) (10000 Issued)
 RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 9900 TRONCO (exception)
-RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 40 TRONCO (exception) 
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 50 TRONCO (exception) 
 RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV    5 TRONCO
 RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   15 TRONCO
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   30 TRONCO
@@ -84,6 +84,48 @@ RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV gets 100 RVN (10,000,000,000 RVN sats)
 RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 300 RVN (30,000,000,000 RVN sats)
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 600 RVN (60,000,000,000 RVN sats)
 ```
+
+Example 3 (Payment of BLACKCO to TRONCO holders with 2 exception addresses)
+TRONCO and BLACKCO is set to units 0.
+Note: Can only make this call if you hold TRONCO! -- the ownership token.
+```
+5 holders of TRONCO (unit 0) (10000 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 9900 TRONCO (exception)
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 50 TRONCO (exception) 
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV    5 TRONCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   15 TRONCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   30 TRONCO
+
+reward 1000 BLACKCO TRONCO ['RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H','RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD']
+
+Takes 1000 BLACKCO and distributes them according to TRONCO holdings (minus holdings by exception addresses)
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV gets 100 BLACKCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 300 BLACKCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 600 BLACKCO
+```
+
+Example 5 (Payment of DOLLARTOKEN to TRONCO holders with 2 exception addresses)
+DOLLARTOKEN - a fictional stablecoin is set to units 2.
+Note: Can only make this call if you hold TRONCO! -- the ownership token.
+```
+5 holders of TRONCO (unit 0) (10000 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 9900 TRONCO (exception)
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 50 TRONCO
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV    5 TRONCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   15 TRONCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   30 TRONCO
+
+reward 1000.00 DOLLARTOKEN TRONCO ['RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H']
+
+Takes 1000.00 DOLLARTOKEN and distributes them according to TRONCO holdings (minus holdings by exception addresses)
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD gets 500.00 DOLLARTOKEN
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV gets  50.00 DOLLARTOKEN
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 150.00 DOLLARTOKEN
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 300.00 DOLLARTOKEN
+```
+
+
+
 
 
 
