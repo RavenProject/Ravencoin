@@ -104,7 +104,7 @@ RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 300 BLACKCO
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 600 BLACKCO
 ```
 
-Example 5 (Payment of DOLLARTOKEN to TRONCO holders with 2 exception addresses)
+Example 4 (Payment of DOLLARTOKEN to TRONCO holders with 1 exception address)
 DOLLARTOKEN - a fictional stablecoin is set to units 2.
 Note: Can only make this call if you hold TRONCO! -- the ownership token.
 ```
@@ -124,9 +124,64 @@ RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets 150.00 DOLLARTOKEN
 RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets 300.00 DOLLARTOKEN
 ```
 
+Example 5 (Payment of INDIVISIBLE to TRONCO holders)
+INDIVISIBLE - a token with units set to 0 (therefore indivisible).
+Note: Can only make this call if you hold TRONCO! -- the ownership token.
+Note: Failure occurs because of indivisibility of INDIVISIBLE token.  Unable to reward equally.
+```
+5 holders of TRONCO (unit 0) (10000 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 9900 TRONCO
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 50 TRONCO
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV    5 TRONCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   15 TRONCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   30 TRONCO
 
+reward 9999 INDIVISIBLE TRONCO
 
+Takes 9999 INDIVISIBLE and attempts to distribute equally according to TRONCO holdings
 
+Results in FAILURE - Error "Unable to reward evenly"
+```
+
+Example 6 (Payment of INDIVISIBLE to TRONCO holders)
+INDIVISIBLE - a token with units set to 0 (therefore indivisible).
+Note: Can only make this call if you hold TRONCO! -- the ownership token.
+Note: Remainder is sent back to sending address.
+```
+5 holders of TRONCO (unit 0) (10000 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 9900 TRONCO
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 	 50 TRONCO
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV    5 TRONCO
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh   15 TRONCO
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP   30 TRONCO
+
+reward 10001 INDIVISIBLE TRONCO
+
+Takes 10001 INDIVISIBLE and attempts to distribute equally according to TRONCO holdings
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H gets 9900 INDIVISIBLE
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD gets   50 INDIVISIBLE
+RPsCVwsq8Uf2dcUSXcYPzVnsAMZtAHw6sV gets    5 INDIVISIBLE
+RBp5woWDU8TRMz1TPeemyLxxLL3xsCnQgh gets   15 INDIVISIBLE
+RFMD7ZJzexAmiLA9BHxwFCPVeiuAgdVjcP gets   30 INDIVISIBLE
+Remaining 1 INDIVISIBLE sent back to the first sending address.
+```
+
+Example 7 (Payment of VERYDIVISIBLE to TRONCO holders)
+VERYDIVISIBLE - a token with units set to 8 (therefore divisible to 8 decimal places).
+Note: Can only make this call if you hold TRONCO! -- the ownership token.
+Note: Remainder is sent back to sending address.
+```
+2 holders of TRONCO (unit 0) (3 Issued)
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H 1 TRONCO
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD 2 TRONCO
+
+reward 1 VERYDIVISIBLE TRONCO
+
+Takes 1 VERYDIVISIBLE and attempts to distribute equally according to TRONCO holdings
+RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H gets 0.33333333 VERYDIVISIBLE
+RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD gets 0.66666666 VERYDIVISIBLE
+Remaining 0.00000001 VERYDIVISIBLE sent back to the first sending address.
+```
 
 
 
