@@ -68,6 +68,11 @@ The normal transfer RPC call would allow vote splitting by transferring some vot
 ## Vote tracking
 Vote tracking adds up the votes in the addresses that match those in the ballot and presents the results.
 
+## Vote by percentage
+This is an optional way of allocating vote tokens.  Instead of issuing a vote token in the same qty and units as the underlying BASETOKEN, allocate 100 vote tokens with units 8.  Then allocate the tokens as a percentage of ownership.
 
+```issue_percent_vote BASETOKEN NAME ipfs_hash lastblocktovote [optional exempt address list]```
 
+The vote mechanism is identical, but this allocates votes as a percentage.  The total BASETOKEN amount minus the exemption addresses is calculated.  Then each address gets QTY_OF_BASETOKEN_HELD / TOTAL_BASETOKEN_NOT_INCLUDING_EXEMPTED_ADDRESSES.  This is calculated down to the satoshi.   The amount of vote tokens must sum up to 100.00000000, so any remaining satoshis (caused by rounding errors at the 10^-8 precision) need to be accounted for and either sent to a burn address or allocated to a BASETOKEN holder.
 
+The advantage of using percentage voting is that it simplifies some vote calculations as a simple asset explorer will allow anyone to see the votes cast and view it as a percentage without knowing the total qty of tokens issued.
