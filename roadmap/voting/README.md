@@ -19,6 +19,7 @@ Creating a vote will create vote tokens.  These vote tokens are identical to nor
 ## RPC
 
 ```issuevote BASETOKEN NAME ipfs_hash lastblocktovote [optional exempt address list]```
+
 ```vote VOTETOKEN <address> [optional qty]```
 
 Creates a BASETOKEN^NAME token in exactly the same qty and units as BASETOKEN.  IPFS hash is the meta-data message that defines what the vote is for - see vote message spec.  The lastblocktovote is a block height which is the last block a vote is allowed into.  After this block, the UTXOs for the un-voted tokens can be expired and removed.  If left blank, lastblocktovote will be set to approximately 30 days or 43200 blocks from current block height.  Exempt tokens are immediately burned at the same time that the vote tokens are distributed to the BASETOKEN holders.
