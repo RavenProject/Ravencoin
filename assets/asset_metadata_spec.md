@@ -45,6 +45,8 @@ Additional fields may be added, but will be ignored by Ravencoin.
 
    "forsale_price": "5000 RVN",
    
+   "domain": "bitactivate.com",
+   
    "restricted": "rule144"
 
 }
@@ -91,5 +93,7 @@ All fields are optional. Clients, explorers, and wallets are not obligated to di
 **forsale** - Should be true or false.  Used by desirable token names that have been left as reissuable.  This is not for the cost of buying one token, but rather for buying the rights to own, control, and reissue the entire asset token.  This might be parsed by token broker websites.
 
 **forsale_price** - To give buyers an idea of the cost to own and admin the asset token.   Price followed by a space, followed by the currency.  Examples: "10000 RVN" or "0.3 BTC" or "50000 USD"  This might be parsed by token broker websites.
+
+**domain** - A root domain for the project (if applicable).  Setting the TXT record for rvn.<domain> to a signed message of the token name -- signed by the issuer address.  This could be verified by clients to ensure the token and domain go together.  Example:  Set TXT record for rvn.bitactivate.com to the signature of the message "BITACTIVATE".  Any client or individual can verify the issuer address, message "BITACTIVATE" which is the token/asset name, and valid signature in the TXT record for rvn.bitactivate.com and return true/false.
 
 **restricted** - Designate the token as being restricted.  One example is "rule144" which means sale may be restricted because of the type of token and the exemption used for issuance.  Other restrictions types can be used here as a signal to explorers, exchanges, or token brokers.  No enforcement of restrictions is built into the Ravencoin protocol. 
