@@ -6,7 +6,7 @@ Rewards do not require a consensus protocol change, and the rpc calls exist to b
 
 These capabilities just make it native and easy-to-use from the client.
 
-Example that rewards TRONCO holders with RVN:
+Example that rewards TRONCO holders with RVN:  
 ```reward 10000 RVN TRONCO```
 
 ## Reward calculation
