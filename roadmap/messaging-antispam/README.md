@@ -2,7 +2,7 @@
 
 Ravencoin will display messages for all tokens that you own.  But wait, what if I get an unsolicited HERPES token because they found my crypto address on-chain?  Maybe I don’t want messages from the HERPES token issuer.
 
-The holder of the owner token, e.g. ATOKEN! can send messages to holders their token ATOKEN.   The owner token has an exclamation point.  The owner token holder can also create channel tokens like ATOKEN~News, or ATOKEN~VoteInfo, or ATOKEN~Emergency   These are message channel tokens and the holder of these tokens can broadcast a message by attaching a special file (IPFS) to the transaction while sending the message channel token to themselves.
+The holder of the owner token, e.g. ATOKEN! can send messages to holders their token ATOKEN.   The owner token has an exclamation point.  The owner token holder can also create channel tokens like ATOKEN\~News, or ATOKEN\~VoteInfo, or ATOKEN~Emergency   These are message channel tokens and the holder of these tokens can broadcast a message by attaching a special file (IPFS) to the transaction while sending the message channel token to themselves.
 
 By default, if you own a token, you will get all the messages that are sent by channel owners, and the token owner.   Message channel tokens can be easily recognized because they contain a tilde ( ~ ) character.  No other tokens can contain a tilde character.
 
