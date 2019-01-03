@@ -6,6 +6,9 @@ Rewards do not require a consensus protocol change, and the rpc calls exist to b
 
 These capabilities just make it native and easy-to-use from the client.
 
+Example that rewards TRONCO holders with RVN:
+```reward 10000 RVN TRONCO```
+
 ## Reward calculation
 
 First, the QTY of TARGET_TOKEN is calculated.  This is the total issuance, minus the qty held by the exception addresses.
