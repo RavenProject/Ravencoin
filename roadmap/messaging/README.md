@@ -31,7 +31,7 @@ Create a broadcast message with optional expiration date.
 
 These rpc calls are added in support of messaging:
 
-issue_channel TOKEN CHANNEL_NAME
+issue_channel TOKEN CHANNEL_NAME  
 send_message TOKEN IPFS_HASH
 
 You must hold the owner token for TOKEN.
