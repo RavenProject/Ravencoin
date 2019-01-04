@@ -57,6 +57,8 @@ Raven may increase the blocksize from 2 MB to X MB to allow for more on-chain tr
 
 Rewards allow payment in RVN to asset holders.
 
+[more...](./rewards/README.md)
+
 ### Phase 4 - Unique Assets (Complete)
 
 Once created, assets can be made unique for a cost of 5 RVN. Only non-divisible assets can be made unique. This moves an asset to a UTXO and associates a unique identifier with the txid. From this point the asset can be moved from one address to another and can be traced back to its origin. Only the issuer of the original asset can make an asset unique.  
