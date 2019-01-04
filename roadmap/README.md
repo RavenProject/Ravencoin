@@ -75,9 +75,9 @@ are unique tokens.
 
 Messaging to token holders by authorized senders will be layered on top of the Phase 4 unique assets. See [KAAAWWW Protocol] (https://medium.com/@tronblack/ravencoin-kaaawww-2f72077aece) for additional information.
 
-[More on messaging...](./messaging/README.md)
-[More on preventing message spam...](./messaging-antispam/README.md)
-[More on IPFS...](./ipfs/README.md)
+[More on messaging...](./messaging/README.md)  
+[More on preventing message spam...](./messaging-antispam/README.md)  
+[More on IPFS...](./ipfs/README.md)  
 
 ### Phase 6 - Voting
 
