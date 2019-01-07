@@ -6,7 +6,7 @@ The Ravencoin asset platform could have an uphill climb getting adoption because
 Direct use of the RPC transfer call for moving assets has been possible from the day that assets launched on Ravencoin - November 5, 2018.  But expecting each and every exchange to modify their infrastructure to handle assets with different RPC calls might slow down Ravencoin asset adoption.
 
 ## The solution - Compatibility Mode - Emulation
-The solution is to speed up adoption is to run ravend in compatibility mode that emulates the RPC capabilities of ravend, for an asset instead of RVN.
+The solution is to speed up adoption is to run ravend in compatibility mode that emulates the RPC capabilities of ravend, for an asset instead of RVN.  Exchanges that have already added RVN, can add asset exchange quickly an easily using emulation for every asset they'd like to add.
 
 As an example, normally the rpc call for transferring RVN is   
 ```sendfrom "fromaccount" "toaddress" amount ( minconf "comment" "comment_to" )```   
