@@ -35,7 +35,7 @@ This will be absent if not running in compatibility mode.
 
 ### Supported RPC Calls
 
-Most of the Ravencoin RPC calls do not interact with assets.  These can be straight pass-through.  Only those that deal with transfers, and balances of RVN are switched to work with the specified asset.
+Most of the Ravencoin RPC calls do not interact with assets.  These can be straight pass-through.  Only those that deal with transfers, and balances of RVN are switched to work with the specified asset.  
 ```getbalance ( "account" minconf include_watchonly )```  
 ```sendfrom "fromaccount" "toaddress" amount ( minconf "comment" "comment_to" )```    
 ```sendmany "fromaccount" {"address":amount,...} ( minconf "comment" ["address",...] replaceable conf_target "estimate_mode")```  
