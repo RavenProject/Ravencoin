@@ -90,6 +90,8 @@ Voting will be accomplished by creating and distributing parallel tokens to toke
 Allows newly created assets to appear exactly like RVN, LTC, or Bitcoin for easy integration into exchanges, wallets, explorers, etc.
 Speeds adoption into the larger crypto ecosystem.
 
+[More on compatibility mode...](./compatibility-mode/README.md)
+
 ### Appendix A - RPC commands for assets
 
 `issue (asset_name, qty, to_address, change_address, units, reissuable, has_ipfs, ipfs_hash)`  
