@@ -32,6 +32,10 @@ The path derivation should be dependent on the way the master key is generated:
 * Original Master Key:  BIP32 m/0'/0' (external) or m/0'/1' (internal)
 * Seed-based master key (BIP39): BIP32/BIP44  m/44'/175'/0'/0
 
+This change does not require a hard fork (upgrade), but it does require maintaining 100% compatibility with the old derivation path when the original master key is in the wallet.dat or it will appear to users that funds are lost.  Only new users, or those that start with a new wallet.dat will be switched over to the 12-word seed.
+
+Optional: In order to back up the master key and chaincode, it requires 48 words.
+
 ### Compatibility
 Other wallets like Jaxx and Coinomi use a 12-word seed.  For wallets that use BIP39/BIP32/BIP44 and the correct coinid of 175 for Ravencoin, the 12-words should be compatible with external wallets.
 
