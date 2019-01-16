@@ -1209,11 +1209,12 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
             }
 
             bool push = false;
-            if (passets) {
+            auto assCache = GetCurrentAssetCache();
+            if (assCache) {
                 CNewAsset asset;
                 int height;
                 uint256 hash;
-                if (passets->GetAssetMetaDataIfExists(inv.name, asset, height, hash)) {
+                if (assCache->GetAssetMetaDataIfExists(inv.name, asset, height, hash)) {
                     auto data = CDatabasedAssetData(asset, height, hash);
                     passetsCache->Put(inv.name, data);
                     connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::ASSETDATA, SerializedAssetData(data)));

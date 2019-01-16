@@ -574,8 +574,9 @@ void ReissueAssetDialog::onAssetSelected(int index)
         QString qstr_name = ui->comboBox->currentText();
 
         LOCK(cs_main);
+        auto assCache = GetCurrentAssetCache();
         // Get the asset data
-        if (!passets->GetAssetMetaDataIfExists(qstr_name.toStdString(), *asset)) {
+        if (!assCache->GetAssetMetaDataIfExists(qstr_name.toStdString(), *asset)) {
             CheckFormState();
             disableAll();
             asset->SetNull();

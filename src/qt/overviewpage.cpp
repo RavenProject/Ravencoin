@@ -448,7 +448,8 @@ void OverviewPage::handleAssetClicked(const QModelIndex &index)
             issueUnique->setDisabled(false);
             reissue->setDisabled(true);
             CNewAsset asset;
-            if (passets && passets->GetAssetMetaDataIfExists(name.toStdString(), asset))
+            auto assCache = GetCurrentAssetCache();
+            if (assCache && assCache->GetAssetMetaDataIfExists(name.toStdString(), asset))
                 if (asset.nReissuable)
                     reissue->setDisabled(false);
 

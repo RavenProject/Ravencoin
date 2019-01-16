@@ -59,13 +59,15 @@ std::string AssetTypeToString(AssetType& assetType)
 
 UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name)
 {
-    if (!passets)
+
+    auto assCache = GetCurrentAssetCache();
+    if (!assCache)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Asset cache isn't available.");
 
     uint8_t units = OWNER_UNITS;
     if (!IsAssetNameAnOwner(asset_name)) {
         CNewAsset assetData;
-        if (!passets->GetAssetMetaDataIfExists(asset_name, assetData))
+        if (!assCache->GetAssetMetaDataIfExists(asset_name, assetData))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't load asset from cache: " + asset_name);
 
         units = assetData.units;
@@ -403,17 +405,18 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
     LOCK(cs_main);
     UniValue result(UniValue::VOBJ);
 
-    if (!passets)
+    auto assCache = GetCurrentAssetCache();
+    if (!assCache)
         return NullUniValue;
 
     // Call get the best address amount on all assets that contain that address ( this update mapAssetsAddressAmount)
-    for (auto it : passets->mapAssetsAddresses) {
+    for (auto it : assCache->mapAssetsAddresses) {
         if (it.second.count(address))
-            GetBestAssetAddressAmount(*passets, it.first, address);
+            GetBestAssetAddressAmount(*assCache, it.first, address);
     }
 
     // Loop through the updated map, and get the results
-    for (auto it : passets->mapAssetsAddressAmount) {
+    for (auto it : assCache->mapAssetsAddressAmount) {
         if (address.compare(it.first.second) == 0) {
             result.push_back(Pair(it.first.first, UnitValueFromAmount(it.second, it.first.first)));
         }
@@ -453,9 +456,10 @@ UniValue getassetdata(const JSONRPCRequest& request)
     LOCK(cs_main);
     UniValue result (UniValue::VOBJ);
 
-    if (passets) {
+    auto assCache = GetCurrentAssetCache();
+    if (assCache) {
         CNewAsset asset;
-        if (!passets->GetAssetMetaDataIfExists(asset_name, asset))
+        if (!assCache->GetAssetMetaDataIfExists(asset_name, asset))
             return NullUniValue;
 
         result.push_back(Pair("name", asset.strName));
@@ -535,7 +539,8 @@ UniValue listmyassets(const JSONRPCRequest &request)
     ObserveSafeMode();
     LOCK2(cs_main, pwallet->cs_wallet);
 
-    if (!passets)
+    auto assCache = GetCurrentAssetCache();
+    if (!assCache)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Asset cache unavailable.");
 
     std::string filter = "*";
@@ -564,22 +569,22 @@ UniValue listmyassets(const JSONRPCRequest &request)
     // retrieve balances
     std::map<std::string, CAmount> balances;
     if (filter == "*") {
-        if (!GetMyAssetBalances(*passets, balances))
+        if (!GetMyAssetBalances(*assCache, balances))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
     else if (filter.back() == '*') {
         std::vector<std::string> assetNames;
         filter.pop_back();
-        if (!GetMyOwnedAssets(*passets, filter, assetNames))
+        if (!GetMyOwnedAssets(*assCache, filter, assetNames))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get owned assets.");
-        if (!GetMyAssetBalances(*passets, assetNames, balances))
+        if (!GetMyAssetBalances(*assCache, assetNames, balances))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances.");
     }
     else {
         if (!IsAssetNameValid(filter))
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid asset name.");
         CAmount balance;
-        if (!GetMyAssetBalance(*passets, filter, balance)) {
+        if (!GetMyAssetBalance(*assCache, filter, balance)) {
             throw JSONRPCError(RPC_INTERNAL_ERROR, std::string("Couldn't get asset balances. For asset : ") + filter);
         }
         balances[filter] = balance;
@@ -602,7 +607,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
             asset.push_back(Pair("balance", UnitValueFromAmount(bal->second, bal->first)));
 
             UniValue outpoints(UniValue::VARR);
-            for (auto const& out : passets->mapMyUnspentAssets[bal->first]) {
+            for (auto const& out : assCache->mapMyUnspentAssets[bal->first]) {
                 UniValue tempOut(UniValue::VOBJ);
                 tempOut.push_back(Pair("txid", out.hash.GetHex()));
                 tempOut.push_back(Pair("vout", (int)out.n));
@@ -685,20 +690,22 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
 
     std::string asset_name = request.params[0].get_str();
 
-    if (!passets)
+    auto assCache = GetCurrentAssetCache();
+    if (!assCache)
         return NullUniValue;
 
-    if (!passets->mapAssetsAddresses.count(asset_name))
+    if (!assCache->mapAssetsAddresses.count(asset_name))
         return NullUniValue;
 
     UniValue addresses(UniValue::VOBJ);
 
-    auto setAddresses = passets->mapAssetsAddresses.at(asset_name);
+    auto setAddresses = assCache->mapAssetsAddresses.at(asset_name);
     for (auto it : setAddresses) {
         auto pair = std::make_pair(asset_name, it);
 
-        if (GetBestAssetAddressAmount(*passets, asset_name, it))
-            addresses.push_back(Pair(it, UnitValueFromAmount(passets->mapAssetsAddressAmount.at(pair), asset_name)));
+
+        if (GetBestAssetAddressAmount(*assCache, asset_name, it))
+            addresses.push_back(Pair(it, UnitValueFromAmount(assCache->mapAssetsAddressAmount.at(pair), asset_name)));
     }
 
     return addresses;
@@ -985,8 +992,8 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
                 + HelpExampleCli("getcacheinfo", "")
         );
 
-
-    if (!passets)
+    auto assCache = GetCurrentAssetCache();
+    if (!assCache)
         throw JSONRPCError(RPC_VERIFY_ERROR, "asset cache is null");
 
     if (!pcoinsTip)
@@ -996,22 +1003,24 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_VERIFY_ERROR, "asset metadata cache is nul");
 
 
+
+
     UniValue result(UniValue::VARR);
 
     UniValue info(UniValue::VOBJ);
     info.push_back(Pair("uxto cache size", (int)pcoinsTip->DynamicMemoryUsage()));
-    info.push_back(Pair("asset total (exclude dirty)", (int)passets->DynamicMemoryUsage()));
+    info.push_back(Pair("asset total (exclude dirty)", (int)assCache->DynamicMemoryUsage()));
 
     UniValue descendants(UniValue::VOBJ);
-    descendants.push_back(Pair("asset address map",  (int)memusage::DynamicUsage(passets->mapAssetsAddresses)));
-    descendants.push_back(Pair("asset address balance",   (int)memusage::DynamicUsage(passets->mapAssetsAddressAmount)));
-    descendants.push_back(Pair("my unspent asset",   (int)memusage::DynamicUsage(passets->mapMyUnspentAssets)));
-    descendants.push_back(Pair("reissue data",   (int)memusage::DynamicUsage(passets->mapReissuedAssetData)));
+    descendants.push_back(Pair("asset address map",  (int)memusage::DynamicUsage(assCache->mapAssetsAddresses)));
+    descendants.push_back(Pair("asset address balance",   (int)memusage::DynamicUsage(assCache->mapAssetsAddressAmount)));
+    descendants.push_back(Pair("my unspent asset",   (int)memusage::DynamicUsage(assCache->mapMyUnspentAssets)));
+    descendants.push_back(Pair("reissue data",   (int)memusage::DynamicUsage(assCache->mapReissuedAssetData)));
 
     info.push_back(Pair("asset data", descendants));
     info.push_back(Pair("asset metadata map",  (int)memusage::DynamicUsage(passetsCache->GetItemsMap())));
     info.push_back(Pair("asset metadata list (est)",  (int)passetsCache->GetItemsList().size() * (32 + 80))); // Max 32 bytes for asset name, 80 bytes max for asset data
-    info.push_back(Pair("dirty cache (est)",  (int)passets->GetCacheSize()));
+    info.push_back(Pair("dirty cache (est)",  (int)assCache->GetCacheSize()));
 
     result.push_back(info);
     return result;
