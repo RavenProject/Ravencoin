@@ -140,10 +140,11 @@ public :
 
     CAssetsCache(const CAssetsCache& cache) : CAssets(cache)
     {
-        this->mapMyUnspentAssets = cache.mapMyUnspentAssets;
-        this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
-        this->mapAssetsAddresses = cache.mapAssetsAddresses;
-        this->mapReissuedAssetData = cache.mapReissuedAssetData;
+        // CAssets constructor does this already
+//        this->mapMyUnspentAssets = cache.mapMyUnspentAssets;
+//        this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
+//        this->mapAssetsAddresses = cache.mapAssetsAddresses;
+//        this->mapReissuedAssetData = cache.mapReissuedAssetData;
 
         // Copy dirty cache also
         this->vSpentAssets = cache.vSpentAssets;
@@ -167,6 +168,10 @@ public :
 
         // Changed Outpoints Caches
         this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
+
+        // Copy sets of possibilymine
+        this->setPossiblyMineAdd = cache.setPossiblyMineAdd;
+        this->setPossiblyMineRemove = cache.setPossiblyMineRemove;
     }
 
     CAssetsCache& operator=(const CAssetsCache& cache)
@@ -198,6 +203,10 @@ public :
 
         // Changed Outpoints Caches
         this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
+
+        // Copy sets of possibilymine
+        this->setPossiblyMineAdd = cache.setPossiblyMineAdd;
+        this->setPossiblyMineRemove = cache.setPossiblyMineRemove;
 
         return *this;
     }
@@ -352,7 +361,7 @@ bool CheckTransferOwnerTx(const CTxOut& txOut);
 
 bool CheckEncodedIPFS(const std::string& hash, std::string& strError);
 
-bool CheckAmountWithUnits(const CAmount& nAmount, const uint8_t nUnits);
+bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits);
 
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex);

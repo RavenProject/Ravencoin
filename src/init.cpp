@@ -252,6 +252,8 @@ void Shutdown()
         pblocktree = nullptr;
         delete passets;
         passets = nullptr;
+        delete tmpAssetCache;
+        tmpAssetCache = nullptr;
         delete passetsdb;
         passetsdb = nullptr;
         delete passetsCache;
@@ -1448,8 +1450,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete passets;
                 delete passetsdb;
                 delete passetsCache;
+                delete tmpAssetCache;
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
+                tmpAssetCache = new CAssetsCache();
                 passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
 
 

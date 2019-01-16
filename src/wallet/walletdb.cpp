@@ -268,8 +268,15 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             CWalletTx wtx;
             ssValue >> wtx;
             CValidationState state;
-            if (!(CheckTransaction(wtx, state) && (wtx.GetHash() == hash) && state.IsValid()))
-                return false;
+            if (!(CheckTransaction(wtx, state) && (wtx.GetHash() == hash) && state.IsValid())) {
+                // If a client has a wallet.dat that contains asset transactions, but we are syncing the chain.
+                // we want to make sure that we don't fail to load this wallet transction just because it is an asset transaction
+                // before asset are active
+                if (state.GetRejectReason() != "bad-txns-is-asset-and-asset-not-active") {
+                    strErr = state.GetRejectReason();
+                    return false;
+                }
+            }
 
             // Undo serialize changes in 31600
             if (31404 <= wtx.fTimeReceivedIsTxTime && wtx.fTimeReceivedIsTxTime <= 31703)
@@ -572,9 +579,10 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
                 {
                     // Leave other errors alone, if we try to fix them we might make things worse.
                     fNoncriticalErrors = true; // ... but do warn the user there is something wrong.
-                    if (strType == "tx")
+                    if (strType == "tx") {
                         // Rescan if there is a bad transaction record:
                         gArgs.SoftSetBoolArg("-rescan", true);
+                    }
                 }
             }
             if (!strErr.empty())

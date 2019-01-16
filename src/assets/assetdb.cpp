@@ -132,6 +132,11 @@ bool CAssetsDB::LoadAssets()
             if (pcursor->GetValue(data)) {
                 passetsCache->Put(data.asset.strName, data);
                 pcursor->Next();
+
+                // Loaded enough from database to have in memory.
+                // No need to load everything if it is just going to be removed from the cache
+                if (passetsCache->Size() == passetsCache->MaxSize())
+                    break;
             } else {
                 return error("%s: failed to read asset", __func__);
             }
