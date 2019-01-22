@@ -14,6 +14,7 @@
 
 static const char ASSET_FLAG = 'A';
 static const char ASSET_ADDRESS_QUANTITY_FLAG = 'B';
+static const char ADDRESS_ASSET_QUANTITY_FLAG = 'C';
 static const char MY_ASSET_FLAG = 'M';
 static const char BLOCK_ASSET_UNDO_DATA = 'U';
 static const char MEMPOOL_REISSUED_TX = 'Z';
@@ -27,14 +28,13 @@ bool CAssetsDB::WriteAssetData(const CNewAsset &asset, const int nHeight, const 
     return Write(std::make_pair(ASSET_FLAG, asset.strName), data);
 }
 
-bool CAssetsDB::WriteMyAssetsData(const std::string &strName, const std::set<COutPoint>& setOuts)
-{
-    return Write(std::make_pair(MY_ASSET_FLAG, strName), setOuts);
-}
-
 bool CAssetsDB::WriteAssetAddressQuantity(const std::string &assetName, const std::string &address, const CAmount &quantity)
 {
     return Write(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, address)), quantity);
+}
+
+bool CAssetsDB::WriteAddressAssetQuantity(const std::string &address, const std::string &assetName, const CAmount& quantity) {
+    return Write(std::make_pair(ADDRESS_ASSET_QUANTITY_FLAG, std::make_pair(address, assetName)), quantity);
 }
 
 bool CAssetsDB::ReadAssetData(const std::string& strName, CNewAsset& asset, int& nHeight, uint256& blockHash)
@@ -52,14 +52,13 @@ bool CAssetsDB::ReadAssetData(const std::string& strName, CNewAsset& asset, int&
     return ret;
 }
 
-bool CAssetsDB::ReadMyAssetsData(const std::string &strName, std::set<COutPoint>& setOuts)
-{
-    return Read(std::make_pair(MY_ASSET_FLAG, strName), setOuts);
-}
-
 bool CAssetsDB::ReadAssetAddressQuantity(const std::string& assetName, const std::string& address, CAmount& quantity)
 {
     return Read(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, address)), quantity);
+}
+
+bool CAssetsDB::ReadAddressAssetQuantity(const std::string &address, const std::string &assetName, CAmount& quantity) {
+    return Read(std::make_pair(ADDRESS_ASSET_QUANTITY_FLAG, std::make_pair(address, assetName)), quantity);
 }
 
 bool CAssetsDB::EraseAssetData(const std::string& assetName)
@@ -76,13 +75,11 @@ bool CAssetsDB::EraseAssetAddressQuantity(const std::string &assetName, const st
     return Erase(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, address)));
 }
 
-bool CAssetsDB::EraseMyOutPoints(const std::string& assetName)
-{
-    if (!EraseMyAssetData(assetName))
-        return error("%s : Failed to erase my asset outpoints from database.", __func__);
-
-    return true;
+bool CAssetsDB::EraseAddressAssetQuantity(const std::string &address, const std::string &assetName) {
+    return Erase(std::make_pair(ADDRESS_ASSET_QUANTITY_FLAG, std::make_pair(address, assetName)));
 }
+
+bool EraseAddressAssetQuantity(const std::string &address, const std::string &assetName);
 
 bool CAssetsDB::WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData)
 {
@@ -135,7 +132,7 @@ bool CAssetsDB::LoadAssets()
 
                 // Loaded enough from database to have in memory.
                 // No need to load everything if it is just going to be removed from the cache
-                if (passetsCache->Size() == passetsCache->MaxSize())
+                if (passetsCache->Size() == (passetsCache->MaxSize() / 2))
                     break;
             } else {
                 return error("%s: failed to read asset", __func__);
@@ -145,41 +142,20 @@ bool CAssetsDB::LoadAssets()
         }
     }
 
-    std::unique_ptr<CDBIterator> pcursor2(NewIterator());
-    pcursor2->Seek(std::make_pair(MY_ASSET_FLAG, std::string()));
-    // Load mapMyUnspentAssets
-    while (pcursor2->Valid()) {
-        boost::this_thread::interruption_point();
-        std::pair<char, std::string> key;
-        if (pcursor2->GetKey(key) && key.first == MY_ASSET_FLAG) {
-            std::set<COutPoint> outs;
-            if (pcursor2->GetValue(outs)) {
-                passets->mapMyUnspentAssets.insert(std::make_pair(key.second, outs));
-                pcursor2->Next();
-            } else {
-                return error("%s: failed to read my assets", __func__);
-            }
-        } else {
-            break;
-        }
-    }
 
     std::unique_ptr<CDBIterator> pcursor3(NewIterator());
     pcursor3->Seek(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(std::string(), std::string())));
-    // Load mapMyUnspentAssets
+
+    // Load mapAssetAddressAmount
     while (pcursor3->Valid()) {
         boost::this_thread::interruption_point();
         std::pair<char, std::pair<std::string, std::string> > key; // <Asset Name, Address> -> Quantity
         if (pcursor3->GetKey(key) && key.first == ASSET_ADDRESS_QUANTITY_FLAG) {
             CAmount value;
             if (pcursor3->GetValue(value)) {
-                if (!passets->mapAssetsAddresses.count(key.second.first)) {
-                    std::set<std::string> setAddresses;
-                    passets->mapAssetsAddresses.insert(std::make_pair(key.second.first, setAddresses));
-                }
-                if (!passets->mapAssetsAddresses[key.second.first].insert(key.second.second).second)
-                    return error("%s: failed to read my address quantity from database", __func__);
                 passets->mapAssetsAddressAmount.insert(std::make_pair(std::make_pair(key.second.first, key.second.second), value));
+                if (passets->mapAssetsAddressAmount.size() > MAX_CACHE_ASSETS_SIZE)
+                    break;
                 pcursor3->Next();
             } else {
                 return error("%s: failed to read my address quantity from database", __func__);
@@ -252,6 +228,124 @@ bool CAssetsDB::AssetDir(std::vector<CDatabasedAssetData>& assets, const std::st
                     } else {
                         return error("%s: failed to read asset", __func__);
                     }
+                }
+            }
+            pcursor->Next();
+        } else {
+            break;
+        }
+    }
+
+    return true;
+}
+
+
+
+bool CAssetsDB::AddressDir(std::vector<std::pair<std::string, CAmount> >& vecAssetAmount, const std::string& address, const size_t count, const long start)
+{
+    FlushStateToDisk();
+
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->Seek(std::make_pair(ADDRESS_ASSET_QUANTITY_FLAG, std::make_pair(address, std::string())));
+
+    size_t skip = 0;
+    if (start >= 0) {
+        skip = start;
+    }
+    else {
+        // compute table size for backwards offset
+        long table_size = 0;
+        while (pcursor->Valid()) {
+            boost::this_thread::interruption_point();
+
+            std::pair<char, std::pair<std::string, std::string> > key;
+            if (pcursor->GetKey(key) && key.first == ADDRESS_ASSET_QUANTITY_FLAG && key.second.first == address) {
+                table_size += 1;
+            }
+            pcursor->Next();
+        }
+        skip = table_size + start;
+        pcursor->SeekToFirst();
+    }
+
+
+    size_t loaded = 0;
+    size_t offset = 0;
+
+    // Load assets
+    while (pcursor->Valid() && loaded < count) {
+        boost::this_thread::interruption_point();
+
+        std::pair<char, std::pair<std::string, std::string> > key;
+        if (pcursor->GetKey(key) && key.first == ADDRESS_ASSET_QUANTITY_FLAG && key.second.first == address) {
+                if (offset < skip) {
+                    offset += 1;
+                }
+                else {
+                    CAmount amount;
+                    if (pcursor->GetValue(amount)) {
+                        vecAssetAmount.emplace_back(std::make_pair(key.second.second, amount));
+                        loaded += 1;
+                    } else {
+                        return error("%s: failed to Address Asset Quanity", __func__);
+                    }
+                }
+            pcursor->Next();
+        } else {
+            break;
+        }
+    }
+
+    return true;
+}
+
+bool CAssetsDB::AssetAddressDir(std::vector<std::pair<std::string, CAmount> >& vecAddressAmount, const std::string& assetName, const size_t count, const long start)
+{
+    FlushStateToDisk();
+
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->Seek(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, std::string())));
+
+    size_t skip = 0;
+    if (start >= 0) {
+        skip = start;
+    }
+    else {
+        // compute table size for backwards offset
+        long table_size = 0;
+        while (pcursor->Valid()) {
+            boost::this_thread::interruption_point();
+
+            std::pair<char, std::pair<std::string, std::string> > key;
+            if (pcursor->GetKey(key) && key.first == ASSET_ADDRESS_QUANTITY_FLAG && key.second.first == assetName) {
+                table_size += 1;
+            }
+            pcursor->Next();
+        }
+        skip = table_size + start;
+        pcursor->SeekToFirst();
+    }
+
+
+    size_t loaded = 0;
+    size_t offset = 0;
+
+    // Load assets
+    while (pcursor->Valid() && loaded < count) {
+        boost::this_thread::interruption_point();
+
+        std::pair<char, std::pair<std::string, std::string> > key;
+        if (pcursor->GetKey(key) && key.first == ASSET_ADDRESS_QUANTITY_FLAG && key.second.first == assetName) {
+            if (offset < skip) {
+                offset += 1;
+            }
+            else {
+                CAmount amount;
+                if (pcursor->GetValue(amount)) {
+                    vecAddressAmount.emplace_back(std::make_pair(key.second.second, amount));
+                    loaded += 1;
+                } else {
+                    return error("%s: failed to Asset Address Quanity", __func__);
                 }
             }
             pcursor->Next();

@@ -9,6 +9,7 @@
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "walletmodel.h"
+#include "wallet/wallet.h"
 
 #include "core_io.h"
 
@@ -19,6 +20,7 @@
 
 #include <QDebug>
 #include <QStringList>
+
 
 
 class AssetTablePriv {
@@ -41,7 +43,8 @@ public:
             {
                 LOCK(cs_main);
                 std::map<std::string, CAmount> balances;
-                if (!GetMyAssetBalances(*currentActiveAssetCache, balances)) {
+                std::map<std::string, std::vector<COutput> > outputs;
+                if (!GetAllMyAssetBalances(outputs, balances)) {
                     qWarning("AssetTablePriv::refreshWallet: Error retrieving asset balances");
                     return;
                 }

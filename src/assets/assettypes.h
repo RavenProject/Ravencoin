@@ -342,25 +342,6 @@ struct CAssetCacheSpendAsset
     }
 };
 
-struct CAssetCachePossibleMine
-{
-    std::string assetName;
-    COutPoint out;
-    CTxOut txOut;
-
-    CAssetCachePossibleMine(const std::string& assetName, const COutPoint& out, const CTxOut txOut)
-    {
-        this->assetName = assetName;
-        this->out = out;
-        this->txOut = txOut;
-    }
-
-    bool operator<(const CAssetCachePossibleMine &other) const
-    {
-        return out < other.out;
-    }
-};
-
 // Least Recently Used Cache
 template<typename cache_key_t, typename cache_value_t>
 class CLRUCache
