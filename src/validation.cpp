@@ -3021,6 +3021,8 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         if (!rv) {
             if (state.IsInvalid())
                 InvalidBlockFound(pindexNew, state);
+            if (assetCache)
+                delete assetCache;
             return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
         }
         int64_t nTimeConnectDone = GetTimeMicros();
