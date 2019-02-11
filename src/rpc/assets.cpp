@@ -68,9 +68,10 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
     if (!IsAssetNameAnOwner(asset_name)) {
         CNewAsset assetData;
         if (!currentActiveAssetCache->GetAssetMetaDataIfExists(asset_name, assetData))
-            throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't load asset from cache: " + asset_name);
-
-        units = assetData.units;
+            units = MAX_UNIT;
+            //throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't load asset from cache: " + asset_name);
+        else
+            units = assetData.units;
     }
 
     return ValueFromAmount(amount, units);
@@ -383,12 +384,15 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
 
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1)
         throw std::runtime_error(
-            "listassetbalancesbyaddress \"address\" (count) (start)\n"
+            "listassetbalancesbyaddress \"address\" (onlytotal) (count) (start)\n"
             + AssetActivationWarning() +
             "\nReturns a list of all asset balances for an address.\n"
 
             "\nArguments:\n"
-            "1. \"address\"               (string, required) a raven address\n"
+            "1. \"address\"                  (string, required) a raven address\n"
+            "2. \"onlytotal\"                (boolean, optional, default=false) when false result is just a list of assets balances -- when true the result is just a single number representing the number of assets\n"
+            "3. \"count\"                    (integer, optional, default=50000, MAX=50000) truncates results to include only the first _count_ assets found\n"
+            "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found (if negative it skips back from the end)\n"
 
             "\nResult:\n"
             "{\n"
@@ -396,9 +400,14 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
             "  ...\n"
             "}\n"
 
+
             "\nExamples:\n"
+            + HelpExampleCli("listassetbalancesbyaddress", "\"myaddress\" false 2 0")
+            + HelpExampleCli("listassetbalancesbyaddress", "\"myaddress\" true")
             + HelpExampleCli("listassetbalancesbyaddress", "\"myaddress\"")
         );
+
+    ObserveSafeMode();
 
     std::string address = request.params[0].get_str();
     CTxDestination destination = DecodeDestination(address);
@@ -406,30 +415,37 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
     }
 
-    ObserveSafeMode();
+    bool fOnlyTotal = false;
+    if (request.params.size() > 1)
+        fOnlyTotal = request.params[1].get_bool();
+
+    size_t count = INT_MAX;
+    if (request.params.size() > 2) {
+        if (request.params[2].get_int() < 1)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
+        count = request.params[2].get_int();
+    }
+
+    long start = 0;
+    if (request.params.size() > 3) {
+        start = request.params[3].get_int();
+    }
 
     if (!passetsdb)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "asset db unavailable.");
 
-//    size_t count = INT_MAX;
-//    if (request.params.size() > 2) {
-//        if (request.params[2].get_int() < 1)
-//            throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
-//        count = request.params[2].get_int();
-//    }
-//
-//    long start = 0;
-//    if (request.params.size() > 3) {
-//        start = request.params[3].get_int();
-//    }
-
     LOCK(cs_main);
     std::vector<std::pair<std::string, CAmount> > vecAssetAmounts;
-    if (!passetsdb->AddressDir(vecAssetAmounts, address, INT_MAX, 0))
+    int nTotalEntries = 0;
+    if (!passetsdb->AddressDir(vecAssetAmounts, nTotalEntries, fOnlyTotal, address, count, start))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "couldn't retrieve address asset directory.");
 
-    UniValue result(UniValue::VOBJ);
+    // If only the number of addresses is wanted return it
+    if (fOnlyTotal) {
+        return nTotalEntries;
+    }
 
+    UniValue result(UniValue::VOBJ);
     for (auto& pair : vecAssetAmounts) {
         result.push_back(Pair(pair.first, UnitValueFromAmount(pair.second, pair.first)));
     }
@@ -674,14 +690,18 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
         return "_This rpc call is not functional unless -assetindex is enabled. To enable, please run the wallet with -assetindex, this will require a reindex to occur";
     }
 
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() != 1)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 4 || request.params.size() < 1)
         throw std::runtime_error(
-                "listaddressesbyasset \"asset_name\"\n"
+                "listaddressesbyasset \"asset_name\" (onlytotal) (count) (start)\n"
                 + AssetActivationWarning() +
                 "\nReturns a list of all address that own the given asset (with balances)"
+                "\nOr returns the total size of how many address own the given asset"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"               (string, required) name of asset\n"
+                "2. \"onlytotal\"                (boolean, optional, default=false) when false result is just a list of addresses with balances -- when true the result is just a single number representing the number of addresses\n"
+                "3. \"count\"                    (integer, optional, default=50000, MAX=50000) truncates results to include only the first _count_ assets found\n"
+                "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found (if negative it skips back from the end)\n"
 
                 "\nResult:\n"
                 "[ "
@@ -690,28 +710,50 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("listaddressesbyasset", "ASSET_NAME")
-                + HelpExampleCli("listaddressesbyasset", "ASSET_NAME")
+                + HelpExampleCli("listaddressesbyasset", "\"ASSET_NAME\" false 2 0")
+                + HelpExampleCli("listaddressesbyasset", "\"ASSET_NAME\" true")
+                + HelpExampleCli("listaddressesbyasset", "\"ASSET_NAME\"")
         );
 
     LOCK(cs_main);
 
     std::string asset_name = request.params[0].get_str();
+    bool fOnlyTotal = false;
+    if (request.params.size() > 1)
+        fOnlyTotal = request.params[1].get_bool();
+
+    size_t count = INT_MAX;
+    if (request.params.size() > 2) {
+        if (request.params[2].get_int() < 1)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "count must be greater than 1.");
+        count = request.params[2].get_int();
+    }
+
+    long start = 0;
+    if (request.params.size() > 3) {
+        start = request.params[3].get_int();
+    }
 
     if (!IsAssetNameValid(asset_name))
         return "_Not a valid asset name";
 
     LOCK(cs_main);
     std::vector<std::pair<std::string, CAmount> > vecAddressAmounts;
-    if (!passetsdb->AssetAddressDir(vecAddressAmounts, asset_name, INT_MAX, 0))
+    int nTotalEntries = 0;
+    if (!passetsdb->AssetAddressDir(vecAddressAmounts, nTotalEntries, fOnlyTotal, asset_name, count, start))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "couldn't retrieve address asset directory.");
 
-    UniValue result(UniValue::VOBJ);
+    // If only the number of addresses is wanted return it
+    if (fOnlyTotal) {
+        return nTotalEntries;
+    }
 
+    UniValue result(UniValue::VOBJ);
     for (auto& pair : vecAddressAmounts) {
         result.push_back(Pair(pair.first, UnitValueFromAmount(pair.second, asset_name)));
     }
 
+    
     return result;
 }
 
@@ -1022,6 +1064,7 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
     info.push_back(Pair("asset metadata map",  (int)memusage::DynamicUsage(passetsCache->GetItemsMap())));
     info.push_back(Pair("asset metadata list (est)",  (int)passetsCache->GetItemsList().size() * (32 + 80))); // Max 32 bytes for asset name, 80 bytes max for asset data
     info.push_back(Pair("dirty cache (est)",  (int)currentActiveAssetCache->GetCacheSize()));
+    info.push_back(Pair("dirty cache V2 (est)",  (int)currentActiveAssetCache->GetCacheSizeV2()));
 
     result.push_back(info);
     return result;
@@ -1032,10 +1075,10 @@ static const CRPCCommand commands[] =
   //  ----------- ------------------------      -----------------------      ----------
     { "assets",   "issue",                      &issue,                      {"asset_name","qty","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
     { "assets",   "issueunique",                &issueunique,                {"root_name", "asset_tags", "ipfs_hashes", "to_address", "change_address"}},
-    { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address"} },
+    { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address", "onlytotal", "count", "start"} },
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
-    { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name"}},
+    { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},

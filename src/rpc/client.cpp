@@ -173,6 +173,12 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "echojson", 9, "arg9" },
     { "rescanblockchain", 0, "start_height"},
     { "rescanblockchain", 1, "stop_height"},
+    { "listaddressesbyasset", 1, "totalonly"},
+    { "listaddressesbyasset", 2, "count"},
+    { "listaddressesbyasset", 3, "start"},
+    { "listassetbalancesbyaddress", 1, "totalonly"},
+    { "listassetbalancesbyaddress", 2, "count"},
+    { "listassetbalancesbyaddress", 3, "start"},
 };
 
 class CRPCConvertTable

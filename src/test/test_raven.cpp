@@ -79,7 +79,6 @@ TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(cha
     }
 
     passets = new CAssetsCache();
-    tmpAssetCache = new CAssetsCache();
     {
         CValidationState state;
         if (!ActivateBestChain(state, chainparams))
@@ -108,7 +107,6 @@ TestingSetup::~TestingSetup()
     delete pcoinsdbview;
     delete pblocktree;
     delete passets;
-    delete tmpAssetCache;
     fs::remove_all(pathTemp);
 }
 

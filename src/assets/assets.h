@@ -100,7 +100,6 @@ public :
     //! These are memory only containers that show dirty entries that will be databased when flushed
     std::vector<CAssetCacheUndoAssetAmount> vUndoAssetAmount;
     std::vector<CAssetCacheSpendAsset> vSpentAssets;
-    std::set<std::string> setChangeOwnedOutPoints;
 
     // New Assets Caches
     std::set<CAssetCacheNewAsset> setNewAssetsToRemove;
@@ -145,9 +144,6 @@ public :
         // Owner Caches
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
-
-        // Changed Outpoints Caches
-        this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
     }
 
     CAssetsCache& operator=(const CAssetsCache& cache)
@@ -175,39 +171,7 @@ public :
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
 
-        // Changed Outpoints Caches
-        this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
-
         return *this;
-    }
-
-    void Copy(const CAssetsCache& cache)
-    {
-        this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
-        this->mapReissuedAssetData = cache.mapReissuedAssetData;
-
-        // Copy dirty cache also
-        this->vSpentAssets = cache.vSpentAssets;
-        this->vUndoAssetAmount = cache.vUndoAssetAmount;
-
-        // Transfer Caches
-        this->setNewTransferAssetsToAdd = cache.setNewTransferAssetsToAdd;
-        this->setNewTransferAssetsToRemove = cache.setNewTransferAssetsToRemove;
-
-        // Issue Caches
-        this->setNewAssetsToRemove = cache.setNewAssetsToRemove;
-        this->setNewAssetsToAdd = cache.setNewAssetsToAdd;
-
-        // Reissue Caches
-        this->setNewReissueToRemove = cache.setNewReissueToRemove;
-        this->setNewReissueToAdd = cache.setNewReissueToAdd;
-
-        // Owner Caches
-        this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
-        this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
-
-        // Changed Outpoints Caches
-        this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
     }
 
     // Cache only undo functions
@@ -239,9 +203,13 @@ public :
 
     //! Get the size of the none databased cache
     size_t GetCacheSize() const;
+    size_t GetCacheSizeV2() const;
 
-    //! Flush a cache to a different cache (usually passets), save to database if fToDataBase is true
-    bool Flush(bool fSoftCopy = false, bool fToDataBase = false);
+    //! Flush all new cache entries into the passets global cache
+    bool Flush();
+
+    //! Write asset cache data to database
+    bool DumpCacheToDatabase();
 
     void ClearDirtyCache() {
 
@@ -260,17 +228,17 @@ public :
         setNewOwnerAssetsToAdd.clear();
         setNewOwnerAssetsToRemove.clear();
 
-        setChangeOwnedOutPoints.clear();
-
         mapReissuedAssetData.clear();
         mapAssetsAddressAmount.clear();
     }
 
    std::string CacheToString() const {
 
-      return strprintf("vNewAssetsToRemove size : %d, vNewAssetsToAdd size : %d, vNewTransfer size : %d, vSpentAssets : %d, setChangeOwnedOutPoints size : %d\n",
-                       setNewAssetsToRemove.size(), setNewAssetsToAdd.size(), setNewTransferAssetsToAdd.size(), vSpentAssets.size(), setChangeOwnedOutPoints.size());
-    }
+       return strprintf(
+               "vNewAssetsToRemove size : %d, vNewAssetsToAdd size : %d, vNewTransfer size : %d, vSpentAssets : %d\n",
+               setNewAssetsToRemove.size(), setNewAssetsToAdd.size(), setNewTransferAssetsToAdd.size(),
+               vSpentAssets.size());
+   }
 };
 
 // Functions to be used to get access to the current burn amount required for specific asset issuance transactions

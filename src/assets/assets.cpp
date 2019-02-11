@@ -1052,18 +1052,20 @@ bool CAssetsCache::AddTransferAsset(const CAssetTransfer& transferAsset, const s
 
 void CAssetsCache::AddToAssetBalance(const std::string& strName, const std::string& address, const CAmount& nAmount)
 {
-    auto pair = std::make_pair(strName, address);
-    // Add to map address -> amount map
+    if (fAssetIndex) {
+        auto pair = std::make_pair(strName, address);
+        // Add to map address -> amount map
 
-    // Get the best amount
-    if (!GetBestAssetAddressAmount(*this, strName, address))
-        mapAssetsAddressAmount.insert(make_pair(pair, 0));
+        // Get the best amount
+        if (!GetBestAssetAddressAmount(*this, strName, address))
+            mapAssetsAddressAmount.insert(make_pair(pair, 0));
 
-    // Add the new amount to the balance
-    if (IsAssetNameAnOwner(strName))
-        mapAssetsAddressAmount.at(pair) = OWNER_ASSET_AMOUNT;
-    else
-        mapAssetsAddressAmount.at(pair) += nAmount;
+        // Add the new amount to the balance
+        if (IsAssetNameAnOwner(strName))
+            mapAssetsAddressAmount.at(pair) = OWNER_ASSET_AMOUNT;
+        else
+            mapAssetsAddressAmount.at(pair) += nAmount;
+    }
 }
 
 bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
@@ -1110,16 +1112,19 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
 
     // If we got the address and the assetName, proceed to remove it from the database, and in memory objects
     if (address != "" && assetName != "" && nAmount > 0) {
-        CAssetCacheSpendAsset spend(assetName, address, nAmount);
-        if (GetBestAssetAddressAmount(*this, assetName, address)) {
-            auto pair = make_pair(assetName, address);
-            mapAssetsAddressAmount.at(pair) -= nAmount;
+        if (fAssetIndex) {
+            CAssetCacheSpendAsset spend(assetName, address, nAmount);
+            if (GetBestAssetAddressAmount(*this, assetName, address)) {
+                auto pair = make_pair(assetName, address);
+                if (mapAssetsAddressAmount.count(pair))
+                    mapAssetsAddressAmount.at(pair) -= nAmount;
 
-            if (mapAssetsAddressAmount.at(pair) < 0)
-                mapAssetsAddressAmount.at(pair) = 0;
+                if (mapAssetsAddressAmount.at(pair) < 0)
+                    mapAssetsAddressAmount.at(pair) = 0;
 
-            // Update the cache so we can save to database
-            vSpentAssets.push_back(spend);
+                // Update the cache so we can save to database
+                vSpentAssets.push_back(spend);
+            }
         }
     } else {
         return error("%s : ERROR Failed to get asset from the OutPoint: %s", __func__, out.ToString());
@@ -1200,14 +1205,16 @@ bool CAssetsCache::UndoAssetCoin(const Coin& coin, const COutPoint& out)
 //! Changes Memory Only
 bool CAssetsCache::AddBackSpentAsset(const Coin& coin, const std::string& assetName, const std::string& address, const CAmount& nAmount, const COutPoint& out)
 {
-    // Update the assets address balance
-    auto pair = std::make_pair(assetName, address);
+    if (fAssetIndex) {
+        // Update the assets address balance
+        auto pair = std::make_pair(assetName, address);
 
-    // Get the map address amount from database if the map doesn't have it already
-    if (!GetBestAssetAddressAmount(*this, assetName, address))
-        mapAssetsAddressAmount.insert(std::make_pair(pair, 0));
+        // Get the map address amount from database if the map doesn't have it already
+        if (!GetBestAssetAddressAmount(*this, assetName, address))
+            mapAssetsAddressAmount.insert(std::make_pair(pair, 0));
 
-    mapAssetsAddressAmount.at(pair) += nAmount;
+        mapAssetsAddressAmount.at(pair) += nAmount;
+    }
 
     // Add the undoAmount to the vector so we know what changes are dirty and what needs to be saved to database
     CAssetCacheUndoAssetAmount undoAmount(assetName, address, nAmount);
@@ -1219,19 +1226,26 @@ bool CAssetsCache::AddBackSpentAsset(const Coin& coin, const std::string& assetN
 //! Changes Memory Only
 bool CAssetsCache::UndoTransfer(const CAssetTransfer& transfer, const std::string& address, const COutPoint& outToRemove)
 {
-    // Make sure we are in a valid state to undo the transfer of the asset
-    if (!GetBestAssetAddressAmount(*this, transfer.strName, address))
-        return error("%s : Failed to get the assets address balance from the database. Asset : %s Address : %s" , __func__, transfer.strName, address);
+    if (fAssetIndex) {
+        // Make sure we are in a valid state to undo the transfer of the asset
+        if (!GetBestAssetAddressAmount(*this, transfer.strName, address))
+            return error("%s : Failed to get the assets address balance from the database. Asset : %s Address : %s",
+                         __func__, transfer.strName, address);
 
-    auto pair = std::make_pair(transfer.strName, address);
-    if (!mapAssetsAddressAmount.count(pair))
-        return error("%s : Tried undoing a transfer and the map of address amount didn't have the asset address pair. Asset : %s Address : %s" , __func__, transfer.strName, address);
+        auto pair = std::make_pair(transfer.strName, address);
+        if (!mapAssetsAddressAmount.count(pair))
+            return error(
+                    "%s : Tried undoing a transfer and the map of address amount didn't have the asset address pair. Asset : %s Address : %s",
+                    __func__, transfer.strName, address);
 
-    if (mapAssetsAddressAmount.at(pair) < transfer.nAmount)
-        return error("%s : Tried undoing a transfer and the map of address amount had less than the amount we are trying to undo. Asset : %s Address : %s" , __func__, transfer.strName, address);
+        if (mapAssetsAddressAmount.at(pair) < transfer.nAmount)
+            return error(
+                    "%s : Tried undoing a transfer and the map of address amount had less than the amount we are trying to undo. Asset : %s Address : %s",
+                    __func__, transfer.strName, address);
 
-    // Change the in memory balance of the asset at the address
-    mapAssetsAddressAmount[pair] -= transfer.nAmount;
+        // Change the in memory balance of the asset at the address
+        mapAssetsAddressAmount[pair] -= transfer.nAmount;
+    }
 
     return true;
 }
@@ -1242,14 +1256,15 @@ bool CAssetsCache::RemoveNewAsset(const CNewAsset& asset, const std::string addr
     if (!CheckIfAssetExists(asset.strName))
         return error("%s : Tried removing an asset that didn't exist. Asset Name : %s", __func__, asset.strName);
 
-    mapAssetsAddressAmount[std::make_pair(asset.strName, address)] = 0;
-
     CAssetCacheNewAsset newAsset(asset, address, 0 , uint256());
 
     if (setNewAssetsToAdd.count(newAsset))
         setNewAssetsToAdd.erase(newAsset);
 
     setNewAssetsToRemove.insert(newAsset);
+
+    if (fAssetIndex)
+        mapAssetsAddressAmount[std::make_pair(asset.strName, address)] = 0;
 
     return true;
 }
@@ -1260,15 +1275,17 @@ bool CAssetsCache::AddNewAsset(const CNewAsset& asset, const std::string address
     if(CheckIfAssetExists(asset.strName))
         return error("%s: Tried adding new asset, but it already existed in the set of assets: %s", __func__, asset.strName);
 
-    // Insert the asset into the assests address amount map
-    mapAssetsAddressAmount[std::make_pair(asset.strName, address)] = asset.nAmount;
-
     CAssetCacheNewAsset newAsset(asset, address, nHeight, blockHash);
 
     if (setNewAssetsToRemove.count(newAsset))
         setNewAssetsToRemove.erase(newAsset);
 
     setNewAssetsToAdd.insert(newAsset);
+
+    if (fAssetIndex) {
+        // Insert the asset into the assests address amount map
+        mapAssetsAddressAmount[std::make_pair(asset.strName, address)] = asset.nAmount;
+    }
 
     return true;
 }
@@ -1284,13 +1301,6 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
     if (!GetAssetMetaDataIfExists(reissue.strName, asset, assetHeight, assetBlockHash))
         return error("%s: Failed to get the original asset that is getting reissued. Asset Name : %s",
                      __func__, reissue.strName);
-
-    // Add the reissued amount to the address amount map
-    if (!GetBestAssetAddressAmount(*this, reissue.strName, address))
-        mapAssetsAddressAmount.insert(make_pair(pair, 0));
-
-    // Add the reissued amount to the amount in the map
-    mapAssetsAddressAmount[pair] += reissue.nAmount;
 
     // Insert the reissue information into the reissue map
     if (!mapReissuedAssetData.count(reissue.strName)) {
@@ -1323,6 +1333,15 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
 
     setNewReissueToAdd.insert(reissueAsset);
 
+    if (fAssetIndex) {
+        // Add the reissued amount to the address amount map
+        if (!GetBestAssetAddressAmount(*this, reissue.strName, address))
+            mapAssetsAddressAmount.insert(make_pair(pair, 0));
+
+        // Add the reissued amount to the amount in the map
+        mapAssetsAddressAmount[pair] += reissue.nAmount;
+    }
+
     return true;
 }
 
@@ -1336,15 +1355,6 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
     uint256 blockHash;
     if (!GetAssetMetaDataIfExists(reissue.strName, assetData, height, blockHash))
         return error("%s: Tried undoing reissue of an asset, but that asset didn't exist: %s", __func__, reissue.strName);
-
-    // Get the best amount form the database or dirty cache
-    if (!GetBestAssetAddressAmount(*this, reissue.strName, address))
-        return error("%s : Trying to undo reissue of an asset but the assets amount isn't in the database", __func__);
-
-    mapAssetsAddressAmount[pair] -= reissue.nAmount;
-
-    if (mapAssetsAddressAmount[pair] < 0)
-        return error("%s : Tried undoing reissue of an asset, but the assets amount went negative: %s", __func__, reissue.strName);
 
     // Change the asset data by undoing what was reissued
     assetData.nAmount -= reissue.nAmount;
@@ -1372,16 +1382,25 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
 
     setNewReissueToRemove.insert(reissueAsset);
 
+    if (fAssetIndex) {
+        // Get the best amount form the database or dirty cache
+        if (!GetBestAssetAddressAmount(*this, reissue.strName, address))
+            return error("%s : Trying to undo reissue of an asset but the assets amount isn't in the database",
+                         __func__);
+
+        mapAssetsAddressAmount[pair] -= reissue.nAmount;
+
+        if (mapAssetsAddressAmount[pair] < 0)
+            return error("%s : Tried undoing reissue of an asset, but the assets amount went negative: %s", __func__,
+                         reissue.strName);
+    }
+
     return true;
 }
 
 //! Changes Memory Only
 bool CAssetsCache::AddOwnerAsset(const std::string& assetsName, const std::string address)
 {
-    // Insert the asset into the assests address amount map
-    mapAssetsAddressAmount[std::make_pair(assetsName, address)] = OWNER_ASSET_AMOUNT;
-
-
     // Update the cache
     CAssetCacheNewOwner newOwner(assetsName, address);
 
@@ -1390,22 +1409,28 @@ bool CAssetsCache::AddOwnerAsset(const std::string& assetsName, const std::strin
 
     setNewOwnerAssetsToAdd.insert(newOwner);
 
+    if (fAssetIndex) {
+        // Insert the asset into the assests address amount map
+        mapAssetsAddressAmount[std::make_pair(assetsName, address)] = OWNER_ASSET_AMOUNT;
+    }
+
     return true;
 }
 
 //! Changes Memory Only
 bool CAssetsCache::RemoveOwnerAsset(const std::string& assetsName, const std::string address)
 {
-    auto pair = std::make_pair(assetsName, address);
-
-    mapAssetsAddressAmount[pair] = 0;
-
     // Update the cache
     CAssetCacheNewOwner newOwner(assetsName, address);
     if (setNewOwnerAssetsToAdd.count(newOwner))
         setNewOwnerAssetsToAdd.erase(newOwner);
 
     setNewOwnerAssetsToRemove.insert(newOwner);
+
+    if (fAssetIndex) {
+        auto pair = std::make_pair(assetsName, address);
+        mapAssetsAddressAmount[pair] = 0;
+    }
 
     return true;
 }
@@ -1416,9 +1441,6 @@ bool CAssetsCache::RemoveTransfer(const CAssetTransfer &transfer, const std::str
     if (!UndoTransfer(transfer, address, out))
         return error("%s : Failed to undo the transfer", __func__);
 
-    // Update the cache
-    setChangeOwnedOutPoints.insert(transfer.strName);
-
     CAssetCacheNewTransfer newTransfer(transfer, address, out);
     if (setNewTransferAssetsToAdd.count(newTransfer))
         setNewTransferAssetsToAdd.erase(newTransfer);
@@ -1428,343 +1450,415 @@ bool CAssetsCache::RemoveTransfer(const CAssetTransfer &transfer, const std::str
     return true;
 }
 
-bool CAssetsCache::Flush(bool fSoftCopy, bool fFlushDB)
+bool CAssetsCache::DumpCacheToDatabase()
 {
     try {
-        if (fFlushDB) {
-            bool dirty = false;
-            std::string message;
+        bool dirty = false;
+        std::string message;
 
-            // Remove new assets from the database
-            for (auto newAsset : setNewAssetsToRemove) {
-                passetsCache->Erase(newAsset.asset.strName);
-                if (!passetsdb->EraseAssetData(newAsset.asset.strName)) {
-                    dirty = true;
-                    message = "_Failed Erasing New Asset Data from database";
-                }
-
-                if (dirty) {
-                    return error("%s : %s", __func__, message);
-                }
-
-                if (fAssetIndex) {
-                    if (!passetsdb->EraseAssetAddressQuantity(newAsset.asset.strName, newAsset.address)) {
-                        dirty = true;
-                        message = "_Failed Erasing Address Balance from database";
-                    }
-
-                    if (!passetsdb->EraseAddressAssetQuantity(newAsset.address, newAsset.asset.strName)) {
-                        dirty = true;
-                        message = "_Failed Erasing New Asset Address Balance from AddressAsset database";
-                    }
-                }
-
-                if (dirty) {
-                    return error("%s : %s", __func__, message);
-                }
+        // Remove new assets from the database
+        for (auto newAsset : setNewAssetsToRemove) {
+            passetsCache->Erase(newAsset.asset.strName);
+            if (!passetsdb->EraseAssetData(newAsset.asset.strName)) {
+                dirty = true;
+                message = "_Failed Erasing New Asset Data from database";
             }
 
-            // Add the new assets to the database
-            for (auto newAsset : setNewAssetsToAdd) {
-                passetsCache->Put(newAsset.asset.strName, CDatabasedAssetData(newAsset.asset, newAsset.blockHeight, newAsset.blockHash));
-                if (!passetsdb->WriteAssetData(newAsset.asset, newAsset.blockHeight, newAsset.blockHash)) {
-                    dirty = true;
-                    message = "_Failed Writing New Asset Data to database";
-                }
-
-                if (dirty) {
-                    return error("%s : %s", __func__, message);
-                }
-
-                if (fAssetIndex) {
-                    if (!passetsdb->WriteAssetAddressQuantity(newAsset.asset.strName, newAsset.address,
-                                                              newAsset.asset.nAmount)) {
-                        dirty = true;
-                        message = "_Failed Writing Address Balance to database";
-                    }
-
-                    if (!passetsdb->WriteAddressAssetQuantity(newAsset.address, newAsset.asset.strName,
-                                                              newAsset.asset.nAmount)) {
-                        dirty = true;
-                        message = "_Failed Writing Address Balance to database";
-                    }
-                }
-
-                if (dirty) {
-                    return error("%s : %s", __func__, message);
-                }
+            if (dirty) {
+                return error("%s : %s", __func__, message);
             }
 
             if (fAssetIndex) {
-                // Remove the new owners from database
-                for (auto ownerAsset : setNewOwnerAssetsToRemove) {
-                    if (!passetsdb->EraseAssetAddressQuantity(ownerAsset.assetName, ownerAsset.address)) {
-                        dirty = true;
-                        message = "_Failed Erasing Owner Address Balance from database";
-                    }
-
-                    if (!passetsdb->EraseAddressAssetQuantity(ownerAsset.address, ownerAsset.assetName)) {
-                        dirty = true;
-                        message = "_Failed Erasing New Owner Address Balance from AddressAsset database";
-                    }
-
-                    if (dirty) {
-                        return error("%s : %s", __func__, message);
-                    }
+                if (!passetsdb->EraseAssetAddressQuantity(newAsset.asset.strName, newAsset.address)) {
+                    dirty = true;
+                    message = "_Failed Erasing Address Balance from database";
                 }
 
-                // Add the new owners to database
-                for (auto ownerAsset : setNewOwnerAssetsToAdd) {
-                    auto pair = std::make_pair(ownerAsset.assetName, ownerAsset.address);
-                    if (mapAssetsAddressAmount.count(pair) && mapAssetsAddressAmount.at(pair) > 0) {
-                        if (!passetsdb->WriteAssetAddressQuantity(ownerAsset.assetName, ownerAsset.address,
-                                                                  mapAssetsAddressAmount.at(pair))) {
-                            dirty = true;
-                            message = "_Failed Writing Owner Address Balance to database";
-                        }
-
-                        if (!passetsdb->WriteAddressAssetQuantity(ownerAsset.address, ownerAsset.assetName,
-                                                                  mapAssetsAddressAmount.at(pair))) {
-                            dirty = true;
-                            message = "_Failed Writing Address Balance to database";
-                        }
-
-                        if (dirty) {
-                            return error("%s : %s", __func__, message);
-                        }
-                    }
-                }
-
-                // Undo the transfering by updating the balances in the database
-
-                for (auto undoTransfer : setNewTransferAssetsToRemove) {
-                    auto pair = std::make_pair(undoTransfer.transfer.strName, undoTransfer.address);
-                    if (mapAssetsAddressAmount.count(pair)) {
-                        if (mapAssetsAddressAmount.at(pair) == 0) {
-                            if (!passetsdb->EraseAssetAddressQuantity(undoTransfer.transfer.strName,
-                                                                      undoTransfer.address)) {
-                                dirty = true;
-                                message = "_Failed Erasing Address Quantity from database";
-                            }
-
-                            if (!passetsdb->EraseAddressAssetQuantity(undoTransfer.address,
-                                                                      undoTransfer.transfer.strName)) {
-                                dirty = true;
-                                message = "_Failed Erasing UndoTransfer Address Balance from AddressAsset database";
-                            }
-
-                            if (dirty) {
-                                return error("%s : %s", __func__, message);
-                            }
-                        } else {
-                            if (!passetsdb->WriteAssetAddressQuantity(undoTransfer.transfer.strName,
-                                                                      undoTransfer.address,
-                                                                      mapAssetsAddressAmount.at(pair))) {
-                                dirty = true;
-                                message = "_Failed Writing updated Address Quantity to database when undoing transfers";
-                            }
-
-                            if (!passetsdb->WriteAddressAssetQuantity(undoTransfer.address,
-                                                                      undoTransfer.transfer.strName,
-                                                                      mapAssetsAddressAmount.at(pair))) {
-                                dirty = true;
-                                message = "_Failed Writing Address Balance to database";
-                            }
-
-                            if (dirty) {
-                                return error("%s : %s", __func__, message);
-                            }
-                        }
-                    }
-                }
-
-
-                // Save the new transfers by updating the quantity in the database
-                for (auto newTransfer : setNewTransferAssetsToAdd) {
-                    auto pair = std::make_pair(newTransfer.transfer.strName, newTransfer.address);
-                    // During init and reindex it disconnects and verifies blocks, can create a state where vNewTransfer will contain transfers that have already been spent. So if they aren't in the map, we can skip them.
-                    if (mapAssetsAddressAmount.count(pair)) {
-                        if (!passetsdb->WriteAssetAddressQuantity(newTransfer.transfer.strName, newTransfer.address,
-                                                                  mapAssetsAddressAmount.at(pair))) {
-                            dirty = true;
-                            message = "_Failed Writing new address quantity to database";
-                        }
-
-                        if (!passetsdb->WriteAddressAssetQuantity(newTransfer.address, newTransfer.transfer.strName,
-                                                                  mapAssetsAddressAmount.at(pair))) {
-                            dirty = true;
-                            message = "_Failed Writing Address Balance to database";
-                        }
-
-                        if (dirty) {
-                            return error("%s : %s", __func__, message);
-                        }
-                    }
+                if (!passetsdb->EraseAddressAssetQuantity(newAsset.address, newAsset.asset.strName)) {
+                    dirty = true;
+                    message = "_Failed Erasing New Asset Address Balance from AddressAsset database";
                 }
             }
 
-            for (auto newReissue : setNewReissueToAdd) {
-                auto reissue_name = newReissue.reissue.strName;
-                auto pair = make_pair(reissue_name, newReissue.address);
-                if (mapReissuedAssetData.count(reissue_name)) {
-                    if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), newReissue.blockHeight, newReissue.blockHash)) {
-                        dirty = true;
-                        message = "_Failed Writing reissue asset data to database";
-                    }
-
-                    if (dirty) {
-                        return error("%s : %s", __func__, message);
-                    }
-
-                    passetsCache->Erase(reissue_name);
-
-                    if (fAssetIndex) {
-                        if (mapAssetsAddressAmount.count(pair)) {
-                            if (!passetsdb->WriteAssetAddressQuantity(pair.first, pair.second,
-                                                                      mapAssetsAddressAmount.at(pair))) {
-                                dirty = true;
-                                message = "_Failed Writing reissue asset quantity to the address quantity database";
-                            }
-
-                            if (!passetsdb->WriteAddressAssetQuantity(pair.second, pair.first,
-                                                                      mapAssetsAddressAmount.at(pair))) {
-                                dirty = true;
-                                message = "_Failed Writing Address Balance to database";
-                            }
-
-                            if (dirty) {
-                                return error("%s, %s", __func__, message);
-                            }
-                        }
-                    }
-                }
+            if (dirty) {
+                return error("%s : %s", __func__, message);
             }
-
-            for (auto undoReissue : setNewReissueToRemove) {
-                // In the case the the issue and reissue are both being removed
-                // we can skip this call because the removal of the issue should remove all data pertaining the to asset
-                // Fixes the issue where the reissue data will write over the removed asset meta data that was removed above
-                CNewAsset asset(undoReissue.reissue.strName, 0);
-                CAssetCacheNewAsset testNewAssetCache(asset, "", 0 , uint256());
-                if (setNewAssetsToRemove.count(testNewAssetCache)) {
-                    continue;
-                }
-
-                auto reissue_name = undoReissue.reissue.strName;
-                if (mapReissuedAssetData.count(reissue_name)) {
-                    if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), undoReissue.blockHeight, undoReissue.blockHash)) {
-                        dirty = true;
-                        message = "_Failed Writing undo reissue asset data to database";
-                    }
-
-                    if (fAssetIndex) {
-                        auto pair = make_pair(undoReissue.reissue.strName, undoReissue.address);
-                        if (mapAssetsAddressAmount.count(pair)) {
-                            if (mapAssetsAddressAmount.at(pair) == 0) {
-                                if (!passetsdb->EraseAssetAddressQuantity(reissue_name, undoReissue.address)) {
-                                    dirty = true;
-                                    message = "_Failed Erasing Address Balance from database";
-                                }
-
-                                if (!passetsdb->EraseAddressAssetQuantity(undoReissue.address, reissue_name)) {
-                                    dirty = true;
-                                    message = "_Failed Erasing UndoReissue Balance from AddressAsset database";
-                                }
-                            } else {
-                                if (!passetsdb->WriteAssetAddressQuantity(reissue_name, undoReissue.address,
-                                                                          mapAssetsAddressAmount.at(pair))) {
-                                    dirty = true;
-                                    message = "_Failed Writing the undo of reissue of asset from database";
-                                }
-
-                                if (!passetsdb->WriteAddressAssetQuantity(undoReissue.address, reissue_name,
-                                                                          mapAssetsAddressAmount.at(pair))) {
-                                    dirty = true;
-                                    message = "_Failed Writing Address Balance to database";
-                                }
-                            }
-                        }
-                    }
-
-                    if (dirty) {
-                        return error("%s : %s", __func__, message);
-                    }
-
-                    passetsCache->Erase(reissue_name);
-                }
-            }
-
-            if (fAssetIndex) {
-                // Undo the asset spends by updating there balance in the database
-                for (auto undoSpend : vUndoAssetAmount) {
-                    auto pair = std::make_pair(undoSpend.assetName, undoSpend.address);
-                    if (mapAssetsAddressAmount.count(pair)) {
-                        if (!passetsdb->WriteAssetAddressQuantity(undoSpend.assetName, undoSpend.address,
-                                                                  mapAssetsAddressAmount.at(pair))) {
-                            dirty = true;
-                            message = "_Failed Writing updated Address Quantity to database when undoing spends";
-                        }
-
-                        if (!passetsdb->WriteAddressAssetQuantity(undoSpend.address, undoSpend.assetName,
-                                                                  mapAssetsAddressAmount.at(pair))) {
-                            dirty = true;
-                            message = "_Failed Writing Address Balance to database";
-                        }
-
-                        if (dirty) {
-                            return error("%s : %s", __func__, message);
-                        }
-                    }
-                }
-
-
-                // Save the assets that have been spent by erasing the quantity in the database
-                for (auto spentAsset : vSpentAssets) {
-                    auto pair = make_pair(spentAsset.assetName, spentAsset.address);
-                    if (mapAssetsAddressAmount.count(pair)) {
-                        if (mapAssetsAddressAmount.at(make_pair(spentAsset.assetName, spentAsset.address)) == 0) {
-                            if (!passetsdb->EraseAssetAddressQuantity(spentAsset.assetName, spentAsset.address)) {
-                                dirty = true;
-                                message = "_Failed Erasing a Spent Asset, from database";
-                            }
-
-                            if (!passetsdb->EraseAddressAssetQuantity(spentAsset.address, spentAsset.assetName)) {
-                                dirty = true;
-                                message = "_Failed Erasing a Spent Asset from AddressAsset database";
-                            }
-
-                            if (dirty) {
-                                return error("%s : %s", __func__, message);
-                            }
-                        } else {
-                            if (!passetsdb->WriteAssetAddressQuantity(spentAsset.assetName, spentAsset.address,
-                                                                      mapAssetsAddressAmount.at(pair))) {
-                                dirty = true;
-                                message = "_Failed Erasing a Spent Asset, from database";
-                            }
-
-                            if (!passetsdb->WriteAddressAssetQuantity(spentAsset.address, spentAsset.assetName,
-                                                                      mapAssetsAddressAmount.at(pair))) {
-                                dirty = true;
-                                message = "_Failed Writing Address Balance to database";
-                            }
-
-                            if (dirty) {
-                                return error("%s : %s", __func__, message);
-                            }
-                        }
-                    }
-                }
-            }
-
-            ClearDirtyCache();
         }
 
-        if (fSoftCopy) {
-            passets->Copy(*this);
+        // Add the new assets to the database
+        for (auto newAsset : setNewAssetsToAdd) {
+            passetsCache->Put(newAsset.asset.strName, CDatabasedAssetData(newAsset.asset, newAsset.blockHeight, newAsset.blockHash));
+            if (!passetsdb->WriteAssetData(newAsset.asset, newAsset.blockHeight, newAsset.blockHash)) {
+                dirty = true;
+                message = "_Failed Writing New Asset Data to database";
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+
+            if (fAssetIndex) {
+                if (!passetsdb->WriteAssetAddressQuantity(newAsset.asset.strName, newAsset.address,
+                                                          newAsset.asset.nAmount)) {
+                    dirty = true;
+                    message = "_Failed Writing Address Balance to database";
+                }
+
+                if (!passetsdb->WriteAddressAssetQuantity(newAsset.address, newAsset.asset.strName,
+                                                          newAsset.asset.nAmount)) {
+                    dirty = true;
+                    message = "_Failed Writing Address Balance to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
+        if (fAssetIndex) {
+            // Remove the new owners from database
+            for (auto ownerAsset : setNewOwnerAssetsToRemove) {
+                if (!passetsdb->EraseAssetAddressQuantity(ownerAsset.assetName, ownerAsset.address)) {
+                    dirty = true;
+                    message = "_Failed Erasing Owner Address Balance from database";
+                }
+
+                if (!passetsdb->EraseAddressAssetQuantity(ownerAsset.address, ownerAsset.assetName)) {
+                    dirty = true;
+                    message = "_Failed Erasing New Owner Address Balance from AddressAsset database";
+                }
+
+                if (dirty) {
+                    return error("%s : %s", __func__, message);
+                }
+            }
+
+            // Add the new owners to database
+            for (auto ownerAsset : setNewOwnerAssetsToAdd) {
+                auto pair = std::make_pair(ownerAsset.assetName, ownerAsset.address);
+                if (mapAssetsAddressAmount.count(pair) && mapAssetsAddressAmount.at(pair) > 0) {
+                    if (!passetsdb->WriteAssetAddressQuantity(ownerAsset.assetName, ownerAsset.address,
+                                                              mapAssetsAddressAmount.at(pair))) {
+                        dirty = true;
+                        message = "_Failed Writing Owner Address Balance to database";
+                    }
+
+                    if (!passetsdb->WriteAddressAssetQuantity(ownerAsset.address, ownerAsset.assetName,
+                                                              mapAssetsAddressAmount.at(pair))) {
+                        dirty = true;
+                        message = "_Failed Writing Address Balance to database";
+                    }
+
+                    if (dirty) {
+                        return error("%s : %s", __func__, message);
+                    }
+                }
+            }
+
+            // Undo the transfering by updating the balances in the database
+
+            for (auto undoTransfer : setNewTransferAssetsToRemove) {
+                auto pair = std::make_pair(undoTransfer.transfer.strName, undoTransfer.address);
+                if (mapAssetsAddressAmount.count(pair)) {
+                    if (mapAssetsAddressAmount.at(pair) == 0) {
+                        if (!passetsdb->EraseAssetAddressQuantity(undoTransfer.transfer.strName,
+                                                                  undoTransfer.address)) {
+                            dirty = true;
+                            message = "_Failed Erasing Address Quantity from database";
+                        }
+
+                        if (!passetsdb->EraseAddressAssetQuantity(undoTransfer.address,
+                                                                  undoTransfer.transfer.strName)) {
+                            dirty = true;
+                            message = "_Failed Erasing UndoTransfer Address Balance from AddressAsset database";
+                        }
+
+                        if (dirty) {
+                            return error("%s : %s", __func__, message);
+                        }
+                    } else {
+                        if (!passetsdb->WriteAssetAddressQuantity(undoTransfer.transfer.strName,
+                                                                  undoTransfer.address,
+                                                                  mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Writing updated Address Quantity to database when undoing transfers";
+                        }
+
+                        if (!passetsdb->WriteAddressAssetQuantity(undoTransfer.address,
+                                                                  undoTransfer.transfer.strName,
+                                                                  mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Writing Address Balance to database";
+                        }
+
+                        if (dirty) {
+                            return error("%s : %s", __func__, message);
+                        }
+                    }
+                }
+            }
+
+
+            // Save the new transfers by updating the quantity in the database
+            for (auto newTransfer : setNewTransferAssetsToAdd) {
+                auto pair = std::make_pair(newTransfer.transfer.strName, newTransfer.address);
+                // During init and reindex it disconnects and verifies blocks, can create a state where vNewTransfer will contain transfers that have already been spent. So if they aren't in the map, we can skip them.
+                if (mapAssetsAddressAmount.count(pair)) {
+                    if (!passetsdb->WriteAssetAddressQuantity(newTransfer.transfer.strName, newTransfer.address,
+                                                              mapAssetsAddressAmount.at(pair))) {
+                        dirty = true;
+                        message = "_Failed Writing new address quantity to database";
+                    }
+
+                    if (!passetsdb->WriteAddressAssetQuantity(newTransfer.address, newTransfer.transfer.strName,
+                                                              mapAssetsAddressAmount.at(pair))) {
+                        dirty = true;
+                        message = "_Failed Writing Address Balance to database";
+                    }
+
+                    if (dirty) {
+                        return error("%s : %s", __func__, message);
+                    }
+                }
+            }
+        }
+
+        for (auto newReissue : setNewReissueToAdd) {
+            auto reissue_name = newReissue.reissue.strName;
+            auto pair = make_pair(reissue_name, newReissue.address);
+            if (mapReissuedAssetData.count(reissue_name)) {
+                if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), newReissue.blockHeight, newReissue.blockHash)) {
+                    dirty = true;
+                    message = "_Failed Writing reissue asset data to database";
+                }
+
+                if (dirty) {
+                    return error("%s : %s", __func__, message);
+                }
+
+                passetsCache->Erase(reissue_name);
+
+                if (fAssetIndex) {
+                    if (mapAssetsAddressAmount.count(pair) && mapAssetsAddressAmount.at(pair) > 0) {
+                        if (!passetsdb->WriteAssetAddressQuantity(pair.first, pair.second,
+                                                                  mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Writing reissue asset quantity to the address quantity database";
+                        }
+
+                        if (!passetsdb->WriteAddressAssetQuantity(pair.second, pair.first,
+                                                                  mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Writing Address Balance to database";
+                        }
+
+                        if (dirty) {
+                            return error("%s, %s", __func__, message);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (auto undoReissue : setNewReissueToRemove) {
+            // In the case the the issue and reissue are both being removed
+            // we can skip this call because the removal of the issue should remove all data pertaining the to asset
+            // Fixes the issue where the reissue data will write over the removed asset meta data that was removed above
+            CNewAsset asset(undoReissue.reissue.strName, 0);
+            CAssetCacheNewAsset testNewAssetCache(asset, "", 0 , uint256());
+            if (setNewAssetsToRemove.count(testNewAssetCache)) {
+                continue;
+            }
+
+            auto reissue_name = undoReissue.reissue.strName;
+            if (mapReissuedAssetData.count(reissue_name)) {
+                if(!passetsdb->WriteAssetData(mapReissuedAssetData.at(reissue_name), undoReissue.blockHeight, undoReissue.blockHash)) {
+                    dirty = true;
+                    message = "_Failed Writing undo reissue asset data to database";
+                }
+
+                if (fAssetIndex) {
+                    auto pair = make_pair(undoReissue.reissue.strName, undoReissue.address);
+                    if (mapAssetsAddressAmount.count(pair)) {
+                        if (mapAssetsAddressAmount.at(pair) == 0) {
+                            if (!passetsdb->EraseAssetAddressQuantity(reissue_name, undoReissue.address)) {
+                                dirty = true;
+                                message = "_Failed Erasing Address Balance from database";
+                            }
+
+                            if (!passetsdb->EraseAddressAssetQuantity(undoReissue.address, reissue_name)) {
+                                dirty = true;
+                                message = "_Failed Erasing UndoReissue Balance from AddressAsset database";
+                            }
+                        } else {
+                            if (!passetsdb->WriteAssetAddressQuantity(reissue_name, undoReissue.address,
+                                                                      mapAssetsAddressAmount.at(pair))) {
+                                dirty = true;
+                                message = "_Failed Writing the undo of reissue of asset from database";
+                            }
+
+                            if (!passetsdb->WriteAddressAssetQuantity(undoReissue.address, reissue_name,
+                                                                      mapAssetsAddressAmount.at(pair))) {
+                                dirty = true;
+                                message = "_Failed Writing Address Balance to database";
+                            }
+                        }
+                    }
+                }
+
+                if (dirty) {
+                    return error("%s : %s", __func__, message);
+                }
+
+                passetsCache->Erase(reissue_name);
+            }
+        }
+
+        if (fAssetIndex) {
+            // Undo the asset spends by updating there balance in the database
+            for (auto undoSpend : vUndoAssetAmount) {
+                auto pair = std::make_pair(undoSpend.assetName, undoSpend.address);
+                if (mapAssetsAddressAmount.count(pair)) {
+                    if (!passetsdb->WriteAssetAddressQuantity(undoSpend.assetName, undoSpend.address,
+                                                              mapAssetsAddressAmount.at(pair))) {
+                        dirty = true;
+                        message = "_Failed Writing updated Address Quantity to database when undoing spends";
+                    }
+
+                    if (!passetsdb->WriteAddressAssetQuantity(undoSpend.address, undoSpend.assetName,
+                                                              mapAssetsAddressAmount.at(pair))) {
+                        dirty = true;
+                        message = "_Failed Writing Address Balance to database";
+                    }
+
+                    if (dirty) {
+                        return error("%s : %s", __func__, message);
+                    }
+                }
+            }
+
+
+            // Save the assets that have been spent by erasing the quantity in the database
+            for (auto spentAsset : vSpentAssets) {
+                auto pair = make_pair(spentAsset.assetName, spentAsset.address);
+                if (mapAssetsAddressAmount.count(pair)) {
+                    if (mapAssetsAddressAmount.at(pair) == 0) {
+                        if (!passetsdb->EraseAssetAddressQuantity(spentAsset.assetName, spentAsset.address)) {
+                            dirty = true;
+                            message = "_Failed Erasing a Spent Asset, from database";
+                        }
+
+                        if (!passetsdb->EraseAddressAssetQuantity(spentAsset.address, spentAsset.assetName)) {
+                            dirty = true;
+                            message = "_Failed Erasing a Spent Asset from AddressAsset database";
+                        }
+
+                        if (dirty) {
+                            return error("%s : %s", __func__, message);
+                        }
+                    } else {
+                        if (!passetsdb->WriteAssetAddressQuantity(spentAsset.assetName, spentAsset.address,
+                                                                  mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Erasing a Spent Asset, from database";
+                        }
+
+                        if (!passetsdb->WriteAddressAssetQuantity(spentAsset.address, spentAsset.assetName,
+                                                                  mapAssetsAddressAmount.at(pair))) {
+                            dirty = true;
+                            message = "_Failed Writing Address Balance to database";
+                        }
+
+                        if (dirty) {
+                            return error("%s : %s", __func__, message);
+                        }
+                    }
+                }
+            }
+        }
+
+        ClearDirtyCache();
+
+        return true;
+    } catch (const std::runtime_error& e) {
+        return error("%s : %s ", __func__, std::string("System error while flushing assets: ") + e.what());
+    }
+}
+
+// This function will put all current cache data into the global passets cache.
+//! Do not call this function on the passets pointer
+bool CAssetsCache::Flush()
+{
+
+    if (!passets)
+        return error("%s: Couldn't find passets pointer while trying to flush assets cache", __func__);
+
+    try {
+        for (auto &item : setNewAssetsToAdd) {
+            if (passets->setNewAssetsToRemove.count(item))
+                passets->setNewAssetsToRemove.erase(item);
+            passets->setNewAssetsToAdd.insert(item);
+        }
+
+        for (auto &item : setNewAssetsToRemove) {
+            if (passets->setNewAssetsToAdd.count(item))
+                passets->setNewAssetsToAdd.erase(item);
+            passets->setNewAssetsToRemove.insert(item);
+        }
+
+        for (auto &item : mapAssetsAddressAmount)
+            passets->mapAssetsAddressAmount[item.first] = item.second;
+
+        for (auto &item : mapReissuedAssetData)
+            passets->mapReissuedAssetData[item.first] = item.second;
+
+        for (auto &item : setNewOwnerAssetsToAdd) {
+            if (passets->setNewOwnerAssetsToRemove.count(item))
+                passets->setNewOwnerAssetsToRemove.erase(item);
+            passets->setNewOwnerAssetsToAdd.insert(item);
+        }
+
+        for (auto &item : setNewOwnerAssetsToRemove) {
+            if (passets->setNewOwnerAssetsToAdd.count(item))
+                passets->setNewOwnerAssetsToAdd.erase(item);
+            passets->setNewOwnerAssetsToRemove.insert(item);
+        }
+
+        for (auto &item : setNewReissueToAdd) {
+            if (passets->setNewReissueToRemove.count(item))
+                passets->setNewReissueToRemove.erase(item);
+            passets->setNewReissueToAdd.insert(item);
+        }
+
+        for (auto &item : setNewReissueToRemove) {
+            if (passets->setNewReissueToAdd.count(item))
+                passets->setNewReissueToAdd.erase(item);
+            passets->setNewReissueToRemove.insert(item);
+        }
+
+        for (auto &item : setNewTransferAssetsToAdd) {
+            if (passets->setNewTransferAssetsToRemove.count(item))
+                passets->setNewTransferAssetsToRemove.erase(item);
+            passets->setNewTransferAssetsToAdd.insert(item);
+        }
+
+        for (auto &item : setNewTransferAssetsToRemove) {
+            if (passets->setNewTransferAssetsToAdd.count(item))
+                passets->setNewTransferAssetsToAdd.erase(item);
+            passets->setNewTransferAssetsToRemove.insert(item);
+        }
+
+        for (auto &item : vSpentAssets) {
+            passets->vSpentAssets.emplace_back(item);
+        }
+
+        for (auto &item : vUndoAssetAmount) {
+            passets->vUndoAssetAmount.emplace_back(item);
         }
 
         return true;
+
     } catch (const std::runtime_error& e) {
         return error("%s : %s ", __func__, std::string("System error while flushing assets: ") + e.what());
     }
@@ -1791,7 +1885,6 @@ size_t CAssetsCache::GetCacheSize() const
     // CTxOut: CAmount + CScript (105 + 8 = 113 bytes)
 
     size_t size = 0;
-    size += 32 * setChangeOwnedOutPoints.size(); // COutPoint
 
     size += (32 + 40 + 8) * vUndoAssetAmount.size(); // Asset Name, Address, CAmount
 
@@ -1808,6 +1901,34 @@ size_t CAssetsCache::GetCacheSize() const
 
     size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToAdd.size(); // CReissueAsset, Address, COutPoint, Block hash, int
     size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToRemove.size(); // CReissueAsset, Address, COutPoint, Block hash, int
+
+    return size;
+}
+
+//! Get an estimated size of the cache in bytes that will be needed inorder to save to database
+size_t CAssetsCache::GetCacheSizeV2() const
+{
+    // COutPoint: 32 bytes
+    // CNewAsset: Max 80 bytes
+    // CAssetTransfer: Asset Name, CAmount ( 40 bytes)
+    // CReissueAsset: Max 80 bytes
+    // CAmount: 8 bytes
+    // Asset Name: Max 32 bytes
+    // Address: 40 bytes
+    // Block hash: 32 bytes
+    // CTxOut: CAmount + CScript (105 + 8 = 113 bytes)
+
+    size_t size = 0;
+    size += memusage::DynamicUsage(vUndoAssetAmount);
+    size += memusage::DynamicUsage(setNewTransferAssetsToRemove);
+    size += memusage::DynamicUsage(setNewTransferAssetsToAdd);
+    size += memusage::DynamicUsage(setNewOwnerAssetsToAdd);
+    size += memusage::DynamicUsage(setNewOwnerAssetsToRemove);
+    size += memusage::DynamicUsage(vSpentAssets);
+    size += memusage::DynamicUsage(setNewAssetsToAdd);
+    size += memusage::DynamicUsage(setNewAssetsToRemove);
+    size += memusage::DynamicUsage(setNewReissueToAdd);
+    size += memusage::DynamicUsage(setNewReissueToRemove);
 
     return size;
 }
@@ -2032,7 +2153,19 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
     if (setNewAssetsToRemove.count(cachedAsset))
         return false;
 
+    // Check the dirty caches first and see if it was recently added or removed
+    if (passets->setNewAssetsToRemove.count(cachedAsset))
+        return false;
+
     if (setNewAssetsToAdd.count(cachedAsset)) {
+        if (fForceDuplicateCheck)
+            return true;
+        else {
+            LogPrintf("%s : Found asset %s in setNewAssetsToAdd but force duplicate check wasn't true\n", __func__, name);
+        }
+    }
+
+    if (passets->setNewAssetsToAdd.count(cachedAsset)) {
         if (fForceDuplicateCheck)
             return true;
         else {
@@ -2083,6 +2216,12 @@ bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &
         return true;
     }
 
+    // Check the map that contains the reissued asset data. If it is in this map, it hasn't been saved to disk yet
+    if (passets->mapReissuedAssetData.count(name)) {
+        asset = passets->mapReissuedAssetData.at(name);
+        return true;
+    }
+
     // Create objects that will be used to check the dirty cache
     CNewAsset tempAsset;
     tempAsset.strName = name;
@@ -2094,8 +2233,22 @@ bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &
         return false;
     }
 
+    // Check the dirty caches first and see if it was recently added or removed
+    if (passets->setNewAssetsToRemove.count(cachedAsset)) {
+        LogPrintf("%s : Found in new assets to Remove - Returning False\n", __func__);
+        return false;
+    }
+
     auto setIterator = setNewAssetsToAdd.find(cachedAsset);
     if (setIterator != setNewAssetsToAdd.end()) {
+        asset = setIterator->asset;
+        nHeight = setIterator->blockHeight;
+        blockHash = setIterator->blockHash;
+        return true;
+    }
+
+    setIterator = passets->setNewAssetsToAdd.find(cachedAsset);
+    if (setIterator != passets->setNewAssetsToAdd.end()) {
         asset = setIterator->asset;
         nHeight = setIterator->blockHeight;
         blockHash = setIterator->blockHash;
@@ -2310,17 +2463,25 @@ std::string GetBurnAddress(const AssetType type)
 //! This will get the amount that an address for a certain asset contains from the database if they cache doesn't already have it
 bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName, const std::string& address)
 {
-    auto pair = make_pair(assetName, address);
+    if (fAssetIndex) {
+        auto pair = make_pair(assetName, address);
 
-    // If the caches map has the pair, return true because the map already contains the best dirty amount
-    if (cache.mapAssetsAddressAmount.count(pair))
-        return true;
+        // If the caches map has the pair, return true because the map already contains the best dirty amount
+        if (cache.mapAssetsAddressAmount.count(pair))
+            return true;
 
-    // If the database contains the assets address amount, insert it into the database and return true
-    CAmount nDBAmount;
-    if (passetsdb->ReadAssetAddressQuantity(pair.first, pair.second, nDBAmount)) {
-        cache.mapAssetsAddressAmount.insert(make_pair(pair, nDBAmount));
-        return true;
+        // If the caches map has the pair, return true because the map already contains the best dirty amount
+        if (passets->mapAssetsAddressAmount.count(pair)) {
+            cache.mapAssetsAddressAmount[pair] = passets->mapAssetsAddressAmount.at(pair);
+            return true;
+        }
+
+        // If the database contains the assets address amount, insert it into the database and return true
+        CAmount nDBAmount;
+        if (passetsdb->ReadAssetAddressQuantity(pair.first, pair.second, nDBAmount)) {
+            cache.mapAssetsAddressAmount.insert(make_pair(pair, nDBAmount));
+            return true;
+        }
     }
 
     // The amount wasn't found return false

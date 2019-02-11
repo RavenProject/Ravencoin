@@ -103,8 +103,6 @@ CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
 
-int nBlockCount = 0;
-
 static void CheckBlockIndex(const Consensus::Params& consensusParams);
 
 /** Constant stuff for coinbase transactions we create: */
@@ -1260,7 +1258,7 @@ bool IsInitialSyncSpeedUp()
 //    		LogPrintf("Work needed: %s", nMinimumChainWork.GetHex());
         return true;
     }
-    if (chainActive.Tip()->GetBlockTime() < (GetTime() - 60 * 60))
+    if (chainActive.Tip()->GetBlockTime() < (GetTime() - (60 * 60 * 72))) // 3 Days
     {
 //        LogPrintf("%s: (tip age): %d\n", __func__, nMaxTipAge);
         return true;
@@ -2660,11 +2658,13 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
         // Get the size of the memory used by the asset cache.
         int64_t assetDynamicSize = 0;
         int64_t assetDirtyCacheSize = 0;
+        size_t assetMapAmountSize = 0;
         if (AreAssetsDeployed()) {
             auto currentActiveAssetCache = GetCurrentAssetCache();
             if (currentActiveAssetCache) {
                 assetDynamicSize = currentActiveAssetCache->DynamicMemoryUsage();
-                assetDirtyCacheSize = currentActiveAssetCache->GetCacheSize();
+                assetDirtyCacheSize = currentActiveAssetCache->GetCacheSizeV2();
+                assetMapAmountSize = currentActiveAssetCache->mapAssetsAddressAmount.size();
             }
         }
 
@@ -2675,7 +2675,7 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
         // The cache is large and we're within 10% and 10 MiB of the limit, but we have time now (not in the middle of a block processing).
         bool fCacheLarge = mode == FLUSH_STATE_PERIODIC && cacheSize > std::max((9 * nTotalSpace) / 10, nTotalSpace - MAX_BLOCK_COINSDB_USAGE * 1024 * 1024);
         // The cache is over the limit, we have to write now.
-        bool fCacheCritical = mode == FLUSH_STATE_IF_NEEDED && cacheSize > nTotalSpace;
+        bool fCacheCritical = mode == FLUSH_STATE_IF_NEEDED && (cacheSize > nTotalSpace || assetMapAmountSize > 1000000);
         // It's been a while since we wrote the block index to disk. Do this frequently, so we don't need to redownload after a crash.
         bool fPeriodicWrite = mode == FLUSH_STATE_PERIODIC && nNow > nLastWrite + (int64_t)DATABASE_WRITE_INTERVAL * 1000000;
         // It's been very long since we flushed the cache. Do this infrequently, to optimize cache usage.
@@ -2741,7 +2741,7 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
                 // Flush the assetstate
                 auto currentActiveAssetCache = GetCurrentAssetCache();
                 if (currentActiveAssetCache) {
-                    if (!currentActiveAssetCache->Flush(false, true))
+                    if (!currentActiveAssetCache->DumpCacheToDatabase())
                         return AbortNode(state, "Failed to write to asset database");
                 }
             }
@@ -2867,7 +2867,7 @@ bool static DisconnectTip(CValidationState& state, const CChainParams& chainpara
         CCoinsViewCache view(pcoinsTip);
 
         auto currentActiveAssetCache = GetCurrentAssetCache();
-        CAssetsCache assetCache(*currentActiveAssetCache);
+        CAssetsCache assetCache;
 
         assert(view.GetBestBlock() == pindexDelete->GetBlockHash());
         if (DisconnectBlock(block, pindexDelete, view, &assetCache) != DISCONNECT_OK)
@@ -2875,7 +2875,7 @@ bool static DisconnectTip(CValidationState& state, const CChainParams& chainpara
         bool flushed = view.Flush();
         assert(flushed);
 
-        bool assetsFlushed = assetCache.Flush(true);
+        bool assetsFlushed = assetCache.Flush();
         assert(assetsFlushed);
     }
     LogPrint(BCLog::BENCH, "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * MILLI);
@@ -2907,6 +2907,8 @@ bool static DisconnectTip(CValidationState& state, const CChainParams& chainpara
 static int64_t nTimeReadFromDisk = 0;
 static int64_t nTimeConnectTotal = 0;
 static int64_t nTimeFlush = 0;
+static int64_t nTimeAssetFlush = 0;
+static int64_t nTimeAssetTasks = 0;
 static int64_t nTimeChainState = 0;
 static int64_t nTimePostConnect = 0;
 
@@ -2999,56 +3001,48 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     // Apply the block atomically to the chain state.
     int64_t nTime2 = GetTimeMicros(); nTimeReadFromDisk += nTime2 - nTime1;
     int64_t nTime3;
+    int64_t nTime4;
     int64_t nTimeAssetsFlush;
     LogPrint(BCLog::BENCH, "  - Load block from disk: %.2fms [%.2fs]\n", (nTime2 - nTime1) * MILLI, nTimeReadFromDisk * MICRO);
 
     /** RVN START */
     // Initialize sets used from removing asset entries from the mempool
-    std::set<CAssetCacheNewAsset> prevNewAssets;
-    std::set<CAssetCacheNewAsset> afterNewAsset;
+    std::set<CAssetCacheNewAsset> setNewAssetsAddedInBlock;
     /** RVN END */
 
     {
         CCoinsViewCache view(pcoinsTip);
-        int64_t nTimeStartCacheCopy = GetTimeMicros();
         /** RVN START */
-        CAssetsCache* assetCache = nullptr;
-        bool fIsInitial = IsInitialSyncSpeedUp();
-        if (!fIsInitial) {
-            assetCache = new CAssetsCache(*passets);
-        } else {
-            nBlockCount++;
-        }
-
-        auto pt = fIsInitial ? GetCurrentAssetCache() : assetCache;
-
-        prevNewAssets = pt->setNewAssetsToAdd; // List of newly cached assets before block is connected
+        // Create the empty asset cache, that will be sent into the connect block
+        // All new data will be added to the cache, and will be flushed back into passets after a successful
+        // Connect Block cycle
+        CAssetsCache assetCache;
         /** RVN END */
 
         int64_t nTimeConnectStart = GetTimeMicros();
-        LogPrint(BCLog::BENCH, "  - Copy Cache Time: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeConnectStart - nTimeStartCacheCopy) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
 
-        bool rv = ConnectBlock(blockConnecting, state, pindexNew, view, chainparams, pt);
+        bool rv = ConnectBlock(blockConnecting, state, pindexNew, view, chainparams, &assetCache);
         GetMainSignals().BlockChecked(blockConnecting, state);
         if (!rv) {
             if (state.IsInvalid())
                 InvalidBlockFound(pindexNew, state);
-            if (assetCache)
-                delete assetCache;
             return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
         }
         int64_t nTimeConnectDone = GetTimeMicros();
         LogPrint(BCLog::BENCH, "  - Connect Block only time: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeConnectDone - nTimeConnectStart) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
 
 
+        int64_t nTimeAssetsStart = GetTimeMicros();
         /** RVN START */
-        // Get the newly created assets, from the connectblock assetCache
-        afterNewAsset = pt->setNewAssetsToAdd;
-        for (auto it : prevNewAssets) {
-            if (afterNewAsset.count(it))
-                afterNewAsset.erase(it);
+        // Get the newly created assets, from the connectblock assetCache so we can remove the correct assets from the mempool
+        setNewAssetsAddedInBlock = assetCache.setNewAssetsToAdd;
+        for (auto it : passets->setNewAssetsToAdd) {
+            if (setNewAssetsAddedInBlock.count(it))
+                setNewAssetsAddedInBlock.erase(it);
         }
 
+        // Remove all tx hashes, that were marked as reissued script from the mapReissuedTx.
+        // Without this check, you wouldn't be able to reissue for those assets again, as this maps block it
         for (auto tx : blockConnecting.vtx) {
             uint256 txHash = tx->GetHash();
             if (mapReissuedTx.count(txHash)) {
@@ -3056,34 +3050,33 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
                 mapReissuedTx.erase(txHash);
             }
         }
+        int64_t nTimeAssetsEnd = GetTimeMicros(); nTimeAssetTasks += nTimeAssetsEnd - nTimeAssetsStart;
+        LogPrint(BCLog::BENCH, "  - Compute Asset Tasks total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetsEnd - nTimeAssetsStart) * MILLI, nTimeAssetsEnd * MICRO, nTimeAssetsEnd * MILLI / nBlocksTotal);
         /** RVN END */
 
         nTime3 = GetTimeMicros(); nTimeConnectTotal += nTime3 - nTime2;
         LogPrint(BCLog::BENCH, "  - Connect total: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime3 - nTime2) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
         bool flushed = view.Flush();
         assert(flushed);
+        nTime4 = GetTimeMicros(); nTimeFlush += nTime4 - nTime3;
+        LogPrint(BCLog::BENCH, "  - Flush RVN: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime4 - nTime3) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
 
-        nTimeAssetsFlush = GetTimeMicros();
         /** RVN START */
-        if ((!fIsInitial || nBlockCount % 100 == 0) && pt) {
-            nBlockCount = 0;
-            passets->Copy(*pt);
-        }
-
-        if (assetCache)
-            delete assetCache;
+        nTimeAssetsFlush = GetTimeMicros();
+        bool assetFlushed = assetCache.Flush();
+        assert(assetFlushed);
+        int64_t nTimeAssetFlushFinished = GetTimeMicros(); nTimeAssetFlush += nTimeAssetFlushFinished - nTimeAssetsFlush;
+        LogPrint(BCLog::BENCH, "  - Flush Assets: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetFlushFinished - nTimeAssetsFlush) * MILLI, nTimeAssetFlush * MICRO, nTimeAssetFlush * MILLI / nBlocksTotal);
         /** RVN END */
     }
-    int64_t nTime4 = GetTimeMicros(); nTimeFlush += nTime4 - nTime3;
-    LogPrint(BCLog::BENCH, "  - Flush RVN: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeAssetsFlush - nTime3) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
-    LogPrint(BCLog::BENCH, "  - Flush Assets: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime4 - nTimeAssetsFlush) * MILLI, nTimeFlush * MICRO, nTimeFlush * MILLI / nBlocksTotal);
+
     // Write the chain state to disk, if necessary.
     if (!FlushStateToDisk(chainparams, state, FLUSH_STATE_IF_NEEDED))
         return false;
     int64_t nTime5 = GetTimeMicros(); nTimeChainState += nTime5 - nTime4;
     LogPrint(BCLog::BENCH, "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO, nTimeChainState * MILLI / nBlocksTotal);
     // Remove conflicting transactions from the mempool.;
-    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, afterNewAsset);
+    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, setNewAssetsAddedInBlock);
     disconnectpool.removeForBlock(blockConnecting.vtx);
     // Update chainActive & related variables.
     UpdateTip(pindexNew, chainparams);
@@ -4691,7 +4684,7 @@ bool ReplayBlocks(const CChainParams& params, CCoinsView* view)
 
     cache.SetBestBlock(pindexNew->GetBlockHash());
     cache.Flush();
-    assetsCache.Flush(true);
+    assetsCache.Flush();
     uiInterface.ShowProgress("", 100, false);
     return true;
 }
@@ -4842,7 +4835,7 @@ bool LoadBlockIndex(const CChainParams& chainparams)
         pblocktree->WriteFlag("txindex", fTxIndex);
         LogPrintf("%s: transaction index %s\n", __func__, fTxIndex ? "enabled" : "disabled");
 
-        // Use the provided setting for -txindex in the new database
+        // Use the provided setting for -assetindex in the new database
         fAssetIndex = gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX);
         pblocktree->WriteFlag("assetindex", fAssetIndex);
         LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
@@ -5391,27 +5384,8 @@ bool IsDGWActive(unsigned int nBlockNumber) {
     return nBlockNumber >= Params().DGWActivationBlock();
 }
 
-bool fSwitchFromInitialBlockDownload = false;
-bool fFirstStart = true;
-
 CAssetsCache* GetCurrentAssetCache()
 {
-    if (fFirstStart) {
-        tmpAssetCache->Copy(*passets);
-        fFirstStart = false;
-    }
-
-    if (!fSwitchFromInitialBlockDownload) {
-        if (IsInitialSyncSpeedUp()) {
-            return tmpAssetCache;
-        } else {
-            passets->Copy(*tmpAssetCache);
-            fSwitchFromInitialBlockDownload = true;
-            delete tmpAssetCache;
-            tmpAssetCache = new CAssetsCache();
-        }
-    }
-
     return passets;
 }
 /** RVN END */
