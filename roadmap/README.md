@@ -57,6 +57,8 @@ Raven may increase the blocksize from 2 MB to X MB to allow for more on-chain tr
 
 Rewards allow payment in RVN to asset holders.
 
+[More on rewards...](./rewards/README.md)
+
 ### Phase 4 - Unique Assets (Complete)
 
 Once created, assets can be made unique for a cost of 5 RVN. Only non-divisible assets can be made unique. This moves an asset to a UTXO and associates a unique identifier with the txid. From this point the asset can be moved from one address to another and can be traced back to its origin. Only the issuer of the original asset can make an asset unique.  
@@ -71,16 +73,30 @@ are unique tokens.
 
 ### Phase 5 - Messaging
 
-Messaging to token holders by authorized senders will be layered on top of the Phase 4 unique assets. See KAAAWWW Protocol for additional information.
+Messaging to token holders by authorized senders will be layered on top of the Phase 4 unique assets. See [KAAAWWW Protocol](https://medium.com/@tronblack/ravencoin-kaaawww-2f72077aece) for additional information.
+
+[More on messaging...](./messaging/README.md)  
+[More on preventing message spam...](./messaging-antispam/README.md)  
+[More on IPFS...](./ipfs/README.md)  
 
 ### Phase 6 - Voting
 
 Voting will be accomplished by creating and distributing parallel tokens to token holders. These tokens can be sent to RVN addresses to record a vote.
 
+[More on voting...](./voting/README.md)
+
 ### Phase 7 - Compatibility Mode
 
 Allows newly created assets to appear exactly like RVN, LTC, or Bitcoin for easy integration into exchanges, wallets, explorers, etc.
 Speeds adoption into the larger crypto ecosystem.
+
+[More on compatibility mode...](./compatibility-mode/README.md)
+
+### Phase 8 - Mobile Wallet compatible Mnemonic Seed
+
+Switches to a default of generating a 128 bit seed from which the master key is generated.  This allows easy backup for anyone that doesn't import private keys.  Warnings added to back up wallet.dat when importing private keys.
+
+[More on Mnemonic Seed...](./mnemonic-seed/README.md)
 
 ### Appendix A - RPC commands for assets
 
