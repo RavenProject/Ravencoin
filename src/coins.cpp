@@ -119,20 +119,6 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                     error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
                           asset.strName);
 
-                int assetIndex = tx.vout.size() - 1;
-                int ownerIndex = assetIndex - 1;
-
-                CAssetCachePossibleMine possibleMineOwner(ownerName, COutPoint(tx.GetHash(), ownerIndex),
-                                                          tx.vout[ownerIndex]);
-                if (!assetsCache->AddPossibleOutPoint(possibleMineOwner))
-                    error("%s: Failed to add the owner asset I own to my Unspent Asset Cache. Asset Name : %s",
-                          __func__, ownerName);
-
-                CAssetCachePossibleMine possibleMine(asset.strName, COutPoint(tx.GetHash(), assetIndex),
-                                                     tx.vout[assetIndex]);
-                if (!assetsCache->AddPossibleOutPoint(possibleMine))
-                    error("%s: Failed to add an asset I own to my Unspent Asset Cache. Asset Name : %s",
-                          __func__, asset.strName);
             } else if (tx.IsReissueAsset()) {
                 CReissueAsset reissue;
                 std::string strAddress;
@@ -157,12 +143,6 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                     undoAssetData->first = reissue.strName; // Asset Name
                     undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, asset.strIPFSHash, asset.units}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
                 }
-
-                CAssetCachePossibleMine possibleMine(reissue.strName, COutPoint(tx.GetHash(), reissueIndex),
-                                                     tx.vout[reissueIndex]);
-                if (!assetsCache->AddPossibleOutPoint(possibleMine))
-                    error("%s: Failed to add an reissued asset I own to my Unspent Asset Cache. Asset Name : %s",
-                          __func__, reissue.strName);
             } else if (tx.IsNewUniqueAsset()) {
                 for (int n = 0; n < (int)tx.vout.size(); n++) {
                     auto out = tx.vout[n];
@@ -177,11 +157,6 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                         if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
                             error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
                                   asset.strName);
-
-                        CAssetCachePossibleMine possibleMine(asset.strName, COutPoint(tx.GetHash(), n), out);
-                        if (!assetsCache->AddPossibleOutPoint(possibleMine))
-                            error("%s: Failed to add an asset I own to my Unspent Asset Cache. Asset Name : %s",
-                                  __func__, asset.strName);
                     }
                 }
             }

@@ -1452,7 +1452,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 passets = new CAssetsCache();
                 passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
 
-
+                // Read for fAssetIndex to make sure that we only load asset address balances if it if true
+                pblocktree->ReadFlag("assetindex", fAssetIndex);
                 // Need to load assets before we verify the database
                 if (!passetsdb->LoadAssets()) {
                     strLoadError = _("Failed to load Assets Database");
@@ -1462,7 +1463,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 if (!passetsdb->ReadReissuedMempoolState())
                     LogPrintf("Database failed to load last Reissued Mempool State. Will have to start from empty state");
 
-                LogPrintf("Loaded Assets from database without error\nCache of assets size: %d\nNumber of assets I have: %d\n", passetsCache->Size(), passets->mapMyUnspentAssets.size());
+                LogPrintf("Loaded Assets from database without error\nCache of assets size: %d\n", passetsCache->Size());
 
                 if (fReset) {
                     pblocktree->WriteReindexing(true);
@@ -1491,6 +1492,12 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Check for changed -txindex state
                 if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
                     strLoadError = _("You need to rebuild the database using -reindex to change -txindex");
+                    break;
+                }
+
+                // Check for changed -assetindex state
+                if (fAssetIndex != gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX)) {
+                    strLoadError = _("You need to rebuild the database using -reindex to change -assetIndex");
                     break;
                 }
 
@@ -1785,7 +1792,5 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     StartWallets(scheduler);
 #endif
 
-
-    UpdatePossibleAssets();
     return !fRequestShutdown;
 }

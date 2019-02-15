@@ -38,6 +38,7 @@ class UniqueAssetTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
+        self.extra_args = [['-assetindex'], ['-assetindex'], ['-assetindex']]
 
     def activate_assets(self):
         self.log.info("Generating RVN for node[0] and activating assets...")
@@ -118,7 +119,7 @@ class UniqueAssetTest(RavenTestFramework):
 
         # invalidate
         n0.invalidateblock(block_hash)
-        assert_does_not_contain_key(root, n0.listmyassets())
+        assert(root in n0.listmyassets())
         assert_does_not_contain_key(asset_name, n0.listmyassets())
 
         # reconsider

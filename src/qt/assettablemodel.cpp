@@ -9,6 +9,7 @@
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "walletmodel.h"
+#include "wallet/wallet.h"
 
 #include "core_io.h"
 
@@ -19,6 +20,7 @@
 
 #include <QDebug>
 #include <QStringList>
+
 
 
 class AssetTablePriv {
@@ -36,11 +38,13 @@ public:
     void refreshWallet() {
         qDebug() << "AssetTablePriv::refreshWallet";
         cachedBalances.clear();
-        if (passets) {
+        auto currentActiveAssetCache = GetCurrentAssetCache();
+        if (currentActiveAssetCache) {
             {
                 LOCK(cs_main);
                 std::map<std::string, CAmount> balances;
-                if (!GetMyAssetBalances(*passets, balances)) {
+                std::map<std::string, std::vector<COutput> > outputs;
+                if (!GetAllMyAssetBalances(outputs, balances)) {
                     qWarning("AssetTablePriv::refreshWallet: Error retrieving asset balances");
                     return;
                 }
@@ -57,7 +61,7 @@ public:
                     if (!IsAssetNameAnOwner(bal->first)) {
                         // Asset is not an administrator asset
                         CNewAsset assetData;
-                        if (!passets->GetAssetMetaDataIfExists(bal->first, assetData)) {
+                        if (!currentActiveAssetCache->GetAssetMetaDataIfExists(bal->first, assetData)) {
                             qWarning("AssetTablePriv::refreshWallet: Error retrieving asset data");
                             return;
                         }

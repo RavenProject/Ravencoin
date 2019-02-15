@@ -106,6 +106,7 @@ TestingSetup::~TestingSetup()
     delete pcoinsTip;
     delete pcoinsdbview;
     delete pblocktree;
+    delete passets;
     fs::remove_all(pathTemp);
 }
 
