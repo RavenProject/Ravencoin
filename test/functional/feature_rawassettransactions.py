@@ -263,7 +263,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         n0.sendrawtransaction(tx_issue_hex)
         n0.generate(1)
         assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used",
-                                get_tx_issue_hex, n0, asset_name, 55)
+                                get_tx_issue_hex, n0, asset_name, 55)  # intermittent failure "Invalid amount" -- out of funds so change is negative?
         assert_raises_rpc_error(-26, f"bad-txns-issue-Invalid parameter: asset_name '{asset_name}' has already been used",
                                 n0.sendrawtransaction, tx_duplicate_issue_hex)
 
@@ -1740,11 +1740,104 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx_id = n0.transfer(asset_name, asset_amount, address)[0]
         n0.generate(1)
         raw_json = n0.getrawtransaction(tx_id, True)
-        asset_out_script = raw_json['vout'][1]['scriptPubKey']
-        assert_contains_key('asset', asset_out_script)
+        found_asset_out = False
+        asset_out_script = ''
+        for vout in raw_json['vout']:
+            out_script = vout['scriptPubKey']
+            if 'asset' in out_script:
+                found_asset_out = True
+                asset_out_script = out_script
+        assert found_asset_out
         asset_section = asset_out_script['asset']
         assert_equal(asset_name, asset_section['name'])
         assert_equal(asset_amount, asset_section['amount'])
+
+
+    def fundrawtransaction_transfer_outs(self):
+        self.log.info("Testing fundrawtransaction with transfer outputs...")
+        n0 = self.nodes[0]
+        n2 = self.nodes[2]
+        asset_name = "DONT_FUND_RVN"
+        asset_amount = 100
+        rvn_amount = 100
+
+        n2_address = n2.getnewaddress()
+
+        n0.issue("XXX")
+        n0.issue("YYY")
+        n0.issue("ZZZ")
+        n0.generate(1)
+        n0.transfer("XXX", 1, n2_address)
+        n0.transfer("YYY", 1, n2_address)
+        n0.transfer("ZZZ", 1, n2_address)
+        n0.generate(1)
+        self.sync_all()
+
+        # issue asset
+        n0.issue(asset_name, asset_amount)
+        n0.generate(1)
+        for n in range(0, 5):
+            n0.transfer(asset_name, asset_amount / 5, n2_address)
+        n0.generate(1)
+        self.sync_all()
+
+        for n in range(0, 5):
+            n0.sendtoaddress(n2_address, rvn_amount / 5)
+        n0.generate(1)
+        self.sync_all()
+
+        inputs = []
+        unspent_asset = n2.listmyassets(asset_name, True)[asset_name]['outpoints'][0]
+        inputs.append({k: unspent_asset[k] for k in ['txid', 'vout']})
+        n0_address = n0.getnewaddress()
+        outputs = {n0_address: {'transfer': {asset_name: asset_amount / 5}}}
+        tx = n2.createrawtransaction(inputs, outputs)
+
+        tx_funded = n2.fundrawtransaction(tx)['hex']
+        signed = n2.signrawtransaction(tx_funded)['hex']
+        n2.sendrawtransaction(signed)
+        # no errors, yay
+
+
+    def fundrawtransaction_nonwallet_transfer_outs(self):
+        self.log.info("Testing fundrawtransaction with non-wallet transfer outputs...")
+        n0 = self.nodes[0]
+        n1 = self.nodes[1]
+        n2 = self.nodes[2]
+        asset_name = "NODE0_STUFF"
+        n1_address = n1.getnewaddress()
+        n2_address = n2.getnewaddress()
+
+        # fund n2
+        n0.sendtoaddress(n2_address, 1000)
+        n0.generate(1)
+        self.sync_all()
+
+        # issue
+        asset_amount = 100
+        n0.issue(asset_name, asset_amount)
+        n0.generate(1)
+        self.sync_all()
+
+        # have n2 construct transfer to n1_address using n0's utxos
+        inputs = []
+        unspent_asset = n0.listmyassets(asset_name, True)[asset_name]['outpoints'][0]
+        inputs.append({k: unspent_asset[k] for k in ['txid', 'vout']})
+        outputs = {n1_address: {'transfer': {asset_name: asset_amount}}}
+        tx = n2.createrawtransaction(inputs, outputs)
+
+        # n2 pays postage (fee)
+        tx_funded = n2.fundrawtransaction(tx)['hex']
+
+        # n2 signs postage; n0 signs transfer
+        signed1 = n2.signrawtransaction(tx_funded)
+        signed2 = n0.signrawtransaction(signed1['hex'])
+
+        # send and verify
+        n2.sendrawtransaction(signed2['hex'])
+        n2.generate(1)
+        self.sync_all()
+        assert_contains_pair(asset_name, asset_amount, n1.listmyassets())
 
 
     def run_test(self):
@@ -1763,6 +1856,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
         self.issue_multiple_outputs_test()
         self.issue_sub_multiple_outputs_test()
         self.getrawtransaction()
+        self.fundrawtransaction_transfer_outs()
+        self.fundrawtransaction_nonwallet_transfer_outs()
 
 
 

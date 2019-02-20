@@ -310,12 +310,13 @@ class RawTransactionsTest(RavenTestFramework):
         ##############################################
         # test a fundrawtransaction with invalid vin #
         ##############################################
-        inputs  = [ {'txid' : "1c7f966dab21119bac53213a2bc7532bff1fa844c124fd750a7d0b1332440bd1", 'vout' : 0} ] #invalid vin!
-        outputs = { self.nodes[0].getnewaddress() : 1.0}
-        rawtx   = self.nodes[2].createrawtransaction(inputs, outputs)
-        dec_tx  = self.nodes[2].decoderawtransaction(rawtx)
-
-        assert_raises_rpc_error(-4, "Insufficient funds", self.nodes[2].fundrawtransaction, rawtx)
+        # inputs  = [ {'txid' : "1c7f966dab21119bac53213a2bc7532bff1fa844c124fd750a7d0b1332440bd1", 'vout' : 0} ] #invalid vin!
+        # outputs = { self.nodes[0].getnewaddress() : 1.0}
+        # rawtx   = self.nodes[2].createrawtransaction(inputs, outputs)
+        # dec_tx  = self.nodes[2].decoderawtransaction(rawtx)
+        #
+        # assert_raises_rpc_error(-4, "Insufficient funds", self.nodes[2].fundrawtransaction, rawtx)
+        # ### non-wallet inputs are ok now ###
 
         ############################################################
         #compare fee of a standard pubkeyhash transaction
