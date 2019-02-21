@@ -27,9 +27,7 @@ class MempoolLimitTest(RavenTestFramework):
         inputs = [{ "txid" : us0["txid"], "vout" : us0["vout"]}]
         outputs = {self.nodes[0].getnewaddress() : 0.0001}
         tx = self.nodes[0].createrawtransaction(inputs, outputs)
-        self.nodes[0].settxfee(relayfee) # specifically fund this tx with low fee
-        txF = self.nodes[0].fundrawtransaction(tx)
-        self.nodes[0].settxfee(0) # return to automatic fee selection
+        txF = self.nodes[0].fundrawtransaction(tx, {"feeRate": relayfee})  # specifically fund this tx with low fee
         txFS = self.nodes[0].signrawtransaction(txF['hex'])
         txid = self.nodes[0].sendrawtransaction(txFS['hex'])
 
