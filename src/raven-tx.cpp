@@ -527,7 +527,7 @@ static CAmount AmountFromValue(const UniValue& value)
         throw std::runtime_error("Amount is not a number or string");
     CAmount amount;
     if (!ParseFixedPoint(value.getValStr(), 8, &amount))
-        throw std::runtime_error("Invalid amount");
+        throw std::runtime_error("Invalid amount (1)");
     if (!MoneyRange(amount))
         throw std::runtime_error("Amount out of range");
     return amount;
