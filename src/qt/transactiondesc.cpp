@@ -295,9 +295,10 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
     strHTML += "<html><font face='verdana, arial, helvetica, sans-serif'>";
 
     CNewAsset asset;
+    auto currentActiveAssetCache = GetCurrentAssetCache();
     if (IsAssetNameAnOwner(rec->assetName))
         rec->units = OWNER_UNITS;
-    else if (passets && passets->GetAssetMetaDataIfExists(rec->assetName, asset))
+    else if (currentActiveAssetCache && currentActiveAssetCache->GetAssetMetaDataIfExists(rec->assetName, asset))
         rec->units = asset.units;
     else
         rec->units = MAX_ASSET_UNITS;

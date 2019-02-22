@@ -16,6 +16,7 @@ class AssetTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
+        self.extra_args = [['-assetindex'], ['-assetindex'], ['-assetindex']]
 
     def activate_assets(self):
         self.log.info("Generating RVN for node[0] and activating assets...")
@@ -111,7 +112,7 @@ class AssetTest(RavenTestFramework):
         self.log.info("Burning all units to test reissue on zero units...")
         n0.transfer(asset_name="MY_ASSET", qty=800, to_address="n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP")
         n0.generate(1)
-        assert_equal(0, n0.listmyassets(asset="MY_ASSET", verbose=True)["MY_ASSET"]["balance"])
+        assert_does_not_contain_key("MY_ASSET", n0.listmyassets(asset="MY_ASSET", verbose=True))
 
         self.log.info("Calling reissue()...")
         address1 = n0.getnewaddress()

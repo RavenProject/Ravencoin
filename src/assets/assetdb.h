@@ -46,15 +46,15 @@ public:
 
     // Write to database functions
     bool WriteAssetData(const CNewAsset& asset, const int nHeight, const uint256& blockHash);
-    bool WriteMyAssetsData(const std::string &strName, const std::set<COutPoint>& setOuts);
     bool WriteAssetAddressQuantity(const std::string& assetName, const std::string& address, const CAmount& quantity);
+    bool WriteAddressAssetQuantity( const std::string& address, const std::string& assetName, const CAmount& quantity);
     bool WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData);
     bool WriteReissuedMempoolState();
 
     // Read from database functions
     bool ReadAssetData(const std::string& strName, CNewAsset& asset, int& nHeight, uint256& blockHash);
-    bool ReadMyAssetsData(const std::string &strName, std::set<COutPoint>& setOuts);
     bool ReadAssetAddressQuantity(const std::string& assetName, const std::string& address, CAmount& quantity);
+    bool ReadAddressAssetQuantity(const std::string& address, const std::string& assetName, CAmount& quantity);
     bool ReadBlockUndoAssetData(const uint256& blockhash, std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData);
     bool ReadReissuedMempoolState();
 
@@ -62,12 +62,15 @@ public:
     bool EraseAssetData(const std::string& assetName);
     bool EraseMyAssetData(const std::string& assetName);
     bool EraseAssetAddressQuantity(const std::string &assetName, const std::string &address);
+    bool EraseAddressAssetQuantity(const std::string &address, const std::string &assetName);
 
     // Helper functions
-    bool EraseMyOutPoints(const std::string& assetName);
     bool LoadAssets();
     bool AssetDir(std::vector<CDatabasedAssetData>& assets, const std::string filter, const size_t count, const long start);
     bool AssetDir(std::vector<CDatabasedAssetData>& assets);
+
+    bool AddressDir(std::vector<std::pair<std::string, CAmount> >& vecAssetAmount, int& totalEntries, const bool& fGetTotal, const std::string& address, const size_t count, const long start);
+    bool AssetAddressDir(std::vector<std::pair<std::string, CAmount> >& vecAddressAmount, int& totalEntries, const bool& fGetTotal, const std::string& assetName, const size_t count, const long start);
 };
 
 

@@ -2656,7 +2656,7 @@ bool CConnman::OutboundTargetReached(bool historicalBlockServingLimit)
     {
         // keep a large enough buffer to at least relay each block once
         uint64_t timeLeftInCycle = GetMaxOutboundTimeLeftInCycle();
-        uint64_t buffer = timeLeftInCycle / 600 * GetMaxBlockSerializedSize();
+        uint64_t buffer = timeLeftInCycle / 60 * GetMaxBlockSerializedSize();
         if (buffer >= nMaxOutboundLimit || nMaxOutboundTotalBytesSentInCycle >= nMaxOutboundLimit - buffer)
             return true;
     }
@@ -2851,9 +2851,12 @@ void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg)
 
         if (pnode->nSendSize > nSendBufferMaxSize)
             pnode->fPauseSend = true;
+//         LogPrintf("Header: %s\n", HexStr(serializedHeader));
         pnode->vSendMsg.push_back(std::move(serializedHeader));
-        if (nMessageSize)
+        if (nMessageSize) {
+//             LogPrintf("Data: %s\n", HexStr(msg.data));
             pnode->vSendMsg.push_back(std::move(msg.data));
+        }
 
         // If write queue empty, attempt "optimistic write"
         if (optimisticSend == true)

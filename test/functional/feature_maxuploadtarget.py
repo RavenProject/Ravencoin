@@ -14,6 +14,7 @@ if uploadtarget has been reached.
 from collections import defaultdict
 import time
 
+from pprint import *
 from test_framework.mininode import *
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import *
@@ -35,7 +36,8 @@ class MaxUploadTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1
-        self.extra_args = [["-maxuploadtarget=800", "-blockmaxsize=999000"]]
+        self.maxuploadtarget = 11200
+        self.extra_args = [["-maxuploadtarget=%s" % self.maxuploadtarget, "-blockmaxsize=999000"]]
 
         # Cache for utxos, as the listunspent may take a long time later in the test
         self.utxo_cache = []
@@ -90,14 +92,17 @@ class MaxUploadTest(RavenTestFramework):
         getdata_request = msg_getdata()
         getdata_request.inv.append(CInv(2, big_old_block))
 
-        max_bytes_per_day = 800*1024*1024
-        daily_buffer = 144 * 4000000
+        block_rate_minutes = 1
+        blocks_per_day = 24 * 60 / block_rate_minutes
+        max_block_serialized_size = 8000000  # This is MAX_BLOCK_SERIALIZED_SIZE_RIP2
+        max_bytes_per_day = self.maxuploadtarget*1024*1024
+        daily_buffer = blocks_per_day * max_block_serialized_size
         max_bytes_available = max_bytes_per_day - daily_buffer
         success_count = max_bytes_available // old_block_size
 
-        # 576MB will be reserved for relaying new blocks, so expect this to
-        # succeed for ~235 tries.
-        for i in range(success_count):
+        # 224051200B will be reserved for relaying new blocks, so expect this to
+        # succeed for ~236 tries.
+        for i in range(int(success_count)):
             test_nodes[0].send_message(getdata_request)
             test_nodes[0].sync_with_ping()
             assert_equal(test_nodes[0].block_receive_map[big_old_block], i+1)
@@ -113,9 +118,9 @@ class MaxUploadTest(RavenTestFramework):
 
         # Requesting the current block on test_nodes[1] should succeed indefinitely,
         # even when over the max upload target.
-        # We'll try 800 times
+        # We'll try lots of times
         getdata_request.inv = [CInv(2, big_new_block)]
-        for i in range(800):
+        for i in range(500):
             test_nodes[1].send_message(getdata_request)
             test_nodes[1].sync_with_ping()
             assert_equal(test_nodes[1].block_receive_map[big_new_block], i+1)

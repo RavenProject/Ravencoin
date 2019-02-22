@@ -7,6 +7,7 @@
 
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import *
+from pprint import *
 
 
 def get_unspent(listunspent, amount):
@@ -30,6 +31,7 @@ class RawTransactionsTest(RavenTestFramework):
 
     def run_test(self):
         min_relay_tx_fee = self.nodes[0].getnetworkinfo()['relayfee']
+
         # This test is not meant to test fee estimation and we'd like
         # to be sure all txs are sent at a consistent desired feerate
         for node in self.nodes:
@@ -306,16 +308,6 @@ class RawTransactionsTest(RavenTestFramework):
 
         assert_equal(matchingOuts, 2)
         assert_equal(len(dec_tx['vout']), 3)
-
-        ##############################################
-        # test a fundrawtransaction with invalid vin #
-        ##############################################
-        inputs  = [ {'txid' : "1c7f966dab21119bac53213a2bc7532bff1fa844c124fd750a7d0b1332440bd1", 'vout' : 0} ] #invalid vin!
-        outputs = { self.nodes[0].getnewaddress() : 1.0}
-        rawtx   = self.nodes[2].createrawtransaction(inputs, outputs)
-        dec_tx  = self.nodes[2].decoderawtransaction(rawtx)
-
-        assert_raises_rpc_error(-4, "Insufficient funds", self.nodes[2].fundrawtransaction, rawtx)
 
         ############################################################
         #compare fee of a standard pubkeyhash transaction
@@ -624,11 +616,13 @@ class RawTransactionsTest(RavenTestFramework):
 
         inputs = []
         outputs = {self.nodes[3].getnewaddress() : 1}
+        pprint(self.nodes[3].getbalance())
         rawtx = self.nodes[3].createrawtransaction(inputs, outputs)
-        result = self.nodes[3].fundrawtransaction(rawtx) # uses min_relay_tx_fee (set by settxfee)
-        result2 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 2*min_relay_tx_fee})
-        result3 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 10*min_relay_tx_fee})
+        result = self.nodes[3].fundrawtransaction(rawtx) # uses DEFAULT_TRANSACTION_MINFEE
+        result2 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 2*0.0005})
+        result3 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 10*0.0005})
         result_fee_rate = result['fee'] * 1000 / count_bytes(result['hex'])
+        assert_fee_amount(result['fee'], count_bytes(result['hex']), result_fee_rate)
         assert_fee_amount(result2['fee'], count_bytes(result2['hex']), 2 * result_fee_rate)
         assert_fee_amount(result3['fee'], count_bytes(result3['hex']), 10 * result_fee_rate)
 

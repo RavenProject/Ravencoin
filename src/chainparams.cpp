@@ -159,10 +159,10 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0x52;
-        pchMessageStart[1] = 0x41;
-        pchMessageStart[2] = 0x56;
-        pchMessageStart[3] = 0x4e;
+        pchMessageStart[0] = 0x52; // R
+        pchMessageStart[1] = 0x41; // A
+        pchMessageStart[2] = 0x56; // V
+        pchMessageStart[3] = 0x4e; // N
         nDefaultPort = 8767;
         nPruneAfterHeight = 100000;
 
@@ -192,7 +192,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-
+                { 535721, uint256S("0x000000000001217f58a594ca742c8635ecaaaf695d1a63f6ab06979f1c159e04")},
             }
         };
 
@@ -267,10 +267,10 @@ public:
         consensus.defaultAssumeValid = uint256S("0x00");
 
 
-        pchMessageStart[0] = 0x52;
-        pchMessageStart[1] = 0x56;
-        pchMessageStart[2] = 0x4E;
-        pchMessageStart[3] = 0x54;
+        pchMessageStart[0] = 0x52; // R
+        pchMessageStart[1] = 0x56; // V
+        pchMessageStart[2] = 0x4E; // N
+        pchMessageStart[3] = 0x54; // T
         nDefaultPort = 18770;
         nPruneAfterHeight = 1000;
 
@@ -437,10 +437,10 @@ public:
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00");
 
-        pchMessageStart[0] = 0x43;
-        pchMessageStart[1] = 0x52;
-        pchMessageStart[2] = 0x4F;
-        pchMessageStart[3] = 0x57;
+        pchMessageStart[0] = 0x43; // C
+        pchMessageStart[1] = 0x52; // R
+        pchMessageStart[2] = 0x4F; // O
+        pchMessageStart[3] = 0x57; // W
         nDefaultPort = 18444;
         nPruneAfterHeight = 1000;
 

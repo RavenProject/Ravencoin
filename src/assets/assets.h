@@ -28,6 +28,7 @@
 #define DEFAULT_HAS_IPFS 0
 #define DEFAULT_IPFS ""
 #define MIN_ASSET_LENGTH 3
+#define MAX_ASSET_LENGTH 32
 #define OWNER_TAG "!"
 #define OWNER_LENGTH 1
 #define OWNER_UNITS 0
@@ -51,6 +52,7 @@ class CWalletTx;
 struct CAssetOutputEntry;
 class CCoinControl;
 struct CBlockAssetUndo;
+class COutput;
 
 // 2500 * 82 Bytes == 205 KB (kilobytes) of memory
 #define MAX_CACHE_ASSETS_SIZE 2500
@@ -62,27 +64,18 @@ extern std::map<std::string, uint256> mapReissuedAssets;
 
 class CAssets {
 public:
-
-    std::map<std::string, std::set<COutPoint> > mapMyUnspentAssets; // Asset Name -> COutPoint
-
-
-    std::map<std::string, std::set<std::string> > mapAssetsAddresses; // Asset Name -> set <Addresses>
     std::map<std::pair<std::string, std::string>, CAmount> mapAssetsAddressAmount; // pair < Asset Name , Address > -> Quantity of tokens in the address
 
     // Dirty, Gets wiped once flushed to database
     std::map<std::string, CNewAsset> mapReissuedAssetData; // Asset Name -> New Asset Data
 
     CAssets(const CAssets& assets) {
-        this->mapMyUnspentAssets = assets.mapMyUnspentAssets;
         this->mapAssetsAddressAmount = assets.mapAssetsAddressAmount;
-        this->mapAssetsAddresses = assets.mapAssetsAddresses;
         this->mapReissuedAssetData = assets.mapReissuedAssetData;
     }
 
     CAssets& operator=(const CAssets& other) {
-        mapMyUnspentAssets = other.mapMyUnspentAssets;
         mapAssetsAddressAmount = other.mapAssetsAddressAmount;
-        mapAssetsAddresses = other.mapAssetsAddresses;
         mapReissuedAssetData = other.mapReissuedAssetData;
         return *this;
     }
@@ -92,8 +85,6 @@ public:
     }
 
     void SetNull() {
-        mapMyUnspentAssets.clear();
-        mapAssetsAddresses.clear();
         mapAssetsAddressAmount.clear();
         mapReissuedAssetData.clear();
     }
@@ -109,7 +100,6 @@ public :
     //! These are memory only containers that show dirty entries that will be databased when flushed
     std::vector<CAssetCacheUndoAssetAmount> vUndoAssetAmount;
     std::vector<CAssetCacheSpendAsset> vSpentAssets;
-    std::set<std::string> setChangeOwnedOutPoints;
 
     // New Assets Caches
     std::set<CAssetCacheNewAsset> setNewAssetsToRemove;
@@ -127,23 +117,14 @@ public :
     std::set<CAssetCacheNewTransfer> setNewTransferAssetsToAdd;
     std::set<CAssetCacheNewTransfer> setNewTransferAssetsToRemove;
 
-    //! During init, the wallet isn't enabled, there for if we disconnect any blocks
-    //! We need to store possible unspends of assets that could be ours and check back when the wallet is enabled.
-    std::set<CAssetCachePossibleMine> setPossiblyMineAdd;
-    std::set<CAssetCachePossibleMine> setPossiblyMineRemove;
-
     CAssetsCache() : CAssets()
     {
         SetNull();
+        ClearDirtyCache();
     }
 
     CAssetsCache(const CAssetsCache& cache) : CAssets(cache)
     {
-        this->mapMyUnspentAssets = cache.mapMyUnspentAssets;
-        this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
-        this->mapAssetsAddresses = cache.mapAssetsAddresses;
-        this->mapReissuedAssetData = cache.mapReissuedAssetData;
-
         // Copy dirty cache also
         this->vSpentAssets = cache.vSpentAssets;
         this->vUndoAssetAmount = cache.vUndoAssetAmount;
@@ -163,16 +144,11 @@ public :
         // Owner Caches
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
-
-        // Changed Outpoints Caches
-        this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
     }
 
     CAssetsCache& operator=(const CAssetsCache& cache)
     {
-        this->mapMyUnspentAssets = cache.mapMyUnspentAssets;
         this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
-        this->mapAssetsAddresses = cache.mapAssetsAddresses;
         this->mapReissuedAssetData = cache.mapReissuedAssetData;
 
         // Copy dirty cache also
@@ -194,46 +170,8 @@ public :
         // Owner Caches
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
-
-        // Changed Outpoints Caches
-        this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
 
         return *this;
-    }
-
-    void Copy(const CAssetsCache& cache)
-    {
-        this->mapMyUnspentAssets = cache.mapMyUnspentAssets;
-        this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
-        this->mapAssetsAddresses = cache.mapAssetsAddresses;
-        this->mapReissuedAssetData = cache.mapReissuedAssetData;
-
-        // Copy dirty cache also
-        this->vSpentAssets = cache.vSpentAssets;
-        this->vUndoAssetAmount = cache.vUndoAssetAmount;
-
-        // Transfer Caches
-        this->setNewTransferAssetsToAdd = cache.setNewTransferAssetsToAdd;
-        this->setNewTransferAssetsToRemove = cache.setNewTransferAssetsToRemove;
-
-        // Issue Caches
-        this->setNewAssetsToRemove = cache.setNewAssetsToRemove;
-        this->setNewAssetsToAdd = cache.setNewAssetsToAdd;
-
-        // Reissue Caches
-        this->setNewReissueToRemove = cache.setNewReissueToRemove;
-        this->setNewReissueToAdd = cache.setNewReissueToAdd;
-
-        // Owner Caches
-        this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
-        this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
-
-        // Changed Outpoints Caches
-        this->setChangeOwnedOutPoints = cache.setChangeOwnedOutPoints;
-
-        // Copy sets of possibilymine
-        this->setPossiblyMineAdd = cache.setPossiblyMineAdd;
-        this->setPossiblyMineRemove = cache.setPossiblyMineRemove;
     }
 
     // Cache only undo functions
@@ -247,17 +185,14 @@ public :
     bool AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash);
     bool AddTransferAsset(const CAssetTransfer& transferAsset, const std::string& address, const COutPoint& out, const CTxOut& txOut);
     bool AddOwnerAsset(const std::string& assetsName, const std::string address);
-    bool AddToMyUnspentOutPoints(const std::string& strName, const COutPoint& out);
     bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out);
 
     // Cache only validation functions
     bool TrySpendCoin(const COutPoint& out, const CTxOut& coin);
 
     // Help functions
-    bool GetAssetsOutPoints(const std::string& strName, std::set<COutPoint>& outpoints);
     bool ContainsAsset(const CNewAsset& asset);
     bool ContainsAsset(const std::string& assetName);
-    bool AddPossibleOutPoint(const CAssetCachePossibleMine& possibleMine);
 
     bool CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck = true);
     bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash);
@@ -268,9 +203,13 @@ public :
 
     //! Get the size of the none databased cache
     size_t GetCacheSize() const;
+    size_t GetCacheSizeV2() const;
 
-    //! Flush a cache to a different cache (usually passets), save to database if fToDataBase is true
-    bool Flush(bool fSoftCopy = false, bool fToDataBase = false);
+    //! Flush all new cache entries into the passets global cache
+    bool Flush();
+
+    //! Write asset cache data to database
+    bool DumpCacheToDatabase();
 
     void ClearDirtyCache() {
 
@@ -289,21 +228,17 @@ public :
         setNewOwnerAssetsToAdd.clear();
         setNewOwnerAssetsToRemove.clear();
 
-        setChangeOwnedOutPoints.clear();
-
         mapReissuedAssetData.clear();
         mapAssetsAddressAmount.clear();
-
-        // Copy sets of possibilymine
-        setPossiblyMineAdd.clear();
-        setPossiblyMineRemove.clear();
     }
 
    std::string CacheToString() const {
 
-      return strprintf("vNewAssetsToRemove size : %d, vNewAssetsToAdd size : %d, vNewTransfer size : %d, vSpentAssets : %d, setChangeOwnedOutPoints size : %d\n",
-                       setNewAssetsToRemove.size(), setNewAssetsToAdd.size(), setNewTransferAssetsToAdd.size(), vSpentAssets.size(), setChangeOwnedOutPoints.size());
-    }
+       return strprintf(
+               "vNewAssetsToRemove size : %d, vNewAssetsToAdd size : %d, vNewTransfer size : %d, vSpentAssets : %d\n",
+               setNewAssetsToRemove.size(), setNewAssetsToAdd.size(), setNewTransferAssetsToAdd.size(),
+               vSpentAssets.size());
+   }
 };
 
 // Functions to be used to get access to the current burn amount required for specific asset issuance transactions
@@ -351,7 +286,7 @@ bool CheckTransferOwnerTx(const CTxOut& txOut);
 
 bool CheckEncodedIPFS(const std::string& hash, std::string& strError);
 
-bool CheckAmountWithUnits(const CAmount& nAmount, const uint8_t nUnits);
+bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits);
 
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool IsScriptNewUniqueAsset(const CScript& scriptPubKey, int& nStartingIndex);
@@ -368,10 +303,6 @@ bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, con
 
 void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names, int nMinConf = 1);
 void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, int nMinConf = 1, bool fIncludeAdministrator = false, bool fOnlyAdministrator = false);
-/** TO BE USED ONLY ON STARTUP */
-void GetAllMyAssetsFromCache(std::vector<std::string>& names);
-
-void UpdatePossibleAssets();
 
 bool GetAssetInfoFromCoin(const Coin& coin, std::string& strName, CAmount& nAmount);
 bool GetAssetInfoFromScript(const CScript& scriptPubKey, std::string& strName, CAmount& nAmount);
@@ -380,11 +311,7 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data);
 
 bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName, const std::string& address);
 
-bool GetMyOwnedAssets(CAssetsCache& cache, std::vector<std::string>& assets);
-bool GetMyOwnedAssets(CAssetsCache& cache, const std::string prefix, std::vector<std::string>& assetNames);
-bool GetMyAssetBalance(CAssetsCache& cache, const std::string& assetName, CAmount& balance);
-bool GetMyAssetBalances(CAssetsCache& cache, const std::vector<std::string>& assetNames, std::map<std::string, CAmount>& balances);
-bool GetMyAssetBalances(CAssetsCache& cache, std::map<std::string, CAmount>& balances);
+bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const std::string& prefix = "");
 
 /** Verifies that this wallet owns the give asset */
 bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
