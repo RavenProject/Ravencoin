@@ -753,7 +753,7 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
         result.push_back(Pair(pair.first, UnitValueFromAmount(pair.second, asset_name)));
     }
 
-    
+
     return result;
 }
 
