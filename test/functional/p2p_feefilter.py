@@ -83,7 +83,7 @@ class FeeFilterTest(RavenTestFramework):
         # to 35 entries in an inv, which means that when this next transaction
         # is eligible for relay, the prior transactions from node1 are eligible
         # as well.
-        node0.settxfee(Decimal("0.00070000"))
+        node0.settxfee(Decimal("0.1000000"))
         txids = [node0.sendtoaddress(node0.getnewaddress(), 1)] #
         assert(allInvsMatch(txids, test_node))
         test_node.clear_invs()
