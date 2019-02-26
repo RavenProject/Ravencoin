@@ -101,6 +101,8 @@ arith_uint256 nMinimumChainWork;
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
+CFeeRate minRelayTxFeeV2 = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE_V2);
+
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
 
@@ -666,7 +668,9 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         // No transactions are allowed below minRelayTxFee except from disconnected blocks
-        if (!bypass_limits && nModifiedFees < ::minRelayTxFee.GetFee(nSize)) {
+        if (!bypass_limits && nModifiedFees < (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize))) {
+
+            LogPrintf("Modifed fees: %u, minrelayfee: %u\n", nModifiedFees, AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize));
             return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "min relay fee not met");
         }
 
