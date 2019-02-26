@@ -9,7 +9,7 @@
 #include <base58.h>
 #include "messages.h"
 #include "messagedb.h"
-#include "block.h"
+#include <primitives/block.h>
 
 
 std::set<COutPoint> setDirtyMessagesRemove;

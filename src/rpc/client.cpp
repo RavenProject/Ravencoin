@@ -180,6 +180,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listassetbalancesbyaddress", 1, "totalonly"},
     { "listassetbalancesbyaddress", 2, "count"},
     { "listassetbalancesbyaddress", 3, "start"},
+    { "sendmessage", 2, "expire_time"},
 };
 
 class CRPCConvertTable
