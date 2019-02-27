@@ -266,9 +266,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1533924000; // GMT: Friday, August 10, 2018 6:00:00 PM
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1538351999; // GMT: Sunday, September 30, 2018 11:59:59 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 6;  //Assets (RIP2)
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 1544116233; // Dec 6, 2018
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 1579480000; // Jan 20, 2020
+        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 6;  //Assets (RIP5)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 1551657600000; // GMT: Sunday Mar 3, 2019 5:00:00 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 1579480000; // GMT: Sun Jan 19 2020 05:26:40 PM
 
 
         // The best chain should have at least this much work.
