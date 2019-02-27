@@ -25,6 +25,7 @@ public:
     bool ReadMessage(const COutPoint& out, CMessage& message);
     bool EraseMessage(const COutPoint& out);
     bool LoadMessages(std::set<CMessage>& setMessages);
+    bool EraseAllMessages(int& count);
 
     // Write / Read Database flags
     bool WriteFlag(const std::string &name, bool fValue);

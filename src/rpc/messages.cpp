@@ -246,6 +246,40 @@ UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
     return NullUniValue;
 }
 
+UniValue clearmessages(const JSONRPCRequest& request) {
+    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 0)
+        throw std::runtime_error(
+                "clearmessages \n"
+                + MessageActivationWarning() +
+                "\nDelete current database of messages\n"
+
+                "\nResult:[\n"
+                "\n]\n"
+                "\nExamples:\n"
+                + HelpExampleCli("clearmessages", "")
+                + HelpExampleRpc("clearmessages", "")
+        );
+
+    if (!fMessaging) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+    }
+
+    if (!pMessagesCache || !pmessagedb) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Message database isn't setup");
+    }
+
+    int count = 0;
+    count += mapDirtyMessagesAdd.size();
+
+    pMessagesCache->Clear();
+    setDirtyMessagesRemove.clear();
+    mapDirtyMessagesAdd.clear();
+    mapDirtyMessagesOrphaned.clear();
+    pmessagedb->EraseAllMessages(count);
+
+    return "Erased " + std::to_string(count) + " Messages from the database and cache";
+}
+
 UniValue sendmessage(const JSONRPCRequest& request) {
     if (request.fHelp || !AreMessagingDeployed() || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
@@ -349,6 +383,7 @@ static const CRPCCommand commands[] =
             { "messages",       "subscribetochannel",         &subscribetochannel,         {"channel_name"}},
             { "messages",       "unsubscribefromchannel",     &unsubscribefromchannel,     {"channel_name"}},
             { "messages",       "sendmessage",                &sendmessage,                {"channel", "ipfs_hash", "expire_time"}},
+            { "messages",       "clearmessages",              &clearmessages,              {}},
     };
 
 void RegisterMessageRPCCommands(CRPCTable &t)

@@ -670,7 +670,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // No transactions are allowed below minRelayTxFee except from disconnected blocks
         if (!bypass_limits && nModifiedFees < (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize))) {
 
-            LogPrintf("Modifed fees: %u, minrelayfee: %u\n", nModifiedFees, AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize));
+            LogPrintf("Modifed fees: %u, minrelayfee: %u\n", nModifiedFees, (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize)));
             return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "min relay fee not met");
         }
 

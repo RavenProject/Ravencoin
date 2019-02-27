@@ -54,6 +54,38 @@ bool CMessageDB::LoadMessages(std::set<CMessage>& setMessages)
     return true;
 }
 
+bool CMessageDB::EraseAllMessages(int& count)
+{
+    std::set<CMessage> setMessages;
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    pcursor->Seek(std::make_pair(MESSAGE_FLAG, COutPoint()));
+
+    // Load messages
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, COutPoint> key;
+        if (pcursor->GetKey(key) && key.first == MESSAGE_FLAG) {
+            CMessage message;
+            if (pcursor->GetValue(message)) {
+                setMessages.insert(message);
+                pcursor->Next();
+            } else {
+                LogPrintf("%s: failed to read message\n", __func__);
+                pcursor->Next();
+            }
+        } else {
+            break;
+        }
+    }
+
+    count += setMessages.size();
+    for (auto message : setMessages)
+        EraseMessage(message.out);
+
+    return true;
+}
+
 bool CMessageDB::Flush() {
     try {
         LogPrintf("%s: Flushing messages to database removeSize:%u, addSize:%u, orphanSize:%u\n", __func__, setDirtyMessagesRemove.size(), mapDirtyMessagesAdd.size(), mapDirtyMessagesOrphaned.size());
