@@ -88,7 +88,7 @@ bool CMessageDB::EraseAllMessages(int& count)
 
 bool CMessageDB::Flush() {
     try {
-        LogPrintf("%s: Flushing messages to database removeSize:%u, addSize:%u, orphanSize:%u\n", __func__, setDirtyMessagesRemove.size(), mapDirtyMessagesAdd.size(), mapDirtyMessagesOrphaned.size());
+
         for (auto messageRemove : setDirtyMessagesRemove) {
             if (!EraseMessage(messageRemove))
                 return error("%s: failed to erase message %s", __func__, messageRemove.ToString());
