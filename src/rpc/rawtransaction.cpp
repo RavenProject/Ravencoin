@@ -545,7 +545,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                 if (assetKey_ == "issue")
                 {
-
                     if (asset_[0].type() != UniValue::VOBJ)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"issue\": {\"key\": value}, ...}"));
 
@@ -595,7 +594,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     AssetType type;
                     if (IsAssetNameValid(asset.strName, type)) {
-                        if (type != AssetType::UNIQUE) {
+                        if (type != AssetType::UNIQUE && type != AssetType::MSGCHANNEL) {
                             asset.ConstructOwnerTransaction(ownerPubKey);
 
                             // Push the scriptPubKey into the vouts.
@@ -613,7 +612,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                 }
                 else if (assetKey_ == "issue_unique")
                 {
-
                     if (asset_[0].type() != UniValue::VOBJ)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"issue_unique\": {\"root_name\": value}, ...}"));
 

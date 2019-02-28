@@ -36,6 +36,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "issueunique", 1, "asset_tags"},
     { "issueunique", 2, "ipfs_hashes"},
     { "transfer", 1, "qty"},
+    { "transfer", 4, "expire_time"},
     { "transferfromaddress", 2, "qty"},
     { "transferfromaddresses", 1, "from_addresses"},
     { "transferfromaddresses", 2, "qty"},
@@ -182,6 +183,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listassetbalancesbyaddress", 1, "totalonly"},
     { "listassetbalancesbyaddress", 2, "count"},
     { "listassetbalancesbyaddress", 3, "start"},
+    { "sendmessage", 2, "expire_time"},
 };
 
 class CRPCConvertTable

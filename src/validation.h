@@ -35,6 +35,8 @@
 #include <atomic>
 #include <assets/assets.h>
 #include <assets/assetdb.h>
+#include <assets/messages.h>
+#include <assets/messagedb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -61,8 +63,9 @@ static const bool DEFAULT_WHITELISTRELAY = true;
 static const bool DEFAULT_WHITELISTFORCERELAY = true;
 /** Default for -minrelaytxfee, minimum relay fee for transactions */
 static const unsigned int DEFAULT_MIN_RELAY_TX_FEE = 1000;
+static const unsigned int DEFAULT_MIN_RELAY_TX_FEE_V2 = 1000000;
 //! -maxtxfee default
-static const CAmount DEFAULT_TRANSACTION_MAXFEE = 10 * COIN;
+static const CAmount DEFAULT_TRANSACTION_MAXFEE = 1000 * COIN;
 //! Discourage users to set fees higher than this amount (in satoshis) per kB
 static const CAmount HIGH_TX_FEE_PER_KB = 0.01 * COIN;
 //! -maxtxfee will warn if called with a higher fee than this amount (in satoshis)
@@ -186,6 +189,7 @@ extern CWaitableCriticalSection csBestBlock;
 extern CConditionVariable cvBlockChange;
 extern std::atomic_bool fImporting;
 extern std::atomic_bool fReindex;
+extern bool fMessaging;
 extern int nScriptCheckThreads;
 extern bool fTxIndex;
 extern bool fAssetIndex;
@@ -201,6 +205,10 @@ extern size_t nCoinCacheUsage;
 extern CFeeRate minRelayTxFee;
 /** Absolute maximum transaction fee (in satoshis) used by wallet and mempool (rejects high fee in sendrawtransaction) */
 extern CAmount maxTxFee;
+/** A fee rate smaller than this is considered zero fee (for relaying, mining and transaction creation) */
+extern CFeeRate minRelayTxFeeV2;
+
+
 /** If the tip is older than this (in seconds), the node is considered to be in initial block download. */
 extern int64_t nMaxTipAge;
 extern bool fEnableReplacement;
@@ -497,6 +505,12 @@ extern CAssetsDB *passetsdb;
 extern CAssetsCache *passets;
 /** Global variable that point to the assets LRU Cache (protexted by cs_main) */
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
+
+extern CLRUCache<std::string, CMessage> *pMessagesCache;
+extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
+extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
+extern CMessageDB *pmessagedb;
+extern CMessageChannelDB *pmessagechanneldb;
 /** RVN END */
 
 /**
@@ -532,6 +546,8 @@ bool LoadMempool();
 
 /** RVN START */
 bool AreAssetsDeployed();
+
+bool AreMessagingDeployed();
 
 bool IsDGWActive(unsigned int nBlockNumber);
 
