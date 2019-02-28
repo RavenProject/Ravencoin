@@ -846,6 +846,208 @@ UniValue transfer(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue transferfromaddresses(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() != 4)
+        throw std::runtime_error(
+            "transferfromaddresses \"asset_name\" [\"from_addresses\"] qty \"to_address\"\n"
+            + AssetActivationWarning() +
+            "\nTransfer a quantity of an owned asset in specific address(es) to a given address"
+
+            "\nArguments:\n"
+            "1. \"asset_name\"               (string, required) name of asset\n"
+            "2. \"from_addresses\"           (array, required) list of from addresses to send from\n"
+            "3. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
+            "4. \"to_address\"               (string, required) address to send the asset to\n"
+
+            "\nResult:\n"
+            "txid"
+            "[ \n"
+                "txid\n"
+                "]\n"
+
+            "\nExamples:\n"
+            + HelpExampleCli("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"address\"")
+            + HelpExampleRpc("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"address\"")
+            );
+
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    std::string asset_name = request.params[0].get_str();
+
+    const UniValue& from_addresses = request.params[1];
+
+    if (!from_addresses.isArray() || from_addresses.size() < 1) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("From addresses must be a non-empty array."));
+    }
+
+    std::set<std::string> setFromDestinations;
+
+    // Add the given array of addresses into the set of destinations
+    for (int i = 0; i < (int) from_addresses.size(); i++) {
+        std::string address = from_addresses[i].get_str();
+        CTxDestination dest = DecodeDestination(address);
+        if (!IsValidDestination(dest))
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("From addresses must be valid addresses. Invalid address: ") + address);
+
+        setFromDestinations.insert(address);
+    }
+
+    CAmount nAmount = AmountFromValue(request.params[2]);
+
+    std::string address = request.params[3].get_str();
+
+    std::pair<int, std::string> error;
+    std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
+
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount), address));
+    CReserveKey reservekey(pwallet);
+    CWalletTx transaction;
+    CAmount nRequiredFee;
+
+    CCoinControl ctrl;
+    std::map<std::string, std::vector<COutput> > mapAssetCoins;
+    pwallet->AvailableAssets(mapAssetCoins);
+
+    if (!mapAssetCoins.count(asset_name)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
+    }
+
+    // Add all the asset outpoints that match the set of given from addresses
+    for (const auto& out : mapAssetCoins.at(asset_name)) {
+        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
+        CTxDestination dest;
+        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, dest);
+
+        if (setFromDestinations.count(EncodeDestination(dest)))
+            ctrl.SelectAsset(COutPoint(out.tx->GetHash(), out.i));
+    }
+
+    std::vector<COutPoint> outs;
+    ctrl.ListSelectedAssets(outs);
+    if (!outs.size()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("No asset outpoints are selected from the given addresses, failed to create the transaction"));
+    }
+
+    // Create the Transaction
+    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+    throw JSONRPCError(error.first, error.second);
+
+    // Send the Transaction to the network
+    std::string txid;
+    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+    throw JSONRPCError(error.first, error.second);
+
+    // Display the transaction id
+    UniValue result(UniValue::VARR);
+    result.push_back(txid);
+    return result;
+}
+
+UniValue transferfromaddress(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() != 4)
+        throw std::runtime_error(
+                "transferfromaddress \"asset_name\" \"from_address\" qty \"to_address\"\n"
+                + AssetActivationWarning() +
+                "\nTransfer a quantity of an owned asset in a specific address to a given address"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"               (string, required) name of asset\n"
+                "2. \"from_address\"             (string, required) address that the asset will be transferred from\n"
+                "3. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
+                "4. \"to_address\"               (string, required) address to send the asset to\n"
+
+                "\nResult:\n"
+                "txid"
+                "[ \n"
+                "txid\n"
+                "]\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\"")
+                + HelpExampleRpc("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\"")
+        );
+
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    std::string asset_name = request.params[0].get_str();
+
+    std::string from_address = request.params[1].get_str();
+
+    // Check to make sure the given from address is valid
+    CTxDestination dest = DecodeDestination(from_address);
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("From address must be valid addresses. Invalid address: ") + from_address);
+
+    CAmount nAmount = AmountFromValue(request.params[2]);
+
+    std::string address = request.params[3].get_str();
+
+    std::pair<int, std::string> error;
+    std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
+
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount), address));
+    CReserveKey reservekey(pwallet);
+    CWalletTx transaction;
+    CAmount nRequiredFee;
+
+    CCoinControl ctrl;
+    std::map<std::string, std::vector<COutput> > mapAssetCoins;
+    pwallet->AvailableAssets(mapAssetCoins);
+
+    if (!mapAssetCoins.count(asset_name)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
+    }
+
+    // Add all the asset outpoints that match the given from addresses
+    for (const auto& out : mapAssetCoins.at(asset_name)) {
+        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
+        CTxDestination dest;
+        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, dest);
+
+        if (from_address == EncodeDestination(dest))
+            ctrl.SelectAsset(COutPoint(out.tx->GetHash(), out.i));
+    }
+
+    std::vector<COutPoint> outs;
+    ctrl.ListSelectedAssets(outs);
+    if (!outs.size()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("No asset outpoints are selected from the given address, failed to create the transaction"));
+    }
+
+    // Create the Transaction
+    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
+        throw JSONRPCError(error.first, error.second);
+
+    // Send the Transaction to the network
+    std::string txid;
+    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+        throw JSONRPCError(error.first, error.second);
+
+    // Display the transaction id
+    UniValue result(UniValue::VARR);
+    result.push_back(txid);
+    return result;
+}
+
+
 UniValue reissue(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 7 || request.params.size() < 3)
@@ -870,7 +1072,7 @@ UniValue reissue(const JSONRPCRequest& request)
 
                 "\nExamples:\n"
                 + HelpExampleCli("reissue", "\"ASSET_NAME\" 20 \"address\"")
-                + HelpExampleCli("reissue", "\"ASSET_NAME\" 20 \"address\" \"change_address\" \"true\" 8 \"Qmd286K6pohQcTKYqnS1YhWrCiS4gz7Xi34sdwMe9USZ7u\"")
+                + HelpExampleRpc("reissue", "\"ASSET_NAME\" 20 \"address\" \"change_address\" \"true\" 8 \"Qmd286K6pohQcTKYqnS1YhWrCiS4gz7Xi34sdwMe9USZ7u\"")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -1103,6 +1305,9 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
+    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
+    { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address"}},
+    { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
