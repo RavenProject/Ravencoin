@@ -10,6 +10,7 @@
 
 class CBlockIndex;
 class CZMQAbstractNotifier;
+class CMessage;
 
 typedef CZMQAbstractNotifier* (*CZMQNotifierFactory)();
 
@@ -35,6 +36,7 @@ public:
 
     virtual bool NotifyBlock(const CBlockIndex *pindex);
     virtual bool NotifyTransaction(const CTransaction &transaction);
+    virtual bool NotifyMessage(const CMessage& message);
 
 protected:
     void *psocket;

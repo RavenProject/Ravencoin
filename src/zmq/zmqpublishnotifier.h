@@ -9,6 +9,7 @@
 #include "zmqabstractnotifier.h"
 
 class CBlockIndex;
+class CMessage;
 
 class CZMQAbstractPublishNotifier : public CZMQAbstractNotifier
 {
@@ -51,6 +52,12 @@ class CZMQPublishRawTransactionNotifier : public CZMQAbstractPublishNotifier
 {
 public:
     bool NotifyTransaction(const CTransaction &transaction) override;
+};
+
+class CZMQPublishNewAssetMessageNotifier : public CZMQAbstractPublishNotifier
+{
+public:
+    bool NotifyMessage(const CMessage& message) override;
 };
 
 #endif // RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
