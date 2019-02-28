@@ -428,7 +428,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
     // Create map that stores the amount of an asset transaction input. Used to verify no assets are burned
     std::map<std::string, CAmount> totalInputs;
 
-    std::map<int, std::string> mapAddresses;
+    std::map<std::string, std::string> mapAddresses;
 
     for (unsigned int i = 0; i < tx.vin.size(); ++i) {
         const COutPoint &prevout = tx.vin[i].prevout;
@@ -447,7 +447,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                 totalInputs.insert(make_pair(data.assetName, data.nAmount));
 
             if (AreMessagingDeployed()) {
-                mapAddresses.insert(make_pair(i,EncodeDestination(data.destination)));
+                mapAddresses.insert(make_pair(data.assetName,EncodeDestination(data.destination)));
             }
         }
     }
@@ -494,12 +494,14 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                 if (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName)) {
                     if (!transfer.message.empty()) {
                         if (transfer.nExpireTime == 0 || transfer.nExpireTime > currentTime) {
-                            if (mapAddresses.count(index) && mapAddresses.at(index) == address) {
-                                COutPoint out(tx.GetHash(), index);
-                                CMessage message(out, transfer.strName, transfer.message,
-                                                 transfer.nExpireTime, nBlocktime);
-                                setMessages->insert(message);
-                                LogPrintf("Got message: %s\n", message.ToString()); // TODO remove after testing
+                            if (mapAddresses.count(transfer.strName)) {
+                                if (mapAddresses.at(transfer.strName) == address) {
+                                    COutPoint out(tx.GetHash(), index);
+                                    CMessage message(out, transfer.strName, transfer.message,
+                                                     transfer.nExpireTime, nBlocktime);
+                                    setMessages->insert(message);
+                                    LogPrintf("Got message: %s\n", message.ToString()); // TODO remove after testing
+                                }
                             }
                         }
                     }
