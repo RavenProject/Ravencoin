@@ -52,6 +52,8 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
                 "\"Block Height:\"                   (number) The height of the block the message was included in\n"
                 "\"Status:\"                         (string) Status of the message (READ, UNREAD, ORPHAN, EXPIRED, SPAM, HIDDEN, ERROR)\n"
                 "\"Expire Time:\"                    (Date, optional) If the message had an expiration date assigned, it will be shown hear in the format (YY-mm-dd Hour-minute-second)\n"
+                "\"Expire UTC Time:\"                (Date, optional) If the message contains a expire date that is to large, the UTC number will be displayed\n"
+
 
                 "\nExamples:\n"
                 + HelpExampleCli("viewallmessages", "")
@@ -103,8 +105,13 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
         obj.push_back(Pair("Time", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", message.time)));
         obj.push_back(Pair("Block Height", message.nBlockHeight));
         obj.push_back(Pair("Status", MessageStatusToString(message.status)));
-        if (message.nExpiredTime)
-            obj.push_back(Pair("Expire Time", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", message.nExpiredTime)));
+        try {
+            std::string date = DateTimeStrFormat("%Y-%m-%d %H:%M:%S", message.nExpiredTime);
+            if (message.nExpiredTime)
+                obj.push_back(Pair("Expire Time", date));
+        } catch (...) {
+            obj.push_back(Pair("Expire UTC Time", message.nExpiredTime));
+        }
 
         messages.push_back(obj);
     }

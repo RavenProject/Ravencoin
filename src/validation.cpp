@@ -2636,11 +2636,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     if (AreMessagingDeployed() && fMessaging && setMessages.size()) {
         LOCK(cs_messaging);
         for (auto message : setMessages) {
+            int nHeight = 0;
+            if (pindex)
+                nHeight = pindex->nHeight;
+            message.nBlockHeight = nHeight;
+
+            if (message.nExpiredTime == 0 || GetTime() < message.nExpiredTime)
+                GetMainSignals().NewAssetMessage(message);
+
             if (IsChannelSubscribed(message.strName)) {
-                int nHeight = 0;
-                if (pindex)
-                    nHeight = pindex->nHeight;
-                message.nBlockHeight = nHeight;
                 AddMessage(message);
             }
         }

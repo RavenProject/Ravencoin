@@ -92,7 +92,7 @@ public:
         nBlockHeight = 0;
     }
 
-    std::string ToString() {
+    std::string ToString() const {
         return strprintf("CMessage(%s, Name=%s, Message=%s, Expires=%u, Time=%u, BlockHeight=%u)", out.ToString(), strName,
                          EncodeIPFS(ipfsHash), nExpiredTime, time, nBlockHeight);
     }
@@ -123,6 +123,23 @@ public:
             ::Serialize(s, IntFromMessageStatus(status));
         }
     }
+};
+
+class CZMQMessage {
+public:
+    int blockHeight;
+    std::string assetName;
+    std::string ipfsHash;
+    int64_t nExpireTime;
+
+    CZMQMessage(const CMessage& message) {
+        this->blockHeight = message.nBlockHeight;
+        this->assetName = message.strName;
+        this->ipfsHash = message.ipfsHash;
+        this->nExpireTime = message.nExpiredTime;
+    }
+
+    std::string createJsonString();
 };
 
 #endif //RAVENCOIN_MESSAGES_H

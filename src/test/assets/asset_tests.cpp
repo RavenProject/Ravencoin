@@ -123,7 +123,6 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(!IsAssetNameValid("ABC~X._X", type));
         BOOST_CHECK(!IsAssetNameValid("ABC~X_.X", type));
         BOOST_CHECK(!IsAssetNameValid("ABC~X..X", type));
-        BOOST_CHECK(!IsAssetNameValid("ABC~nolower", type));
 
         // owner
         BOOST_CHECK(IsAssetNameAnOwner("ABC!"));

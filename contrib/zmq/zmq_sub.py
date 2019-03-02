@@ -47,6 +47,7 @@ class ZMQHandler():
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "hashtx")
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawblock")
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawtx")
+        self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawmessage")
         self.zmqSubSocket.connect("tcp://127.0.0.1:%i" % port)
 
     async def handle(self) :
@@ -69,6 +70,9 @@ class ZMQHandler():
         elif topic == b"rawtx":
             print('- RAW TX ('+sequence+') -')
             print(binascii.hexlify(body))
+        elif topic == b"rawmessage":
+            print('- RAW ASSET MSG ('+sequence+') -')
+            print(body)
         # schedule ourselves to receive the next message
         asyncio.ensure_future(self.handle())
 
@@ -80,6 +84,7 @@ class ZMQHandler():
     def stop(self):
         self.loop.stop()
         self.zmqContext.destroy()
+
 
 daemon = ZMQHandler()
 daemon.start()
