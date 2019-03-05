@@ -1,7 +1,6 @@
-// Copyright (c) 2018 The Raven Core developers
+// Copyright (c) 2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-// Created by Jeremy Anderson on 5/15/18.
 
 #ifndef RAVENCOIN_NEWASSET_H
 #define RAVENCOIN_NEWASSET_H

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -65,7 +65,7 @@ class ZMQHandler():
             print('- HASH TX  ('+sequence+') -')
             print(binascii.hexlify(body))
         elif topic == b"rawblock":
-            print('- RAW BLOCK HEADER ('+sequence+') -')
+             print('- RAW BLOCK HEADER ('+sequence+') -')
             print(binascii.hexlify(body[:80]))
         elif topic == b"rawtx":
             print('- RAW TX ('+sequence+') -')
