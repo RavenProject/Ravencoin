@@ -3,6 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <chainparamsbase.h>
+#include <chainparams.h>
 #include "bench.h"
 #include "crypto/sha256.h"
 #include "key.h"
@@ -19,6 +21,7 @@ main(int argc, char **argv)
     SetupEnvironment();
     fPrintToDebugLog = false; // don't want to write to debug.log file
 
+    SelectParams(CBaseChainParams::MAIN);
     benchmark::BenchRunner::RunAll();
 
     ECC_Stop();
