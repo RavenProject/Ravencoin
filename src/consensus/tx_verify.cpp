@@ -205,7 +205,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         if (AreAssetsDeployed() && isAsset) {
             if (assetCache) {
                 // Get the transfer transaction data from the scriptPubKey
-                if ( nType == TX_TRANSFER_ASSET) {
+                if (nType == TX_TRANSFER_ASSET) {
                     CAssetTransfer transfer;
                     std::string address;
                     if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
@@ -462,6 +462,11 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             std::string address;
             if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
                 return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize");
+
+            std::string strError = "";
+            if (!transfer.IsValid(strError)) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-not-valid " + strError);
+            }
 
             // Add to the total value of assets in the outputs
             if (totalOutputs.count(transfer.strName))

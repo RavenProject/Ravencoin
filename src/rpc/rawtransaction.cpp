@@ -766,8 +766,10 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                         // Verify
                         std::string strError = "";
-                        if (!transfer.IsValid(strError))
+                        if (!transfer.IsValid(strError)) {
+                            std::cout << strError << std::endl;
                             throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                        }
 
                         // Construct transaction
                         CScript scriptPubKey = GetScriptForDestination(destination);
