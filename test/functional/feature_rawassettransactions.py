@@ -24,7 +24,7 @@ def get_tx_issue_hex(node, asset_name, asset_quantity, asset_units=0):
     inputs = [{k: unspent[k] for k in ['txid', 'vout']}]
     outputs = {
         'n1issueAssetXXXXXXXXXXXXXXXXWdnemQ': 500,
-        change_address: truncate(float(unspent['amount']) - 500.0001),
+        change_address: truncate(float(unspent['amount']) - 500.01),
         to_address: {
             'issue': {
                 'asset_name':       asset_name,
@@ -81,7 +81,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         ]
         outputs = {
             'n1ReissueAssetXXXXXXXXXXXXXXWG9NLd': 100,
-            n0.getnewaddress(): truncate(float(unspent['amount']) - 100.0001),
+            n0.getnewaddress(): truncate(float(unspent['amount']) - 100.01),
             to_address: {
                 'reissue': {
                     'asset_name':       asset_name,
@@ -286,7 +286,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         inputs = [{k: unspent[k] for k in ['txid', 'vout']}]
         outputs = {
             'n1issueAssetXXXXXXXXXXXXXXXXWdnemQ': 500,
-            change_address: truncate(float(unspent['amount']) - 500.0001),
+            change_address: truncate(float(unspent['amount']) - 500.01),
             to_address: {
                 'issue': {
                     'asset_name':       'TEST_ASSET',
@@ -320,7 +320,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         outputs = {
             'n1ReissueAssetXXXXXXXXXXXXXXWG9NLd': 100,
-            change_address: truncate(float(unspent['amount']) - 100.0001),
+            change_address: truncate(float(unspent['amount']) - 100.01),
             to_address: {
                 'reissue': {
                     'asset_name':       'TEST_ASSET',
@@ -352,7 +352,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
             {k: unspent_asset[k] for k in ['txid', 'vout']},
         ]
         outputs = {
-            change_address: truncate(float(unspent['amount']) - 0.0001),
+            change_address: truncate(float(unspent['amount']) - 0.01),
             remote_to_address: {
                 'transfer': {
                     'TEST_ASSET': 400
@@ -571,7 +571,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # switch to proper burn address
         outputs = {
             unique_burn: burn,
-            change_address: truncate(float(unspent['amount']) - (burn + 0.0001)),
+            change_address: truncate(float(unspent['amount']) - (burn + 0.01)),
             to_address: {
                 'issue_unique': {
                     'root_name':    root,
@@ -618,7 +618,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         burn = 5
         outputs = {
             'n1issueUniqueAssetXXXXXXXXXXS4695i': burn,
-            change_address: truncate(float(unspent['amount']) - (burn + 0.0001)),
+            change_address: truncate(float(unspent['amount']) - (burn + 0.01)),
             owner_change_address: {
                 'transfer': {
                     owner: 1,
@@ -828,7 +828,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # switch to valid burn address, and valid burn amount
         outputs = {
             issue_burn: burn,
-            change_address: truncate(float(unspent['amount']) - (burn + 0.0001)),
+            change_address: truncate(float(unspent['amount']) - (burn + 0.01)),
             to_address: {
                 'issue': {
                     'asset_name':       asset_name,
@@ -1013,7 +1013,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # switch to valid burn address, and valid burn amount
         outputs = {
             sub_burn: burn,
-            change_address: truncate(float(unspent['amount']) - (burn + 0.0001)),
+            change_address: truncate(float(unspent['amount']) - (burn + 0.01)),
             owner_change_address: {
                 'transfer': {
                     owner: 1,
@@ -1286,7 +1286,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # Create the valid sub asset and broadcast the transaction
         outputs = {
             sub_burn: burn,
-            change_address: truncate(float(unspent['amount']) - (burn + 0.0001)),
+            change_address: truncate(float(unspent['amount']) - (burn + 0.01)),
             owner_change_address: {
                 'transfer': {
                     owner: 1,
@@ -1370,7 +1370,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         ########################################
         # Create the valid transfer outputs
         outputs = {
-            change_address: truncate(float(unspent['amount']) - 0.00001),
+            change_address: truncate(float(unspent['amount']) - 0.01),
             to_address: {
                 'transfer': {
                     root: 4,
@@ -1521,7 +1521,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # n1 buys 400 ANDUIN from n2 for 4000 RVN
         price = 4000
         amount = 400
-        fee = 0.0001
+        fee = 0.01
 
         unspent1 = n1.listunspent()[0]
         unspent_amount1 = float(unspent1['amount'])
@@ -1835,7 +1835,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx = n2.createrawtransaction(inputs, outputs)
 
         # n2 pays postage (fee)
-        tx_funded = n2.fundrawtransaction(tx)['hex']
+        tx_funded = n2.fundrawtransaction(tx, {"feeRate":0.02})['hex']
 
         # n2 signs postage; n0 signs transfer
         signed1 = n2.signrawtransaction(tx_funded)
