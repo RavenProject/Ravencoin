@@ -188,7 +188,7 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
                             assetInfo.pushKV("units", asset.units);
                             assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
                             if (asset.nHasIPFS > 0) {
-                                assetInfo.pushKV("ipfs_hash", EncodeIPFS(asset.strIPFSHash));
+                                assetInfo.pushKV("ipfs_hash", EncodeAssetData(asset.strIPFSHash));
                             }
                         }
                     }
@@ -203,7 +203,7 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
                         }
                         assetInfo.pushKV("reissuable", asset.nReissuable > 0 ? true : false);
                         if (!asset.strIPFSHash.empty()) {
-                            assetInfo.pushKV("ipfs_hash", EncodeIPFS(asset.strIPFSHash));
+                            assetInfo.pushKV("ipfs_hash", EncodeAssetData(asset.strIPFSHash));
                         }
                     }
                     break;

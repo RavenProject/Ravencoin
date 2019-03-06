@@ -194,10 +194,19 @@ UniValue issue(const JSONRPCRequest& request)
     std::string ipfs_hash = "";
     if (request.params.size() > 7 && has_ipfs) {
         ipfs_hash = request.params[7].get_str();
-        if (ipfs_hash.length() != 46)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
-        if (ipfs_hash.substr(0,2) != "Qm")
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
+//        if (ipfs_hash.length() != 46 && (AreMessagingDeployed() && ipfs_hash.length() != 64))
+//            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
+//
+//        bool fIPFS = true;
+//        if (ipfs_hash.length() != 46 || ipfs_hash.substr(0, 2) != "Qm" || )
+//            fIPFS = false;
+//
+//        std::cout << "Status: " <<  fIPFS << std::endl;
+//        if (!fIPFS && !IsHex(ipfs_hash))
+//            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
+//
+//        if (fIPFS && DecodeIPFS(ipfs_hash).empty())
+//            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (contains invalid characters)"));
     }
 
     // check for required unique asset params
@@ -205,7 +214,7 @@ UniValue issue(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a unique asset."));
     }
 
-    CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeIPFS(ipfs_hash));
+    CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeAssetData(ipfs_hash));
 
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
@@ -347,7 +356,7 @@ UniValue issueunique(const JSONRPCRequest& request)
         else
         {
             asset = CNewAsset(assetName, UNIQUE_ASSET_AMOUNT, UNIQUE_ASSET_UNITS, UNIQUE_ASSETS_REISSUABLE, 1,
-                              DecodeIPFS(ipfsHashes[i].get_str()));
+                              DecodeAssetData(ipfsHashes[i].get_str()));
         }
 
         assets.push_back(asset);
@@ -496,7 +505,7 @@ UniValue getassetdata(const JSONRPCRequest& request)
         result.push_back(Pair("reissuable", asset.nReissuable));
         result.push_back(Pair("has_ipfs", asset.nHasIPFS));
         if (asset.nHasIPFS)
-            result.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+            result.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
 
         return result;
     }
@@ -808,10 +817,14 @@ UniValue transfer(const JSONRPCRequest& request)
     std::string message = "";
     if (request.params.size() > 3) {
         message = request.params[3].get_str();
-        if (message.length() != 46)
+        if (message.length() != 46 || (AreMessagingDeployed() && message.length() != 64))
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
+        bool fNotIPFS = false;
         if (message.substr(0, 2) != "Qm")
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
+            fNotIPFS = true;
+
+        if (fNotIPFS && !IsHex(message))
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
     }
 
     int64_t expireTime = 0;
@@ -824,7 +837,7 @@ UniValue transfer(const JSONRPCRequest& request)
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeIPFS(message), expireTime), address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -1108,15 +1121,22 @@ UniValue reissue(const JSONRPCRequest& request)
     std::string newipfs = "";
     if (request.params.size() > 6) {
         newipfs = request.params[6].get_str();
-        if (newipfs.length() != 46)
+
+        if (newipfs.length() != 46 && (AreMessagingDeployed() && newipfs.length() != 64))
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
-        if (newipfs.substr(0,2) != "Qm")
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
-        if (DecodeIPFS(newipfs).empty())
+
+        bool fIPFS = true;
+        if (newipfs.substr(0, 2) != "Qm")
+            fIPFS = false;
+
+        if (!fIPFS && !IsHex(newipfs))
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
+
+        if (fIPFS && DecodeIPFS(newipfs).empty())
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (contains invalid characters)"));
     }
 
-    CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeIPFS(newipfs));
+    CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeAssetData(newipfs));
 
     std::pair<int, std::string> error;
     CReserveKey reservekey(pwallet);
@@ -1227,7 +1247,7 @@ UniValue listassets(const JSONRPCRequest& request)
             detail.push_back(Pair("block_height", data.nHeight));
             detail.push_back(Pair("blockhash", data.blockHash.GetHex()));
             if (asset.nHasIPFS)
-                detail.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+                detail.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
             result.push_back(Pair(asset.strName, detail));
         } else {
             result.push_back(asset.strName);

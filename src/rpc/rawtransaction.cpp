@@ -582,7 +582,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     CAmount nAmount = AmountFromValue(asset_quantity);
 
                     // Create a new asset
-                    CNewAsset asset(asset_name.get_str(), nAmount, units.get_int(), reissuable.get_int(), has_ipfs.get_int(), DecodeIPFS(ipfs_hash.get_str()));
+                    CNewAsset asset(asset_name.get_str(), nAmount, units.get_int(), reissuable.get_int(), has_ipfs.get_int(), DecodeAssetData(ipfs_hash.get_str()));
 
                     // Verify that data
                     std::string strError = "";
@@ -656,7 +656,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         } else {
                             asset = CNewAsset(GetUniqueAssetName(root_name.get_str(), asset_tags[i].get_str()),
                                               UNIQUE_ASSET_AMOUNT, UNIQUE_ASSET_UNITS, UNIQUE_ASSETS_REISSUABLE,
-                                              1, DecodeIPFS(ipfs_hashes[i].get_str()));
+                                              1, DecodeAssetData(ipfs_hashes[i].get_str()));
                         }
 
                         // Verify that data
@@ -712,7 +712,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         if (!ipfs_hash.isStr())
                             throw JSONRPCError(RPC_INVALID_PARAMETER,
                                                "Invalid parameter, missing reissue metadata for key: ipfs_hash");
-                        reissueObj.strIPFSHash = DecodeIPFS(ipfs_hash.get_str());
+                        reissueObj.strIPFSHash = DecodeAssetData(ipfs_hash.get_str());
                     }
 
                     // Add the received data into the reissue object
@@ -949,7 +949,7 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("reissuable", reissuable));
 
         if (reissue.strIPFSHash != "")
-            r.push_back(Pair("new_ipfs_hash", EncodeIPFS(reissue.strIPFSHash)));
+            r.push_back(Pair("new_ipfs_hash", EncodeAssetData(reissue.strIPFSHash)));
 
     } else if (type.isStr() && type.get_str() == ASSET_NEW_STRING) {
         if (!AreAssetsDeployed())
@@ -971,7 +971,7 @@ UniValue decodescript(const JSONRPCRequest& request)
             r.push_back(Pair("hasIPFS", hasIPFS));
 
             if (hasIPFS)
-                r.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+                r.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
         }
         else if (OwnerAssetFromScript(script, ownerAsset, address))
         {

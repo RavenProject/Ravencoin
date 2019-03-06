@@ -354,13 +354,13 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
         return false;
     }
 
-    if (nHasIPFS && strIPFSHash.size() != 34) {
-        strError = _("Invalid parameter: ipfs_hash must be 34 bytes.");
+    if (nHasIPFS && strIPFSHash.size() != 34 && (AreMessagingDeployed() && strIPFSHash.size() != 32)) {
+        strError = _("Invalid parameter: ipfs_hash must be 34 bytes. Txid must be 64 bytes");
         return false;
     }
 
     if (nHasIPFS) {
-        if (!CheckEncodedIPFS(EncodeIPFS(strIPFSHash), strError))
+        if (!CheckEncoded(strIPFSHash, strError))
             return false;
     }
 
@@ -1120,13 +1120,13 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache, boo
         }
     }
 
-    if (strIPFSHash != "" && strIPFSHash.size() != 34) {
-        strError = _("Invalid parameter: ipfs_hash must be 34 bytes.");
+    if (strIPFSHash != "" && strIPFSHash.size() != 34 && (AreMessagingDeployed() && strIPFSHash.size() != 32)) {
+        strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 64 bytes");
         return false;
     }
 
     if (strIPFSHash != "") {
-        if (!CheckEncodedIPFS(EncodeIPFS(strIPFSHash), strError))
+        if (!CheckEncoded(strIPFSHash, strError))
             return false;
     }
 
@@ -2669,6 +2669,36 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
 }
 
 // 46 char base58 --> 34 char KAW compatible
+std::string DecodeAssetData(std::string encoded)
+{
+    if (encoded.size() == 46) {
+        std::vector<unsigned char> b;
+        DecodeBase58(encoded, b);
+        return std::string(b.begin(), b.end());
+    }
+
+    else if (encoded.size() == 64 && IsHex(encoded)) {
+        std::vector<unsigned char> vec = ParseHex(encoded);
+        return std::string(vec.begin(), vec.end());
+    }
+
+    return "";
+
+};
+
+std::string EncodeAssetData(std::string decoded)
+{
+    if (decoded.size() == 34) {
+        return EncodeIPFS(decoded);
+    }
+    else if (decoded.size() == 32){
+        return HexStr(decoded);
+    }
+
+    return "";
+}
+
+// 46 char base58 --> 34 char KAW compatible
 std::string DecodeIPFS(std::string encoded)
 {
     std::vector<unsigned char> b;
@@ -3025,14 +3055,29 @@ bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits)
     return nAmount % int64_t(pow(10, (MAX_UNIT - nUnits))) == 0;
 }
 
-bool CheckEncodedIPFS(const std::string& hash, std::string& strError)
+bool CheckEncoded(const std::string& hash, std::string& strError)
 {
-    if (hash.substr(0, 2) != "Qm") {
-        strError = _("Invalid parameter: ipfs_hash must start with 'Qm'.");
-        return false;
+    bool ret = true;
+
+    std::string encodedStr = EncodeAssetData(hash);
+    if (encodedStr.substr(0, 2) != "Qm") {
+        std::cout << __func__ << __LINE__ << std::endl;
+        ret = false;
     }
 
-    return true;
+    if (AreMessagingDeployed()) {
+        std::cout << __func__ << __LINE__ << std::endl;
+        if (!ret && encodedStr.length() == 64) {
+            std::cout << __func__ << __LINE__ << std::endl;
+            ret = true;
+        }
+    }
+
+
+    if (!ret)
+        strError = _("Invalid parameter: ipfs_hash is not valid, or txid hash is not the write length");
+
+    return ret;
 }
 
 void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reissues, int& transfers, int& owners)

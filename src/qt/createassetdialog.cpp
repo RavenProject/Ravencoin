@@ -451,19 +451,19 @@ bool CreateAssetDialog::checkIPFSHash(QString hash)
 {
     if (!hash.isEmpty()) {
         std::string error;
-        if (!CheckEncodedIPFS(hash.toStdString(), error)) {
+        if (!CheckEncoded(DecodeAssetData(hash.toStdString()), error)) {
             ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must start with 'Qm'");
+            showMessage("IPFS Hash must start with 'Qm' or txid's must have size of 64 characters");
             disableCreateButton();
             return false;
         }
-        else if (hash.size() != 46) {
+        else if (hash.size() != 46 && hash.size() != 64) {
             ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must have size of 46 characters");
+            showMessage("IPFS/txid Hash must have size of 46 characters");
             disableCreateButton();
             return false;
-        } else if (DecodeIPFS(hash.toStdString()).empty()) {
-            showMessage("IPFS hash is not valid. Please use a valid IPFS hash");
+        } else if (DecodeAssetData(hash.toStdString()).empty()) {
+            showMessage("IPFS/txid hash is not valid. Please use a valid IPFS/txid hash");
             disableCreateButton();
             return false;
         }
@@ -649,7 +649,7 @@ void CreateAssetDialog::onCreateAssetClicked()
 
     std::string ipfsDecoded = "";
     if (hasIPFS)
-        ipfsDecoded = DecodeIPFS(ui->ipfsText->text().toStdString());
+        ipfsDecoded = DecodeAssetData(ui->ipfsText->text().toStdString());
 
     CNewAsset asset(name.toStdString(), quantity, units, reissuable ? 1 : 0, hasIPFS ? 1 : 0, ipfsDecoded);
 

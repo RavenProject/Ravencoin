@@ -541,7 +541,7 @@ void ReissueAssetDialog::buildUpdatedData()
 
     QString ipfs;
     if (asset->nHasIPFS && (!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty())))
-        ipfs = formatBlack.arg(tr("IPFS Hash"), ":", QString::fromStdString(EncodeIPFS(asset->strIPFSHash))) + "\n";
+        ipfs = formatBlack.arg(tr("IPFS Hash"), ":", QString::fromStdString(EncodeAssetData(asset->strIPFSHash))) + "\n";
     else if (ui->ipfsBox->isChecked() && !ui->ipfsText->text().isEmpty()) {
         ipfs = formatGreen.arg(tr("IPFS Hash"), ":", ui->ipfsText->text()) + "\n";
     }
@@ -602,15 +602,24 @@ void ReissueAssetDialog::onAssetSelected(int index)
         QString quantity = formatBlack.arg(tr("Current Quantity"), ":", QString::fromStdString(ss.str())) + "\n";
         QString units = formatBlack.arg(tr("Current Units"), ":", QString::number(ui->unitSpinBox->value()));
         QString reissue = formatBlack.arg(tr("Can Reissue"), ":", tr("Yes")) + "\n";
-        QString ipfs;
-        if (asset->nHasIPFS)
-            ipfs = formatBlack.arg(tr("IPFS Hash"), ":", QString::fromStdString(EncodeIPFS(asset->strIPFSHash))) + "\n";
+        QString assetdatahash = "";
+        if (asset->nHasIPFS) {
+            QString qstr = QString::fromStdString(EncodeAssetData(asset->strIPFSHash));
+            if (qstr.size() == 46) {
+                    assetdatahash = formatBlack.arg(tr("IPFS Hash"), ":", qstr) + "\n";
+            } else if (qstr.size() == 64) {
+                    assetdatahash = formatBlack.arg(tr("Txid Hash"), ":", qstr) + "\n";
+            }
+            else {
+                assetdatahash = formatBlack.arg(tr("Unknown data hash type"), ":", qstr) + "\n";
+            }
+        }
 
         ui->currentAssetData->append(name);
         ui->currentAssetData->append(quantity);
         ui->currentAssetData->append(units);
         ui->currentAssetData->append(reissue);
-        ui->currentAssetData->append(ipfs);
+        ui->currentAssetData->append(assetdatahash);
         ui->currentAssetData->setFixedHeight(ui->currentAssetData->document()->size().height());
 
         buildUpdatedData();
@@ -638,19 +647,19 @@ bool ReissueAssetDialog::checkIPFSHash(QString hash)
 {
     if (!hash.isEmpty()) {
         std::string error;
-        if (!CheckEncodedIPFS(hash.toStdString(), error)) {
+        if (!CheckEncoded(DecodeAssetData(hash.toStdString()), error)) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS Hash must start with 'Qm'"));
+            showMessage(tr("IPFS Hash must start with 'Qm', Txid is indicated by 0x54 0x20"));
             disableReissueButton();
             return false;
-        } else if (hash.size() != 46) {
+        } else if (hash.size() != 46 && hash.size() != 64) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS Hash must have size of 46 characters"));
+            showMessage(tr("IPFS/Txid Hash must have size of 46 characters"));
             disableReissueButton();
             return false;
-        } else if (DecodeIPFS(ui->ipfsText->text().toStdString()).empty()) {
+        } else if (DecodeAssetData(ui->ipfsText->text().toStdString()).empty()) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS hash is not valid. Please use a valid IPFS hash"));
+            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS hash"));
             disableReissueButton();
             return false;
         }
@@ -733,7 +742,7 @@ void ReissueAssetDialog::onReissueAssetClicked()
 
     std::string ipfsDecoded = "";
     if (hasIPFS)
-        ipfsDecoded = DecodeIPFS(ui->ipfsText->text().toStdString());
+        ipfsDecoded = DecodeAssetData(ui->ipfsText->text().toStdString());
 
     CReissueAsset reissueAsset(name.toStdString(), quantity, unit, reissuable ? 1 : 0, ipfsDecoded);
 
