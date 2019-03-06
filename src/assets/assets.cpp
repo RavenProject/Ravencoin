@@ -3069,7 +3069,7 @@ bool CheckEncoded(const std::string& hash, std::string& strError)
             ret = true;
         }
     }
-    
+
     if (!ret)
         strError = _("Invalid parameter: ipfs_hash is not valid, or txid hash is not the write length");
 

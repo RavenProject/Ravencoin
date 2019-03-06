@@ -97,7 +97,7 @@ UniValue issue(const JSONRPCRequest& request)
             "5. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "6. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
             "7. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
-            "8. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash (only sha2-256 hashes currently supported -- Qm...)\n"
+            "8. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
 
             "\nResult:\n"
             "\"txid\"                     (string) The transaction id\n"
@@ -253,7 +253,7 @@ UniValue issueunique(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"root_name\"             (string, required) name of the asset the unique asset(s) are being issued under\n"
                 "2. \"asset_tags\"            (array, required) the unique tag for each asset which is to be issued\n"
-                "3. \"ipfs_hashes\"           (array, optional) ipfs hashes corresponding to each supplied tag (should be same size as \"asset_tags\") (only sha2-256 hashes currently supported -- Qm...)\n"
+                "3. \"ipfs_hashes\"           (array, optional) ipfs hashes or txid hashes corresponding to each supplied tag (should be same size as \"asset_tags\")\n"
                 "4. \"to_address\"            (string, optional, default=\"\"), address assets will be sent to, if it is empty, address will be generated for you\n"
                 "5. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
 
@@ -480,11 +480,13 @@ UniValue getassetdata(const JSONRPCRequest& request)
                 "  units: (number),\n"
                 "  reissuable: (number),\n"
                 "  has_ipfs: (number),\n"
-                "  ipfs_hash: (hash) (only if has_ipfs = 1)\n"
+                "  ipfs_hash: (hash) (only if has_ipfs = 1 and that data is an ipfs hash)\n"
+                "  txid_hash: (hash) (only if has_ipfs = 1 and that data is an txid hash)\n"
                 "}\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("getallassets", "\"ASSET_NAME\"")
+                + HelpExampleCli("getassetdata", "\"ASSET_NAME\"")
+                + HelpExampleRpc("getassetdata", "\"ASSET_NAME\"")
         );
 
 
@@ -504,8 +506,13 @@ UniValue getassetdata(const JSONRPCRequest& request)
         result.push_back(Pair("units", asset.units));
         result.push_back(Pair("reissuable", asset.nReissuable));
         result.push_back(Pair("has_ipfs", asset.nHasIPFS));
-        if (asset.nHasIPFS)
-            result.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+        if (asset.nHasIPFS) {
+            if (asset.strIPFSHash.size() == 32) {
+                result.push_back(Pair("txid", EncodeAssetData(asset.strIPFSHash)));
+            } else {
+                result.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+            }
+        }
 
         return result;
     }
@@ -778,7 +785,7 @@ UniValue transfer(const JSONRPCRequest& request)
                 "1. \"asset_name\"               (string, required) name of asset\n"
                 "2. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
-                "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash to send along with the transfer\n"
+                "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "5. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
                 "\nResult:\n"
@@ -1078,7 +1085,7 @@ UniValue reissue(const JSONRPCRequest& request)
                 "4. \"change_address\"           (string, optional) address that the change of the transaction will be sent to\n"
                 "5. \"reissuable\"               (boolean, optional, default=true), whether future reissuance is allowed\n"
                 "6. \"new_unit\"                 (numeric, optional, default=-1), the new units that will be associated with the asset\n"
-                "6. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash (only sha2-256 hashes currently supported -- Qm...)\n"
+                "6. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1189,7 +1196,8 @@ UniValue listassets(const JSONRPCRequest& request)
                 "      units: (number),\n"
                 "      reissuable: (number),\n"
                 "      has_ipfs: (number),\n"
-                "      ipfs_hash: (hash) (only if has_ipfs = 1)\n"
+                "      ipfs_hash: (hash) (only if has_ipfs = 1 and data is an ipfs hash)\n"
+                "      ipfs_hash: (hash) (only if has_ipfs = 1 and data is an txid hash)\n"
                 "    },\n"
                 "  {...}, {...}\n"
                 "}\n"
@@ -1246,8 +1254,13 @@ UniValue listassets(const JSONRPCRequest& request)
             detail.push_back(Pair("has_ipfs", asset.nHasIPFS));
             detail.push_back(Pair("block_height", data.nHeight));
             detail.push_back(Pair("blockhash", data.blockHash.GetHex()));
-            if (asset.nHasIPFS)
-                detail.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+            if (asset.nHasIPFS) {
+                if (asset.strIPFSHash.size() == 32) {
+                    detail.push_back(Pair("txid_hash", EncodeAssetData(asset.strIPFSHash)));
+                } else {
+                    detail.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+                }
+            }
             result.push_back(Pair(asset.strName, detail));
         } else {
             result.push_back(asset.strName);
@@ -1325,7 +1338,6 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
-    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
     { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address"}},
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time"}},
