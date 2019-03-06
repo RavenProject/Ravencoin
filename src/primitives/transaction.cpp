@@ -21,7 +21,6 @@ std::string COutPoint::ToSerializedString() const
 {
     CDataStream stream(PROTOCOL_VERSION, SER_DISK);
     stream << *this;
-    LogPrintf("Got a string COutPoint: %s\n", stream.str());
     return stream.str();
 }
 
