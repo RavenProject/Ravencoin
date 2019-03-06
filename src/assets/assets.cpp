@@ -3061,19 +3061,15 @@ bool CheckEncoded(const std::string& hash, std::string& strError)
 
     std::string encodedStr = EncodeAssetData(hash);
     if (encodedStr.substr(0, 2) != "Qm") {
-        std::cout << __func__ << __LINE__ << std::endl;
         ret = false;
     }
 
     if (AreMessagingDeployed()) {
-        std::cout << __func__ << __LINE__ << std::endl;
         if (!ret && encodedStr.length() == 64) {
-            std::cout << __func__ << __LINE__ << std::endl;
             ret = true;
         }
     }
-
-
+    
     if (!ret)
         strError = _("Invalid parameter: ipfs_hash is not valid, or txid hash is not the write length");
 

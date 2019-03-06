@@ -136,7 +136,6 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
     completer->setCompletionMode(QCompleter::PopupCompletion);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->comboBox->setCompleter(completer);
-
     adjustSize();
 }
 
@@ -210,6 +209,9 @@ void ReissueAssetDialog::setModel(WalletModel *_model)
             ui->confTargetSelector->setCurrentIndex(getIndexForConfTarget(model->getDefaultConfirmTarget()));
         else
             ui->confTargetSelector->setCurrentIndex(getIndexForConfTarget(settings.value("nConfTarget").toInt()));
+
+        ui->reissueCostLabel->setText(tr("Cost") + ": " + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::REISSUE)));
+        ui->reissueCostLabel->setStyleSheet("font-weight: bold");
 
         // Setup the default values
         setUpValues();
