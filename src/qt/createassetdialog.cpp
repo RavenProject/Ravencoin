@@ -463,7 +463,7 @@ bool CreateAssetDialog::checkIPFSHash(QString hash)
             disableCreateButton();
             return false;
         } else if (DecodeAssetData(hash.toStdString()).empty()) {
-            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS/txid hash"));
+            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash"));
             disableCreateButton();
             return false;
         }
