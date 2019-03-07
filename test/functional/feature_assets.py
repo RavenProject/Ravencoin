@@ -181,8 +181,6 @@ class AssetTest(RavenTestFramework):
         # trying to issue things that can't be issued
         assert_raises_rpc_error(-8, "Unsupported asset type: OWNER", \
             n0.issue, "AN_OWNER!");
-        assert_raises_rpc_error(-8, "Unsupported asset type: MSGCHANNEL", \
-            n0.issue, "A_MSGCHANNEL~CHANNEL_4");
         assert_raises_rpc_error(-8, "Unsupported asset type: VOTE", \
             n0.issue, "A_VOTE^PEDRO");
 
