@@ -453,17 +453,17 @@ bool CreateAssetDialog::checkIPFSHash(QString hash)
         std::string error;
         if (!CheckEncoded(DecodeAssetData(hash.toStdString()), error)) {
             ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must start with 'Qm' or txid's must have size of 64 characters");
+            showMessage(tr("IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters"));
             disableCreateButton();
             return false;
         }
         else if (hash.size() != 46 && hash.size() != 64) {
             ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS/txid Hash must have size of 46 characters");
+            showMessage(tr("IPFS/Txid Hash must have size of 46 characters, or 64 hex characters"));
             disableCreateButton();
             return false;
         } else if (DecodeAssetData(hash.toStdString()).empty()) {
-            showMessage("IPFS/txid hash is not valid. Please use a valid IPFS/txid hash");
+            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS/txid hash"));
             disableCreateButton();
             return false;
         }

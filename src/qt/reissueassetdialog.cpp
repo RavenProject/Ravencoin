@@ -656,12 +656,12 @@ bool ReissueAssetDialog::checkIPFSHash(QString hash)
             return false;
         } else if (hash.size() != 46 && hash.size() != 64) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS/Txid Hash must have size of 46 characters"));
+            showMessage(tr("IPFS/Txid Hash must have size of 46 characters or 64 characters"));
             disableReissueButton();
             return false;
         } else if (DecodeAssetData(ui->ipfsText->text().toStdString()).empty()) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS hash"));
+            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS or Txid hash"));
             disableReissueButton();
             return false;
         }

@@ -1144,7 +1144,7 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache, boo
     }
 
     if (strIPFSHash != "" && strIPFSHash.size() != 34 && (AreMessagingDeployed() && strIPFSHash.size() != 32)) {
-        strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 64 bytes");
+        strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 32 bytes");
         return false;
     }
 
