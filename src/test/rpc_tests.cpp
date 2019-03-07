@@ -168,6 +168,9 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
         // coin and asset out
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
 
+        // coin and asset out with message
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transferwithmessage\":{\"RAVEN_ASSET\":20000,\"message\":\"QmTqu3Lk3gmTsQVZZZZZZEAW4xZZZZNmbuEAp2Mjr4AV7E\",\"expire_time\":0}}}"));
+
         // bad command
         BOOST_CHECK_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"badcommand\":{\"RAVEN_ASSET\":20000}}}"), std::runtime_error);
     }

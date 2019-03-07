@@ -355,11 +355,15 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (nHasIPFS && strIPFSHash.size() != 34) {
-        if ((AreMessagingDeployed() && strIPFSHash.size() != 32))
-
-
-        strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
-        return false;
+        if (!AreMessagingDeployed()) {
+            strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
+            return false;
+        } else {
+            if (strIPFSHash.size() != 32) {
+                strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
+                return false;
+            }
+        }
     }
 
     if (nHasIPFS) {

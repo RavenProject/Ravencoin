@@ -542,10 +542,21 @@ void ReissueAssetDialog::buildUpdatedData()
         reissue = formatGreen.arg(tr("Can Reisssue"), ":", reissuable) + "\n";
 
     QString ipfs;
-    if (asset->nHasIPFS && (!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty())))
-        ipfs = formatBlack.arg(tr("IPFS Hash"), ":", QString::fromStdString(EncodeAssetData(asset->strIPFSHash))) + "\n";
-    else if (ui->ipfsBox->isChecked() && !ui->ipfsText->text().isEmpty()) {
-        ipfs = formatGreen.arg(tr("IPFS Hash"), ":", ui->ipfsText->text()) + "\n";
+
+    if (asset->nHasIPFS && (!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty()))) {
+        QString qstr = QString::fromStdString(EncodeAssetData(asset->strIPFSHash));
+        if (qstr.size() == 46) {
+            ipfs = formatBlack.arg(tr("IPFS Hash"), ":", qstr) + "\n";
+        } else if (qstr.size() == 64) {
+            ipfs = formatBlack.arg(tr("Txid Hash"), ":", qstr) + "\n";
+        }
+    } else if (ui->ipfsBox->isChecked() && !ui->ipfsText->text().isEmpty()) {
+        QString qstr = ui->ipfsText->text();
+        if (qstr.size() == 46) {
+            ipfs = formatGreen.arg(tr("IPFS Hash"), ":", qstr) + "\n";
+        } else if (qstr.size() == 64) {
+            ipfs = formatGreen.arg(tr("Txid Hash"), ":", qstr) + "\n";
+        }
     }
 
     ui->updatedAssetData->clear();
@@ -648,20 +659,28 @@ void ReissueAssetDialog::onIPFSStateChanged()
 bool ReissueAssetDialog::checkIPFSHash(QString hash)
 {
     if (!hash.isEmpty()) {
+        if (!AreMessagingDeployed()) {
+            if (hash.length() > 46) {
+                showMessage(tr("Only IPFS Hashes allowed until RIP5 is activated"));
+                disableReissueButton();
+                return false;
+            }
+        }
+
         std::string error;
         if (!CheckEncoded(DecodeAssetData(hash.toStdString()), error)) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS Hash must start with 'Qm', Txid is indicated by 0x54 0x20"));
+            showMessage(tr("IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters"));
             disableReissueButton();
             return false;
         } else if (hash.size() != 46 && hash.size() != 64) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS/Txid Hash must have size of 46 characters or 64 characters"));
+            showMessage(tr("IPFS/Txid Hash must have size of 46 characters, or 64 hex characters"));
             disableReissueButton();
             return false;
         } else if (DecodeAssetData(ui->ipfsText->text().toStdString()).empty()) {
             ui->ipfsText->setStyleSheet(STYLE_INVALID);
-            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS or Txid hash"));
+            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash"));
             disableReissueButton();
             return false;
         }

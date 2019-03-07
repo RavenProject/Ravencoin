@@ -220,8 +220,6 @@ UniValue issue(const JSONRPCRequest& request)
     // Check the ipfs
     std::string ipfs_hash = "";
     bool fMessageCheck = false;
-    std::string message = "";
-
     if (request.params.size() > 7 && has_ipfs) {
         fMessageCheck = true;
         ipfs_hash = request.params[7].get_str();
@@ -232,7 +230,7 @@ UniValue issue(const JSONRPCRequest& request)
 
     // Check the message data
     if (fMessageCheck)
-        CheckIPFSTxidMessage(message, expireTime);
+        CheckIPFSTxidMessage(ipfs_hash, expireTime);
 
     // check for required unique asset params
     if ((assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) && (nAmount != COIN || units != 0 || reissuable)) {
@@ -1188,7 +1186,6 @@ UniValue reissue(const JSONRPCRequest& request)
 
     std::string newipfs = "";
     bool fMessageCheck = false;
-    std::string message = "";
 
     if (request.params.size() > 6) {
         fMessageCheck = true;
@@ -1200,7 +1197,7 @@ UniValue reissue(const JSONRPCRequest& request)
 
     // Check the message data
     if (fMessageCheck)
-        CheckIPFSTxidMessage(message, expireTime);
+        CheckIPFSTxidMessage(newipfs, expireTime);
 
     CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeAssetData(newipfs));
 
