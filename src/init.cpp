@@ -1823,7 +1823,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 #endif
 
     // ********************************************************* Step 12: Init Msg Channel list
-    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb) {
+    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
         bool found;
         if (!pmessagechanneldb->ReadFlag("init", found)) {
             uiInterface.InitMessage(_("Init Message Channels - Scanning Asset Transactions"));
