@@ -92,6 +92,7 @@ Speeds adoption into the larger crypto ecosystem.
 
 [More on compatibility mode...](./compatibility-mode/README.md)
 
+
 ### Phase 8 - Mobile Wallet compatible Mnemonic Seed
 
 Switches to a default of generating a 128 bit seed from which the master key is generated.  This allows easy backup for anyone that doesn't import private keys.  Warnings added to back up wallet.dat when importing private keys.
