@@ -787,20 +787,20 @@
                <string>Does this asset have an ipfs hash to go with it</string>
               </property>
               <property name="text">
-               <string>Add JSON Meta Data Hash</string>
+               <string>Add IPFS/Txid Hash</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QLineEdit" name="ipfsText">
               <property name="toolTip">
-               <string>The ipfs hash that contains information about the asset</string>
+               <string>The ipfs/txid hash that contains information about the asset</string>
               </property>
               <property name="maxLength">
-               <number>46</number>
+               <number>64</number>
               </property>
               <property name="placeholderText">
-               <string>The IPFS Hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</string>
+               <string>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</string>
               </property>
              </widget>
             </item>
@@ -1153,7 +1153,7 @@
                  <item>
                   <widget class="QRadioButton" name="radioCustomFee">
                    <property name="text">
-                    <string>Custom:</string>
+                    <string>C&amp;ustom:</string>
                    </property>
                    <attribute name="buttonGroup">
                     <string notr="true">groupFee</string>

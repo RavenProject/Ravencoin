@@ -101,7 +101,7 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
         UniValue obj(UniValue::VOBJ);
 
         obj.push_back(Pair("Asset Name", message.strName));
-        obj.push_back(Pair("Message", EncodeIPFS(message.ipfsHash)));
+        obj.push_back(Pair("Message", EncodeAssetData(message.ipfsHash)));
         obj.push_back(Pair("Time", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", message.time)));
         obj.push_back(Pair("Block Height", message.nBlockHeight));
         obj.push_back(Pair("Status", MessageStatusToString(message.status)));
@@ -360,7 +360,7 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     ExtractDestination(mapAssetCoins.at(asset_name)[0].tx->tx->vout[mapAssetCoins.at(asset_name)[0].i].scriptPubKey, dest);
     std::string address = EncodeDestination(dest);
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, OWNER_ASSET_AMOUNT, DecodeIPFS(ipfs_hash), expire_time), address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, OWNER_ASSET_AMOUNT, DecodeAssetData(ipfs_hash), expire_time), address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;

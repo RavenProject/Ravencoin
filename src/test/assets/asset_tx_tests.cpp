@@ -23,7 +23,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKey
-        CAssetTransfer asset("RAVEN", 1000);
+        CAssetTransfer asset("RAVENTEST", 1000);
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
@@ -69,7 +69,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKey
-        CAssetTransfer asset("RAVEN", 1000);
+        CAssetTransfer asset("RAVENTEST", 1000);
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
@@ -96,7 +96,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
         // Create CTxOut that will only send 100 of the asset
         // This should fail because 900 RAVEN doesn't have a destination
-        CAssetTransfer assetTransfer("RAVEN", 100);
+        CAssetTransfer assetTransfer("RAVENTEST", 100);
         CScript scriptLess = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         assetTransfer.ConstructTransaction(scriptLess);
 
@@ -125,7 +125,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKey
-        CAssetTransfer asset("RAVEN", 1000);
+        CAssetTransfer asset("RAVENTEST", 1000);
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
@@ -153,7 +153,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // Create CTxOut that will only send 100 of the asset 10 times total = 1000
         for (int i = 0; i < 10; i++)
         {
-            CAssetTransfer asset2("RAVEN", 100);
+            CAssetTransfer asset2("RAVENTEST", 100);
             CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             asset2.ConstructTransaction(scriptPubKey2);
 
@@ -185,7 +185,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKey
-        CAssetTransfer asset("RAVEN", 1000);
+        CAssetTransfer asset("RAVENTEST", 1000);
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
@@ -213,7 +213,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // Create CTxOut that will only send 100 of the asset 12 times, total = 1200
         for (int i = 0; i < 12; i++)
         {
-            CAssetTransfer asset2("RAVEN", 100);
+            CAssetTransfer asset2("RAVENTEST", 100);
             CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             asset2.ConstructTransaction(scriptPubKey2);
 
@@ -245,15 +245,15 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKeys
-        CAssetTransfer asset("RAVEN", 1000);
+        CAssetTransfer asset("RAVENTEST", 1000);
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
-        CAssetTransfer asset2("RAVENTEST", 1000);
+        CAssetTransfer asset2("RAVENTESTTEST", 1000);
         CScript scriptPubKey2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset2.ConstructTransaction(scriptPubKey2);
 
-        CAssetTransfer asset3("RAVENTESTTEST", 1000);
+        CAssetTransfer asset3("RAVENTESTTESTTEST", 1000);
         CScript scriptPubKey3 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
         asset3.ConstructTransaction(scriptPubKey3);
 
@@ -309,7 +309,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         for (int i = 0; i < 10; i++)
         {
             // Add the first asset
-            CAssetTransfer outAsset("RAVEN", 100);
+            CAssetTransfer outAsset("RAVENTEST", 100);
             CScript outScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset.ConstructTransaction(outScript);
 
@@ -320,7 +320,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
             mutTx.vout.emplace_back(txOutNew);
 
             // Add the second asset
-            CAssetTransfer outAsset2("RAVENTEST", 100);
+            CAssetTransfer outAsset2("RAVENTESTTEST", 100);
             CScript outScript2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset2.ConstructTransaction(outScript2);
 
@@ -331,7 +331,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
             mutTx.vout.emplace_back(txOutNew2);
 
             // Add the third asset
-            CAssetTransfer outAsset3("RAVENTESTTEST", 100);
+            CAssetTransfer outAsset3("RAVENTESTTESTTEST", 100);
             CScript outScript3 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset3.ConstructTransaction(outScript3);
 
@@ -364,7 +364,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         for (int i = 0; i < 9; i++)
         {
             // Add the first asset
-            CAssetTransfer outAsset("RAVEN", 100);
+            CAssetTransfer outAsset("RAVENTEST", 100);
             CScript outScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset.ConstructTransaction(outScript);
 
@@ -375,7 +375,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
             mutTx2.vout.emplace_back(txOutNew);
 
             // Add the second asset
-            CAssetTransfer outAsset2("RAVENTEST", 100);
+            CAssetTransfer outAsset2("RAVENTESTTEST", 100);
             CScript outScript2 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset2.ConstructTransaction(outScript2);
 
@@ -386,7 +386,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
             mutTx2.vout.emplace_back(txOutNew2);
 
             // Add the third asset
-            CAssetTransfer outAsset3("RAVENTESTTEST", 100);
+            CAssetTransfer outAsset3("RAVENTESTTESTTEST", 100);
             CScript outScript3 = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
             outAsset3.ConstructTransaction(outScript3);
 

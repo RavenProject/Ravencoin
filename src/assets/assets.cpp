@@ -355,12 +355,19 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (nHasIPFS && strIPFSHash.size() != 34) {
-        strError = _("Invalid parameter: ipfs_hash must be 34 bytes.");
-        return false;
+        if (!AreMessagingDeployed()) {
+            strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
+            return false;
+        } else {
+            if (strIPFSHash.size() != 32) {
+                strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
+                return false;
+            }
+        }
     }
 
     if (nHasIPFS) {
-        if (!CheckEncodedIPFS(EncodeIPFS(strIPFSHash), strError))
+        if (!CheckEncoded(strIPFSHash, strError))
             return false;
     }
 
@@ -1036,6 +1043,7 @@ bool CTransaction::VerifyReissueAsset(std::string& strError) const
 
 CAssetTransfer::CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message, const int64_t& nExpireTime)
 {
+    SetNull();
     this->strName = strAssetName;
     this->nAmount = nAmount;
     this->message = message;
@@ -1052,13 +1060,32 @@ bool CAssetTransfer::IsValid(std::string& strError) const
 {
     strError = "";
 
-    if (!IsAssetNameValid(std::string(strName)))
+    if (!IsAssetNameValid(std::string(strName))) {
         strError = "Invalid parameter: asset_name must only consist of valid characters and have a size between 3 and 30 characters. See help for more details.";
+        return false;
+    }
 
-    if (nAmount <= 0)
+    if (nAmount <= 0) {
         strError  = "Invalid parameter: asset amount can't be equal to or less than zero.";
+        return false;
+    }
 
-    return strError == "";
+    if (message.empty() && nExpireTime > 0) {
+        strError = "Invalid parameter: asset transfer expiration time requires a message to be attached to the transfer";
+        std::cout << "Time: " << nExpireTime << std::endl;
+        return false;
+    }
+
+    if (nExpireTime < 0) {
+        strError = "Invalid parameter: expiration time must be a positive value";
+        return false;
+    }
+
+    if (message.size() && !CheckEncoded(message, strError)) {
+        return false;
+    }
+
+    return true;
 }
 
 void CAssetTransfer::ConstructTransaction(CScript& script) const
@@ -1079,7 +1106,7 @@ void CAssetTransfer::ConstructTransaction(CScript& script) const
 CReissueAsset::CReissueAsset(const std::string &strAssetName, const CAmount &nAmount, const int &nUnits, const int &nReissuable,
                              const std::string &strIPFSHash)
 {
-
+    SetNull();
     this->strName = strAssetName;
     this->strIPFSHash = strIPFSHash;
     this->nReissuable = int8_t(nReissuable);
@@ -1120,13 +1147,13 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache, boo
         }
     }
 
-    if (strIPFSHash != "" && strIPFSHash.size() != 34) {
-        strError = _("Invalid parameter: ipfs_hash must be 34 bytes.");
+    if (strIPFSHash != "" && strIPFSHash.size() != 34 && (AreMessagingDeployed() && strIPFSHash.size() != 32)) {
+        strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 32 bytes");
         return false;
     }
 
     if (strIPFSHash != "") {
-        if (!CheckEncodedIPFS(EncodeIPFS(strIPFSHash), strError))
+        if (!CheckEncoded(strIPFSHash, strError))
             return false;
     }
 
@@ -1512,10 +1539,11 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
 
     if (fAssetIndex) {
         // Get the best amount form the database or dirty cache
-        if (!GetBestAssetAddressAmount(*this, reissue.strName, address))
-            return error("%s : Trying to undo reissue of an asset but the assets amount isn't in the database",
+        if (!GetBestAssetAddressAmount(*this, reissue.strName, address)) {
+            if (reissueAsset.reissue.nAmount != 0)
+                return error("%s : Trying to undo reissue of an asset but the assets amount isn't in the database",
                          __func__);
-
+        }
         mapAssetsAddressAmount[pair] -= reissue.nAmount;
 
         if (mapAssetsAddressAmount[pair] < 0)
@@ -1768,6 +1796,7 @@ bool CAssetsCache::DumpCacheToDatabase()
                 passetsCache->Erase(reissue_name);
 
                 if (fAssetIndex) {
+
                     if (mapAssetsAddressAmount.count(pair) && mapAssetsAddressAmount.at(pair) > 0) {
                         if (!passetsdb->WriteAssetAddressQuantity(pair.first, pair.second,
                                                                   mapAssetsAddressAmount.at(pair))) {
@@ -2669,6 +2698,36 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
 }
 
 // 46 char base58 --> 34 char KAW compatible
+std::string DecodeAssetData(std::string encoded)
+{
+    if (encoded.size() == 46) {
+        std::vector<unsigned char> b;
+        DecodeBase58(encoded, b);
+        return std::string(b.begin(), b.end());
+    }
+
+    else if (encoded.size() == 64 && IsHex(encoded)) {
+        std::vector<unsigned char> vec = ParseHex(encoded);
+        return std::string(vec.begin(), vec.end());
+    }
+
+    return "";
+
+};
+
+std::string EncodeAssetData(std::string decoded)
+{
+    if (decoded.size() == 34) {
+        return EncodeIPFS(decoded);
+    }
+    else if (decoded.size() == 32){
+        return HexStr(decoded);
+    }
+
+    return "";
+}
+
+// 46 char base58 --> 34 char KAW compatible
 std::string DecodeIPFS(std::string encoded)
 {
     std::vector<unsigned char> b;
@@ -3025,14 +3084,22 @@ bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits)
     return nAmount % int64_t(pow(10, (MAX_UNIT - nUnits))) == 0;
 }
 
-bool CheckEncodedIPFS(const std::string& hash, std::string& strError)
+bool CheckEncoded(const std::string& hash, std::string& strError)
 {
-    if (hash.substr(0, 2) != "Qm") {
-        strError = _("Invalid parameter: ipfs_hash must start with 'Qm'.");
-        return false;
+    std::string encodedStr = EncodeAssetData(hash);
+    if (encodedStr.substr(0, 2) == "Qm" && encodedStr.size() == 46) {
+        return true;
     }
 
-    return true;
+    if (AreMessagingDeployed()) {
+        if (encodedStr.length() == 64) {
+            return true;
+        }
+    }
+
+    strError = _("Invalid parameter: ipfs_hash is not valid, or txid hash is not the right length");
+
+    return false;
 }
 
 void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reissues, int& transfers, int& owners)

@@ -64,6 +64,8 @@ public:
     QSortFilterProxyModel* proxy;
     QCompleter* completer;
 
+    bool eventFilter(QObject *object, QEvent *event);
+
 
 public Q_SLOTS:
     void clear();

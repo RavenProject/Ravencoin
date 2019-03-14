@@ -288,7 +288,7 @@ bool CheckOwnerDataTx(const CTxOut& txOut);
 bool CheckReissueDataTx(const CTxOut& txOut);
 bool CheckTransferOwnerTx(const CTxOut& txOut);
 
-bool CheckEncodedIPFS(const std::string& hash, std::string& strError);
+bool CheckEncoded(const std::string& hash, std::string& strError);
 
 bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits);
 
@@ -327,6 +327,8 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
 /** Verifies that this wallet owns the give asset */
 bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
 
+std::string DecodeAssetData(std::string encoded);
+std::string EncodeAssetData(std::string decoded);
 std::string DecodeIPFS(std::string encoded);
 std::string EncodeIPFS(std::string decoded);
 

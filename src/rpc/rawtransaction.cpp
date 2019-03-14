@@ -358,6 +358,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "    issue:        500 to Issue Burn Address\n"
             "    issue_unique    5 to Issue Unique Burn Address\n"
             "    reissue:      100 to Reissue Burn Address\n"
+            "    transferwithmessage:       0\n"
 
             "\nOwnership:\n"
             "  These operations require an ownership token input for the asset being operated upon:\n"
@@ -376,22 +377,32 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "     [\n"
             "       {\n"
             "         \"txid\":\"id\",                      (string, required) The transaction id\n"
-            "         \"vout\":n,                         (numeric, required) The output number\n"
-            "         \"sequence\":n                      (numeric, optional) The sequence number\n"
+            "         \"vout\":n,                         (number, required) The output number\n"
+            "         \"sequence\":n                      (number, optional) The sequence number\n"
             "       } \n"
             "       ,...\n"
             "     ]\n"
             "2. \"outputs\"                               (object, required) a json object with outputs\n"
             "     {\n"
             "       \"address\":                          (string, required) The destination raven address.  Each output must have a different address.\n"
-            "         x.xxx                             (numeric or string, required) The RVN amount\n"
+            "         x.xxx                             (number or string, required) The RVN amount\n"
             "           or\n"
             "         {                                 (object) A json object of assets to send\n"
             "           \"transfer\":\n"
             "             {\n"
             "               \"asset-name\":               (string, required) asset name\n"
-            "               asset-quantity              (numeric, required) the number of raw units to transfer\n"
+            "               asset-quantity              (number, required) the number of raw units to transfer\n"
             "               ,...\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object of describing the transfer and message contents to send\n"
+            "           \"transferwithmessage\":\n"
+            "             {\n"
+            "               \"asset-name\":              (string, required) asset name\n"
+            "               asset-quantity,            (number, required) the number of raw units to transfer\n"
+            "               \"message\":\"hash\",          (string, required) ipfs hash or a txid hash\n"
+            "               \"expire_time\": n           (number, required) utc time in seconds to expire the message\n"
             "             }\n"
             "         }\n"
             "           or\n"
@@ -422,7 +433,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "               \"asset_name\":\"asset-name\",  (string, required) name of asset to be reissued\n"
             "               \"asset_quantity\":n,         (number, required) the number of raw units to issue\n"
             "               \"reissuable\":[0-1],         (number, optional) default is 1, 1=reissuable asset\n"
-            "               \"ipfs_hash\":\"hash\"        (string, optional) An ipfs hash for discovering asset metadata, Overrides the current ipfs hash if given\n"
+            "               \"ipfs_hash\":\"hash\"          (string, optional) An ipfs hash for discovering asset metadata, Overrides the current ipfs hash if given\n"
             "             }\n"
             "         }\n"
             "         or\n"
@@ -442,6 +453,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             + HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"mycoin\\\",\\\"vout\\\":0}]\" \"{\\\"RXissueAssetXXXXXXXXXXXXXXXXXhhZGt\\\":500,\\\"change_address\\\":change_amount,\\\"issuer_address\\\":{\\\"issue\\\":{\\\"asset_name\\\":\\\"MYASSET\\\",\\\"asset_quantity\\\":1000000,\\\"units\\\":1,\\\"reissuable\\\":0,\\\"has_ipfs\\\":1,\\\"ipfs_hash\\\":\\\"43f81c6f2c0593bde5a85e09ae662816eca80797\\\"}}}\"")
             + HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"mycoin\\\",\\\"vout\\\":0}]\" \"{\\\"RXissueUniqueAssetXXXXXXXXXXWEAe58\\\":20,\\\"change_address\\\":change_amount,\\\"issuer_address\\\":{\\\"issue_unique\\\":{\\\"root_name\\\":\\\"MYASSET\\\",\\\"asset_tags\\\":[\\\"ALPHA\\\",\\\"BETA\\\"],\\\"ipfs_hashes\\\":[\\\"43f81c6f2c0593bde5a85e09ae662816eca80797\\\",\\\"43f81c6f2c0593bde5a85e09ae662816eca80797\\\"]}}}\"")
             + HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"mycoin\\\",\\\"vout\\\":0},{\\\"txid\\\":\\\"myasset\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":{\\\"transfer\\\":{\\\"MYASSET\\\":50}}}\"")
+            + HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"mycoin\\\",\\\"vout\\\":0},{\\\"txid\\\":\\\"myasset\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":{\\\"transferwithmessage\\\":{\\\"MYASSET\\\":50,\\\"message\\\":\\\"hash\\\",\\\"expire_time\\\": utc_time}}}\"")
             + HelpExampleCli("createrawtransaction", "\"[{\\\"txid\\\":\\\"mycoin\\\",\\\"vout\\\":0},{\\\"txid\\\":\\\"myownership\\\",\\\"vout\\\":0}]\" \"{\\\"issuer_address\\\":{\\\"reissue\\\":{\\\"asset_name\\\":\\\"MYASSET\\\",\\\"asset_quantity\\\":2000000}}}\"")
             + HelpExampleRpc("createrawtransaction", "\"[{\\\"txid\\\":\\\"mycoin\\\",\\\"vout\\\":0}]\", \"{\\\"data\\\":\\\"00010203\\\"}\"")
         );
@@ -582,7 +594,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     CAmount nAmount = AmountFromValue(asset_quantity);
 
                     // Create a new asset
-                    CNewAsset asset(asset_name.get_str(), nAmount, units.get_int(), reissuable.get_int(), has_ipfs.get_int(), DecodeIPFS(ipfs_hash.get_str()));
+                    CNewAsset asset(asset_name.get_str(), nAmount, units.get_int(), reissuable.get_int(), has_ipfs.get_int(), DecodeAssetData(ipfs_hash.get_str()));
 
                     // Verify that data
                     std::string strError = "";
@@ -656,7 +668,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         } else {
                             asset = CNewAsset(GetUniqueAssetName(root_name.get_str(), asset_tags[i].get_str()),
                                               UNIQUE_ASSET_AMOUNT, UNIQUE_ASSET_UNITS, UNIQUE_ASSETS_REISSUABLE,
-                                              1, DecodeIPFS(ipfs_hashes[i].get_str()));
+                                              1, DecodeAssetData(ipfs_hashes[i].get_str()));
                         }
 
                         // Verify that data
@@ -712,7 +724,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         if (!ipfs_hash.isStr())
                             throw JSONRPCError(RPC_INVALID_PARAMETER,
                                                "Invalid parameter, missing reissue metadata for key: ipfs_hash");
-                        reissueObj.strIPFSHash = DecodeIPFS(ipfs_hash.get_str());
+                        reissueObj.strIPFSHash = DecodeAssetData(ipfs_hash.get_str());
                     }
 
                     // Add the received data into the reissue object
@@ -747,6 +759,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"transfer\": {\"asset_name\": amount, ...} }"));
 
                     UniValue transferData = asset_.getValues()[0].get_obj();
+
                     auto keys = transferData.getKeys();
 
                     if (keys.size() == 0)
@@ -766,8 +779,10 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                         // Verify
                         std::string strError = "";
-                        if (!transfer.IsValid(strError))
+                        if (!transfer.IsValid(strError)) {
+                            std::cout << strError << std::endl;
                             throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                        }
 
                         // Construct transaction
                         CScript scriptPubKey = GetScriptForDestination(destination);
@@ -777,9 +792,62 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         CTxOut out(0, scriptPubKey);
                         rawTx.vout.push_back(out);
                     }
-                }
-                else {
-                    throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, unknown output type (should be 'issue', 'reissue' or 'transfer'): " + assetKey_));
+                } else if (assetKey_ == "transferwithmessage") {
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string(
+                                "Invalid parameter, the format must follow { \"transferwithmessage\": {\"asset_name\": amount, \"message\": messagehash, \"expire_time\": utc_time} }"));
+
+                    UniValue transferData = asset_.getValues()[0].get_obj();
+
+                    auto keys = transferData.getKeys();
+
+                    if (keys.size() == 0)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string(
+                                "Invalid parameter, the format must follow { \"transferwithmessage\": {\"asset_name\": amount, \"message\": messagehash, \"expire_time\": utc_time} }"));
+
+                    UniValue asset_quantity;
+                    std::string asset_name = keys[0];
+
+                    if (!IsAssetNameValid(asset_name)) {
+                        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                           "Invalid parameter, missing valid asset name to transferwithmessage");
+
+                        const UniValue &asset_quantity = find_value(transferData, asset_name);
+                        if (!asset_quantity.isNum())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing or invalid quantity");
+
+                        const UniValue &message = find_value(transferData, "message");
+                        if (!message.isStr())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, missing reissue data for key: message");
+
+                        const UniValue &expire_time = find_value(transferData, "expire_time");
+                        if (!expire_time.isNum())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, missing reissue data for key: expire_time");
+
+                        CAmount nAmount = AmountFromValue(asset_quantity);
+
+                        // Create a new transfer
+                        CAssetTransfer transfer(asset_name, nAmount, DecodeAssetData(message.get_str()),
+                                                expire_time.get_int64());
+
+                        // Verify
+                        std::string strError = "";
+                        if (!transfer.IsValid(strError)) {
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                        }
+
+                        // Construct transaction
+                        CScript scriptPubKey = GetScriptForDestination(destination);
+                        transfer.ConstructTransaction(scriptPubKey);
+
+                        // Push into vouts
+                        CTxOut out(0, scriptPubKey);
+                        rawTx.vout.push_back(out);
+                    }
+                } else {
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, unknown output type (should be 'issue', 'reissue', 'transfer' or 'transferwithmessage'): " + assetKey_));
                 }
             } else {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, Output must be of the type object"));
@@ -949,7 +1017,7 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("reissuable", reissuable));
 
         if (reissue.strIPFSHash != "")
-            r.push_back(Pair("new_ipfs_hash", EncodeIPFS(reissue.strIPFSHash)));
+            r.push_back(Pair("new_ipfs_hash", EncodeAssetData(reissue.strIPFSHash)));
 
     } else if (type.isStr() && type.get_str() == ASSET_NEW_STRING) {
         if (!AreAssetsDeployed())
@@ -971,7 +1039,7 @@ UniValue decodescript(const JSONRPCRequest& request)
             r.push_back(Pair("hasIPFS", hasIPFS));
 
             if (hasIPFS)
-                r.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+                r.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
         }
         else if (OwnerAssetFromScript(script, ownerAsset, address))
         {

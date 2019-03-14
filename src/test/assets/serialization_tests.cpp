@@ -21,7 +21,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         SelectParams("test");
 
         // Create asset
-        CNewAsset asset("SERIALIZATION", 100000000, 0, 0, 1, DecodeIPFS("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
+        CNewAsset asset("SERIALIZATION", 100000000, 0, 0, 1, DecodeAssetData("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
 
         // Create destination
         CTxDestination dest = DecodeDestination("mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp"); // Testnet Address
@@ -41,7 +41,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset.units == 0, "Units weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nReissuable == 0, "Reissuable wasn't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nHasIPFS == 1, "HasIPFS wasn't equal");
-        BOOST_CHECK_MESSAGE(EncodeIPFS(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
+        BOOST_CHECK_MESSAGE(EncodeAssetData(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
 
         // Bare asset
         CNewAsset asset2("SERIALIZATION", 100000000);
@@ -56,6 +56,21 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset2.nReissuable == 1, "Reissuable wasn't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.nHasIPFS == 0, "HasIPFS wasn't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.strIPFSHash == "", "IPFSHash wasn't equal");
+
+
+        // Asset with txid hash instead of ipfs hash
+        CNewAsset asset3("SERIALIZATION", 100000000, 0, 1, 1, DecodeAssetData("9c2c8e121a0139ba39bffd3ca97267bca9d4c0c1e84ac0c34a883c28e7a912ca"));
+        scriptPubKey = GetScriptForDestination(dest);
+        asset3.ConstructTransaction(scriptPubKey);
+        CNewAsset serializedAsset3;
+        BOOST_CHECK_MESSAGE(AssetFromScript(scriptPubKey, serializedAsset3, address), "Failed to get asset from script");
+        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.strName == "SERIALIZATION", "Asset names weren't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.nAmount == 100000000, "Amount weren't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.units == 0, "Units weren't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.nReissuable == 1, "Reissuable wasn't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.nHasIPFS == 1, "HasIPFS wasn't equal");
+        BOOST_CHECK_MESSAGE(EncodeAssetData(serializedAsset3.strIPFSHash) == "9c2c8e121a0139ba39bffd3ca97267bca9d4c0c1e84ac0c34a883c28e7a912ca", "Txid Hash wasn't equal");
     }
 
     BOOST_AUTO_TEST_CASE(reissue_asset_serialization_test)
@@ -66,7 +81,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
         // Create asset
         std::string name = "SERIALIZATION";
-        CReissueAsset reissue(name, 100000000, 0, 0, DecodeIPFS("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
+        CReissueAsset reissue(name, 100000000, 0, 0, DecodeAssetData("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
 
         // Create destination
         CTxDestination dest = DecodeDestination("mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp"); // Testnet Address
@@ -83,7 +98,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nAmount == 100000000, "Amount weren't equal");
-        BOOST_CHECK_MESSAGE(EncodeIPFS(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
+        BOOST_CHECK_MESSAGE(EncodeAssetData(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
 
         // Empty IPFS
         CReissueAsset reissue2(name, 100000000, 0, 0, "");
@@ -95,6 +110,17 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset2.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.nAmount == 100000000, "Amount weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.strIPFSHash == "", "IPFSHash wasn't equal");
+
+        // Txid Hash instead of IPFS
+        CReissueAsset reissue3(name, 100000000, 0, 0, DecodeAssetData("9c2c8e121a0139ba39bffd3ca97267bca9d4c0c1e84ac0c34a883c28e7a912ca"));
+        scriptPubKey = GetScriptForDestination(dest);
+        reissue3.ConstructTransaction(scriptPubKey);
+        CReissueAsset serializedAsset3;
+        BOOST_CHECK_MESSAGE(ReissueAssetFromScript(scriptPubKey, serializedAsset3, address), "Failed to get asset from script");
+        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.strName == "SERIALIZATION", "Asset names weren't equal");
+        BOOST_CHECK_MESSAGE(serializedAsset3.nAmount == 100000000, "Amount weren't equal");
+        BOOST_CHECK_MESSAGE(EncodeAssetData(serializedAsset3.strIPFSHash) == "9c2c8e121a0139ba39bffd3ca97267bca9d4c0c1e84ac0c34a883c28e7a912ca", "IPFSHash wasn't equal");
     }
 
     BOOST_AUTO_TEST_CASE(owner_asset_serialization_test)

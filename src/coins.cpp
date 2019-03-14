@@ -127,7 +127,6 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
 
                 int reissueIndex = tx.vout.size() - 1;
 
-
                 // Get the asset before we change it
                 CNewAsset asset;
                 if (!assetsCache->GetAssetMetaDataIfExists(reissue.strName, asset))

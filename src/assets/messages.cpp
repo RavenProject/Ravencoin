@@ -336,7 +336,7 @@ std::string CZMQMessage::createJsonString()
     str += "{";
     str += "\"blockheight\": " + std::to_string(this->blockHeight) + ", ";
     str += "\"assetname\": \"" + this->assetName + "\", ";
-    str += "\"ipfshash\": \"" + EncodeIPFS(this->ipfsHash) + "\", ";
+    str += "\"ipfshash\": \"" + EncodeAssetData(this->ipfsHash) + "\", ";
     str += "\"expiretime\": " + std::to_string(this->nExpireTime);
     str += "}";
 

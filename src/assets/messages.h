@@ -94,7 +94,7 @@ public:
 
     std::string ToString() const {
         return strprintf("CMessage(%s, Name=%s, Message=%s, Expires=%u, Time=%u, BlockHeight=%u)", out.ToString(), strName,
-                         EncodeIPFS(ipfsHash), nExpiredTime, time, nBlockHeight);
+                         EncodeAssetData(ipfsHash), nExpiredTime, time, nBlockHeight);
     }
 
     CMessage(const COutPoint &out, const std::string &strName, const std::string &ipfsHash, const int64_t &nExpiredTime,

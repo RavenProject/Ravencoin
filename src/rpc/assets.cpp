@@ -36,6 +36,32 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
+void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
+{
+    size_t msglen = message.length();
+    if (msglen == 46 || msglen == 64) {
+        if (msglen == 64 && !AreMessagingDeployed()) {
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until RIP5 is activated"));
+        }
+    } else {
+        if (msglen)
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters), Txid hashes (must be 64 characters)"));
+    }
+
+    bool fNotIPFS = false;
+    if (message.substr(0, 2) != "Qm") {
+        fNotIPFS = true;
+        if (!AreMessagingDeployed())
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid ipfs hash. Please use a valid ipfs hash. They usually start with Qm"));
+    }
+
+    if (fNotIPFS && !IsHex(message))
+        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
+
+    if (expireTime < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Expire time must be a positive number"));
+}
+
 std::string AssetActivationWarning()
 {
     return AreAssetsDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/RavenProject/rips/blob/master/rip-0002.mediawiki\n";
@@ -97,7 +123,7 @@ UniValue issue(const JSONRPCRequest& request)
             "5. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "6. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
             "7. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
-            "8. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash (only sha2-256 hashes currently supported -- Qm...)\n"
+            "8. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
 
             "\nResult:\n"
             "\"txid\"                     (string) The transaction id\n"
@@ -191,21 +217,27 @@ UniValue issue(const JSONRPCRequest& request)
     if (request.params.size() > 6)
         has_ipfs = request.params[6].get_bool();
 
+    // Check the ipfs
     std::string ipfs_hash = "";
+    bool fMessageCheck = false;
     if (request.params.size() > 7 && has_ipfs) {
+        fMessageCheck = true;
         ipfs_hash = request.params[7].get_str();
-        if (ipfs_hash.length() != 46)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
-        if (ipfs_hash.substr(0,2) != "Qm")
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
     }
+
+    // Reissues don't have an expire time
+    int64_t expireTime = 0;
+
+    // Check the message data
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(ipfs_hash, expireTime);
 
     // check for required unique asset params
     if ((assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) && (nAmount != COIN || units != 0 || reissuable)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a unique asset."));
     }
 
-    CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeIPFS(ipfs_hash));
+    CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeAssetData(ipfs_hash));
 
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
@@ -244,7 +276,7 @@ UniValue issueunique(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"root_name\"             (string, required) name of the asset the unique asset(s) are being issued under\n"
                 "2. \"asset_tags\"            (array, required) the unique tag for each asset which is to be issued\n"
-                "3. \"ipfs_hashes\"           (array, optional) ipfs hashes corresponding to each supplied tag (should be same size as \"asset_tags\") (only sha2-256 hashes currently supported -- Qm...)\n"
+                "3. \"ipfs_hashes\"           (array, optional) ipfs hashes or txid hashes corresponding to each supplied tag (should be same size as \"asset_tags\")\n"
                 "4. \"to_address\"            (string, optional, default=\"\"), address assets will be sent to, if it is empty, address will be generated for you\n"
                 "5. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
 
@@ -347,7 +379,7 @@ UniValue issueunique(const JSONRPCRequest& request)
         else
         {
             asset = CNewAsset(assetName, UNIQUE_ASSET_AMOUNT, UNIQUE_ASSET_UNITS, UNIQUE_ASSETS_REISSUABLE, 1,
-                              DecodeIPFS(ipfsHashes[i].get_str()));
+                              DecodeAssetData(ipfsHashes[i].get_str()));
         }
 
         assets.push_back(asset);
@@ -471,11 +503,13 @@ UniValue getassetdata(const JSONRPCRequest& request)
                 "  units: (number),\n"
                 "  reissuable: (number),\n"
                 "  has_ipfs: (number),\n"
-                "  ipfs_hash: (hash) (only if has_ipfs = 1)\n"
+                "  ipfs_hash: (hash) (only if has_ipfs = 1 and that data is a ipfs hash)\n"
+                "  txid_hash: (hash) (only if has_ipfs = 1 and that data is a txid hash)\n"
                 "}\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("getallassets", "\"ASSET_NAME\"")
+                + HelpExampleCli("getassetdata", "\"ASSET_NAME\"")
+                + HelpExampleRpc("getassetdata", "\"ASSET_NAME\"")
         );
 
 
@@ -495,8 +529,13 @@ UniValue getassetdata(const JSONRPCRequest& request)
         result.push_back(Pair("units", asset.units));
         result.push_back(Pair("reissuable", asset.nReissuable));
         result.push_back(Pair("has_ipfs", asset.nHasIPFS));
-        if (asset.nHasIPFS)
-            result.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+        if (asset.nHasIPFS) {
+            if (asset.strIPFSHash.size() == 32) {
+                result.push_back(Pair("txid", EncodeAssetData(asset.strIPFSHash)));
+            } else {
+                result.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+            }
+        }
 
         return result;
     }
@@ -761,7 +800,7 @@ UniValue transfer(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 5)
         throw std::runtime_error(
-                "transfer \"asset_name\" qty \"to_address\" \"message\"\n"
+                "transfer \"asset_name\" qty \"to_address\" \"message\" expire_time\n"
                 + AssetActivationWarning() +
                 "\nTransfers a quantity of an owned asset to a given address"
 
@@ -769,7 +808,7 @@ UniValue transfer(const JSONRPCRequest& request)
                 "1. \"asset_name\"               (string, required) name of asset\n"
                 "2. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
-                "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash to send along with the transfer\n"
+                "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "5. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
                 "\nResult:\n"
@@ -805,13 +844,11 @@ UniValue transfer(const JSONRPCRequest& request)
         }
     }
 
+    bool fMessageCheck = false;
     std::string message = "";
     if (request.params.size() > 3) {
+        fMessageCheck = true;
         message = request.params[3].get_str();
-        if (message.length() != 46)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
-        if (message.substr(0, 2) != "Qm")
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
     }
 
     int64_t expireTime = 0;
@@ -821,10 +858,13 @@ UniValue transfer(const JSONRPCRequest& request)
         }
     }
 
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(message, expireTime);
+
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeIPFS(message), expireTime), address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -848,9 +888,9 @@ UniValue transfer(const JSONRPCRequest& request)
 
 UniValue transferfromaddresses(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() != 4)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 4 || request.params.size() > 6)
         throw std::runtime_error(
-            "transferfromaddresses \"asset_name\" [\"from_addresses\"] qty \"to_address\"\n"
+            "transferfromaddresses \"asset_name\" [\"from_addresses\"] qty \"to_address\" \"message\" expire_time\n"
             + AssetActivationWarning() +
             "\nTransfer a quantity of an owned asset in specific address(es) to a given address"
 
@@ -859,6 +899,8 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
             "2. \"from_addresses\"           (array, required) list of from addresses to send from\n"
             "3. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
             "4. \"to_address\"               (string, required) address to send the asset to\n"
+            "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
+            "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
             "\nResult:\n"
             "txid"
@@ -867,8 +909,8 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
                 "]\n"
 
             "\nExamples:\n"
-            + HelpExampleCli("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"address\"")
-            + HelpExampleRpc("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"address\"")
+            + HelpExampleCli("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"to_address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 154652365")
+            + HelpExampleRpc("transferfromaddresses", "\"ASSET_NAME\" \'[\"fromaddress1\", \"fromaddress2\"]\' 20 \"to_address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 154652365")
             );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -905,10 +947,27 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
     std::string address = request.params[3].get_str();
 
+    bool fMessageCheck = false;
+    std::string message = "";
+    if (request.params.size() > 4) {
+        fMessageCheck = true;
+        message = request.params[4].get_str();
+    }
+
+    int64_t expireTime = 0;
+    if (!message.empty()) {
+        if (request.params.size() > 5) {
+            expireTime = request.params[5].get_int64();
+        }
+    }
+
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(message, expireTime);
+
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount), address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -954,9 +1013,9 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
 UniValue transferfromaddress(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() != 4)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 4 || request.params.size() > 6)
         throw std::runtime_error(
-                "transferfromaddress \"asset_name\" \"from_address\" qty \"to_address\"\n"
+                "transferfromaddress \"asset_name\" \"from_address\" qty \"to_address\" \"message\" expire_time\n"
                 + AssetActivationWarning() +
                 "\nTransfer a quantity of an owned asset in a specific address to a given address"
 
@@ -965,6 +1024,8 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
                 "2. \"from_address\"             (string, required) address that the asset will be transferred from\n"
                 "3. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "4. \"to_address\"               (string, required) address to send the asset to\n"
+                "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
+                "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
                 "\nResult:\n"
                 "txid"
@@ -973,8 +1034,8 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\"")
-                + HelpExampleRpc("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\"")
+                + HelpExampleCli("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\", 156545652")
+                + HelpExampleRpc("transferfromaddress", "\"ASSET_NAME\" \"fromaddress\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\", 156545652")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -1000,10 +1061,28 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
 
     std::string address = request.params[3].get_str();
 
+
+    bool fMessageCheck = false;
+    std::string message = "";
+    if (request.params.size() > 4) {
+        fMessageCheck = true;
+        message = request.params[4].get_str();
+    }
+
+    int64_t expireTime = 0;
+    if (!message.empty()) {
+        if (request.params.size() > 5) {
+            expireTime = request.params[5].get_int64();
+        }
+    }
+
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(message, expireTime);
+
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount), address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -1065,7 +1144,7 @@ UniValue reissue(const JSONRPCRequest& request)
                 "4. \"change_address\"           (string, optional) address that the change of the transaction will be sent to\n"
                 "5. \"reissuable\"               (boolean, optional, default=true), whether future reissuance is allowed\n"
                 "6. \"new_unit\"                 (numeric, optional, default=-1), the new units that will be associated with the asset\n"
-                "6. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash (only sha2-256 hashes currently supported -- Qm...)\n"
+                "6. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1106,17 +1185,21 @@ UniValue reissue(const JSONRPCRequest& request)
     }
 
     std::string newipfs = "";
+    bool fMessageCheck = false;
+
     if (request.params.size() > 6) {
+        fMessageCheck = true;
         newipfs = request.params[6].get_str();
-        if (newipfs.length() != 46)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
-        if (newipfs.substr(0,2) != "Qm")
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
-        if (DecodeIPFS(newipfs).empty())
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (contains invalid characters)"));
     }
 
-    CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeIPFS(newipfs));
+    // Reissues don't have an expire time
+    int64_t expireTime = 0;
+
+    // Check the message data
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(newipfs, expireTime);
+
+    CReissueAsset reissueAsset(asset_name, nAmount, newUnits, reissuable, DecodeAssetData(newipfs));
 
     std::pair<int, std::string> error;
     CReserveKey reservekey(pwallet);
@@ -1169,7 +1252,8 @@ UniValue listassets(const JSONRPCRequest& request)
                 "      units: (number),\n"
                 "      reissuable: (number),\n"
                 "      has_ipfs: (number),\n"
-                "      ipfs_hash: (hash) (only if has_ipfs = 1)\n"
+                "      ipfs_hash: (hash) (only if has_ipfs = 1 and data is a ipfs hash)\n"
+                "      ipfs_hash: (hash) (only if has_ipfs = 1 and data is a txid hash)\n"
                 "    },\n"
                 "  {...}, {...}\n"
                 "}\n"
@@ -1226,8 +1310,13 @@ UniValue listassets(const JSONRPCRequest& request)
             detail.push_back(Pair("has_ipfs", asset.nHasIPFS));
             detail.push_back(Pair("block_height", data.nHeight));
             detail.push_back(Pair("blockhash", data.blockHash.GetHex()));
-            if (asset.nHasIPFS)
-                detail.push_back(Pair("ipfs_hash", EncodeIPFS(asset.strIPFSHash)));
+            if (asset.nHasIPFS) {
+                if (asset.strIPFSHash.size() == 32) {
+                    detail.push_back(Pair("txid_hash", EncodeAssetData(asset.strIPFSHash)));
+                } else {
+                    detail.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
+                }
+            }
             result.push_back(Pair(asset.strName, detail));
         } else {
             result.push_back(asset.strName);
@@ -1305,9 +1394,8 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
-    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address"}},
-    { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address"}},
-    { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address"}},
+    { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address", "message", "expire_time"}},
+    { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address", "message", "expire_time"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
