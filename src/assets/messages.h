@@ -61,7 +61,7 @@ enum class MessageStatus {
     SPAM = 3,
     HIDDEN = 4,
     ORPHAN = 5,
-    ERROR = 6
+    MSG_ERROR = 6
 };
 
 int8_t IntFromMessageStatus(MessageStatus status);
@@ -88,7 +88,7 @@ public:
         strName = "";
         ipfsHash = "";
         time = 0;
-        status = MessageStatus::ERROR;
+        status = MessageStatus::MSG_ERROR;
         nBlockHeight = 0;
     }
 
