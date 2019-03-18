@@ -6,12 +6,8 @@
 #ifndef RAVENCOIN_MESSAGES_H
 #define RAVENCOIN_MESSAGES_H
 
-
 #include <uint256.h>
 #include <serialize.h>
-#include <primitives/transaction.h>
-#include <validation.h>
-#include "assettypes.h"
 
 class CMessage;
 class COutPoint;
@@ -61,7 +57,7 @@ enum class MessageStatus {
     SPAM = 3,
     HIDDEN = 4,
     ORPHAN = 5,
-    ERROR = 6
+    MSG_ERROR = 6
 };
 
 int8_t IntFromMessageStatus(MessageStatus status);
@@ -88,7 +84,7 @@ public:
         strName = "";
         ipfsHash = "";
         time = 0;
-        status = MessageStatus::ERROR;
+        status = MessageStatus::MSG_ERROR;
         nBlockHeight = 0;
     }
 

@@ -1,9 +1,10 @@
 // Copyright (c) 2018 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#include <validation.h>
+#include "validation.h"
 #include "messagedb.h"
 #include "messages.h"
+#include <boost/thread.hpp>
 
 static const char MESSAGE_FLAG = 'Z'; // Message
 static const char MY_MESSAGE_CHANNEL = 'C'; // My followed Channels

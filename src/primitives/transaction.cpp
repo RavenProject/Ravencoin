@@ -5,7 +5,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <streams.h>
-#include <util.h>
 #include "primitives/transaction.h"
 
 #include "hash.h"

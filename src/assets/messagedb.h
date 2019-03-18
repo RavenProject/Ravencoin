@@ -5,8 +5,6 @@
 #ifndef RAVENCOIN_MESSAGEDB_H
 #define RAVENCOIN_MESSAGEDB_H
 
-
-
 #include <dbwrapper.h>
 
 class CMessage;
