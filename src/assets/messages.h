@@ -6,12 +6,8 @@
 #ifndef RAVENCOIN_MESSAGES_H
 #define RAVENCOIN_MESSAGES_H
 
-
 #include <uint256.h>
 #include <serialize.h>
-#include <primitives/transaction.h>
-#include <validation.h>
-#include "assettypes.h"
 
 class CMessage;
 class COutPoint;
