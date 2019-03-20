@@ -274,11 +274,12 @@ class AssetTest(RavenTestFramework):
 
         ########################################
         # bad hash (isn't a valid multihash sha2-256)
+        self.log.info("Testing issue asset with invalid IPFS...")
         try:
             n0.issue(asset_name=asset_name1, qty=1000, to_address=address1, change_address=address2, \
                      units=0, reissuable=True, has_ipfs=True, ipfs_hash=bad_hash)
         except JSONRPCException as e:
-            if "Invalid IPFS hash (doesn't start with 'Qm')" not in e.error['message']:
+            if "Invalid IPFS/Txid hash" not in e.error['message']:
                 raise AssertionError("Expected substring not found:" + e.error['message'])
         except Exception as e:
             raise AssertionError("Unexpected exception raised: " + type(e).__name__)
@@ -287,6 +288,7 @@ class AssetTest(RavenTestFramework):
 
         ########################################
         # no hash
+        self.log.info("Testing issue asset with no IPFS...")
         n0.issue(asset_name=asset_name2, qty=1000, to_address=address1, change_address=address2, \
                  units=0, reissuable=True, has_ipfs=False)
         n0.generate(1)
@@ -296,11 +298,12 @@ class AssetTest(RavenTestFramework):
 
         ########################################
         # reissue w/ bad hash
+        self.log.info("Testing re-issue asset with invalid IPFS...")
         try:
             n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, \
                        reissuable=True, new_unit=-1, new_ipfs=bad_hash)
         except JSONRPCException as e:
-            if "Invalid IPFS hash (doesn't start with 'Qm')" not in e.error['message']:
+            if "Invalid IPFS/Txid hash" not in e.error['message']:
                 raise AssertionError("Expected substring not found:" + e.error['message'])
         except Exception as e:
             raise AssertionError("Unexpected exception raised: " + type(e).__name__)
@@ -309,6 +312,7 @@ class AssetTest(RavenTestFramework):
 
         ########################################
         # reissue w/ hash
+        self.log.info("Testing re-issue asset with valid IPFS...")
         n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, \
                    reissuable=True, new_unit=-1, new_ipfs=ipfs_hash)
         n0.generate(1)
