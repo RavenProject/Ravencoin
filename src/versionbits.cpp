@@ -18,6 +18,10 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
             /*.name =*/ "assets",
             /*.gbt_force =*/ true,
+    },
+    {
+            /*.name =*/ "messaging",
+            /*.gbt_force =*/ true,
     }
 };
 
