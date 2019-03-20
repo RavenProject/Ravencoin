@@ -1222,6 +1222,8 @@ void ReissueAssetDialog::clear()
     disableAll();
     asset->SetNull();
     setDisplayedDataToNone();
+
+    updateAssetsList();
 }
 
 void ReissueAssetDialog::onClearButtonClicked()
