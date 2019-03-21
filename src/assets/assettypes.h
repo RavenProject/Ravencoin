@@ -27,7 +27,10 @@ enum class AssetType
     MSGCHANNEL = 4,
     VOTE = 5,
     REISSUE = 6,
-    INVALID = 7
+    QUALIFIER = 7,
+    SUB_QUALIFIER = 8,
+    RESTRICTED = 9,
+    INVALID = 10
 };
 
 int IntFromAssetType(AssetType type);

@@ -45,21 +45,33 @@ static const std::regex UNIQUE_TAG_CHARACTERS("^[-A-Za-z0-9@$%&*()[\\]{}_.?:]+$"
 static const std::regex MSGCHANNEL_TAG_CHARACTERS("^[A-Za-z0-9_]+$");
 static const std::regex VOTE_TAG_CHARACTERS("^[A-Z0-9._]+$");
 
+// Restricted assets
+static const std::regex QUALIFIER_NAME_CHARACTERS("#[A-Z0-9._]{3,}$");
+static const std::regex SUB_QUALIFIER_NAME_CHARACTERS("#[A-Z0-9._]+$");
+static const std::regex RESTRICTED_NAME_CHARACTERS("\\$[A-Z0-9._]{3,}$");
+
 static const std::regex DOUBLE_PUNCTUATION("^.*[._]{2,}.*$");
 static const std::regex LEADING_PUNCTUATION("^[._].*$");
 static const std::regex TRAILING_PUNCTUATION("^.*[._]$");
+static const std::regex QUALIFIER_LEADING_PUNCTUATION("^[#\\$][._].*$"); // Used for qualifier assets, and restricted asset only
 
 static const std::string SUB_NAME_DELIMITER = "/";
 static const std::string UNIQUE_TAG_DELIMITER = "#";
 static const std::string MSGCHANNEL_TAG_DELIMITER = "~";
 static const std::string VOTE_TAG_DELIMITER = "^";
+static const std::string RESTRICTED_TAG_DELIMITER = "$";
+
 
 static const std::regex UNIQUE_INDICATOR(R"(^[^^~#!]+#[^~#!\/]+$)");
 static const std::regex MSGCHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");
 static const std::regex OWNER_INDICATOR(R"(^[^^~#!]+!$)");
 static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 
-static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$");
+static const std::regex QUALIFIER_INDICATOR("^[#][A-Z0-9._]{3,}$"); // Starts with #
+static const std::regex SUB_QUALIFIER_INDICATOR("^#[A-Z0-9._]+\\/#[A-Z0-9._]+$"); // Starts with #
+static const std::regex RESTRICTED_INDICATOR("^[\\$][A-Z0-9._]{3,}$"); // Starts with $
+
+static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^#RVN$|^#RAVEN$|^#RAVENCOIN$|^$RVN$|^$RAVEN$|^$RAVENCOIN$");
 
 bool IsRootNameValid(const std::string& name)
 {
@@ -68,6 +80,32 @@ bool IsRootNameValid(const std::string& name)
         && !std::regex_match(name, LEADING_PUNCTUATION)
         && !std::regex_match(name, TRAILING_PUNCTUATION)
         && !std::regex_match(name, RAVEN_NAMES);
+}
+
+bool IsQualifierNameValid(const std::string& name)
+{
+    return std::regex_match(name, QUALIFIER_NAME_CHARACTERS)
+           && !std::regex_match(name, DOUBLE_PUNCTUATION)
+           && !std::regex_match(name, QUALIFIER_LEADING_PUNCTUATION)
+           && !std::regex_match(name, TRAILING_PUNCTUATION)
+           && !std::regex_match(name, RAVEN_NAMES);
+}
+
+bool IsRestrictedNameValid(const std::string& name)
+{
+    return std::regex_match(name, RESTRICTED_NAME_CHARACTERS)
+           && !std::regex_match(name, DOUBLE_PUNCTUATION)
+           && !std::regex_match(name, LEADING_PUNCTUATION)
+           && !std::regex_match(name, TRAILING_PUNCTUATION)
+           && !std::regex_match(name, RAVEN_NAMES);
+}
+
+bool IsSubQualifierNameValid(const std::string& name)
+{
+    return std::regex_match(name, SUB_QUALIFIER_NAME_CHARACTERS)
+           && !std::regex_match(name, DOUBLE_PUNCTUATION)
+           && !std::regex_match(name, LEADING_PUNCTUATION)
+           && !std::regex_match(name, TRAILING_PUNCTUATION);
 }
 
 bool IsSubNameValid(const std::string& name)
@@ -114,6 +152,30 @@ bool IsNameValidBeforeTag(const std::string& name)
     return true;
 }
 
+bool IsQualifierNameValidBeforeTag(const std::string& name)
+{
+    std::vector<std::string> parts;
+    boost::split(parts, name, boost::is_any_of(SUB_NAME_DELIMITER));
+
+    if (!IsQualifierNameValid(parts.front())) return false;
+
+    // Qualifiers can only have one sub qualifier under it
+    if (parts.size() > 2) {
+        return false;
+    }
+
+    if (parts.size() > 1)
+    {
+
+        for (unsigned long i = 1; i < parts.size(); i++)
+        {
+            if (!IsSubQualifierNameValid(parts[i])) return false;
+        }
+    }
+
+    return true;
+}
+
 bool IsAssetNameASubasset(const std::string& name)
 {
     std::vector<std::string> parts;
@@ -123,6 +185,17 @@ bool IsAssetNameASubasset(const std::string& name)
 
     return parts.size() > 1;
 }
+
+bool IsAssetNameASubQualifier(const std::string& name)
+{
+    std::vector<std::string> parts;
+    boost::split(parts, name, boost::is_any_of(SUB_NAME_DELIMITER));
+
+    if (!IsQualifierNameValid(parts.front())) return false;
+
+    return parts.size() > 1;
+}
+
 
 bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string& error)
 {
@@ -156,6 +229,36 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string
         bool ret = IsTypeCheckNameValid(AssetType::VOTE, name, error);
         if (ret)
             assetType = AssetType::VOTE;
+
+        return ret;
+    }
+    else if (std::regex_match(name, QUALIFIER_INDICATOR))
+    {
+        bool ret = IsTypeCheckNameValid(AssetType::QUALIFIER, name, error);
+        if (ret) {
+            if (IsAssetNameASubQualifier(name))
+                assetType = AssetType::SUB_QUALIFIER;
+            else
+                assetType = AssetType::QUALIFIER;
+        }
+
+        return ret;
+    }
+    else if (std::regex_match(name, SUB_QUALIFIER_INDICATOR))
+    {
+        bool ret = IsTypeCheckNameValid(AssetType::SUB_QUALIFIER, name, error);
+        if (ret) {
+            if (IsAssetNameASubQualifier(name))
+                assetType = AssetType::SUB_QUALIFIER;
+        }
+
+        return ret;
+    }
+    else if (std::regex_match(name, RESTRICTED_INDICATOR))
+    {
+        bool ret = IsTypeCheckNameValid(AssetType::RESTRICTED, name, error);
+        if (ret)
+            assetType = AssetType::RESTRICTED;
 
         return ret;
     }
@@ -223,6 +326,16 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
         bool valid = IsNameValidBeforeTag(parts.front()) && IsVoteTagValid(parts.back());
         if (!valid) { error = "Vote name contains invalid characters (Valid characters are: A-Z 0-9 _ .) (special characters can't be the first or last characters)";  return false; }
         return true;
+    } else if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+        if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
+        bool valid = IsQualifierNameValidBeforeTag(name);
+        if (!valid) { error = "Qualifier name contains invalid characters (Valid characters are: A-Z 0-9 _ .) (# must be the first character, _ . special characters can't be the first or last characters)";  return false; }
+        return true;
+    } else if (type == AssetType::RESTRICTED) {
+        if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
+        bool valid = IsRestrictedNameValid(name);
+        if (!valid) { error = "Restricted name contains invalid characters (Valid characters are: A-Z 0-9 _ .) ($ must be the first character, _ . special characters can't be the first or last characters)";  return false; }
+        return true;
     } else {
         if (name.size() > MAX_NAME_LENGTH - 1) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH - 1); return false; }  //Assets and sub-assets need to leave one extra char for OWNER indicator
         if (!IsAssetNameASubasset(name) && name.size() < MIN_ASSET_LENGTH) { error = "Name must be contain " + std::to_string(MIN_ASSET_LENGTH) + " characters"; return false; }
@@ -248,8 +361,15 @@ std::string GetParentName(const std::string& name)
         index = name.find_last_of(MSGCHANNEL_TAG_DELIMITER);
     } else if (type == AssetType::VOTE) {
         index = name.find_last_of(VOTE_TAG_DELIMITER);
-    } else if (type == AssetType::ROOT)
+    } else if (type == AssetType::ROOT) {
         return name;
+    } else if (type == AssetType::QUALIFIER) {
+        return name;
+    } else if (type == AssetType::SUB_QUALIFIER) {
+        index = name.find_last_of(SUB_NAME_DELIMITER);
+    } else if (type == AssetType::RESTRICTED) {
+        return name;
+    }
 
     if (std::string::npos != index)
     {
