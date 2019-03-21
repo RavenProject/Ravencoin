@@ -173,6 +173,51 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(GetParentName("TEST/TEST/SUB/SUB") == "TEST/TEST/SUB");
         BOOST_CHECK(GetParentName("TEST/SUB^VOTE") == "TEST/SUB");
         BOOST_CHECK(GetParentName("TEST/SUB/SUB~CHANNEL") == "TEST/SUB/SUB");
+
+        BOOST_CHECK(GetParentName("#TEST/#HELLO") == "#TEST");
+        BOOST_CHECK(GetParentName("#TEST") == "#TEST");
+
+        BOOST_CHECK(GetParentName("$RESTRICTED") == "$RESTRICTED");
+
+        // Qualifier
+        BOOST_CHECK(IsAssetNameValid("#ABC"));
+        BOOST_CHECK(IsAssetNameValid("#ABC_TEST"));
+        BOOST_CHECK(IsAssetNameValid("#ABC.TEST"));
+        BOOST_CHECK(IsAssetNameValid("#ABC_IS_31_CHARACTERS_LENGTH_31", type));
+        BOOST_CHECK(type == AssetType::QUALIFIER);
+        BOOST_CHECK(!IsAssetNameValid("#ABC_IS_32_CHARACTERS_LEN_GTH_32"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC^"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC_.A"));
+        BOOST_CHECK(!IsAssetNameValid("#A"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC!"));
+        BOOST_CHECK(!IsAssetNameValid("#_ABC"));
+        BOOST_CHECK(!IsAssetNameValid("#.ABC"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC_"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC."));
+
+
+        // Sub Qualifier
+        BOOST_CHECK(IsAssetNameValid("#ABC/#TESTING"));
+        BOOST_CHECK(IsAssetNameValid("#ABC/#TESTING_THIS"));
+        BOOST_CHECK(IsAssetNameValid("#ABC/#SUB_IS_31_CHARACTERS_LENG"));
+        BOOST_CHECK(IsAssetNameValid("#ABC/#A", type));
+        BOOST_CHECK(type == AssetType::SUB_QUALIFIER);
+        BOOST_CHECK(!IsAssetNameValid("#ABC/TEST_"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC/TEST."));
+        BOOST_CHECK(!IsAssetNameValid("#ABC/TEST"));
+        BOOST_CHECK(!IsAssetNameValid("#ABC/#SUB_IS_32_CHARACTERS_LEN32"));
+
+
+        // Restricted
+        BOOST_CHECK(IsAssetNameValid("$ABC"));
+        BOOST_CHECK(IsAssetNameValid("$ABC_A"));
+        BOOST_CHECK(IsAssetNameValid("$ABC_A"));
+        BOOST_CHECK(IsAssetNameValid("$ABC_IS_30_CHARACTERS_LENGTH30", type));
+        BOOST_CHECK(type == AssetType::RESTRICTED);
+        BOOST_CHECK(!IsAssetNameValid("$ABC_IS_32_CHARACTERSA_LENGTH_32"));
+        BOOST_CHECK(!IsAssetNameValid("$ABC/$NO"));
+        BOOST_CHECK(!IsAssetNameValid("$ABC/NO"));
+        BOOST_CHECK(!IsAssetNameValid("$ABC/#NO"));
     }
 
     BOOST_AUTO_TEST_CASE(transfer_asset_coin_test)
