@@ -5491,6 +5491,18 @@ bool AreMessagingDeployed() {
     return fMessagesIsActive;
 }
 
+bool AreRestrictedAssetsDeployed() {
+
+    if (fRestrictedAssetsIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_RESTRICTED_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        fRestrictedAssetsIsActive = true;
+
+    return fRestrictedAssetsIsActive;
+}
+
 bool IsDGWActive(unsigned int nBlockNumber) {
     return nBlockNumber >= Params().DGWActivationBlock();
 }

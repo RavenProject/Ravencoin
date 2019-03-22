@@ -22,6 +22,10 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
             /*.name =*/ "messaging",
             /*.gbt_force =*/ true,
+    },
+    {
+            /*.name =*/ "restricted_assets",
+            /*.gbt_force =*/ true,
     }
 };
 
