@@ -140,6 +140,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 7;  //Messaging (RIP5)
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 5544116233; // TODO Update when ready
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 5544116233; //TODO Update when ready
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].bit = 8;  // Restricted assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nStartTime = 5544116233; // TODO Update when ready
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nTimeout = 5544116233; //TODO Update when ready
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -269,6 +272,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 6;  //Assets (RIP5)
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 1551657600; // GMT: Sunday Mar 3, 2019 5:00:00 PM
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 1579480000; // GMT: Sun Jan 19 2020 05:26:40 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].bit = 7;  // Restricted assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nStartTime = 5544116233; // TODO Update when ready
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nTimeout = 5544116233; //TODO Update when ready
 
 
         // The best chain should have at least this much work.
@@ -448,6 +454,9 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 7;
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 1551989903;
         consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 999999999999ULL;
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].bit = 8;  // Restricted assets
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nTimeout = 999999999999ULL;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");

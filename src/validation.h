@@ -549,6 +549,8 @@ bool AreAssetsDeployed();
 
 bool AreMessagingDeployed();
 
+bool AreRestrictedAssetsDeployed();
+
 bool IsDGWActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
