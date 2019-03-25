@@ -715,78 +715,6 @@ bool CTransaction::IsNewAsset() const
     return true;
 }
 
-//! To be called on CTransactions where IsNewAsset returns true
-bool CTransaction::VerifyNewAsset(std::string& strError) const
-{
-    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
-    if (vout.size() < 3) {
-        strError  = "bad-txns-issue-vout-size-to-small";
-        return false;
-    }
-
-    // Check for the assets data CTxOut. This will always be the last output in the transaction
-    if (!CheckIssueDataTx(vout[vout.size() - 1])) {
-        strError  = "bad-txns-issue-data-not-found";
-        return false;
-    }
-
-    // Check to make sure the owner asset is created
-    if (!CheckOwnerDataTx(vout[vout.size() - 2])) {
-        strError  = "bad-txns-issue-owner-data-not-found";
-        return false;
-    }
-
-    // Get the asset type
-    CNewAsset asset;
-    std::string address;
-    if (!AssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
-        strError = "bad-txns-issue-serialzation-failed";
-        return error("%s : Failed to get new asset from transaction: %s", __func__, this->GetHash().GetHex());
-    }
-
-    AssetType assetType;
-    IsAssetNameValid(asset.strName, assetType);
-
-    std::string strOwnerName;
-    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address)) {
-        strError = "bad-txns-issue-owner-serialzation-failed";
-        return false;
-    }
-
-    if (strOwnerName != asset.strName + OWNER_TAG) {
-        strError = "bad-txns-issue-owner-name-doesn't-match";
-        return false;
-    }
-
-    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
-    bool fFoundIssueBurnTx = false;
-    for (auto out : vout) {
-        if (CheckIssueBurnTx(out, assetType)) {
-            fFoundIssueBurnTx = true;
-            break;
-        }
-    }
-
-    if (!fFoundIssueBurnTx) {
-        strError = "bad-txns-issue-burn-not-found";
-        return false;
-    }
-
-    // Loop through all of the vouts and make sure only the expected asset creations are taking place
-    int nTransfers = 0;
-    int nOwners = 0;
-    int nIssues = 0;
-    int nReissues = 0;
-    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
-
-    if (nOwners != 1 || nIssues != 1 || nReissues > 0) {
-        strError = "bad-txns-failed-issue-asset-formatting-check";
-        return false;
-    }
-
-    return true;
-}
-
 //! Make sure to call VerifyNewUniqueAsset if this call returns true
 bool CTransaction::IsNewUniqueAsset() const
 {
@@ -893,6 +821,97 @@ bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
     return true;
 }
 
+//! To be called on CTransactions where IsNewAsset returns true
+bool CTransaction::VerifyNewAsset(std::string& strError) const {
+    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
+    if (vout.size() < 3) {
+        strError = "bad-txns-issue-vout-size-to-small";
+        return false;
+    }
+
+    // Check for the assets data CTxOut. This will always be the last output in the transaction
+    if (!CheckIssueDataTx(vout[vout.size() - 1])) {
+        strError = "bad-txns-issue-data-not-found";
+        return false;
+    }
+
+    // Check to make sure the owner asset is created
+    if (!CheckOwnerDataTx(vout[vout.size() - 2])) {
+        strError = "bad-txns-issue-owner-data-not-found";
+        return false;
+    }
+
+    // Get the asset type
+    CNewAsset asset;
+    std::string address;
+    if (!AssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
+        strError = "bad-txns-issue-serialzation-failed";
+        return error("%s : Failed to get new asset from transaction: %s", __func__, this->GetHash().GetHex());
+    }
+
+    AssetType assetType;
+    IsAssetNameValid(asset.strName, assetType);
+
+    std::string strOwnerName;
+    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address)) {
+        strError = "bad-txns-issue-owner-serialzation-failed";
+        return false;
+    }
+
+    if (strOwnerName != asset.strName + OWNER_TAG) {
+        strError = "bad-txns-issue-owner-name-doesn't-match";
+        return false;
+    }
+
+    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
+    bool fFoundIssueBurnTx = false;
+    for (auto out : vout) {
+        if (CheckIssueBurnTx(out, assetType)) {
+            fFoundIssueBurnTx = true;
+            break;
+        }
+    }
+
+    if (!fFoundIssueBurnTx) {
+        strError = "bad-txns-issue-burn-not-found";
+        return false;
+    }
+
+    if (assetType == AssetType::SUB) {
+        std::string root = GetParentName(asset.strName);
+        bool fOwnerOutFound = false;
+        for (auto out : vout) {
+            CAssetTransfer transfer;
+            std::string transferAddress;
+            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+                if (root + OWNER_TAG == transfer.strName) {
+                    fOwnerOutFound = true;
+                    break;
+                }
+            }
+        }
+
+        if (!fOwnerOutFound) {
+            strError = "bad-txns-issue-unique-asset-bad-owner-asset";
+            return false;
+        }
+    }
+
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners != 1 || nIssues != 1 || nReissues > 0) {
+        strError = "bad-txns-failed-issue-asset-formatting-check";
+        return false;
+    }
+
+    return true;
+}
+
 //! Make sure to call VerifyNewUniqueAsset if this call returns true
 bool CTransaction::IsNewMsgChannelAsset() const
 {
@@ -943,6 +962,25 @@ bool CTransaction::VerifyNewMsgChannelAsset(std::string &strError) const
 
     if (!fFoundIssueBurnTx) {
         strError = "bad-txns-issue-msgchannel-burn-not-found";
+        return false;
+    }
+
+    // check for owner change outpoint that matches root
+    std::string root = GetParentName(asset.strName);
+    bool fOwnerOutFound = false;
+    for (auto out : vout) {
+        CAssetTransfer transfer;
+        std::string transferAddress;
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (root + OWNER_TAG == transfer.strName) {
+                fOwnerOutFound = true;
+                break;
+            }
+        }
+    }
+
+    if (!fOwnerOutFound) {
+        strError = "bad-txns-issue-msg-channel-asset-bad-owner-asset";
         return false;
     }
 
@@ -1065,24 +1103,25 @@ bool CAssetTransfer::IsValid(std::string& strError) const
         return false;
     }
 
-    if (nAmount <= 0) {
-        strError  = "Invalid parameter: asset amount can't be equal to or less than zero.";
-        return false;
-    }
+    if (AreMessagingDeployed()) {
+        if (nAmount <= 0) {
+            strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
+            return false;
+        }
 
-    if (message.empty() && nExpireTime > 0) {
-        strError = "Invalid parameter: asset transfer expiration time requires a message to be attached to the transfer";
-        std::cout << "Time: " << nExpireTime << std::endl;
-        return false;
-    }
+        if (message.empty() && nExpireTime > 0) {
+            strError = "Invalid parameter: asset transfer expiration time requires a message to be attached to the transfer";
+            return false;
+        }
 
-    if (nExpireTime < 0) {
-        strError = "Invalid parameter: expiration time must be a positive value";
-        return false;
-    }
+        if (nExpireTime < 0) {
+            strError = "Invalid parameter: expiration time must be a positive value";
+            return false;
+        }
 
-    if (message.size() && !CheckEncoded(message, strError)) {
-        return false;
+        if (message.size() && !CheckEncoded(message, strError)) {
+            return false;
+        }
     }
 
     return true;
@@ -3084,8 +3123,7 @@ bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits)
     return nAmount % int64_t(pow(10, (MAX_UNIT - nUnits))) == 0;
 }
 
-bool CheckEncoded(const std::string& hash, std::string& strError)
-{
+bool CheckEncoded(const std::string& hash, std::string& strError) {
     std::string encodedStr = EncodeAssetData(hash);
     if (encodedStr.substr(0, 2) == "Qm" && encodedStr.size() == 46) {
         return true;

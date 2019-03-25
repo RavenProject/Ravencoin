@@ -211,17 +211,17 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
 
-                    // Check to make sure that messages are not sent before the RIP5 is active
-                    if (!transfer.message.empty()) {
-                        if (!AreMessagingDeployed()) {
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-included-message-before-messaging-is-active");
-                        }
-                    }
-
                     // Check asset name validity and get type
                     AssetType assetType;
                     if (!IsAssetNameValid(transfer.strName, assetType)) {
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-name-invalid");
+                    }
+
+                    // Check transfer asset amount > 0
+                    if (AreMessagingDeployed()) {
+                        if (transfer.nAmount <= 0) {
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-amount-must-be-greater-than-zero");
+                        }
                     }
 
                     // If the transfer is an ownership asset. Check to make sure that it is OWNER_ASSET_AMOUNT
