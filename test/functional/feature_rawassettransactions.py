@@ -693,7 +693,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        assert_raises_rpc_error(-8, "Invalid parameter: ipfs_hash must start with 'Qm'.", n0.createrawtransaction, inputs, outputs)
+        assert_raises_rpc_error(-8, "Invalid parameter: ipfs_hash is not valid, or txid hash is not the right length", n0.createrawtransaction, inputs, outputs)
 
         ########################################
         # reissue
@@ -716,7 +716,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        assert_raises_rpc_error(-8, "Invalid parameter: ipfs_hash must start with 'Qm'.", n0.createrawtransaction, inputs, outputs)
+        assert_raises_rpc_error(-8, "Invalid parameter: ipfs_hash is not valid, or txid hash is not the right length", n0.createrawtransaction, inputs, outputs)
 
 
     def issue_invalid_address_test(self):
@@ -1408,7 +1408,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_bad_transfer = bytes_to_hex_str(tx.serialize())
         tx_bad_transfer_signed = n0.signrawtransaction(tx_bad_transfer)['hex']
-        assert_raises_rpc_error(-26, "bad-tx-inputs-outputs-mismatch Bad Transaction - Assets would be burnt TRANSFER_TX_TAMPERING",
+        assert_raises_rpc_error(-26, "bad-txns-transfer-not-valid Invalid parameter: asset amount can't be equal to or less than zero.",
                                 n0.sendrawtransaction, tx_bad_transfer_signed)
 
         signed_hex = n0.signrawtransaction(tx_transfer_hex)['hex']
