@@ -1863,6 +1863,22 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             }
                         }
                     }
+                } else if (tx.IsNewMsgChannelAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!MsgChannelAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get msgchannel asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Msg Channel Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -2454,7 +2470,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             }
             else if (tx.IsNewMsgChannelAsset())
             {
-                if (!AreAssetsDeployed())
+                if (!AreMessagingDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-msgchannel-when-assets-is-not-active");
 
                 std::string strError = "";
