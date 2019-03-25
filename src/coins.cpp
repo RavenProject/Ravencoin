@@ -168,6 +168,15 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
                     error("%s : Failed at adding a new asset to our cache. asset: %s", __func__,
                           asset.strName);
+            } else if (tx.IsNewQualifierAsset()) {
+                CNewAsset asset;
+                std::string strAddress;
+                QualifierAssetFromTransaction(tx, asset, strAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new qualifier asset to our cache. asset: %s", __func__,
+                          asset.strName);
             }
         }
     }

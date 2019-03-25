@@ -1879,6 +1879,51 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             return DISCONNECT_FAILED;
                         }
                     }
+                } else if (tx.IsNewQualifierAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!QualifierAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get qualifier asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Qualifier Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+                } else if (tx.IsNewRestrictedAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!RestrictedAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get restricted asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Restricted Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+
+                    // Get the owner from the transaction and remove it
+                    std::string ownerName;
+                    std::string ownerAddress;
+                    if (!OwnerFromTransaction(tx, ownerName, ownerAddress)) {
+                        error("%s : Failed to get restrcited owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (!assetsCache->RemoveOwnerAsset(ownerName, ownerAddress)) {
+                        error("%s : Failed to Remove Restricted Owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -2419,7 +2464,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 if (!AssetFromTransaction(tx, asset, strAddress))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-serialization");
 
-
                 if(!IsNewOwnerTxValid(tx, asset.strName, strAddress, strError))
                     return state.DoS(100, false, REJECT_INVALID, strError);
 
@@ -2484,6 +2528,40 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
                 if (!asset.IsValid(strError, *assetsCache))
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-msgchannel");
+            }
+            else if (tx.IsNewQualifierAsset())
+            {
+                if (!AreRestrictedAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-qualifier-when-it-is-not-active");
+
+                std::string strError = "";
+                if (!tx.VerifyNewQualfierAsset(strError))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualifier-failed-verify");
+
+                CNewAsset asset;
+                std::string strAddress;
+                if (!QualifierAssetFromTransaction(tx, asset, strAddress))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualifier-serialization");
+
+                if (!asset.IsValid(strError, *assetsCache))
+                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-qualifier");
+            }
+            else if (tx.IsNewRestrictedAsset())
+            {
+                if (!AreRestrictedAssetsDeployed())
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-restricted-when-it-is-not-active");
+
+                std::string strError = "";
+                if (!tx.VerifyNewAsset(strError))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-failed-verify");
+
+                CNewAsset asset;
+                std::string strAddress;
+                if (!RestrictedAssetFromTransaction(tx, asset, strAddress))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-serialization");
+
+                if (!asset.IsValid(strError, *assetsCache))
+                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-qualifier");
             }
         }
         /** RVN END */

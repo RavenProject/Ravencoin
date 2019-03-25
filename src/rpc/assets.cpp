@@ -78,8 +78,11 @@ std::string AssetTypeToString(AssetType& assetType)
         case AssetType::MSGCHANNEL:    return "MSGCHANNEL";
         case AssetType::VOTE:          return "VOTE";
         case AssetType::REISSUE:       return "REISSUE";
+        case AssetType::QUALIFIER:     return "QUALIFIER";
+        case AssetType::SUB_QUALIFIER: return "SUB_QUALIFIER";
+        case AssetType::RESTRICTED:    return "RESTRICTED";
         case AssetType::INVALID:       return "INVALID";
-        default:            return "UNKNOWN";
+        default:                       return "UNKNOWN";
     }
 }
 
@@ -156,8 +159,8 @@ UniValue issue(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName + std::string("\nError: ") + assetError);
     }
 
-    // Check assetType supported
-    if (!(assetType == AssetType::ROOT || assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL)) {
+    // Check for unsupported asset types
+    if (assetType == AssetType::VOTE || assetType == AssetType::REISSUE || assetType == AssetType::OWNER || assetType == AssetType::INVALID) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
@@ -209,7 +212,7 @@ UniValue issue(const JSONRPCRequest& request)
     if (request.params.size() > 4)
         units = request.params[4].get_int();
 
-    bool reissuable = assetType != AssetType::UNIQUE && assetType != AssetType::MSGCHANNEL;
+    bool reissuable = assetType != AssetType::UNIQUE && assetType != AssetType::MSGCHANNEL && assetType != AssetType::QUALIFIER && assetType != AssetType::SUB_QUALIFIER;
     if (request.params.size() > 5)
         reissuable = request.params[5].get_bool();
 
@@ -234,6 +237,11 @@ UniValue issue(const JSONRPCRequest& request)
 
     // check for required unique asset params
     if ((assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) && (nAmount != COIN || units != 0 || reissuable)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a unique asset."));
+    }
+
+    // check for required unique asset params
+    if ((assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER) && (nAmount < QUALIFIER_ASSET_MIN_AMOUNT || nAmount > QUALIFIER_ASSET_MAX_AMOUNT  || units != 0 || reissuable)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a unique asset."));
     }
 

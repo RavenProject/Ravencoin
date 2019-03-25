@@ -439,6 +439,21 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
         }
     }
 
+    if (assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER) {
+        if (units != QUALIFIER_ASSET_UNITS) {
+            strError = _("Invalid parameter: units must be ") + std::to_string(QUALIFIER_ASSET_UNITS);
+            return false;
+        }
+        if (nAmount < QUALIFIER_ASSET_MIN_AMOUNT || nAmount > QUALIFIER_ASSET_MAX_AMOUNT) {
+            strError = _("Invalid parameter: amount must be between ") + std::to_string(QUALIFIER_ASSET_MIN_AMOUNT) + " - " + std::to_string(QUALIFIER_ASSET_MAX_AMOUNT);
+            return false;
+        }
+        if (nReissuable != 0) {
+            strError = _("Invalid parameter: reissuable must be 0");
+            return false;
+        }
+    }
+
     if (IsAssetNameAnOwner(std::string(strName))) {
         strError = _("Invalid parameters: asset_name can't have a '!' at the end of it. See help for more details.");
         return false;
@@ -624,6 +639,29 @@ bool MsgChannelAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, st
     return MsgChannelAssetFromScript(scriptPubKey, asset, strAddress);
 }
 
+bool QualifierAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
+{
+    // Check to see if the transaction is an new asset qualifier issue tx
+    if (!tx.IsNewQualifierAsset())
+        return false;
+
+    // Get the scriptPubKey from the last tx in vout
+    CScript scriptPubKey = tx.vout[tx.vout.size() - 1].scriptPubKey;
+
+    return QualifierAssetFromScript(scriptPubKey, asset, strAddress);
+}
+bool RestrictedAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
+{
+    // Check to see if the transaction is an new asset qualifier issue tx
+    if (!tx.IsNewRestrictedAsset())
+        return false;
+
+    // Get the scriptPubKey from the last tx in vout
+    CScript scriptPubKey = tx.vout[tx.vout.size() - 1].scriptPubKey;
+
+    return RestrictedAssetFromScript(scriptPubKey, asset, strAddress);
+}
+
 bool ReissueAssetFromTransaction(const CTransaction& tx, CReissueAsset& reissue, std::string& strAddress)
 {
     // Check to see if the transaction is a reissue tx
@@ -765,7 +803,55 @@ bool MsgChannelAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew,
     return true;
 }
 
+bool QualifierAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew, std::string& strAddress)
+{
+    int nStartingIndex = 0;
+    if (!IsScriptNewQualifierAsset(scriptPubKey, nStartingIndex))
+        return false;
 
+    CTxDestination destination;
+    ExtractDestination(scriptPubKey, destination);
+
+    strAddress = EncodeDestination(destination);
+
+    std::vector<unsigned char> vchNewAsset;
+    vchNewAsset.insert(vchNewAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    CDataStream ssAsset(vchNewAsset, SER_NETWORK, PROTOCOL_VERSION);
+
+    try {
+        ssAsset >> assetNew;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the qualifier asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool RestrictedAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew, std::string& strAddress)
+{
+    int nStartingIndex = 0;
+    if (!IsScriptNewRestrictedAsset(scriptPubKey, nStartingIndex))
+        return false;
+
+    CTxDestination destination;
+    ExtractDestination(scriptPubKey, destination);
+
+    strAddress = EncodeDestination(destination);
+
+    std::vector<unsigned char> vchNewAsset;
+    vchNewAsset.insert(vchNewAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    CDataStream ssAsset(vchNewAsset, SER_NETWORK, PROTOCOL_VERSION);
+
+    try {
+        ssAsset >> assetNew;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the qualifier asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
 
 bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, std::string& strAddress)
 {
@@ -1119,7 +1205,107 @@ bool CTransaction::VerifyNewMsgChannelAsset(std::string &strError) const
     return true;
 }
 
+//! Make sure to call VerifyNewQualifierAsset if this call returns true
+bool CTransaction::IsNewQualifierAsset() const
+{
+    // Check trailing outpoint for issue data with unique asset name
+    if (!CheckIssueDataTx(vout[vout.size() - 1]))
+        return false;
 
+    if (!IsScriptNewQualifierAsset(vout[vout.size() - 1].scriptPubKey))
+        return false;
+
+    return true;
+}
+
+//! To be called on CTransactions where IsNewQualifierAsset returns true
+bool CTransaction::VerifyNewQualfierAsset(std::string &strError) const
+{
+    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
+    if (vout.size() < 2) {
+        strError  = "bad-txns-issue-qualifier-vout-size-to-small";
+        return false;
+    }
+
+    // Check for the assets data CTxOut. This will always be the last output in the transaction
+    if (!CheckIssueDataTx(vout[vout.size() - 1])) {
+        strError  = "bad-txns-issue-qualifider-data-not-found";
+        return false;
+    }
+
+    // Get the asset type
+    CNewAsset asset;
+    std::string address;
+    if (!AssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
+        strError = "bad-txns-issue-qualifier-serialzation-failed";
+        return error("%s : Failed to get new qualifier asset from transaction: %s", __func__, this->GetHash().GetHex());
+    }
+
+    AssetType assetType;
+    IsAssetNameValid(asset.strName, assetType);
+
+    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
+    bool fFoundIssueBurnTx = false;
+    for (auto out : vout) {
+        if (CheckIssueBurnTx(out, assetType)) {
+            fFoundIssueBurnTx = true;
+            break;
+        }
+    }
+
+    if (!fFoundIssueBurnTx) {
+        strError = "bad-txns-issue-qualifier-burn-not-found";
+        return false;
+    }
+
+    if (assetType == AssetType::SUB_QUALIFIER) {
+        // Check that there is an asset transfer with the parent name, qualifier use just the parent name, they don't use not parent + !
+        bool fOwnerOutFound = false;
+        std::string root = GetParentName(asset.strName);
+        for (auto out : vout) {
+            CAssetTransfer transfer;
+            std::string transferAddress;
+            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+                if (root == transfer.strName) {
+                    fOwnerOutFound = true;
+                    break;
+                }
+            }
+        }
+
+        if (!fOwnerOutFound) {
+            strError  = "bad-txns-issue-sub-qualifier-parent-outpoint-not-found";
+            return false;
+        }
+    }
+
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners != 0 || nIssues != 1 || nReissues > 0) {
+        strError = "bad-txns-failed-issue-asset-formatting-check";
+        return false;
+    }
+
+    return true;
+}
+
+//! Make sure to call VerifyNewAsset if this call returns true
+bool CTransaction::IsNewRestrictedAsset() const
+{
+    // Check trailing outpoint for issue data with unique asset name
+    if (!CheckIssueDataTx(vout[vout.size() - 1]))
+        return false;
+
+    if (!IsScriptNewRestrictedAsset(vout[vout.size() - 1].scriptPubKey))
+        return false;
+
+    return true;
+}
 
 bool CTransaction::IsReissueAsset() const
 {
@@ -2473,6 +2659,56 @@ bool IsScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex)
     return false;
 }
 
+bool IsScriptNewQualifierAsset(const CScript& scriptPubKey)
+{
+    int index = 0;
+    return IsScriptNewQualifierAsset(scriptPubKey, index);
+}
+
+bool IsScriptNewQualifierAsset(const CScript &scriptPubKey, int &nStartingIndex)
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+        return false;
+
+    CNewAsset asset;
+    std::string address;
+    if (!AssetFromScript(scriptPubKey, asset, address))
+        return false;
+
+    AssetType assetType;
+    if (!IsAssetNameValid(asset.strName, assetType))
+        return false;
+
+    return AssetType::QUALIFIER == assetType || AssetType::SUB_QUALIFIER == assetType;
+}
+
+bool IsScriptNewRestrictedAsset(const CScript& scriptPubKey)
+{
+    int index = 0;
+    return IsScriptNewRestrictedAsset(scriptPubKey, index);
+}
+
+bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex)
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+        return false;
+
+    CNewAsset asset;
+    std::string address;
+    if (!AssetFromScript(scriptPubKey, asset, address))
+        return false;
+
+    AssetType assetType;
+    if (!IsAssetNameValid(asset.strName, assetType))
+        return false;
+
+    return AssetType::RESTRICTED == assetType;
+}
+
 
 //! Returns a boolean on if the asset exists
 bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck)
@@ -2748,6 +2984,21 @@ CAmount GetIssueMsgChannelAssetBurnAmount()
     return Params().IssueMsgChannelAssetBurnAmount();
 }
 
+CAmount GetIssueQualifierAssetBurnAmount()
+{
+    return Params().IssueQualifierAssetBurnAmount();
+}
+
+CAmount GetIssueSubQualifierAssetBurnAmount()
+{
+    return Params().IssueSubQualifierAssetBurnAmount();
+}
+
+CAmount GetIssueRestrictedAssetBurnAmount()
+{
+    return Params().IssueRestrictedAssetBurnAmount();
+}
+
 CAmount GetBurnAmount(const int nType)
 {
     return GetBurnAmount((AssetType(nType)));
@@ -2770,6 +3021,12 @@ CAmount GetBurnAmount(const AssetType type)
             return 0;
         case AssetType::REISSUE:
             return GetReissueAssetBurnAmount();
+        case AssetType::QUALIFIER:
+            return GetIssueQualifierAssetBurnAmount();
+        case AssetType::SUB_QUALIFIER:
+            return GetIssueSubQualifierAssetBurnAmount();
+        case AssetType::RESTRICTED:
+            return GetIssueRestrictedAssetBurnAmount();
         default:
             return 0;
     }
@@ -2797,6 +3054,12 @@ std::string GetBurnAddress(const AssetType type)
             return "";
         case AssetType::REISSUE:
             return Params().ReissueAssetBurnAddress();
+        case AssetType::QUALIFIER:
+            return Params().IssueQualifierAssetBurnAddress();
+        case AssetType::SUB_QUALIFIER:
+            return Params().IssueSubQualifierAssetBurnAddress();
+        case AssetType::RESTRICTED:
+            return Params().IssueRestrictedAssetBurnAddress();
         default:
             return "";
     }
@@ -3002,11 +3265,32 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
         vecSend.push_back(rec);
     }
 
+    // If the asset is a sub qualifier. We need to send the token parent change back to ourselfs
+    if (assetType == AssetType::SUB_QUALIFIER) {
+        // Get the script for the destination address for the assets
+        CScript scriptTransferQualifierAsset = GetScriptForDestination(DecodeDestination(change_address));
+
+        CAssetTransfer assetTransfer(parentName, OWNER_ASSET_AMOUNT);
+        assetTransfer.ConstructTransaction(scriptTransferQualifierAsset);
+        CRecipient rec = {scriptTransferQualifierAsset, 0, fSubtractFeeFromAmount};
+        vecSend.push_back(rec);
+    }
+
     // Get the owner outpoints if this is a subasset or unique asset
     if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
         for (auto asset : assets) {
             if (!VerifyWalletHasAsset(parentName + OWNER_TAG, error)) {
+                return false;
+            }
+        }
+    }
+
+    // Get the owner outpoints if this is a sub_qualifier asset
+    if (assetType == AssetType::SUB_QUALIFIER) {
+        // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
+        for (auto asset : assets) {
+            if (!VerifyWalletHasAsset(parentName, error)) {
                 return false;
             }
         }
