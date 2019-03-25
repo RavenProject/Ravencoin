@@ -337,6 +337,9 @@ public:
     bool VerifyReissueAsset(std::string& strError) const;
     bool IsNewMsgChannelAsset() const;
     bool VerifyNewMsgChannelAsset(std::string& strError) const;
+    bool IsNewQualifierAsset() const;
+    bool VerifyNewQualfierAsset(std::string &strError) const;
+    bool IsNewRestrictedAsset() const;
 
     /** RVN END */
 

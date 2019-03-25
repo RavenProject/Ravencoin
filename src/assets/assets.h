@@ -37,6 +37,10 @@
 #define UNIQUE_ASSET_UNITS 0
 #define UNIQUE_ASSETS_REISSUABLE 0
 
+#define QUALIFIER_ASSET_MIN_AMOUNT 1 * COIN
+#define QUALIFIER_ASSET_MAX_AMOUNT 100 * COIN
+#define QUALIFIER_ASSET_UNITS 0
+
 #define ASSET_TRANSFER_STRING "transfer_asset"
 #define ASSET_NEW_STRING "new_asset"
 #define ASSET_REISSUE_STRING "reissue_asset"
@@ -247,6 +251,9 @@ CAmount GetReissueAssetBurnAmount();
 CAmount GetIssueSubAssetBurnAmount();
 CAmount GetIssueUniqueAssetBurnAmount();
 CAmount GetIssueMsgChannelAssetBurnAmount();
+CAmount GetIssueQualifierAssetBurnAmount();
+CAmount GetIssueSubQualifierAssetBurnAmount();
+CAmount GetIssueRestrictedAssetBurnAmount();
 CAmount GetBurnAmount(const AssetType type);
 CAmount GetBurnAmount(const int nType);
 std::string GetBurnAddress(const AssetType type);
@@ -272,12 +279,16 @@ bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::s
 bool ReissueAssetFromTransaction(const CTransaction& tx, CReissueAsset& reissue, std::string& strAddress);
 bool UniqueAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 bool MsgChannelAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
+bool QualifierAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
+bool RestrictedAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 
 bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetTransfer, std::string& strAddress);
 bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string& strAddress);
 bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, std::string& strAddress);
 bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue, std::string& strAddress);
 bool MsgChannelAssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string& strAddress);
+bool QualifierAssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string& strAddress);
+bool RestrictedAssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string& strAddress);
 
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued);
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type);
@@ -309,6 +320,12 @@ bool IsScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
 bool IsScriptNewMsgChannelAsset(const CScript& scriptPubKey);
 bool IsScriptNewMsgChannelAsset(const CScript& scriptPubKey, int& nStartingIndex);
+
+bool IsScriptNewQualifierAsset(const CScript& scriptPubKey);
+bool IsScriptNewQualifierAsset(const CScript &scriptPubKey, int &nStartingIndex);
+
+bool IsScriptNewRestrictedAsset(const CScript& scriptPubKey);
+bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex);
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
 

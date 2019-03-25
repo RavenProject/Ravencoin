@@ -95,12 +95,18 @@ public:
     const CAmount& IssueSubAssetBurnAmount() const { return nIssueSubAssetBurnAmount; }
     const CAmount& IssueUniqueAssetBurnAmount() const { return nIssueUniqueAssetBurnAmount; }
     const CAmount& IssueMsgChannelAssetBurnAmount() const { return nIssueMsgChannelAssetBurnAmount; }
+    const CAmount& IssueQualifierAssetBurnAmount() const { return nIssueQualifierAssetBurnAmount; }
+    const CAmount& IssueSubQualifierAssetBurnAmount() const { return nIssueSubQualifierAssetBurnAmount; }
+    const CAmount& IssueRestrictedAssetBurnAmount() const { return nIssueRestrictedAssetBurnAmount; }
 
     const std::string& IssueAssetBurnAddress() const { return strIssueAssetBurnAddress; }
     const std::string& ReissueAssetBurnAddress() const { return strReissueAssetBurnAddress; }
     const std::string& IssueSubAssetBurnAddress() const { return strIssueSubAssetBurnAddress; }
     const std::string& IssueUniqueAssetBurnAddress() const { return strIssueUniqueAssetBurnAddress; }
     const std::string& IssueMsgChannelAssetBurnAddress() const { return strIssueMsgChannelAssetBurnAddress; }
+    const std::string& IssueQualifierAssetBurnAddress() const { return strIssueQualifierAssetBurnAddress; }
+    const std::string& IssueSubQualifierAssetBurnAddress() const { return strIssueSubQualifierAssetBurnAddress; }
+    const std::string& IssueRestrictedAssetBurnAddress() const { return strIssueRestrictedAssetBurnAddress; }
     const std::string& GlobalBurnAddress() const { return strGlobalBurnAddress; }
 
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
@@ -139,6 +145,9 @@ protected:
     CAmount nIssueSubAssetBurnAmount;
     CAmount nIssueUniqueAssetBurnAmount;
     CAmount nIssueMsgChannelAssetBurnAmount;
+    CAmount nIssueQualifierAssetBurnAmount;
+    CAmount nIssueSubQualifierAssetBurnAmount;
+    CAmount nIssueRestrictedAssetBurnAmount;
 
     // Burn Addresses
     std::string strIssueAssetBurnAddress;
@@ -146,6 +155,9 @@ protected:
     std::string strIssueSubAssetBurnAddress;
     std::string strIssueUniqueAssetBurnAddress;
     std::string strIssueMsgChannelAssetBurnAddress;
+    std::string strIssueQualifierAssetBurnAddress;
+    std::string strIssueSubQualifierAssetBurnAddress;
+    std::string strIssueRestrictedAssetBurnAddress;
 
     // Global Burn Address
     std::string strGlobalBurnAddress;
