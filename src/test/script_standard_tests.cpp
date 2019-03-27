@@ -96,6 +96,16 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
         BOOST_CHECK_EQUAL(whichType, TX_NULL_DATA);
         BOOST_CHECK_EQUAL(solutions.size(), 0);
 
+        // TX_RESTRICTED_ASSET_DATA
+        s.clear();
+        s << OP_RVN_ASSET <<
+          std::vector<unsigned char>({0}) <<
+          std::vector<unsigned char>({75}) <<
+          std::vector<unsigned char>({255});
+        BOOST_CHECK(Solver(s, whichType, solutions));
+        BOOST_CHECK_EQUAL(whichType, TX_RESTRICTED_ASSET_DATA);
+        BOOST_CHECK_EQUAL(solutions.size(), 0);
+
         // TX_WITNESS_V0_KEYHASH
         s.clear();
         s << OP_0 << ToByteVector(pubkeys[0].GetID());
@@ -176,6 +186,11 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
         s << OP_RETURN << std::vector<unsigned char>({75}) << OP_ADD;
         BOOST_CHECK(!Solver(s, whichType, solutions));
 
+        // TX_RESTRICTED_ASSET_DATA with other opcodes
+        s.clear();
+        s << OP_RVN_ASSET << std::vector<unsigned char>({75}) << OP_ADD;
+        BOOST_CHECK(!Solver(s, whichType, solutions));
+
         // TX_WITNESS with unknown version
         s.clear();
         s << OP_1 << ToByteVector(pubkey);
@@ -229,6 +244,11 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
         // TX_NULL_DATA
         s.clear();
         s << OP_RETURN << std::vector<unsigned char>({75});
+        BOOST_CHECK(!ExtractDestination(s, address));
+
+        // TX_RESTRICTED_ASSET_DATA
+        s.clear();
+        s << OP_RVN_ASSET << std::vector<unsigned char>({75});
         BOOST_CHECK(!ExtractDestination(s, address));
 
         // TX_WITNESS_V0_KEYHASH
@@ -308,6 +328,11 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
         // TX_NULL_DATA
         s.clear();
         s << OP_RETURN << std::vector<unsigned char>({75});
+        BOOST_CHECK(!ExtractDestinations(s, whichType, addresses, nRequired));
+
+        // TX_RESTRICTED_ASSET_DATA
+        s.clear();
+        s << OP_RVN_ASSET << std::vector<unsigned char>({75});
         BOOST_CHECK(!ExtractDestinations(s, whichType, addresses, nRequired));
 
         // TX_WITNESS_V0_KEYHASH
@@ -735,6 +760,19 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
 
             scriptPubKey.clear();
             scriptPubKey << OP_RETURN << ToByteVector(pubkeys[0]);
+
+            result = IsMine(keystore, scriptPubKey, isInvalid);
+            BOOST_CHECK_EQUAL(result, ISMINE_NO);
+            BOOST_CHECK(!isInvalid);
+        }
+
+        // OP_RVN_ASSET at front of script
+        {
+            CBasicKeyStore keystore;
+            keystore.AddKey(keys[0]);
+
+            scriptPubKey.clear();
+            scriptPubKey << OP_RVN_ASSET << ToByteVector(pubkeys[0]);
 
             result = IsMine(keystore, scriptPubKey, isInvalid);
             BOOST_CHECK_EQUAL(result, ISMINE_NO);

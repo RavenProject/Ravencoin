@@ -68,7 +68,8 @@ enum txnouttype
     /** RVN START */
     TX_NEW_ASSET = 8,
     TX_REISSUE_ASSET = 9,
-    TX_TRANSFER_ASSET = 10
+    TX_TRANSFER_ASSET = 10,
+    TX_RESTRICTED_ASSET_DATA = 11, //!< unspendable OP_RAVEN_ASSET script that carries data
     /** RVN END */
 };
 
