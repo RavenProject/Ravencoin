@@ -410,8 +410,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction");
                         }
                     } else {
-                        if (out.scriptPubKey.Find(OP_RVN_ASSET) > 0) {
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-script");
+                        if (out.scriptPubKey.Find(OP_RVN_ASSET)) {
+                            if (AreRestrictedAssetsDeployed()) {
+                                if (out.scriptPubKey[0] != OP_RVN_ASSET) {
+                                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-op-rvn-asset-not-in-right-script-location");
+                                }
+                            } else {
+                                return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-script");
+                            }
                         }
                     }
                 }
