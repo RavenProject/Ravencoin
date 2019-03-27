@@ -267,6 +267,8 @@ void Shutdown()
         pmessagedb = nullptr;
         delete pmessagechanneldb;
         pmessagechanneldb = nullptr;
+        delete prestricteddb;
+        prestricteddb = nullptr;
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -1462,6 +1464,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete passetsCache;
                 delete pmessagedb;
                 delete pmessagechanneldb;
+                delete prestricteddb;
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
                 passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
@@ -1470,6 +1473,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pMessagesSeenAddressCache = new CLRUCache<std::string, int>(1000);
                 pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
                 pmessagechanneldb = new CMessageChannelDB(nBlockTreeDBCache, false, false);
+                prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset);
 
 
                 // Read for fAssetIndex to make sure that we only load asset address balances if it if true

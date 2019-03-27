@@ -1,0 +1,47 @@
+// Copyright (c) 2019 The Raven Core developers
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+
+#ifndef RAVENCOIN_RESTRICTEDDB_H
+#define RAVENCOIN_RESTRICTEDDB_H
+
+#include <dbwrapper.h>
+
+class CRestrictedDB  : public CDBWrapper {
+
+public:
+    explicit CRestrictedDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+
+    CRestrictedDB(const CRestrictedDB&) = delete;
+    CRestrictedDB& operator=(const CRestrictedDB&) = delete;
+
+    // Database of restricted asset verifier strings
+    bool WriteVerifier(const std::string& assetName, const std::string& verifier);
+    bool ReadVerifier(const std::string& assetName, std::string& verifier);
+    bool EraseVerifier(const std::string& assetName);
+
+    // Database of Addresses and the Tag that are assigned to them
+    bool WriteAddressTag(const std::string& address, const std::string& tag);
+    bool ReadAddressTag(const std::string& address, const std::string& tag);
+    bool EraseAddressTag(const std::string& address, const std::string& tag);
+
+    // Database of Blacklist addresses
+    bool WriteRestrictedAddress(const std::string& address, const std::string& assetName);
+    bool ReadRestrictedAddress(const std::string& address, const std::string& assetName);
+    bool EraseRestrictedAddress(const std::string& address, const std::string& assetName);
+
+    // Database of Restricted Trading Global Off
+    bool WriteGlobalRestriction(const std::string& assetName);
+    bool ReadGlobalRestriction(const std::string& assetName);
+    bool EraseGlobalRestriction(const std::string& assetName);
+
+    // Write / Read Database flags
+    bool WriteFlag(const std::string &name, bool fValue);
+    bool ReadFlag(const std::string &name, bool &fValue);
+
+    bool Flush();
+};
+
+
+#endif //RAVENCOIN_RESTRICTEDDB_H

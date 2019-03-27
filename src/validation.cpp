@@ -208,6 +208,7 @@ CLRUCache<std::string, int> *pMessageSubscribedChannelsCache = nullptr;
 CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
+CRestrictedDB *prestricteddb = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,

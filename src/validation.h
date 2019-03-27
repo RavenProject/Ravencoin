@@ -37,6 +37,7 @@
 #include <assets/assetdb.h>
 #include <assets/messages.h>
 #include <assets/messagedb.h>
+#include <assets/restricteddb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -511,6 +512,7 @@ extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
 extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
 extern CMessageDB *pmessagedb;
 extern CMessageChannelDB *pmessagechanneldb;
+extern CRestrictedDB *prestricteddb;
 /** RVN END */
 
 /**
