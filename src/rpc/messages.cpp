@@ -205,8 +205,11 @@ UniValue subscribetochannel(const JSONRPCRequest& request) {
     // if the given asset name is a root of sub asset, subscribe to that assets owner token
     if (type == AssetType::ROOT || type == AssetType::SUB) {
         channel_name += "!";
+        if (!IsAssetNameValid(channel_name, type))
+        throw JSONRPCError(
+                RPC_INVALID_PARAMETER, "Channel Name is not valid after adding !.");
     }
-
+    
     if (type != AssetType::OWNER && type != AssetType::MSGCHANNEL)
         throw JSONRPCError(
                 RPC_INVALID_PARAMETER, "Channel Name must be a owner asset, or a message channel asset e.g OWNER!, MSG_CHANNEL~123.");
@@ -247,11 +250,15 @@ UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
     AssetType type;
     if (!IsAssetNameValid(channel_name, type))
         throw JSONRPCError(
-                RPC_INVALID_PARAMETER, "Channel Name is not valid.");
+                RPC_INVALID_PARAMETER, "Channel Name is not valid after adding !.");
 
     // if the given asset name is a root of sub asset, subscribe to that assets owner token
     if (type == AssetType::ROOT || type == AssetType::SUB) {
         channel_name += "!";
+        
+        if (!IsAssetNameValid(channel_name, type))
+        throw JSONRPCError(
+                RPC_INVALID_PARAMETER, "Channel Name is not valid.");
     }
 
     if (type != AssetType::OWNER && type != AssetType::MSGCHANNEL)
