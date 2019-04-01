@@ -82,6 +82,7 @@ BASE_SCRIPTS= [
 #    'wallet_basic.py',
     'mempool_limit.py',
     'feature_assets.py',
+    'feature_messaging.py',
     'feature_assets_reorg.py',
     'feature_assets_mempool.py',
     'mining_prioritisetransaction.py',
