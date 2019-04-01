@@ -3300,6 +3300,15 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
 
+                    /** RVN START */
+                    // Check to see if you need to make an asset data outpoint OP_RVN_ASSET data
+                    if (recipient.scriptPubKey.IsNullAssetTxDataScript()) {
+                        assert(txout.nValue == 0);
+                        txNew.vout.push_back(txout);
+                        continue;
+                    }
+                    /** RVN END */
+
                     if (recipient.fSubtractFeeFromAmount)
                     {
                         assert(nSubtractFeeFromAmount != 0);
@@ -3326,6 +3335,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                         }
                         return false;
                     }
+
                     txNew.vout.push_back(txout);
                 }
 

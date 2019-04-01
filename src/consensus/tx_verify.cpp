@@ -257,7 +257,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-before-it-is-active");
 
                         if (transfer.nAmount < QUALIFIER_ASSET_MIN_AMOUNT || transfer.nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-amount-was-not-1");
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-amount-must be between 1 - 100");
                     }
                 }
             }

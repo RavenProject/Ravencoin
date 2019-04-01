@@ -663,6 +663,7 @@ public:
     bool IsReissueAsset() const;
     bool IsTransferAsset() const;
     bool IsAsset() const;
+    bool IsNullAssetTxDataScript() const;
     /** RVN END */
 
     /** Used for obsolete pay-to-pubkey addresses indexing. */

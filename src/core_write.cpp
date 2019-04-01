@@ -212,6 +212,27 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
 
         out.pushKV("asset", assetInfo);
     }
+
+    if (type == TX_RESTRICTED_ASSET_DATA) {
+        UniValue assetInfo(UniValue::VOBJ);
+        CNullAssetTxData data;
+        std::string address;
+        if (AssetNullDataFromScript(scriptPubKey, data, address)) {
+            AssetType type;
+            IsAssetNameValid(data.asset_name, type);
+            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                assetInfo.pushKV("qualifier_name", data.asset_name);
+                assetInfo.pushKV("qualifier_type", data.flag ? "adding qualifier" : "removing qualifier");
+                assetInfo.pushKV("address", address);
+            } else if (type == AssetType::RESTRICTED) {
+                assetInfo.pushKV("restricted_name", data.asset_name);
+                assetInfo.pushKV("restricted_type", data.flag ? "adding restriction" : "removing restriction");
+                assetInfo.pushKV("address", address);
+            }
+        }
+
+        out.pushKV("asset_data", assetInfo);
+    }
      /** RVN END */
 
     UniValue a(UniValue::VARR);

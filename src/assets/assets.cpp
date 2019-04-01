@@ -846,7 +846,7 @@ bool RestrictedAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew,
     try {
         ssAsset >> assetNew;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the qualifier asset from the stream: " << e.what() << std::endl;
+        std::cout << "Failed to get the restricted asset from the stream: " << e.what() << std::endl;
         return false;
     }
 
@@ -897,6 +897,31 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
         ssReissue >> reissue;
     } catch(std::exception& e) {
         std::cout << "Failed to get the reissue asset from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& assetData, std::string& strAddress)
+{
+    if (!scriptPubKey.IsNullAssetTxDataScript()) {
+        return false;
+    }
+
+    CTxDestination destination;
+    ExtractDestination(scriptPubKey, destination);
+
+    strAddress = EncodeDestination(destination);
+
+    std::vector<unsigned char> vchAssetData;
+    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + 23, scriptPubKey.end());
+    CDataStream ssData(vchAssetData, SER_NETWORK, PROTOCOL_VERSION);
+
+    try {
+        ssData >> assetData;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the asset tx data from the stream: " << e.what() << std::endl;
         return false;
     }
 
@@ -1221,7 +1246,7 @@ bool CTransaction::IsNewQualifierAsset() const
 //! To be called on CTransactions where IsNewQualifierAsset returns true
 bool CTransaction::VerifyNewQualfierAsset(std::string &strError) const
 {
-    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
+    // Issuing an Asset must contain at least 2 CTxOut( Raven Burn Tx, New Asset Tx, Any Number of other Outputs...)
     if (vout.size() < 2) {
         strError  = "bad-txns-issue-qualifier-vout-size-to-small";
         return false;
@@ -3414,7 +3439,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     return true;
 }
 
-bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired)
+bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData)
 {
     // Initialize Values for transaction
     std::string strTxError;
@@ -3474,6 +3499,17 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
 
         CRecipient recipient = {scriptPubKey, 0, fSubtractFeeFromAmount};
         vecSend.push_back(recipient);
+    }
+
+    // If assetTxData is not nullptr, the user wants to add some OP_RVN_ASSET data transactions into the transaction
+    if (nullAssetTxData) {
+        for (auto pair : *nullAssetTxData) {
+            CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
+            pair.first.ConstructTransaction(dataScript);
+
+            CRecipient recipient = {dataScript, 0, false};
+            vecSend.push_back(recipient);
+        }
     }
 
     // Create and send the transaction
@@ -3617,4 +3653,47 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
         return true;
     }
     return false;
+}
+
+CNullAssetTxData::CNullAssetTxData(const std::string &strAssetname, const int8_t &nFlag)
+{
+    SetNull();
+    this->asset_name = strAssetname;
+    this->flag = nFlag;
+}
+
+bool CNullAssetTxData::IsValid(std::string &strError, CAssetsCache &assetCache, bool fForceCheckPrimaryAssetExists) const
+{
+    AssetType type;
+    if (!IsAssetNameValid(asset_name, type)) {
+        strError = _("Asset name is not valid");
+        return false;
+    }
+
+    if (type != AssetType::QUALIFIER && type != AssetType::SUB_QUALIFIER && type != AssetType::RESTRICTED) {
+        strError = _("Asset must be a qualifier, sub qualifier, or a restricted asset");
+    }
+
+    if (flag != 0 || flag != 1) {
+        strError = _("Flag must be 1 or 0");
+        return false;
+    }
+
+    if (fForceCheckPrimaryAssetExists) {
+        CNewAsset asset;
+        if (!assetCache.CheckIfAssetExists(asset_name)) {
+            strError = _("Asset doesn't exist: ") + asset_name;
+            return false;
+        }
+    }
+}
+
+void CNullAssetTxData::ConstructTransaction(CScript &script) const
+{
+    CDataStream ssAssetTxData(SER_NETWORK, PROTOCOL_VERSION);
+    ssAssetTxData << *this;
+
+    std::vector<unsigned char> vchMessage;
+    vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
+    script << ToByteVector(vchMessage);
 }
