@@ -261,6 +261,36 @@ public:
     bool IsNull() const;
 };
 
+class CNullAssetTxData {
+public:
+    std::string asset_name;
+    int8_t flag; // on/off but could be used to determine multiple options later on
+
+    CNullAssetTxData()
+    {
+        SetNull();
+    }
+
+    void SetNull()
+    {
+        flag = -1;
+        asset_name = "";
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(asset_name);
+        READWRITE(flag);
+    }
+
+    CNullAssetTxData(const std::string& strAssetname, const int8_t& nFlag);
+    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fForceCheckPrimaryAssetExists) const;
+    void ConstructTransaction(CScript& script) const;
+};
+
 
 /** THESE ARE ONLY TO BE USED WHEN ADDING THINGS TO THE CACHE DURING CONNECT AND DISCONNECT BLOCK */
 struct CAssetCacheNewAsset

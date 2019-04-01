@@ -1917,7 +1917,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     std::string ownerName;
                     std::string ownerAddress;
                     if (!OwnerFromTransaction(tx, ownerName, ownerAddress)) {
-                        error("%s : Failed to get restrcited owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        error("%s : Failed to get restricted owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
                     }
 

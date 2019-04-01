@@ -322,6 +322,13 @@ bool CScript::IsTransferAsset() const
 
     return false;
 }
+
+bool CScript::IsNullAssetTxDataScript() const
+{
+    return (this->size() > 23 &&
+            (*this)[0] == OP_RVN_ASSET &&
+            (*this)[1] == 0x14);
+}
 /** RVN END */
 
 bool CScript::IsPayToWitnessScriptHash() const
