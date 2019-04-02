@@ -43,16 +43,16 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
         throw std::runtime_error(
                 "viewallmessages \n"
                 + MessageActivationWarning() +
-                "\nView all Messages that the wallet contains\n"
+                "\nView all messages that the wallet contains\n"
 
                 "\nResult:\n"
                 "\"Asset Name:\"                     (string) The name of the asset the message was sent on\n"
-                "\"Message:\"                        (string) The IPFS hash that is the message\n"
+                "\"Message:\"                        (string) The IPFS hash of the message\n"
                 "\"Time:\"                           (Date) The time as a date in the format (YY-mm-dd Hour-minute-second)\n"
                 "\"Block Height:\"                   (number) The height of the block the message was included in\n"
                 "\"Status:\"                         (string) Status of the message (READ, UNREAD, ORPHAN, EXPIRED, SPAM, HIDDEN, ERROR)\n"
-                "\"Expire Time:\"                    (Date, optional) If the message had an expiration date assigned, it will be shown hear in the format (YY-mm-dd Hour-minute-second)\n"
-                "\"Expire UTC Time:\"                (Date, optional) If the message contains a expire date that is to large, the UTC number will be displayed\n"
+                "\"Expire Time:\"                    (Date, optional) If the message had an expiration date assigned, it will be shown here in the format (YY-mm-dd Hour-minute-second)\n"
+                "\"Expire UTC Time:\"                (Date, optional) If the message contains an expire date that is too large, the UTC number will be displayed\n"
 
 
                 "\nExamples:\n"
@@ -125,10 +125,10 @@ UniValue viewallmessagechannels(const JSONRPCRequest& request) {
         throw std::runtime_error(
                 "viewallmessagechannels \n"
                 + MessageActivationWarning() +
-                "\nView all Message Channel the wallet is subscribed to\n"
+                "\nView all message channels the wallet is subscribed to\n"
 
                 "\nResult:[\n"
-                "\"Asset Name:\"                     (string) The asset channel name\n"
+                "\"Asset Name\"                      (string) The asset channel name\n"
                 "\n]\n"
                 "\nExamples:\n"
                 + HelpExampleCli("viewallmessagechannels", "")
@@ -175,7 +175,7 @@ UniValue subscribetochannel(const JSONRPCRequest& request) {
         throw std::runtime_error(
                 "subscribetochannel \n"
                 + MessageActivationWarning() +
-                "\nSubscribe to a certain messagechannel\n"
+                "\nSubscribe to a certain message channel\n"
 
                 "\nArguments:\n"
                 "1. \"channel_name\"            (string, required) The channel name to subscribe to, it must end with '!' or have an '~' in the name\n"
@@ -217,10 +217,10 @@ UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
         throw std::runtime_error(
                 "unsubscribefromchannel \n"
                 + MessageActivationWarning() +
-                "\nUnsubscribe from a certain messagechannel\n"
+                "\nUnsubscribe from a certain message channel\n"
 
                 "\nArguments:\n"
-                "1. \"channel_name\"            (string, required) The channel name to unscribe from, must end with '!' or have an '~' in the name\n"
+                "1. \"channel_name\"            (string, required) The channel name to unsubscribe from, must end with '!' or have an '~' in the name\n"
 
                 "\nResult:[\n"
                 "\n]\n"
@@ -292,16 +292,14 @@ UniValue sendmessage(const JSONRPCRequest& request) {
         throw std::runtime_error(
                 "sendmessage \"channel_name\" \"ipfs_hash\" (expire_time)\n"
                 + MessageActivationWarning() +
-                "\nCreates and Broadcasts a message transaction to the network for a channel this wallet owns"
+                "\nCreates and broadcasts a message transaction to the network for a channel this wallet owns"
 
                 "\nArguments:\n"
-                "1. \"asset_name\"               (string, required) Name of the asset of which you want to send a message with (messagechannel, administrator asset, if a non administrator asset name is given, We will add the administrator '!' to it\n"
-                "2. \"ipfs_hash\"                (string, required) The ipfs hash to send along with the transfer\n"
+                "1. \"channel_name\"             (string, required) Name of the channel that you want to send a message with (message channel, administrator asset), if a non administrator asset name is given, the administrator '!' will be added to it\n"
+                "2. \"ipfs_hash\"                (string, required) The IPFS hash of the message\n"
                 "3. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
-                "\nResult:\n"
-                "txid"
-                "[ \n"
+                "\nResult:[\n"
                 "txid\n"
                 "]\n"
 
