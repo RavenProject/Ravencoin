@@ -30,7 +30,8 @@ enum class AssetType
     QUALIFIER = 7,
     SUB_QUALIFIER = 8,
     RESTRICTED = 9,
-    INVALID = 10
+    RESTRICTED_OWNER = 10,
+    INVALID = 11
 };
 
 int IntFromAssetType(AssetType type);

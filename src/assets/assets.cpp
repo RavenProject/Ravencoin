@@ -61,6 +61,7 @@ static const std::string MSGCHANNEL_TAG_DELIMITER = "~";
 static const std::string VOTE_TAG_DELIMITER = "^";
 static const std::string RESTRICTED_TAG_DELIMITER = "$";
 
+static const char RESTRICTED_TAG_CHAR = '$';
 
 static const std::regex UNIQUE_INDICATOR(R"(^[^^~#!]+#[^~#!\/]+$)");
 static const std::regex MSGCHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");
@@ -218,6 +219,14 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string
     }
     else if (std::regex_match(name, OWNER_INDICATOR))
     {
+
+        if (name.front() == RESTRICTED_TAG_CHAR) {
+            bool ret = IsTypeCheckNameValid(AssetType::RESTRICTED_OWNER, name, error);
+            if (ret)
+                assetType = AssetType::RESTRICTED_OWNER;
+            return ret;
+        }
+
         bool ret = IsTypeCheckNameValid(AssetType::OWNER, name, error);
         if (ret)
             assetType = AssetType::OWNER;
@@ -335,6 +344,11 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
         if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
         bool valid = IsRestrictedNameValid(name);
         if (!valid) { error = "Restricted name contains invalid characters (Valid characters are: A-Z 0-9 _ .) ($ must be the first character, _ . special characters can't be the first or last characters)";  return false; }
+        return true;
+    } else if (type == AssetType::RESTRICTED_OWNER) {
+        if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
+        bool valid = IsRestrictedNameValid(name.substr(0, name.size() - 1));
+        if (!valid) { error = "Restricted owner name contains invalid characters (Valid characters are: A-Z 0-9 _ .) ($ must be the first character, _ . special characters can't be the first or last characters)";  return false; }
         return true;
     } else {
         if (name.size() > MAX_NAME_LENGTH - 1) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH - 1); return false; }  //Assets and sub-assets need to leave one extra char for OWNER indicator
@@ -2472,7 +2486,7 @@ bool IsAssetUnitsValid(const CAmount& units)
 
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued)
 {
-    if (type == AssetType::REISSUE || type == AssetType::VOTE || type == AssetType::OWNER || type == AssetType::INVALID)
+    if (type == AssetType::REISSUE || type == AssetType::VOTE || type == AssetType::OWNER || type == AssetType::RESTRICTED_OWNER || type == AssetType::INVALID)
         return false;
 
     CAmount burnAmount = 0;
@@ -3052,6 +3066,8 @@ CAmount GetBurnAmount(const AssetType type)
             return GetIssueSubQualifierAssetBurnAmount();
         case AssetType::RESTRICTED:
             return GetIssueRestrictedAssetBurnAmount();
+        case AssetType::RESTRICTED_OWNER:
+            return 0;
         default:
             return 0;
     }
@@ -3085,6 +3101,8 @@ std::string GetBurnAddress(const AssetType type)
             return Params().IssueSubQualifierAssetBurnAddress();
         case AssetType::RESTRICTED:
             return Params().IssueRestrictedAssetBurnAddress();
+        case AssetType::RESTRICTED_OWNER:
+            return "";
         default:
             return "";
     }

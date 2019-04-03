@@ -202,7 +202,7 @@ UniValue subscribetochannel(const JSONRPCRequest& request) {
         throw JSONRPCError(
                 RPC_INVALID_PARAMETER, "Channel Name is not valid.");
 
-    if (type != AssetType::OWNER && type != AssetType::MSGCHANNEL)
+    if (type != AssetType::OWNER && type != AssetType::RESTRICTED_OWNER && type != AssetType::MSGCHANNEL)
         throw JSONRPCError(
                 RPC_INVALID_PARAMETER, "Channel Name must must a owner asset, or a message channel asset e.g OWNER!, MSG_CHANNEL~123.");
 
@@ -244,7 +244,7 @@ UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
         throw JSONRPCError(
                 RPC_INVALID_PARAMETER, "Channel Name is not valid.");
 
-    if (type != AssetType::OWNER && type != AssetType::MSGCHANNEL)
+    if (type != AssetType::OWNER && type != AssetType::RESTRICTED_OWNER && type != AssetType::MSGCHANNEL)
         throw JSONRPCError(
                 RPC_INVALID_PARAMETER, "Channel Name must must a owner asset, or a message channel asset e.g OWNER!, MSG_CHANNEL~123.");
 
@@ -338,11 +338,11 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     if (!IsAssetNameValid(asset_name, type, strNameError))
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: ") + strNameError);
 
-    if (type != AssetType::MSGCHANNEL && type != AssetType::OWNER && type != AssetType::ROOT && type != AssetType::SUB) {
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: Only message channels, root, sub, and owner assets are allowed"));
+    if (type != AssetType::MSGCHANNEL && type != AssetType::OWNER && type != AssetType::ROOT && type != AssetType::SUB && type != AssetType::RESTRICTED && type != AssetType::RESTRICTED_OWNER) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: Only message channels, root, sub, restricted, and owner assets are allowed"));
     }
 
-    if (type == AssetType::ROOT || type == AssetType::SUB)
+    if (type == AssetType::ROOT || type == AssetType::SUB || type == AssetType::RESTRICTED)
         asset_name += OWNER_TAG;
 
     std::pair<int, std::string> error;
