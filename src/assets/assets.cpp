@@ -942,6 +942,26 @@ bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& asse
     return true;
 }
 
+bool GlobalAssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& assetData)
+{
+    if (!scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+        return false;
+    }
+
+    std::vector<unsigned char> vchAssetData;
+    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + 4, scriptPubKey.end());
+    CDataStream ssData(vchAssetData, SER_NETWORK, PROTOCOL_VERSION);
+
+    try {
+        ssData >> assetData;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the global restriction asset tx data from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 //! Call VerifyNewAsset if this function returns true
 bool CTransaction::IsNewAsset() const
 {
@@ -3457,7 +3477,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     return true;
 }
 
-bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData)
+bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData, std::vector<CNullAssetTxData>* nullGlobalRestrictionData)
 {
     // Initialize Values for transaction
     std::string strTxError;
@@ -3525,6 +3545,16 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
             CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
             pair.first.ConstructTransaction(dataScript);
 
+            CRecipient recipient = {dataScript, 0, false};
+            vecSend.push_back(recipient);
+        }
+    }
+
+    // nullGlobalRestiotionData, the user wants to add OP_RVN_ASSET OP_RVN_ASSET OP_RVN_ASSETS data transaction to the transaction
+    if (nullGlobalRestrictionData) {
+        for (auto dataObject : *nullGlobalRestrictionData) {
+            CScript dataScript;
+            dataObject.ConstructGlobalRestrictionTransaction(dataScript);
             CRecipient recipient = {dataScript, 0, false};
             vecSend.push_back(recipient);
         }
@@ -3714,4 +3744,14 @@ void CNullAssetTxData::ConstructTransaction(CScript &script) const
     std::vector<unsigned char> vchMessage;
     vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
     script << ToByteVector(vchMessage);
+}
+
+void CNullAssetTxData::ConstructGlobalRestrictionTransaction(CScript &script) const
+{
+    CDataStream ssAssetTxData(SER_NETWORK, PROTOCOL_VERSION);
+    ssAssetTxData << *this;
+
+    std::vector<unsigned char> vchMessage;
+    vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
+    script << OP_RVN_ASSET << OP_RESERVED << OP_RESERVED << ToByteVector(vchMessage);
 }

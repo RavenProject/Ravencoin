@@ -664,6 +664,7 @@ public:
     bool IsTransferAsset() const;
     bool IsAsset() const;
     bool IsNullAssetTxDataScript() const;
+    bool IsNullGlobalRestrictionAssetTxDataScript() const;
     /** RVN END */
 
     /** Used for obsolete pay-to-pubkey addresses indexing. */

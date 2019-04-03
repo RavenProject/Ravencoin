@@ -290,6 +290,7 @@ public:
     CNullAssetTxData(const std::string& strAssetname, const int8_t& nFlag);
     bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fForceCheckPrimaryAssetExists) const;
     void ConstructTransaction(CScript& script) const;
+    void ConstructGlobalRestrictionTransaction(CScript &script) const;
 };
 
 

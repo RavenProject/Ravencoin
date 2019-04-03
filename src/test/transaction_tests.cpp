@@ -762,8 +762,9 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         BOOST_CHECK(!IsStandardTx(t, reason));
 
         // MAX_OP_RETURN_RELAY-byte TX_RESTRICTED_ASSET_DATA(standard)
+        // The text after OP_RVN_ASSET, will be an address if it isn't another OP_RVN_ASSET
         t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET
-                                           << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef3804678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
+                                           << ParseHex("04678fdab0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef3804678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
         BOOST_CHECK_EQUAL(MAX_OP_RETURN_RELAY, t.vout[0].scriptPubKey.size());
         BOOST_CHECK(IsStandardTx(t, reason));
 
@@ -828,10 +829,12 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
                                            << ParseHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         BOOST_CHECK(IsStandardTx(t, reason));
 
-        // ...so long as it only contains PUSHDATA's
-        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << OP_RVN_ASSET;
-        BOOST_CHECK(!IsStandardTx(t, reason));
+        // ...so long as it only contains PUSHDATA's don't check the first three bytes on OP_RVN_ASSET TX's
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << OP_RESERVED;
+        BOOST_CHECK(IsStandardTx(t, reason));
 
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << OP_RESERVED << OP_RESERVED << OP_RVN_ASSET;
+        BOOST_CHECK(!IsStandardTx(t, reason));
 
         // TX_RESTRICTED_ASSET_DATA w/o PUSHDATA
         t.vout.resize(1);

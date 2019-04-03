@@ -59,14 +59,13 @@ bool IsDust(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)
         return (txout.nValue < GetDustThreshold(txout, dustRelayFeeIn));
 }
 
-bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType, const bool witnessEnabled)
-{
+bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType, const bool witnessEnabled) {
     std::vector<std::vector<unsigned char> > vSolutions;
     if (!Solver(scriptPubKey, whichType, vSolutions))
         return false;
 
-    if (whichType == TX_MULTISIG)
-    {
+
+    if (whichType == TX_MULTISIG) {
         unsigned char m = vSolutions.front()[0];
         unsigned char n = vSolutions.back()[0];
         // Support up to x-of-3 multisig txns as standard
@@ -76,13 +75,11 @@ bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType, const bool w
             return false;
     } else if (whichType == TX_NULL_DATA &&
                (!fAcceptDatacarrier || scriptPubKey.size() > nMaxDatacarrierBytes))
-          return false;
-    else if (whichType == TX_RESTRICTED_ASSET_DATA && (scriptPubKey.size() > MAX_OP_RETURN_RELAY))
+        return false;
+    else if (whichType == TX_RESTRICTED_ASSET_DATA && scriptPubKey.size() > MAX_OP_RETURN_RELAY)
         return false;
     else if (!witnessEnabled && (whichType == TX_WITNESS_V0_KEYHASH || whichType == TX_WITNESS_V0_SCRIPTHASH))
         return false;
-    else if (whichType == TX_TRANSFER_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_NEW_ASSET)
-        return true;
 
     return whichType != TX_NONSTANDARD ;
 }
