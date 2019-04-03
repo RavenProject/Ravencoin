@@ -13,6 +13,8 @@
 #include <base58.h>
 #include <chainparams.h>
 
+#include "LibBoolEE.h"
+
 BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
     BOOST_AUTO_TEST_CASE(unit_validation_tests)
@@ -313,6 +315,16 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         amount = 40000000;
         BOOST_CHECK(ValueFromAmountString(amount, 8) == "0.40000000");
 
+    }
+
+    BOOST_AUTO_TEST_CASE(boolean_expression_evaluator_test)
+    {
+        BOOST_TEST_MESSAGE("Running Boolean Expression Evaluator Test");
+
+        LibBoolEE::Vals vals = { { "KYC", true }, { "CIA", false } };
+        BOOST_CHECK(LibBoolEE::resolve("KYC & !CIA", vals));
+        BOOST_CHECK_THROW(LibBoolEE::resolve("KYC|MISS", vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve("BAD -- EXPRESSION -- BUST", vals), std::runtime_error);
     }
 
 BOOST_AUTO_TEST_SUITE_END()
