@@ -226,7 +226,7 @@ bool ScanForMessageChannels(std::string& strError)
                             IsAssetNameValid(assetData.assetName, type);
 
                             if (assetData.type == TX_TRANSFER_ASSET) {
-                                if (type == AssetType::MSGCHANNEL || type == AssetType::OWNER) { // Subscribe to any channels or owner tokens you own
+                                if (type == AssetType::MSGCHANNEL || type == AssetType::OWNER || type == AssetType::RESTRICTED_OWNER) { // Subscribe to any channels or owner tokens you own
                                     AddChannel(assetData.assetName);
                                     AddAddressSeen(EncodeDestination(assetData.destination));
                                 } else if (type == AssetType::ROOT || type == AssetType::SUB) { // Subscribe to any assets you are sent, if they are sent to a new address
@@ -241,7 +241,7 @@ bool ScanForMessageChannels(std::string& strError)
                                 if (fOwner || type == AssetType::MSGCHANNEL) {
                                     AddChannel(assetData.assetName);
                                     AddAddressSeen(EncodeDestination(assetData.destination));
-                                } else if (type == AssetType::ROOT || type == AssetType::SUB) {
+                                } else if (type == AssetType::ROOT || type == AssetType::SUB || type == AssetType::RESTRICTED) {
                                     AddChannel(assetData.assetName + "!");
                                     AddAddressSeen(EncodeDestination(assetData.destination));
                                 }
