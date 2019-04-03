@@ -229,6 +229,10 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
                 assetInfo.pushKV("restricted_type", data.flag ? "adding restriction" : "removing restriction");
                 assetInfo.pushKV("address", address);
             }
+        } else if (GlobalAssetNullDataFromScript(scriptPubKey, data)) {
+            assetInfo.pushKV("restricted_name", data.asset_name);
+            assetInfo.pushKV("restricted_type", data.flag ? "adding global restriction" : "removing global restriction");
+            assetInfo.pushKV("address", "all addresses");
         }
 
         out.pushKV("asset_data", assetInfo);

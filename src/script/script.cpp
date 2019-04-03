@@ -329,6 +329,15 @@ bool CScript::IsNullAssetTxDataScript() const
             (*this)[0] == OP_RVN_ASSET &&
             (*this)[1] == 0x14);
 }
+
+bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
+{
+    // 3 OP_RVN ASSETS + atleast 4 characters for the restricted name $ABC
+    return (this->size() > 6 &&
+            (*this)[0] == OP_RVN_ASSET &&
+            (*this)[1] == OP_RESERVED &&
+            (*this)[2] == OP_RESERVED);
+}
 /** RVN END */
 
 bool CScript::IsPayToWitnessScriptHash() const
@@ -379,12 +388,14 @@ bool CScript::IsPushOnly(const_iterator pc) const
         opcodetype opcode;
         if (!GetOp(pc, opcode))
             return false;
+
         // Note that IsPushOnly() *does* consider OP_RESERVED to be a
         // push-type opcode, however execution of OP_RESERVED fails, so
         // it's not relevant to P2SH/BIP62 as the scriptSig would fail prior to
         // the P2SH special validation code being executed.
         if (opcode > OP_16)
             return false;
+
     }
     return true;
 }

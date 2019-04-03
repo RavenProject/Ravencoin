@@ -283,6 +283,90 @@ UniValue UpdateRestrictedAddress(const JSONRPCRequest &request, const int8_t &fl
     return result;
 }
 
+UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t &flag)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    // Check asset name and infer assetType
+    std::string restricted_name = request.params[0].get_str();
+
+    // Check to see if the given asset name is an owner
+    // If it is an owner, remove the ! at the end of the string
+    if (IsAssetNameAnOwner(restricted_name)) {
+        restricted_name.pop_back();
+    }
+
+    AssetType assetType;
+    std::string assetError = "";
+    if (!IsAssetNameValid(restricted_name, assetType, assetError)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + restricted_name + std::string("\nError: ") + assetError);
+    }
+
+    if (assetType != AssetType::RESTRICTED) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
+    }
+
+    // Add back the owner tag
+    restricted_name.push_back('!');
+
+    // Get the optional change address
+    std::string change_address = "";
+    if (request.params.size() > 1) {
+        change_address = request.params[1].get_str();
+        CTxDestination change_dest = DecodeDestination(change_address);
+        if (!IsValidDestination(change_dest)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+        }
+    }
+
+    CReserveKey reservekey(pwallet);
+    CWalletTx transaction;
+    CAmount nRequiredFee;
+    CCoinControl ctrl;
+
+    // If the optional change address wasn't given create a new change address for this wallet
+    if (change_address == "") {
+        CKeyID keyID;
+        std::string strFailReason;
+        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
+            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
+
+        change_address = EncodeDestination(keyID);
+    }
+
+    std::pair<int, std::string> error;
+    std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
+
+    // Always transfer 1 of the restricted tokens to the change address
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name, 1 * COIN), change_address));
+
+    // Add the global asset data, 1 = Freeze all transfers, 0 = Allow transfers
+    std::vector<CNullAssetTxData> vecGlobalAssetData;
+    vecGlobalAssetData.push_back(CNullAssetTxData(restricted_name.substr(0, restricted_name.size() - 1), flag));
+
+    // Create the Transaction
+    if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, nullptr, &vecGlobalAssetData))
+        throw JSONRPCError(error.first, error.second);
+
+    // Send the Transaction to the network
+    std::string txid;
+    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+        throw JSONRPCError(error.first, error.second);
+
+    // Display the transaction id
+    UniValue result(UniValue::VARR);
+    result.push_back(txid);
+    return result;
+}
+
 UniValue issue(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 8)
@@ -1678,9 +1762,57 @@ UniValue unfreezeaddress(const JSONRPCRequest& request)
     return UpdateRestrictedAddress(request, 0);
 }
 
+UniValue freezerestrictedasset(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 1 || request.params.size() > 2)
+        throw std::runtime_error(
+                "freezerestrictedasset asset_name (change_address)\n"
+                + RestrictedActivationWarning() +
+                "\nFreeze all trading for a specific restricted asset\n"
 
+                "\nArguments:\n"
+                "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
+                "2. \"change_address\"   (string), optional) The change address for the owner token of the restricted asset\n"
 
+                "\nResult:\n"
+                "\"txid\"                     (string) The transaction id\n"
 
+                "\nExamples:\n"
+                + HelpExampleCli("freezerestrictedasset", "\"$RESTRICTED_ASSET\"")
+                + HelpExampleRpc("freezerestrictedasset", "\"$RESTRICTED_ASSET\"")
+                + HelpExampleCli("freezerestrictedasset", "\"$RESTRICTED_ASSET\" \"change_address\"")
+                + HelpExampleRpc("freezerestrictedasset", "\"$RESTRICTED_ASSET\" \"change_address\"")
+        );
+
+    // 1 = Freeze all trading
+    return UpdateGlobalRestrictedAsset(request, 1);
+}
+
+UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 1 || request.params.size() > 2)
+        throw std::runtime_error(
+                "unfreezerestrictedasset asset_name (change_address)\n"
+                + RestrictedActivationWarning() +
+                "\nUnfreeze all trading for a specific restricted asset\n"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
+                "2. \"change_address\"   (string), optional) The change address for the owner token of the restricted asset\n"
+
+                "\nResult:\n"
+                "\"txid\"                     (string) The transaction id\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("unfreezerestrictedasset", "\"$RESTRICTED_ASSET\"")
+                + HelpExampleRpc("unfreezerestrictedasset", "\"$RESTRICTED_ASSET\"")
+                + HelpExampleCli("unfreezerestrictedasset", "\"$RESTRICTED_ASSET\" \"change_address\"")
+                + HelpExampleRpc("unfreezerestrictedasset", "\"$RESTRICTED_ASSET\" \"change_address\"")
+        );
+
+    // 0 = Unfreeze all trading
+    return UpdateGlobalRestrictedAsset(request, 0);
+}
 
 
 static const CRPCCommand commands[] =
@@ -1698,10 +1830,13 @@ static const CRPCCommand commands[] =
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
+
     { "restricted assets",   "addqualifiertoaddress",      &addqualifiertoaddress,      {"tag_name", "to_address", "change_address"}},
     { "restricted assets",   "removequalifierfromaddress", &removequalifierfromaddress, {"tag_name", "to_address", "change_address"}},
     { "restricted assets",   "freezeaddress",              &freezeaddress,              {"asset_name", "address", "change_address"}},
-    { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address"}}
+    { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address"}},
+    { "restricted assets",   "freezerestrictedasset",      &freezerestrictedasset,      {"asset_name", "change_address"}},
+    { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

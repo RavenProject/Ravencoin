@@ -110,12 +110,15 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
 
     // Provably prunable, asset data-carrying output
     //
-    // So long as script passes the IsUnspendable() test and all but the first
+    // So long as script passes the IsUnspendable() test and all but the first three
     // byte passes the IsPushOnly()
     if (scriptPubKey.size() >= 1 && scriptPubKey[0] == OP_RVN_ASSET && scriptPubKey.IsPushOnly(scriptPubKey.begin()+1)) {
         typeRet = TX_RESTRICTED_ASSET_DATA;
-        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
-        vSolutionsRet.push_back(hashBytes);
+
+        if (scriptPubKey.size() >= 23 && scriptPubKey[1] != OP_RESERVED) {
+            std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
+            vSolutionsRet.push_back(hashBytes);
+        }
         return true;
     }
 
@@ -235,7 +238,9 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
         addressRet = CKeyID(uint160(vSolutions[0]));
         return true;
     } else if (whichType == TX_RESTRICTED_ASSET_DATA) {
-        addressRet = CKeyID(uint160(vSolutions[0]));
+        if (vSolutions.size()) {
+            addressRet = CKeyID(uint160(vSolutions[0]));
+        }
         return true;
     }
      /** RVN END */
