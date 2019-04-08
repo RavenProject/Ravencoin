@@ -221,17 +221,17 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
             AssetType type;
             IsAssetNameValid(data.asset_name, type);
             if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
-                assetInfo.pushKV("qualifier_name", data.asset_name);
+                assetInfo.pushKV("asset_name", data.asset_name);
                 assetInfo.pushKV("qualifier_type", data.flag ? "adding qualifier" : "removing qualifier");
                 assetInfo.pushKV("address", address);
             } else if (type == AssetType::RESTRICTED) {
-                assetInfo.pushKV("restricted_name", data.asset_name);
-                assetInfo.pushKV("restricted_type", data.flag ? "adding restriction" : "removing restriction");
+                assetInfo.pushKV("asset_name", data.asset_name);
+                assetInfo.pushKV("restricted_type", data.flag ? "freezing address" : "unfreezing address");
                 assetInfo.pushKV("address", address);
             }
         } else if (GlobalAssetNullDataFromScript(scriptPubKey, data)) {
             assetInfo.pushKV("restricted_name", data.asset_name);
-            assetInfo.pushKV("restricted_type", data.flag ? "adding global restriction" : "removing global restriction");
+            assetInfo.pushKV("restricted_type", data.flag ? "freezing" : "unfreezing");
             assetInfo.pushKV("address", "all addresses");
         }
 

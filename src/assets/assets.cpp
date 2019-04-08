@@ -3720,6 +3720,7 @@ bool CNullAssetTxData::IsValid(std::string &strError, CAssetsCache &assetCache, 
 
     if (type != AssetType::QUALIFIER && type != AssetType::SUB_QUALIFIER && type != AssetType::RESTRICTED) {
         strError = _("Asset must be a qualifier, sub qualifier, or a restricted asset");
+        return false;
     }
 
     if (flag != 0 || flag != 1) {
@@ -3728,12 +3729,13 @@ bool CNullAssetTxData::IsValid(std::string &strError, CAssetsCache &assetCache, 
     }
 
     if (fForceCheckPrimaryAssetExists) {
-        CNewAsset asset;
         if (!assetCache.CheckIfAssetExists(asset_name)) {
             strError = _("Asset doesn't exist: ") + asset_name;
             return false;
         }
     }
+
+    return true;
 }
 
 void CNullAssetTxData::ConstructTransaction(CScript &script) const
