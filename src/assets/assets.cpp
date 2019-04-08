@@ -468,6 +468,15 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
         }
     }
 
+    if (assetType == AssetType::RESTRICTED) {
+        if (units != MIN_UNIT) {
+            strError = _("Invalid parameter: units must be ") + std::to_string(MIN_UNIT);
+            return false;
+        }
+
+        // TODO add more restricted asset checks
+    }
+
     if (IsAssetNameAnOwner(std::string(strName))) {
         strError = _("Invalid parameters: asset_name can't have a '!' at the end of it. See help for more details.");
         return false;
@@ -956,6 +965,26 @@ bool GlobalAssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData
         ssData >> assetData;
     } catch(std::exception& e) {
         std::cout << "Failed to get the global restriction asset tx data from the stream: " << e.what() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool AssetNullVerifierDataFromScript(const CScript& scriptPubKey, CNullAssetTxVerifierString& verifierData)
+{
+    if (!scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+        return false;
+    }
+
+    std::vector<unsigned char> vchAssetData;
+    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + 3, scriptPubKey.end());
+    CDataStream ssData(vchAssetData, SER_NETWORK, PROTOCOL_VERSION);
+
+    try {
+        ssData >> verifierData;
+    } catch(std::exception& e) {
+        std::cout << "Failed to get the verifier string from the stream: " << e.what() << std::endl;
         return false;
     }
 
@@ -3229,14 +3258,14 @@ std::string EncodeIPFS(std::string decoded){
     return EncodeBase58(unsignedCharData);
 };
 
-bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired)
+bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string)
 {
     std::vector<CNewAsset> assets;
     assets.push_back(asset);
-    return CreateAssetTransaction(pwallet, coinControl, assets, address, error, wtxNew, reservekey, nFeeRequired);
+    return CreateAssetTransaction(pwallet, coinControl, assets, address, error, wtxNew, reservekey, nFeeRequired, verifier_string);
 }
 
-bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired)
+bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string)
 {
     std::string change_address = EncodeDestination(coinControl.destChange);
 
@@ -3359,6 +3388,20 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
         }
     }
 
+    if (assetType == AssetType::RESTRICTED) {
+        if (!verifier_string) {
+            error = std::make_pair(RPC_INVALID_PARAMETER, "Error: Verifier string not found");
+            return false;
+        }
+        // Create the asset null data transaction that will get added to the issue transaction
+        CScript verifierScript;
+        CNullAssetTxVerifierString verifier(*verifier_string);
+
+        verifier.ConstructTransaction(verifierScript);
+        CRecipient rec = {verifierScript, 0, false};
+        vecSend.push_back(rec);
+    }
+
     if (!pwallet->CreateTransactionWithAssets(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coinControl, assets, DecodeDestination(address), assetType)) {
         if (!fSubtractFeeFromAmount && burnAmount + nFeeRequired > curBalance)
             strTxError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
@@ -3477,6 +3520,9 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     return true;
 }
 
+
+// nullAssetTxData -> Use this for freeze/unfreeze an address or adding a qualifier to an address
+// nullGlobalRestrictionData -> Use this to globally freeze/unfreeze a restricted asset.
 bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData, std::vector<CNullAssetTxData>* nullGlobalRestrictionData)
 {
     // Initialize Values for transaction
@@ -3756,4 +3802,34 @@ void CNullAssetTxData::ConstructGlobalRestrictionTransaction(CScript &script) co
     std::vector<unsigned char> vchMessage;
     vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
     script << OP_RVN_ASSET << OP_RESERVED << OP_RESERVED << ToByteVector(vchMessage);
+}
+
+CNullAssetTxVerifierString::CNullAssetTxVerifierString(const std::string &verifier)
+{
+    SetNull();
+    this->verifier_string = verifier;
+}
+
+bool CNullAssetTxVerifierString::IsValid(std::string &strError, bool fForceCheckAssetsExist) const
+{
+    // TODO check the verifier string is a valid boolean expression
+
+    // TODO check to make sure all values are qualifier names
+
+    if (fForceCheckAssetsExist) {
+        // TODO check to make sure the verifier string contains valid qualifier asset names
+    }
+
+
+    return true;
+}
+
+void CNullAssetTxVerifierString::ConstructTransaction(CScript &script) const
+{
+    CDataStream ssAssetTxData(SER_NETWORK, PROTOCOL_VERSION);
+    ssAssetTxData << *this;
+
+    std::vector<unsigned char> vchMessage;
+    vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
+    script << OP_RVN_ASSET << OP_RESERVED << ToByteVector(vchMessage);
 }

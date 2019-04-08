@@ -664,6 +664,7 @@ public:
     bool IsTransferAsset() const;
     bool IsAsset() const;
     bool IsNullAssetTxDataScript() const;
+    bool IsNullAssetVerifierTxDataScript() const;
     bool IsNullGlobalRestrictionAssetTxDataScript() const;
     /** RVN END */
 
