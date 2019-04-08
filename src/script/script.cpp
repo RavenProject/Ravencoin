@@ -332,7 +332,7 @@ bool CScript::IsNullAssetTxDataScript() const
 
 bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
 {
-    // 3 OP_RVN ASSETS + atleast 4 characters for the restricted name $ABC
+    // 1 OP_RVN_ASSET followed by two OP_RESERVED + atleast 4 characters for the restricted name $ABC
     return (this->size() > 6 &&
             (*this)[0] == OP_RVN_ASSET &&
             (*this)[1] == OP_RESERVED &&
