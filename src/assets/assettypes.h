@@ -293,6 +293,34 @@ public:
     void ConstructGlobalRestrictionTransaction(CScript &script) const;
 };
 
+class CNullAssetTxVerifierString {
+
+public:
+    std::string verifier_string;
+
+    CNullAssetTxVerifierString()
+    {
+        SetNull();
+    }
+
+    void SetNull()
+    {
+        verifier_string ="";
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(verifier_string);
+    }
+
+    CNullAssetTxVerifierString(const std::string& verifier);
+    bool IsValid(std::string& strError, bool fForceCheckAssetsExist) const;
+    void ConstructTransaction(CScript& script) const;
+};
+
 
 /** THESE ARE ONLY TO BE USED WHEN ADDING THINGS TO THE CACHE DURING CONNECT AND DISCONNECT BLOCK */
 struct CAssetCacheNewAsset

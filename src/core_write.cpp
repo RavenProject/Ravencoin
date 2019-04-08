@@ -216,6 +216,7 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
     if (type == TX_RESTRICTED_ASSET_DATA) {
         UniValue assetInfo(UniValue::VOBJ);
         CNullAssetTxData data;
+        CNullAssetTxVerifierString verifierData;
         std::string address;
         if (AssetNullDataFromScript(scriptPubKey, data, address)) {
             AssetType type;
@@ -233,6 +234,8 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
             assetInfo.pushKV("restricted_name", data.asset_name);
             assetInfo.pushKV("restricted_type", data.flag ? "freezing" : "unfreezing");
             assetInfo.pushKV("address", "all addresses");
+        } else if (AssetNullVerifierDataFromScript(scriptPubKey, verifierData)) {
+            assetInfo.pushKV("verifier_string", verifierData.verifier_string);
         }
 
         out.pushKV("asset_data", assetInfo);

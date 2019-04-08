@@ -338,6 +338,16 @@ bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
             (*this)[1] == OP_RESERVED &&
             (*this)[2] == OP_RESERVED);
 }
+
+
+bool CScript::IsNullAssetVerifierTxDataScript() const
+{
+    // 1 OP_RVN_ASSET followed by one OP_RESERVED
+    return (this->size() > 3 &&
+            (*this)[0] == OP_RVN_ASSET &&
+            (*this)[1] == OP_RESERVED &&
+            (*this)[2] != OP_RESERVED);
+}
 /** RVN END */
 
 bool CScript::IsPayToWitnessScriptHash() const
@@ -365,6 +375,7 @@ bool CScript::IsWitnessProgram(int& version, std::vector<unsigned char>& program
     }
     return false;
 }
+
 bool CScript::IsPayToPublicKey() const
 {
     // Test for pay-to-pubkey CScript with both
