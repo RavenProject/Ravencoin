@@ -177,6 +177,12 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
 
     // Check for negative or overflow output values
     CAmount nValueOut = 0;
+    std::set<std::string> setAssetTransferNames;
+    std::map<std::pair<std::string, std::string>, int> mapNullDataTxCount; // (asset_name, address) -> int
+    std::set<std::string> setNullGlobalAssetChanges;
+    bool fContainsNewRestrictedAsset = false;
+    bool fContainsRestrictedAssetReissue = false;
+    bool fContainsNullAssetVerifierTx = false;
     for (const auto& txout : tx.vout)
     {
         if (txout.nValue < 0)
@@ -186,6 +192,45 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         nValueOut += txout.nValue;
         if (!MoneyRange(nValueOut))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
+
+        if (txout.scriptPubKey.IsNullAsset()) {
+            CNullAssetTxData data;
+            std::string address;
+
+            if (txout.scriptPubKey.IsNullAssetTxDataScript()) {
+                if (!AssetNullDataFromScript(txout.scriptPubKey, data, address))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-asset-data-serialization");
+
+                auto pair = std::make_pair(data.asset_name, address);
+                if(!mapNullDataTxCount.count(pair)){
+                    mapNullDataTxCount.insert(std::make_pair(pair, 0));
+                }
+
+                mapNullDataTxCount.at(pair)++;
+
+                if (mapNullDataTxCount.at(pair) > 1)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-change-per-asset-address");
+            } else if (txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+                if (!GlobalAssetNullDataFromScript(txout.scriptPubKey, data))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-global-asset-data-serialization");
+
+                if (setNullGlobalAssetChanges.count(data.asset_name)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-global-change-per-asset-name");
+                }
+
+                setNullGlobalAssetChanges.insert(data.asset_name);
+            } else if (txout.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                CNullAssetTxVerifierString verifier;
+                if (!AssetNullVerifierDataFromScript(txout.scriptPubKey, verifier)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-verifier-data-serialization");
+                }
+
+                if (fContainsNullAssetVerifierTx)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-verifier-per-tx");
+
+                fContainsNullAssetVerifierTx = true;
+            }
+        }
 
         /** RVN START */
         bool isAsset = false;
@@ -210,6 +255,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     std::string address;
                     if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
+
+                    // insert into set, so that later on we can check asset null data transactions
+                    setAssetTransferNames.insert(transfer.strName);
 
                     // Check asset name validity and get type
                     AssetType assetType;
@@ -249,6 +297,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     if (assetType == AssetType::RESTRICTED) {
                         if (!AreRestrictedAssetsDeployed())
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-restricted-before-it-is-active");
+
+                        // TODO, check the destination address, and make sure that the restricted asset can be sent to it
                     }
 
                     // If the transfer is a qualifier channel asset.
@@ -263,6 +313,22 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
             }
         }
     }
+
+    if (AreRestrictedAssetsDeployed()) {
+        for (auto entry: mapNullDataTxCount) {
+            if (!setAssetTransferNames.count(entry.first.first)) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-asset-null-tx-without-asset-transfer");
+            }
+        }
+
+        for (auto name: setNullGlobalAssetChanges) {
+            if (!setAssetTransferNames.count(name + OWNER_TAG)) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-global-asset-null-tx-without-asset-transfer");
+            }
+        }
+    }
+
+
     /** RVN END */
 
     if (fCheckDuplicateInputs) {
@@ -290,7 +356,6 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
     if (AreAssetsDeployed()) {
         if (assetCache) {
             if (tx.IsNewAsset()) {
-
                 /** Verify the reissue assets data */
                 std::string strError = "";
                 if(!tx.VerifyNewAsset(strError))
@@ -323,6 +388,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 if (!reissue.IsValid(strError, *assetCache, false)) {
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-" + strError);
                 }
+
+                // Get the assetType
+                AssetType type;
+                IsAssetNameValid(reissue.strName, type);
+
+                // If this is a reissuance of a restricted asset, mark it as such, so we can check to make sure only valid verifer string tx are added to the chain
+                if (type == AssetType::RESTRICTED)
+                    fContainsRestrictedAssetReissue = true;
 
             } else if (tx.IsNewUniqueAsset()) {
 
@@ -386,9 +459,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 if (!AreRestrictedAssetsDeployed())
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-before-it-is-active");
 
-                /** Verify the restricted channel assets data. */
+                /** Verify the restricted assets data. */
                 std::string strError = "";
-                if(!tx.VerifyNewAsset(strError))
+                if(!tx.VerifyNewRestrictedAsset(strError))
                     return state.DoS(100, false, REJECT_INVALID, strError);
 
                 CNewAsset asset;
@@ -396,8 +469,23 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 if (!RestrictedAssetFromTransaction(tx, asset, strAddress))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-from-transaction");
 
+                // Validate the new assets information
+                if (!IsNewRestrictedOwnerTxValid(tx, asset.strName, strAddress, strError))
+                    return state.DoS(100, false, REJECT_INVALID, strError);
+
                 if (!asset.IsValid(strError, *assetCache, fMemPoolCheck, fCheckAssetDuplicate, fForceDuplicateCheck))
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-restricted" + strError);
+
+                CNullAssetTxVerifierString verifier;
+                if (!tx.GetVerifierStringFromTx(verifier, strError))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-" + strError);
+
+                if (!verifier.IsValid(strError, fCheckAssetDuplicate)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-not-valid-" + strError);
+                }
+
+                // Mark that this transaction has a restricted asset issuance, for checks later with the verifier string tx
+                fContainsNewRestrictedAsset = true;
             }
             else {
                 // Fail if transaction contains any non-transfer asset scripts and hasn't conformed to one of the
@@ -422,6 +510,17 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     }
                 }
             }
+
+            // Check to make sure that if there is a verifier string, that there is also a issue or reissuance of a restricted asset
+            if (fContainsNullAssetVerifierTx && !fContainsRestrictedAssetReissue && !fContainsNewRestrictedAsset)
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-cointains-verifier-string-without-restricted-asset-issuance-or-reissuance");
+
+            // If there is a restricted asset issuance, verify that there is a verifier tx associated with it.
+            if (fContainsNewRestrictedAsset && !fContainsNullAssetVerifierTx) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-cointains-restricted-asset-issuance-without-verifier");
+            }
+
+            // we allow restricted asset reissuance without having a verifier string transaction
         }
     }
     /** RVN END */

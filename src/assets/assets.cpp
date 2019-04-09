@@ -739,10 +739,51 @@ bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, con
     return true;
 }
 
+bool IsNewRestrictedOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg)
+{
+    std::string ownerName;
+    std::string ownerAddress;
+    if (!RestrictedOwnerFromTransaction(tx, ownerName, ownerAddress)) {
+        errorMsg = "bad-txns-bad-restricted-owner";
+        return false;
+    }
+
+    int size = ownerName.size();
+
+    if (ownerAddress != address) {
+        errorMsg = "bad-txns-restricted-owner-address-mismatch";
+        return false;
+    }
+
+    if (size < OWNER_LENGTH + MIN_ASSET_LENGTH) {
+        errorMsg = "bad-txns-restricted-owner-asset-length";
+        return false;
+    }
+
+    if (ownerName != std::string(assetName + OWNER_TAG)) {
+        errorMsg = "bad-txns-restricted-owner-name-mismatch";
+        return false;
+    }
+
+    return true;
+}
+
 bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress)
 {
     // Check to see if the transaction is an new asset issue tx
     if (!tx.IsNewAsset())
+        return false;
+
+    // Get the scriptPubKey from the last tx in vout
+    CScript scriptPubKey = tx.vout[tx.vout.size() - 2].scriptPubKey;
+
+    return OwnerAssetFromScript(scriptPubKey, ownerName, strAddress);
+}
+
+bool RestrictedOwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress)
+{
+    // Check to see if the transaction is an new asset issue tx
+    if (!tx.IsNewRestrictedAsset())
         return false;
 
     // Get the scriptPubKey from the last tx in vout
@@ -1003,7 +1044,8 @@ bool CTransaction::IsNewAsset() const
         return false;
 
     // Don't overlap with IsNewUniqueAsset()
-    if (IsScriptNewUniqueAsset(vout[vout.size() - 1].scriptPubKey))
+    CScript script = vout[vout.size() - 1].scriptPubKey;
+    if (IsScriptNewUniqueAsset(script)|| IsScriptNewRestrictedAsset(script))
         return false;
 
     return true;
@@ -1395,6 +1437,109 @@ bool CTransaction::IsNewRestrictedAsset() const
     return true;
 }
 
+//! To be called on CTransactions where IsNewRestrictedAsset returns true
+bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
+    // Issuing a restricted asset must cointain at least 4 CTxOut(Raven Burn Tx, Owner Token Creation, Asset Creation, and CNullAssetTxVerifierString)
+    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
+    if (vout.size() < 4) {
+        strError = "bad-txns-issue-restricted-vout-size-to-small";
+        return false;
+    }
+
+    // Check for the assets data CTxOut. This will always be the last output in the transaction
+    if (!CheckIssueDataTx(vout[vout.size() - 1])) {
+        strError = "bad-txns-issue-restricted-data-not-found";
+        return false;
+    }
+
+    // Check to make sure the owner asset is created
+    if (!CheckOwnerDataTx(vout[vout.size() - 2])) {
+        strError = "bad-txns-issue-restrcited-owner-data-not-found";
+        return false;
+    }
+
+    // Get the asset type
+    CNewAsset asset;
+    std::string address;
+    if (!RestrictedAssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
+        strError = "bad-txns-issue-restricted-serialzation-failed";
+        return error("%s : Failed to get new restricted asset from transaction: %s", __func__, this->GetHash().GetHex());
+    }
+
+    AssetType assetType;
+    IsAssetNameValid(asset.strName, assetType);
+
+    std::string strOwnerName;
+    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address)) {
+        strError = "bad-txns-issue-owner-serialzation-failed";
+        return false;
+    }
+
+    if (strOwnerName != asset.strName + OWNER_TAG) {
+        strError = "bad-txns-issue-restricted-owner-name-doesn't-match";
+        return false;
+    }
+
+    // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
+    bool fFoundIssueBurnTx = false;
+    for (auto out : vout) {
+        if (CheckIssueBurnTx(out, assetType)) {
+            fFoundIssueBurnTx = true;
+            break;
+        }
+    }
+
+    if (!fFoundIssueBurnTx) {
+        strError = "bad-txns-issue-restricted-burn-not-found";
+        return false;
+    }
+
+    CNullAssetTxVerifierString verifier;
+    if (!GetVerifierStringFromTx(verifier, strError)) {
+        return false;
+    }
+
+    // TODO is verifier string valid check
+
+    // Loop through all of the vouts and make sure only the expected asset creations are taking place
+    int nTransfers = 0;
+    int nOwners = 0;
+    int nIssues = 0;
+    int nReissues = 0;
+    GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
+
+    if (nOwners != 1 || nIssues != 1 || nReissues > 0) {
+        strError = "bad-txns-failed-issue-asset-formatting-check";
+        return false;
+    }
+
+    return true;
+}
+
+bool CTransaction::GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const
+{
+    bool found = false;
+    int count = 0;
+    for (auto out : vout) {
+        if (out.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+            count++;
+
+            if (count > 1) {
+                strError = _("Multiple verifier strings found in transaction");
+                return false;
+            }
+            if (!AssetNullVerifierDataFromScript(out.scriptPubKey, verifier)) {
+                strError = _("Failed to get verifier string from output: ") + out.ToString();
+                return false;
+            }
+
+            found = true;
+        }
+    }
+
+    return found && count == 1;
+}
+
 bool CTransaction::IsReissueAsset() const
 {
     // Check for the reissue asset data CTxOut. This will always be the last output in the transaction
@@ -1598,6 +1743,23 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache, boo
     if (nUnits > MAX_UNIT || nUnits < -1) {
         strError = _("Unable to reissue asset: unit must be between 8 and -1");
         return false;
+    }
+
+    if (AreRestrictedAssetsDeployed()) {
+        AssetType type;
+        IsAssetNameValid(strName, type);
+
+        if (type == AssetType::RESTRICTED) {
+            // TODO verify that these are the correct settings we want for restricted assets
+            if (nUnits != -1) { // -1 means that the units didn't change
+                strError = _("Unable to reissue asset: Unable to change units on a restricted asset");
+                return false;
+            }
+            if (nReissuable == 0) {
+                strError = _("Unable to reissue asset: Restricted assets must be reissuable");
+                return false;
+            }
+        }
     }
 
     return true;

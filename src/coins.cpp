@@ -101,7 +101,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
     /** RVN START */
     if (AreAssetsDeployed()) {
         if (assetsCache) {
-            if (tx.IsNewAsset()) {
+            if (tx.IsNewAsset()) { // This works are all new root assets, sub asset, and restricted assets
                 CNewAsset asset;
                 std::string strAddress;
                 AssetFromTransaction(tx, asset, strAddress);
@@ -176,6 +176,24 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 // Add the new asset to cache
                 if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
                     error("%s : Failed at adding a new qualifier asset to our cache. asset: %s", __func__,
+                          asset.strName);
+            }  else if (tx.IsNewRestrictedAsset()) {
+                CNewAsset asset;
+                std::string strAddress;
+                RestrictedAssetFromTransaction(tx, asset, strAddress);
+
+                std::string ownerName;
+                std::string ownerAddress;
+                RestrictedOwnerFromTransaction(tx, ownerName, ownerAddress);
+
+                // Add the new asset to cache
+                if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
+                    error("%s : Failed at adding a new restricted asset to our cache. asset: %s", __func__,
+                          asset.strName);
+
+                // Add the owner asset to cache
+                if (!assetsCache->AddOwnerAsset(ownerName, ownerAddress))
+                    error("%s : Failed at adding a new restricted asset owner to our cache. asset: %s", __func__,
                           asset.strName);
             }
         }

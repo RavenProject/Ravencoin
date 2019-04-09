@@ -323,6 +323,11 @@ bool CScript::IsTransferAsset() const
     return false;
 }
 
+bool CScript::IsNullAsset() const
+{
+    return IsNullAssetTxDataScript() || IsNullGlobalRestrictionAssetTxDataScript() || IsNullAssetVerifierTxDataScript();
+}
+
 bool CScript::IsNullAssetTxDataScript() const
 {
     return (this->size() > 23 &&
