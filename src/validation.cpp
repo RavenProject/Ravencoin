@@ -1717,6 +1717,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
         bool is_coinbase = tx.IsCoinBase();
 
         std::vector<int> vAssetTxIndex;
+        std::vector<int> vNullAssetTxIndex;
         if (fAddressIndex) {
 
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
@@ -1792,6 +1793,13 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     }
                 }
                 /** RVN START */
+            } else {
+                if(AreRestrictedAssetsDeployed()) {
+                    if (assetsCache) {
+                        if (tx.vout[o].scriptPubKey.IsNullAsset())
+                            vNullAssetTxIndex.emplace_back(o);
+                    }
+                }
             }
         }
 
@@ -1916,7 +1924,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     // Get the owner from the transaction and remove it
                     std::string ownerName;
                     std::string ownerAddress;
-                    if (!OwnerFromTransaction(tx, ownerName, ownerAddress)) {
+                    if (!RestrictedOwnerFromTransaction(tx, ownerName, ownerAddress)) {
                         error("%s : Failed to get restricted owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
                     }
@@ -1925,6 +1933,8 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         error("%s : Failed to Remove Restricted Owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
                     }
+
+                    // TODO get the verifier string and add it to the remove cache
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -1951,6 +1961,47 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         LOCK(cs_messaging);
                         if (IsChannelSubscribed(transfer.strName)) {
                             OrphanMessage(COutPoint(hash, index));
+                        }
+                    }
+                }
+
+                if (AreRestrictedAssetsDeployed()) {
+                    // Because of the strict rules for allowing the null asset tx types into a transaction.
+                    // We know that if these are in a transaction, that they are valid null asset tx, and can be reversed
+                    for (auto index: vNullAssetTxIndex) {
+                        CScript script = tx.vout[index].scriptPubKey;
+
+                        if (script.IsNullAssetTxDataScript()) {
+                            CNullAssetTxData data;
+                            std::string address;
+                            if (!AssetNullDataFromScript(script, data, address)) {
+                                error("%s : Failed to get null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            // TODO remove the null tx data from the cache
+
+                        } else if (script.IsNullGlobalRestrictionAssetTxDataScript()) {
+                            CNullAssetTxData data;
+                            std::string address;
+                            if (!GlobalAssetNullDataFromScript(script, data)) {
+                                error("%s : Failed to get global null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            // TODO remove the global null tx data from the cache
+                        } else if (script.IsNullAssetVerifierTxDataScript()) {
+                            CNullAssetTxVerifierString data;
+                            std::string address;
+                            if (!AssetNullVerifierDataFromScript(script, data)) {
+                                error("%s : Failed to get verifier null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            // TODO remove the verifier null tx data from the cache
                         }
                     }
                 }
