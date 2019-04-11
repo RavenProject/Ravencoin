@@ -34,6 +34,20 @@ enum class AssetType
     INVALID = 11
 };
 
+enum class QualifierType
+{
+    REMOVE_QUALIFIER = 0,
+    ADD_QUALIFIER = 1
+};
+
+enum class RestrictedType
+{
+    FREEZE_ADDRESS= 0,
+    UNFREEZE_ADDRESS = 1,
+    GLOBAL_FREEZE = 3,
+    GLOBAL_UNFREEZE = 4
+};
+
 int IntFromAssetType(AssetType type);
 AssetType AssetTypeFromInt(int nType);
 
@@ -431,6 +445,78 @@ struct CAssetCacheSpendAsset
         this->assetName = assetName;
         this->address = address;
         this->nAmount = nAmount;
+    }
+};
+
+struct CAssetCacheQualifierAddress
+{
+    std::string assetName;
+    std::string address;
+    QualifierType type;
+
+    CAssetCacheQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType& type)
+    {
+        this->assetName = assetName;
+        this->address = address;
+        this->type = type;
+    }
+
+    bool operator<(const CAssetCacheQualifierAddress& rhs) const
+    {
+        return assetName < rhs.assetName || (assetName == rhs.assetName && address < rhs.address);
+    }
+};
+
+struct CAssetCacheRestrictedAddress
+{
+    std::string assetName;
+    std::string address;
+    RestrictedType type;
+
+    CAssetCacheRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType& type)
+    {
+        this->assetName = assetName;
+        this->address = address;
+        this->type = type;
+    }
+
+    bool operator<(const CAssetCacheRestrictedAddress& rhs) const
+    {
+        return assetName < rhs.assetName || (assetName == rhs.assetName && address < rhs.address);
+    }
+};
+
+struct CAssetCacheRestrictedGlobal
+{
+    std::string assetName;
+    RestrictedType type;
+
+    CAssetCacheRestrictedGlobal(const std::string& assetName, const RestrictedType& type)
+    {
+        this->assetName = assetName;
+        this->type = type;
+    }
+
+    bool operator<(const CAssetCacheRestrictedGlobal& rhs) const
+    {
+        return assetName < rhs.assetName;
+    }
+};
+
+struct CAssetCacheRestrictedVerifiers
+{
+    std::string assetName;
+    std::string verifier;
+
+    CAssetCacheRestrictedVerifiers(const std::string& assetName, const std::string& verifier)
+    {
+        this->assetName = assetName;
+        this->verifier = verifier;
+    }
+
+    bool operator<(const CAssetCacheRestrictedVerifiers& rhs) const
+    {
+        return assetName < rhs.assetName;
     }
 };
 

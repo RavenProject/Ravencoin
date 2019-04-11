@@ -1851,6 +1851,8 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             return DISCONNECT_FAILED;
                         }
                     }
+
+                    // TODO, if there was a reissue of a restricted asset in the transaction, the verifier string could be changed
                 } else if (tx.IsNewUniqueAsset()) {
                     for (int n = 0; n < (int)tx.vout.size(); n++) {
                         auto out = tx.vout[n];
@@ -1933,8 +1935,6 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         error("%s : Failed to Remove Restricted Owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
                     }
-
-                    // TODO get the verifier string and add it to the remove cache
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -1980,8 +1980,24 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                                 return DISCONNECT_FAILED;
                             }
 
-                            // TODO remove the null tx data from the cache
+                            AssetType type;
+                            IsAssetNameValid(data.asset_name, type);
 
+                            // Handle adding qualifiers to addresses
+                            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                                if (!assetsCache->RemoveQualifierAddress(data.asset_name, address, data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER)) {
+                                    error("%s : Failed to remove qualifier from address, Qualifier : %s, Flag Removing : %d, Address : %s",
+                                          __func__, data.asset_name, data.flag, address);
+                                    return DISCONNECT_FAILED;
+                                }
+                            // Handle adding restrictions to addresses
+                            } else if (type == AssetType::RESTRICTED) {
+                                if (!assetsCache->RemoveRestrictedAddress(data.asset_name, address, data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS)) {
+                                    error("%s : Failed to remove restriction from address, Restriction : %s, Flag Removing : %d, Address : %s",
+                                          __func__, data.asset_name, data.flag, address);
+                                    return DISCONNECT_FAILED;
+                                }
+                            }
                         } else if (script.IsNullGlobalRestrictionAssetTxDataScript()) {
                             CNullAssetTxData data;
                             std::string address;
@@ -1991,15 +2007,19 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                                 return DISCONNECT_FAILED;
                             }
 
-                            // TODO remove the global null tx data from the cache
+                            if (!assetsCache->RemoveGlobalRestricted(data.asset_name, data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE)) {
+                                error("%s : Failed to remove global restriction from cache. Asset Name: %s, Flag Removing %d", __func__, data.asset_name, data.flag);
+                                return DISCONNECT_FAILED;
+                            }
                         } else if (script.IsNullAssetVerifierTxDataScript()) {
                             CNullAssetTxVerifierString data;
-                            std::string address;
                             if (!AssetNullVerifierDataFromScript(script, data)) {
                                 error("%s : Failed to get verifier null asset data from transaction. CTxOut : %s", __func__,
                                       tx.vout[index].ToString());
                                 return DISCONNECT_FAILED;
                             }
+
+                            if (!assetsCache->RemoveRestrictedVerifier(data.asset_name, data.verifier))
 
                             // TODO remove the verifier null tx data from the cache
                         }
