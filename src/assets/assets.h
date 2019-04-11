@@ -121,6 +121,22 @@ public :
     std::set<CAssetCacheNewTransfer> setNewTransferAssetsToAdd;
     std::set<CAssetCacheNewTransfer> setNewTransferAssetsToRemove;
 
+    // Qualfier Address Asset Caches
+    std::set<CAssetCacheQualifierAddress> setNewQualifierAddressToAdd;
+    std::set<CAssetCacheQualifierAddress> setNewQualifierAddressToRemove;
+
+    // Restricted Address Asset Caches
+    std::set<CAssetCacheRestrictedAddress> setNewRestrictedAddressToAdd;
+    std::set<CAssetCacheRestrictedAddress> setNewRestrictedAddressToRemove;
+
+    // Restricted Global Asset Caches
+    std::set<CAssetCacheRestrictedGlobal> setNewRestrictedGlobalToAdd;
+    std::set<CAssetCacheRestrictedGlobal> setNewRestrictedGlobalToRemove;
+
+    // Restricted Assets Verifier Caches
+    std::set<CAssetCacheRestrictedVerifiers> setNewRestrictedVerifierToAdd;
+    std::set<CAssetCacheRestrictedVerifiers> setNewRestrictedVerifierToRemove;
+
     CAssetsCache() : CAssets()
     {
         SetNull();
@@ -148,6 +164,22 @@ public :
         // Owner Caches
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
+
+        //Qualifier Caches
+        this->setNewQualifierAddressToAdd = cache.setNewQualifierAddressToAdd;
+        this->setNewQualifierAddressToRemove = cache.setNewQualifierAddressToRemove;
+
+        //Restricted Address Caches
+        this->setNewRestrictedAddressToAdd = cache.setNewRestrictedAddressToAdd;
+        this->setNewRestrictedAddressToRemove = cache.setNewRestrictedAddressToRemove;
+
+        //Restricted Global Caches
+        this->setNewRestrictedGlobalToAdd = cache.setNewRestrictedGlobalToAdd;
+        this->setNewRestrictedGlobalToRemove = cache.setNewRestrictedGlobalToRemove;
+
+        //Restricted Verifier Caches
+        this->setNewRestrictedVerifierToAdd = cache.setNewRestrictedVerifierToAdd;
+        this->setNewRestrictedVerifierToRemove = cache.setNewRestrictedVerifierToRemove;
     }
 
     CAssetsCache& operator=(const CAssetsCache& cache)
@@ -175,6 +207,22 @@ public :
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
 
+        //Qualifier Caches
+        this->setNewQualifierAddressToAdd = cache.setNewQualifierAddressToAdd;
+        this->setNewQualifierAddressToRemove = cache.setNewQualifierAddressToRemove;
+
+        //Restricted Address Caches
+        this->setNewRestrictedAddressToAdd = cache.setNewRestrictedAddressToAdd;
+        this->setNewRestrictedAddressToRemove = cache.setNewRestrictedAddressToRemove;
+
+        //Restricted Global Caches
+        this->setNewRestrictedGlobalToAdd = cache.setNewRestrictedGlobalToAdd;
+        this->setNewRestrictedGlobalToRemove = cache.setNewRestrictedGlobalToRemove;
+
+        //Restricted Verifier Caches
+        this->setNewRestrictedVerifierToAdd = cache.setNewRestrictedVerifierToAdd;
+        this->setNewRestrictedVerifierToRemove = cache.setNewRestrictedVerifierToRemove;
+
         return *this;
     }
 
@@ -184,12 +232,20 @@ public :
     bool RemoveOwnerAsset(const std::string& assetsName, const std::string address);
     bool RemoveReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out, const std::vector<std::pair<std::string, CBlockAssetUndo> >& vUndoIPFS);
     bool UndoAssetCoin(const Coin& coin, const COutPoint& out);
+    bool RemoveQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType type);
+    bool RemoveRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType type);
+    bool RemoveGlobalRestricted(const std::string& assetName, const RestrictedType type);
+    bool RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier);
 
     // Cache only add asset functions
     bool AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash);
     bool AddTransferAsset(const CAssetTransfer& transferAsset, const std::string& address, const COutPoint& out, const CTxOut& txOut);
     bool AddOwnerAsset(const std::string& assetsName, const std::string address);
     bool AddReissueAsset(const CReissueAsset& reissue, const std::string address, const COutPoint& out);
+    bool AddQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType type);
+    bool AddRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType type);
+    bool AddGlobalRestricted(const std::string& assetName, const RestrictedType type);
+    bool AddRestrictedVerifier(const std::string& assetName, const std::string& verifier);
 
     // Cache only validation functions
     bool TrySpendCoin(const COutPoint& out, const CTxOut& coin);
@@ -234,14 +290,29 @@ public :
 
         mapReissuedAssetData.clear();
         mapAssetsAddressAmount.clear();
+
+        setNewQualifierAddressToAdd.clear();
+        setNewQualifierAddressToRemove.clear();
+
+        setNewRestrictedAddressToAdd.clear();
+        setNewRestrictedAddressToRemove.clear();
+
+        setNewRestrictedGlobalToAdd.clear();
+        setNewRestrictedGlobalToRemove.clear();
+
+        setNewRestrictedVerifierToAdd.clear();
+        setNewRestrictedVerifierToRemove.clear();
     }
 
    std::string CacheToString() const {
 
        return strprintf(
-               "vNewAssetsToRemove size : %d, vNewAssetsToAdd size : %d, vNewTransfer size : %d, vSpentAssets : %d\n",
+               "vNewAssetsToRemove size : %d, vNewAssetsToAdd size : %d, vNewTransfer size : %d, vSpentAssets : %d\n"
+               "setNewQualifierAddressToAdd size : %d, setNewQualifierAddressToRemove size : %d, setNewRestrictedAddressToAdd size : %d\n"
+               "setNewRestrictedAddressToRemove size : %d, setNewRestrictedGlobalToAdd size : %d, setNewRestrictedGlobalToRemove : %d",
                setNewAssetsToRemove.size(), setNewAssetsToAdd.size(), setNewTransferAssetsToAdd.size(),
-               vSpentAssets.size());
+               vSpentAssets.size(), setNewQualifierAddressToAdd.size(), setNewQualifierAddressToRemove.size(), setNewRestrictedAddressToAdd.size(),
+               setNewRestrictedAddressToRemove.size(), setNewRestrictedGlobalToAdd.size(), setNewRestrictedGlobalToRemove.size());
    }
 };
 

@@ -1440,7 +1440,6 @@ bool CTransaction::IsNewRestrictedAsset() const
 //! To be called on CTransactions where IsNewRestrictedAsset returns true
 bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
     // Issuing a restricted asset must cointain at least 4 CTxOut(Raven Burn Tx, Owner Token Creation, Asset Creation, and CNullAssetTxVerifierString)
-    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
     if (vout.size() < 4) {
         strError = "bad-txns-issue-restricted-vout-size-to-small";
         return false;
@@ -2201,6 +2200,159 @@ bool CAssetsCache::RemoveTransfer(const CAssetTransfer &transfer, const std::str
     return true;
 }
 
+//! Changes Memory Only, this only called when adding a block to the chain
+bool CAssetsCache::AddQualifierAddress(const std::string& assetName, std::string& address, QualifierType type)
+{
+    CAssetCacheQualifierAddress newQualifier(assetName, address, type);
+
+    // We are adding a qualifier that was in a transaction, so, if the set of qualifiers
+    // that contains qualifiers to undo contains the same qualfier assetName, and address, erase it
+    if (setNewQualifierAddressToRemove.count(newQualifier)) {
+        setNewQualifierAddressToRemove.erase(newQualifier);
+    }
+
+    // If the set of qualifiers from transactions contains our qualifier already, we need to overwrite it
+    if (setNewQualifierAddressToAdd.count(newQualifier)) {
+        setNewQualifierAddressToAdd.erase(newQualifier);
+    }
+
+    setNewQualifierAddressToAdd.insert(newQualifier);
+
+    return true;
+}
+
+//! Changes Memory Only, this is only called when undoing a block from the chain
+bool CAssetsCache::RemoveQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType type)
+{
+    CAssetCacheQualifierAddress newQualifier(assetName, address, type);
+
+    // We are adding a qualifier that was in a transaction, so, if the set of qualifiers
+    // that contains qualifiers to undo contains the same qualfier assetName, and address, erase it
+    if (setNewQualifierAddressToAdd.count(newQualifier)) {
+        setNewQualifierAddressToAdd.erase(newQualifier);
+    }
+
+    // If the set of qualifiers from transactions contains our qualifier already, we need to overwrite it
+    if (setNewQualifierAddressToRemove.count(newQualifier)) {
+        setNewQualifierAddressToRemove.erase(newQualifier);
+    }
+
+    setNewQualifierAddressToRemove.insert(newQualifier);
+
+    return true;
+}
+
+
+//! Changes Memory Only, this only called when adding a block to the chain
+bool CAssetsCache::AddRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType type)
+{
+    CAssetCacheRestrictedAddress newRestricted(assetName, address, type);
+
+    // We are adding a restricted address that was in a transaction, so, if the set of restricted addresses
+    // to undo contains our restricted address. Erase it
+    if (setNewRestrictedAddressToRemove.count(newRestricted)) {
+        setNewRestrictedAddressToRemove.erase(newRestricted);
+    }
+
+    // If the set of restricted addresses from transactions contains our restricted asset address already, we need to overwrite it
+    if (setNewRestrictedAddressToAdd.count(newRestricted)) {
+        setNewRestrictedAddressToAdd.erase(newRestricted);
+    }
+
+    setNewRestrictedAddressToAdd.insert(newRestricted);
+
+    return true;
+}
+
+//! Changes Memory Only, this is only called when undoing a block from the chain
+bool CAssetsCache::RemoveRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType type)
+{
+    CAssetCacheRestrictedAddress newRestricted(assetName, address, type);
+
+    // We are undoing a restricted address transaction, so if the set that contains restricted address from new block
+    // contains this restricted address, erase it.
+    if (setNewRestrictedAddressToAdd.count(newRestricted)) {
+        setNewRestrictedAddressToAdd.erase(newRestricted);
+    }
+
+    // If the set of restricted address to undo contains our restricted address already, we need to overwrite it
+    if (setNewRestrictedAddressToRemove.count(newRestricted)) {
+        setNewRestrictedAddressToRemove.erase(newRestricted);
+    }
+
+    setNewRestrictedAddressToRemove.insert(newRestricted);
+
+    return true;
+}
+
+//! Changes Memory Only, this only called when adding a block to the chain
+bool CAssetsCache::AddGlobalRestricted(const std::string& assetName, const RestrictedType type)
+{
+    CAssetCacheRestrictedGlobal newGlobalRestriction(assetName, type);
+
+    // We are adding a global restriction transaction, so if the set the contains undo global restrictions,
+    // contains this global restriction, erase it
+    if (setNewRestrictedGlobalToRemove.count(newGlobalRestriction)) {
+        setNewRestrictedGlobalToRemove.erase(newGlobalRestriction);
+    }
+
+    // If the set of global restrictions to add already contains our set, overwrite it
+    if (setNewRestrictedGlobalToAdd.count(newGlobalRestriction)) {
+        setNewRestrictedGlobalToAdd.erase(newGlobalRestriction);
+    }
+
+    setNewRestrictedGlobalToAdd.insert(newGlobalRestriction);
+
+    return true;
+}
+
+//! Changes Memory Only, this is only called when undoing a block from the chain
+bool CAssetsCache::RemoveGlobalRestricted(const std::string& assetName, const RestrictedType type)
+{
+    CAssetCacheRestrictedGlobal newGlobalRestriction(assetName, type);
+
+    // We are undoing a global restriction transaction, so if the set the contains new global restrictions,
+    // contains this global restriction, erase it
+    if (setNewRestrictedGlobalToAdd.count(newGlobalRestriction)) {
+        setNewRestrictedGlobalToAdd.erase(newGlobalRestriction);
+    }
+
+    // If the set of global restrictions to undo already contains our set, overwrite it
+    if (setNewRestrictedGlobalToRemove.count(newGlobalRestriction)) {
+        setNewRestrictedGlobalToRemove.erase(newGlobalRestriction);
+    }
+
+    setNewRestrictedGlobalToRemove.insert(newGlobalRestriction);
+
+    return true;
+}
+
+//! Changes Memory Only
+bool CAssetsCache::AddRestrictedVerifier(const std::string& assetName, const std::string& verifier)
+{
+    CAssetCacheRestrictedVerifiers newVerifier(assetName, verifier);
+
+    if (setNewRestrictedVerifierToRemove.count(newVerifier))
+        setNewRestrictedVerifierToRemove.erase(newVerifier);
+
+    setNewRestrictedVerifierToAdd.insert(newVerifier);
+
+    return true;
+}
+
+//! Changes Memory Only
+bool CAssetsCache::RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier)
+{
+    CAssetCacheRestrictedVerifiers newVerifier(assetName, verifier);
+
+    if (setNewRestrictedVerifierToAdd.count(newVerifier))
+        setNewRestrictedVerifierToAdd.erase(newVerifier);
+
+    setNewRestrictedVerifierToRemove.insert(newVerifier);
+
+    return true;
+}
+
 bool CAssetsCache::DumpCacheToDatabase()
 {
     try {
@@ -2609,6 +2761,78 @@ bool CAssetsCache::Flush()
             passets->vUndoAssetAmount.emplace_back(item);
         }
 
+        for(auto &item : setNewQualifierAddressToAdd) {
+            if (passets->setNewQualifierAddressToRemove.count(item)) {
+                passets->setNewQualifierAddressToRemove.erase(item);
+            }
+
+            if (passets->setNewQualifierAddressToAdd.count(item)) {
+                passets->setNewQualifierAddressToAdd.erase(item);
+            }
+
+            passets->setNewQualifierAddressToAdd.insert(item);
+        }
+
+        for(auto &item : setNewQualifierAddressToRemove) {
+            if (passets->setNewQualifierAddressToAdd.count(item)) {
+                passets->setNewQualifierAddressToAdd.erase(item);
+            }
+
+            if (passets->setNewQualifierAddressToRemove.count(item)) {
+                passets->setNewQualifierAddressToRemove.erase(item);
+            }
+
+            passets->setNewQualifierAddressToRemove.insert(item);
+        }
+
+        for(auto &item : setNewRestrictedAddressToAdd) {
+            if (passets->setNewRestrictedAddressToRemove.count(item)) {
+                passets->setNewRestrictedAddressToRemove.erase(item);
+            }
+
+            if (passets->setNewRestrictedAddressToAdd.count(item)) {
+                passets->setNewRestrictedAddressToAdd.erase(item);
+            }
+
+            passets->setNewRestrictedAddressToAdd.insert(item);
+        }
+
+        for(auto &item : setNewRestrictedAddressToRemove) {
+            if (passets->setNewRestrictedAddressToAdd.count(item)) {
+                passets->setNewRestrictedAddressToAdd.erase(item);
+            }
+
+            if (passets->setNewRestrictedAddressToRemove.count(item)) {
+                passets->setNewRestrictedAddressToRemove.erase(item);
+            }
+
+            passets->setNewRestrictedAddressToRemove.insert(item);
+        }
+
+        for(auto &item : setNewRestrictedGlobalToAdd) {
+            if (passets->setNewRestrictedGlobalToRemove.count(item)) {
+                passets->setNewRestrictedGlobalToRemove.erase(item);
+            }
+
+            if (passets->setNewRestrictedGlobalToAdd.count(item)) {
+                passets->setNewRestrictedGlobalToAdd.erase(item);
+            }
+
+            passets->setNewRestrictedGlobalToAdd.insert(item);
+        }
+
+        for(auto &item : setNewRestrictedGlobalToRemove) {
+            if (passets->setNewRestrictedGlobalToAdd.count(item)) {
+                passets->setNewRestrictedGlobalToAdd.erase(item);
+            }
+
+            if (passets->setNewRestrictedGlobalToRemove.count(item)) {
+                passets->setNewRestrictedGlobalToRemove.erase(item);
+            }
+
+            passets->setNewRestrictedGlobalToRemove.insert(item);
+        }
+
         return true;
 
     } catch (const std::runtime_error& e) {
@@ -2653,6 +2877,8 @@ size_t CAssetsCache::GetCacheSize() const
 
     size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToAdd.size(); // CReissueAsset, Address, COutPoint, Block hash, int
     size += (80 + 40 + 32 + 32 + sizeof(int)) * setNewReissueToRemove.size(); // CReissueAsset, Address, COutPoint, Block hash, int
+
+    // TODO add the qualfier, and restricted sets into this calculation
 
     return size;
 }
