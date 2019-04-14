@@ -9,6 +9,7 @@
 
 #include "rpcconsole.h"
 #include "ui_debugwindow.h"
+#include "sendcoinsdialog.h"
 
 #include "bantablemodel.h"
 #include "clientmodel.h"
@@ -737,7 +738,19 @@ void RPCConsole::walletZaptxes1()
 /** Restart wallet with "-reindex" */
 void RPCConsole::walletReindex()
 {
-    buildParameterlist(REINDEX);
+  QString questionString = tr("Are you sure you want to reindex?");
+  questionString.append(QString("<br /><br />This process may take a few hours."));
+
+  SendConfirmationDialog confirmationDialog(tr("Confirm reindex"), questionString, 0, this);
+  confirmationDialog.exec();
+  QMessageBox::StandardButton retval = (QMessageBox::StandardButton)confirmationDialog.result();
+
+  if(retval != QMessageBox::Yes)
+  {
+      return;
+  }
+
+  buildParameterlist(REINDEX);
 }
 
 /** Build command-line parameter list for restart */
