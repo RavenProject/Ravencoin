@@ -926,8 +926,9 @@ UniValue getassetdata(const JSONRPCRequest& request)
                 "  units: (number),\n"
                 "  reissuable: (number),\n"
                 "  has_ipfs: (number),\n"
-                "  ipfs_hash: (hash) (only if has_ipfs = 1 and that data is a ipfs hash)\n"
-                "  txid_hash: (hash) (only if has_ipfs = 1 and that data is a txid hash)\n"
+                "  ipfs_hash: (hash), (only if has_ipfs = 1 and that data is a ipfs hash)\n"
+                "  txid_hash: (hash), (only if has_ipfs = 1 and that data is a txid hash)\n"
+                "  verifier_string: (string)\n"
                 "}\n"
 
                 "\nExamples:\n"
@@ -952,12 +953,18 @@ UniValue getassetdata(const JSONRPCRequest& request)
         result.push_back(Pair("units", asset.units));
         result.push_back(Pair("reissuable", asset.nReissuable));
         result.push_back(Pair("has_ipfs", asset.nHasIPFS));
+
         if (asset.nHasIPFS) {
             if (asset.strIPFSHash.size() == 32) {
                 result.push_back(Pair("txid", EncodeAssetData(asset.strIPFSHash)));
             } else {
                 result.push_back(Pair("ipfs_hash", EncodeAssetData(asset.strIPFSHash)));
             }
+        }
+
+        CNullAssetTxVerifierString verifier;
+        if (currentActiveAssetCache->GetAssetVerifierStringIfExists(asset.strName, verifier)) {
+            result.push_back(Pair("verifier_string", verifier.verifier_string));
         }
 
         return result;
@@ -1968,6 +1975,170 @@ UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
     return UpdateGlobalRestrictedAsset(request, 0);
 }
 
+UniValue listaddressqualifiers(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() !=1)
+        throw std::runtime_error(
+                "listaddressqualifiers address\n"
+                + RestrictedActivationWarning() +
+                "\nList all qualifiers assigned to an address\n"
+
+                "\nArguments:\n"
+                "1. \"address\"          (string), required) the address to list qualifier for\n"
+
+                "\nResult:\n"
+                "["
+                "\"qualifier_name\",        (string) The qualifier name\n"
+                "...,\n"
+                "]\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("listaddressqualifiers", "\"address\"")
+                + HelpExampleRpc("listaddressqualifiers", "\"address\"")
+        );
+
+    if (!prestricteddb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Restricted asset database not available");
+
+    std::string address = request.params[0].get_str();
+
+    // Check to make sure the given from address is valid
+    CTxDestination dest = DecodeDestination(address);
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid RVN address: ") + address);
+
+    std::vector<std::string> qualifiers;
+
+    if (!prestricteddb->GetAddressQualifiers(address, qualifiers)) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to search the database");
+    }
+
+    UniValue ret(UniValue::VARR);
+    for (auto item : qualifiers) {
+        ret.push_back(item);
+    }
+
+    return ret;
+}
+
+UniValue listaddressrestrictions(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() !=1)
+        throw std::runtime_error(
+                "listaddressrestrictions address\n"
+                + RestrictedActivationWarning() +
+                "\nList all assets that have frozen this address\n"
+
+                "\nArguments:\n"
+                "1. \"address\"          (string), required) the address to list restrictions for\n"
+
+                "\nResult:\n"
+                "["
+                "\"asset_name\",        (string) The restriction name\n"
+                "...,\n"
+                "]\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("listaddressrestrictions", "\"address\"")
+                + HelpExampleRpc("listaddressrestrictions", "\"address\"")
+        );
+
+    if (!prestricteddb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Restricted asset database not available");
+
+    std::string address = request.params[0].get_str();
+
+    // Check to make sure the given from address is valid
+    CTxDestination dest = DecodeDestination(address);
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid RVN address: ") + address);
+
+    std::vector<std::string> restrictions;
+
+    if (!prestricteddb->GetAddressRestrictions(address, restrictions)) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to search the database");
+    }
+
+    UniValue ret(UniValue::VARR);
+    for (auto item : restrictions) {
+        ret.push_back(item);
+    }
+
+    return ret;
+}
+
+UniValue listglobalrestrictions(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 0)
+        throw std::runtime_error(
+                "listglobalrestrictions\n"
+                + RestrictedActivationWarning() +
+                "\nList all global restricted assetse\n"
+
+
+                "\nResult:\n"
+                "["
+                "\"asset_name\", (string) The asset name\n"
+                "...,\n"
+                "]\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("listglobalrestrictions", "")
+                + HelpExampleRpc("listglobalrestrictions", "")
+        );
+
+    if (!prestricteddb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Restricted asset database not available");
+
+    std::vector<std::string> restrictions;
+
+    if (!prestricteddb->GetGlobalRestrictions(restrictions)) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to search the database");
+    }
+
+    UniValue ret(UniValue::VARR);
+    for (auto item : restrictions) {
+        ret.push_back(item);
+    }
+
+    return ret;
+}
+
+UniValue getassetverifierstring(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 1)
+        throw std::runtime_error(
+                "getassetverifierstring\n"
+                + RestrictedActivationWarning() +
+                "\nThe verifier string belong to the given asset\n"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"          (string), required) the asset_name\n"
+
+                "\nResult:\n"
+                "\"verifier_string\", (string) The verifier for the asset\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("getassetverifierstring", "\"asset_name\"")
+                + HelpExampleRpc("getassetverifierstring", "\"asset_name\"")
+        );
+
+    if (!prestricteddb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Restricted asset database not available");
+
+    if (!passets) {
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Assets cache not available");
+    }
+
+
+    std::string asset_name = request.params[0].get_str();
+
+    CNullAssetTxVerifierString verifier;
+    if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier))
+        return "Verifier not found for asset " + asset_name;
+
+    return verifier.verifier_string;
+}
 
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
@@ -1991,7 +2162,11 @@ static const CRPCCommand commands[] =
     { "restricted assets",   "freezeaddress",              &freezeaddress,              {"asset_name", "address", "change_address"}},
     { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address"}},
     { "restricted assets",   "freezerestrictedasset",      &freezerestrictedasset,      {"asset_name", "change_address"}},
-    { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address"}}
+    { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address"}},
+    { "restricted assets",   "listaddressqualifiers",      &listaddressqualifiers,      {"address"}},
+    { "restricted assets",   "listaddressrestrictions",    &listaddressrestrictions,    {"address"}},
+    { "restricted assets",   "listglobalrestrictions",     &listglobalrestrictions,     {}},
+    { "restricted assets",   "getassetverifierstring",     &getassetverifierstring,     {"asset_name"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

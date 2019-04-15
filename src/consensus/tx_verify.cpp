@@ -248,76 +248,82 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
 
         // Check for transfers that don't meet the assets units only if the assetCache is not null
         if (AreAssetsDeployed() && isAsset) {
-            if (assetCache) {
-                // Get the transfer transaction data from the scriptPubKey
-                if (nType == TX_TRANSFER_ASSET) {
-                    CAssetTransfer transfer;
-                    std::string address;
-                    if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
-                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
+            // Get the transfer transaction data from the scriptPubKey
+            if (nType == TX_TRANSFER_ASSET) {
+                CAssetTransfer transfer;
+                std::string address;
+                if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-bad-deserialize");
 
-                    // insert into set, so that later on we can check asset null data transactions
-                    setAssetTransferNames.insert(transfer.strName);
+                // insert into set, so that later on we can check asset null data transactions
+                setAssetTransferNames.insert(transfer.strName);
 
-                    // Check asset name validity and get type
-                    AssetType assetType;
-                    if (!IsAssetNameValid(transfer.strName, assetType)) {
-                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-name-invalid");
+                // Check asset name validity and get type
+                AssetType assetType;
+                if (!IsAssetNameValid(transfer.strName, assetType)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-name-invalid");
+                }
+
+                // Check transfer asset amount > 0
+                if (AreMessagingDeployed()) {
+                    if (transfer.nAmount <= 0) {
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-amount-must-be-greater-than-zero");
                     }
+                }
 
-                    // Check transfer asset amount > 0
-                    if (AreMessagingDeployed()) {
-                        if (transfer.nAmount <= 0) {
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-amount-must-be-greater-than-zero");
-                        }
-                    }
+                // If the transfer is an ownership asset. Check to make sure that it is OWNER_ASSET_AMOUNT
+                if (IsAssetNameAnOwner(transfer.strName)) {
+                    if (transfer.nAmount != OWNER_ASSET_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-owner-amount-was-not-1");
+                }
 
-                    // If the transfer is an ownership asset. Check to make sure that it is OWNER_ASSET_AMOUNT
-                    if (IsAssetNameAnOwner(transfer.strName)) {
-                        if (transfer.nAmount != OWNER_ASSET_AMOUNT)
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-owner-amount-was-not-1");
-                    }
+                // If the transfer is a unique asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
+                if (assetType == AssetType::UNIQUE) {
+                    if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-unique-amount-was-not-1");
+                }
 
-                    // If the transfer is a unique asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
-                    if (assetType == AssetType::UNIQUE) {
-                        if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-unique-amount-was-not-1");
-                    }
+                // If the transfer is a message channel asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
+                if (assetType == AssetType::MSGCHANNEL) {
+                    if (!AreMessagingDeployed())
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-msgchannel-before-messaging-is-active");
 
-                    // If the transfer is a message channel asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
-                    if (assetType == AssetType::MSGCHANNEL) {
-                        if (!AreMessagingDeployed())
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-msgchannel-before-messaging-is-active");
+                    if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-msgchannel-amount-was-not-1");
+                }
 
-                        if (transfer.nAmount != UNIQUE_ASSET_AMOUNT)
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-msgchannel-amount-was-not-1");
-                    }
+                // If the transfer is a restricted channel asset.
+                if (assetType == AssetType::RESTRICTED) {
+                    if (!AreRestrictedAssetsDeployed())
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-restricted-before-it-is-active");
 
-                    // If the transfer is a restricted channel asset.
-                    if (assetType == AssetType::RESTRICTED) {
-                        if (!AreRestrictedAssetsDeployed())
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-restricted-before-it-is-active");
+                    // TODO, check the destination address, and make sure that the restricted asset can be sent to it
+                }
 
-                        // TODO, check the destination address, and make sure that the restricted asset can be sent to it
-                    }
+                // If the transfer is a qualifier channel asset.
+                if (assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER) {
+                    if (!AreRestrictedAssetsDeployed())
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-before-it-is-active");
 
-                    // If the transfer is a qualifier channel asset.
-                    if (assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER) {
-                        if (!AreRestrictedAssetsDeployed())
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-before-it-is-active");
-
-                        if (transfer.nAmount < QUALIFIER_ASSET_MIN_AMOUNT || transfer.nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-amount-must be between 1 - 100");
-                    }
+                    if (transfer.nAmount < QUALIFIER_ASSET_MIN_AMOUNT || transfer.nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
+                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-amount-must be between 1 - 100");
                 }
             }
         }
     }
 
+
     if (AreRestrictedAssetsDeployed()) {
         for (auto entry: mapNullDataTxCount) {
-            if (!setAssetTransferNames.count(entry.first.first)) {
-                return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-asset-null-tx-without-asset-transfer");
+            if (entry.first.first.front() == RESTRICTED_CHAR) {
+                if (!setAssetTransferNames.count(entry.first.first + OWNER_TAG)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-restricted-asset-null-tx-without-asset-transfer");
+                }
+            } else { // must be a qualifier asset QUALIFIER_CHAR
+                if (!setAssetTransferNames.count(entry.first.first)) {
+                    return state.DoS(100, false, REJECT_INVALID,
+                                     "bad-txns-tx-contains-qualifier-asset-null-tx-without-asset-transfer");
+                }
             }
         }
 

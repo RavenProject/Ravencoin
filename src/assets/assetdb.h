@@ -12,6 +12,8 @@
 #include <map>
 #include <dbwrapper.h>
 
+const int8_t ASSET_UNDO_INCLUDES_VERIFIER_STRING = 255;
+
 class CNewAsset;
 class uint256;
 class COutPoint;
@@ -23,6 +25,9 @@ struct CBlockAssetUndo
     bool fChangedUnits;
     std::string strIPFS;
     int nUnits;
+    int8_t version;
+    bool fChangedVerifierString;
+    std::string verifierString;
 
     ADD_SERIALIZE_METHODS;
 
@@ -32,6 +37,23 @@ struct CBlockAssetUndo
         READWRITE(fChangedIPFS);
         READWRITE(strIPFS);
         READWRITE(nUnits);
+        if (ser_action.ForRead()) {
+            if (!s.empty() and s.size() >= 1) {
+                int8_t nVersionCheck;
+                ::Unserialize(s, nVersionCheck);
+
+                if (nVersionCheck == ASSET_UNDO_INCLUDES_VERIFIER_STRING) {
+                    READWRITE(fChangedVerifierString);
+                    ::Unserialize(s, fChangedVerifierString);
+                    ::Unserialize(s, verifierString);
+                }
+                version = nVersionCheck;
+            }
+        } else {
+            ::Serialize(s, ASSET_UNDO_INCLUDES_VERIFIER_STRING);
+            ::Serialize(s, fChangedVerifierString);
+            ::Serialize(s, verifierString);
+        }
     }
 };
 

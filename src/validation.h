@@ -500,12 +500,15 @@ extern CCoinsViewCache *pcoinsTip;
 extern CBlockTreeDB *pblocktree;
 
 /** RVN START */
-/** Global variable that point to the active assets database (protexted by cs_main) */
+/** Global variable that point to the active assets database (protected by cs_main) */
 extern CAssetsDB *passetsdb;
-/** Global variable that point to the active assets (protexted by cs_main) */
+/** Global variable that point to the active assets (protected by cs_main) */
 extern CAssetsCache *passets;
-/** Global variable that point to the assets LRU Cache (protexted by cs_main) */
+/** Global variable that point to the assets LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
+
+/** Global variable to points to the asseet verifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, CNullAssetTxVerifierString> *passetVerifierCache;
 
 extern CLRUCache<std::string, CMessage> *pMessagesCache;
 extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
