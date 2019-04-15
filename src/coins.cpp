@@ -136,12 +136,58 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 if (!assetsCache->AddReissueAsset(reissue, strAddress, COutPoint(txid, reissueIndex)))
                     error("%s: Failed to reissue an asset. Asset Name : %s", __func__, reissue.strName);
 
+                // Check to see if we are reissuing a restricted asset
+                bool fFoundRestrictedAsset = false;
+                AssetType type;
+                IsAssetNameValid(asset.strName, type);
+                if (type == AssetType::RESTRICTED) {
+                    CNewAsset tempRestictedAsset;
+                    if (assetsCache->GetAssetMetaDataIfExists(asset.strName, tempRestictedAsset)) {
+                        fFoundRestrictedAsset = true;
+                    }
+                }
+
                 // Set the old IPFSHash for the blockundo
                 bool fIPFSChanged = !reissue.strIPFSHash.empty();
                 bool fUnitsChanged = reissue.nUnits != -1;
-                if (fIPFSChanged || fUnitsChanged) {
+                bool fVerifierChanged = false;
+                std::string strOldVerifier = "";
+
+                // If we are reissuing a restricted asset, we need to check to see if the verifier string is being reissued
+                if (fFoundRestrictedAsset) {
+                    CNullAssetTxVerifierString verifier;
+                    // Search through all outputs until you find a restricted verifier change.
+                    for (auto index: tx.vout) {
+                        if (index.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                            CNullAssetTxVerifierString verifier;
+                            if (!AssetNullVerifierDataFromScript(index.scriptPubKey, verifier)) {
+                                error("%s: Failed to get asset null data and add it to the coins CTxOut: %s", __func__,
+                                      index.ToString());
+                                break;
+                            }
+
+                            fVerifierChanged = true;
+                            break;
+                        }
+                    }
+
+                    CNullAssetTxVerifierString oldVerifer{strOldVerifier};
+                    if (fVerifierChanged && !assetsCache->GetAssetVerifierStringIfExists(asset.strName, oldVerifer))
+                        error("%s : Failed to get asset original verifier string that is getting reissued, Asset Name: %s", __func__, asset.strName);
+
+                    if (fVerifierChanged)
+                        strOldVerifier = oldVerifer.verifier_string;
+
+                    // Add the verifier to the cache if there was one found
+                    if (fVerifierChanged && !assetsCache->AddRestrictedVerifier(asset.strName, verifier.verifier_string))
+                        error("%s : Failed at adding a restricted verifier to our cache: asset: %s, verifier : %s",
+                              asset.strName, verifier.verifier_string);
+                }
+
+                // If any of the following items were changed by reissuing, we need to database the old values so it can be undone correctly
+                if (fIPFSChanged || fUnitsChanged || fVerifierChanged) {
                     undoAssetData->first = reissue.strName; // Asset Name
-                    undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, asset.strIPFSHash, asset.units}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
+                    undoAssetData->second = CBlockAssetUndo {fIPFSChanged, fUnitsChanged, asset.strIPFSHash, asset.units, ASSET_UNDO_INCLUDES_VERIFIER_STRING, fVerifierChanged, strOldVerifier}; // ipfschanged, unitchanged, Old Assets IPFSHash, old units
                 }
             } else if (tx.IsNewUniqueAsset()) {
                 for (int n = 0; n < (int)tx.vout.size(); n++) {
@@ -195,6 +241,25 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 if (!assetsCache->AddOwnerAsset(ownerName, ownerAddress))
                     error("%s : Failed at adding a new restricted asset owner to our cache. asset: %s", __func__,
                           asset.strName);
+
+                // Find the restricted verifier string and cache it
+                CNullAssetTxVerifierString verifier;
+                // Search through all outputs until you find a restricted verifier change.
+                for (auto index: tx.vout) {
+                    if (index.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                        CNullAssetTxVerifierString verifier;
+                        if (!AssetNullVerifierDataFromScript(index.scriptPubKey, verifier))
+                            error("%s: Failed to get asset null data and add it to the coins CTxOut: %s", __func__,
+                                  index.ToString());
+
+                        // Add the verifier to the cache
+                        if (!assetsCache->AddRestrictedVerifier(asset.strName, verifier.verifier_string))
+                            error("%s : Failed at adding a restricted verifier to our cache: asset: %s, verifier : %s",
+                                  asset.strName, verifier.verifier_string);
+
+                        break;
+                    }
+                }
             }
         }
     }
@@ -267,6 +332,29 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                                 }
                             }
                         }
+                    }
+                }
+
+                CScript script = tx.vout[i].scriptPubKey;
+                if (script.IsNullAsset()) {
+                    if (script.IsNullAssetTxDataScript()) {
+                        CNullAssetTxData data;
+                        std::string address;
+                        AssetNullDataFromScript(script, data, address);
+
+                        AssetType type;
+                        IsAssetNameValid(data.asset_name, type);
+
+                        if (type == AssetType::RESTRICTED) {
+                            assetsCache->AddRestrictedAddress(data.asset_name, address, data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS);
+                        } else if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                            assetsCache->AddQualifierAddress(data.asset_name, address, data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER);
+                        }
+                    } else if (script.IsNullGlobalRestrictionAssetTxDataScript()) {
+                        CNullAssetTxData data;
+                        GlobalAssetNullDataFromScript(script, data);
+
+                        assetsCache->AddGlobalRestricted(data.asset_name, data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE);
                     }
                 }
             }

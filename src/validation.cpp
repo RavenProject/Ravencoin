@@ -208,6 +208,8 @@ CLRUCache<std::string, int> *pMessageSubscribedChannelsCache = nullptr;
 CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
+
+CLRUCache<std::string, CNullAssetTxVerifierString> *passetVerifierCache = nullptr;
 CRestrictedDB *prestricteddb = nullptr;
 
 enum FlushStateMode {
@@ -1719,7 +1721,6 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
         std::vector<int> vAssetTxIndex;
         std::vector<int> vNullAssetTxIndex;
         if (fAddressIndex) {
-
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
                 const CTxOut &out = tx.vout[k];
 
@@ -1776,6 +1777,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
 
         // Check that all outputs are available and match the outputs in the block itself
         // exactly.
+        int indexOfRestrictedAssetVerifierString = -1;
         for (size_t o = 0; o < tx.vout.size(); o++) {
             if (!tx.vout[o].scriptPubKey.IsUnspendable()) {
                 COutPoint out(hash, o);
@@ -1796,8 +1798,13 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
             } else {
                 if(AreRestrictedAssetsDeployed()) {
                     if (assetsCache) {
-                        if (tx.vout[o].scriptPubKey.IsNullAsset())
-                            vNullAssetTxIndex.emplace_back(o);
+                        if (tx.vout[o].scriptPubKey.IsNullAsset()) {
+                            if (tx.vout[o].scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                                indexOfRestrictedAssetVerifierString = o;
+                            } else {
+                                vNullAssetTxIndex.emplace_back(o);
+                            }
+                        }
                     }
                 }
             }
@@ -1851,8 +1858,6 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             return DISCONNECT_FAILED;
                         }
                     }
-
-                    // TODO, if there was a reissue of a restricted asset in the transaction, the verifier string could be changed
                 } else if (tx.IsNewUniqueAsset()) {
                     for (int n = 0; n < (int)tx.vout.size(); n++) {
                         auto out = tx.vout[n];
@@ -1935,6 +1940,22 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         error("%s : Failed to Remove Restricted Owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
                     }
+
+                    if (indexOfRestrictedAssetVerifierString < 0) {
+                        error("%s : Failed to find the restricted asset verifier string index from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    CNullAssetTxVerifierString verifier;
+                    if (!AssetNullVerifierDataFromScript(tx.vout[indexOfRestrictedAssetVerifierString].scriptPubKey, verifier)) {
+                        error("%s : Failed to get the restricted asset verifier string from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (!assetsCache->RemoveRestrictedVerifier(asset.strName, verifier.verifier_string)){
+                        error("%s : Failed to Remove Restricted Verifier from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -2012,16 +2033,8 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                                 return DISCONNECT_FAILED;
                             }
                         } else if (script.IsNullAssetVerifierTxDataScript()) {
-                            CNullAssetTxVerifierString data;
-                            if (!AssetNullVerifierDataFromScript(script, data)) {
-                                error("%s : Failed to get verifier null asset data from transaction. CTxOut : %s", __func__,
-                                      tx.vout[index].ToString());
-                                return DISCONNECT_FAILED;
-                            }
-
-                            if (!assetsCache->RemoveRestrictedVerifier(data.asset_name, data.verifier))
-
-                            // TODO remove the verifier null tx data from the cache
+                            // These are handled in the undo restricted asset issuance, and restricted asset reissuance
+                            continue;
                         }
                     }
                 }

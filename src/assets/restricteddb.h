@@ -22,9 +22,9 @@ public:
     bool EraseVerifier(const std::string& assetName);
 
     // Database of Addresses and the Tag that are assigned to them
-    bool WriteAddressTag(const std::string& address, const std::string& tag);
-    bool ReadAddressTag(const std::string& address, const std::string& tag);
-    bool EraseAddressTag(const std::string& address, const std::string& tag);
+    bool WriteAddressQualifier(const std::string &address, const std::string &tag);
+    bool ReadAddressQualifier(const std::string &address, const std::string &tag);
+    bool EraseAddressQualifier(const std::string &address, const std::string &tag);
 
     // Database of Blacklist addresses
     bool WriteRestrictedAddress(const std::string& address, const std::string& assetName);
@@ -39,6 +39,10 @@ public:
     // Write / Read Database flags
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
+
+    bool GetAddressQualifiers(std::string& address, std::vector<std::string>& qualifiers);
+    bool GetAddressRestrictions(std::string& address, std::vector<std::string>& restrictions);
+    bool GetGlobalRestrictions(std::vector<std::string>& restrictions);
 
     bool Flush();
 };

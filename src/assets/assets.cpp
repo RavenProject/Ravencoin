@@ -2109,6 +2109,8 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
     assetData.nAmount -= reissue.nAmount;
     assetData.nReissuable = 1;
 
+    bool fVerifierStringChanged = false;
+    std::string verifierString = "";
     // Find the ipfs hash in the undoblock data and restore the ipfs hash to its previous hash
     for (auto undoItem : vUndoIPFS) {
         if (undoItem.first == reissue.strName) {
@@ -2118,6 +2120,11 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
                 assetData.units = undoItem.second.nUnits;
             if (assetData.strIPFSHash == "")
                 assetData.nHasIPFS = 0;
+            if (undoItem.second.fChangedVerifierString) {
+                fVerifierStringChanged = true;
+                verifierString = undoItem.second.verifierString;
+
+            }
             break;
         }
     }
@@ -2130,6 +2137,12 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
         setNewReissueToAdd.erase(reissueAsset);
 
     setNewReissueToRemove.insert(reissueAsset);
+
+    // If the verifier string was changed by this reissue, undo the change
+    if (fVerifierStringChanged) {
+        mapReissuedVerifierStrings[assetData.strName] = verifierString;
+        RemoveRestrictedVerifier(assetData.strName, verifierString);
+    }
 
     if (fAssetIndex) {
         // Get the best amount form the database or dirty cache
@@ -2201,7 +2214,7 @@ bool CAssetsCache::RemoveTransfer(const CAssetTransfer &transfer, const std::str
 }
 
 //! Changes Memory Only, this only called when adding a block to the chain
-bool CAssetsCache::AddQualifierAddress(const std::string& assetName, std::string& address, QualifierType type)
+bool CAssetsCache::AddQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType type)
 {
     CAssetCacheQualifierAddress newQualifier(assetName, address, type);
 
@@ -2330,6 +2343,7 @@ bool CAssetsCache::RemoveGlobalRestricted(const std::string& assetName, const Re
 //! Changes Memory Only
 bool CAssetsCache::AddRestrictedVerifier(const std::string& assetName, const std::string& verifier)
 {
+    // Insert the reissue information into the reissue map
     CAssetCacheRestrictedVerifiers newVerifier(assetName, verifier);
 
     if (setNewRestrictedVerifierToRemove.count(newVerifier))
@@ -2369,6 +2383,11 @@ bool CAssetsCache::DumpCacheToDatabase()
 
             if (dirty) {
                 return error("%s : %s", __func__, message);
+            }
+
+            if (!prestricteddb->EraseVerifier(newAsset.asset.strName)) {
+                dirty = true;
+                message = "_Failed Erasing verifier of new asset removal data from database";
             }
 
             if (fAssetIndex) {
@@ -2619,6 +2638,161 @@ bool CAssetsCache::DumpCacheToDatabase()
             }
         }
 
+        // Add new verifier strings for restricted assets
+        for (auto newVerifier : setNewRestrictedVerifierToAdd) {
+            auto assetName = newVerifier.assetName;
+            if (mapReissuedVerifierStrings.count(assetName)) {
+                if(!prestricteddb->WriteVerifier(assetName, mapReissuedVerifierStrings.at(assetName))) {
+                    dirty = true;
+                    message = "_Failed Writing restricted verifier to database";
+                }
+
+                if (dirty) {
+                    return error("%s : %s", __func__, message);
+                }
+
+                passetVerifierCache->Erase(assetName);
+            }
+        }
+
+        // Undo verifier string for restricted assets
+        for (auto undoVerifiers : setNewRestrictedVerifierToRemove) {
+            auto assetName = undoVerifiers.assetName;
+
+            if (mapReissuedVerifierStrings.count(assetName)) {
+                if (!prestricteddb->WriteVerifier(undoVerifiers.assetName, undoVerifiers.verifier)) {
+                    dirty = true;
+                    message = "_Failed Writing undo restricted verifer to database";
+                }
+
+                if (dirty) {
+                    return error("%s : %s", __func__, message);
+                }
+
+                passetVerifierCache->Erase(assetName);
+            }
+        }
+
+        // Add the new qualifier commands to the database
+        for (auto newQualifierAddress : setNewQualifierAddressToAdd) {
+            if (newQualifierAddress.type == QualifierType::REMOVE_QUALIFIER) {
+                if (!prestricteddb->EraseAddressQualifier(newQualifierAddress.address, newQualifierAddress.assetName)) {
+                    dirty = true;
+                    message = "_Failed Erasing qualifier address from database";
+                }
+            } else if (newQualifierAddress.type == QualifierType::ADD_QUALIFIER) {
+                if (!prestricteddb->WriteAddressQualifier(newQualifierAddress.address, newQualifierAddress.assetName))
+                {
+                    dirty = true;
+                    message = "_Failed Writing qualifier address to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
+        // Undo the qualifier commands
+        for (auto undoQualifierAddress : setNewQualifierAddressToRemove) {
+            if (undoQualifierAddress.type == QualifierType::REMOVE_QUALIFIER) { // If we are undoing a removal, we write the data to database
+                if (!prestricteddb->WriteAddressQualifier(undoQualifierAddress.address, undoQualifierAddress.assetName)) {
+                    dirty = true;
+                    message = "_Failed undoing a removal of a qualifier address from database";
+                }
+            } else if (undoQualifierAddress.type == QualifierType::ADD_QUALIFIER) { // If we are undoing an addition, we remove the data from the database
+                if (!prestricteddb->EraseAddressQualifier(undoQualifierAddress.address, undoQualifierAddress.assetName))
+                {
+                    dirty = true;
+                    message = "_Failed undoing a addition of a qualifier address to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
+        // Add new restricted address commands
+        for (auto newRestrictedAddress : setNewRestrictedAddressToAdd) {
+            if (newRestrictedAddress.type == RestrictedType::UNFREEZE_ADDRESS) {
+                if (!prestricteddb->EraseRestrictedAddress(newRestrictedAddress.address, newRestrictedAddress.assetName)) {
+                    dirty = true;
+                    message = "_Failed Erasing restricted address from database";
+                }
+            } else if (newRestrictedAddress.type == RestrictedType::FREEZE_ADDRESS) {
+                if (!prestricteddb->WriteRestrictedAddress(newRestrictedAddress.address, newRestrictedAddress.assetName))
+                {
+                    dirty = true;
+                    message = "_Failed Writing restricted address to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
+        // Undo the qualifier addresses from database
+        for (auto undoRestrictedAddress : setNewRestrictedAddressToRemove) {
+            if (undoRestrictedAddress.type == RestrictedType::UNFREEZE_ADDRESS) { // If we are undoing an unfreeze, we need to freeze the address
+                if (!prestricteddb->WriteRestrictedAddress(undoRestrictedAddress.address, undoRestrictedAddress.assetName)) {
+                    dirty = true;
+                    message = "_Failed undoing a removal of a restricted address from database";
+                }
+            } else if (undoRestrictedAddress.type == RestrictedType::FREEZE_ADDRESS) { // If we are undoing a freeze, we need to unfreeze the address
+                if (!prestricteddb->EraseRestrictedAddress(undoRestrictedAddress.address, undoRestrictedAddress.assetName))
+                {
+                    dirty = true;
+                    message = "_Failed undoing a addition of a restricted address to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
+        // Add new global restriction commands
+        for (auto newGlobalRestriction : setNewRestrictedGlobalToAdd) {
+            if (newGlobalRestriction.type == RestrictedType::GLOBAL_UNFREEZE) {
+                if (!prestricteddb->EraseGlobalRestriction(newGlobalRestriction.assetName)) {
+                    dirty = true;
+                    message = "_Failed Erasing global restriction from database";
+                }
+            } else if (newGlobalRestriction.type == RestrictedType::GLOBAL_FREEZE) {
+                if (!prestricteddb->WriteGlobalRestriction(newGlobalRestriction.assetName))
+                {
+                    dirty = true;
+                    message = "_Failed Writing global restriction to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
+        // Undo the global restriction commands
+        for (auto undoGlobalRestriction : setNewRestrictedGlobalToRemove) {
+            if (undoGlobalRestriction.type == RestrictedType::GLOBAL_UNFREEZE) { // If we are undoing an global unfreeze, we need to write a global freeze
+                if (!prestricteddb->WriteGlobalRestriction(undoGlobalRestriction.assetName)) {
+                    dirty = true;
+                    message = "_Failed undoing a global unfreeze of a restricted asset from database";
+                }
+            } else if (undoGlobalRestriction.type == RestrictedType::GLOBAL_FREEZE) { // If we are undoing a global freeze, erase the freeze from the database
+                if (!prestricteddb->EraseGlobalRestriction(undoGlobalRestriction.assetName))
+                {
+                    dirty = true;
+                    message = "_Failed undoing a global freeze of a restricted asset to database";
+                }
+            }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+        }
+
         if (fAssetIndex) {
             // Undo the asset spends by updating there balance in the database
             for (auto undoSpend : vUndoAssetAmount) {
@@ -2832,6 +3006,33 @@ bool CAssetsCache::Flush()
 
             passets->setNewRestrictedGlobalToRemove.insert(item);
         }
+
+        for (auto &item : setNewRestrictedVerifierToAdd) {
+            if (passets->setNewRestrictedVerifierToRemove.count(item)) {
+                passets->setNewRestrictedVerifierToRemove.erase(item);
+            }
+
+            if (passets->setNewRestrictedVerifierToAdd.count(item)) {
+                passets->setNewRestrictedVerifierToAdd.erase(item);
+            }
+
+            passets->setNewRestrictedVerifierToAdd.insert(item);
+        }
+
+        for (auto &item : setNewRestrictedVerifierToRemove) {
+            if (passets->setNewRestrictedVerifierToAdd.count(item)) {
+                passets->setNewRestrictedVerifierToAdd.erase(item);
+            }
+
+            if (passets->setNewRestrictedVerifierToRemove.count(item)) {
+                passets->setNewRestrictedVerifierToRemove.erase(item);
+            }
+
+            passets->setNewRestrictedVerifierToRemove.insert(item);
+        }
+
+        for(auto &item : mapReissuedVerifierStrings)
+            passets->mapReissuedVerifierStrings[item.first] = item.second;
 
         return true;
 
@@ -4208,7 +4409,6 @@ bool CNullAssetTxVerifierString::IsValid(std::string &strError, bool fForceCheck
         // TODO check to make sure the verifier string contains valid qualifier asset names
     }
 
-
     return true;
 }
 
@@ -4220,4 +4420,66 @@ void CNullAssetTxVerifierString::ConstructTransaction(CScript &script) const
     std::vector<unsigned char> vchMessage;
     vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
     script << OP_RVN_ASSET << OP_RESERVED << ToByteVector(vchMessage);
+}
+
+bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifierString)
+{
+    // Check the map that contains the reissued verifier data. If it is in this map, it hasn't been saved to disk yet
+    if (mapReissuedVerifierStrings.count(name)) {
+        verifierString.verifier_string = mapReissuedVerifierStrings.at(name);
+        return true;
+    }
+
+    // Check the map that contains the reissued asset data. If it is in this map, it hasn't been saved to disk yet
+    if (passets->mapReissuedVerifierStrings.count(name)) {
+        verifierString.verifier_string = passets->mapReissuedVerifierStrings.at(name);
+        return true;
+    }
+
+    // Create objects that will be used to check the dirty cache
+    CAssetCacheRestrictedVerifiers tempCacheVerifier {name, ""};
+
+    // Check the dirty caches first and see if it was recently added or removed
+    if (setNewRestrictedVerifierToRemove.count(tempCacheVerifier)) {
+        LogPrintf("%s : Found in new verifier to Remove - Returning False\n", __func__);
+        return false;
+    }
+
+    // Check the dirty caches first and see if it was recently added or removed
+    if (passets->setNewRestrictedVerifierToRemove.count(tempCacheVerifier)) {
+        LogPrintf("%s : Found in new verifer to Remove - Returning False\n", __func__);
+        return false;
+    }
+
+    auto setIterator = setNewRestrictedVerifierToAdd.find(tempCacheVerifier);
+    if (setIterator != setNewRestrictedVerifierToAdd.end()) {
+        verifierString.verifier_string = setIterator->verifier;
+        return true;
+    }
+
+    setIterator = passets->setNewRestrictedVerifierToAdd.find(tempCacheVerifier);
+    if (setIterator != passets->setNewRestrictedVerifierToAdd.end()) {
+        verifierString.verifier_string = setIterator->verifier;
+        return true;
+    }
+
+    // Check the cache, if it doesn't exist in the cache. Try and read it from database
+    if (passetVerifierCache) {
+        if (passetVerifierCache->Exists(name)) {
+            verifierString = passetVerifierCache->Get(name);
+            return true;
+        }
+    }
+
+    if (prestricteddb && passetVerifierCache) {
+        std::string verifier;
+        if (prestricteddb->ReadVerifier(name, verifier)) {
+            verifierString.verifier_string = verifier;
+            passetVerifierCache->Put(name, verifierString);
+            return true;
+        }
+    }
+
+    LogPrintf("%s : Didn't find asset verifier string meta data anywhere. Returning False\n", __func__);
+    return false;
 }
