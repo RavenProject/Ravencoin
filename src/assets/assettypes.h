@@ -335,7 +335,6 @@ public:
     void ConstructTransaction(CScript& script) const;
 };
 
-
 /** THESE ARE ONLY TO BE USED WHEN ADDING THINGS TO THE CACHE DURING CONNECT AND DISCONNECT BLOCK */
 struct CAssetCacheNewAsset
 {
@@ -448,23 +447,22 @@ struct CAssetCacheSpendAsset
     }
 };
 
-struct CAssetCacheQualifierAddress
-{
+struct CAssetCacheQualifierAddress {
     std::string assetName;
     std::string address;
     QualifierType type;
 
-    CAssetCacheQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType& type)
-    {
+    CAssetCacheQualifierAddress(const std::string &assetName, const std::string &address, const QualifierType &type) {
         this->assetName = assetName;
         this->address = address;
         this->type = type;
     }
 
-    bool operator<(const CAssetCacheQualifierAddress& rhs) const
-    {
+    bool operator<(const CAssetCacheQualifierAddress &rhs) const {
         return assetName < rhs.assetName || (assetName == rhs.assetName && address < rhs.address);
     }
+
+    uint256 GetHash();
 };
 
 struct CAssetCacheRestrictedAddress
@@ -484,6 +482,8 @@ struct CAssetCacheRestrictedAddress
     {
         return assetName < rhs.assetName || (assetName == rhs.assetName && address < rhs.address);
     }
+
+    uint256 GetHash();
 };
 
 struct CAssetCacheRestrictedGlobal

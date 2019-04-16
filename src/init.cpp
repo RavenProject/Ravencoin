@@ -250,31 +250,56 @@ void PrepareShutdown()
         }
         delete pcoinsTip;
         pcoinsTip = nullptr;
+
         delete pcoinscatcher;
         pcoinscatcher = nullptr;
+
         delete pcoinsdbview;
         pcoinsdbview = nullptr;
+
         delete pblocktree;
         pblocktree = nullptr;
+
+        /** RVN START */
         delete passets;
         passets = nullptr;
+
         delete passetsdb;
         passetsdb = nullptr;
+
         delete passetsCache;
         passetsCache = nullptr;
+
         delete pMessagesCache;
         pMessagesCache = nullptr;
+
         delete pMessageSubscribedChannelsCache;
         pMessageSubscribedChannelsCache = nullptr;
+
         delete pMessagesSeenAddressCache;
         pMessagesSeenAddressCache = nullptr;
-        pmessagechanneldb = nullptr;
-        delete pmessagedb;
-        pmessagedb = nullptr;
+
         delete pmessagechanneldb;
         pmessagechanneldb = nullptr;
+
+        delete pmessagedb;
+        pmessagedb = nullptr;
+
+        delete passetsVerifierCache;
+        passetsVerifierCache = nullptr;
+
+        delete passetsQualifierCache;
+        passetsQualifierCache = nullptr;
+
+        delete passetsRestrictionCache;
+        passetsRestrictionCache = nullptr;
+
+        delete passetsGlobalRestrictionCache;
+        passetsGlobalRestrictionCache = nullptr;
+
         delete prestricteddb;
         prestricteddb = nullptr;
+        /** RVN END */
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -1481,46 +1506,74 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
-
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReset, dbMaxFileSize);
 
-                delete passets;
-                delete passetsdb;
-                delete passetsCache;
-                delete pmessagedb;
-                delete pmessagechanneldb;
-                delete prestricteddb;
-                passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
-                passets = new CAssetsCache();
-                passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
-                pMessagesCache = new CLRUCache<std::string, CMessage>(1000);
-                pMessageSubscribedChannelsCache = new CLRUCache<std::string, int>(1000);
-                pMessagesSeenAddressCache = new CLRUCache<std::string, int>(1000);
-                pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
-                pmessagechanneldb = new CMessageChannelDB(nBlockTreeDBCache, false, false);
-                prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset);
+                /** RVN START */
+                {
+                    // Basic assets
+                    delete passets;
+                    delete passetsdb;
+                    delete passetsCache;
+
+                    // Messaging assets
+                    delete pmessagedb;
+                    delete pmessagechanneldb;
+                    delete pMessagesCache;
+                    delete pMessagesSeenAddressCache;
+                    delete pMessageSubscribedChannelsCache;
+
+                    // Restricted assets
+                    delete prestricteddb;
+                    delete passetsVerifierCache;
+                    delete passetsQualifierCache;
+                    delete passetsRestrictionCache;
+                    delete passetsGlobalRestrictionCache;
+
+                    // Basic assets
+                    passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
+                    passets = new CAssetsCache();
+                    passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
+
+                    // Messaging assets
+                    pMessagesCache = new CLRUCache<std::string, CMessage>(1000);
+                    pMessageSubscribedChannelsCache = new CLRUCache<std::string, int>(1000);
+                    pMessagesSeenAddressCache = new CLRUCache<std::string, int>(1000);
+                    pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
+                    pmessagechanneldb = new CMessageChannelDB(nBlockTreeDBCache, false, false);
+
+                    // Restricted assets
+                    prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset);
+                    passetsVerifierCache = new CLRUCache<std::string, CNullAssetTxVerifierString>(
+                            MAX_CACHE_ASSETS_SIZE);
+                    passetsQualifierCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);
+                    passetsRestrictionCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);
+                    passetsGlobalRestrictionCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);
 
 
-                // Read for fAssetIndex to make sure that we only load asset address balances if it if true
-                pblocktree->ReadFlag("assetindex", fAssetIndex);
-                // Need to load assets before we verify the database
-                if (!passetsdb->LoadAssets()) {
-                    strLoadError = _("Failed to load Assets Database");
-                    break;
+                    // Read for fAssetIndex to make sure that we only load asset address balances if it if true
+                    pblocktree->ReadFlag("assetindex", fAssetIndex);
+                    // Need to load assets before we verify the database
+                    if (!passetsdb->LoadAssets()) {
+                        strLoadError = _("Failed to load Assets Database");
+                        break;
+                    }
+
+                    if (!passetsdb->ReadReissuedMempoolState())
+                        LogPrintf(
+                                "Database failed to load last Reissued Mempool State. Will have to start from empty state");
+
+                    LogPrintf("Loaded Assets from database without error\nCache of assets size: %d\n",
+                              passetsCache->Size());
+
+                    // Check for changed -disablemessaging state
+                    if (gArgs.GetArg("-disablemessaging", false)) {
+                        LogPrintf("Messaging is disabled\n");
+                        fMessaging = false;
+                    } else {
+                        LogPrintf("Messaging is enabled\n");
+                    }
                 }
-
-                if (!passetsdb->ReadReissuedMempoolState())
-                    LogPrintf("Database failed to load last Reissued Mempool State. Will have to start from empty state");
-
-                LogPrintf("Loaded Assets from database without error\nCache of assets size: %d\n", passetsCache->Size());
-
-                // Check for changed -disablemessaging state
-                if (gArgs.GetArg("-disablemessaging", false)) {
-                    LogPrintf("Messaging is disabled\n");
-                    fMessaging = false;
-                } else {
-                    LogPrintf("Messaging is enabled\n");
-                }
+                /** RVN END */
 
                 if (fReset) {
                     pblocktree->WriteReindexing(true);
