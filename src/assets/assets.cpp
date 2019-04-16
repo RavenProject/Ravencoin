@@ -2651,7 +2651,7 @@ bool CAssetsCache::DumpCacheToDatabase()
                     return error("%s : %s", __func__, message);
                 }
 
-                passetVerifierCache->Erase(assetName);
+                passetsVerifierCache->Erase(assetName);
             }
         }
 
@@ -2669,18 +2669,20 @@ bool CAssetsCache::DumpCacheToDatabase()
                     return error("%s : %s", __func__, message);
                 }
 
-                passetVerifierCache->Erase(assetName);
+                passetsVerifierCache->Erase(assetName);
             }
         }
 
         // Add the new qualifier commands to the database
         for (auto newQualifierAddress : setNewQualifierAddressToAdd) {
             if (newQualifierAddress.type == QualifierType::REMOVE_QUALIFIER) {
+                passetsQualifierCache->Erase(newQualifierAddress.GetHash().GetHex());
                 if (!prestricteddb->EraseAddressQualifier(newQualifierAddress.address, newQualifierAddress.assetName)) {
                     dirty = true;
                     message = "_Failed Erasing qualifier address from database";
                 }
             } else if (newQualifierAddress.type == QualifierType::ADD_QUALIFIER) {
+                passetsQualifierCache->Put(newQualifierAddress.GetHash().GetHex(), 1);
                 if (!prestricteddb->WriteAddressQualifier(newQualifierAddress.address, newQualifierAddress.assetName))
                 {
                     dirty = true;
@@ -2696,11 +2698,13 @@ bool CAssetsCache::DumpCacheToDatabase()
         // Undo the qualifier commands
         for (auto undoQualifierAddress : setNewQualifierAddressToRemove) {
             if (undoQualifierAddress.type == QualifierType::REMOVE_QUALIFIER) { // If we are undoing a removal, we write the data to database
+                passetsQualifierCache->Put(undoQualifierAddress.GetHash().GetHex(), 1);
                 if (!prestricteddb->WriteAddressQualifier(undoQualifierAddress.address, undoQualifierAddress.assetName)) {
                     dirty = true;
                     message = "_Failed undoing a removal of a qualifier address from database";
                 }
             } else if (undoQualifierAddress.type == QualifierType::ADD_QUALIFIER) { // If we are undoing an addition, we remove the data from the database
+                passetsQualifierCache->Erase(undoQualifierAddress.GetHash().GetHex());
                 if (!prestricteddb->EraseAddressQualifier(undoQualifierAddress.address, undoQualifierAddress.assetName))
                 {
                     dirty = true;
@@ -2716,11 +2720,13 @@ bool CAssetsCache::DumpCacheToDatabase()
         // Add new restricted address commands
         for (auto newRestrictedAddress : setNewRestrictedAddressToAdd) {
             if (newRestrictedAddress.type == RestrictedType::UNFREEZE_ADDRESS) {
+                passetsRestrictionCache->Erase(newRestrictedAddress.GetHash().GetHex());
                 if (!prestricteddb->EraseRestrictedAddress(newRestrictedAddress.address, newRestrictedAddress.assetName)) {
                     dirty = true;
                     message = "_Failed Erasing restricted address from database";
                 }
             } else if (newRestrictedAddress.type == RestrictedType::FREEZE_ADDRESS) {
+                passetsRestrictionCache->Put(newRestrictedAddress.GetHash().GetHex(), 1);
                 if (!prestricteddb->WriteRestrictedAddress(newRestrictedAddress.address, newRestrictedAddress.assetName))
                 {
                     dirty = true;
@@ -2736,11 +2742,13 @@ bool CAssetsCache::DumpCacheToDatabase()
         // Undo the qualifier addresses from database
         for (auto undoRestrictedAddress : setNewRestrictedAddressToRemove) {
             if (undoRestrictedAddress.type == RestrictedType::UNFREEZE_ADDRESS) { // If we are undoing an unfreeze, we need to freeze the address
+                passetsRestrictionCache->Put(undoRestrictedAddress.GetHash().GetHex(), 1);
                 if (!prestricteddb->WriteRestrictedAddress(undoRestrictedAddress.address, undoRestrictedAddress.assetName)) {
                     dirty = true;
                     message = "_Failed undoing a removal of a restricted address from database";
                 }
             } else if (undoRestrictedAddress.type == RestrictedType::FREEZE_ADDRESS) { // If we are undoing a freeze, we need to unfreeze the address
+                passetsRestrictionCache->Erase(undoRestrictedAddress.GetHash().GetHex());
                 if (!prestricteddb->EraseRestrictedAddress(undoRestrictedAddress.address, undoRestrictedAddress.assetName))
                 {
                     dirty = true;
@@ -2756,11 +2764,13 @@ bool CAssetsCache::DumpCacheToDatabase()
         // Add new global restriction commands
         for (auto newGlobalRestriction : setNewRestrictedGlobalToAdd) {
             if (newGlobalRestriction.type == RestrictedType::GLOBAL_UNFREEZE) {
+                passetsGlobalRestrictionCache->Erase(newGlobalRestriction.assetName);
                 if (!prestricteddb->EraseGlobalRestriction(newGlobalRestriction.assetName)) {
                     dirty = true;
                     message = "_Failed Erasing global restriction from database";
                 }
             } else if (newGlobalRestriction.type == RestrictedType::GLOBAL_FREEZE) {
+                passetsGlobalRestrictionCache->Put(newGlobalRestriction.assetName, 1);
                 if (!prestricteddb->WriteGlobalRestriction(newGlobalRestriction.assetName))
                 {
                     dirty = true;
@@ -2776,11 +2786,13 @@ bool CAssetsCache::DumpCacheToDatabase()
         // Undo the global restriction commands
         for (auto undoGlobalRestriction : setNewRestrictedGlobalToRemove) {
             if (undoGlobalRestriction.type == RestrictedType::GLOBAL_UNFREEZE) { // If we are undoing an global unfreeze, we need to write a global freeze
+                passetsGlobalRestrictionCache->Put(undoGlobalRestriction.assetName, 1);
                 if (!prestricteddb->WriteGlobalRestriction(undoGlobalRestriction.assetName)) {
                     dirty = true;
                     message = "_Failed undoing a global unfreeze of a restricted asset from database";
                 }
             } else if (undoGlobalRestriction.type == RestrictedType::GLOBAL_FREEZE) { // If we are undoing a global freeze, erase the freeze from the database
+                passetsGlobalRestrictionCache->Erase(undoGlobalRestriction.assetName);
                 if (!prestricteddb->EraseGlobalRestriction(undoGlobalRestriction.assetName))
                 {
                     dirty = true;
@@ -4454,22 +4466,163 @@ bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNull
     }
 
     // Check the cache, if it doesn't exist in the cache. Try and read it from database
-    if (passetVerifierCache) {
-        if (passetVerifierCache->Exists(name)) {
-            verifierString = passetVerifierCache->Get(name);
+    if (passetsVerifierCache) {
+        if (passetsVerifierCache->Exists(name)) {
+            verifierString = passetsVerifierCache->Get(name);
             return true;
         }
     }
 
-    if (prestricteddb && passetVerifierCache) {
+    if (prestricteddb && passetsVerifierCache) {
         std::string verifier;
         if (prestricteddb->ReadVerifier(name, verifier)) {
             verifierString.verifier_string = verifier;
-            passetVerifierCache->Put(name, verifierString);
+            passetsVerifierCache->Put(name, verifierString);
             return true;
         }
     }
 
     LogPrintf("%s : Didn't find asset verifier string meta data anywhere. Returning False\n", __func__);
+    return false;
+}
+
+bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address)
+{
+    // Create cache object that will be used to check the dirty caches
+    CAssetCacheQualifierAddress cachedQualifierAddress(qualifier_name, address, QualifierType::ADD_QUALIFIER);
+
+    // Check the dirty caches first and see if it was recently added or removed
+    auto setIterator = setNewQualifierAddressToRemove.find(cachedQualifierAddress);
+    if (setIterator != setNewQualifierAddressToRemove.end()) {
+        // Undoing a remove qualifier command, means that we are adding the qualifier to the address
+        return setIterator->type == QualifierType::REMOVE_QUALIFIER;
+    }
+
+    setIterator = passets->setNewQualifierAddressToRemove.find(cachedQualifierAddress);
+    if (setIterator != passets->setNewQualifierAddressToRemove.end()) {
+        // Undoing a remove qualifier command, means that we are adding the qualifier to the address
+        return setIterator->type == QualifierType::REMOVE_QUALIFIER;
+    }
+
+    setIterator = setNewQualifierAddressToAdd.find(cachedQualifierAddress);
+    if (setIterator != setNewQualifierAddressToAdd.end()) {
+        // Return true if we are adding the qualifier, and false if we are removing it
+        return setIterator->type == QualifierType::ADD_QUALIFIER;
+    }
+
+    setIterator = passets->setNewQualifierAddressToAdd.find(cachedQualifierAddress);
+    if (setIterator != passets->setNewQualifierAddressToAdd.end()) {
+        // Return true if we are adding the qualifier, and false if we are removing it
+        return setIterator->type == QualifierType::ADD_QUALIFIER;
+    }
+
+    // Check the cache, if it doesn't exist in the cache. Try and read it from database
+    if (passetsQualifierCache) {
+        if (passetsQualifierCache->Exists(cachedQualifierAddress.GetHash().GetHex())) {
+            return true;
+        } else {
+            if (prestricteddb) {
+                if (prestricteddb->ReadAddressQualifier(address, qualifier_name)) {
+                    passetsQualifierCache->Put(cachedQualifierAddress.GetHash().GetHex(), 1);
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name, const std::string& address)
+{
+    // Create cache object that will be used to check the dirty caches (type, doesn't matter in this search)
+    CAssetCacheRestrictedAddress cachedRestrictedAddress(restricted_name, address, RestrictedType::FREEZE_ADDRESS);
+
+    // Check the dirty caches first and see if it was recently added or removed
+    auto setIterator = setNewRestrictedAddressToRemove.find(cachedRestrictedAddress);
+    if (setIterator != setNewRestrictedAddressToRemove.end()) {
+        // Undoing a unfreeze, means that we are adding back a freeze
+        return setIterator->type == RestrictedType ::UNFREEZE_ADDRESS;
+    }
+
+    setIterator = passets->setNewRestrictedAddressToRemove.find(cachedRestrictedAddress);
+    if (setIterator != passets->setNewRestrictedAddressToRemove.end()) {
+        // Undoing a unfreeze, means that we are adding back a freeze
+        return setIterator->type == RestrictedType::UNFREEZE_ADDRESS;
+    }
+
+    setIterator = setNewRestrictedAddressToAdd.find(cachedRestrictedAddress);
+    if (setIterator != setNewRestrictedAddressToAdd.end()) {
+        // Return true if we are freezing the address
+        return setIterator->type == RestrictedType::FREEZE_ADDRESS;
+    }
+
+    setIterator = passets->setNewRestrictedAddressToAdd.find(cachedRestrictedAddress);
+    if (setIterator != passets->setNewRestrictedAddressToAdd.end()) {
+        // Return true if we are freezing the address
+        return setIterator->type == RestrictedType::FREEZE_ADDRESS;
+    }
+
+    // Check the cache, if it doesn't exist in the cache. Try and read it from database
+    if (passetsRestrictionCache) {
+        if (passetsRestrictionCache->Exists(cachedRestrictedAddress.GetHash().GetHex())) {
+            return true;
+        } else {
+            if (prestricteddb) {
+                if (prestricteddb->ReadRestrictedAddress(address, restricted_name)) {
+                    passetsRestrictionCache->Put(cachedRestrictedAddress.GetHash().GetHex(), 1);
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name)
+{
+    // Create cache object that will be used to check the dirty caches (type, doesn't matter in this search)
+    CAssetCacheRestrictedGlobal cachedRestrictedGlobal(restricted_name, RestrictedType::GLOBAL_FREEZE);
+
+    // Check the dirty caches first and see if it was recently added or removed
+    auto setIterator = setNewRestrictedGlobalToRemove.find(cachedRestrictedGlobal);
+    if (setIterator != setNewRestrictedGlobalToRemove.end()) {
+        // Undoing a removal of a global unfreeze, means that is will become frozen
+        return setIterator->type == RestrictedType ::GLOBAL_UNFREEZE;
+    }
+
+    setIterator = passets->setNewRestrictedGlobalToRemove.find(cachedRestrictedGlobal);
+    if (setIterator != passets->setNewRestrictedGlobalToRemove.end()) {
+        // Undoing a removal of a global unfreeze, means that is will become frozen
+        return setIterator->type == RestrictedType::GLOBAL_UNFREEZE;
+    }
+
+    setIterator = setNewRestrictedGlobalToAdd.find(cachedRestrictedGlobal);
+    if (setIterator != setNewRestrictedGlobalToAdd.end()) {
+        // Return true if we are adding a freeze command
+        return setIterator->type == RestrictedType::GLOBAL_FREEZE;
+    }
+
+    setIterator = passets->setNewRestrictedGlobalToAdd.find(cachedRestrictedGlobal);
+    if (setIterator != passets->setNewRestrictedGlobalToAdd.end()) {
+        // Return true if we are adding a freeze command
+        return setIterator->type == RestrictedType::GLOBAL_FREEZE;
+    }
+
+    // Check the cache, if it doesn't exist in the cache. Try and read it from database
+    if (passetsGlobalRestrictionCache) {
+        if (passetsGlobalRestrictionCache->Exists(cachedRestrictedGlobal.assetName)) {
+            return true;
+        } else {
+            if (prestricteddb) {
+                if (prestricteddb->ReadGlobalRestriction(restricted_name)) {
+                    passetsGlobalRestrictionCache->Put(cachedRestrictedGlobal.assetName, 1);
+                    return true;
+                }
+            }
+        }
+    }
+
     return false;
 }

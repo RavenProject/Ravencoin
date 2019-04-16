@@ -209,7 +209,10 @@ CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
 
-CLRUCache<std::string, CNullAssetTxVerifierString> *passetVerifierCache = nullptr;
+CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsRestrictionCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache = nullptr;
 CRestrictedDB *prestricteddb = nullptr;
 
 enum FlushStateMode {

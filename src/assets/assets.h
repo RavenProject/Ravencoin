@@ -276,7 +276,7 @@ public :
     bool CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address);
 
     //! Return true if the address is marked as frozen
-    bool CheckForAddressFrozen(const std::string &restricted_name, const std::string& address);
+    bool CheckForAddressRestriction(const std::string &restricted_name, const std::string& address);
 
     //! Return true if the restricted asset is globally freezing trading
     bool CheckForGlobalRestriction(const std::string &restricted_name);

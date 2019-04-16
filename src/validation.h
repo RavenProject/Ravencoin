@@ -500,22 +500,46 @@ extern CCoinsViewCache *pcoinsTip;
 extern CBlockTreeDB *pblocktree;
 
 /** RVN START */
+
 /** Global variable that point to the active assets database (protected by cs_main) */
 extern CAssetsDB *passetsdb;
+
 /** Global variable that point to the active assets (protected by cs_main) */
 extern CAssetsCache *passets;
-/** Global variable that point to the assets LRU Cache (protected by cs_main) */
+
+/** Global variable that point to the assets metadata LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
 
-/** Global variable to points to the asseet verifier LRU Cache (protected by cs_main) */
-extern CLRUCache<std::string, CNullAssetTxVerifierString> *passetVerifierCache;
-
+/** Global variable that points to the subscribed channel LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, CMessage> *pMessagesCache;
+
+/** Global variable that points to the subscribed channel LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
+
+/** Global variable that points to the address seen LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
+
+/** Global variable that points to the messages database (protected by cs_main) */
 extern CMessageDB *pmessagedb;
+
+/** Global variable that points to the message channel database (protected by cs_main) */
 extern CMessageChannelDB *pmessagechanneldb;
+
+/** Global variable that points to the active restricted asset database (protected by cs_main) */
 extern CRestrictedDB *prestricteddb;
+
+/** Global variable that points to the asset verifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache;
+
+/** Global variable that points to the asset address qualifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsQualifierCache; // hash(address,qualifier_name) ->int8_t
+
+/** Global variable that points to the asset address restriction LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsRestrictionCache; // hash(address,qualifier_name) ->int8_t
+
+/** Global variable that points to the global asset restriction LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache;
+
 /** RVN END */
 
 /**
