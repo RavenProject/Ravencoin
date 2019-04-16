@@ -112,35 +112,35 @@ public :
     std::vector<CAssetCacheUndoAssetAmount> vUndoAssetAmount;
     std::vector<CAssetCacheSpendAsset> vSpentAssets;
 
-    // New Assets Caches
+    //! New Assets Caches
     std::set<CAssetCacheNewAsset> setNewAssetsToRemove;
     std::set<CAssetCacheNewAsset> setNewAssetsToAdd;
 
-    // New Reissue Caches
+    //! New Reissue Caches
     std::set<CAssetCacheReissueAsset> setNewReissueToRemove;
     std::set<CAssetCacheReissueAsset> setNewReissueToAdd;
 
-    // Ownership Assets Caches
+    //! Ownership Assets Caches
     std::set<CAssetCacheNewOwner> setNewOwnerAssetsToAdd;
     std::set<CAssetCacheNewOwner> setNewOwnerAssetsToRemove;
 
-    // Transfer Assets Caches
+    //! Transfer Assets Caches
     std::set<CAssetCacheNewTransfer> setNewTransferAssetsToAdd;
     std::set<CAssetCacheNewTransfer> setNewTransferAssetsToRemove;
 
-    // Qualfier Address Asset Caches
+    //! Qualfier Address Asset Caches
     std::set<CAssetCacheQualifierAddress> setNewQualifierAddressToAdd;
     std::set<CAssetCacheQualifierAddress> setNewQualifierAddressToRemove;
 
-    // Restricted Address Asset Caches
+    //! Restricted Address Asset Caches
     std::set<CAssetCacheRestrictedAddress> setNewRestrictedAddressToAdd;
     std::set<CAssetCacheRestrictedAddress> setNewRestrictedAddressToRemove;
 
-    // Restricted Global Asset Caches
+    //! Restricted Global Asset Caches
     std::set<CAssetCacheRestrictedGlobal> setNewRestrictedGlobalToAdd;
     std::set<CAssetCacheRestrictedGlobal> setNewRestrictedGlobalToRemove;
 
-    // Restricted Assets Verifier Caches
+    //! Restricted Assets Verifier Caches
     std::set<CAssetCacheRestrictedVerifiers> setNewRestrictedVerifierToAdd;
     std::set<CAssetCacheRestrictedVerifiers> setNewRestrictedVerifierToRemove;
 
@@ -152,39 +152,39 @@ public :
 
     CAssetsCache(const CAssetsCache& cache) : CAssets(cache)
     {
-        // Copy dirty cache also
+        //! Copy dirty cache also
         this->vSpentAssets = cache.vSpentAssets;
         this->vUndoAssetAmount = cache.vUndoAssetAmount;
 
-        // Transfer Caches
+        //! Transfer Caches
         this->setNewTransferAssetsToAdd = cache.setNewTransferAssetsToAdd;
         this->setNewTransferAssetsToRemove = cache.setNewTransferAssetsToRemove;
 
-        // Issue Caches
+        //! Issue Caches
         this->setNewAssetsToRemove = cache.setNewAssetsToRemove;
         this->setNewAssetsToAdd = cache.setNewAssetsToAdd;
 
-        // Reissue Caches
+        //! Reissue Caches
         this->setNewReissueToRemove = cache.setNewReissueToRemove;
         this->setNewReissueToAdd = cache.setNewReissueToAdd;
 
-        // Owner Caches
+        //! Owner Caches
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
 
-        //Qualifier Caches
+        //! Qualifier Caches
         this->setNewQualifierAddressToAdd = cache.setNewQualifierAddressToAdd;
         this->setNewQualifierAddressToRemove = cache.setNewQualifierAddressToRemove;
 
-        //Restricted Address Caches
+        //! Restricted Address Caches
         this->setNewRestrictedAddressToAdd = cache.setNewRestrictedAddressToAdd;
         this->setNewRestrictedAddressToRemove = cache.setNewRestrictedAddressToRemove;
 
-        //Restricted Global Caches
+        //! Restricted Global Caches
         this->setNewRestrictedGlobalToAdd = cache.setNewRestrictedGlobalToAdd;
         this->setNewRestrictedGlobalToRemove = cache.setNewRestrictedGlobalToRemove;
 
-        //Restricted Verifier Caches
+        //! Restricted Verifier Caches
         this->setNewRestrictedVerifierToAdd = cache.setNewRestrictedVerifierToAdd;
         this->setNewRestrictedVerifierToRemove = cache.setNewRestrictedVerifierToRemove;
     }
@@ -195,46 +195,46 @@ public :
         this->mapReissuedAssetData = cache.mapReissuedAssetData;
         this->mapReissuedVerifierStrings = cache.mapReissuedVerifierStrings;
 
-        // Copy dirty cache also
+        //! Copy dirty cache also
         this->vSpentAssets = cache.vSpentAssets;
         this->vUndoAssetAmount = cache.vUndoAssetAmount;
 
-        // Transfer Caches
+        //! Transfer Caches
         this->setNewTransferAssetsToAdd = cache.setNewTransferAssetsToAdd;
         this->setNewTransferAssetsToRemove = cache.setNewTransferAssetsToRemove;
 
-        // Issue Caches
+        //! Issue Caches
         this->setNewAssetsToRemove = cache.setNewAssetsToRemove;
         this->setNewAssetsToAdd = cache.setNewAssetsToAdd;
 
-        // Reissue Caches
+        //! Reissue Caches
         this->setNewReissueToRemove = cache.setNewReissueToRemove;
         this->setNewReissueToAdd = cache.setNewReissueToAdd;
 
-        // Owner Caches
+        //! Owner Caches
         this->setNewOwnerAssetsToAdd = cache.setNewOwnerAssetsToAdd;
         this->setNewOwnerAssetsToRemove = cache.setNewOwnerAssetsToRemove;
 
-        //Qualifier Caches
+        //! Qualifier Caches
         this->setNewQualifierAddressToAdd = cache.setNewQualifierAddressToAdd;
         this->setNewQualifierAddressToRemove = cache.setNewQualifierAddressToRemove;
 
-        //Restricted Address Caches
+        //! Restricted Address Caches
         this->setNewRestrictedAddressToAdd = cache.setNewRestrictedAddressToAdd;
         this->setNewRestrictedAddressToRemove = cache.setNewRestrictedAddressToRemove;
 
-        //Restricted Global Caches
+        //! Restricted Global Caches
         this->setNewRestrictedGlobalToAdd = cache.setNewRestrictedGlobalToAdd;
         this->setNewRestrictedGlobalToRemove = cache.setNewRestrictedGlobalToRemove;
 
-        //Restricted Verifier Caches
+        //! Restricted Verifier Caches
         this->setNewRestrictedVerifierToAdd = cache.setNewRestrictedVerifierToAdd;
         this->setNewRestrictedVerifierToRemove = cache.setNewRestrictedVerifierToRemove;
 
         return *this;
     }
 
-    // Cache only undo functions
+    //! Cache only undo functions
     bool RemoveNewAsset(const CNewAsset& asset, const std::string address);
     bool RemoveTransfer(const CAssetTransfer& transfer, const std::string& address, const COutPoint& out);
     bool RemoveOwnerAsset(const std::string& assetsName, const std::string address);
@@ -245,7 +245,7 @@ public :
     bool RemoveGlobalRestricted(const std::string& assetName, const RestrictedType type);
     bool RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier);
 
-    // Cache only add asset functions
+    //! Cache only add asset functions
     bool AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash);
     bool AddTransferAsset(const CAssetTransfer& transferAsset, const std::string& address, const COutPoint& out, const CTxOut& txOut);
     bool AddOwnerAsset(const std::string& assetsName, const std::string address);
@@ -255,17 +255,31 @@ public :
     bool AddGlobalRestricted(const std::string& assetName, const RestrictedType type);
     bool AddRestrictedVerifier(const std::string& assetName, const std::string& verifier);
 
-    // Cache only validation functions
+    //! Cache only validation functions
     bool TrySpendCoin(const COutPoint& out, const CTxOut& coin);
 
-    // Help functions
+    //! Help functions
     bool ContainsAsset(const CNewAsset& asset);
     bool ContainsAsset(const std::string& assetName);
 
+    //! Returns true if an asset with this name already exists
     bool CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck = true);
-    bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash);
+
+    //! Returns true if an asset with the name exists, and it was able to get the asset metadata from database
     bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset);
+    bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash);
+
+    //! Returns true if the Asset Verifier String was found for an asset_name
     bool GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifier);
+
+    //! Return true if the address has the given qualifier assigned to it
+    bool CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address);
+
+    //! Return true if the address is marked as frozen
+    bool CheckForAddressFrozen(const std::string &restricted_name, const std::string& address);
+
+    //! Return true if the restricted asset is globally freezing trading
+    bool CheckForGlobalRestriction(const std::string &restricted_name);
 
     //! Calculate the size of the CAssets (in bytes)
     size_t DynamicMemoryUsage() const;
@@ -280,6 +294,7 @@ public :
     //! Write asset cache data to database
     bool DumpCacheToDatabase();
 
+    //! Clear all dirty cache sets, vetors, and maps
     void ClearDirtyCache() {
 
         vUndoAssetAmount.clear();
@@ -326,7 +341,7 @@ public :
    }
 };
 
-// Functions to be used to get access to the current burn amount required for specific asset issuance transactions
+//! Functions to be used to get access to the current burn amount required for specific asset issuance transactions
 CAmount GetIssueAssetBurnAmount();
 CAmount GetReissueAssetBurnAmount();
 CAmount GetIssueSubAssetBurnAmount();
@@ -337,24 +352,38 @@ CAmount GetIssueSubQualifierAssetBurnAmount();
 CAmount GetIssueRestrictedAssetBurnAmount();
 CAmount GetBurnAmount(const AssetType type);
 CAmount GetBurnAmount(const int nType);
+
+//! Functions to be used to get access to the burn address for a given asset type issuance
 std::string GetBurnAddress(const AssetType type);
 std::string GetBurnAddress(const int nType);
 
 void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reissues, int& transfers, int& owners);
 
+//! Check is an asset name is valid, and being able to return the asset type if needed
 bool IsAssetNameValid(const std::string& name);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType);
 bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string& error);
+
+//! Check if an unique tagname is valid
 bool IsUniqueTagValid(const std::string& tag);
+
+//! Check if an asset is an owner
 bool IsAssetNameAnOwner(const std::string& name);
+
+//! Check if an asset is a message channel
 bool IsAssetNameAnMsgChannel(const std::string& name);
+
+//! Get the root name of an asset
 std::string GetParentName(const std::string& name); // Gets the parent name of a subasset TEST/TESTSUB would return TEST
+
+//! Build a unique asset buy giving the root name, and the tag name (ROOT, TAG) => ROOT#TAG
 std::string GetUniqueAssetName(const std::string& parent, const std::string& tag);
 
+//! Given a type, and an asset name, return if that name is valid based on the type
 bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::string& error);
 
-bool IsAssetUnitsValid(const CAmount& units);
-
+//! These types of asset tx, have specific metadata at certain indexes in the transaction.
+//! These functions pull data from the scripts at those indexes
 bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress);
 bool RestrictedOwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress);
@@ -364,6 +393,7 @@ bool MsgChannelAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, st
 bool QualifierAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 bool RestrictedAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 
+//! Get specific asset type metadata from the given scripts
 bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetTransfer, std::string& strAddress);
 bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, std::string& strAddress);
 bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, std::string& strAddress);
@@ -375,40 +405,55 @@ bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& asse
 bool AssetNullVerifierDataFromScript(const CScript& scriptPubKey, CNullAssetTxVerifierString& verifierData);
 bool GlobalAssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& assetData);
 
+//! Check to make sure the script contains the burn transaction
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued);
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type);
+
+// TODO, maybe remove this function and input that check into the CheckIssueBurnTx.
+//! Check to make sure the script contains the reissue burn data
 bool CheckReissueBurnTx(const CTxOut& txOut);
 
-bool CheckIssueDataTx(const CTxOut& txOut);
-bool CheckOwnerDataTx(const CTxOut& txOut);
-bool CheckReissueDataTx(const CTxOut& txOut);
-bool CheckTransferOwnerTx(const CTxOut& txOut);
+//! issue asset scripts to make sure script meets the standards
+bool CheckIssueDataTx(const CTxOut& txOut); // OP_RAVEN_ASSET RVNQ (That is a Q as in Que not an O)
+bool CheckOwnerDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNO
+bool CheckReissueDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNR
+bool CheckTransferOwnerTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNT
 
+//! Check the Encoded hash and make sure it is either an IPFS hash or a OIP hash
 bool CheckEncoded(const std::string& hash, std::string& strError);
 
+//! Checks the amount and units, and makes sure that the amount uses the correct decimals
 bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits);
 
+//! Check script and see if it matches the asset issuance template
 bool IsScriptNewAsset(const CScript& scriptPubKey);
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
+//! Check script and see if it matches the unquie issuance template
 bool IsScriptNewUniqueAsset(const CScript& scriptPubKey);
 bool IsScriptNewUniqueAsset(const CScript &scriptPubKey, int &nStartingIndex);
 
+//! Check script and see if it matches the owner issuance template
 bool IsScriptOwnerAsset(const CScript& scriptPubKey);
 bool IsScriptOwnerAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
+//! Check script and see if it matches the reissue template
 bool IsScriptReissueAsset(const CScript& scriptPubKey);
 bool IsScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
+//! Check script and see if it matches the transfer asset template
 bool IsScriptTransferAsset(const CScript& scriptPubKey);
 bool IsScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
+//! Check script and see if it matches the message channel issuance template
 bool IsScriptNewMsgChannelAsset(const CScript& scriptPubKey);
 bool IsScriptNewMsgChannelAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
+//! Check script and see if it matches the qualifier issuance template
 bool IsScriptNewQualifierAsset(const CScript& scriptPubKey);
 bool IsScriptNewQualifierAsset(const CScript &scriptPubKey, int &nStartingIndex);
 
+//! Check script and see if it matches the restricted issueance template
 bool IsScriptNewRestrictedAsset(const CScript& scriptPubKey);
 bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex);
 
@@ -430,15 +475,23 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
 /** Verifies that this wallet owns the give asset */
 bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
 
+//! Decode and Encode IPFS hashes, or OIP hashes
 std::string DecodeAssetData(std::string encoded);
 std::string EncodeAssetData(std::string decoded);
 std::string DecodeIPFS(std::string encoded);
 std::string EncodeIPFS(std::string decoded);
 
+//! Creates new asset issuance transaction
 bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string = nullptr);
 bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string = nullptr);
+
+//! Create a reissue asset transaction
 bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
+
+//! Create a transfer asset transaction
 bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData = nullptr, std::vector<CNullAssetTxData>* nullGlobalRestrictionData = nullptr);
+
+//! Send any type of asset transaction to the network
 bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey& reserveKey, std::pair<int, std::string>& error, std::string& txid);
 
 /** Helper method for extracting address bytes, asset name and amount from an asset script */
