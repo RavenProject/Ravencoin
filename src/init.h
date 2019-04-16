@@ -19,7 +19,7 @@ namespace boost
 } // namespace boost
 
 void StartShutdown();
-
+void StartRestart();
 bool ShutdownRequested();
 
 /** Interrupt threads */
@@ -66,6 +66,7 @@ bool AppInitLockDataDirectory();
  * @pre Parameters should be parsed and config file should be read, AppInitLockDataDirectory should have been called.
  */
 bool AppInitMain(boost::thread_group &threadGroup, CScheduler &scheduler);
+void PrepareShutdown();
 
 /** The help message mode determines what help message to show */
 enum HelpMessageMode

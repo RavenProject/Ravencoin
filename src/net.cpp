@@ -1647,7 +1647,7 @@ void CConnman::ThreadDNSAddressSeed()
                     int nOneDay = 24*3600;
                     CAddress addr = CAddress(CService(ip, Params().GetDefaultPort()), requiredServiceBits);
                     LogPrintf("IP: %s\n", addr.ToString());
-                    
+
                     addr.nTime = GetTime() - 3*nOneDay - GetRand(4*nOneDay); // use a random age between 3 and 7 days old
                     vAdd.push_back(addr);
                     found++;
@@ -2398,6 +2398,14 @@ public:
     }
 }
 instance_of_cnetcleanup;
+
+void CExplicitNetCleanup::callCleanup()
+{
+    // Explicit call to destructor of CNetCleanup because it's not implicitly called
+    // when the wallet is restarted from within the wallet itself.
+    CNetCleanup *tmp = new CNetCleanup();
+    delete tmp;
+}
 
 void CConnman::Interrupt()
 {
