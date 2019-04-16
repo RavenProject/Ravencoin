@@ -17,14 +17,6 @@
 
 BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
-    BOOST_AUTO_TEST_CASE(unit_validation_tests)
-    {
-        BOOST_TEST_MESSAGE("Running Unit Validation Test");
-
-        BOOST_CHECK(IsAssetUnitsValid(COIN));
-        BOOST_CHECK(IsAssetUnitsValid(CENT));
-    }
-
     BOOST_AUTO_TEST_CASE(name_validation_tests)
     {
         BOOST_TEST_MESSAGE("Running Name Validation Test");

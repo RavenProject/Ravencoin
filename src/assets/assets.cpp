@@ -3112,16 +3112,6 @@ size_t CAssetsCache::GetCacheSizeV2() const
     return size;
 }
 
-// 1, 10, 100 ... COIN
-// (0.00000001, 0.0000001, ... 1)
-bool IsAssetUnitsValid(const CAmount& units)
-{
-    for (int i = 1; i <= COIN; i *= 10) {
-        if (units == i) return true;
-    }
-    return false;
-}
-
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued)
 {
     if (type == AssetType::REISSUE || type == AssetType::VOTE || type == AssetType::OWNER || type == AssetType::RESTRICTED_OWNER || type == AssetType::INVALID)
@@ -4253,7 +4243,7 @@ bool CheckEncoded(const std::string& hash, std::string& strError) {
     }
 
     if (AreMessagingDeployed()) {
-        if (encodedStr.length() == 64) {
+        if (IsHex(hash) && encodedStr.length() == 64) {
             return true;
         }
     }
