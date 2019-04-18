@@ -507,11 +507,13 @@ struct CAssetCacheRestrictedVerifiers
 {
     std::string assetName;
     std::string verifier;
+    bool fUndoingRessiue;
 
     CAssetCacheRestrictedVerifiers(const std::string& assetName, const std::string& verifier)
     {
         this->assetName = assetName;
         this->verifier = verifier;
+        fUndoingRessiue = false;
     }
 
     bool operator<(const CAssetCacheRestrictedVerifiers& rhs) const

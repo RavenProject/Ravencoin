@@ -43,7 +43,6 @@ struct CBlockAssetUndo
                 ::Unserialize(s, nVersionCheck);
 
                 if (nVersionCheck == ASSET_UNDO_INCLUDES_VERIFIER_STRING) {
-                    READWRITE(fChangedVerifierString);
                     ::Unserialize(s, fChangedVerifierString);
                     ::Unserialize(s, verifierString);
                 }

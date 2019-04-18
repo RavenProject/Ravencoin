@@ -404,7 +404,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 AssetType type;
                 IsAssetNameValid(reissue.strName, type);
 
-                // If this is a reissuance of a restricted asset, mark it as such, so we can check to make sure only valid verifer string tx are added to the chain
+                // If this is a reissuance of a restricted asset, mark it as such, so we can check to make sure only valid verifier string tx are added to the chain
                 if (type == AssetType::RESTRICTED)
                     fContainsRestrictedAssetReissue = true;
 
@@ -529,7 +529,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-cointains-restricted-asset-issuance-without-verifier");
             }
 
-            // we allow restricted asset reissuance without having a verifier string transaction
+            // we allow restricted asset reissuance without having a verifier string transaction, we don't force it to be updated
         }
     }
     /** RVN END */

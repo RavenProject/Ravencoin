@@ -243,7 +243,7 @@ public :
     bool RemoveQualifierAddress(const std::string& assetName, const std::string& address, const QualifierType type);
     bool RemoveRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType type);
     bool RemoveGlobalRestricted(const std::string& assetName, const RestrictedType type);
-    bool RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier);
+    bool RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier, const bool fUndoingReissue = false);
 
     //! Cache only add asset functions
     bool AddNewAsset(const CNewAsset& asset, const std::string address, const int& nHeight, const uint256& blockHash);
@@ -484,7 +484,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const C
 bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const std::vector<CNewAsset> assets, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string = nullptr);
 
 //! Create a reissue asset transaction
-bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired);
+bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string = nullptr);
 
 //! Create a transfer asset transaction
 bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData = nullptr, std::vector<CNullAssetTxData>* nullGlobalRestrictionData = nullptr);

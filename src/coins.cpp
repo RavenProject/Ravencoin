@@ -141,10 +141,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 AssetType type;
                 IsAssetNameValid(asset.strName, type);
                 if (type == AssetType::RESTRICTED) {
-                    CNewAsset tempRestictedAsset;
-                    if (assetsCache->GetAssetMetaDataIfExists(asset.strName, tempRestictedAsset)) {
-                        fFoundRestrictedAsset = true;
-                    }
+                    fFoundRestrictedAsset = true;
                 }
 
                 // Set the old IPFSHash for the blockundo
@@ -159,9 +156,8 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                     // Search through all outputs until you find a restricted verifier change.
                     for (auto index: tx.vout) {
                         if (index.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
-                            CNullAssetTxVerifierString verifier;
                             if (!AssetNullVerifierDataFromScript(index.scriptPubKey, verifier)) {
-                                error("%s: Failed to get asset null data and add it to the coins CTxOut: %s", __func__,
+                                error("%s: Failed to get asset null verifier data and add it to the coins CTxOut: %s", __func__,
                                       index.ToString());
                                 break;
                             }
@@ -175,13 +171,18 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                     if (fVerifierChanged && !assetsCache->GetAssetVerifierStringIfExists(asset.strName, oldVerifer))
                         error("%s : Failed to get asset original verifier string that is getting reissued, Asset Name: %s", __func__, asset.strName);
 
-                    if (fVerifierChanged)
+                    if (fVerifierChanged) {
                         strOldVerifier = oldVerifer.verifier_string;
+                    }
 
                     // Add the verifier to the cache if there was one found
                     if (fVerifierChanged && !assetsCache->AddRestrictedVerifier(asset.strName, verifier.verifier_string))
                         error("%s : Failed at adding a restricted verifier to our cache: asset: %s, verifier : %s",
                               asset.strName, verifier.verifier_string);
+
+                    if (fVerifierChanged) {
+                        assetsCache->mapReissuedVerifierStrings[asset.strName] = verifier.verifier_string;
+                    }
                 }
 
                 // If any of the following items were changed by reissuing, we need to database the old values so it can be undone correctly
