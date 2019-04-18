@@ -469,11 +469,6 @@ bool CNewAsset::IsValid(std::string& strError, CAssetsCache& assetCache, bool fC
     }
 
     if (assetType == AssetType::RESTRICTED) {
-        if (units != MIN_UNIT) {
-            strError = _("Invalid parameter: units must be ") + std::to_string(MIN_UNIT);
-            return false;
-        }
-
         // TODO add more restricted asset checks
     }
 
@@ -739,51 +734,10 @@ bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, con
     return true;
 }
 
-bool IsNewRestrictedOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg)
-{
-    std::string ownerName;
-    std::string ownerAddress;
-    if (!RestrictedOwnerFromTransaction(tx, ownerName, ownerAddress)) {
-        errorMsg = "bad-txns-bad-restricted-owner";
-        return false;
-    }
-
-    int size = ownerName.size();
-
-    if (ownerAddress != address) {
-        errorMsg = "bad-txns-restricted-owner-address-mismatch";
-        return false;
-    }
-
-    if (size < OWNER_LENGTH + MIN_ASSET_LENGTH) {
-        errorMsg = "bad-txns-restricted-owner-asset-length";
-        return false;
-    }
-
-    if (ownerName != std::string(assetName + OWNER_TAG)) {
-        errorMsg = "bad-txns-restricted-owner-name-mismatch";
-        return false;
-    }
-
-    return true;
-}
-
 bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress)
 {
     // Check to see if the transaction is an new asset issue tx
     if (!tx.IsNewAsset())
-        return false;
-
-    // Get the scriptPubKey from the last tx in vout
-    CScript scriptPubKey = tx.vout[tx.vout.size() - 2].scriptPubKey;
-
-    return OwnerAssetFromScript(scriptPubKey, ownerName, strAddress);
-}
-
-bool RestrictedOwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress)
-{
-    // Check to see if the transaction is an new asset issue tx
-    if (!tx.IsNewRestrictedAsset())
         return false;
 
     // Get the scriptPubKey from the last tx in vout
@@ -1439,7 +1393,7 @@ bool CTransaction::IsNewRestrictedAsset() const
 
 //! To be called on CTransactions where IsNewRestrictedAsset returns true
 bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
-    // Issuing a restricted asset must cointain at least 4 CTxOut(Raven Burn Tx, Owner Token Creation, Asset Creation, and CNullAssetTxVerifierString)
+    // Issuing a restricted asset must cointain at least 4 CTxOut(Raven Burn Tx, Asset Creation, Root Owner Token Transfer, and CNullAssetTxVerifierString)
     if (vout.size() < 4) {
         strError = "bad-txns-issue-restricted-vout-size-to-small";
         return false;
@@ -1451,33 +1405,16 @@ bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
         return false;
     }
 
-    // Check to make sure the owner asset is created
-    if (!CheckOwnerDataTx(vout[vout.size() - 2])) {
-        strError = "bad-txns-issue-restrcited-owner-data-not-found";
-        return false;
-    }
-
     // Get the asset type
     CNewAsset asset;
     std::string address;
     if (!RestrictedAssetFromScript(vout[vout.size() - 1].scriptPubKey, asset, address)) {
-        strError = "bad-txns-issue-restricted-serialzation-failed";
+        strError = "bad-txns-issue-restricted-serialization-failed";
         return error("%s : Failed to get new restricted asset from transaction: %s", __func__, this->GetHash().GetHex());
     }
 
     AssetType assetType;
     IsAssetNameValid(asset.strName, assetType);
-
-    std::string strOwnerName;
-    if (!OwnerAssetFromScript(vout[vout.size() - 2].scriptPubKey, strOwnerName, address)) {
-        strError = "bad-txns-issue-owner-serialzation-failed";
-        return false;
-    }
-
-    if (strOwnerName != asset.strName + OWNER_TAG) {
-        strError = "bad-txns-issue-restricted-owner-name-doesn't-match";
-        return false;
-    }
 
     // Check for the Burn CTxOut in one of the vouts ( This is needed because the change CTxOut is places in a random position in the CWalletTx
     bool fFoundIssueBurnTx = false;
@@ -1493,6 +1430,27 @@ bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
         return false;
     }
 
+    // Check that there is an asset transfer with the parent name, restricted assets use the root owner token. So issuing $TOKEN requires TOKEN!
+    bool fRootOwnerOutFound = false;
+    std::string root = GetParentName(asset.strName);
+    std::string strippedRoot = root.substr(1, root.size() -1) + OWNER_TAG; // $TOKEN checks for TOKEN!
+    for (auto out : vout) {
+        CAssetTransfer transfer;
+        std::string transferAddress;
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (strippedRoot == transfer.strName) {
+                fRootOwnerOutFound = true;
+                break;
+            }
+        }
+    }
+
+    if (!fRootOwnerOutFound) {
+        strError  = "bad-txns-issue-restricted-root-owner-token-outpoint-not-found";
+        return false;
+    }
+
+    // Check to make sure we can get the verifier string from the transaction
     CNullAssetTxVerifierString verifier;
     if (!GetVerifierStringFromTx(verifier, strError)) {
         return false;
@@ -1507,7 +1465,7 @@ bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
     int nReissues = 0;
     GetTxOutAssetTypes(vout, nIssues, nReissues, nTransfers, nOwners);
 
-    if (nOwners != 1 || nIssues != 1 || nReissues > 0) {
+    if (nOwners != 0 || nIssues != 1 || nReissues > 0) {
         strError = "bad-txns-failed-issue-asset-formatting-check";
         return false;
     }
@@ -2642,17 +2600,22 @@ bool CAssetsCache::DumpCacheToDatabase()
         for (auto newVerifier : setNewRestrictedVerifierToAdd) {
             auto assetName = newVerifier.assetName;
             if (mapReissuedVerifierStrings.count(assetName)) {
-                if(!prestricteddb->WriteVerifier(assetName, mapReissuedVerifierStrings.at(assetName))) {
+                if (!prestricteddb->WriteVerifier(assetName, mapReissuedVerifierStrings.at(assetName))) {
                     dirty = true;
                     message = "_Failed Writing restricted verifier to database";
                 }
-
-                if (dirty) {
-                    return error("%s : %s", __func__, message);
+            } else {
+                if (!prestricteddb->WriteVerifier(assetName, newVerifier.verifier)) {
+                    dirty = true;
+                    message = "_Failed Writing restricted verifier to database";
                 }
-
-                passetsVerifierCache->Erase(assetName);
             }
+
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+
+            passetsVerifierCache->Erase(assetName);
         }
 
         // Undo verifier string for restricted assets
@@ -2664,13 +2627,12 @@ bool CAssetsCache::DumpCacheToDatabase()
                     dirty = true;
                     message = "_Failed Writing undo restricted verifer to database";
                 }
-
+            }
                 if (dirty) {
                     return error("%s : %s", __func__, message);
                 }
 
                 passetsVerifierCache->Erase(assetName);
-            }
         }
 
         // Add the new qualifier commands to the database
@@ -3980,15 +3942,35 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     }
 
     if (assetType == AssetType::RESTRICTED) {
+        // Restricted assets require the ROOT! token to be sent with the issuance
+        CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
+
+        // Create a transaction that sends the ROOT owner token (e.g. $TOKEN requires TOKEN!)
+        std::string strStripped = parentName.substr(1, parentName.size() - 1);
+        std::cout << strStripped << std::endl;
+
+        // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
+        if (!VerifyWalletHasAsset(strStripped + OWNER_TAG, error)) {
+            return false;
+        }
+
+        CAssetTransfer assetTransfer(strStripped + OWNER_TAG, OWNER_ASSET_AMOUNT);
+        assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+
+        CRecipient ownerRec = {scriptTransferOwnerAsset, 0, fSubtractFeeFromAmount};
+        vecSend.push_back(ownerRec);
+
+        // Every restricted asset issuance must have a verifier string
         if (!verifier_string) {
             error = std::make_pair(RPC_INVALID_PARAMETER, "Error: Verifier string not found");
             return false;
         }
+
         // Create the asset null data transaction that will get added to the issue transaction
         CScript verifierScript;
         CNullAssetTxVerifierString verifier(*verifier_string);
-
         verifier.ConstructTransaction(verifierScript);
+
         CRecipient rec = {verifierScript, 0, false};
         vecSend.push_back(rec);
     }

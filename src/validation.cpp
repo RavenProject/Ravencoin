@@ -1931,19 +1931,6 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         }
                     }
 
-                    // Get the owner from the transaction and remove it
-                    std::string ownerName;
-                    std::string ownerAddress;
-                    if (!RestrictedOwnerFromTransaction(tx, ownerName, ownerAddress)) {
-                        error("%s : Failed to get restricted owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
-                        return DISCONNECT_FAILED;
-                    }
-
-                    if (!assetsCache->RemoveOwnerAsset(ownerName, ownerAddress)) {
-                        error("%s : Failed to Remove Restricted Owner from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
-                        return DISCONNECT_FAILED;
-                    }
-
                     if (indexOfRestrictedAssetVerifierString < 0) {
                         error("%s : Failed to find the restricted asset verifier string index from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
                         return DISCONNECT_FAILED;
@@ -2642,7 +2629,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-restricted-when-it-is-not-active");
 
                 std::string strError = "";
-                if (!tx.VerifyNewAsset(strError))
+                if (!tx.VerifyNewRestrictedAsset(strError))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-failed-verify");
 
                 CNewAsset asset;

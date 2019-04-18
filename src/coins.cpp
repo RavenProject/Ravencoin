@@ -228,18 +228,9 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 std::string strAddress;
                 RestrictedAssetFromTransaction(tx, asset, strAddress);
 
-                std::string ownerName;
-                std::string ownerAddress;
-                RestrictedOwnerFromTransaction(tx, ownerName, ownerAddress);
-
                 // Add the new asset to cache
                 if (!assetsCache->AddNewAsset(asset, strAddress, nHeight, blockHash))
                     error("%s : Failed at adding a new restricted asset to our cache. asset: %s", __func__,
-                          asset.strName);
-
-                // Add the owner asset to cache
-                if (!assetsCache->AddOwnerAsset(ownerName, ownerAddress))
-                    error("%s : Failed at adding a new restricted asset owner to our cache. asset: %s", __func__,
                           asset.strName);
 
                 // Find the restricted verifier string and cache it

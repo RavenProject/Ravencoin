@@ -193,6 +193,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         if (!MoneyRange(nValueOut))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
 
+        /** RVN START */
+        // Find and handle all new OP_RVN_ASSET null data transactions
         if (txout.scriptPubKey.IsNullAsset()) {
             CNullAssetTxData data;
             std::string address;
@@ -231,6 +233,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 fContainsNullAssetVerifierTx = true;
             }
         }
+        /** RVN END */
 
         /** RVN START */
         bool isAsset = false;
@@ -316,7 +319,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
     if (AreRestrictedAssetsDeployed()) {
         for (auto entry: mapNullDataTxCount) {
             if (entry.first.first.front() == RESTRICTED_CHAR) {
-                if (!setAssetTransferNames.count(entry.first.first + OWNER_TAG)) {
+                std::string ownerToken = entry.first.first.substr(1,  entry.first.first.size() -1); // $TOKEN into TOKEN
+                if (!setAssetTransferNames.count(ownerToken + OWNER_TAG)) {
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-restricted-asset-null-tx-without-asset-transfer");
                 }
             } else { // must be a qualifier asset QUALIFIER_CHAR
@@ -328,6 +332,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         }
 
         for (auto name: setNullGlobalAssetChanges) {
+            std::string ownerToken = name.substr(1,  name.size() - 1); // $TOKEN into TOKEN
             if (!setAssetTransferNames.count(name + OWNER_TAG)) {
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-global-asset-null-tx-without-asset-transfer");
             }
@@ -470,18 +475,16 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 if(!tx.VerifyNewRestrictedAsset(strError))
                     return state.DoS(100, false, REJECT_INVALID, strError);
 
+                // Get asset data
                 CNewAsset asset;
                 std::string strAddress;
                 if (!RestrictedAssetFromTransaction(tx, asset, strAddress))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-from-transaction");
 
-                // Validate the new assets information
-                if (!IsNewRestrictedOwnerTxValid(tx, asset.strName, strAddress, strError))
-                    return state.DoS(100, false, REJECT_INVALID, strError);
-
                 if (!asset.IsValid(strError, *assetCache, fMemPoolCheck, fCheckAssetDuplicate, fForceDuplicateCheck))
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-restricted" + strError);
 
+                // Get verifier string
                 CNullAssetTxVerifierString verifier;
                 if (!tx.GetVerifierStringFromTx(verifier, strError))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-" + strError);
