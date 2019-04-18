@@ -2255,6 +2255,159 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
     return passets->CheckForGlobalRestriction(restricted_name);
 }
 
+UniValue reissuerestricted(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 3 || request.params.size() > 9)
+        throw std::runtime_error(
+                "reissuerestricted \"asset_name\" qty ( change_verifier ) ( \"new_verifier\" ) \"( to_address )\" \"( change_address )\" ( new_unit ) ( reissuable ) \"( ipfs_hash )\"\n"
+                + RestrictedActivationWarning() +
+                "\nReissue a already created restricted\n"
+                "Reissuable is true/false for whether additional asset quantity can be created, an changing the verifier string\n"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"            (string, required) a unique name, starts with '$'\n"
+                "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
+                "3. \"change_verifier\"       (boolean, optional, default=false) If the verifier string will get changed\n"
+                "4. \"verifier\"              (string, optional, default=\"\") the KYC string that is evaluated when restricted asset transfers are made\n"
+                "5. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
+                "6. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+                "7. \"new_unit\"              (numeric, optional, default=-1), the new units that will be associated with the asset\n"
+                "8. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
+                "9. \"ipfs_hash\"            (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
+
+                "\nResult:\n"
+                "\"txid\"                     (string) The transaction id\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\"")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\" \"myaddress\"")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\" \"myaddress\" \"changeaddress\"")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\" \"myaddress\" \"changeaddress\" true")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 false \"\" \"myaddress\" \"changeaddress\" -1 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
+        );
+
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    // Check asset name and infer assetType
+    std::string assetName = request.params[0].get_str();
+    AssetType assetType;
+    std::string assetError = "";
+    if (!IsAssetNameValid(assetName, assetType, assetError)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName + std::string("\nError: ") + assetError);
+    }
+
+    // Check for unsupported asset types, only restricted assets are allowed for this rpc call
+    if (assetType != AssetType::RESTRICTED) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
+    }
+
+    CAmount nAmount = AmountFromValue(request.params[1]);
+
+    bool fChangeVerifier = false;
+    if (request.params.size() > 2)
+        fChangeVerifier = request.params[2].get_bool();
+
+    std::string verifier_string = "";
+    if (request.params.size() > 3)
+        verifier_string = request.params[3].get_str();
+
+    // TODO verify the verifier_string
+
+    std::string to_address = "";
+    if (request.params.size() > 4)
+        to_address = request.params[4].get_str();
+
+    if (!to_address.empty()) {
+        CTxDestination destination = DecodeDestination(to_address);
+        if (!IsValidDestination(destination)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+        }
+    } else {
+        // Create a new address
+        std::string strAccount;
+
+        if (!pwallet->IsLocked()) {
+            pwallet->TopUpKeyPool();
+        }
+
+        // Generate a new key that is added to wallet
+        CPubKey newKey;
+        if (!pwallet->GetKeyFromPool(newKey)) {
+            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        }
+        CKeyID keyID = newKey.GetID();
+
+        pwallet->SetAddressBook(keyID, strAccount, "receive");
+
+        to_address = EncodeDestination(keyID);
+    }
+
+    std::string changeAddress = "";
+    if (request.params.size() > 5)
+        changeAddress = request.params[5].get_str();
+    if (!changeAddress.empty()) {
+        CTxDestination destination = DecodeDestination(changeAddress);
+        if (!IsValidDestination(destination)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                               std::string("Invalid Change Address: Invalid Raven address: ") + changeAddress);
+        }
+    }
+
+    int newUnits = -1;
+    if (request.params.size() > 6)
+        newUnits = request.params[6].get_int();
+
+    bool reissuable = true;
+    if (request.params.size() > 7)
+        reissuable = request.params[7].get_bool();
+
+    std::string new_ipfs_data = "";
+    bool fMessageCheck = false;
+
+    if (request.params.size() > 8) {
+        fMessageCheck = true;
+        new_ipfs_data = request.params[8].get_str();
+    }
+
+    // Reissues don't have an expire time
+    int64_t expireTime = 0;
+
+    // Check the message data
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(new_ipfs_data, expireTime);
+
+    CReissueAsset reissueAsset(assetName, nAmount, newUnits, reissuable ? 1 : 0, DecodeAssetData(new_ipfs_data));
+
+    CReserveKey reservekey(pwallet);
+    CWalletTx transaction;
+    CAmount nRequiredFee;
+    std::pair<int, std::string> error;
+
+    CCoinControl crtl;
+    crtl.destChange = DecodeDestination(changeAddress);
+
+    // Create the Transaction
+    if (!CreateReissueAssetTransaction(pwallet, crtl, reissueAsset, to_address, error, transaction, reservekey, nRequiredFee, fChangeVerifier ? &verifier_string : nullptr))
+        throw JSONRPCError(error.first, error.second);
+
+    // Send the Transaction to the network
+    std::string txid;
+    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+        throw JSONRPCError(error.first, error.second);
+
+    UniValue result(UniValue::VARR);
+    result.push_back(txid);
+    return result;
+}
+
 
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
@@ -2285,7 +2438,8 @@ static const CRPCCommand commands[] =
     { "restricted assets",   "getassetverifierstring",     &getassetverifierstring,     {"asset_name"}},
     { "restricted assets",   "checkaddressqualifier",      &checkaddressqualifier,      {"address", "qualifier_name"}},
     { "restricted assets",   "checkaddressrestriction",    &checkaddressrestriction,    {"address", "restricted_name"}},
-    { "restricted assets",   "checkglobalrestriction",     &checkglobalrestriction,     {"restricted_name"}}
+    { "restricted assets",   "checkglobalrestriction",     &checkglobalrestriction,     {"restricted_name"}},
+    { "restricted assets",   "reissuerestricted",          &reissuerestricted,          {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_unit", "reissuable", "ipfs_hash"}}
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

@@ -1528,13 +1528,25 @@ bool CTransaction::VerifyReissueAsset(std::string& strError) const
         return false;
     }
 
+    // Reissuing a regular asset checks the reissue_asset_name + "!"
+    AssetType asset_type = AssetType::INVALID;
+    IsAssetNameValid(reissue.strName, asset_type);
+
+    // This is going to be the asset name that we need to verify that the owner token of was added to the transaction
+    std::string asset_name_to_check = reissue.strName;
+
+    // If the asset type is restricted, remove the $ from the name, so we can check for the correct owner token transfer
+    if (asset_type == AssetType::RESTRICTED) {
+        asset_name_to_check = reissue.strName.substr(1, reissue.strName.size() -1);
+    }
+
     // Check that there is an asset transfer, this will be the owner asset change
     bool fOwnerOutFound = false;
     for (auto out : vout) {
         CAssetTransfer transfer;
         std::string transferAddress;
         if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
-            if (reissue.strName + OWNER_TAG == transfer.strName) {
+            if (asset_name_to_check + OWNER_TAG == transfer.strName) {
                 fOwnerOutFound = true;
                 break;
             }
@@ -1707,15 +1719,7 @@ bool CReissueAsset::IsValid(std::string &strError, CAssetsCache& assetCache, boo
         IsAssetNameValid(strName, type);
 
         if (type == AssetType::RESTRICTED) {
-            // TODO verify that these are the correct settings we want for restricted assets
-            if (nUnits != -1) { // -1 means that the units didn't change
-                strError = _("Unable to reissue asset: Unable to change units on a restricted asset");
-                return false;
-            }
-            if (nReissuable == 0) {
-                strError = _("Unable to reissue asset: Restricted assets must be reissuable");
-                return false;
-            }
+            // TODO Add checks for restricted asset if we can come up with any
         }
     }
 
@@ -2099,7 +2103,7 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
     // If the verifier string was changed by this reissue, undo the change
     if (fVerifierStringChanged) {
         mapReissuedVerifierStrings[assetData.strName] = verifierString;
-        RemoveRestrictedVerifier(assetData.strName, verifierString);
+        RemoveRestrictedVerifier(assetData.strName, verifierString, true);
     }
 
     if (fAssetIndex) {
@@ -2313,9 +2317,10 @@ bool CAssetsCache::AddRestrictedVerifier(const std::string& assetName, const std
 }
 
 //! Changes Memory Only
-bool CAssetsCache::RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier)
+bool CAssetsCache::RemoveRestrictedVerifier(const std::string& assetName, const std::string& verifier, const bool fUndoingReissue)
 {
     CAssetCacheRestrictedVerifiers newVerifier(assetName, verifier);
+    newVerifier.fUndoingRessiue = fUndoingReissue;
 
     if (setNewRestrictedVerifierToAdd.count(newVerifier))
         setNewRestrictedVerifierToAdd.erase(newVerifier);
@@ -2622,17 +2627,23 @@ bool CAssetsCache::DumpCacheToDatabase()
         for (auto undoVerifiers : setNewRestrictedVerifierToRemove) {
             auto assetName = undoVerifiers.assetName;
 
-            if (mapReissuedVerifierStrings.count(assetName)) {
+            if (undoVerifiers.fUndoingRessiue) {
                 if (!prestricteddb->WriteVerifier(undoVerifiers.assetName, undoVerifiers.verifier)) {
                     dirty = true;
                     message = "_Failed Writing undo restricted verifer to database";
                 }
-            }
-                if (dirty) {
-                    return error("%s : %s", __func__, message);
+            } else {
+                if (!prestricteddb->EraseVerifier(undoVerifiers.assetName)) {
+                    dirty = true;
+                    message = "_Failed Writing undo restricted verifer to database";
                 }
+            }
 
-                passetsVerifierCache->Erase(assetName);
+            if (dirty) {
+                return error("%s : %s", __func__, message);
+            }
+
+            passetsVerifierCache->Erase(assetName);
         }
 
         // Add the new qualifier commands to the database
@@ -3947,7 +3958,6 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 
         // Create a transaction that sends the ROOT owner token (e.g. $TOKEN requires TOKEN!)
         std::string strStripped = parentName.substr(1, parentName.size() - 1);
-        std::cout << strStripped << std::endl;
 
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
         if (!VerifyWalletHasAsset(strStripped + OWNER_TAG, error)) {
@@ -3984,10 +3994,21 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     return true;
 }
 
-bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& reissueAsset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired)
+bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& reissueAsset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string)
 {
+    // Create transaction variables
+    std::string strTxError;
+    std::vector<CRecipient> vecSend;
+    int nChangePosRet = -1;
+    bool fSubtractFeeFromAmount = false;
+
+    // Create asset variables
     std::string asset_name = reissueAsset.strName;
     std::string change_address = EncodeDestination(coinControl.destChange);
+
+    // Get the asset type
+    AssetType asset_type = AssetType::INVALID;
+    IsAssetNameValid(asset_name, asset_type);
 
     // Check that validitity of the address
     if (!IsValidDestinationString(address)) {
@@ -3995,6 +4016,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         return false;
     }
 
+    // Build the change address
     if (!change_address.empty()) {
         CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
@@ -4019,6 +4041,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         return false;
     }
 
+    // Check to make sure this isn't an owner token
     if (IsAssetNameAnOwner(asset_name)) {
         error = std::make_pair(RPC_INVALID_PARAMS, std::string("Owner Assets are not able to be reissued"));
         return false;
@@ -4031,12 +4054,14 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         return false;
     }
 
+    // Fail if the asset cache isn't initialized
     if (!passetsCache) {
         error = std::make_pair(RPC_DATABASE_ERROR,
                                std::string("passetsCache isn't initialized"));
         return false;
     }
 
+    // Check to make sure that the reissue asset data is valid
     std::string strError;
     if (!reissueAsset.IsValid(strError, *currentActiveAssetCache)) {
         error = std::make_pair(RPC_VERIFY_ERROR,
@@ -4044,9 +4069,20 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         return false;
     }
 
-    // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-    if (!VerifyWalletHasAsset(asset_name + OWNER_TAG, error)) {
-        return false;
+    // strip of the first character of the asset name, this is used for restricted assets only
+    std::string stripped_asset_name = asset_name.substr(1, asset_name.size() - 1);
+
+    // If we are reissuing a restricted asset, check to see if we have the root owner token $TOKEN check for TOKEN!
+    if (asset_type == AssetType::RESTRICTED) {
+        // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
+        if (!VerifyWalletHasAsset(stripped_asset_name + OWNER_TAG, error)) {
+            return false;
+        }
+    } else {
+        // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
+        if (!VerifyWalletHasAsset(asset_name + OWNER_TAG, error)) {
+            return false;
+        }
     }
 
     // Check the wallet balance
@@ -4069,17 +4105,31 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     // Get the script for the destination address for the assets
     CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
 
-    CAssetTransfer assetTransfer(asset_name + OWNER_TAG, OWNER_ASSET_AMOUNT);
-    assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+    if (asset_type == AssetType::RESTRICTED) {
+        CAssetTransfer assetTransfer(stripped_asset_name + OWNER_TAG, OWNER_ASSET_AMOUNT);
+        assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+    } else {
+        CAssetTransfer assetTransfer(asset_name + OWNER_TAG, OWNER_ASSET_AMOUNT);
+        assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+    }
+
+    if (asset_type == AssetType::RESTRICTED) {
+        // Every restricted asset issuance must have a verifier string
+        if (verifier_string) {
+            // Create the asset null data transaction that will get added to the issue transaction
+            CScript verifierScript;
+            CNullAssetTxVerifierString verifier(*verifier_string);
+            verifier.ConstructTransaction(verifierScript);
+
+            CRecipient rec = {verifierScript, 0, false};
+            vecSend.push_back(rec);
+        }
+    }
 
     // Get the script for the burn address
     CScript scriptPubKeyBurn = GetScriptForDestination(DecodeDestination(Params().ReissueAssetBurnAddress()));
 
     // Create and send the transaction
-    std::string strTxError;
-    std::vector<CRecipient> vecSend;
-    int nChangePosRet = -1;
-    bool fSubtractFeeFromAmount = false;
     CRecipient recipient = {scriptPubKeyBurn, burnAmount, fSubtractFeeFromAmount};
     CRecipient recipient2 = {scriptTransferOwnerAsset, 0, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
