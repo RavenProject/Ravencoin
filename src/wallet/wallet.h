@@ -998,7 +998,7 @@ public:
 
     /** RVN START */
     bool CreateTransactionWithAssets(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                   std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination dest, const AssetType& assetType, bool sign = true);
+                                   std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination destination, const AssetType& assetType, bool sign = true);
 
     bool CreateTransactionWithTransferAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
                                                      std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);

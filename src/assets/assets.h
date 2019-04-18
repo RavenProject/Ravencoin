@@ -386,7 +386,6 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
 //! These functions pull data from the scripts at those indexes
 bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress);
-bool RestrictedOwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::string& strAddress);
 bool ReissueAssetFromTransaction(const CTransaction& tx, CReissueAsset& reissue, std::string& strAddress);
 bool UniqueAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
 bool MsgChannelAssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress);
@@ -458,7 +457,6 @@ bool IsScriptNewRestrictedAsset(const CScript& scriptPubKey);
 bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex);
 
 bool IsNewOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
-bool IsNewRestrictedOwnerTxValid(const CTransaction& tx, const std::string& assetName, const std::string& address, std::string& errorMsg);
 
 void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names, int nMinConf = 1);
 void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, int nMinConf = 1, bool fIncludeAdministrator = false, bool fOnlyAdministrator = false);
