@@ -2102,7 +2102,6 @@ bool CAssetsCache::RemoveReissueAsset(const CReissueAsset& reissue, const std::s
 
     // If the verifier string was changed by this reissue, undo the change
     if (fVerifierStringChanged) {
-        mapReissuedVerifierStrings[assetData.strName] = verifierString;
         RemoveRestrictedVerifier(assetData.strName, verifierString, true);
     }
 
@@ -2604,16 +2603,9 @@ bool CAssetsCache::DumpCacheToDatabase()
         // Add new verifier strings for restricted assets
         for (auto newVerifier : setNewRestrictedVerifierToAdd) {
             auto assetName = newVerifier.assetName;
-            if (mapReissuedVerifierStrings.count(assetName)) {
-                if (!prestricteddb->WriteVerifier(assetName, mapReissuedVerifierStrings.at(assetName))) {
-                    dirty = true;
-                    message = "_Failed Writing restricted verifier to database";
-                }
-            } else {
-                if (!prestricteddb->WriteVerifier(assetName, newVerifier.verifier)) {
-                    dirty = true;
-                    message = "_Failed Writing restricted verifier to database";
-                }
+            if (!prestricteddb->WriteVerifier(assetName, newVerifier.verifier)) {
+                dirty = true;
+                message = "_Failed Writing restricted verifier to database";
             }
 
             if (dirty) {
@@ -2627,6 +2619,7 @@ bool CAssetsCache::DumpCacheToDatabase()
         for (auto undoVerifiers : setNewRestrictedVerifierToRemove) {
             auto assetName = undoVerifiers.assetName;
 
+            // If we are undoing a reissue, we need to save back the old verifier string to database
             if (undoVerifiers.fUndoingRessiue) {
                 if (!prestricteddb->WriteVerifier(undoVerifiers.assetName, undoVerifiers.verifier)) {
                     dirty = true;
@@ -3015,9 +3008,6 @@ bool CAssetsCache::Flush()
 
             passets->setNewRestrictedVerifierToRemove.insert(item);
         }
-
-        for(auto &item : mapReissuedVerifierStrings)
-            passets->mapReissuedVerifierStrings[item.first] = item.second;
 
         return true;
 
@@ -4458,34 +4448,32 @@ void CNullAssetTxVerifierString::ConstructTransaction(CScript &script) const
 
 bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifierString)
 {
-    // Check the map that contains the reissued verifier data. If it is in this map, it hasn't been saved to disk yet
-    if (mapReissuedVerifierStrings.count(name)) {
-        verifierString.verifier_string = mapReissuedVerifierStrings.at(name);
-        return true;
-    }
-
-    // Check the map that contains the reissued asset data. If it is in this map, it hasn't been saved to disk yet
-    if (passets->mapReissuedVerifierStrings.count(name)) {
-        verifierString.verifier_string = passets->mapReissuedVerifierStrings.at(name);
-        return true;
-    }
-
     // Create objects that will be used to check the dirty cache
     CAssetCacheRestrictedVerifiers tempCacheVerifier {name, ""};
 
+    auto setIterator = setNewRestrictedVerifierToRemove.find(tempCacheVerifier);
     // Check the dirty caches first and see if it was recently added or removed
-    if (setNewRestrictedVerifierToRemove.count(tempCacheVerifier)) {
+    if (setIterator != setNewRestrictedVerifierToRemove.end()) {
+        if (setIterator->fUndoingRessiue) {
+            verifierString.verifier_string = setIterator->verifier;
+            return true;
+        }
         LogPrintf("%s : Found in new verifier to Remove - Returning False\n", __func__);
         return false;
     }
 
+    setIterator = passets->setNewRestrictedVerifierToRemove.find(tempCacheVerifier);
     // Check the dirty caches first and see if it was recently added or removed
-    if (passets->setNewRestrictedVerifierToRemove.count(tempCacheVerifier)) {
+    if (setIterator != passets->setNewRestrictedVerifierToRemove.end()) {
+        if (setIterator->fUndoingRessiue) {
+            verifierString.verifier_string = setIterator->verifier;
+            return true;
+        }
         LogPrintf("%s : Found in new verifer to Remove - Returning False\n", __func__);
         return false;
     }
 
-    auto setIterator = setNewRestrictedVerifierToAdd.find(tempCacheVerifier);
+    setIterator = setNewRestrictedVerifierToAdd.find(tempCacheVerifier);
     if (setIterator != setNewRestrictedVerifierToAdd.end()) {
         verifierString.verifier_string = setIterator->verifier;
         return true;

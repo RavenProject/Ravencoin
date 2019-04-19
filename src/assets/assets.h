@@ -75,18 +75,15 @@ public:
 
     // Dirty, Gets wiped once flushed to database
     std::map<std::string, CNewAsset> mapReissuedAssetData; // Asset Name -> New Asset Data
-    std::map<std::string, std::string> mapReissuedVerifierStrings; // Asset Name -> New Verifier String
 
     CAssets(const CAssets& assets) {
         this->mapAssetsAddressAmount = assets.mapAssetsAddressAmount;
         this->mapReissuedAssetData = assets.mapReissuedAssetData;
-        this->mapReissuedVerifierStrings = assets.mapReissuedVerifierStrings;
     }
 
     CAssets& operator=(const CAssets& other) {
         mapAssetsAddressAmount = other.mapAssetsAddressAmount;
         mapReissuedAssetData = other.mapReissuedAssetData;
-        mapReissuedVerifierStrings = other.mapReissuedVerifierStrings;
         return *this;
     }
 
@@ -97,7 +94,6 @@ public:
     void SetNull() {
         mapAssetsAddressAmount.clear();
         mapReissuedAssetData.clear();
-        mapReissuedVerifierStrings.clear();
     }
 };
 
@@ -193,7 +189,6 @@ public :
     {
         this->mapAssetsAddressAmount = cache.mapAssetsAddressAmount;
         this->mapReissuedAssetData = cache.mapReissuedAssetData;
-        this->mapReissuedVerifierStrings = cache.mapReissuedVerifierStrings;
 
         //! Copy dirty cache also
         this->vSpentAssets = cache.vSpentAssets;
@@ -314,7 +309,6 @@ public :
 
         mapReissuedAssetData.clear();
         mapAssetsAddressAmount.clear();
-        mapReissuedVerifierStrings.clear();
 
         setNewQualifierAddressToAdd.clear();
         setNewQualifierAddressToRemove.clear();
