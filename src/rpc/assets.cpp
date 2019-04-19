@@ -1145,7 +1145,9 @@ UniValue transfer(const JSONRPCRequest& request)
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, nAmount, DecodeAssetData(message), expireTime), address));
+    CAssetTransfer transfer(asset_name, nAmount, DecodeAssetData(message), expireTime);
+
+    vTransfers.emplace_back(std::make_pair(transfer, address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;

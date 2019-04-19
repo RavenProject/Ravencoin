@@ -233,6 +233,7 @@ public:
     CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message = "", const int64_t& nExpireTime = 0);
     bool IsValid(std::string& strError) const;
     void ConstructTransaction(CScript& script) const;
+    bool CheckAgainstVerifyString(CAssetsCache &assetsCache, const std::string& address, std::string& strError);
 };
 
 class CReissueAsset
@@ -331,7 +332,7 @@ public:
     }
 
     CNullAssetTxVerifierString(const std::string& verifier);
-    bool IsValid(CAssetsCache &assetsCache, std::string& strError) const;
+    bool IsValid(CAssetsCache &assetsCache, std::string check_address, std::string& strError) const;
     void ConstructTransaction(CScript& script) const;
 };
 

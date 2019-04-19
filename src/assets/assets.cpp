@@ -301,6 +301,11 @@ bool IsAssetNameAnOwner(const std::string& name)
     return IsAssetNameValid(name) && std::regex_match(name, OWNER_INDICATOR);
 }
 
+bool IsAssetNameAnRestricted(const std::string& name)
+{
+    return IsAssetNameValid(name) && std::regex_match(name, RESTRICTED_INDICATOR);
+}
+
 bool IsAssetNameAnMsgChannel(const std::string& name)
 {
     return IsAssetNameValid(name) && std::regex_match(name, MSGCHANNEL_INDICATOR);
@@ -1631,6 +1636,24 @@ bool CAssetTransfer::IsValid(std::string& strError) const
         if (message.size() && !CheckEncoded(message, strError)) {
             return false;
         }
+    }
+
+    return true;
+}
+
+bool CAssetTransfer::CheckAgainstVerifyString(CAssetsCache &assetsCache, const std::string& address, std::string& strError)
+{
+    // Get the verifier string
+    CNullAssetTxVerifierString verifier;
+    if (!assetsCache.GetAssetVerifierStringIfExists(this->strName, verifier)) {
+        // This shouldn't ever happen, but if it does we need to know
+        strError = _("Verifier String doens't exist for asset: ") + this->strName;
+        return false;
+    }
+
+    // Check if verifier is valid given the destination address
+    if (!verifier.IsValid(assetsCache, address, strError)) {
+        return false;
     }
 
     return true;
@@ -4188,6 +4211,15 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
             }
         }
 
+        // If the asset is a restricted asset, check the verifier script
+        if(IsAssetNameAnRestricted(asset_name)) {
+            std::string strError = "";
+            if (!transfer.first.CheckAgainstVerifyString(*passets, address, strError)) {
+                error = std::make_pair(RPC_INVALID_PARAMETER, strError);
+                return false;
+            }
+        }
+
         // Get the script for the burn address
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(address));
 
@@ -4424,9 +4456,9 @@ CNullAssetTxVerifierString::CNullAssetTxVerifierString(const std::string &verifi
     this->verifier_string = verifier;
 }
 
-bool CNullAssetTxVerifierString::IsValid(CAssetsCache &assetsCache, std::string &strError) const
+bool CNullAssetTxVerifierString::IsValid(CAssetsCache &assetsCache, std::string check_address, std::string &strError) const
 {
-    if (!CheckVerifierString(assetsCache, verifier_string, strError, false))
+    if (!CheckVerifierString(assetsCache, verifier_string, strError, check_address, false))
         return false;
 
     return true;
@@ -4675,7 +4707,7 @@ std::string GetStrippedVerifierString(const std::string& verifier)
     return str_without_qualifier_tags;
 }
 
-bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, bool fWithTags)
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, std::string check_address, bool fWithTags)
 {
     if (verifier == "true") {
         return true;
@@ -4709,13 +4741,30 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
 
     LibBoolEE::Vals vals;
 
-    // set all qualifiers in the verifier to true
-    for (auto qualifier : setFoundQualifiers) {
-        vals.insert(std::make_pair(qualifier, true));
+    if (check_address == "") {
+        // set all qualifiers in the verifier to true
+        for (auto qualifier : setFoundQualifiers) {
+            vals.insert(std::make_pair(qualifier, true));
+        }
+    } else {
+        for (auto qualifier : setFoundQualifiers) {
+            std::string search = qualifier;
+            if (!fWithTags)
+                search = QUALIFIER_CHAR + qualifier;
+
+            // Check to see if the address contains the qualifier
+            bool has_qualifier = cache.CheckForAddressQualifier(search, check_address);
+
+            // Add the true or false value into the vals
+            vals.insert(std::make_pair(qualifier, has_qualifier));
+        }
     }
 
     try {
-        LibBoolEE::resolve(verifier, vals);
+        if (check_address != "")
+            return LibBoolEE::resolve(verifier, vals);
+        else
+            LibBoolEE::resolve(verifier, vals);
         return true;
     } catch (...) {
         strError = _("Verifier string failed to resolve. Please check string syntax");
