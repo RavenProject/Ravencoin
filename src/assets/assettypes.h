@@ -331,7 +331,7 @@ public:
     }
 
     CNullAssetTxVerifierString(const std::string& verifier);
-    bool IsValid(std::string& strError, bool fForceCheckAssetsExist) const;
+    bool IsValid(CAssetsCache &assetsCache, std::string& strError) const;
     void ConstructTransaction(CScript& script) const;
 };
 

@@ -488,4 +488,9 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
 
 /** Helper method for extracting address bytes, asset name and amount from an asset script */
 bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount);
+
+/** Helper method for extracting #TAGS from a verifier string */
+bool ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag = true);
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, bool fWithTags = true);
+std::string GetStrippedVerifierString(const std::string& verifier);
 #endif //RAVENCOIN_ASSET_PROTOCOL_H

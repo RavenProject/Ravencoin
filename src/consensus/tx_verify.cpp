@@ -230,6 +230,12 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 if (fContainsNullAssetVerifierTx)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-verifier-per-tx");
 
+                if (assetCache) {
+                    std::string strError = "";
+                    if (!verifier.IsValid(*assetCache, strError))
+                        return state.DoS(100, false, REJECT_INVALID, "bad_txns-null-data-verifier: " + strError);
+                }
+
                 fContainsNullAssetVerifierTx = true;
             }
         }
@@ -488,10 +494,6 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 CNullAssetTxVerifierString verifier;
                 if (!tx.GetVerifierStringFromTx(verifier, strError))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-" + strError);
-
-                if (!verifier.IsValid(strError, fCheckAssetDuplicate)) {
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-not-valid-" + strError);
-                }
 
                 // Mark that this transaction has a restricted asset issuance, for checks later with the verifier string tx
                 fContainsNewRestrictedAsset = true;

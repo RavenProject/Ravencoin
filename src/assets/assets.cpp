@@ -28,6 +28,7 @@
 #include "utilmoneystr.h"
 #include "coins.h"
 #include "wallet/wallet.h"
+#include "LibBoolEE.h"
 
 #define SIX_MONTHS 15780000 // Six months worth of seconds
 
@@ -4423,15 +4424,10 @@ CNullAssetTxVerifierString::CNullAssetTxVerifierString(const std::string &verifi
     this->verifier_string = verifier;
 }
 
-bool CNullAssetTxVerifierString::IsValid(std::string &strError, bool fForceCheckAssetsExist) const
+bool CNullAssetTxVerifierString::IsValid(CAssetsCache &assetsCache, std::string &strError) const
 {
-    // TODO check the verifier string is a valid boolean expression
-
-    // TODO check to make sure all values are qualifier names
-
-    if (fForceCheckAssetsExist) {
-        // TODO check to make sure the verifier string contains valid qualifier asset names
-    }
+    if (!CheckVerifierString(assetsCache, verifier_string, strError, false))
+        return false;
 
     return true;
 }
@@ -4645,4 +4641,84 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name)
     }
 
     return false;
+}
+
+bool ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag)
+{
+    std::string s(verifier);
+
+    std::regex regexSearch;
+    if (fWithTag)
+        regexSearch = std::regex(R"(#[A-Z0-9_.]+)");
+    else
+        regexSearch = std::regex(R"([A-Z0-9_.]+)");
+
+    std::smatch match;
+
+    while (std::regex_search(s,match,regexSearch)) {
+        for (auto str : match)
+            qualifiers.insert(str);
+        s = match.suffix().str();
+    }
+
+    return true;
+}
+
+std::string GetStrippedVerifierString(const std::string& verifier)
+{
+    // Remove all white spaces from the verifier string
+    std::string str_without_whitespaces = LibBoolEE::removeWhitespaces(verifier);
+
+    // Remove all '#' from the verifier string
+    std::string str_without_qualifier_tags = LibBoolEE::removeCharacter(str_without_whitespaces, QUALIFIER_CHAR);
+
+    return str_without_qualifier_tags;
+}
+
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, bool fWithTags)
+{
+    if (verifier == "true") {
+        return true;
+    }
+
+    if (verifier.empty()) {
+        strError = _("Verifier string can not be empty. To default to true, use \"true\"");
+        return false;
+    }
+
+    std::string strippedVerifier = GetStrippedVerifierString(verifier);
+
+    if (strippedVerifier.length() > 80){
+        strError = _("Verifier string has length greater than 80 after whitespaces and '#' are removed");
+        return false;
+    }
+
+    std::set<std::string> setFoundQualifiers;
+    // Get the qualifiers from the verifier string
+    ExtractVerifierStringQualifiers(verifier, setFoundQualifiers, fWithTags);
+
+    for(auto qualifier : setFoundQualifiers) {
+        std::string search = qualifier;
+        if (!fWithTags)
+            search = QUALIFIER_CHAR + qualifier;
+        if (!cache.CheckIfAssetExists(search)) {
+            strError = _("Verifier string contains qualifier that isn't in the chain: ") + qualifier;
+            return false;
+        }
+    }
+
+    LibBoolEE::Vals vals;
+
+    // set all qualifiers in the verifier to true
+    for (auto qualifier : setFoundQualifiers) {
+        vals.insert(std::make_pair(qualifier, true));
+    }
+
+    try {
+        LibBoolEE::resolve(verifier, vals);
+        return true;
+    } catch (...) {
+        strError = _("Verifier string failed to resolve. Please check string syntax");
+        return false;
+    }
 }

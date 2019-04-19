@@ -125,13 +125,23 @@ std::string LibBoolEE::trim(const std::string &source) {
 }
 
 bool LibBoolEE::belongsToName(const char ch) {
-    return isalnum(ch) || ch == '_' || ch == '-';
+    return isalnum(ch) || ch == '_' || ch == '#' || ch == '.';
 }
 
 std::string LibBoolEE::removeWhitespaces(const std::string &source) {
     std::string result;
     for (int i = 0; i < static_cast<int>(source.size()); i++) {
         if (!isspace(source.at(i))) {
+            result += source.at(i);
+        }
+    }
+    return result;
+}
+
+std::string LibBoolEE::removeCharacter(const std::string &source, const char ch) {
+    std::string result;
+    for (int i = 0; i < static_cast<int>(source.size()); i++) {
+        if (ch != source.at(i)) {
             result += source.at(i);
         }
     }

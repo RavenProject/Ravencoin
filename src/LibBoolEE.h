@@ -45,6 +45,12 @@ public:
     // @return	true iff the formula is true under the valuation (where the valuation are pairs (variable,value))
     static bool resolve(const std::string & source, const Vals & valuation);
 
+    // @return  new string made from the source by removing whitespaces
+    static std::string removeWhitespaces(const std::string & source);
+
+    // @return new string made from the source by removing removal all character that match the given character
+    static std::string removeCharacter(const std::string &source, const char ch);
+
 private:
     static std::vector<std::string> singleParse(const std::string & formula, const char op);
 
@@ -57,9 +63,6 @@ private:
 
     // @return	new string made from the source by removing the leading and trailing white spaces
     static std::string trim(const std::string & source);
-
-    // @return  new string made from the source by removing whitespaces
-    static std::string removeWhitespaces(const std::string & source);
 };
 
 #endif
