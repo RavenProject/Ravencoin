@@ -179,10 +179,6 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                     if (fVerifierChanged && !assetsCache->AddRestrictedVerifier(asset.strName, verifier.verifier_string))
                         error("%s : Failed at adding a restricted verifier to our cache: asset: %s, verifier : %s",
                               asset.strName, verifier.verifier_string);
-
-                    if (fVerifierChanged) {
-                        assetsCache->mapReissuedVerifierStrings[asset.strName] = verifier.verifier_string;
-                    }
                 }
 
                 // If any of the following items were changed by reissuing, we need to database the old values so it can be undone correctly
