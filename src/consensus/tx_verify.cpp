@@ -232,7 +232,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
 
                 if (assetCache) {
                     std::string strError = "";
-                    if (!verifier.IsValid(*assetCache, strError))
+                    if (!verifier.IsValid(*assetCache, "", strError))
                         return state.DoS(100, false, REJECT_INVALID, "bad_txns-null-data-verifier: " + strError);
                 }
 
@@ -306,7 +306,16 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     if (!AreRestrictedAssetsDeployed())
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-restricted-before-it-is-active");
 
-                    // TODO, check the destination address, and make sure that the restricted asset can be sent to it
+                    if (assetCache) {
+                        // TODO remove this log print before mainnet release
+                        LogPrintf("%s : Checking restricted transfer: %s, amount: %d, address: %s\n", __func__, transfer.strName, transfer.nAmount, address);
+                        std::string strError = "";
+                        if (!transfer.CheckAgainstVerifyString(*assetCache, address, strError)) {
+                            error("%s : %s", __func__, strError);
+                            return state.DoS(100, false, REJECT_INVALID,
+                                             "bad-txns-transfer-restricted-asset-failed-verifier-check");
+                        }
+                    }
                 }
 
                 // If the transfer is a qualifier channel asset.

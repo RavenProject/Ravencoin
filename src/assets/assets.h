@@ -364,6 +364,9 @@ bool IsUniqueTagValid(const std::string& tag);
 //! Check if an asset is an owner
 bool IsAssetNameAnOwner(const std::string& name);
 
+//! Check if an asset is a restricted asset
+bool IsAssetNameAnRestricted(const std::string& name);
+
 //! Check if an asset is a message channel
 bool IsAssetNameAnMsgChannel(const std::string& name);
 
@@ -491,6 +494,6 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
 
 /** Helper method for extracting #TAGS from a verifier string */
 bool ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag = true);
-bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, bool fWithTags = true);
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, std::string check_address = "", bool fWithTags = true);
 std::string GetStrippedVerifierString(const std::string& verifier);
 #endif //RAVENCOIN_ASSET_PROTOCOL_H
