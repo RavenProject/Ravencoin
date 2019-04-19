@@ -3470,10 +3470,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 tempSet.insert(setAssets.begin(), setAssets.end());
 
                 // Fill in dummy signatures for fee calculation.
-                if (!DummySignTx(txNew, tempSet)) {
-                    strFailReason = _("Signing transaction for fee calculation failed");
-                    return false;
-                }
+                DummySignTx(txNew, tempSet);
 
                 nBytes = GetVirtualTransactionSize(txNew);
 

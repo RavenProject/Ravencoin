@@ -1254,9 +1254,15 @@ public:
 // Helper for producing a bunch of max-sized low-S signatures (eg 72 bytes)
 // ContainerType is meant to hold pair<CWalletTx *, int>, and be iterable
 // so that each entry corresponds to each vIn, in order.
+// Returns true if all inputs could be signed normally, false if any were padded out for sizing purposes.
 template <typename ContainerType>
 bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins) const
 {
+    bool allSigned = true;
+
+    const std::string zeros = "000000000000000000000000000000000000000000000000000000000000000000000000";
+    const unsigned char* cstrZeros = (unsigned char*)zeros.c_str();
+
     // Fill in dummy signatures for fee calculation.
     int nIn = 0;
     for (const auto& coin : coins)
@@ -1266,14 +1272,18 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins
 
         if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, sigdata))
         {
-            return false;
+            // just add dummy 72 bytes as sigdata if this fails (can't necessarily sign for all inputs)
+            CScript dummyScript = CScript(cstrZeros, cstrZeros + 72);
+            SignatureData dummyData = SignatureData(dummyScript);
+            UpdateTransaction(txNew, nIn, dummyData);
+            allSigned = false;
         } else {
             UpdateTransaction(txNew, nIn, sigdata);
         }
 
         nIn++;
     }
-    return true;
+    return allSigned;
 }
 
 #endif // RAVEN_WALLET_WALLET_H
