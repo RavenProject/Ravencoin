@@ -344,6 +344,7 @@ public:
     bool VerifyNewRestrictedAsset(std::string& strError) const;
 
     bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const;
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const;
 
     /** RVN END */
 

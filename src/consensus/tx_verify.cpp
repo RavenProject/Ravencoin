@@ -420,8 +420,39 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 IsAssetNameValid(reissue.strName, type);
 
                 // If this is a reissuance of a restricted asset, mark it as such, so we can check to make sure only valid verifier string tx are added to the chain
-                if (type == AssetType::RESTRICTED)
+                if (type == AssetType::RESTRICTED) {
+                    CNullAssetTxVerifierString new_verifier;
+                    bool fNotFound = false;
+
+                    // Try and get the verifier string if it was changed
+                    if (!tx.GetVerifierStringFromTx(new_verifier, strError, fNotFound)) {
+                        // If it return false for any other reason besides not being found, fail the transaction check
+                        if (!fNotFound) {
+                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-restricted-verifier-" + strError);
+                        }
+                    }
+
+                    // If we are reissuing an assets, we need to check to make sure the destination address is valid with the current or new verifier string
+                    if (reissue.nAmount > 0) {
+                        // If it wasn't found, get the current verifier and validate against it
+                        if (fNotFound) {
+                            CNullAssetTxVerifierString current_verifier;
+                            if (assetCache->GetAssetVerifierStringIfExists(reissue.strName, current_verifier)) {
+                                if (!CheckVerifierString(*assetCache, current_verifier.verifier_string, strAddress, strError, false))
+                                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-restricted-verifier-failed-current-" + strError);
+                            } else {
+                                // This should happen, but if it does. The wallet needs to shutdown,
+                                // TODO, remove this after restricted assets have been tested in testnet for some time, and this hasn't happened yet. It this has happened. Investigation is required by the dev team
+                                error("%s : failed to get verifier string from a restricted asset, this shouldn't happen, database is out of sync. Reindex required. Please report this is to development team asset name: %s, txhash : %s",__func__, reissue.strName, tx.GetHash().GetHex());
+                                return state.DoS(100, false, REJECT_INVALID, "failed to get verifier string from a restricted asset, database is out of sync. Reindex required. Please report this is to development team");
+                            }
+                        } else {
+                            if (!CheckVerifierString(*assetCache, new_verifier.verifier_string, strAddress, strError, false))
+                                return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-restricted-verifier-failed-new-" + strError);
+                        }
+                    }
                     fContainsRestrictedAssetReissue = true;
+                }
 
             } else if (tx.IsNewUniqueAsset()) {
 
@@ -502,7 +533,11 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 // Get verifier string
                 CNullAssetTxVerifierString verifier;
                 if (!tx.GetVerifierStringFromTx(verifier, strError))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-" + strError);
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-search-" + strError);
+
+                // Check the verifier string against the destination address
+                if (!verifier.IsValid(*assetCache, strAddress, strError))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-valid-" + strError);
 
                 // Mark that this transaction has a restricted asset issuance, for checks later with the verifier string tx
                 fContainsNewRestrictedAsset = true;

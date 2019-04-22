@@ -37,7 +37,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "issuerestricted", 5, "reissuable" },
     { "issuerestricted", 6, "has_ipfs" },
     { "reissuerestricted", 1, "qty" },
-    { "reissuerestricted", 2, "change_verifier" },
+    { "reissuerestricted", 3, "change_verifier" },
     { "reissuerestricted", 6, "new_unit" },
     { "reissuerestricted", 7, "reissuable" },
     { "issueunique", 1, "asset_tags"},

@@ -494,6 +494,6 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
 
 /** Helper method for extracting #TAGS from a verifier string */
 bool ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag = true);
-bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, std::string check_address = "", bool fWithTags = true);
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string check_address, std::string& strError, bool fWithTags = true);
 std::string GetStrippedVerifierString(const std::string& verifier);
 #endif //RAVENCOIN_ASSET_PROTOCOL_H
