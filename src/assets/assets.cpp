@@ -1479,8 +1479,9 @@ bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
     return true;
 }
 
-bool CTransaction::GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const
+bool CTransaction::GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const
 {
+    fNotFound = false;
     bool found = false;
     int count = 0;
     for (auto out : vout) {
@@ -1500,7 +1501,19 @@ bool CTransaction::GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier,
         }
     }
 
+    // Set error message, for if it returns false
+    if (!found) {
+        fNotFound = true;
+        strError = _("Verifier string not found");
+    }
+
     return found && count == 1;
+}
+
+bool CTransaction::GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const
+{
+    bool fNotFound = false;
+    return GetVerifierStringFromTx(verifier, strError, fNotFound);
 }
 
 bool CTransaction::IsReissueAsset() const
@@ -4458,7 +4471,7 @@ CNullAssetTxVerifierString::CNullAssetTxVerifierString(const std::string &verifi
 
 bool CNullAssetTxVerifierString::IsValid(CAssetsCache &assetsCache, std::string check_address, std::string &strError) const
 {
-    if (!CheckVerifierString(assetsCache, verifier_string, strError, check_address, false))
+    if (!CheckVerifierString(assetsCache, verifier_string, check_address, strError, false))
         return false;
 
     return true;
@@ -4707,28 +4720,35 @@ std::string GetStrippedVerifierString(const std::string& verifier)
     return str_without_qualifier_tags;
 }
 
-bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string& strError, std::string check_address, bool fWithTags)
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string check_address, std::string& strError, bool fWithTags)
 {
+    // If verifier string is true, always return true
     if (verifier == "true") {
         return true;
     }
 
+    // If verifier string is empty, return false
     if (verifier.empty()) {
         strError = _("Verifier string can not be empty. To default to true, use \"true\"");
         return false;
     }
 
+    // Remove all white spaces, and # from the string as this is how it will be stored in database, and in the script
     std::string strippedVerifier = GetStrippedVerifierString(verifier);
 
+    // Check the stripped size to make sure it isn't over 80
     if (strippedVerifier.length() > 80){
         strError = _("Verifier string has length greater than 80 after whitespaces and '#' are removed");
         return false;
     }
 
+    // Create a set that will store the each qualifier
     std::set<std::string> setFoundQualifiers;
-    // Get the qualifiers from the verifier string
+
+    // Extract the qualifiers from the verifier string
     ExtractVerifierStringQualifiers(verifier, setFoundQualifiers, fWithTags);
 
+    // Loop through each qualifier and make sure that the asset exists
     for(auto qualifier : setFoundQualifiers) {
         std::string search = qualifier;
         if (!fWithTags)
@@ -4739,8 +4759,10 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
         }
     }
 
+    // Create an object that stores if an address contains a qualifier
     LibBoolEE::Vals vals;
 
+    // If the check address is empty
     if (check_address == "") {
         // set all qualifiers in the verifier to true
         for (auto qualifier : setFoundQualifiers) {
@@ -4761,8 +4783,13 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
     }
 
     try {
-        if (check_address != "")
-            return LibBoolEE::resolve(verifier, vals);
+        if (check_address != "") {
+            bool ret = LibBoolEE::resolve(verifier, vals);
+            if (!ret) {
+                strError = _("The address ") + check_address + _(" failed to verify against: ") + "\"" + verifier + "\"";
+            }
+            return ret;
+        }
         else
             LibBoolEE::resolve(verifier, vals);
         return true;

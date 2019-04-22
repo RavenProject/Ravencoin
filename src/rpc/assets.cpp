@@ -2109,21 +2109,20 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
 
 UniValue issuerestricted(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 3 || request.params.size() > 8)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 4 || request.params.size() > 8)
         throw std::runtime_error(
-                "issuerestricted \"asset_name\" qty \"verifier\" \"( to_address )\" \"( change_address )\" ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
+                "issuerestricted \"asset_name\" qty \"verifier\" \"to_address\" \"( change_address )\" ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
                 + RestrictedActivationWarning() +
                 "\nIssue a restricted asset.\n"
                 "Restricted asset names must not conflict with any existing restricted asset.\n"
                 "Restricted assets have units set to 0.\n"
-                "Reissuable is true/false for whether additional assets can be created\n"
-                "Qualifier"
+                "Reissuable is true/false for whether additional assets can be created and if the verifier string can be changed\n"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"            (string, required) a unique name, starts with '$'\n"
                 "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
                 "3. \"verifier\"              (string, required) the KYC string that is evaluated when restricted asset transfers are made\n"
-                "4. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
+                "4. \"to_address\"            (string), required), address asset will be sent to, this address must obey the verifier rules\n"
                 "5. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
                 "6. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
                 "7. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
@@ -2133,7 +2132,7 @@ UniValue issuerestricted(const JSONRPCRequest& request)
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\"")
+                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\"")
                 + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\"")
                 + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\"")
                 + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" true")
@@ -2163,43 +2162,23 @@ UniValue issuerestricted(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
+    // Get the remaining three required parameters
     CAmount nAmount = AmountFromValue(request.params[1]);
-
     std::string verifier_string = request.params[2].get_str();
+    std::string to_address = request.params[3].get_str();
 
-    std::string strError = "";
-    if (!CheckVerifierString(*passets, verifier_string, strError))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
-
-    std::string to_address = "";
-    if (request.params.size() > 3)
-        to_address = request.params[3].get_str();
-
-    if (!to_address.empty()) {
-        CTxDestination destination = DecodeDestination(to_address);
-        if (!IsValidDestination(destination)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
-        }
-    } else {
-        // Create a new address
-        std::string strAccount;
-
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
-
-        to_address = EncodeDestination(keyID);
+    // Validate the address
+    CTxDestination destination = DecodeDestination(to_address);
+    if (!IsValidDestination(destination)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
+    // Validate the verifier string with the given to_address
+    std::string strError = "";
+    if (!CheckVerifierString(*passets, verifier_string, to_address, strError))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+
+    // Get the change address if one was given
     std::string changeAddress = "";
     if (request.params.size() > 4)
         changeAddress = request.params[4].get_str();
@@ -2273,23 +2252,23 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"asset_name\"            (string, required) a unique name, starts with '$'\n"
                 "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
-                "3. \"change_verifier\"       (boolean, optional, default=false) If the verifier string will get changed\n"
-                "4. \"verifier\"              (string, optional, default=\"\") the KYC string that is evaluated when restricted asset transfers are made\n"
-                "5. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
+                "3. \"to_address\"            (string, required) address asset will be sent to, this address must have the verifier string requirements\n"
+                "4. \"change_verifier\"       (boolean, optional, default=false) If the verifier string will get changed\n"
+                "5. \"verifier\"              (string, optional, default=\"\") the KYC string that is evaluated when restricted asset transfers are made\n"
                 "6. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
                 "7. \"new_unit\"              (numeric, optional, default=-1), the new units that will be associated with the asset\n"
                 "8. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
-                "9. \"ipfs_hash\"            (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
+                "9. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\"")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\" \"myaddress\"")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\" \"myaddress\" \"changeaddress\"")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 true \"KYC && !AML\" \"myaddress\" \"changeaddress\" true")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000 false \"\" \"myaddress\" \"changeaddress\" -1 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\"")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" ")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\"")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\" true")
+                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" false \"\" \"changeaddress\" -1 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -2316,49 +2295,45 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
     }
 
     CAmount nAmount = AmountFromValue(request.params[1]);
+    std::string to_address = request.params[2].get_str();
+
+    CTxDestination destination = DecodeDestination(to_address);
+    if (!IsValidDestination(destination)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+    }
 
     bool fChangeVerifier = false;
-    if (request.params.size() > 2)
-        fChangeVerifier = request.params[2].get_bool();
+    if (request.params.size() > 3)
+        fChangeVerifier = request.params[3].get_bool();
 
     std::string verifier_string = "";
-    if (request.params.size() > 3)
-        verifier_string = request.params[3].get_str();
-
-    if (fChangeVerifier) {
-        std::string strError = "";
-        if (!CheckVerifierString(*passets, verifier_string, strError))
-            throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
-    }
-
-    std::string to_address = "";
     if (request.params.size() > 4)
-        to_address = request.params[4].get_str();
+        verifier_string = request.params[4].get_str();
 
-    if (!to_address.empty()) {
-        CTxDestination destination = DecodeDestination(to_address);
-        if (!IsValidDestination(destination)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
-        }
-    } else {
-        // Create a new address
-        std::string strAccount;
-
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
-
-        to_address = EncodeDestination(keyID);
-    }
+    // If we are changing the verifier string, check to make sure the new address meets the new verifier string rules
+//    if (fChangeVerifier) {
+//        if (nAmount > 0) {
+//            std::string strError = "";
+//            if (!CheckVerifierString(*passets, verifier_string, to_address, strError))
+//                throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+//        } else {
+//            std::string strError = "";
+//            if (!CheckVerifierString(*passets, verifier_string, "", strError))
+//                throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+//        }
+//    } else {
+//        // If the user is reissuing more assets, check to make sure that to address meets the verifier string check
+//        if (nAmount > 0) {
+//            CNullAssetTxVerifierString verifier;
+//            if (passets->GetAssetVerifierStringIfExists(assetName, verifier)) {
+//                std::string strError = "";
+//                if (!CheckVerifierString(*passets, verifier.verifier_string, to_address, strError))
+//                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+//            } else {
+//                throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to get the assets cache pointer");
+//            }
+//        }
+//    }
 
     std::string changeAddress = "";
     if (request.params.size() > 5)
@@ -2426,7 +2401,7 @@ UniValue checkverifierstring(const JSONRPCRequest& request)
         throw std::runtime_error(
                 "checkverifierstring\n"
                 + RestrictedActivationWarning() +
-                "\nChecks to see if a restricted asset is globally frozen\n"
+                "\nChecks to see if the given verifier string is valid\n"
 
                 "\nArguments:\n"
                 "1. \"verifier_string\"   (string), required) the verifier string to check\n"
@@ -2448,7 +2423,7 @@ UniValue checkverifierstring(const JSONRPCRequest& request)
     std::string verifier_string = request.params[0].get_str();
 
     std::string strError;
-    if (!CheckVerifierString(*passets, verifier_string, strError)) {
+    if (!CheckVerifierString(*passets, verifier_string, "", strError)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
     }
 
