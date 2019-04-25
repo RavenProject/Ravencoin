@@ -463,14 +463,13 @@ UniValue issue(const JSONRPCRequest& request)
         address = EncodeDestination(keyID);
     }
 
-    std::string changeAddress = "";
-    if (request.params.size() > 3)
-        changeAddress = request.params[3].get_str();
-    if (!changeAddress.empty()) {
-        CTxDestination destination = DecodeDestination(changeAddress);
+    std::string change_address = "";
+    if (request.params.size() > 3) {
+        change_address = request.params[3].get_str();
+        CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + changeAddress);
+                               std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
         }
     }
 
@@ -519,7 +518,7 @@ UniValue issue(const JSONRPCRequest& request)
     std::pair<int, std::string> error;
 
     CCoinControl crtl;
-    crtl.destChange = DecodeDestination(changeAddress);
+    crtl.destChange = DecodeDestination(change_address);
 
     // Create the Transaction
     if (!CreateAssetTransaction(pwallet, crtl, asset, address, error, transaction, reservekey, nRequiredFee))
@@ -1079,7 +1078,7 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
 
 UniValue transfer(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 5)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 6)
         throw std::runtime_error(
                 "transfer \"asset_name\" qty \"to_address\" \"message\" expire_time\n"
                 + AssetActivationWarning() +
@@ -1089,8 +1088,9 @@ UniValue transfer(const JSONRPCRequest& request)
                 "1. \"asset_name\"               (string, required) name of asset\n"
                 "2. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
-                "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
-                "5. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
+                "4. \"change_address\"           (string, optional, default = \"\") the transaction change will be sent to this address\n"
+                "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
+                "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
                 "\nResult:\n"
                 "txid"
@@ -1099,8 +1099,8 @@ UniValue transfer(const JSONRPCRequest& request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
-                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
+                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
+                + HelpExampleCli("transfer", "\"ASSET_NAME\" 20 \"address\" \"\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -1117,9 +1117,23 @@ UniValue transfer(const JSONRPCRequest& request)
 
     CAmount nAmount = AmountFromValue(request.params[1]);
 
-    std::string address = request.params[2].get_str();
+    std::string to_address = request.params[2].get_str();
+    CTxDestination to_dest = DecodeDestination(to_address);
+    if (!IsValidDestination(to_dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+    }
 
-    if (request.params.size() > 3) {
+    std::string change_address = "";
+    if(request.params.size() > 3) {
+        change_address = request.params[3].get_str();
+
+        CTxDestination change_dest = DecodeDestination(change_address);
+        if (!IsValidDestination(change_dest)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
+        }
+    }
+
+    if (request.params.size() > 4) {
         if (!AreMessagingDeployed()) {
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Unable to send messages until Messaging RIP5 is enabled"));
         }
@@ -1127,15 +1141,15 @@ UniValue transfer(const JSONRPCRequest& request)
 
     bool fMessageCheck = false;
     std::string message = "";
-    if (request.params.size() > 3) {
+    if (request.params.size() > 4) {
         fMessageCheck = true;
-        message = request.params[3].get_str();
+        message = request.params[4].get_str();
     }
 
     int64_t expireTime = 0;
     if (!message.empty()) {
-        if (request.params.size() > 4) {
-            expireTime = request.params[4].get_int64();
+        if (request.params.size() > 5) {
+            expireTime = request.params[5].get_int64();
         }
     }
 
@@ -1147,12 +1161,13 @@ UniValue transfer(const JSONRPCRequest& request)
 
     CAssetTransfer transfer(asset_name, nAmount, DecodeAssetData(message), expireTime);
 
-    vTransfers.emplace_back(std::make_pair(transfer, address));
+    vTransfers.emplace_back(std::make_pair(transfer, to_address));
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
 
     CCoinControl ctrl;
+    ctrl.destChange = DecodeDestination(change_address);
 
     // Create the Transaction
     if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
@@ -2175,18 +2190,18 @@ UniValue issuerestricted(const JSONRPCRequest& request)
 
     // Validate the verifier string with the given to_address
     std::string strError = "";
-    if (!CheckVerifierString(*passets, verifier_string, to_address, strError))
+    if (!CheckVerifierString(*passets, verifier_string, to_address, strError, true))
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
 
     // Get the change address if one was given
-    std::string changeAddress = "";
+    std::string change_address = "";
     if (request.params.size() > 4)
-        changeAddress = request.params[4].get_str();
-    if (!changeAddress.empty()) {
-        CTxDestination destination = DecodeDestination(changeAddress);
+        change_address = request.params[4].get_str();
+    if (!change_address.empty()) {
+        CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + changeAddress);
+                               std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
         }
     }
 
@@ -2222,7 +2237,7 @@ UniValue issuerestricted(const JSONRPCRequest& request)
     std::pair<int, std::string> error;
 
     CCoinControl crtl;
-    crtl.destChange = DecodeDestination(changeAddress);
+    crtl.destChange = DecodeDestination(change_address);
 
     std::string verifierStripped = GetStrippedVerifierString(verifier_string);
 
@@ -2297,8 +2312,8 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
     CAmount nAmount = AmountFromValue(request.params[1]);
     std::string to_address = request.params[2].get_str();
 
-    CTxDestination destination = DecodeDestination(to_address);
-    if (!IsValidDestination(destination)) {
+    CTxDestination to_dest = DecodeDestination(to_address);
+    if (!IsValidDestination(to_dest)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
@@ -2310,39 +2325,13 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
     if (request.params.size() > 4)
         verifier_string = request.params[4].get_str();
 
-    // If we are changing the verifier string, check to make sure the new address meets the new verifier string rules
-//    if (fChangeVerifier) {
-//        if (nAmount > 0) {
-//            std::string strError = "";
-//            if (!CheckVerifierString(*passets, verifier_string, to_address, strError))
-//                throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
-//        } else {
-//            std::string strError = "";
-//            if (!CheckVerifierString(*passets, verifier_string, "", strError))
-//                throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
-//        }
-//    } else {
-//        // If the user is reissuing more assets, check to make sure that to address meets the verifier string check
-//        if (nAmount > 0) {
-//            CNullAssetTxVerifierString verifier;
-//            if (passets->GetAssetVerifierStringIfExists(assetName, verifier)) {
-//                std::string strError = "";
-//                if (!CheckVerifierString(*passets, verifier.verifier_string, to_address, strError))
-//                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
-//            } else {
-//                throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to get the assets cache pointer");
-//            }
-//        }
-//    }
-
-    std::string changeAddress = "";
-    if (request.params.size() > 5)
-        changeAddress = request.params[5].get_str();
-    if (!changeAddress.empty()) {
-        CTxDestination destination = DecodeDestination(changeAddress);
-        if (!IsValidDestination(destination)) {
+    std::string change_address = "";
+    if (request.params.size() > 5) {
+        change_address = request.params[5].get_str();
+        CTxDestination change_dest = DecodeDestination(change_address);
+        if (!IsValidDestination(change_dest)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + changeAddress);
+                               std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
         }
     }
 
@@ -2377,7 +2366,7 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
     std::pair<int, std::string> error;
 
     CCoinControl crtl;
-    crtl.destChange = DecodeDestination(changeAddress);
+    crtl.destChange = DecodeDestination(change_address);
 
     std::string verifierStripped = GetStrippedVerifierString(verifier_string);
 
@@ -2423,7 +2412,7 @@ UniValue checkverifierstring(const JSONRPCRequest& request)
     std::string verifier_string = request.params[0].get_str();
 
     std::string strError;
-    if (!CheckVerifierString(*passets, verifier_string, "", strError)) {
+    if (!CheckVerifierString(*passets, verifier_string, "", strError, true)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
     }
 
@@ -2443,7 +2432,7 @@ static const CRPCCommand commands[] =
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
     { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address", "message", "expire_time"}},
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address", "message", "expire_time"}},
-    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time"}},
+    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "change_address", "message", "expire_time"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
