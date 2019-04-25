@@ -16,6 +16,7 @@
 #include <cmath>
 #include <wallet/wallet.h>
 #include <base58.h>
+#include <tinyformat.h>
 
 // TODO remove the following dependencies
 #include "chain.h"
@@ -227,12 +228,20 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-verifier-data-serialization");
                 }
 
+                // All restricted verifiers should have white spaces stripped from the data before it is added to a script
+                if (verifier.verifier_string.find_first_of(' ') != -1)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-verifier-data-contained-whitespaces");
+
+                // All restricted verifiers should have # stripped from that data before it is added to a script
+                if (verifier.verifier_string.find_first_of('#') != -1)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-verifier-data-contained-qualifier-character-#");
+
                 if (fContainsNullAssetVerifierTx)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-verifier-per-tx");
 
                 if (assetCache) {
                     std::string strError = "";
-                    if (!verifier.IsValid(*assetCache, "", strError))
+                    if (!verifier.IsValid(*assetCache, "", strError, fCheckAssetDuplicate, fForceDuplicateCheck))
                         return state.DoS(100, false, REJECT_INVALID, "bad_txns-null-data-verifier: " + strError);
                 }
 
@@ -310,7 +319,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                         // TODO remove this log print before mainnet release
                         LogPrintf("%s : Checking restricted transfer: %s, amount: %d, address: %s\n", __func__, transfer.strName, transfer.nAmount, address);
                         std::string strError = "";
-                        if (!transfer.CheckAgainstVerifyString(*assetCache, address, strError)) {
+                        if (!transfer.CheckAgainstVerifyString(*assetCache, address, strError, fCheckAssetDuplicate, fForceDuplicateCheck)) {
                             error("%s : %s", __func__, strError);
                             return state.DoS(100, false, REJECT_INVALID,
                                              "bad-txns-transfer-restricted-asset-failed-verifier-check");
@@ -438,7 +447,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                         if (fNotFound) {
                             CNullAssetTxVerifierString current_verifier;
                             if (assetCache->GetAssetVerifierStringIfExists(reissue.strName, current_verifier)) {
-                                if (!CheckVerifierString(*assetCache, current_verifier.verifier_string, strAddress, strError, false))
+                                if (!CheckVerifierString(*assetCache, current_verifier.verifier_string, strAddress, strError, false, fCheckAssetDuplicate, fForceDuplicateCheck))
                                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-restricted-verifier-failed-current-" + strError);
                             } else {
                                 // This should happen, but if it does. The wallet needs to shutdown,
@@ -447,7 +456,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                                 return state.DoS(100, false, REJECT_INVALID, "failed to get verifier string from a restricted asset, database is out of sync. Reindex required. Please report this is to development team");
                             }
                         } else {
-                            if (!CheckVerifierString(*assetCache, new_verifier.verifier_string, strAddress, strError, false))
+                            if (!CheckVerifierString(*assetCache, new_verifier.verifier_string, strAddress, strError, false, fCheckAssetDuplicate, fForceDuplicateCheck))
                                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-restricted-verifier-failed-new-" + strError);
                         }
                     }
@@ -536,7 +545,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-search-" + strError);
 
                 // Check the verifier string against the destination address
-                if (!verifier.IsValid(*assetCache, strAddress, strError))
+                if (!verifier.IsValid(*assetCache, strAddress, strError, fCheckAssetDuplicate, fForceDuplicateCheck))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-verifier-valid-" + strError);
 
                 // Mark that this transaction has a restricted asset issuance, for checks later with the verifier string tx

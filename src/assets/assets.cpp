@@ -1654,7 +1654,7 @@ bool CAssetTransfer::IsValid(std::string& strError) const
     return true;
 }
 
-bool CAssetTransfer::CheckAgainstVerifyString(CAssetsCache &assetsCache, const std::string& address, std::string& strError)
+bool CAssetTransfer::CheckAgainstVerifyString(CAssetsCache &assetsCache, const std::string& address, std::string& strError, bool fCheckAssetDuplicate, bool fForceDuplicateCheck)
 {
     // Get the verifier string
     CNullAssetTxVerifierString verifier;
@@ -1665,7 +1665,7 @@ bool CAssetTransfer::CheckAgainstVerifyString(CAssetsCache &assetsCache, const s
     }
 
     // Check if verifier is valid given the destination address
-    if (!verifier.IsValid(assetsCache, address, strError)) {
+    if (!verifier.IsValid(assetsCache, address, strError, fCheckAssetDuplicate, fForceDuplicateCheck)) {
         return false;
     }
 
@@ -4141,6 +4141,31 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     }
 
     if (asset_type == AssetType::RESTRICTED) {
+        // If we are changing the verifier string, check to make sure the new address meets the new verifier string rules
+        if (verifier_string) {
+            if (reissueAsset.nAmount > 0) {
+                std::string strError = "";
+                if (!CheckVerifierString(*passets, *verifier_string, address, strError, true))
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+            } else {
+                // If we aren't adding any assets but we are changing the verifier string, Check to make sure the verifier string parses correctly
+                std::string strError = "";
+                if (!CheckVerifierString(*passets, *verifier_string, "", strError, true))
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+            }
+        } else {
+            // If the user is reissuing more assets, and they aren't changing the verifier string, check it against the current verifier string
+            if (reissueAsset.nAmount > 0) {
+                CNullAssetTxVerifierString verifier;
+                if (!passets->GetAssetVerifierStringIfExists(reissueAsset.strName, verifier))
+                    throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to get the assets cache pointer");
+
+                std::string strError = "";
+                if (!CheckVerifierString(*passets, verifier.verifier_string, address, strError, true))
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+            }
+        }
+
         // Every restricted asset issuance must have a verifier string
         if (verifier_string) {
             // Create the asset null data transaction that will get added to the issue transaction
@@ -4230,6 +4255,18 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
             if (!transfer.first.CheckAgainstVerifyString(*passets, address, strError)) {
                 error = std::make_pair(RPC_INVALID_PARAMETER, strError);
                 return false;
+            }
+
+            if (!coinControl.destChange.empty()) {
+                std::string change_address = EncodeDestination(coinControl.destChange);
+                // If this is a transfer of a restricted asset, check the destination address against the verifier string
+                CNullAssetTxVerifierString verifier;
+                if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier))
+                    throw JSONRPCError(RPC_DATABASE_ERROR, _("Unable to get restricted assets verifier string. Database out of sync. Reindex required"));
+
+                if (!CheckVerifierString(*passets, verifier.verifier_string, change_address, strError))
+                    throw JSONRPCError(RPC_DATABASE_ERROR,
+                                       std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
             }
         }
 
@@ -4469,9 +4506,9 @@ CNullAssetTxVerifierString::CNullAssetTxVerifierString(const std::string &verifi
     this->verifier_string = verifier;
 }
 
-bool CNullAssetTxVerifierString::IsValid(CAssetsCache &assetsCache, std::string check_address, std::string &strError) const
+bool CNullAssetTxVerifierString::IsValid(CAssetsCache &assetsCache, std::string check_address, std::string &strError, bool fCheckAssetDuplicate, bool fForceDuplicateCheck) const
 {
-    if (!CheckVerifierString(assetsCache, verifier_string, check_address, strError, false))
+    if (!CheckVerifierString(assetsCache, verifier_string, check_address, strError, false, fCheckAssetDuplicate, fForceDuplicateCheck))
         return false;
 
     return true;
@@ -4720,7 +4757,7 @@ std::string GetStrippedVerifierString(const std::string& verifier)
     return str_without_qualifier_tags;
 }
 
-bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string check_address, std::string& strError, bool fWithTags)
+bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string check_address, std::string& strError, bool fWithTags, bool fCheckAssetDuplicate, bool fForceDuplicateCheck)
 {
     // If verifier string is true, always return true
     if (verifier == "true") {
@@ -4753,9 +4790,11 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
         std::string search = qualifier;
         if (!fWithTags)
             search = QUALIFIER_CHAR + qualifier;
-        if (!cache.CheckIfAssetExists(search)) {
-            strError = _("Verifier string contains qualifier that isn't in the chain: ") + qualifier;
-            return false;
+        if (fCheckAssetDuplicate) {
+            if (!cache.CheckIfAssetExists(search, fForceDuplicateCheck)) {
+                strError = _("Verifier string contains qualifier that isn't in the chain: ") + qualifier;
+                return false;
+            }
         }
     }
 
@@ -4783,16 +4822,17 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
     }
 
     try {
-        if (check_address != "") {
+        if (check_address != "" && fForceDuplicateCheck && fCheckAssetDuplicate) {
             bool ret = LibBoolEE::resolve(verifier, vals);
             if (!ret) {
                 strError = _("The address ") + check_address + _(" failed to verify against: ") + "\"" + verifier + "\"";
             }
             return ret;
         }
-        else
+        else {
             LibBoolEE::resolve(verifier, vals);
-        return true;
+            return true;
+        }
     } catch (...) {
         strError = _("Verifier string failed to resolve. Please check string syntax");
         return false;

@@ -3375,13 +3375,78 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
                     for (auto assetChange : mapAssetChange) {
                         if (assetChange.second > 0) {
-                            CScript scriptAssetChange = scriptChange;
-                            CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
+                            if (IsAssetNameAnRestricted(assetChange.first))
+                            {
+                                // Get the verifier string for the restricted asset
+                                CNullAssetTxVerifierString verifier;
+                                if (!passets->GetAssetVerifierStringIfExists(assetChange.first, verifier)) {
+                                    strFailReason = _("Verifier String for asset trasnfer, not found");
+                                    return false;
+                                }
 
-                            assetTransfer.ConstructTransaction(scriptAssetChange);
-                            CTxOut newAssetTxOut(0, scriptAssetChange);
+                                // Get the change address
+                                CTxDestination dest;
+                                if (!ExtractDestination(scriptChange, dest)) {
+                                    strFailReason = _("Failed to extract destination from change script");
+                                    return false;
+                                }
 
-                            txNew.vout.emplace_back(newAssetTxOut);
+                                std::string change_address = EncodeDestination(dest);
+                                bool fFoundValueChangeAddress = false;
+                                // Check the verifier string against the change address, if it fails, we will try to send the change back to the same input that created this transaction
+                                if (!CheckVerifierString(*passets, verifier.verifier_string, change_address, strFailReason)) {
+                                    // Loop through all assets that are inputs into the transaction
+                                    for (auto asset: setAssets) {
+                                        if (asset.txout.scriptPubKey.IsAssetScript()) {
+                                            CAssetOutputEntry outputData;
+                                            if (!GetAssetData(asset.txout.scriptPubKey, outputData)) {
+                                                strFailReason = _("Failed to get asset data from script");
+                                                return false;
+                                            }
+
+                                            // If the asset names don't match, continue through the set of assets
+                                            if (outputData.assetName != assetChange.first)
+                                                continue;
+
+                                            std::string check_address = EncodeDestination(outputData.destination);
+
+                                            if (CheckVerifierString(*passets, verifier.verifier_string, check_address, strFailReason)) {
+                                                fFoundValueChangeAddress = true;
+
+                                                CScript scriptAssetChange = GetScriptForDestination(outputData.destination);
+                                                CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
+
+                                                assetTransfer.ConstructTransaction(scriptAssetChange);
+                                                CTxOut newAssetTxOut(0, scriptAssetChange);
+
+                                                txNew.vout.emplace_back(newAssetTxOut);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } else  {
+                                    fFoundValueChangeAddress = true;
+                                    CScript scriptAssetChange = scriptChange;
+                                    CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
+
+                                    assetTransfer.ConstructTransaction(scriptAssetChange);
+                                    CTxOut newAssetTxOut(0, scriptAssetChange);
+
+                                    txNew.vout.emplace_back(newAssetTxOut);
+                                }
+                                if (!fFoundValueChangeAddress) {
+                                    strFailReason = _("Failed to find restricted asset change address from inputs");
+                                    return false;
+                                }
+                            } else {
+                                CScript scriptAssetChange = scriptChange;
+                                CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
+
+                                assetTransfer.ConstructTransaction(scriptAssetChange);
+                                CTxOut newAssetTxOut(0, scriptAssetChange);
+
+                                txNew.vout.emplace_back(newAssetTxOut);
+                            }
                         }
                     }
                 }
