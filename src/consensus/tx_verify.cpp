@@ -199,6 +199,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         if (txout.scriptPubKey.IsNullAsset()) {
             CNullAssetTxData data;
             std::string address;
+            std::string strError = "";
 
             if (txout.scriptPubKey.IsNullAssetTxDataScript()) {
                 if (!AssetNullDataFromScript(txout.scriptPubKey, data, address))
@@ -213,6 +214,19 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
 
                 if (mapNullDataTxCount.at(pair) > 1)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-change-per-asset-address");
+
+                // Check to make sure that you can only add or remove qualifiers and freezes of addresses, if they don't have that status already
+                if (assetCache && fCheckAssetDuplicate) {
+                    if (IsAssetNameAQualifier(data.asset_name)) {
+                        if (!VerifyQualifierChange(*assetCache, data, address, strError))
+                            return state.DoS(100, false, REJECT_INVALID, strError);
+
+                    } else if (IsAssetNameAnRestricted(data.asset_name)) {
+                        if (!VerifyRestrictedAddressChange(*assetCache, data, address, strError))
+                            return state.DoS(100, false, REJECT_INVALID, strError);
+                    }
+                }
+
             } else if (txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
                 if (!GlobalAssetNullDataFromScript(txout.scriptPubKey, data))
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-global-asset-data-serialization");
@@ -222,6 +236,13 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                 }
 
                 setNullGlobalAssetChanges.insert(data.asset_name);
+
+                // Check to make sure that you can only globally freeze if it is currently unfrozen, and vice-versa
+                if (assetCache && fCheckAssetDuplicate) {
+                    if (!VerifyGlobalRestrictedChange(*assetCache, data, strError))
+                        return state.DoS(100, false, REJECT_INVALID, strError);
+                }
+
             } else if (txout.scriptPubKey.IsNullAssetVerifierTxDataScript()) {
                 CNullAssetTxVerifierString verifier;
                 if (!AssetNullVerifierDataFromScript(txout.scriptPubKey, verifier)) {
@@ -343,7 +364,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
     if (AreRestrictedAssetsDeployed()) {
         for (auto entry: mapNullDataTxCount) {
             if (entry.first.first.front() == RESTRICTED_CHAR) {
-                std::string ownerToken = entry.first.first.substr(1,  entry.first.first.size() -1); // $TOKEN into TOKEN
+                std::string ownerToken = entry.first.first.substr(1,  entry.first.first.size()); // $TOKEN into TOKEN
                 if (!setAssetTransferNames.count(ownerToken + OWNER_TAG)) {
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-restricted-asset-null-tx-without-asset-transfer");
                 }
@@ -356,8 +377,8 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
         }
 
         for (auto name: setNullGlobalAssetChanges) {
-            std::string ownerToken = name.substr(1,  name.size() - 1); // $TOKEN into TOKEN
-            if (!setAssetTransferNames.count(name + OWNER_TAG)) {
+            std::string rootName = name.substr(1,  name.size()); // $TOKEN into TOKEN
+            if (!setAssetTransferNames.count(rootName + OWNER_TAG)) {
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-global-asset-null-tx-without-asset-transfer");
             }
         }

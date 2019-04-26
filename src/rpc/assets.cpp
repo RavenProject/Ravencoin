@@ -158,6 +158,8 @@ UniValue UpdateAddressQualifier(const JSONRPCRequest &request, const int8_t &fla
     CAmount nRequiredFee;
     CCoinControl ctrl;
 
+    ctrl.destChange = DecodeDestination(change_address);
+
     // If the optional change address wasn't given create a new change address for this wallet
     if (change_address == "") {
         CKeyID keyID;
@@ -208,12 +210,6 @@ UniValue UpdateRestrictedAddress(const JSONRPCRequest &request, const int8_t &fl
     // Check asset name and infer assetType
     std::string restricted_name = request.params[0].get_str();
 
-    // Check to see if the given asset name is an owner
-    // If it is an owner, remove the ! at the end of the string
-    if (IsAssetNameAnOwner(restricted_name)) {
-        restricted_name.pop_back();
-    }
-
     AssetType assetType;
     std::string assetError = "";
     if (!IsAssetNameValid(restricted_name, assetType, assetError)) {
@@ -223,9 +219,6 @@ UniValue UpdateRestrictedAddress(const JSONRPCRequest &request, const int8_t &fl
     if (assetType != AssetType::RESTRICTED) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
-
-    // Add back the owner tag
-    restricted_name.push_back('!');
 
     std::string address = request.params[1].get_str();
     CTxDestination destination = DecodeDestination(address);
@@ -262,11 +255,12 @@ UniValue UpdateRestrictedAddress(const JSONRPCRequest &request, const int8_t &fl
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     // Always transfer 1 of the restricted tokens to the change address
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name, 1 * COIN), change_address));
+    // Use the ROOT owner token to make this change occur. if $TOKEN -> Use TOKEN!
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN), change_address));
 
     // Add the asset data with the flag to remove or add the tag 1 = Freeze, 0 = Unfreeze
     std::vector< std::pair<CNullAssetTxData, std::string> > vecAssetData;
-    vecAssetData.push_back(std::make_pair(CNullAssetTxData(restricted_name.substr(0, restricted_name.size() - 1), flag), address));
+    vecAssetData.push_back(std::make_pair(CNullAssetTxData(restricted_name.substr(0, restricted_name.size()), flag), address));
 
     // Create the Transaction
     if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, &vecAssetData))
@@ -298,12 +292,6 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     // Check asset name and infer assetType
     std::string restricted_name = request.params[0].get_str();
 
-    // Check to see if the given asset name is an owner
-    // If it is an owner, remove the ! at the end of the string
-    if (IsAssetNameAnOwner(restricted_name)) {
-        restricted_name.pop_back();
-    }
-
     AssetType assetType;
     std::string assetError = "";
     if (!IsAssetNameValid(restricted_name, assetType, assetError)) {
@@ -313,9 +301,6 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     if (assetType != AssetType::RESTRICTED) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
-
-    // Add back the owner tag
-    restricted_name.push_back('!');
 
     // Get the optional change address
     std::string change_address = "";
@@ -346,11 +331,12 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     // Always transfer 1 of the restricted tokens to the change address
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name, 1 * COIN), change_address));
+    // Use the ROOT owner token to make this change occur. if $TOKEN -> Use TOKEN!
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN), change_address));
 
     // Add the global asset data, 1 = Freeze all transfers, 0 = Allow transfers
     std::vector<CNullAssetTxData> vecGlobalAssetData;
-    vecGlobalAssetData.push_back(CNullAssetTxData(restricted_name.substr(0, restricted_name.size() - 1), flag));
+    vecGlobalAssetData.push_back(CNullAssetTxData(restricted_name.substr(0, restricted_name.size()), flag));
 
     // Create the Transaction
     if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, nullptr, &vecGlobalAssetData))
