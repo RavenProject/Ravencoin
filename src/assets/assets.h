@@ -367,6 +367,9 @@ bool IsAssetNameAnOwner(const std::string& name);
 //! Check if an asset is a restricted asset
 bool IsAssetNameAnRestricted(const std::string& name);
 
+//! Check if an asset is a qualifier asset
+bool IsAssetNameAQualifier(const std::string& name);
+
 //! Check if an asset is a message channel
 bool IsAssetNameAnMsgChannel(const std::string& name);
 
@@ -496,4 +499,11 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
 bool ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag = true);
 bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::string check_address, std::string& strError, bool fWithTags = false, bool fCheckAssetDuplicate = true, bool fForceDuplicateCheck = true);
 std::string GetStrippedVerifierString(const std::string& verifier);
+
+/** Helper methods that validate changes to null asset data transaction databases */
+bool VerifyNullAssetDataFlag(const int& flag, std::string& strError);
+bool VerifyQualifierChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError);
+bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError);
+bool VerifyGlobalRestrictedChange(CAssetsCache& cache, const CNullAssetTxData& data, std::string& strError);
+
 #endif //RAVENCOIN_ASSET_PROTOCOL_H

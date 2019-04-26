@@ -306,6 +306,11 @@ bool IsAssetNameAnRestricted(const std::string& name)
     return IsAssetNameValid(name) && std::regex_match(name, RESTRICTED_INDICATOR);
 }
 
+bool IsAssetNameAQualifier(const std::string& name)
+{
+    return IsAssetNameValid(name) && (std::regex_match(name, QUALIFIER_INDICATOR) || std::regex_match(name, SUB_QUALIFIER_INDICATOR));
+}
+
 bool IsAssetNameAnMsgChannel(const std::string& name)
 {
     return IsAssetNameValid(name) && std::regex_match(name, MSGCHANNEL_INDICATOR);
@@ -4244,7 +4249,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         if (IsAssetNameAnOwner(asset_name)) {
             if (nAmount != OWNER_ASSET_AMOUNT) {
                 error = std::make_pair(RPC_INVALID_PARAMS, std::string(
-                        "When transfer an 'Ownership Asset' the amount must always be 1. Please try again with the amount of 1"));
+                        _("When transferring an 'Ownership Asset' the amount must always be 1. Please try again with the amount of 1")));
                 return false;
             }
         }
@@ -4283,7 +4288,17 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
 
     // If assetTxData is not nullptr, the user wants to add some OP_RVN_ASSET data transactions into the transaction
     if (nullAssetTxData) {
+        std::string strError = "";
         for (auto pair : *nullAssetTxData) {
+
+            if (IsAssetNameAQualifier(pair.first.asset_name)) {
+                if (!VerifyQualifierChange(*passets, pair.first, pair.second, strError))
+                    throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+            } else if (IsAssetNameAnRestricted(pair.first.asset_name)) {
+                if (!VerifyRestrictedAddressChange(*passets, pair.first, pair.second, strError))
+                    throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+            }
+
             CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
             pair.first.ConstructTransaction(dataScript);
 
@@ -4294,7 +4309,12 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
 
     // nullGlobalRestiotionData, the user wants to add OP_RVN_ASSET OP_RVN_ASSET OP_RVN_ASSETS data transaction to the transaction
     if (nullGlobalRestrictionData) {
+        std::string strError = "";
         for (auto dataObject : *nullGlobalRestrictionData) {
+
+            if (!VerifyGlobalRestrictedChange(*passets, dataObject, strError))
+                throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+
             CScript dataScript;
             dataObject.ConstructGlobalRestrictionTransaction(dataScript);
             CRecipient recipient = {dataScript, 0, false};
@@ -4837,4 +4857,86 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
         strError = _("Verifier string failed to resolve. Please check string syntax");
         return false;
     }
+}
+
+bool VerifyNullAssetDataFlag(const int& flag, std::string& strError)
+{
+    // Check the flag
+    if (flag != 0 && flag != 1) {
+        strError = "bad-txns-null-data-flag-must-be-0-or-1";
+        return false;
+    }
+
+    return true;
+}
+
+bool VerifyQualifierChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError)
+{
+    // Check the flag
+    if (!VerifyNullAssetDataFlag(data.flag, strError))
+        return false;
+
+    // Check to make sure we only allow changes to the current status
+    bool fHasQualifier = cache.CheckForAddressQualifier(data.asset_name, address);
+    QualifierType type = data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER;
+    if (type == QualifierType::ADD_QUALIFIER) {
+        if (fHasQualifier) {
+            strError = "bad-txns-null-data-add-qualifier-when-already-assigned";
+            return false;
+        }
+    } else if (type == QualifierType::REMOVE_QUALIFIER) {
+        if (!fHasQualifier) {
+            strError = "bad-txns-null-data-removing-qualifier-when-not-assigned";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError)
+{
+    // Check the flag
+    if (!VerifyNullAssetDataFlag(data.flag, strError))
+        return false;
+
+    // Check to make sure we only allow changes to the current status
+    bool fIsFrozen = cache.CheckForAddressRestriction(data.asset_name, address);
+    RestrictedType type = data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS;
+    if (type == RestrictedType::FREEZE_ADDRESS) {
+        if (fIsFrozen) {
+            strError = "bad-txns-null-data-freeze-address-when-already-frozen";
+            return false;
+        }
+    } else if (type == RestrictedType::UNFREEZE_ADDRESS) {
+        if (!fIsFrozen) {
+            strError = "bad-txns-null-data-unfreeze-address-when-not-frozen";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool VerifyGlobalRestrictedChange(CAssetsCache& cache, const CNullAssetTxData& data, std::string& strError)
+{
+    // Check the flag
+    if (!VerifyNullAssetDataFlag(data.flag, strError))
+        return false;
+
+    bool fIsGloballyFrozen = cache.CheckForGlobalRestriction(data.asset_name);
+    RestrictedType type = data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE;
+    if (type == RestrictedType::GLOBAL_FREEZE) {
+        if (fIsGloballyFrozen) {
+            strError = "bad-txns-null-data-global-freeze-when-already-frozen";
+            return false;
+        }
+    } else if (type == RestrictedType::GLOBAL_UNFREEZE) {
+        if (!fIsGloballyFrozen) {
+            strError = "bad-txns-null-data-global-unfreeze-when-not-frozen";
+            return false;
+        }
+    }
+
+    return true;
 }

@@ -42,10 +42,11 @@ enum class QualifierType
 
 enum class RestrictedType
 {
-    FREEZE_ADDRESS= 0,
-    UNFREEZE_ADDRESS = 1,
-    GLOBAL_FREEZE = 3,
-    GLOBAL_UNFREEZE = 4
+    UNFREEZE_ADDRESS = 0,
+    FREEZE_ADDRESS= 1,
+    GLOBAL_UNFREEZE = 2,
+    GLOBAL_FREEZE = 3
+
 };
 
 int IntFromAssetType(AssetType type);
