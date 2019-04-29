@@ -1384,6 +1384,14 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             return false;
         }
 
+        if (AreMessagingDeployed() && nVersion < ASSET_MESSAGING_VERSION) {
+            LogPrintf("peer=%d using obsolete version %i; disconnecting because messaging is active\n", pfrom->GetId(), nVersion);
+            connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                                                                              strprintf("Version must be %d or greater", ASSET_MESSAGING_VERSION)));
+            pfrom->fDisconnect = true;
+            return false;
+        }
+
         if (nVersion == 10300)
             nVersion = 300;
         if (!vRecv.empty())

@@ -2053,6 +2053,9 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     if (AreAssetsDeployed())
         nVersion = VERSIONBITS_TOP_BITS_ASSETS;
 
+    if (AreMessagingDeployed())
+        nVersion = VERSIONBITS_TOP_BITS_MESSAGING;
+
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
         ThresholdState state = VersionBitsState(pindexPrev, params, (Consensus::DeploymentPos)i, versionbitscache);
         if (state == THRESHOLD_LOCKED_IN || state == THRESHOLD_STARTED) {
@@ -3856,12 +3859,12 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     int nMaxReorgDepth = gArgs.GetArg("-maxreorg", Params().MaxReorganizationDepth());
     int nMinReorgPeers = gArgs.GetArg("-minreorgpeers", Params().MinReorganizationPeers());
     int nMinReorgAge = gArgs.GetArg("-minreorgage", Params().MinReorganizationAge());
-    bool fGreaterThanMaxReorg = chainActive.Height() - (nHeight - 1) >= nMaxReorgDepth;
+    bool fGreaterThanMaxReorg = (chainActive.Height() - (nHeight - 1)) >= nMaxReorgDepth;
     if (fGreaterThanMaxReorg && g_connman) {
         int nCurrentNodeCount = g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL);
-        bool bIsCurrentChainCaughtUp = (GetTime() - pindexPrev->nTime) <= nMinReorgAge;
+        bool bIsCurrentChainCaughtUp = (GetTime() - chainActive.Tip()->nTime) <= nMinReorgAge;
         if ((nCurrentNodeCount >= nMinReorgPeers) && bIsCurrentChainCaughtUp)
-            return state.DoS(1,
+            return state.DoS(10,
                              error("%s: forked chain older than max reorganization depth (height %d), with connections (count %d), and caught up with active chain (%s)",
                                    __func__, nHeight, nCurrentNodeCount, bIsCurrentChainCaughtUp ? "true" : "false"),
                              REJECT_MAXREORGDEPTH, "bad-fork-prior-to-maxreorgdepth");
@@ -3908,6 +3911,9 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
 
     // Reject outdated veresion blocks onces assets are active.
     if (AreAssetsDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_ASSETS)
+        return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block", block.nVersion));
+
+    if (AreMessagingDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_MESSAGING)
         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
     return true;
