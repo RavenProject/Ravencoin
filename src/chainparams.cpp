@@ -233,8 +233,8 @@ public:
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
 
-
         nAssetActivationHeight = 435456; // Asset activated block height
+        nMessagingActivationBlock = 0; // Messaging activated block height // TODO after messaging goes active on mainnet
         /** RVN End **/
     }
 };
@@ -414,6 +414,7 @@ public:
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
 
         nAssetActivationHeight = 6048; // Asset activated block height
+        nMessagingActivationBlock = 249984; // Messaging activated block height
         /** RVN End **/
 
     }
@@ -580,6 +581,7 @@ public:
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
 
         nAssetActivationHeight = 0; // Asset activated block height
+        nMessagingActivationBlock = 0; // Messaging activated block height
         /** RVN End **/
     }
 };
