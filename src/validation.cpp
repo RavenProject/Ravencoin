@@ -3908,10 +3908,11 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     //         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
     //                              strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
-    // Reject outdated version blocks onces assets are active.
+    // Reject outdated version blocks once assets are active.
     if (AreAssetsDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_ASSETS)
         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
+    // Reject outdated version blocks once messages are active.
     if (IsMessagingActive(pindexPrev->nHeight+1)) {
         if (block.nVersion < VERSIONBITS_TOP_BITS_MESSAGING) {
             return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
@@ -5496,7 +5497,7 @@ bool IsDGWActive(unsigned int nBlockNumber) {
 
 bool IsMessagingActive(unsigned int nBlockNumber) {
     if (Params().MessagingActivationBlock()) {
-        return nBlockNumber >= Params().MessagingActivationBlock();
+        return nBlockNumber > Params().MessagingActivationBlock();
     } else {
         return AreMessagingDeployed();
     }
