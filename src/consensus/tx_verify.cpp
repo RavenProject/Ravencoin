@@ -420,7 +420,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
 bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime, CAssetsCache* assetsCache)
 {
 
-    if (!assetsCache) {
+    if (!assetsCache && !fRunningUnitTests) {
         return error("%s : Assets Cache is null, failing", __func__);
     }
 
