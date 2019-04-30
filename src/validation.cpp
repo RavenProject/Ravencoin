@@ -618,7 +618,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         if (AreAssetsDeployed()) {
-            if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets))
+            if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets, false, nullptr, 0, GetCurrentAssetCache()))
                 return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                              FormatStateMessage(state));
         }
@@ -2298,7 +2298,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
             if (AreAssetsDeployed()) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets, false, &setMessages, block.nTime)) {
+                if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets, false, &setMessages, block.nTime, assetsCache)) {
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
                 }
@@ -2428,7 +2428,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
                 if (!asset.IsValid(strError, *assetsCache))
                     return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-asset");
-
             }
             else if (tx.IsReissueAsset())
             {
@@ -3909,12 +3908,16 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     //         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
     //                              strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
-    // Reject outdated veresion blocks onces assets are active.
+    // Reject outdated version blocks onces assets are active.
     if (AreAssetsDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_ASSETS)
         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
-    if (AreMessagingDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_MESSAGING)
-        return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block", block.nVersion));
+    if (IsMessagingActive(pindexPrev->nHeight+1)) {
+        if (block.nVersion < VERSIONBITS_TOP_BITS_MESSAGING) {
+            return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
+                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
+        }
+    }
 
     return true;
 }
@@ -5489,6 +5492,14 @@ bool AreMessagingDeployed() {
 
 bool IsDGWActive(unsigned int nBlockNumber) {
     return nBlockNumber >= Params().DGWActivationBlock();
+}
+
+bool IsMessagingActive(unsigned int nBlockNumber) {
+    if (Params().MessagingActivationBlock()) {
+        return nBlockNumber >= Params().MessagingActivationBlock();
+    } else {
+        return AreMessagingDeployed();
+    }
 }
 
 CAssetsCache* GetCurrentAssetCache()

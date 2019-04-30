@@ -10,7 +10,7 @@
  * network protocol versioning
  */
 
-static const int PROTOCOL_VERSION = 70021;
+static const int PROTOCOL_VERSION = 70022;
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 209;
@@ -50,6 +50,6 @@ static const int ASSETDATA_VERSION = 70017;
 static const int ASSETDATA_VERSION_UPDATED = 70020;
 
 //! In this veresion, 'asset messaging' was introduced
-static const int ASSET_MESSAGING_VERSION = 70021;
+static const int ASSET_MESSAGING_VERSION = 70022;
 
 #endif // RAVEN_VERSION_H

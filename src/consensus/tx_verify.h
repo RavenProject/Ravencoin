@@ -37,7 +37,7 @@ namespace Consensus {
 bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight, CAmount& txfee);
 
 /** RVN START */
-bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0);
+bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0, CAssetsCache* assetsCache = nullptr);
 /** RVN END */
 } // namespace Consensus
 

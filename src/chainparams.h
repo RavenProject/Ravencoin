@@ -104,6 +104,7 @@ public:
     const std::string& GlobalBurnAddress() const { return strGlobalBurnAddress; }
 
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
+    unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
 
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
@@ -150,6 +151,7 @@ protected:
     std::string strGlobalBurnAddress;
 
     unsigned int nDGWActivationBlock;
+    unsigned int nMessagingActivationBlock;
 
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;
