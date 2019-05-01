@@ -550,6 +550,7 @@ bool AreAssetsDeployed();
 bool AreMessagingDeployed();
 
 bool IsDGWActive(unsigned int nBlockNumber);
+bool IsMessagingActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
 /** RVN END */

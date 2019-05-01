@@ -875,7 +875,7 @@ static void CheckInputsAndUpdateCoins(const CTransaction& tx, CCoinsViewCache& m
     /** RVN START */
     if (AreAssetsDeployed()) {
         std::vector<std::pair<std::string, uint256>> vReissueAssets;
-        bool fCheckAssets = Consensus::CheckTxAssets(tx, state, mempoolDuplicate, vReissueAssets);
+        bool fCheckAssets = Consensus::CheckTxAssets(tx, state, mempoolDuplicate, vReissueAssets, false, nullptr, 0, GetCurrentAssetCache());
         assert(fCheckResult && fCheckAssets);
     } else
         assert(fCheckResult);
