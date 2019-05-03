@@ -1260,7 +1260,8 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins
 {
     bool allSigned = true;
 
-    const std::string zeros = "000000000000000000000000000000000000000000000000000000000000000000000000";
+    // pad past max expected sig length (256)
+    const std::string zeros = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     const unsigned char* cstrZeros = (unsigned char*)zeros.c_str();
 
     // Fill in dummy signatures for fee calculation.
@@ -1272,8 +1273,8 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins
 
         if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, sigdata))
         {
-            // just add dummy 72 bytes as sigdata if this fails (can't necessarily sign for all inputs)
-            CScript dummyScript = CScript(cstrZeros, cstrZeros + 72);
+            // just add dummy 256 bytes as sigdata if this fails (can't necessarily sign for all inputs)
+            CScript dummyScript = CScript(cstrZeros, cstrZeros + 256);
             SignatureData dummyData = SignatureData(dummyScript);
             UpdateTransaction(txNew, nIn, dummyData);
             allSigned = false;
