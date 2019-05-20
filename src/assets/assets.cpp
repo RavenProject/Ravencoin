@@ -220,14 +220,6 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string
     }
     else if (std::regex_match(name, OWNER_INDICATOR))
     {
-
-        if (name.front() == RESTRICTED_TAG_CHAR) {
-            bool ret = IsTypeCheckNameValid(AssetType::RESTRICTED_OWNER, name, error);
-            if (ret)
-                assetType = AssetType::RESTRICTED_OWNER;
-            return ret;
-        }
-
         bool ret = IsTypeCheckNameValid(AssetType::OWNER, name, error);
         if (ret)
             assetType = AssetType::OWNER;
@@ -355,11 +347,6 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
         if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
         bool valid = IsRestrictedNameValid(name);
         if (!valid) { error = "Restricted name contains invalid characters (Valid characters are: A-Z 0-9 _ .) ($ must be the first character, _ . special characters can't be the first or last characters)";  return false; }
-        return true;
-    } else if (type == AssetType::RESTRICTED_OWNER) {
-        if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
-        bool valid = IsRestrictedNameValid(name.substr(0, name.size() - 1));
-        if (!valid) { error = "Restricted owner name contains invalid characters (Valid characters are: A-Z 0-9 _ .) ($ must be the first character, _ . special characters can't be the first or last characters)";  return false; }
         return true;
     } else {
         if (name.size() > MAX_NAME_LENGTH - 1) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH - 1); return false; }  //Assets and sub-assets need to leave one extra char for OWNER indicator
@@ -1663,7 +1650,7 @@ bool CAssetTransfer::CheckAgainstVerifyString(CAssetsCache &assetsCache, const s
 {
     // Get the verifier string
     CNullAssetTxVerifierString verifier;
-    if (!assetsCache.GetAssetVerifierStringIfExists(this->strName, verifier)) {
+    if (!assetsCache.GetAssetVerifierStringIfExists(this->strName, verifier, true)) {
         // This shouldn't ever happen, but if it does we need to know
         strError = _("Verifier String doens't exist for asset: ") + this->strName;
         return false;
@@ -3131,7 +3118,7 @@ size_t CAssetsCache::GetCacheSizeV2() const
 
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued)
 {
-    if (type == AssetType::REISSUE || type == AssetType::VOTE || type == AssetType::OWNER || type == AssetType::RESTRICTED_OWNER || type == AssetType::INVALID)
+    if (type == AssetType::REISSUE || type == AssetType::VOTE || type == AssetType::OWNER || type == AssetType::INVALID)
         return false;
 
     CAmount burnAmount = 0;
@@ -3711,8 +3698,6 @@ CAmount GetBurnAmount(const AssetType type)
             return GetIssueSubQualifierAssetBurnAmount();
         case AssetType::RESTRICTED:
             return GetIssueRestrictedAssetBurnAmount();
-        case AssetType::RESTRICTED_OWNER:
-            return 0;
         default:
             return 0;
     }
@@ -3746,8 +3731,6 @@ std::string GetBurnAddress(const AssetType type)
             return Params().IssueSubQualifierAssetBurnAddress();
         case AssetType::RESTRICTED:
             return Params().IssueRestrictedAssetBurnAddress();
-        case AssetType::RESTRICTED_OWNER:
-            return "";
         default:
             return "";
     }
@@ -4257,6 +4240,13 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         // If the asset is a restricted asset, check the verifier script
         if(IsAssetNameAnRestricted(asset_name)) {
             std::string strError = "";
+
+            // Check for global restriction
+            if (passets->CheckForGlobalRestriction(transfer.first.strName, true)) {
+                error = std::make_pair(RPC_INVALID_PARAMETER, _("Unable to transfer restricted asset, this restricted asset has been globally frozen"));
+                return false;
+            }
+
             if (!transfer.first.CheckAgainstVerifyString(*passets, address, strError)) {
                 error = std::make_pair(RPC_INVALID_PARAMETER, strError);
                 return false;
@@ -4544,19 +4534,29 @@ void CNullAssetTxVerifierString::ConstructTransaction(CScript &script) const
     script << OP_RVN_ASSET << OP_RESERVED << ToByteVector(vchMessage);
 }
 
-bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifierString)
+bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifierString, bool fSkipTempCache)
 {
+
+    /** There are circumstances where a blocks transactions could be changing an assets verifier string, While at the
+     * same time a transaction is added to the same block that is trying to transfer the assets who verifier string is
+     * changing.
+     * Depending on the ordering of these two transactions. The verifier string used to verify the validity of the
+     * transaction could be different.
+     * To fix this all restricted asset transfer validation checks will use only the latest connect block tips caches
+     * and databases to validate it. This allows for asset transfers and verify string change transactions to be added in the same block
+     * without failing validation
+    **/
+
     // Create objects that will be used to check the dirty cache
     CAssetCacheRestrictedVerifiers tempCacheVerifier {name, ""};
 
     auto setIterator = setNewRestrictedVerifierToRemove.find(tempCacheVerifier);
     // Check the dirty caches first and see if it was recently added or removed
-    if (setIterator != setNewRestrictedVerifierToRemove.end()) {
+    if (!fSkipTempCache && setIterator != setNewRestrictedVerifierToRemove.end()) {
         if (setIterator->fUndoingRessiue) {
             verifierString.verifier_string = setIterator->verifier;
             return true;
         }
-        LogPrintf("%s : Found in new verifier to Remove - Returning False\n", __func__);
         return false;
     }
 
@@ -4567,12 +4567,11 @@ bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNull
             verifierString.verifier_string = setIterator->verifier;
             return true;
         }
-        LogPrintf("%s : Found in new verifer to Remove - Returning False\n", __func__);
         return false;
     }
 
     setIterator = setNewRestrictedVerifierToAdd.find(tempCacheVerifier);
-    if (setIterator != setNewRestrictedVerifierToAdd.end()) {
+    if (!fSkipTempCache && setIterator != setNewRestrictedVerifierToAdd.end()) {
         verifierString.verifier_string = setIterator->verifier;
         return true;
     }
@@ -4591,30 +4590,40 @@ bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNull
         }
     }
 
-    if (prestricteddb && passetsVerifierCache) {
+    if (prestricteddb) {
         std::string verifier;
         if (prestricteddb->ReadVerifier(name, verifier)) {
             verifierString.verifier_string = verifier;
-            passetsVerifierCache->Put(name, verifierString);
+            if (passetsVerifierCache)
+                passetsVerifierCache->Put(name, verifierString);
             return true;
         }
     }
 
-    LogPrintf("%s : Didn't find asset verifier string meta data anywhere. Returning False\n", __func__);
     return false;
 }
 
-bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address)
+bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address, bool fSkipTempCache)
 {
+    /** There are circumstances where a blocks transactions could be removing or adding a qualifier to an address,
+     * While at the same time a transaction is added to the same block that is trying to transfer to the same address.
+     * Depending on the ordering of these two transactions. The qualifier database used to verify the validity of the
+     * transactions could be different.
+     * To fix this all restricted asset transfer validation checks will use only the latest connect block tips caches
+     * and databases to validate it. This allows for asset transfers and address qualifier transactions to be added in the same block
+     * without failing validation
+    **/
+
     // Create cache object that will be used to check the dirty caches
     CAssetCacheQualifierAddress cachedQualifierAddress(qualifier_name, address, QualifierType::ADD_QUALIFIER);
 
     // Check the dirty caches first and see if it was recently added or removed
     auto setIterator = setNewQualifierAddressToRemove.find(cachedQualifierAddress);
-    if (setIterator != setNewQualifierAddressToRemove.end()) {
+    if (!fSkipTempCache &&setIterator != setNewQualifierAddressToRemove.end()) {
         // Undoing a remove qualifier command, means that we are adding the qualifier to the address
         return setIterator->type == QualifierType::REMOVE_QUALIFIER;
     }
+
 
     setIterator = passets->setNewQualifierAddressToRemove.find(cachedQualifierAddress);
     if (setIterator != passets->setNewQualifierAddressToRemove.end()) {
@@ -4623,10 +4632,11 @@ bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, c
     }
 
     setIterator = setNewQualifierAddressToAdd.find(cachedQualifierAddress);
-    if (setIterator != setNewQualifierAddressToAdd.end()) {
+    if (!fSkipTempCache && setIterator != setNewQualifierAddressToAdd.end()) {
         // Return true if we are adding the qualifier, and false if we are removing it
         return setIterator->type == QualifierType::ADD_QUALIFIER;
     }
+
 
     setIterator = passets->setNewQualifierAddressToAdd.find(cachedQualifierAddress);
     if (setIterator != passets->setNewQualifierAddressToAdd.end()) {
@@ -4638,29 +4648,40 @@ bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, c
     if (passetsQualifierCache) {
         if (passetsQualifierCache->Exists(cachedQualifierAddress.GetHash().GetHex())) {
             return true;
-        } else {
-            if (prestricteddb) {
-                if (prestricteddb->ReadAddressQualifier(address, qualifier_name)) {
-                    passetsQualifierCache->Put(cachedQualifierAddress.GetHash().GetHex(), 1);
-                    return true;
-                }
-            }
+        }
+    }
+
+    if (prestricteddb) {
+        if (prestricteddb->ReadAddressQualifier(address, qualifier_name)) {
+            if (passetsQualifierCache)
+                passetsQualifierCache->Put(cachedQualifierAddress.GetHash().GetHex(), 1);
+            return true;
         }
     }
 
     return false;
 }
 
-bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name, const std::string& address)
+
+bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name, const std::string& address, bool fSkipTempCache)
 {
+    /** There are circumstances where a blocks transactions could be removing or adding a restriction to an address,
+     * While at the same time a transaction is added to the same block that is trying to transfer from that address.
+     * Depending on the ordering of these two transactions. The address restriction database used to verify the validity of the
+     * transactions could be different.
+     * To fix this all restricted asset transfer validation checks will use only the latest connect block tips caches
+     * and databases to validate it. This allows for asset transfers and address restriction transactions to be added in the same block
+     * without failing validation
+    **/
+
     // Create cache object that will be used to check the dirty caches (type, doesn't matter in this search)
     CAssetCacheRestrictedAddress cachedRestrictedAddress(restricted_name, address, RestrictedType::FREEZE_ADDRESS);
 
     // Check the dirty caches first and see if it was recently added or removed
     auto setIterator = setNewRestrictedAddressToRemove.find(cachedRestrictedAddress);
-    if (setIterator != setNewRestrictedAddressToRemove.end()) {
+    if (!fSkipTempCache && setIterator != setNewRestrictedAddressToRemove.end()) {
         // Undoing a unfreeze, means that we are adding back a freeze
-        return setIterator->type == RestrictedType ::UNFREEZE_ADDRESS;
+        return setIterator->type == RestrictedType::UNFREEZE_ADDRESS;
     }
 
     setIterator = passets->setNewRestrictedAddressToRemove.find(cachedRestrictedAddress);
@@ -4670,7 +4691,7 @@ bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name
     }
 
     setIterator = setNewRestrictedAddressToAdd.find(cachedRestrictedAddress);
-    if (setIterator != setNewRestrictedAddressToAdd.end()) {
+    if (!fSkipTempCache && setIterator != setNewRestrictedAddressToAdd.end()) {
         // Return true if we are freezing the address
         return setIterator->type == RestrictedType::FREEZE_ADDRESS;
     }
@@ -4685,29 +4706,41 @@ bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name
     if (passetsRestrictionCache) {
         if (passetsRestrictionCache->Exists(cachedRestrictedAddress.GetHash().GetHex())) {
             return true;
-        } else {
-            if (prestricteddb) {
-                if (prestricteddb->ReadRestrictedAddress(address, restricted_name)) {
-                    passetsRestrictionCache->Put(cachedRestrictedAddress.GetHash().GetHex(), 1);
-                    return true;
-                }
+        }
+    }
+
+    if (prestricteddb) {
+        if (prestricteddb->ReadRestrictedAddress(address, restricted_name)) {
+            if (passetsRestrictionCache) {
+                passetsRestrictionCache->Put(cachedRestrictedAddress.GetHash().GetHex(), 1);
             }
+            return true;
         }
     }
 
     return false;
 }
 
-bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name)
+bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name, bool fSkipTempCache)
 {
+    /** There are circumstances where a blocks transactions could be freezing all asset transfers. While at
+     * the same time a transaction is added to the same block that is trying to transfer the same asset that is being
+     * frozen.
+     * Depending on the ordering of these two transactions. The global restriction database used to verify the validity of the
+     * transactions could be different.
+     * To fix this all restricted asset transfer validation checks will use only the latest connect block tips caches
+     * and databases to validate it. This allows for asset transfers and global restriction transactions to be added in the same block
+     * without failing validation
+    **/
+
     // Create cache object that will be used to check the dirty caches (type, doesn't matter in this search)
     CAssetCacheRestrictedGlobal cachedRestrictedGlobal(restricted_name, RestrictedType::GLOBAL_FREEZE);
 
     // Check the dirty caches first and see if it was recently added or removed
     auto setIterator = setNewRestrictedGlobalToRemove.find(cachedRestrictedGlobal);
-    if (setIterator != setNewRestrictedGlobalToRemove.end()) {
+    if (!fSkipTempCache && setIterator != setNewRestrictedGlobalToRemove.end()) {
         // Undoing a removal of a global unfreeze, means that is will become frozen
-        return setIterator->type == RestrictedType ::GLOBAL_UNFREEZE;
+        return setIterator->type == RestrictedType::GLOBAL_UNFREEZE;
     }
 
     setIterator = passets->setNewRestrictedGlobalToRemove.find(cachedRestrictedGlobal);
@@ -4717,7 +4750,7 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name)
     }
 
     setIterator = setNewRestrictedGlobalToAdd.find(cachedRestrictedGlobal);
-    if (setIterator != setNewRestrictedGlobalToAdd.end()) {
+    if (fSkipTempCache && setIterator != setNewRestrictedGlobalToAdd.end()) {
         // Return true if we are adding a freeze command
         return setIterator->type == RestrictedType::GLOBAL_FREEZE;
     }
@@ -4732,13 +4765,14 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name)
     if (passetsGlobalRestrictionCache) {
         if (passetsGlobalRestrictionCache->Exists(cachedRestrictedGlobal.assetName)) {
             return true;
-        } else {
-            if (prestricteddb) {
-                if (prestricteddb->ReadGlobalRestriction(restricted_name)) {
-                    passetsGlobalRestrictionCache->Put(cachedRestrictedGlobal.assetName, 1);
-                    return true;
-                }
-            }
+        }
+    }
+
+    if (prestricteddb) {
+        if (prestricteddb->ReadGlobalRestriction(restricted_name)) {
+            if (passetsGlobalRestrictionCache)
+                passetsGlobalRestrictionCache->Put(cachedRestrictedGlobal.assetName, 1);
+            return true;
         }
     }
 
@@ -4811,7 +4845,7 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
         if (!fWithTags)
             search = QUALIFIER_CHAR + qualifier;
         if (fCheckAssetDuplicate) {
-            if (!cache.CheckIfAssetExists(search, fForceDuplicateCheck)) {
+            if (!cache.CheckIfAssetExists(search, true)) {
                 strError = _("Verifier string contains qualifier that isn't in the chain: ") + qualifier;
                 return false;
             }
@@ -4834,7 +4868,7 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
                 search = QUALIFIER_CHAR + qualifier;
 
             // Check to see if the address contains the qualifier
-            bool has_qualifier = cache.CheckForAddressQualifier(search, check_address);
+            bool has_qualifier = cache.CheckForAddressQualifier(search, check_address, true);
 
             // Add the true or false value into the vals
             vals.insert(std::make_pair(qualifier, has_qualifier));
@@ -4877,7 +4911,7 @@ bool VerifyQualifierChange(CAssetsCache& cache, const CNullAssetTxData& data, co
         return false;
 
     // Check to make sure we only allow changes to the current status
-    bool fHasQualifier = cache.CheckForAddressQualifier(data.asset_name, address);
+    bool fHasQualifier = cache.CheckForAddressQualifier(data.asset_name, address, true);
     QualifierType type = data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER;
     if (type == QualifierType::ADD_QUALIFIER) {
         if (fHasQualifier) {
@@ -4901,7 +4935,7 @@ bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& 
         return false;
 
     // Check to make sure we only allow changes to the current status
-    bool fIsFrozen = cache.CheckForAddressRestriction(data.asset_name, address);
+    bool fIsFrozen = cache.CheckForAddressRestriction(data.asset_name, address, true);
     RestrictedType type = data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS;
     if (type == RestrictedType::FREEZE_ADDRESS) {
         if (fIsFrozen) {
@@ -4924,7 +4958,7 @@ bool VerifyGlobalRestrictedChange(CAssetsCache& cache, const CNullAssetTxData& d
     if (!VerifyNullAssetDataFlag(data.flag, strError))
         return false;
 
-    bool fIsGloballyFrozen = cache.CheckForGlobalRestriction(data.asset_name);
+    bool fIsGloballyFrozen = cache.CheckForGlobalRestriction(data.asset_name, true);
     RestrictedType type = data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE;
     if (type == RestrictedType::GLOBAL_FREEZE) {
         if (fIsGloballyFrozen) {

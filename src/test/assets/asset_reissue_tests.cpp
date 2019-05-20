@@ -59,7 +59,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
 
         // Remove the reissue from the cache
         std::vector<std::pair<std::string, CBlockAssetUndo> > undoBlockData;
-        undoBlockData.emplace_back(std::make_pair("RVNASSET", CBlockAssetUndo{true, false, "", 0}));
+        undoBlockData.emplace_back(std::make_pair("RVNASSET", CBlockAssetUndo{true, false, "", 0, ASSET_UNDO_INCLUDES_VERIFIER_STRING, false, ""}));
         BOOST_CHECK_MESSAGE(cache.RemoveReissueAsset(reissue1, Params().GlobalBurnAddress(), out, undoBlockData), "Failed to remove reissue");
 
         // Get the asset data from the cache now that the reissuance was removed
@@ -119,7 +119,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
 
         // Remove the reissue from the cache
         std::vector<std::pair<std::string, CBlockAssetUndo> > undoBlockData;
-        undoBlockData.emplace_back(std::make_pair("RVNASSET", CBlockAssetUndo{true, false, "", 0}));
+        undoBlockData.emplace_back(std::make_pair("RVNASSET", CBlockAssetUndo{true, false, "", 0, ASSET_UNDO_INCLUDES_VERIFIER_STRING, false, ""}));
         BOOST_CHECK_MESSAGE(cache.RemoveReissueAsset(reissue1, Params().GlobalBurnAddress(), out, undoBlockData), "Failed to remove reissue");
 
         // Get the asset data from the cache now that the reissuance was removed

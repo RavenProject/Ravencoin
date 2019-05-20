@@ -307,7 +307,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                                     if (aType == AssetType::ROOT || aType == AssetType::SUB) {
                                         AddChannel(assetData.assetName + OWNER_TAG);
                                         AddAddressSeen(EncodeDestination(assetData.destination));
-                                    } else if (aType == AssetType::OWNER || aType == AssetType::RESTRICTED_OWNER || aType == AssetType::MSGCHANNEL) {
+                                    } else if (aType == AssetType::OWNER || aType == AssetType::MSGCHANNEL) {
                                         AddChannel(assetData.assetName);
                                         AddAddressSeen(EncodeDestination(assetData.destination));
                                     }

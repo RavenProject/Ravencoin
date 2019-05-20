@@ -14,9 +14,9 @@ AssetType AssetTypeFromInt(int nType) {
 }
 
 uint256 CAssetCacheQualifierAddress::GetHash() {
-    Hash(assetName.begin(), assetName.end(), address.begin(), address.end());
+    return Hash(assetName.begin(), assetName.end(), address.begin(), address.end());
 }
 
 uint256 CAssetCacheRestrictedAddress::GetHash() {
-    Hash(assetName.begin(), assetName.end(), address.begin(), address.end());
+    return Hash(assetName.begin(), assetName.end(), address.begin(), address.end());
 }

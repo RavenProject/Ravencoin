@@ -337,6 +337,13 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-restricted-before-it-is-active");
 
                     if (assetCache) {
+                        if (fCheckAssetDuplicate) {
+                            if (assetCache->CheckForGlobalRestriction(transfer.strName, true)) {
+                                return state.DoS(100, false, REJECT_INVALID,
+                                                 "bad-txns-transfer-restricted-asset-that-is-globally-restricted");
+                            }
+                        }
+
                         // TODO remove this log print before mainnet release
                         LogPrintf("%s : Checking restricted transfer: %s, amount: %d, address: %s\n", __func__, transfer.strName, transfer.nAmount, address);
                         std::string strError = "";
@@ -694,6 +701,12 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
 
             if (AreMessagingDeployed()) {
                 mapAddresses.insert(make_pair(data.assetName,EncodeDestination(data.destination)));
+            }
+
+            if (IsAssetNameAnRestricted(data.assetName)) {
+                if (passets->CheckForAddressRestriction(data.assetName, EncodeDestination(data.destination), true)) {
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-restricted-asset-transfer-from-frozen-address");
+                }
             }
         }
     }

@@ -264,17 +264,17 @@ public :
     bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset);
     bool GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash);
 
-    //! Returns true if the Asset Verifier String was found for an asset_name
-    bool GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifier);
+    //! Returns true if the Asset Verifier String was found for an asset_name, if fSkipTempCache is true, it will only search passets pointer and databases
+    bool GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifier, bool fSkipTempCache = false);
 
     //! Return true if the address has the given qualifier assigned to it
-    bool CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address);
+    bool CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address, bool fSkipTempCache = false);
 
     //! Return true if the address is marked as frozen
-    bool CheckForAddressRestriction(const std::string &restricted_name, const std::string& address);
+    bool CheckForAddressRestriction(const std::string &restricted_name, const std::string& address, bool fSkipTempCache = false);
 
     //! Return true if the restricted asset is globally freezing trading
-    bool CheckForGlobalRestriction(const std::string &restricted_name);
+    bool CheckForGlobalRestriction(const std::string &restricted_name, bool fSkipTempCache = false);
 
     //! Calculate the size of the CAssets (in bytes)
     size_t DynamicMemoryUsage() const;

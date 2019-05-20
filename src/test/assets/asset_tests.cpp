@@ -215,18 +215,6 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(!IsAssetNameValid("$ABC^NO"));
         BOOST_CHECK(!IsAssetNameValid("$ABC~#NO"));
         BOOST_CHECK(!IsAssetNameValid("$ABC#NO"));
-
-
-        // restricted owner
-        BOOST_CHECK(IsAssetNameAnOwner("$ABC!"));
-        BOOST_CHECK(!IsAssetNameAnOwner("ABC"));
-        BOOST_CHECK(!IsAssetNameAnOwner("$ABC!COIN"));
-        BOOST_CHECK(IsAssetNameAnOwner("$MAX_ASSET_IS_30_CHARACTER_LNG!"));
-        BOOST_CHECK(!IsAssetNameAnOwner("$MAX_ASSET_IS_31_CHARACTER_LONG!"));
-        BOOST_CHECK(!IsAssetNameAnOwner("$ABC/A!"));
-        BOOST_CHECK(!IsAssetNameAnOwner("$ABC/A/1!"));
-        BOOST_CHECK(IsAssetNameValid("$ABC!", type));
-        BOOST_CHECK(type == AssetType::RESTRICTED_OWNER);
     }
 
     BOOST_AUTO_TEST_CASE(transfer_asset_coin_test)

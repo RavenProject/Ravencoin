@@ -30,8 +30,7 @@ enum class AssetType
     QUALIFIER = 7,
     SUB_QUALIFIER = 8,
     RESTRICTED = 9,
-    RESTRICTED_OWNER = 10,
-    INVALID = 11
+    INVALID = 10
 };
 
 enum class QualifierType

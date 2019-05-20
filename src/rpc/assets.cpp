@@ -86,7 +86,6 @@ std::string AssetTypeToString(AssetType& assetType)
         case AssetType::QUALIFIER:          return "QUALIFIER";
         case AssetType::SUB_QUALIFIER:      return "SUB_QUALIFIER";
         case AssetType::RESTRICTED:         return "RESTRICTED";
-        case AssetType::RESTRICTED_OWNER:   return "RESTRICTED_OWNER";
         case AssetType::INVALID:            return "INVALID";
         default:                            return "UNKNOWN";
     }
@@ -412,7 +411,7 @@ UniValue issue(const JSONRPCRequest& request)
     }
 
     // Check for unsupported asset types
-    if (assetType == AssetType::VOTE || assetType == AssetType::REISSUE || assetType == AssetType::OWNER || assetType == AssetType::RESTRICTED_OWNER || assetType == AssetType::INVALID) {
+    if (assetType == AssetType::VOTE || assetType == AssetType::REISSUE || assetType == AssetType::OWNER || assetType == AssetType::INVALID) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
@@ -1158,6 +1157,32 @@ UniValue transfer(const JSONRPCRequest& request)
     // Create the Transaction
     if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
+
+    // Do a validity check before commiting the transaction
+    if (IsAssetNameAnRestricted(asset_name)) {
+        if (pcoinsTip && passets) {
+            for (auto input : transaction.tx->vin) {
+                const COutPoint &prevout = input.prevout;
+                const Coin &coin = pcoinsTip->AccessCoin(prevout);
+
+                if (coin.IsAsset()) {
+                    CAssetOutputEntry data;
+                    if (!GetAssetData(coin.out.scriptPubKey, data))
+                        throw JSONRPCError(RPC_DATABASE_ERROR, std::string(
+                                _("Unable to get coin to verify restricted asset transfer from address")));
+
+
+                    if (IsAssetNameAnRestricted(data.assetName)) {
+                        if (passets->CheckForAddressRestriction(data.assetName, EncodeDestination(data.destination),
+                                                                true)) {
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string(
+                                    _("Restricted asset transfer from address that has been frozen")));
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     // Send the Transaction to the network
     std::string txid;
@@ -2105,7 +2130,7 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
 
     std::string restricted_name = request.params[0].get_str();
 
-    return passets->CheckForGlobalRestriction(restricted_name);
+    return passets->CheckForGlobalRestriction(restricted_name, true);
 }
 
 UniValue issuerestricted(const JSONRPCRequest& request)
