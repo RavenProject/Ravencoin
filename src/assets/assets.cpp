@@ -4133,12 +4133,12 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         if (verifier_string) {
             if (reissueAsset.nAmount > 0) {
                 std::string strError = "";
-                if (!CheckVerifierString(*passets, *verifier_string, address, strError, true))
+                if (!CheckVerifierString(*passets, *verifier_string, address, strError))
                     throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
             } else {
                 // If we aren't adding any assets but we are changing the verifier string, Check to make sure the verifier string parses correctly
                 std::string strError = "";
-                if (!CheckVerifierString(*passets, *verifier_string, "", strError, true))
+                if (!CheckVerifierString(*passets, *verifier_string, "", strError))
                     throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
             }
         } else {
@@ -4149,7 +4149,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
                     throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to get the assets cache pointer");
 
                 std::string strError = "";
-                if (!CheckVerifierString(*passets, verifier.verifier_string, address, strError, true))
+                if (!CheckVerifierString(*passets, verifier.verifier_string, address, strError))
                     throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
             }
         }
@@ -4835,7 +4835,6 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
 
     // Create a set that will store the each qualifier
     std::set<std::string> setFoundQualifiers;
-
     // Extract the qualifiers from the verifier string
     ExtractVerifierStringQualifiers(verifier, setFoundQualifiers, fWithTags);
 
@@ -4887,9 +4886,9 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
             LibBoolEE::resolve(verifier, vals);
             return true;
         }
-    } catch (...) {
+    } catch (const std::runtime_error& run_error) {
         strError = _("Verifier string failed to resolve. Please check string syntax");
-        return false;
+        return error("%s : %s\n", __func__, run_error.what());
     }
 }
 

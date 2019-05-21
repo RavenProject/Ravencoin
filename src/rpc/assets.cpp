@@ -2270,7 +2270,7 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 3 || request.params.size() > 9)
         throw std::runtime_error(
-                "reissuerestricted \"asset_name\" qty ( change_verifier ) ( \"new_verifier\" ) \"( to_address )\" \"( change_address )\" ( new_unit ) ( reissuable ) \"( ipfs_hash )\"\n"
+                "reissuerestricted \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( to_address )\" \"( change_address )\" ( new_unit ) ( reissuable ) \"( ipfs_hash )\"\n"
                 + RestrictedActivationWarning() +
                 "\nReissue a already created restricted\n"
                 "Reissuable is true/false for whether additional asset quantity can be created, an changing the verifier string\n"

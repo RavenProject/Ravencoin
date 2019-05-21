@@ -55,6 +55,7 @@
 
 #include "assets/assets.h"
 #include "assets/assetdb.h"
+#include "base58.h"
 
 #if defined(NDEBUG)
 # error "Raven cannot be compiled without assertions."
@@ -949,6 +950,41 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
                     if (data.type == TX_NEW_ASSET && !IsAssetNameAnOwner(data.assetName)) {
                         pool.mapAssetToHash[data.assetName] = hash;
                         pool.mapHashToAsset[hash] = data.assetName;
+                    }
+
+                    // Keep track of all restricted assets tx that can become invalid if qualifier or verifiers are changed
+                    if (AreRestrictedAssetsDeployed()) {
+                        if (IsAssetNameAnRestricted(data.assetName)) {
+                            std::string address = EncodeDestination(data.destination);
+                            pool.mapAddressesQualifiersChanged[address].insert(hash);
+                            pool.mapHashQualifiersChanged[hash].insert(address);
+
+                            pool.mapAssetVerifierChanged[data.assetName].insert(hash);
+                            pool.mapHashVerifierChanged[hash].insert(data.assetName);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Keep track of all restricted assets tx that can become invalid if address or assets are marked as frozen
+        if (AreRestrictedAssetsDeployed()) {
+            for (auto in : tx.vin) {
+                const Coin coin = pcoinsTip->AccessCoin(in.prevout);
+
+                if (!coin.IsAsset())
+                    continue;
+
+                CAssetOutputEntry data;
+                if (GetAssetData(coin.out.scriptPubKey, data)) {
+
+                    if (IsAssetNameAnRestricted(data.assetName)) {
+                        pool.mapAssetMarkedGlobalFrozen[data.assetName].insert(hash);
+                        pool.mapHashMarkedGlobalFrozen[hash].insert(data.assetName);
+
+                        auto pair = std::make_pair(EncodeDestination(data.destination), data.assetName);
+                        pool.mapAddressesMarkedFrozen[pair].insert(hash);
+                        pool.mapHashToAddressMarkedFrozen[hash].insert(pair);
                     }
                 }
             }
@@ -3250,7 +3286,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
 
     /** RVN START */
     // Initialize sets used from removing asset entries from the mempool
-    std::set<CAssetCacheNewAsset> setNewAssetsAddedInBlock;
+    ConnectedBlockAssetData assetDataFromBlock;
     /** RVN END */
 
     {
@@ -3277,11 +3313,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         int64_t nTimeAssetsStart = GetTimeMicros();
         /** RVN START */
         // Get the newly created assets, from the connectblock assetCache so we can remove the correct assets from the mempool
-        setNewAssetsAddedInBlock = assetCache.setNewAssetsToAdd;
-        for (auto it : passets->setNewAssetsToAdd) {
-            if (setNewAssetsAddedInBlock.count(it))
-                setNewAssetsAddedInBlock.erase(it);
-        }
+        assetDataFromBlock = {assetCache.setNewAssetsToAdd, assetCache.setNewRestrictedVerifierToAdd, assetCache.setNewRestrictedAddressToAdd, assetCache.setNewRestrictedGlobalToAdd, assetCache.setNewQualifierAddressToAdd};
 
         // Remove all tx hashes, that were marked as reissued script from the mapReissuedTx.
         // Without this check, you wouldn't be able to reissue for those assets again, as this maps block it
@@ -3318,7 +3350,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     int64_t nTime5 = GetTimeMicros(); nTimeChainState += nTime5 - nTime4;
     LogPrint(BCLog::BENCH, "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO, nTimeChainState * MILLI / nBlocksTotal);
     // Remove conflicting transactions from the mempool.;
-    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, setNewAssetsAddedInBlock);
+    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, assetDataFromBlock);
     disconnectpool.removeForBlock(blockConnecting.vtx);
     // Update chainActive & related variables.
     UpdateTip(pindexNew, chainparams);

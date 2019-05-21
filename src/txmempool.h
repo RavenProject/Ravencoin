@@ -31,6 +31,7 @@
 #include <boost/signals2/signal.hpp>
 
 class CBlockIndex;
+struct ConnectedBlockAssetData;
 
 /** Fake height value used in Coin to signify they are only in the memory pool (since 0.8) */
 static const uint32_t MEMPOOL_HEIGHT = 0x7FFFFFFF;
@@ -470,6 +471,23 @@ public:
     std::map<std::string, uint256> mapAssetToHash;
     std::map<uint256, std::string> mapHashToAsset;
 
+    /** Restricted assets maps */
+    // Helper maps for when addresses are marked as frozen
+    std::map<std::pair<std::string, std::string>, std::set<uint256> > mapAddressesMarkedFrozen;
+    std::map<uint256, std::set<std::pair<std::string, std::string>>> mapHashToAddressMarkedFrozen;
+
+    // Helper maps for when restricted assets are globally frozen
+    std::map<std::string, std::set<uint256>> mapAssetMarkedGlobalFrozen;
+    std::map<uint256, std::set<std::string>> mapHashMarkedGlobalFrozen;
+
+    // Helper maps for when qualifiers are added or removed from addresses
+    std::map<std::string, std::set<uint256>> mapAddressesQualifiersChanged;
+    std::map<uint256, std::set<std::string>> mapHashQualifiersChanged;
+
+    // Helper maps for when verifier string are changed
+    std::map<std::string, std::set<uint256>> mapAssetVerifierChanged;
+    std::map<uint256, std::set<std::string>> mapHashVerifierChanged;
+
     typedef indexed_transaction_set::nth_index<0>::type::iterator txiter;
     std::vector<std::pair<uint256, txiter> > vTxHashes; //!< All tx witness hashes/entries in mapTx, in random order
 
@@ -548,7 +566,7 @@ public:
     void removeRecursive(const CTransaction &tx, MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);
     void removeForReorg(const CCoinsViewCache *pcoins, unsigned int nMemPoolHeight, int flags);
     void removeConflicts(const CTransaction &tx);
-    void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, std::set<CAssetCacheNewAsset>& setNewAssets );
+    void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, ConnectedBlockAssetData& connectedBlockData );
     void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight);
 
     void clear();
@@ -803,6 +821,15 @@ struct DisconnectedBlockTransactions {
         cachedInnerUsage = 0;
         queuedTx.clear();
     }
+};
+
+struct ConnectedBlockAssetData
+{
+    std::set<CAssetCacheNewAsset> newAssetsToAdd;
+    std::set<CAssetCacheRestrictedVerifiers> newVerifiersToAdd;
+    std::set<CAssetCacheRestrictedAddress> newAddressRestrictionsToAdd;
+    std::set<CAssetCacheRestrictedGlobal> newGlobalRestrictionsToAdd;
+    std::set<CAssetCacheQualifierAddress> newQualifiersToAdd;
 };
 
 #endif // RAVEN_TXMEMPOOL_H
