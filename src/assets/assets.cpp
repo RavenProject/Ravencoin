@@ -2674,14 +2674,28 @@ bool CAssetsCache::DumpCacheToDatabase()
                 passetsQualifierCache->Erase(newQualifierAddress.GetHash().GetHex());
                 if (!prestricteddb->EraseAddressQualifier(newQualifierAddress.address, newQualifierAddress.assetName)) {
                     dirty = true;
-                    message = "_Failed Erasing qualifier address from database";
+                    message = "_Failed Erasing address qualifier from database";
+                }
+                if (fAssetIndex && !dirty) {
+                    if (!prestricteddb->EraseQualifierAddress(newQualifierAddress.address,
+                                                              newQualifierAddress.assetName)) {
+                        dirty = true;
+                        message = "_Failed Erasing qualifier address from database";
+                    }
                 }
             } else if (newQualifierAddress.type == QualifierType::ADD_QUALIFIER) {
                 passetsQualifierCache->Put(newQualifierAddress.GetHash().GetHex(), 1);
                 if (!prestricteddb->WriteAddressQualifier(newQualifierAddress.address, newQualifierAddress.assetName))
                 {
                     dirty = true;
-                    message = "_Failed Writing qualifier address to database";
+                    message = "_Failed Writing address qualifier to database";
+                }
+                if (fAssetIndex & !dirty) {
+                    if (!prestricteddb->WriteQualifierAddress(newQualifierAddress.address, newQualifierAddress.assetName))
+                    {
+                        dirty = true;
+                        message = "_Failed Writing qualifier address to database";
+                    }
                 }
             }
 
@@ -2696,14 +2710,28 @@ bool CAssetsCache::DumpCacheToDatabase()
                 passetsQualifierCache->Put(undoQualifierAddress.GetHash().GetHex(), 1);
                 if (!prestricteddb->WriteAddressQualifier(undoQualifierAddress.address, undoQualifierAddress.assetName)) {
                     dirty = true;
-                    message = "_Failed undoing a removal of a qualifier address from database";
+                    message = "_Failed undoing a removal of a address qualifier  from database";
+                }
+                if (fAssetIndex & !dirty) {
+                    if (!prestricteddb->WriteQualifierAddress(undoQualifierAddress.address, undoQualifierAddress.assetName))
+                    {
+                        dirty = true;
+                        message = "_Failed undoing a removal of a qualifier address from database";
+                    }
                 }
             } else if (undoQualifierAddress.type == QualifierType::ADD_QUALIFIER) { // If we are undoing an addition, we remove the data from the database
                 passetsQualifierCache->Erase(undoQualifierAddress.GetHash().GetHex());
                 if (!prestricteddb->EraseAddressQualifier(undoQualifierAddress.address, undoQualifierAddress.assetName))
                 {
                     dirty = true;
-                    message = "_Failed undoing a addition of a qualifier address to database";
+                    message = "_Failed undoing a addition of a address qualifier to database";
+                }
+                if (fAssetIndex && !dirty) {
+                    if (!prestricteddb->EraseQualifierAddress(undoQualifierAddress.address,
+                                                              undoQualifierAddress.assetName)) {
+                        dirty = true;
+                        message = "_Failed undoing a addition of a qualifier address from database";
+                    }
                 }
             }
 

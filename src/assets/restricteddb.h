@@ -26,6 +26,11 @@ public:
     bool ReadAddressQualifier(const std::string &address, const std::string &tag);
     bool EraseAddressQualifier(const std::string &address, const std::string &tag);
 
+    // Database of the Qualifier to the address that are assigned to them
+    bool WriteQualifierAddress(const std::string &address, const std::string &tag);
+    bool ReadQualifierAddress(const std::string &address, const std::string &tag);
+    bool EraseQualifierAddress(const std::string &address, const std::string &tag);
+
     // Database of Blacklist addresses
     bool WriteRestrictedAddress(const std::string& address, const std::string& assetName);
     bool ReadRestrictedAddress(const std::string& address, const std::string& assetName);
@@ -40,6 +45,7 @@ public:
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
 
+    bool GetQualifierAddresses(std::string& qualifier, std::vector<std::string>& addresses);
     bool GetAddressQualifiers(std::string& address, std::vector<std::string>& qualifiers);
     bool GetAddressRestrictions(std::string& address, std::vector<std::string>& restrictions);
     bool GetGlobalRestrictions(std::vector<std::string>& restrictions);
