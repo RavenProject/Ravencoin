@@ -1537,6 +1537,7 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
     }
 
     return true;
+    
 }
 
 //! Changes Memory Only
