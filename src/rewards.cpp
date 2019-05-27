@@ -6,6 +6,7 @@
 #include "config/raven-config.h"
 #endif
 
+#include "util.h"
 #include "rewards.h"
 
 #include <boost/thread.hpp>
