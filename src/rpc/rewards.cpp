@@ -66,7 +66,6 @@ UniValue reward(const JSONRPCRequest& request) {
     std::string target_asset_name = request.params[2].get_str();
     std::string exception_addresses = request.params[3].get_str();
 
-
     AssetType srcAssetType;
     AssetType tgtAssetType;
 
@@ -83,15 +82,22 @@ UniValue reward(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
 
     const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 100; //  Select to hopefully be far enough forward to be safe from forks
-    int64_t blockHeightForSnapshot = chainActive.Height() + FUTURE_BLOCK_HEIGHT_OFFSET;
 
     if (!pRewardsDb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Reward database is not setup. Please restart wallet to try again"));
 
-    if (pRewardsDb->WriteSnapshotCheck(target_asset_name, blockHeightForSnapshot))
-        return "Reward Snapshot Check was successfully added to the database";
+    //  Build our reward record for scheduling
+    CRewardsDBEntry entryToAdd;
+    entryToAdd.heightForPayout = chainActive.Height() + FUTURE_BLOCK_HEIGHT_OFFSET;
+    entryToAdd.totalPayoutAmt = total_payout_amount;
+    entryToAdd.tgtAssetName = target_asset_name;
+    entryToAdd.payoutSrc = payout_source;
+    entryToAdd.exceptionAddresses = exception_addresses;
 
-    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to add Snapshot Check to database"));
+    if (pRewardsDb->SchedulePendingReward(entryToAdd))
+        return "Reward was successfully scheduled in the database";
+
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to add scheduled reward to database"));
 }
 
 static const CRPCCommand commands[] =
