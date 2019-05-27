@@ -49,6 +49,9 @@ std::string GetWalletHelpString(bool showDebug)
         strUsage += HelpMessageOpt("-walletrejectlongchains", strprintf(_("Wallet will not create transactions that violate mempool chain limits (default: %u)"), DEFAULT_WALLET_REJECT_LONG_CHAINS));
     }
 
+    strUsage += HelpMessageOpt("-minrewardheight=<n>", _("The default height that is required before rewards are allowed to be sent out") + " " + strprintf(_("(default: %u)"), MINIMUM_REWARDS_PAYOUT_HEIGHT));
+
+
     return strUsage;
 }
 
