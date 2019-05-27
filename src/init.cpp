@@ -48,6 +48,7 @@
 #include "assets/assets.h"
 #include "assets/assetdb.h"
 #include "assets/rewardsdb.h"
+#include "rewards.h"
 #ifdef ENABLE_WALLET
 #include "wallet/init.h"
 #include <wallet/wallet.h>
@@ -199,6 +200,7 @@ void PrepareShutdown()
     StopREST();
     StopRPC();
     StopHTTPServer();
+    ShutdownRewardsProcessorThread();
 #ifdef ENABLE_WALLET
     FlushWallets();
 #endif
@@ -1470,6 +1472,14 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf("* Using %.1fMiB for block index database\n", nBlockTreeDBCache * (1.0 / 1024 / 1024));
     LogPrintf("* Using %.1fMiB for chain state database\n", nCoinDBCache * (1.0 / 1024 / 1024));
     LogPrintf("* Using %.1fMiB for in-memory UTXO set (plus up to %.1fMiB of unused mempool space)\n", nCoinCacheUsage * (1.0 / 1024 / 1024), nMempoolSizeMax * (1.0 / 1024 / 1024));
+
+    // If the rewards system is enabled, launch a background thread thatt will process scheduled reward payouts
+    if (gArgs.IsArgSet("-rewards")) {
+        bool launchResult = LaunchRewardsProcessorThread();
+        if (!launchResult) {
+            return InitError("Failed to launch rewards processing thread.");
+        }
+    }
 
     bool fLoaded = false;
     while (!fLoaded && !fRequestShutdown) {

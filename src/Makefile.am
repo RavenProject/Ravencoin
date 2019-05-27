@@ -139,6 +139,7 @@ RAVEN_CORE_H = \
   random.h \
   reverse_iterator.h \
   reverselock.h \
+  rewards.h \
   rpc/blockchain.h \
   rpc/client.h \
   rpc/mining.h \
@@ -226,6 +227,7 @@ libraven_server_a_SOURCES = \
   policy/rbf.cpp \
   pow.cpp \
   rest.cpp \
+  rewards.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
   rpc/messages.cpp \
