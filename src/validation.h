@@ -38,6 +38,7 @@
 #include <assets/messages.h>
 #include <assets/myassetsdb.h>
 #include <assets/restricteddb.h>
+#include <assets/assetsnapshotdb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -54,6 +55,7 @@ struct ChainTxData;
 
 class CAssetsDB;
 class CAssets;
+class CSnapshotRequestDB;
 
 struct PrecomputedTransactionData;
 struct LockPoints;
@@ -149,6 +151,7 @@ static const bool DEFAULT_ASSETINDEX = false;
 static const bool DEFAULT_ADDRESSINDEX = false;
 static const bool DEFAULT_TIMESTAMPINDEX = false;
 static const bool DEFAULT_SPENTINDEX = false;
+static const bool DEFAULT_REWARDS_ENABLED = false;
 /** Default for -dbmaxfilesize , in MB */
 static const int64_t DEFAULT_DB_MAX_FILE_SIZE = 2;
 
@@ -542,6 +545,12 @@ extern CLRUCache<std::string, int8_t> *passetsRestrictionCache; // hash(address,
 
 /** Global variable that points to the global asset restriction LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache;
+
+/** Global variable that point to the active Snapshot Request database (protected by cs_main) */
+extern CSnapshotRequestDB *pSnapshotRequestDb;
+
+/** Global variable that point to the active asset snapshot database (protected by cs_main) */
+extern CAssetSnapshotDB *pAssetSnapshotDb;
 
 /** RVN END */
 
