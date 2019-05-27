@@ -27,7 +27,9 @@ const unsigned int SECONDS_TO_WAIT_FOR_SHUTDOWN = 1;
 void RewardsProcessorThreadFunc();
 
 //  Main functionality for the rewards processor
+void InitializeRewardProcessing();
 void ProcessRewards();
+void ShutdownRewardsProcessing();
 
 bool LaunchRewardsProcessorThread()
 {
@@ -100,7 +102,7 @@ bool ShutdownRewardsProcessorThread()
             }
         }
 
-        //  Join the thread to wait for it to finish
+        //  Join the thread to wait for it to actually finish
         gs_processorThread.join();
 
         //  Indicate success
@@ -118,6 +120,7 @@ void RewardsProcessorThreadFunc()
     LogPrintf("rewards_thread: Rewards processor thread is starting up...\n");
 
     //  Perform intialization
+    InitializeRewardProcessing();
 
     LogPrintf("rewards_thread: Rewards processor thread has started.\n");
 
@@ -131,7 +134,7 @@ void RewardsProcessorThreadFunc()
     //  Process work until a shutdown signal is received
     do {
         //  Process pending rewards
-        LogPrintf("rewards_thread: Processing awards...\n");
+        ProcessRewards();
 
         //  And check for the shutdown signal
         {
@@ -141,6 +144,9 @@ void RewardsProcessorThreadFunc()
     } while (!gs_beginShutdown);
 
     LogPrintf("rewards_thread: Rewards processor thread is shutting down...\n");
+
+    //  Perform shutdown processing
+    ShutdownRewardsProcessing();
 
     //  Signal successful shutdown
     {
@@ -152,11 +158,33 @@ void RewardsProcessorThreadFunc()
     LogPrintf("rewards_thread: Rewards processor thread has stopped.\n");
 }
 
+void InitializeRewardProcessing()
+{
+    //  Load/initialize anything that can be done outside the main loop
+}
+
 void ProcessRewards()
 {
     LogPrintf("rewards_thread: Processing rewards...\n");
 
-    //  Actual logic to process rewards
+    //  Retrieve list of un-processed reward requests
 
+    //  Iterate through list of requests, processing each one
+    {
+        //  For each request, retrieve the list of non-exception owner records for the specified asset
+
+        //  Use the count of payable asset owners to create a divisor
+
+        //  Divide the total payout amount by the number of payable asset owners
+
+        //  Loop through each payable account, sending it the appropriate portion of the total payout amount
+
+        //  Delete the processed reward request from the database
+    }
     LogPrintf("rewards_thread: Rewards processing completed.\n");
+}
+
+void ShutdownRewardsProcessing()
+{
+    //  Cleanup anything needed after the main loop exits
 }
