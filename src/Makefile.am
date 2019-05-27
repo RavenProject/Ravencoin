@@ -90,6 +90,7 @@ RAVEN_CORE_H = \
   assets/assettypes.h \
   assets/messages.h \
   assets/messagedb.h \
+  assets/rewardsdb.h \
   base58.h \
   bloom.h \
   blockencodings.h \
@@ -217,6 +218,7 @@ libraven_server_a_SOURCES = \
   assets/assets.cpp \
   assets/assetdb.cpp \
   assets/assettypes.cpp \
+  assets/rewardsdb.cpp \
   assets/messages.cpp \
   assets/messagedb.cpp \
   policy/fees.cpp \
@@ -231,6 +233,7 @@ libraven_server_a_SOURCES = \
   rpc/misc.cpp \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
+  rpc/rewards.cpp \
   rpc/safemode.cpp \
   rpc/server.cpp \
   script/sigcache.cpp \

@@ -53,6 +53,7 @@ struct ChainTxData;
 
 class CAssetsDB;
 class CAssets;
+class CRewardsDB;
 
 struct PrecomputedTransactionData;
 struct LockPoints;
@@ -511,6 +512,9 @@ extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
 extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
 extern CMessageDB *pmessagedb;
 extern CMessageChannelDB *pmessagechanneldb;
+
+/** Global variable that point to the active rewards database (protected by cs_main) */
+extern CRewardsDB *pRewardsDB;
 /** RVN END */
 
 /**
