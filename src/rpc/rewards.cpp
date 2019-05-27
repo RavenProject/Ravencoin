@@ -60,6 +60,19 @@ UniValue reward(const JSONRPCRequest& request) {
         return ret;
     }
 
+    //  Figure out which wallet to use
+    CWallet * const walletPtr = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(walletPtr, request.fHelp)) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Rewards system requires a wallet.");
+        return ret;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, walletPtr->cs_wallet);
+
+    EnsureWalletIsUnlocked(walletPtr);
+
     //  Extract parameters
     int64_t total_payout_amount = request.params[0].get_int64();
     std::string payout_source = request.params[1].get_str();
@@ -88,6 +101,7 @@ UniValue reward(const JSONRPCRequest& request) {
 
     //  Build our reward record for scheduling
     CRewardsDBEntry entryToAdd;
+    entryToAdd.walletName = walletPtr->GetName();
     entryToAdd.heightForPayout = chainActive.Height() + FUTURE_BLOCK_HEIGHT_OFFSET;
     entryToAdd.totalPayoutAmt = total_payout_amount;
     entryToAdd.tgtAssetName = target_asset_name;

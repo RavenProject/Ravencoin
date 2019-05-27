@@ -10,6 +10,9 @@
 #include "rewards.h"
 #include "validation.h"
 #include "assets/rewardsdb.h"
+#include "wallet/wallet.h"
+#include "univalue.h"
+#include "wallet/coincontrol.h"
 
 #include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
@@ -44,7 +47,15 @@ bool RetrievePayableOwnersOfAsset(
     std::set<std::string> & p_payableOwners);
 
 //  Transfer the specified amount of the asset from the source to the target
-bool InitiateTransfer(int64_t p_xferAmt, std::string p_src, std::string p_dest);
+bool InitiateTransfer(
+    CWallet * const p_walletPtr, int64_t p_xferAmt, std::string p_src, std::string p_dest,
+    std::string & p_resultantTxID);
+
+//  Retrieves the wallet with teh specified name
+CWallet *GetWalletByName(const std::string & p_walletName);
+
+//  This is in another module
+extern CAmount AmountFromValue(const UniValue & p_value);
 
 bool LaunchRewardsProcessorThread()
 {
@@ -226,10 +237,24 @@ void ProcessRewards()
             //  Divide the total payout amount by the number of payable asset owners
             int64_t payoutAmountPerAccount = rewardEntry.totalPayoutAmt / payableOwners.size();
 
+            //  Retrieve the specified wallet for this payout
+            CWallet * const walletPtr = GetWalletByName(rewardEntry.walletName);
+            if (!EnsureWalletIsAvailable(walletPtr, true)) {
+                LogPrintf("rewards_thread: Wallet associated with reward is unavailable!\n");
+
+                continue;
+            }
+
+            //  Lock the wallet while we're doing stuff
+            LOCK2(cs_main, walletPtr->cs_wallet);
+            EnsureWalletIsUnlocked(walletPtr);
+
             //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
             for (auto const & payableOwner : payableOwners) {
                 //  Send the amount to the destination
-                if (!InitiateTransfer(payoutAmountPerAccount, rewardEntry.payoutSrc, payableOwner)) {
+                std::string transactionID;
+
+                if (!InitiateTransfer(walletPtr, payoutAmountPerAccount, rewardEntry.payoutSrc, payableOwner, transactionID)) {
                     LogPrintf("rewards_thread: Failed to transfer %lld of '%s' to '%s'!\n",
                         static_cast<long long>(payoutAmountPerAccount), rewardEntry.payoutSrc.c_str(),
                         payableOwner.c_str());
@@ -311,7 +336,9 @@ bool RetrievePayableOwnersOfAsset(
     return fcnRetVal;
 }
 
-bool InitiateTransfer(int64_t p_xferAmt, std::string p_src, std::string p_dest)
+bool InitiateTransfer(
+    CWallet * const p_walletPtr, int64_t p_xferAmt, std::string p_src, std::string p_dest,
+    std::string & p_resultantTxID)
 {
     bool fcnRetVal = false;
 
@@ -320,6 +347,29 @@ bool InitiateTransfer(int64_t p_xferAmt, std::string p_src, std::string p_dest)
     // While condition is false to ensure a single pass through this logic
     do {
         //  Transfer the specified amount of the asset from the source to the target
+        CAmount nAmount = AmountFromValue(p_xferAmt);
+
+        std::pair<int, std::string> error;
+        std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
+
+        vTransfers.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_dest));
+        CReserveKey reservekey(p_walletPtr);
+        CWalletTx transaction;
+        CAmount nRequiredFee;
+
+        CCoinControl ctrl;
+
+        // Create the Transaction
+        if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee)) {
+            LogPrintf("Failed to create transfer asset transaction\n");
+            break;
+        }
+
+        // Send the Transaction to the network
+        if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, p_resultantTxID)) {
+            LogPrintf("Failed to send asset transaction\n");
+            break;
+        }
 
         //  Indicate success
         fcnRetVal = true;
@@ -329,4 +379,15 @@ bool InitiateTransfer(int64_t p_xferAmt, std::string p_src, std::string p_dest)
         fcnRetVal ? "succeeded" : "failed");
 
     return fcnRetVal;
+}
+
+CWallet *GetWalletByName(const std::string & p_walletName)
+{
+    for (CWalletRef pwallet : ::vpwallets) {
+        if (pwallet->GetName() == p_walletName) {
+            return pwallet;
+        }
+    }
+
+    return ::vpwallets.size() == 1 ? ::vpwallets[0] : nullptr;
 }

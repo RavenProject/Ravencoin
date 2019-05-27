@@ -18,4 +18,10 @@ bool LaunchRewardsProcessorThread();
 // Shuts down the rewards processing thread
 bool ShutdownRewardsProcessorThread();
 
+//  Error codes
+enum RewardsErrorCode
+{
+    REWARDS_TYPE_ERROR  = -1,
+};
+
 #endif // RAVEN_REWARDS_H
