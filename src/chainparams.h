@@ -111,6 +111,27 @@ public:
     const std::string& AddNullQualifierTagBurnAddress() const { return strAddNullQualifierTagBurnAddress; }
     const std::string& GlobalBurnAddress() const { return strGlobalBurnAddress; }
 
+    //  Indicates whether or not the provided address is a burn address
+    bool IsBurnAddress(const std::string & p_address) const
+    {
+        if (
+            p_address == strIssueAssetBurnAddress
+            || p_address == strReissueAssetBurnAddress
+            || p_address == strIssueSubAssetBurnAddress
+            || p_address == strIssueUniqueAssetBurnAddress
+            || p_address == strIssueMsgChannelAssetBurnAddress
+            || p_address == strIssueQualifierAssetBurnAddress
+            || p_address == strIssueSubQualifierAssetBurnAddress
+            || p_address == strIssueRestrictedAssetBurnAddress
+            || p_address == strAddNullQualifierTagBurnAddress
+            || p_address == strGlobalBurnAddress
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
     unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
