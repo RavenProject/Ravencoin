@@ -42,13 +42,14 @@ void ShutdownRewardsProcessing();
 
 //  Retrieves all of the payable owners for the specified asset, excluding those
 //      in the exception address list.
-bool RetrievePayableOwnersOfAsset(
-    const std::string & p_assetName, const std::string & p_exceptionAddresses,
-    std::set<std::string> & p_payableOwners);
+bool GenerateBatchedTransactions(
+    CWallet * const p_walletPtr, const int64_t p_paymentAmt,
+    const std::string & p_assetName, const std::string & p_exceptionAddresses);
 
 //  Transfer the specified amount of the asset from the source to the target
 bool InitiateTransfer(
-    CWallet * const p_walletPtr, int64_t p_xferAmt, std::string p_src, std::string p_dest,
+    CWallet * const p_walletPtr, int64_t p_xferAmt, const std::string & p_src,
+    const std::vector<std::string> & p_destAddresses, size_t p_offset, size_t p_count,
     std::string & p_resultantTxID);
 
 //  Retrieves the wallet with teh specified name
@@ -226,40 +227,20 @@ void ProcessRewards()
         //  For each request, retrieve the list of non-exception owner records for the specified asset
         std::set<std::string> payableOwners;
 
-        if (!RetrievePayableOwnersOfAsset(rewardEntry.payoutSrc, rewardEntry.exceptionAddresses, payableOwners)) {
-            LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
-                rewardEntry.payoutSrc.c_str());
+        //  Retrieve the specified wallet for this payout
+        CWallet * const walletPtr = GetWalletByName(rewardEntry.walletName);
+        if (!EnsureWalletIsAvailable(walletPtr, true)) {
+            LogPrintf("rewards_thread: Wallet associated with reward is unavailable!\n");
 
             continue;
         }
 
-        if (payableOwners.size() > 0) {
-            //  Divide the total payout amount by the number of payable asset owners
-            int64_t payoutAmountPerAccount = rewardEntry.totalPayoutAmt / payableOwners.size();
+        //  Generate batched transactions based on the owner addresses
+        if (!GenerateBatchedTransactions(walletPtr, rewardEntry.totalPayoutAmt, rewardEntry.payoutSrc, rewardEntry.exceptionAddresses)) {
+            LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
+                rewardEntry.payoutSrc.c_str());
 
-            //  Retrieve the specified wallet for this payout
-            CWallet * const walletPtr = GetWalletByName(rewardEntry.walletName);
-            if (!EnsureWalletIsAvailable(walletPtr, true)) {
-                LogPrintf("rewards_thread: Wallet associated with reward is unavailable!\n");
-
-                continue;
-            }
-
-            //  Lock the wallet while we're doing stuff
-            LOCK2(cs_main, walletPtr->cs_wallet);
-            EnsureWalletIsUnlocked(walletPtr);
-
-            //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
-            for (auto const & payableOwner : payableOwners) {
-                //  Send the amount to the destination
-                std::string transactionID;
-
-                if (!InitiateTransfer(walletPtr, payoutAmountPerAccount, rewardEntry.payoutSrc, payableOwner, transactionID)) {
-                    LogPrintf("rewards_thread: Failed to transfer %lld of '%s' to '%s'!\n",
-                        static_cast<long long>(payoutAmountPerAccount), rewardEntry.payoutSrc.c_str(),
-                        payableOwner.c_str());
-                }
-            }
+            continue;
         }
 
         //  Delete the processed reward request from the database
@@ -274,9 +255,9 @@ void ShutdownRewardsProcessing()
     //  Cleanup anything needed after the main loop exits
 }
 
-bool RetrievePayableOwnersOfAsset(
-    const std::string & p_assetName, const std::string & p_exceptionAddresses,
-    std::set<std::string> & p_payableOwners)
+bool GenerateBatchedTransactions(
+    CWallet * const p_walletPtr, const int64_t p_paymentAmt,
+    const std::string & p_assetName, const std::string & p_exceptionAddresses)
 {
     bool fcnRetVal = false;
 
@@ -301,6 +282,8 @@ bool RetrievePayableOwnersOfAsset(
 
         //  Step 2 - retrieve all of the addresses in batches
         const int MAX_RETRIEVAL_COUNT = 100;
+        std::vector<std::string> paymentAddresses;
+
         for (int retrievalOffset = 0; retrievalOffset < totalEntryCount; retrievalOffset += MAX_RETRIEVAL_COUNT) {
             //  Retrieve the specified segment of addresses
             addressInfoPairs.clear();
@@ -321,8 +304,26 @@ bool RetrievePayableOwnersOfAsset(
                 }
 
                 if (!isExceptionAddress) {
-                    p_payableOwners.insert(addressInfoPair.first);
+                    paymentAddresses.push_back(addressInfoPair.first);
                 }
+            }
+        }
+
+        //  Divide the total payout amount by the number of payable asset owners
+        int64_t payoutAmountPerAccount = p_paymentAmt / paymentAddresses.size();
+
+        //  Lock the wallet while we're doing stuff
+        LOCK2(cs_main, p_walletPtr->cs_wallet);
+        EnsureWalletIsUnlocked(p_walletPtr);
+
+        //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
+        const size_t MAX_ADDRESSES_PER_TRANSACTION = 100;
+        for (size_t ctr = 0; ctr < paymentAddresses.size(); ctr += MAX_ADDRESSES_PER_TRANSACTION) {
+            //  Process the address lists in batches
+            std::string transactionID;
+
+            if (!InitiateTransfer(p_walletPtr, payoutAmountPerAccount, p_assetName, paymentAddresses, ctr, MAX_ADDRESSES_PER_TRANSACTION, transactionID)) {
+                LogPrintf("rewards_thread: Transaction generation failed!\n");
             }
         }
 
@@ -337,7 +338,8 @@ bool RetrievePayableOwnersOfAsset(
 }
 
 bool InitiateTransfer(
-    CWallet * const p_walletPtr, int64_t p_xferAmt, std::string p_src, std::string p_dest,
+    CWallet * const p_walletPtr, int64_t p_xferAmt, const std::string & p_src,
+    const std::vector<std::string> & p_destAddresses, size_t p_offset, size_t p_count,
     std::string & p_resultantTxID)
 {
     bool fcnRetVal = false;
@@ -346,13 +348,22 @@ bool InitiateTransfer(
 
     // While condition is false to ensure a single pass through this logic
     do {
+        //  Ensure that we don't somehow run past the end of the address vector
+        if (p_offset >= p_destAddresses.size() || p_offset + p_count -1 >= p_destAddresses.size()) {
+            LogPrintf("Out of range issue with destination address list\n");
+            break;
+        }
+
         //  Transfer the specified amount of the asset from the source to the target
         CAmount nAmount = AmountFromValue(p_xferAmt);
 
         std::pair<int, std::string> error;
         std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-        vTransfers.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_dest));
+        for (size_t idx = p_offset; idx < p_count && idx < p_destAddresses.size(); idx++) {
+            vTransfers.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_destAddresses[idx]));
+        }
+
         CReserveKey reservekey(p_walletPtr);
         CWalletTx transaction;
         CAmount nRequiredFee;

@@ -11,6 +11,12 @@ CRewardsDB::CRewardsDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper
 
 bool CRewardsDB::SchedulePendingReward(const CRewardsDBEntry & p_newReward)
 {
+    LogPrintf("%s : Scheduling reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+        __func__,
+        p_newReward.walletName.c_str(), p_newReward.heightForPayout, static_cast<long long>(p_newReward.totalPayoutAmt),
+        p_newReward.payoutSrc.c_str(), p_newReward.tgtAssetName.c_str(),
+        p_newReward.exceptionAddresses.c_str());
+
     //  Retrieve height-based entry which contains list of rewards to pay at that height
     std::set<CRewardsDBEntry> entriesAtSpecifiedHeight;
 
@@ -21,21 +27,37 @@ bool CRewardsDB::SchedulePendingReward(const CRewardsDBEntry & p_newReward)
     entriesAtSpecifiedHeight.insert(p_newReward);
 
     //  Overwrite the entry in the database
-    return Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), entriesAtSpecifiedHeight);
+    bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), entriesAtSpecifiedHeight);
+
+    LogPrintf("%s : Scheduling %s!\n",
+        __func__,
+        succeeded ? "succeeded" : "failed");
+
+    return succeeded;
 }
 
 bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward)
 {
+    LogPrintf("%s : Removing reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+        __func__,
+        p_completedReward.walletName.c_str(), p_completedReward.heightForPayout, static_cast<long long>(p_completedReward.totalPayoutAmt),
+        p_completedReward.payoutSrc.c_str(), p_completedReward.tgtAssetName.c_str(),
+        p_completedReward.exceptionAddresses.c_str());
+
     //  Retrieve height-based entry which contains list of rewards to pay at that height
     std::set<CRewardsDBEntry> entriesAtSpecifiedHeight;
 
     //  If this fails, bail, since we can't be sure we won't blow away valid entries
     if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout), entriesAtSpecifiedHeight)) {
+        LogPrintf("%s : Failed to read scheduled rewards at specified height!\n", __func__);
+
         return false;
     }
 
     //  If the list is empty, bail
     if (entriesAtSpecifiedHeight.size() == 0) {
+        LogPrintf("%s : No scheduled reward exists at specified height!\n", __func__);
+
         return true;
     }
 
@@ -53,16 +75,31 @@ bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward
 
     //  If the list still has entries, overwrite the record in the database
     if (entriesAtSpecifiedHeight.size() > 0) {
-        return Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout), entriesAtSpecifiedHeight);
+        bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout), entriesAtSpecifiedHeight);
+
+        LogPrintf("%s : Removal of scheduled reward %s!\n",
+            __func__,
+            succeeded ? "succeeded" : "failed");
+
+        return succeeded;
     }
 
     //  Otherwise, erase the entire entry since none are left.
-    return Erase(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout));
+    bool succeeded = Erase(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout));
+
+    LogPrintf("%s : Removal of last scheduled reward %s!\n",
+        __func__,
+        succeeded ? "succeeded" : "failed");
+
+    return succeeded;
 }
 
 bool CRewardsDB::LoadPayableRewards(
     std::set<CRewardsDBEntry> & p_dbEntries, const int & p_minBlockHeight)
 {
+    LogPrintf("%s : Looking for scheduled rewards below height %d!\n",
+        __func__, p_minBlockHeight);
+
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
     pcursor->SeekToFirst();
@@ -79,13 +116,21 @@ bool CRewardsDB::LoadPayableRewards(
             if (pcursor->GetValue(dbEntry)) {
                 p_dbEntries.insert(dbEntry);
             } else {
-                LogPrintf("%s: failed to read reward\n", __func__);
+                LogPrintf("%s: Failed to read reward\n", __func__);
             }
 
             pcursor->Next();
         } else {
             break;
         }
+    }
+
+    for (auto const & reward : p_dbEntries) {
+        LogPrintf("%s : Found payable reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+            __func__,
+            reward.walletName.c_str(), reward.heightForPayout, static_cast<long long>(reward.totalPayoutAmt),
+            reward.payoutSrc.c_str(), reward.tgtAssetName.c_str(),
+            reward.exceptionAddresses.c_str());
     }
 
     return true;
