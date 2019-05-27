@@ -1878,7 +1878,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         }
     }
 
-    // If the rewards system is enabled, launch a background thread thatt will process scheduled reward payouts
+    // If the rewards system is enabled, launch a background thread that will process scheduled reward payouts
     if (gArgs.IsArgSet("-rewards") && gArgs.IsArgSet("-rewards_processor")) {
         bool launchResult = LaunchRewardsProcessorThread();
         if (!launchResult) {
