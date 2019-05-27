@@ -8,8 +8,11 @@
 
 #include "util.h"
 #include "rewards.h"
+#include "validation.h"
+#include "assets/rewardsdb.h"
 
 #include <boost/thread.hpp>
+#include <boost/algorithm/string.hpp>
 
 static boost::thread gs_processorThread;
 
@@ -23,6 +26,9 @@ static bool gs_shutdownCompleted = false;
 //  Number of seconds to wait for shutdown while processing rewards
 const unsigned int SECONDS_TO_WAIT_FOR_SHUTDOWN = 1;
 
+//  Addresses are delimited by commas
+static const std::string ADDRESS_COMMA_DELIMITER = ",";
+
 //  Thread function for the rewards processor thread
 void RewardsProcessorThreadFunc();
 
@@ -30,6 +36,15 @@ void RewardsProcessorThreadFunc();
 void InitializeRewardProcessing();
 void ProcessRewards();
 void ShutdownRewardsProcessing();
+
+//  Retrieves all of the payable owners for the specified asset, excluding those
+//      in the exception address list.
+bool RetrievePayableOwnersOfAsset(
+    const std::string & p_assetName, const std::string & p_exceptionAddresses,
+    std::set<std::string> & p_payableOwners);
+
+//  Transfer the specified amount of the asset from the source to the target
+bool InitiateTransfer(int64_t p_xferAmt, std::string p_src, std::string p_dest);
 
 bool LaunchRewardsProcessorThread()
 {
@@ -167,24 +182,151 @@ void ProcessRewards()
 {
     LogPrintf("rewards_thread: Processing rewards...\n");
 
+    //  Lock access to the databases
+    LOCK(cs_main);
+
+    //  Verify that DB pointers are good
+    if (pRewardsDb == nullptr) {
+        LogPrintf("rewards_thread: Invalid rewards DB!\n");
+        return;
+    }
+    if (passetsdb == nullptr) {
+        LogPrintf("rewards_thread: Invalid assets DB!\n");
+        return;
+    }
+
     //  Retrieve list of un-processed reward requests
+    std::set<CRewardsDBEntry> dbEntriesToProcess;
+    int currentHeight = chainActive.Height();
+
+    if (!pRewardsDb->LoadPayableRewards(dbEntriesToProcess, currentHeight)) {
+        LogPrintf("rewards_thread: Failed to retrieve pending records from rewards DB!\n");
+        return;
+    }
+
+    if (dbEntriesToProcess.size() == 0) {
+        LogPrintf("rewards_thread: There are no rewards pending processing at the current height of %d!\n",
+            currentHeight);
+        return;
+    }
 
     //  Iterate through list of requests, processing each one
-    {
+    for (auto const & rewardEntry : dbEntriesToProcess) {
         //  For each request, retrieve the list of non-exception owner records for the specified asset
+        std::set<std::string> payableOwners;
 
-        //  Use the count of payable asset owners to create a divisor
+        if (!RetrievePayableOwnersOfAsset(rewardEntry.payoutSrc, rewardEntry.exceptionAddresses, payableOwners)) {
+            LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
+                rewardEntry.payoutSrc.c_str());
 
-        //  Divide the total payout amount by the number of payable asset owners
+            continue;
+        }
 
-        //  Loop through each payable account, sending it the appropriate portion of the total payout amount
+        if (payableOwners.size() > 0) {
+            //  Divide the total payout amount by the number of payable asset owners
+            int64_t payoutAmountPerAccount = rewardEntry.totalPayoutAmt / payableOwners.size();
+
+            //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
+            for (auto const & payableOwner : payableOwners) {
+                //  Send the amount to the destination
+                if (!InitiateTransfer(payoutAmountPerAccount, rewardEntry.payoutSrc, payableOwner)) {
+                    LogPrintf("rewards_thread: Failed to transfer %lld of '%s' to '%s'!\n",
+                        static_cast<long long>(payoutAmountPerAccount), rewardEntry.payoutSrc.c_str(),
+                        payableOwner.c_str());
+                }
+            }
+        }
 
         //  Delete the processed reward request from the database
+        pRewardsDb->RemoveCompletedReward(rewardEntry);
     }
+
     LogPrintf("rewards_thread: Rewards processing completed.\n");
 }
 
 void ShutdownRewardsProcessing()
 {
     //  Cleanup anything needed after the main loop exits
+}
+
+bool RetrievePayableOwnersOfAsset(
+    const std::string & p_assetName, const std::string & p_exceptionAddresses,
+    std::set<std::string> & p_payableOwners)
+{
+    bool fcnRetVal = false;
+
+    LogPrintf("Retrieving payable owners...\n");
+
+    // While condition is false to ensure a single pass through this logic
+    do {
+        //  Split up the exception address string
+        std::vector<std::string> exceptionAddressList;
+        boost::split(exceptionAddressList, p_exceptionAddresses, boost::is_any_of(ADDRESS_COMMA_DELIMITER));
+
+        //  Retrieve the payable owners for the specified asset
+        //  This is done in batches. First, the total count is retrieved, then all of the addresses.
+        std::vector<std::pair<std::string, CAmount>> addressInfoPairs;
+        int totalEntryCount = 0;
+
+        //  Step 1 - find out how many addresses currently exist
+        if (!passetsdb->AssetAddressDir(addressInfoPairs, totalEntryCount, true, p_assetName, INT_MAX, 0)) {
+            LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
+            break;
+        }
+
+        //  Step 2 - retrieve all of the addresses in batches
+        const int MAX_RETRIEVAL_COUNT = 100;
+        for (int retrievalOffset = 0; retrievalOffset < totalEntryCount; retrievalOffset += MAX_RETRIEVAL_COUNT) {
+            //  Retrieve the specified segment of addresses
+            addressInfoPairs.clear();
+
+            if (!passetsdb->AssetAddressDir(addressInfoPairs, totalEntryCount, false, p_assetName, MAX_RETRIEVAL_COUNT, retrievalOffset)) {
+                LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
+                break;
+            }
+
+            //  Add only non-exception addresses to the list
+            for (auto const & addressInfoPair : addressInfoPairs) {
+                bool isExceptionAddress = false;
+
+                for (auto const & exceptionAddr : exceptionAddressList) {
+                    if (addressInfoPair.first.compare(exceptionAddr) == 0) {
+                        isExceptionAddress = true;
+                    }
+                }
+
+                if (!isExceptionAddress) {
+                    p_payableOwners.insert(addressInfoPair.first);
+                }
+            }
+        }
+
+        //  Indicate success
+        fcnRetVal = true;
+    } while (false);
+
+    LogPrintf("Payable owner retrieval %s.\n",
+        fcnRetVal ? "succeeded" : "failed");
+
+    return fcnRetVal;
+}
+
+bool InitiateTransfer(int64_t p_xferAmt, std::string p_src, std::string p_dest)
+{
+    bool fcnRetVal = false;
+
+    LogPrintf("Initiating transfer...\n");
+
+    // While condition is false to ensure a single pass through this logic
+    do {
+        //  Transfer the specified amount of the asset from the source to the target
+
+        //  Indicate success
+        fcnRetVal = true;
+    } while (false);
+
+    LogPrintf("Transfer processing %s.\n",
+        fcnRetVal ? "succeeded" : "failed");
+
+    return fcnRetVal;
 }
