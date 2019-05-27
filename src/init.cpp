@@ -425,6 +425,8 @@ std::string HelpMessage(HelpMessageMode mode)
 #endif
     strUsage += HelpMessageOpt("-txindex", strprintf(_("Maintain a full transaction index, used by the getrawtransaction rpc call (default: %u)"), DEFAULT_TXINDEX));
 
+    strUsage += HelpMessageOpt("-rewards", strprintf("Enable the rewards system (default: %u)", DEFAULT_REWARDS_ENABLED));
+ 
     strUsage += HelpMessageOpt("-addressindex", strprintf(_("Maintain a full address index, used to query for the balance, txids and unspent outputs for addresses (default: %u)"), DEFAULT_ADDRESSINDEX));
     strUsage += HelpMessageOpt("-timestampindex", strprintf(_("Maintain a timestamp index for block hashes, used to query blocks hashes by a range of timestamps (default: %u)"), DEFAULT_TIMESTAMPINDEX));
     strUsage += HelpMessageOpt("-spentindex", strprintf(_("Maintain a full spent index, used to query the spending txid and input index for an outpoint (default: %u)"), DEFAULT_SPENTINDEX));
@@ -1032,6 +1034,7 @@ bool AppInitParameterInteraction()
     }
     fCheckBlockIndex = gArgs.GetBoolArg("-checkblockindex", chainparams.DefaultConsistencyChecks());
     fCheckpointsEnabled = gArgs.GetBoolArg("-checkpoints", DEFAULT_CHECKPOINTS_ENABLED);
+    fRewardsEnabled = gArgs.GetBoolArg("-rewards", DEFAULT_REWARDS_ENABLED);
 
     hashAssumeValid = uint256S(gArgs.GetArg("-assumevalid", chainparams.GetConsensus().defaultAssumeValid.GetHex()));
     if (!hashAssumeValid.IsNull())
@@ -1506,6 +1509,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                 // Read for fAssetIndex to make sure that we only load asset address balances if it if true
                 pblocktree->ReadFlag("assetindex", fAssetIndex);
+
                 // Need to load assets before we verify the database
                 if (!passetsdb->LoadAssets()) {
                     strLoadError = _("Failed to load Assets Database");
@@ -1549,15 +1553,21 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 if (!mapBlockIndex.empty() && mapBlockIndex.count(chainparams.GetConsensus().hashGenesisBlock) == 0)
                     return InitError(_("Incorrect or no genesis block found. Wrong datadir for network?"));
 
-                // Check for changed -txindex state
-                if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
-                    strLoadError = _("You need to rebuild the database using -reindex to change -txindex");
+                // See if the state of the rewards system is being changed
+                if (fRewardsEnabled != gArgs.GetBoolArg("-rewards", DEFAULT_REWARDS_ENABLED)) {
+                    strLoadError = _("You need to rebuild the database using -reindex to change -rewards");
                     break;
                 }
 
                 // Check for changed -assetindex state
                 if (fAssetIndex != gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX)) {
                     strLoadError = _("You need to rebuild the database using -reindex to change -assetIndex");
+                    break;
+                }
+
+                // Check for changed -txindex state
+                if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
+                    strLoadError = _("You need to rebuild the database using -reindex to change -txindex");
                     break;
                 }
 

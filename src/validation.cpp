@@ -92,6 +92,7 @@ bool fIsBareMultisigStd = DEFAULT_PERMIT_BAREMULTISIG;
 bool fRequireStandard = true;
 bool fCheckBlockIndex = false;
 bool fCheckpointsEnabled = DEFAULT_CHECKPOINTS_ENABLED;
+bool fRewardsEnabled = DEFAULT_REWARDS_ENABLED;
 size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
@@ -4545,6 +4546,10 @@ bool static LoadBlockIndexDB(const CChainParams& chainparams)
     pblocktree->ReadReindexing(fReindexing);
     if(fReindexing) fReindex = true;
 
+    // See if rewards have been enabled
+    pblocktree->ReadFlag("rewards", fRewardsEnabled);
+    LogPrintf("%s: rewards %s\n", __func__, fRewardsEnabled ? "enabled" : "disabled");
+
     // Check whether we have a transaction index
     pblocktree->ReadFlag("txindex", fTxIndex);
     LogPrintf("%s: transaction index %s\n", __func__, fTxIndex ? "enabled" : "disabled");
@@ -4937,10 +4942,25 @@ bool LoadBlockIndex(const CChainParams& chainparams)
         pblocktree->WriteFlag("txindex", fTxIndex);
         LogPrintf("%s: transaction index %s\n", __func__, fTxIndex ? "enabled" : "disabled");
 
-        // Use the provided setting for -assetindex in the new database
-        fAssetIndex = gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX);
-        pblocktree->WriteFlag("assetindex", fAssetIndex);
-        LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
+        // Use the provided setting for -rewards in the new database
+        fRewardsEnabled = gArgs.GetBoolArg("-rewards", DEFAULT_REWARDS_ENABLED);
+        pblocktree->WriteFlag("rewards", fRewardsEnabled);
+        LogPrintf("%s: rewards %s\n", __func__, fRewardsEnabled ? "enabled" : "disabled");
+
+        // Rewards requires txindex and assetindex
+        if (fRewardsEnabled) {
+            LogPrintf("%s: rewards has enabled the asset index\n", __func__);
+
+            fAssetIndex = true;
+            pblocktree->WriteFlag("assetindex", fAssetIndex);
+            LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
+        }
+        else {
+            // Use the provided setting for -assetindex in the new database
+            fAssetIndex = gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX);
+            pblocktree->WriteFlag("assetindex", fAssetIndex);
+            LogPrintf("%s: asset index %s\n", __func__, fAssetIndex ? "enabled" : "disabled");
+        }
 
         // Use the provided setting for -addressindex in the new database
         fAddressIndex = gArgs.GetBoolArg("-addressindex", DEFAULT_ADDRESSINDEX);

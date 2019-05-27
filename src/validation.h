@@ -150,6 +150,7 @@ static const bool DEFAULT_ASSETINDEX = false;
 static const bool DEFAULT_ADDRESSINDEX = false;
 static const bool DEFAULT_TIMESTAMPINDEX = false;
 static const bool DEFAULT_SPENTINDEX = false;
+static const bool DEFAULT_REWARDS_ENABLED = false;
 /** Default for -dbmaxfilesize , in MB */
 static const int64_t DEFAULT_DB_MAX_FILE_SIZE = 2;
 
@@ -201,6 +202,7 @@ extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
 extern bool fCheckBlockIndex;
 extern bool fCheckpointsEnabled;
+extern bool fRewardsEnabled;
 extern size_t nCoinCacheUsage;
 /** A fee rate smaller than this is considered zero fee (for relaying, mining and transaction creation) */
 extern CFeeRate minRelayTxFee;
@@ -514,7 +516,7 @@ extern CMessageDB *pmessagedb;
 extern CMessageChannelDB *pmessagechanneldb;
 
 /** Global variable that point to the active rewards database (protected by cs_main) */
-extern CRewardsDB *pRewardsDB;
+extern CRewardsDB *pRewardsDb;
 /** RVN END */
 
 /**
