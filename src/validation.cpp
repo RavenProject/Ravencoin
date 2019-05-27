@@ -57,6 +57,9 @@
 #include "assets/assetdb.h"
 #include "base58.h"
 
+#include "assets/snapshotrequestdb.h"
+#include "assets/assetsnapshotdb.h"
+
 #if defined(NDEBUG)
 # error "Raven cannot be compiled without assertions."
 #endif
@@ -230,6 +233,8 @@ CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
 CMyRestrictedDB *pmyrestricteddb = nullptr;
+CSnapshotRequestDB *pSnapshotRequestDb = nullptr;
+CAssetSnapshotDB *pAssetSnapshotDb = nullptr;
 
 CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
 CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
@@ -3284,6 +3289,32 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     LogPrint(BCLog::BENCH, "- Connect block: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime6 - nTime1) * MILLI, nTimeTotal * MICRO, nTimeTotal * MILLI / nBlocksTotal);
 
     connectTrace.BlockConnected(pindexNew, std::move(pthisBlock));
+
+    /** RVN START */
+
+    //  Determine if the new block height has any pending snapshot requests,
+    //      and if so, capture a snapshot of the relevant target assets.
+    if (pSnapshotRequestDb != nullptr) {
+        //  Retrieve the scheduled snapshot requests
+        std::set<std::string> assetsToSnapshot;
+
+        if (pSnapshotRequestDb->RetrieveSnapshotRequestsForHeight("", pindexNew->nHeight, assetsToSnapshot)) {
+            //  Loop through them
+            for (auto const & assetName : assetsToSnapshot) {
+                //  Add a snapshot entry for the target asset ownership
+                if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(assetName, pindexNew->nHeight)) {
+                   LogPrint(BCLog::REWARDS, "ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
+                       assetName.c_str(), pindexNew->nHeight);
+                }
+            }
+        }
+        else {
+            LogPrint(BCLog::REWARDS, "ConnectTip: Failed to load payable Snapshot Requests at height %d!\n", pindexNew->nHeight);
+        }
+    }
+
+    /** RVN END */
+
     return true;
 }
 

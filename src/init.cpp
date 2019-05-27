@@ -47,6 +47,7 @@
 #include "validationinterface.h"
 #include "assets/assets.h"
 #include "assets/assetdb.h"
+#include "assets/snapshotrequestdb.h"
 #ifdef ENABLE_WALLET
 #include "wallet/init.h"
 #include <wallet/wallet.h>
@@ -302,6 +303,16 @@ void PrepareShutdown()
 
         delete prestricteddb;
         prestricteddb = nullptr;
+
+        delete pmessagechanneldb;
+        pmessagechanneldb = nullptr;
+
+        delete pSnapshotRequestDb;
+        pSnapshotRequestDb = nullptr;
+
+        delete pAssetSnapshotDb;
+        pAssetSnapshotDb = nullptr;
+
         /** RVN END */
     }
 #ifdef ENABLE_WALLET
@@ -1536,6 +1547,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     delete passetsRestrictionCache;
                     delete passetsGlobalRestrictionCache;
 
+                    //  Rewards
+                    delete pSnapshotRequestDb;
+                    delete pAssetSnapshotDb;
+
                     // Basic assets
                     passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                     passets = new CAssetsCache();
@@ -1559,6 +1574,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     passetsRestrictionCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);
                     passetsGlobalRestrictionCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);
 
+                    // Rewards
+                    pSnapshotRequestDb = new CSnapshotRequestDB(nBlockTreeDBCache, false, false);
+                    pAssetSnapshotDb = new CAssetSnapshotDB(nBlockTreeDBCache, false, false);
 
                     // Read for fAssetIndex to make sure that we only load asset address balances if it if true
                     pblocktree->ReadFlag("assetindex", fAssetIndex);
@@ -1612,12 +1630,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 // Check for changed -txindex state
                 if (fTxIndex != gArgs.GetBoolArg("-txindex", DEFAULT_TXINDEX)) {
                     strLoadError = _("You need to rebuild the database using -reindex to change -txindex");
-                    break;
-                }
-
-                // Check for changed -assetindex state
-                if (fAssetIndex != gArgs.GetBoolArg("-assetindex", DEFAULT_ASSETINDEX)) {
-                    strLoadError = _("You need to rebuild the database using -reindex to change -assetIndex");
                     break;
                 }
 
