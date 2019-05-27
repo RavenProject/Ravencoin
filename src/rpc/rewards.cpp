@@ -35,7 +35,7 @@
 #include "assets/rewardsdb.h"
 
 UniValue reward(const JSONRPCRequest& request) {
-    if (request.fHelp || request.params.size() != 2)
+    if (request.fHelp || request.params.size() < 3)
         throw std::runtime_error(
                 "reward \n"
                 "\nSchedules a payout for the specified amount, using either RVN or the specified source asset name,\n"
@@ -77,16 +77,21 @@ UniValue reward(const JSONRPCRequest& request) {
     int64_t total_payout_amount = request.params[0].get_int64();
     std::string payout_source = request.params[1].get_str();
     std::string target_asset_name = request.params[2].get_str();
-    std::string exception_addresses = request.params[3].get_str();
+    std::string exception_addresses;
+    if (request.params.size() > 3) {
+        exception_addresses = request.params[3].get_str();
+    }
 
     AssetType srcAssetType;
     AssetType tgtAssetType;
 
-    if (!IsAssetNameValid(payout_source, srcAssetType))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid payout_source: Please use a valid payout_source"));
+    if (payout_source.compare("RVN") != 0) {
+        if (!IsAssetNameValid(payout_source, srcAssetType))
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid payout_source: Please use a valid payout_source"));
 
-    if (srcAssetType == AssetType::UNIQUE || srcAssetType == AssetType::OWNER || srcAssetType == AssetType::MSGCHANNEL)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+        if (srcAssetType == AssetType::UNIQUE || srcAssetType == AssetType::OWNER || srcAssetType == AssetType::MSGCHANNEL)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+    }
 
     if (!IsAssetNameValid(target_asset_name, tgtAssetType))
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid target_asset_name: Please use a valid target_asset_name"));

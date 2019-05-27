@@ -211,6 +211,11 @@ void ProcessRewards()
     std::set<CRewardsDBEntry> dbEntriesToProcess;
     int currentHeight = chainActive.Height();
 
+    if (currentHeight == 0) {
+        LogPrintf("rewards_thread: Chain height is currently zero!\n");
+        return;
+    }
+
     if (!pRewardsDb->LoadPayableRewards(dbEntriesToProcess, currentHeight)) {
         LogPrintf("rewards_thread: Failed to retrieve pending records from rewards DB!\n");
         return;

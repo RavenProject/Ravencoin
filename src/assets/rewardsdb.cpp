@@ -6,7 +6,7 @@
 
 static const char SCHEDULEDREWARD_FLAG = 'S';
 
-CRewardsDB::CRewardsDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "Rewards", nCacheSize, fMemory, fWipe) {
+CRewardsDB::CRewardsDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "rewards", nCacheSize, fMemory, fWipe) {
 }
 
 bool CRewardsDB::SchedulePendingReward(const CRewardsDBEntry & p_newReward)

@@ -187,10 +187,6 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listassetbalancesbyaddress", 3, "start"},
     { "sendmessage", 2, "expire_time"},
     { "reward", 0, "total_payout_amount"},
-    { "reward", 1, "payout_source"},
-    { "reward", 2, "target_asset_name"},
-    { "reward", 3, "exception_addresses"},
-
 };
 
 class CRPCConvertTable
