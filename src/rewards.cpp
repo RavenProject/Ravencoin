@@ -405,10 +405,6 @@ bool InitiateTransfer(
                 LogPrintf("Invalid amount\n");
                 break;
             }
-            if (nAmount > curBalance) {
-                LogPrintf("Insufficient funds\n");
-                break;
-            }
 
             if (p_walletPtr->GetBroadcastTransactions() && !g_connman) {
                 LogPrintf("Error: Peer-to-peer functionality missing or disabled\n");
@@ -437,6 +433,12 @@ bool InitiateTransfer(
                 break;
             }
 
+            //  Verify funds
+            if (nAmount * static_cast<int64_t>(vDestinations.size()) > curBalance) {
+                LogPrintf("Insufficient funds\n");
+                break;
+            }
+
             // Create and send the transaction
             CReserveKey reservekey(p_walletPtr);
             CAmount nFeeRequired;
@@ -444,7 +446,7 @@ bool InitiateTransfer(
             int nChangePosRet = -1;
 
             if (!p_walletPtr->CreateTransaction(vDestinations, transaction, reservekey, nFeeRequired, nChangePosRet, strError, ctrl)) {
-                if (nAmount + nFeeRequired > curBalance)
+                if (nAmount * static_cast<int64_t>(vDestinations.size()) + nFeeRequired > curBalance)
                     strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
                 LogPrintf("%s\n", strError.c_str());
                 break;
