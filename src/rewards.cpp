@@ -9,10 +9,15 @@
 #include "util.h"
 #include "rewards.h"
 #include "validation.h"
+#include "consensus/validation.h"
+#include "validationinterface.h"
 #include "assets/rewardsdb.h"
 #include "wallet/wallet.h"
 #include "univalue.h"
 #include "wallet/coincontrol.h"
+#include "net.h"
+#include "utilmoneystr.h"
+
 
 #include <boost/thread.hpp>
 #include <boost/algorithm/string.hpp>
@@ -55,8 +60,10 @@ bool InitiateTransfer(
 //  Retrieves the wallet with teh specified name
 CWallet *GetWalletByName(const std::string & p_walletName);
 
-//  This is in another module
+//  These are in other modules
 extern CAmount AmountFromValue(const UniValue & p_value);
+extern CTxDestination DecodeDestination(const std::string& str);
+bool IsValidDestinationString(const std::string& str);
 
 bool LaunchRewardsProcessorThread()
 {
@@ -380,36 +387,97 @@ bool InitiateTransfer(
         //  Ensure that we don't somehow run past the end of the address vector
         if (p_offset >= p_destAddresses.size()) {
             LogPrintf("Out of range issue with destination address list: offset=%u, size=%u\n",
-            static_cast<unsigned int>(p_offset), static_cast<unsigned int>(p_destAddresses.size()));
+                static_cast<unsigned int>(p_offset), static_cast<unsigned int>(p_destAddresses.size()));
             break;
         }
 
         //  Transfer the specified amount of the asset from the source to the target
         CAmount nAmount = AmountFromValue(p_xferAmt);
-
-        std::pair<int, std::string> error;
-        std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
-
-        for (size_t idx = p_offset; idx < (p_offset + p_count) && idx < p_destAddresses.size(); idx++) {
-            vTransfers.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_destAddresses[idx]));
-        }
-
-        CReserveKey reservekey(p_walletPtr);
-        CWalletTx transaction;
-        CAmount nRequiredFee;
-
         CCoinControl ctrl;
+        CWalletTx transaction;
 
-        // Create the Transaction
-        if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee)) {
-            LogPrintf("Failed to create transfer asset transaction: %s\n", error.second.c_str());
-            break;
+        //  Handle payouts using RVN differently from those using an asset
+        if (p_src.compare("RVN") == 0) {
+            // Check amount
+            CAmount curBalance = p_walletPtr->GetBalance();
+
+            if (nAmount <= 0) {
+                LogPrintf("Invalid amount\n");
+                break;
+            }
+            if (nAmount > curBalance) {
+                LogPrintf("Insufficient funds\n");
+                break;
+            }
+
+            if (p_walletPtr->GetBroadcastTransactions() && !g_connman) {
+                LogPrintf("Error: Peer-to-peer functionality missing or disabled\n");
+                break;
+            }
+
+            std::vector<CRecipient> vDestinations;
+            bool errorsOccurred = false;
+
+            for (size_t idx = p_offset; idx < (p_offset + p_count) && idx < p_destAddresses.size(); idx++) {
+                // Parse Raven address
+                CTxDestination dest = DecodeDestination(p_destAddresses[idx]);
+                if (!IsValidDestination(dest)) {
+                    LogPrintf("Destination address '%s' is invalid.\n", p_destAddresses[idx].c_str());
+                    errorsOccurred = true;
+                    continue;
+                }
+
+                CScript scriptPubKey = GetScriptForDestination(dest);
+                CRecipient recipient = {scriptPubKey, nAmount, false};
+                vDestinations.push_back(recipient);
+            }
+
+            if (errorsOccurred) {
+                LogPrintf("Breaking out due to invalid destination address(es)\n");
+                break;
+            }
+
+            // Create and send the transaction
+            CReserveKey reservekey(p_walletPtr);
+            CAmount nFeeRequired;
+            std::string strError;
+            int nChangePosRet = -1;
+
+            if (!p_walletPtr->CreateTransaction(vDestinations, transaction, reservekey, nFeeRequired, nChangePosRet, strError, ctrl)) {
+                if (nAmount + nFeeRequired > curBalance)
+                    strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
+                LogPrintf("%s\n", strError.c_str());
+                break;
+            }
+
+            CValidationState state;
+            if (!p_walletPtr->CommitTransaction(transaction, reservekey, g_connman.get(), state)) {
+                LogPrintf("Error: The transaction was rejected! Reason given: %s\n", state.GetRejectReason());
+                break;
+            }
         }
+        else {
+            std::pair<int, std::string> error;
+            std::vector< std::pair<CAssetTransfer, std::string> > vDestinations;
 
-        // Send the Transaction to the network
-        if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, p_resultantTxID)) {
-            LogPrintf("Failed to send asset transaction: %s\n", error.second.c_str());
-            break;
+            for (size_t idx = p_offset; idx < (p_offset + p_count) && idx < p_destAddresses.size(); idx++) {
+                vDestinations.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_destAddresses[idx]));
+            }
+
+            CReserveKey reservekey(p_walletPtr);
+            CAmount nRequiredFee;
+
+            // Create the Transaction
+            if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vDestinations, "", error, transaction, reservekey, nRequiredFee)) {
+                LogPrintf("Failed to create transfer asset transaction: %s\n", error.second.c_str());
+                break;
+            }
+
+            // Send the Transaction to the network
+            if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, p_resultantTxID)) {
+                LogPrintf("Failed to send asset transaction: %s\n", error.second.c_str());
+                break;
+            }
         }
 
         //  Indicate success
