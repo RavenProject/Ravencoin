@@ -229,27 +229,48 @@ void ProcessRewards()
 
     //  Iterate through list of requests, processing each one
     for (auto const & rewardEntry : dbEntriesToProcess) {
-        //  For each request, retrieve the list of non-exception owner records for the specified asset
-        std::set<std::string> payableOwners;
+        bool deleteReward = false;
 
-        //  Retrieve the specified wallet for this payout
-        CWallet * const walletPtr = GetWalletByName(rewardEntry.walletName);
-        if (!EnsureWalletIsAvailable(walletPtr, true)) {
-            LogPrintf("rewards_thread: Wallet associated with reward is unavailable!\n");
+        do {
+            //  Verify entry is good
+            if (rewardEntry.tgtAssetName.length() == 0) {
+                LogPrintf("rewards_thread: Reward entry has invalid target asset name!\n");
+                deleteReward = true;
+                break;
+            }
+            if (rewardEntry.payoutSrc.length() == 0) {
+                LogPrintf("rewards_thread: Reward entry has invalid payout source name!\n");
+                deleteReward = true;
+                break;
+            }
 
-            continue;
-        }
+            //  For each request, retrieve the list of non-exception owner records for the specified asset
+            std::set<std::string> payableOwners;
 
-        //  Generate batched transactions based on the owner addresses
-        if (!GenerateBatchedTransactions(walletPtr, rewardEntry.totalPayoutAmt, rewardEntry.payoutSrc, rewardEntry.exceptionAddresses)) {
-            LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
-                rewardEntry.payoutSrc.c_str());
+            //  Retrieve the specified wallet for this payout
+            CWallet * const walletPtr = GetWalletByName(rewardEntry.walletName);
+            if (!EnsureWalletIsAvailable(walletPtr, true)) {
+                LogPrintf("rewards_thread: Wallet associated with reward is unavailable!\n");
 
-            continue;
-        }
+                continue;
+            }
+
+            //  Generate batched transactions based on the owner addresses
+            if (!GenerateBatchedTransactions(walletPtr, rewardEntry.totalPayoutAmt, rewardEntry.payoutSrc, rewardEntry.exceptionAddresses)) {
+                LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
+                    rewardEntry.payoutSrc.c_str());
+
+                continue;
+            }
+
+            //  Indicate success
+            deleteReward = true;
+        } while (false);
 
         //  Delete the processed reward request from the database
-        pRewardsDb->RemoveCompletedReward(rewardEntry);
+        if (deleteReward) {
+            pRewardsDb->RemoveCompletedReward(rewardEntry);
+        }
     }
 
     LogPrintf("rewards_thread: Rewards processing completed.\n");
@@ -266,7 +287,7 @@ bool GenerateBatchedTransactions(
 {
     bool fcnRetVal = false;
 
-    LogPrintf("Retrieving payable owners...\n");
+    LogPrintf("Generating batched transactions...\n");
 
     // While condition is false to ensure a single pass through this logic
     do {
@@ -280,6 +301,8 @@ bool GenerateBatchedTransactions(
         int totalEntryCount = 0;
 
         //  Step 1 - find out how many addresses currently exist
+        LogPrintf("Retrieving payable owners...\n");
+
         if (!passetsdb->AssetAddressDir(addressInfoPairs, totalEntryCount, true, p_assetName, INT_MAX, 0)) {
             LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
             break;
@@ -336,7 +359,7 @@ bool GenerateBatchedTransactions(
         fcnRetVal = true;
     } while (false);
 
-    LogPrintf("Payable owner retrieval %s.\n",
+    LogPrintf("Batched transaction generation %s.\n",
         fcnRetVal ? "succeeded" : "failed");
 
     return fcnRetVal;

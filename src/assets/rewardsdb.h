@@ -21,7 +21,23 @@ public:
     std::string tgtAssetName;
     std::string exceptionAddresses;
 
-    bool operator<(const CRewardsDBEntry &rhs) const {
+    CRewardsDBEntry();
+    CRewardsDBEntry(
+        const std::string & p_walletName, const int p_heightForPayout, const int64_t p_totalPayoutAmt,
+        const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
+    );
+
+    void SetNull()
+    {
+        walletName = "";
+        heightForPayout = 0;
+        totalPayoutAmt = 0;
+        payoutSrc = "";
+        exceptionAddresses = "";
+    }
+
+    bool operator<(const CRewardsDBEntry &rhs) const
+    {
         return heightForPayout < rhs.heightForPayout;
     }
 
@@ -29,7 +45,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template<typename Stream, typename Operation>
-    inline void SerializationOp(Stream &s, Operation ser_action) {
+    inline void SerializationOp(Stream &s, Operation ser_action)
+    {
         READWRITE(walletName);
         READWRITE(heightForPayout);
         READWRITE(totalPayoutAmt);

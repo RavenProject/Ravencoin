@@ -37,7 +37,7 @@
 UniValue reward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 3)
         throw std::runtime_error(
-                "reward \n"
+                "reward total_payout_amount \"payout_source\" \"target_asset_name\" ( \"exception_addresses\" )\n"
                 "\nSchedules a payout for the specified amount, using either RVN or the specified source asset name,\n"
                 "\tto all owners of the specified asset, excluding the exception addresses.\n"
 
@@ -45,13 +45,13 @@ UniValue reward(const JSONRPCRequest& request) {
                 "total_payout_amount: (number, required) The block height at which to schedule the payout\n"
                 "payout_source: (string, required) Either RVN or the asset name to distribute as the reward\n"
                 "target_asset_name:   (string, required) The asset name to whose owners the reward will be paid\n"
-                "exception_addresses: (JSON string array, optional) A list of exception addresses that should not receive rewards\n"
+                "exception_addresses: (comma-delimited string, optional) A list of exception addresses that should not receive rewards\n"
 
                 "\nResult:\n"
 
                 "\nExamples:\n"
                 + HelpExampleCli("reward", "100 \"RVN\" \"TRONCO\"")
-                + HelpExampleRpc("reward", "1000 \"BLACKCO\" \"TRONCO\" \"['RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H','RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD']\"")
+                + HelpExampleRpc("reward", "1000 \"BLACKCO\" \"TRONCO\" \"RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H,RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD\"")
         );
 
     if (!fRewardsEnabled) {
@@ -99,10 +99,10 @@ UniValue reward(const JSONRPCRequest& request) {
     if (tgtAssetType == AssetType::UNIQUE || tgtAssetType == AssetType::OWNER || tgtAssetType == AssetType::MSGCHANNEL)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
 
-    const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 100; //  Select to hopefully be far enough forward to be safe from forks
-
     if (!pRewardsDb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Reward database is not setup. Please restart wallet to try again"));
+
+    const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 1; //  Select to hopefully be far enough forward to be safe from forks
 
     //  Build our reward record for scheduling
     CRewardsDBEntry entryToAdd;

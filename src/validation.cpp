@@ -2330,7 +2330,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     const CTxIn input = tx.vin[j];
                     const CTxOut &prevout = view.AccessCoin(tx.vin[j].prevout).out;
                     uint160 hashBytes;
-                    int addressType;
+                    int addressType = 0;
                     bool isAsset = false;
                     std::string assetName;
                     CAmount assetAmount;

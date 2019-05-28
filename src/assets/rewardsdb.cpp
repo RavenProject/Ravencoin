@@ -6,6 +6,26 @@
 
 static const char SCHEDULEDREWARD_FLAG = 'S';
 
+CRewardsDBEntry::CRewardsDBEntry()
+{
+    SetNull();
+}
+
+CRewardsDBEntry::CRewardsDBEntry(
+    const std::string & p_walletName, const int p_heightForPayout, const int64_t p_totalPayoutAmt,
+    const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
+)
+{
+    SetNull();
+
+    walletName = p_walletName;
+    heightForPayout = p_heightForPayout;
+    totalPayoutAmt = p_totalPayoutAmt;
+    payoutSrc = p_payoutSrc;
+    tgtAssetName = p_tgtAssetName;
+    exceptionAddresses = p_exceptionAddresses;
+}
+
 CRewardsDB::CRewardsDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "rewards", nCacheSize, fMemory, fWipe) {
 }
 
@@ -95,10 +115,10 @@ bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward
 }
 
 bool CRewardsDB::LoadPayableRewards(
-    std::set<CRewardsDBEntry> & p_dbEntries, const int & p_minBlockHeight)
+    std::set<CRewardsDBEntry> & p_dbEntries, const int & p_maxBlockHeight)
 {
     LogPrintf("%s : Looking for scheduled rewards below height %d!\n",
-        __func__, p_minBlockHeight);
+        __func__, p_maxBlockHeight);
 
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
@@ -110,11 +130,13 @@ bool CRewardsDB::LoadPayableRewards(
         std::pair<char, int> key;
 
         //  Only retrieve entries earlier than the provided block height
-        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second <= p_minBlockHeight) {
-            CRewardsDBEntry dbEntry;
+        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second <= p_maxBlockHeight) {
+            std::set<CRewardsDBEntry> dbEntrySet;
 
-            if (pcursor->GetValue(dbEntry)) {
-                p_dbEntries.insert(dbEntry);
+            if (pcursor->GetValue(dbEntrySet)) {
+                for (auto const & entry : dbEntrySet) {
+                    p_dbEntries.insert(entry);
+                }
             } else {
                 LogPrintf("%s: Failed to read reward\n", __func__);
             }
