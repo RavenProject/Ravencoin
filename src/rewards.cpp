@@ -44,7 +44,7 @@ void ShutdownRewardsProcessing();
 //      in the exception address list.
 bool GenerateBatchedTransactions(
     CWallet * const p_walletPtr, const int64_t p_paymentAmt,
-    const std::string & p_assetName, const std::string & p_exceptionAddresses);
+    const std::string & p_assetName, const std::string & p_payoutSrc, const std::string & p_exceptionAddresses);
 
 //  Transfer the specified amount of the asset from the source to the target
 bool InitiateTransfer(
@@ -256,7 +256,7 @@ void ProcessRewards()
             }
 
             //  Generate batched transactions based on the owner addresses
-            if (!GenerateBatchedTransactions(walletPtr, rewardEntry.totalPayoutAmt, rewardEntry.payoutSrc, rewardEntry.exceptionAddresses)) {
+            if (!GenerateBatchedTransactions(walletPtr, rewardEntry.totalPayoutAmt, rewardEntry.tgtAssetName, rewardEntry.payoutSrc, rewardEntry.exceptionAddresses)) {
                 LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
                     rewardEntry.payoutSrc.c_str());
 
@@ -283,7 +283,7 @@ void ShutdownRewardsProcessing()
 
 bool GenerateBatchedTransactions(
     CWallet * const p_walletPtr, const int64_t p_paymentAmt,
-    const std::string & p_assetName, const std::string & p_exceptionAddresses)
+    const std::string & p_assetName, const std::string & p_payoutSrc, const std::string & p_exceptionAddresses)
 {
     bool fcnRetVal = false;
 
@@ -297,13 +297,13 @@ bool GenerateBatchedTransactions(
 
         //  Retrieve the payable owners for the specified asset
         //  This is done in batches. First, the total count is retrieved, then all of the addresses.
-        std::vector<std::pair<std::string, CAmount>> addressInfoPairs;
+        std::vector<std::pair<std::string, CAmount>> addressAmtPairs;
         int totalEntryCount = 0;
 
         //  Step 1 - find out how many addresses currently exist
         LogPrintf("Retrieving payable owners...\n");
 
-        if (!passetsdb->AssetAddressDir(addressInfoPairs, totalEntryCount, true, p_assetName, INT_MAX, 0)) {
+        if (!passetsdb->AssetAddressDir(addressAmtPairs, totalEntryCount, true, p_assetName, INT_MAX, 0)) {
             LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
             break;
         }
@@ -314,25 +314,26 @@ bool GenerateBatchedTransactions(
 
         for (int retrievalOffset = 0; retrievalOffset < totalEntryCount; retrievalOffset += MAX_RETRIEVAL_COUNT) {
             //  Retrieve the specified segment of addresses
-            addressInfoPairs.clear();
+            addressAmtPairs.clear();
 
-            if (!passetsdb->AssetAddressDir(addressInfoPairs, totalEntryCount, false, p_assetName, MAX_RETRIEVAL_COUNT, retrievalOffset)) {
+            if (!passetsdb->AssetAddressDir(addressAmtPairs, totalEntryCount, false, p_assetName, MAX_RETRIEVAL_COUNT, retrievalOffset)) {
                 LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
                 break;
             }
 
             //  Add only non-exception addresses to the list
-            for (auto const & addressInfoPair : addressInfoPairs) {
+            for (auto const & addressAmtPair : addressAmtPairs) {
                 bool isExceptionAddress = false;
 
                 for (auto const & exceptionAddr : exceptionAddressList) {
-                    if (addressInfoPair.first.compare(exceptionAddr) == 0) {
+                    if (addressAmtPair.first.compare(exceptionAddr) == 0) {
                         isExceptionAddress = true;
                     }
                 }
 
                 if (!isExceptionAddress) {
-                    paymentAddresses.push_back(addressInfoPair.first);
+                    LogPrintf("Found ownership address for '%s': '%s'\n", p_assetName.c_str(), addressAmtPair.first.c_str());
+                    paymentAddresses.push_back(addressAmtPair.first);
                 }
             }
         }
@@ -350,7 +351,7 @@ bool GenerateBatchedTransactions(
             //  Process the address lists in batches
             std::string transactionID;
 
-            if (!InitiateTransfer(p_walletPtr, payoutAmountPerAccount, p_assetName, paymentAddresses, ctr, MAX_ADDRESSES_PER_TRANSACTION, transactionID)) {
+            if (!InitiateTransfer(p_walletPtr, payoutAmountPerAccount, p_payoutSrc, paymentAddresses, ctr, MAX_ADDRESSES_PER_TRANSACTION, transactionID)) {
                 LogPrintf("rewards_thread: Transaction generation failed!\n");
             }
         }
@@ -377,8 +378,9 @@ bool InitiateTransfer(
     // While condition is false to ensure a single pass through this logic
     do {
         //  Ensure that we don't somehow run past the end of the address vector
-        if (p_offset >= p_destAddresses.size() || p_offset + p_count -1 >= p_destAddresses.size()) {
-            LogPrintf("Out of range issue with destination address list\n");
+        if (p_offset >= p_destAddresses.size()) {
+            LogPrintf("Out of range issue with destination address list: offset=%u, size=%u\n",
+            static_cast<unsigned int>(p_offset), static_cast<unsigned int>(p_destAddresses.size()));
             break;
         }
 
@@ -388,7 +390,7 @@ bool InitiateTransfer(
         std::pair<int, std::string> error;
         std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
-        for (size_t idx = p_offset; idx < p_count && idx < p_destAddresses.size(); idx++) {
+        for (size_t idx = p_offset; idx < (p_offset + p_count) && idx < p_destAddresses.size(); idx++) {
             vTransfers.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_destAddresses[idx]));
         }
 
@@ -400,13 +402,13 @@ bool InitiateTransfer(
 
         // Create the Transaction
         if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee)) {
-            LogPrintf("Failed to create transfer asset transaction\n");
+            LogPrintf("Failed to create transfer asset transaction: %s\n", error.second.c_str());
             break;
         }
 
         // Send the Transaction to the network
         if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, p_resultantTxID)) {
-            LogPrintf("Failed to send asset transaction\n");
+            LogPrintf("Failed to send asset transaction: %s\n", error.second.c_str());
             break;
         }
 
