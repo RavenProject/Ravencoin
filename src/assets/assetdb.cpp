@@ -392,3 +392,48 @@ bool CAssetsDB::AssetDir(std::vector<CDatabasedAssetData>& assets)
 {
     return CAssetsDB::AssetDir(assets, "*", MAX_SIZE, 0);
 }
+
+
+// Get the total amount of the asset owned by all addresses, except the excluded ones
+bool CAssetsDB::AssetTotalAmountNotExcluded(const std::string & p_assetName, const std::vector<std::string> & p_excludedAddresses, CAmount & p_totalAmount)
+{
+    FlushStateToDisk();
+
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    pcursor->Seek(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(p_assetName, std::string())));
+
+    // Load assets
+    p_totalAmount = 0;
+
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+
+        std::pair<char, std::pair<std::string, std::string> > key;
+        if (pcursor->GetKey(key) && key.first == ASSET_ADDRESS_QUANTITY_FLAG && key.second.first == p_assetName) {
+            //  Ensure that this is not one of the excluded addresses
+            bool excluded = false;
+            for (auto const & excludedAddr : p_excludedAddresses) {
+                if (key.second.second.compare(excludedAddr) == 0) {
+                    excluded = true;
+                    break;
+                }
+            }
+
+            // If this is not an excluded address, include its amount in the total
+            if (!excluded) {
+                CAmount amount;
+                if (pcursor->GetValue(amount)) {
+                    p_totalAmount += amount;
+                }
+                else {
+                    return error("%s: failed to acquire Asset Address Quantity", __func__);
+                }
+            }
+        }
+
+        // Move on to the next entry
+        pcursor->Next();
+    }
+
+    return true;
+}

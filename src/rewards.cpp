@@ -53,8 +53,8 @@ bool GenerateBatchedTransactions(
 
 //  Transfer the specified amount of the asset from the source to the target
 bool InitiateTransfer(
-    CWallet * const p_walletPtr, int64_t p_xferAmt, const std::string & p_src,
-    const std::vector<std::string> & p_destAddresses, size_t p_offset, size_t p_count,
+    CWallet * const p_walletPtr, const std::string & p_src,
+    const std::vector<std::pair<std::string, CAmount>> & p_addrAmtPairs,
     std::string & p_resultantTxID);
 
 //  Retrieves the wallet with teh specified name
@@ -307,6 +307,21 @@ bool GenerateBatchedTransactions(
         std::vector<std::pair<std::string, CAmount>> addressAmtPairs;
         int totalEntryCount = 0;
 
+        //  Step 0 - Retrieve the total amount of the target asset not owned by exception addresses
+        LogPrintf("Retrieving total non-exception amount...\n");
+
+        CAmount totalAssetAmt = 0;
+
+        if (!passetsdb->AssetTotalAmountNotExcluded(p_assetName, exceptionAddressList, totalAssetAmt)) {
+            LogPrintf("Failed to retrieve total asset amount for '%s'\n", p_assetName.c_str());
+            break;
+        }
+        if (totalAssetAmt <= 0) {
+            LogPrintf("No instances of asset '%s' are owned by non-exception addresses\n", p_assetName.c_str());
+            break;
+        }
+
+
         //  Step 1 - find out how many addresses currently exist
         LogPrintf("Retrieving payable owners...\n");
 
@@ -328,37 +343,58 @@ bool GenerateBatchedTransactions(
                 break;
             }
 
-            //  Add only non-exception addresses to the list
-            for (auto const & addressAmtPair : addressAmtPairs) {
+            //  Verify that some addresses were returned
+            if (addressAmtPairs.size() == 0) {
+                LogPrintf("No addresses were retrieved.\n");
+                continue;
+            }
+
+            //  Remove exception addresses from the list
+            std::vector<std::pair<std::string, CAmount>>::iterator entryIT;
+
+            for (entryIT = addressAmtPairs.begin(); entryIT != addressAmtPairs.end(); ) {
                 bool isExceptionAddress = false;
 
                 for (auto const & exceptionAddr : exceptionAddressList) {
-                    if (addressAmtPair.first.compare(exceptionAddr) == 0) {
+                    if (entryIT->first.compare(exceptionAddr) == 0) {
                         isExceptionAddress = true;
+                        break;
                     }
                 }
 
-                if (!isExceptionAddress) {
-                    LogPrintf("Found ownership address for '%s': '%s'\n", p_assetName.c_str(), addressAmtPair.first.c_str());
-                    paymentAddresses.push_back(addressAmtPair.first);
+                if (isExceptionAddress) {
+                    entryIT = addressAmtPairs.erase(entryIT);
+                }
+                else {
+                    ++entryIT;
                 }
             }
-        }
 
-        //  Divide the total payout amount by the number of payable asset owners
-        int64_t payoutAmountPerAccount = p_paymentAmt / paymentAddresses.size();
+            //  Make sure we have some addresses to pay to
+            if (addressAmtPairs.size() == 0) {
+                LogPrintf("Current batch includes only exception addresses.\n");
+                continue;
+            }
 
-        //  Lock the wallet while we're doing stuff
-        LOCK2(cs_main, p_walletPtr->cs_wallet);
-        EnsureWalletIsUnlocked(p_walletPtr);
+            //  Calculate the per-address payout amount based on their ownership
+            for (auto & addressAmtPair : addressAmtPairs) {
+                //  Replace the ownership amount with the reward amount
+                CAmount rewardAmt = p_paymentAmt * addressAmtPair.second / totalAssetAmt;
 
-        //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
-        const size_t MAX_ADDRESSES_PER_TRANSACTION = 100;
-        for (size_t ctr = 0; ctr < paymentAddresses.size(); ctr += MAX_ADDRESSES_PER_TRANSACTION) {
-            //  Process the address lists in batches
+                LogPrintf("Found ownership address for '%s': '%s' owns %lld => reward %lld\n",
+                    p_assetName.c_str(), addressAmtPair.first.c_str(),
+                    static_cast<long long>(addressAmtPair.second), static_cast<long long>(rewardAmt));
+
+                addressAmtPair.second = rewardAmt;
+            }
+
+            //  Lock the wallet while we're generating a transaction
+            LOCK2(cs_main, p_walletPtr->cs_wallet);
+            EnsureWalletIsUnlocked(p_walletPtr);
+
+            //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
             std::string transactionID;
-
-            if (!InitiateTransfer(p_walletPtr, payoutAmountPerAccount, p_payoutSrc, paymentAddresses, ctr, MAX_ADDRESSES_PER_TRANSACTION, transactionID)) {
+            if (!InitiateTransfer(p_walletPtr, p_payoutSrc, addressAmtPairs, transactionID)) {
                 LogPrintf("rewards_thread: Transaction generation failed!\n");
             }
         }
@@ -374,8 +410,8 @@ bool GenerateBatchedTransactions(
 }
 
 bool InitiateTransfer(
-    CWallet * const p_walletPtr, int64_t p_xferAmt, const std::string & p_src,
-    const std::vector<std::string> & p_destAddresses, size_t p_offset, size_t p_count,
+    CWallet * const p_walletPtr, const std::string & p_src,
+    const std::vector<std::pair<std::string, CAmount>> & p_addrAmtPairs,
     std::string & p_resultantTxID)
 {
     bool fcnRetVal = false;
@@ -384,15 +420,7 @@ bool InitiateTransfer(
 
     // While condition is false to ensure a single pass through this logic
     do {
-        //  Ensure that we don't somehow run past the end of the address vector
-        if (p_offset >= p_destAddresses.size()) {
-            LogPrintf("Out of range issue with destination address list: offset=%u, size=%u\n",
-                static_cast<unsigned int>(p_offset), static_cast<unsigned int>(p_destAddresses.size()));
-            break;
-        }
-
         //  Transfer the specified amount of the asset from the source to the target
-        CAmount nAmount = AmountFromValue(p_xferAmt);
         CCoinControl ctrl;
         CWalletTx transaction;
 
@@ -401,11 +429,6 @@ bool InitiateTransfer(
             // Check amount
             CAmount curBalance = p_walletPtr->GetBalance();
 
-            if (nAmount <= 0) {
-                LogPrintf("Invalid amount\n");
-                break;
-            }
-
             if (p_walletPtr->GetBroadcastTransactions() && !g_connman) {
                 LogPrintf("Error: Peer-to-peer functionality missing or disabled\n");
                 break;
@@ -413,19 +436,22 @@ bool InitiateTransfer(
 
             std::vector<CRecipient> vDestinations;
             bool errorsOccurred = false;
+            CAmount totalPaymentAmt = 0;
 
-            for (size_t idx = p_offset; idx < (p_offset + p_count) && idx < p_destAddresses.size(); idx++) {
+            for (auto const & addrAmtPair : p_addrAmtPairs) {
                 // Parse Raven address
-                CTxDestination dest = DecodeDestination(p_destAddresses[idx]);
+                CTxDestination dest = DecodeDestination(addrAmtPair.first);
                 if (!IsValidDestination(dest)) {
-                    LogPrintf("Destination address '%s' is invalid.\n", p_destAddresses[idx].c_str());
+                    LogPrintf("Destination address '%s' is invalid.\n", addrAmtPair.first.c_str());
                     errorsOccurred = true;
                     continue;
                 }
 
                 CScript scriptPubKey = GetScriptForDestination(dest);
-                CRecipient recipient = {scriptPubKey, nAmount, false};
-                vDestinations.push_back(recipient);
+                CRecipient recipient = {scriptPubKey, addrAmtPair.second, false};
+                vDestinations.emplace_back(recipient);
+
+                totalPaymentAmt += addrAmtPair.second;
             }
 
             if (errorsOccurred) {
@@ -434,7 +460,7 @@ bool InitiateTransfer(
             }
 
             //  Verify funds
-            if (nAmount * static_cast<int64_t>(vDestinations.size()) > curBalance) {
+            if (totalPaymentAmt > curBalance) {
                 LogPrintf("Insufficient funds\n");
                 break;
             }
@@ -446,7 +472,7 @@ bool InitiateTransfer(
             int nChangePosRet = -1;
 
             if (!p_walletPtr->CreateTransaction(vDestinations, transaction, reservekey, nFeeRequired, nChangePosRet, strError, ctrl)) {
-                if (nAmount * static_cast<int64_t>(vDestinations.size()) + nFeeRequired > curBalance)
+                if (totalPaymentAmt + nFeeRequired > curBalance)
                     strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
                 LogPrintf("%s\n", strError.c_str());
                 break;
@@ -462,8 +488,8 @@ bool InitiateTransfer(
             std::pair<int, std::string> error;
             std::vector< std::pair<CAssetTransfer, std::string> > vDestinations;
 
-            for (size_t idx = p_offset; idx < (p_offset + p_count) && idx < p_destAddresses.size(); idx++) {
-                vDestinations.emplace_back(std::make_pair(CAssetTransfer(p_src, nAmount, DecodeAssetData(""), 0), p_destAddresses[idx]));
+            for (auto const & addrAmtPair : p_addrAmtPairs) {
+                vDestinations.emplace_back(std::make_pair(CAssetTransfer(p_src, addrAmtPair.second, DecodeAssetData(""), 0), addrAmtPair.first));
             }
 
             CReserveKey reservekey(p_walletPtr);
