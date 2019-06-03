@@ -64,10 +64,10 @@ public:
     CRewardsDB(const CRewardsDB&) = delete;
     CRewardsDB& operator=(const CRewardsDB&) = delete;
 
-    // Add reward record
+    // Schedule a pending reward payout
     bool SchedulePendingReward(const CRewardsDBEntry & p_newReward);
 
-    // Add reward record
+    // Remove a reward that has been paid out
     bool RemoveCompletedReward(const CRewardsDBEntry & p_completedReward);
 
     // Retrieve all reward records lower than the provided block height
