@@ -58,6 +58,7 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
     connect(ui->reissuableBox, SIGNAL(clicked()), this, SLOT(onReissueBoxChanged()));
     connect(ui->unitSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onUnitChanged(int)));
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(onClearButtonClicked()));
+    connect(ui->lineEditVerifierString, SIGNAL(textChanged(QString)), this, SLOT(onVerifierStringChanged(QString)));
     this->asset = new CNewAsset();
     asset->SetNull();
 
@@ -137,6 +138,10 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     ui->comboBox->setCompleter(completer);
     adjustSize();
+
+
+    ui->addressText->installEventFilter(this);
+    ui->lineEditVerifierString->installEventFilter(this);
 }
 
 void ReissueAssetDialog::setClientModel(ClientModel *_clientModel)
@@ -216,6 +221,8 @@ void ReissueAssetDialog::setModel(WalletModel *_model)
         // Setup the default values
         setUpValues();
 
+        restrictedAssetUnselected();
+
         adjustSize();
     }
 }
@@ -224,6 +231,24 @@ ReissueAssetDialog::~ReissueAssetDialog()
 {
     delete ui;
     delete asset;
+}
+
+bool ReissueAssetDialog::eventFilter(QObject *sender, QEvent *event)
+{
+    if (sender == ui->addressText)
+    {
+        if(event->type()== QEvent::FocusIn)
+        {
+            ui->addressText->setStyleSheet("");
+        }
+    } else if (sender == ui->lineEditVerifierString)
+    {
+        if(event->type()== QEvent::FocusIn)
+        {
+            hideInvalidVerifierStringMessage();
+        }
+    }
+    return QWidget::eventFilter(sender,event);
 }
 
 /** Helper Methods */
@@ -343,6 +368,9 @@ void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
     ui->reissueAssetDataLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->reissueAssetDataLabel->setFont(GUIUtil::getTopLabelFont());
 
+    ui->labelVerifierString->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelVerifierString->setFont(GUIUtil::getSubLabelFont());
+
 }
 
 void ReissueAssetDialog::setupFeeControl(const PlatformStyle *platformStyle)
@@ -453,6 +481,9 @@ void ReissueAssetDialog::CheckFormState()
 {
     disableReissueButton(); // Disable the button by default
 
+
+    bool fReissuingRestricted = IsAssetNameAnRestricted(ui->comboBox->currentText().toStdString());
+
     // If asset is null
     if (asset->strName == "") {
         showMessage(tr("Asset data couldn't be found"));
@@ -478,11 +509,56 @@ void ReissueAssetDialog::CheckFormState()
         if (!checkIPFSHash(ui->ipfsText->text()))
             return;
 
+    if (fReissuingRestricted) {
+
+        QString qVerifier = ui->lineEditVerifierString->text();
+        std::string strVerifier = qVerifier.toStdString();
+
+        std::string strippedVerifier = GetStrippedVerifierString(strVerifier);
+
+        if (!strVerifier.empty()) {
+            // A valid address must be given
+            QString qAddress = ui->addressText->text();
+            std::string strAddress = qAddress.toStdString();
+
+            bool fHasQuantity = ui->quantitySpinBox->value() > 0;
+            if (fHasQuantity && strAddress.empty()) {
+                ui->addressText->setStyleSheet(STYLE_INVALID);
+                showMessage(tr("Warning: Restricted Assets Issuance requires an address"));
+                return;
+            }
+
+            if (fHasQuantity && !IsValidDestination(dest)) {
+                ui->addressText->setStyleSheet(STYLE_INVALID);
+                showMessage(tr("Warning: Invalid Raven address"));
+                return;
+            }
+
+            // Check the verifier string
+            std::string strError;
+            ErrorReport errorReport;
+            errorReport.type = ErrorReport::ErrorType::NotSetError;
+            if (!ContextualCheckVerifierString(passets, strippedVerifier, strAddress, strError, &errorReport)) {
+                ui->lineEditVerifierString->setStyleSheet(STYLE_INVALID);
+                qDebug() << "Failing here 1";
+                showInvalidVerifierStringMessage(QString::fromStdString(GetUserErrorString(errorReport)));
+                return;
+            } else {
+                hideInvalidVerifierStringMessage();
+            }
+        } else {
+            // In some cases, if the user. Fixes the addressText box staying red
+            if (ui->quantitySpinBox->value() > 0)
+                ui->addressText->setStyleSheet("");
+        }
+    }
+
     // Keep the button disabled if no changes have been made
-    if ((!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty())) && ui->reissuableBox->isChecked() && ui->quantitySpinBox->value() == 0 && ui->unitSpinBox->value() == asset->units) {
+    if ((!ui->ipfsBox->isChecked() || (ui->ipfsBox->isChecked() && ui->ipfsText->text().isEmpty())) && ui->reissuableBox->isChecked() && ui->quantitySpinBox->value() == 0 && ui->unitSpinBox->value() == asset->units && ui->lineEditVerifierString->text().isEmpty()) {
         hideMessage();
         return;
     }
+
 
     enableReissueButton();
     hideMessage();
@@ -496,6 +572,7 @@ void ReissueAssetDialog::disableAll()
     ui->ipfsBox->setDisabled(true);
     ui->reissueAssetButton->setDisabled(true);
     ui->unitSpinBox->setDisabled(true);
+    ui->lineEditVerifierString->setDisabled(true);
 
     asset->SetNull();
 }
@@ -507,6 +584,7 @@ void ReissueAssetDialog::enableDataEntry()
     ui->reissuableBox->setDisabled(false);
     ui->ipfsBox->setDisabled(false);
     ui->unitSpinBox->setDisabled(false);
+    ui->lineEditVerifierString->setDisabled(false);
 }
 
 void ReissueAssetDialog::buildUpdatedData()
@@ -559,12 +637,31 @@ void ReissueAssetDialog::buildUpdatedData()
         }
     }
 
+    QString verifierString;
+    if (!ui->lineEditVerifierString->isHidden()) {
+        if (!ui->lineEditVerifierString->text().isEmpty()) {
+            QString qstr = ui->lineEditVerifierString->text();
+            verifierString = formatGreen.arg(tr("Verifier String"), ":", qstr) + "\n";
+        } else {
+            CNullAssetTxVerifierString verifier;
+            if (passets->GetAssetVerifierStringIfExists(ui->comboBox->currentText().toStdString(), verifier)) {
+                verifierString = formatBlack.arg(tr("Current Verifier String"), ":", QString::fromStdString(verifier.verifier_string)) + "\n";
+            } else {
+                verifierString = "No verifier string found";
+            }
+        }
+    }
+
+
     ui->updatedAssetData->clear();
     ui->updatedAssetData->append(name);
     ui->updatedAssetData->append(quantity);
     ui->updatedAssetData->append(units);
     ui->updatedAssetData->append(reissue);
-    ui->updatedAssetData->append(ipfs);
+    if (!ipfs.isEmpty())
+        ui->updatedAssetData->append(ipfs);
+    if (!verifierString.isEmpty())
+        ui->updatedAssetData->append(verifierString);
     ui->updatedAssetData->show();
     ui->updatedAssetData->setFixedHeight(ui->updatedAssetData->document()->size().height());
 }
@@ -598,6 +695,14 @@ void ReissueAssetDialog::onAssetSelected(int index)
             return;
         }
 
+        bool fRestrictedAssetSelected = IsAssetNameAnRestricted(qstr_name.toStdString());
+
+        if (fRestrictedAssetSelected) {
+            restrictedAssetSelected();
+        } else {
+            restrictedAssetUnselected();
+        }
+
         // Get the display value for the asset quantity
         auto value = ValueFromAmount(asset->nAmount, asset->units);
         std::stringstream ss;
@@ -628,11 +733,25 @@ void ReissueAssetDialog::onAssetSelected(int index)
             }
         }
 
+        QString verifierString = "";
+
+        if (fRestrictedAssetSelected) {
+            CNullAssetTxVerifierString verifier;
+            if (passets->GetAssetVerifierStringIfExists(qstr_name.toStdString(), verifier)) {
+                verifierString = formatBlack.arg(tr("Current Verifier String"), ":", QString::fromStdString(verifier.verifier_string)) + "\n";
+            } else {
+                verifierString = "No verifier string found";
+            }
+        }
+
         ui->currentAssetData->append(name);
         ui->currentAssetData->append(quantity);
         ui->currentAssetData->append(units);
         ui->currentAssetData->append(reissue);
-        ui->currentAssetData->append(assetdatahash);
+        if (asset->nHasIPFS)
+            ui->currentAssetData->append(assetdatahash);
+        if (fRestrictedAssetSelected)
+            ui->currentAssetData->append(verifierString);
         ui->currentAssetData->setFixedHeight(ui->currentAssetData->document()->size().height());
 
         buildUpdatedData();
@@ -654,6 +773,12 @@ void ReissueAssetDialog::onQuantityChanged(double qty)
 void ReissueAssetDialog::onIPFSStateChanged()
 {
     toggleIPFSText();
+}
+
+void ReissueAssetDialog::onVerifierStringChanged(QString verifier)
+{
+    buildUpdatedData();
+    CheckFormState();
 }
 
 bool ReissueAssetDialog::checkIPFSHash(QString hash)
@@ -772,8 +897,17 @@ void ReissueAssetDialog::onReissueAssetClicked()
     std::pair<int, std::string> error;
     CAmount nFeeRequired;
 
+    std::string verifier_string;
+    bool fReissueRestrictedAsset = false;
+    if (IsAssetNameAnRestricted(name.toStdString())) {
+        fReissueRestrictedAsset = true;
+        verifier_string = ui->lineEditVerifierString->text().toStdString();
+        std::string stripped = GetStrippedVerifierString(verifier_string);
+        verifier_string = stripped;
+    }
+
     // Create the transaction
-    if (!CreateReissueAssetTransaction(model->getWallet(), ctrl, reissueAsset, address.toStdString(), error, tx, reservekey, nFeeRequired)) {
+    if (!CreateReissueAssetTransaction(model->getWallet(), ctrl, reissueAsset, address.toStdString(), error, tx, reservekey, nFeeRequired, fReissueRestrictedAsset ? &verifier_string : nullptr)) {
         showMessage("Invalid: " + QString::fromStdString(error.second));
         return;
     }
@@ -1206,7 +1340,12 @@ void ReissueAssetDialog::updateAssetsList()
             if (asset.nReissuable)
                 list << QString::fromStdString(asset.strName);
         }
+
+        if (passets->CheckIfAssetExists(RESTRICTED_CHAR + name)) {
+            list << QString::fromStdString(RESTRICTED_CHAR + name);
+        }
     }
+
 
     stringModel->setStringList(list);
 }
@@ -1250,3 +1389,40 @@ void ReissueAssetDialog::focusReissueAsset(const QModelIndex &index)
 
     ui->quantitySpinBox->setFocus();
 }
+
+void ReissueAssetDialog::restrictedAssetSelected()
+{
+    ui->addressLabel->show();
+    ui->addressText->show();
+
+    ui->labelVerifierString->show();
+    ui->lineEditVerifierString->show();
+}
+
+void ReissueAssetDialog::restrictedAssetUnselected()
+{
+    ui->labelVerifierString->hide();
+    ui->lineEditVerifierString->hide();
+    ui->labelReissueVerifierStringErrorMessage->hide();
+
+    bool fCoinControlEnabled = this->model->getOptionsModel()->getCoinControlFeatures();
+    ui->addressText->setVisible(fCoinControlEnabled);
+    ui->addressLabel->setVisible(fCoinControlEnabled);
+}
+
+void ReissueAssetDialog::showInvalidVerifierStringMessage(QString string)
+{
+    ui->lineEditVerifierString->setStyleSheet(STYLE_INVALID);
+    ui->labelReissueVerifierStringErrorMessage->setStyleSheet("color: red; font-size: 15pt;font-weight: bold;");
+    ui->labelReissueVerifierStringErrorMessage->setText(string);
+    ui->labelReissueVerifierStringErrorMessage->show();
+}
+
+void ReissueAssetDialog::hideInvalidVerifierStringMessage()
+{
+    ui->lineEditVerifierString->setStyleSheet(STYLE_VALID);
+    ui->labelReissueVerifierStringErrorMessage->clear();
+    ui->labelReissueVerifierStringErrorMessage->hide();
+}
+
+
