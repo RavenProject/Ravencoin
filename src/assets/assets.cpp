@@ -2219,6 +2219,16 @@ bool CAssetsCache::AddQualifierAddress(const std::string& assetName, const std::
         setNewQualifierAddressToAdd.erase(newQualifier);
     }
 
+    if (IsAssetNameASubQualifier(assetName)) {
+        if (type == QualifierType::ADD_QUALIFIER) {
+            mapRootQualifierAddressesAdd[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].insert(assetName);
+            mapRootQualifierAddressesRemove[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].erase(assetName);
+        } else {
+            mapRootQualifierAddressesRemove[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].insert(assetName);
+            mapRootQualifierAddressesAdd[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].erase(assetName);
+        }
+    }
+
     setNewQualifierAddressToAdd.insert(newQualifier);
 
     return true;
@@ -2238,6 +2248,18 @@ bool CAssetsCache::RemoveQualifierAddress(const std::string& assetName, const st
     // If the set of qualifiers from transactions contains our qualifier already, we need to overwrite it
     if (setNewQualifierAddressToRemove.count(newQualifier)) {
         setNewQualifierAddressToRemove.erase(newQualifier);
+    }
+
+    if (IsAssetNameASubQualifier(assetName)) {
+        if (type == QualifierType::ADD_QUALIFIER) {
+            // When undoing a add, we want to remove it
+            mapRootQualifierAddressesRemove[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].insert(assetName);
+            mapRootQualifierAddressesAdd[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].erase(assetName);
+        } else {
+            // When undoing a remove, we want to add it
+            mapRootQualifierAddressesAdd[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].insert(assetName);
+            mapRootQualifierAddressesRemove[CAssetCacheRootQualifierChecker(GetParentName(assetName), address)].erase(assetName);
+        }
     }
 
     setNewQualifierAddressToRemove.insert(newQualifier);
@@ -3066,6 +3088,18 @@ bool CAssetsCache::Flush()
             passets->setNewRestrictedVerifierToRemove.insert(item);
         }
 
+        for (auto &item : mapRootQualifierAddressesAdd) {
+            for (auto asset : item.second) {
+                passets->mapRootQualifierAddressesAdd[item.first].insert(asset);
+            }
+        }
+
+        for (auto &item : mapRootQualifierAddressesRemove) {
+            for (auto asset : item.second) {
+                passets->mapRootQualifierAddressesAdd[item.first].insert(asset);
+            }
+        }
+
         return true;
 
     } catch (const std::runtime_error& e) {
@@ -3412,7 +3446,10 @@ bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex
 //! Returns a boolean on if the asset exists
 bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck)
 {
-    // TODO we need to add some Locks to this I would think
+    // If we are reindexing, we don't know if an asset exists when accepting blocks
+    if (fReindex) {
+        return true;
+    }
 
     // Create objects that will be used to check the dirty cache
     CNewAsset asset;
@@ -3420,24 +3457,28 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
     CAssetCacheNewAsset cachedAsset(asset, "", 0, uint256());
 
     // Check the dirty caches first and see if it was recently added or removed
-    if (setNewAssetsToRemove.count(cachedAsset))
+    if (setNewAssetsToRemove.count(cachedAsset)) {
         return false;
+    }
 
     // Check the dirty caches first and see if it was recently added or removed
-    if (passets->setNewAssetsToRemove.count(cachedAsset))
+    if (passets->setNewAssetsToRemove.count(cachedAsset)) {
         return false;
+    }
 
     if (setNewAssetsToAdd.count(cachedAsset)) {
-        if (fForceDuplicateCheck)
+        if (fForceDuplicateCheck) {
             return true;
+        }
         else {
             LogPrintf("%s : Found asset %s in setNewAssetsToAdd but force duplicate check wasn't true\n", __func__, name);
         }
     }
 
     if (passets->setNewAssetsToAdd.count(cachedAsset)) {
-        if (fForceDuplicateCheck)
+        if (fForceDuplicateCheck) {
             return true;
+        }
         else {
             LogPrintf("%s : Found asset %s in setNewAssetsToAdd but force duplicate check wasn't true\n", __func__, name);
         }
@@ -3446,8 +3487,9 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
     // Check the cache, if it doesn't exist in the cache. Try and read it from database
     if (passetsCache) {
         if (passetsCache->Exists(name)) {
-            if (fForceDuplicateCheck)
+            if (fForceDuplicateCheck) {
                 return true;
+            }
             else {
                 LogPrintf("%s : Found asset %s in passetsCache but force duplicate check wasn't true\n", __func__, name);
             }
@@ -3458,8 +3500,9 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
                 uint256 hash;
                 if (passetsdb->ReadAssetData(name, readAsset, nHeight, hash)) {
                     passetsCache->Put(readAsset.strName, CDatabasedAssetData(readAsset, nHeight, hash));
-                    if (fForceDuplicateCheck)
+                    if (fForceDuplicateCheck) {
                         return true;
+                    }
                     else {
                         LogPrintf("%s : Found asset %s in passetsdb but force duplicate check wasn't true\n", __func__, name);
                     }
@@ -3467,7 +3510,6 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
             }
         }
     }
-
     return false;
 }
 
@@ -4672,6 +4714,19 @@ bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, c
         return setIterator->type == QualifierType::ADD_QUALIFIER;
     }
 
+    auto tempCache = CAssetCacheRootQualifierChecker(qualifier_name, address);
+    if (!fSkipTempCache && this->mapRootQualifierAddressesAdd.count(tempCache)){
+        if (mapRootQualifierAddressesAdd[tempCache].size()) {
+            return true;
+        }
+    }
+
+    if (passets->mapRootQualifierAddressesAdd.count(tempCache)) {
+        if (mapRootQualifierAddressesAdd[tempCache].size()) {
+            return true;
+        }
+    }
+
     // Check the cache, if it doesn't exist in the cache. Try and read it from database
     if (passetsQualifierCache) {
         if (passetsQualifierCache->Exists(cachedQualifierAddress.GetHash().GetHex())) {
@@ -4680,11 +4735,15 @@ bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, c
     }
 
     if (prestricteddb) {
-        if (prestricteddb->ReadAddressQualifier(address, qualifier_name)) {
-            if (passetsQualifierCache)
-                passetsQualifierCache->Put(cachedQualifierAddress.GetHash().GetHex(), 1);
+        if (prestricteddb->CheckForAddressRootQualifier(address, qualifier_name)){
             return true;
         }
+//                } else {
+//                    if (prestricteddb->ReadAddressQualifier(address, qualifier_name)) {
+//                        passetsQualifierCache->Put(cachedQualifierAddress.GetHash().GetHex(), 1);
+//                        return true;
+//                    }
+//                }
     }
 
     return false;
@@ -4873,7 +4932,7 @@ bool CheckVerifierString(CAssetsCache& cache, const std::string& verifier, std::
             search = QUALIFIER_CHAR + qualifier;
         if (fCheckAssetDuplicate) {
             if (!cache.CheckIfAssetExists(search, true)) {
-                strError = _("Verifier string contains qualifier that isn't in the chain: ") + qualifier;
+                strError = _("Verifier string contains qualifier that isn't in the chain: ") + search;
                 return false;
             }
         }
@@ -4943,11 +5002,15 @@ bool VerifyQualifierChange(CAssetsCache& cache, const CNullAssetTxData& data, co
     if (type == QualifierType::ADD_QUALIFIER) {
         if (fHasQualifier) {
             strError = "bad-txns-null-data-add-qualifier-when-already-assigned";
+            if (fReindex)
+                return true;
             return false;
         }
     } else if (type == QualifierType::REMOVE_QUALIFIER) {
         if (!fHasQualifier) {
             strError = "bad-txns-null-data-removing-qualifier-when-not-assigned";
+            if (fReindex)
+                return true;
             return false;
         }
     }
@@ -4955,7 +5018,7 @@ bool VerifyQualifierChange(CAssetsCache& cache, const CNullAssetTxData& data, co
     return true;
 }
 
-bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError)
+bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError, bool fForceDuplicateCheck)
 {
     // Check the flag
     if (!VerifyNullAssetDataFlag(data.flag, strError))
@@ -4967,11 +5030,15 @@ bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& 
     if (type == RestrictedType::FREEZE_ADDRESS) {
         if (fIsFrozen) {
             strError = "bad-txns-null-data-freeze-address-when-already-frozen";
+            if (fReindex)
+                return true;
             return false;
         }
     } else if (type == RestrictedType::UNFREEZE_ADDRESS) {
         if (!fIsFrozen) {
             strError = "bad-txns-null-data-unfreeze-address-when-not-frozen";
+            if (fReindex)
+                return true;
             return false;
         }
     }
@@ -4990,11 +5057,15 @@ bool VerifyGlobalRestrictedChange(CAssetsCache& cache, const CNullAssetTxData& d
     if (type == RestrictedType::GLOBAL_FREEZE) {
         if (fIsGloballyFrozen) {
             strError = "bad-txns-null-data-global-freeze-when-already-frozen";
+            if (fReindex)
+                return true;
             return false;
         }
     } else if (type == RestrictedType::GLOBAL_UNFREEZE) {
         if (!fIsGloballyFrozen) {
             strError = "bad-txns-null-data-global-unfreeze-when-not-frozen";
+            if (fReindex)
+                return true;
             return false;
         }
     }

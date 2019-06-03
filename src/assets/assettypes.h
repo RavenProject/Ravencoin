@@ -466,6 +466,22 @@ struct CAssetCacheQualifierAddress {
     uint256 GetHash();
 };
 
+struct CAssetCacheRootQualifierChecker {
+    std::string rootAssetName;
+    std::string address;
+
+    CAssetCacheRootQualifierChecker(const std::string &assetName, const std::string &address) {
+        this->rootAssetName = assetName;
+        this->address = address;
+    }
+
+    bool operator<(const CAssetCacheRootQualifierChecker &rhs) const {
+        return rootAssetName < rhs.rootAssetName || (rootAssetName == rhs.rootAssetName && address < rhs.address);
+    }
+
+    uint256 GetHash();
+};
+
 struct CAssetCacheRestrictedAddress
 {
     std::string assetName;

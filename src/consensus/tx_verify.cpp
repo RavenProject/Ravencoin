@@ -222,7 +222,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, CAssetsCa
                             return state.DoS(100, false, REJECT_INVALID, strError);
 
                     } else if (IsAssetNameAnRestricted(data.asset_name)) {
-                        if (!VerifyRestrictedAddressChange(*assetCache, data, address, strError))
+                        if (!VerifyRestrictedAddressChange(*assetCache, data, address, strError, fForceDuplicateCheck))
                             return state.DoS(100, false, REJECT_INVALID, strError);
                     }
                 }

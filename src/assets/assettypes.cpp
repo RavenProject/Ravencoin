@@ -20,3 +20,7 @@ uint256 CAssetCacheQualifierAddress::GetHash() {
 uint256 CAssetCacheRestrictedAddress::GetHash() {
     return Hash(assetName.begin(), assetName.end(), address.begin(), address.end());
 }
+
+uint256 CAssetCacheRootQualifierChecker::GetHash() {
+    return Hash(rootAssetName.begin(), rootAssetName.end(), address.begin(), address.end());
+}

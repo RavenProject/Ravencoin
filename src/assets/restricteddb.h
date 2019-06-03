@@ -50,6 +50,8 @@ public:
     bool GetAddressRestrictions(std::string& address, std::vector<std::string>& restrictions);
     bool GetGlobalRestrictions(std::vector<std::string>& restrictions);
 
+    bool CheckForAddressRootQualifier(const std::string& address, const std::string& qualifier);
+
     bool Flush();
 };
 

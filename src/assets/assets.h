@@ -140,6 +140,10 @@ public :
     std::set<CAssetCacheRestrictedVerifiers> setNewRestrictedVerifierToAdd;
     std::set<CAssetCacheRestrictedVerifiers> setNewRestrictedVerifierToRemove;
 
+    //! Root Qualifier Address Map
+    std::map<CAssetCacheRootQualifierChecker, std::set<std::string> > mapRootQualifierAddressesAdd;
+    std::map<CAssetCacheRootQualifierChecker, std::set<std::string> > mapRootQualifierAddressesRemove;
+
     CAssetsCache() : CAssets()
     {
         SetNull();
@@ -183,6 +187,10 @@ public :
         //! Restricted Verifier Caches
         this->setNewRestrictedVerifierToAdd = cache.setNewRestrictedVerifierToAdd;
         this->setNewRestrictedVerifierToRemove = cache.setNewRestrictedVerifierToRemove;
+
+        //! Root Qualifier Address Map
+        this->mapRootQualifierAddressesAdd = cache.mapRootQualifierAddressesAdd;
+        this->mapRootQualifierAddressesRemove = cache.mapRootQualifierAddressesRemove;
     }
 
     CAssetsCache& operator=(const CAssetsCache& cache)
@@ -225,6 +233,10 @@ public :
         //! Restricted Verifier Caches
         this->setNewRestrictedVerifierToAdd = cache.setNewRestrictedVerifierToAdd;
         this->setNewRestrictedVerifierToRemove = cache.setNewRestrictedVerifierToRemove;
+
+        //! Root Qualifier Address Map
+        this->mapRootQualifierAddressesAdd = cache.mapRootQualifierAddressesAdd;
+        this->mapRootQualifierAddressesRemove = cache.mapRootQualifierAddressesRemove;
 
         return *this;
     }
@@ -321,6 +333,9 @@ public :
 
         setNewRestrictedVerifierToAdd.clear();
         setNewRestrictedVerifierToRemove.clear();
+
+        mapRootQualifierAddressesAdd.clear();
+        mapRootQualifierAddressesRemove.clear();
     }
 
    std::string CacheToString() const {
@@ -367,8 +382,11 @@ bool IsAssetNameAnOwner(const std::string& name);
 //! Check if an asset is a restricted asset
 bool IsAssetNameAnRestricted(const std::string& name);
 
-//! Check if an asset is a qualifier asset
+//! Check if an asset is a qualifier asset or sub qualifier
 bool IsAssetNameAQualifier(const std::string& name);
+
+//! Check if an asset is a sub qualifier
+bool IsAssetNameASubQualifier(const std::string& name);
 
 //! Check if an asset is a message channel
 bool IsAssetNameAnMsgChannel(const std::string& name);
@@ -503,7 +521,7 @@ std::string GetStrippedVerifierString(const std::string& verifier);
 /** Helper methods that validate changes to null asset data transaction databases */
 bool VerifyNullAssetDataFlag(const int& flag, std::string& strError);
 bool VerifyQualifierChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError);
-bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError);
+bool VerifyRestrictedAddressChange(CAssetsCache& cache, const CNullAssetTxData& data, const std::string& address, std::string& strError, bool fForceDuplicateCheck = true);
 bool VerifyGlobalRestrictedChange(CAssetsCache& cache, const CNullAssetTxData& data, std::string& strError);
 
 #endif //RAVENCOIN_ASSET_PROTOCOL_H

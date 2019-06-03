@@ -2674,7 +2674,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-serialization");
 
                 if (!asset.IsValid(strError, *assetsCache))
-                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-qualifier");
+                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-restricted");
             }
         }
         /** RVN END */

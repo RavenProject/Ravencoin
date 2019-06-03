@@ -815,6 +815,8 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
 void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, ConnectedBlockAssetData& connectedBlockData)
 {
     LOCK(cs);
+    std::set<uint256> setAlreadyRemoving;
+
     std::vector<const CTxMemPoolEntry*> entries;
     for (const auto& tx : vtx)
     {
@@ -834,6 +836,7 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
             if (i != mapTx.end()) {
                 entries.push_back(&*i);
                 trans.emplace_back(i->GetTx());
+                setAlreadyRemoving.insert(mapAssetToHash.at(it.asset.strName));
             }
         }
     }
@@ -844,9 +847,10 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                 indexed_transaction_set::iterator i = mapTx.find(hash);
                 if (i != mapTx.end()) {
                     CValidationState state;
-                    if (!CheckTransaction(i->GetTx(), state, passets)) {
+                    if (!setAlreadyRemoving.count(hash) && !CheckTransaction(i->GetTx(), state, passets)) {
                         entries.push_back(&*i);
                         trans.emplace_back(i->GetTx());
+                        setAlreadyRemoving.insert(hash);
                     }
                 }
             }
@@ -859,9 +863,10 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                 indexed_transaction_set::iterator i = mapTx.find(hash);
                 if (i != mapTx.end()) {
                     CValidationState state;
-                    if (!CheckTransaction(i->GetTx(), state, passets)) {
+                    if (!setAlreadyRemoving.count(hash) && !CheckTransaction(i->GetTx(), state, passets)) {
                         entries.push_back(&*i);
                         trans.emplace_back(i->GetTx());
+                        setAlreadyRemoving.insert(hash);
                     }
                 }
             }
@@ -875,9 +880,10 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                     indexed_transaction_set::iterator i = mapTx.find(hash);
                     if (i != mapTx.end()) {
                         CValidationState state;
-                        if (!CheckTransaction(i->GetTx(), state, passets)) {
+                        if (!setAlreadyRemoving.count(hash) && !CheckTransaction(i->GetTx(), state, passets)) {
                             entries.push_back(&*i);
                             trans.emplace_back(i->GetTx());
+                            setAlreadyRemoving.insert(hash);
                         }
                     }
                 }
@@ -894,9 +900,10 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                     if (i != mapTx.end()) {
                         CValidationState state;
                         std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                        if (!Consensus::CheckTxAssets(i->GetTx(), state, pcoinsTip, vReissueAssets)) {
+                        if (!setAlreadyRemoving.count(hash) && !Consensus::CheckTxAssets(i->GetTx(), state, pcoinsTip, vReissueAssets)) {
                             entries.push_back(&*i);
                             trans.emplace_back(i->GetTx());
+                            setAlreadyRemoving.insert(hash);
                         }
                     }
                 }
