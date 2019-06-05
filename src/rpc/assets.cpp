@@ -479,10 +479,12 @@ UniValue issue(const JSONRPCRequest& request)
     std::string change_address = "";
     if (request.params.size() > 3) {
         change_address = request.params[3].get_str();
-        CTxDestination destination = DecodeDestination(change_address);
-        if (!IsValidDestination(destination)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+        if (!change_address.empty()) {
+            CTxDestination destination = DecodeDestination(change_address);
+            if (!IsValidDestination(destination)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                                   std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+            }
         }
     }
 
@@ -849,9 +851,9 @@ void safe_advance(Iter& curr, const Iter& end, Incr n)
 
 UniValue listmyassets(const JSONRPCRequest &request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 4)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 5)
         throw std::runtime_error(
-                "listmyassets \"( asset )\" ( verbose ) ( count ) ( start )\n"
+                "listmyassets \"( asset )\" ( verbose ) ( count ) ( start ) (confs) \n"
                 + AssetActivationWarning() +
                 "\nReturns a list of all asset that are owned by this wallet\n"
 
@@ -860,6 +862,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 "2. \"verbose\"                  (boolean, optional, default=false) when false results only contain balances -- when true results include outpoints\n"
                 "3. \"count\"                    (integer, optional, default=ALL) truncates results to include only the first _count_ assets found\n"
                 "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found (if negative it skips back from the end)\n"
+                "5. \"confs\"                    (integet, optional, default=0) results are skipped if they don't have this number of confirmations\n"
 
                 "\nResult (verbose=false):\n"
                 "{\n"
@@ -889,6 +892,7 @@ UniValue listmyassets(const JSONRPCRequest &request)
                 + HelpExampleRpc("listmyassets", "")
                 + HelpExampleCli("listmyassets", "ASSET")
                 + HelpExampleCli("listmyassets", "\"ASSET*\" true 10 20")
+                  + HelpExampleCli("listmyassets", "\"ASSET*\" true 10 20 1")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -922,23 +926,28 @@ UniValue listmyassets(const JSONRPCRequest &request)
         start = request.params[3].get_int();
     }
 
+    int confs = 0;
+    if (request.params.size() > 4) {
+        confs = request.params[4].get_int();
+    }
+
     // retrieve balances
     std::map<std::string, CAmount> balances;
     std::map<std::string, std::vector<COutput> > outputs;
     if (filter == "*") {
-        if (!GetAllMyAssetBalances(outputs, balances))
+        if (!GetAllMyAssetBalances(outputs, balances, confs))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
     else if (filter.back() == '*') {
         std::vector<std::string> assetNames;
         filter.pop_back();
-        if (!GetAllMyAssetBalances(outputs, balances, filter))
+        if (!GetAllMyAssetBalances(outputs, balances, confs, filter))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
     else {
         if (!IsAssetNameValid(filter))
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid asset name.");
-        if (!GetAllMyAssetBalances(outputs, balances, filter))
+        if (!GetAllMyAssetBalances(outputs, balances, confs, filter))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
 
@@ -1535,6 +1544,10 @@ UniValue reissue(const JSONRPCRequest& request)
     // Create the Transaction
     if (!CreateReissueAssetTransaction(pwallet, crtl, reissueAsset, address, error, transaction, reservekey, nRequiredFee))
         throw JSONRPCError(error.first, error.second);
+
+    std::string strError = "";
+    if (!ContextualCheckReissueAsset(passets, reissueAsset, strError, *transaction.tx.get()))
+        throw JSONRPCError(RPC_INVALID_REQUEST, strError);
 
     // Send the Transaction to the network
     std::string txid;
@@ -2262,7 +2275,7 @@ UniValue issuerestricted(const JSONRPCRequest& request)
 
     // Validate the verifier string with the given to_address
     std::string strError = "";
-    if (!CheckVerifierString(*passets, verifier_string, to_address, strError, true))
+    if (!ContextualCheckVerifierString(passets, verifier_string, to_address, strError, true))
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
 
     // Get the change address if one was given
@@ -2456,6 +2469,10 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
     if (!CreateReissueAssetTransaction(pwallet, crtl, reissueAsset, to_address, error, transaction, reservekey, nRequiredFee, fChangeVerifier ? &verifierStripped : nullptr))
         throw JSONRPCError(error.first, error.second);
 
+    std::string strError = "";
+    if (!ContextualCheckReissueAsset(passets, reissueAsset, strError, *transaction.tx.get()))
+        throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+
     // Send the Transaction to the network
     std::string txid;
     if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
@@ -2605,7 +2622,7 @@ UniValue checkverifierstring(const JSONRPCRequest& request)
     std::string verifier_string = request.params[0].get_str();
 
     std::string strError;
-    if (!CheckVerifierString(*passets, verifier_string, "", strError, true)) {
+    if (!ContextualCheckVerifierString(passets, verifier_string, "", strError, true)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
     }
 
@@ -2621,7 +2638,7 @@ static const CRPCCommand commands[] =
     { "assets",   "issueunique",                &issueunique,                {"root_name", "asset_tags", "ipfs_hashes", "to_address", "change_address"}},
     { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address", "onlytotal", "count", "start"} },
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
-    { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start"}},
+    { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start", "confs"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
     { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address", "message", "expire_time"}},
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address", "message", "expire_time"}},

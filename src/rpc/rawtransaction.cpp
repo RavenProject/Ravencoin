@@ -598,8 +598,9 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     // Verify that data
                     std::string strError = "";
-                    if (!asset.IsValid(strError, *currentActiveAssetCache))
+                    if (!ContextualCheckNewAsset(currentActiveAssetCache, asset, strError)) {
                         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                    }
 
                     // Construct the asset transaction
                     asset.ConstructTransaction(scriptPubKey);
@@ -673,7 +674,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                         // Verify that data
                         std::string strError = "";
-                        if (!asset.IsValid(strError, *currentActiveAssetCache))
+                        if (!ContextualCheckNewAsset(currentActiveAssetCache, asset, strError))
                             throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
 
                         // Construct the asset transaction
@@ -733,9 +734,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     // Validate the the object is valid
                     std::string strError;
-                    if (!reissueObj.IsValid(strError, *currentActiveAssetCache))
+                    if (!ContextualCheckReissueAsset(currentActiveAssetCache, reissueObj, strError))
                         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
-
 
                     // Create the scripts for the change of the ownership token
                     CScript scriptTransferOwnerAsset = GetScriptForDestination(destination);
@@ -780,7 +780,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         // Verify
                         std::string strError = "";
                         if (!transfer.IsValid(strError)) {
-                            std::cout << strError << std::endl;
                             throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
                         }
 

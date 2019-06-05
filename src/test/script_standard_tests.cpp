@@ -246,10 +246,16 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
         s << OP_RETURN << std::vector<unsigned char>({75});
         BOOST_CHECK(!ExtractDestination(s, address));
 
-        // TX_RESTRICTED_ASSET_DATA
+        // TX_RESTRICTED_ASSET_DATA without an address
         s.clear();
         s << OP_RVN_ASSET << std::vector<unsigned char>({75});
         BOOST_CHECK(!ExtractDestination(s, address));
+
+        // TX_RESTRICTED_ASSET_DATA with an address
+        CNullAssetTxData data("#NAME", 1);
+        CScript dataScript = GetScriptForNullAssetDataDestination(address);
+        data.ConstructTransaction(dataScript);
+        BOOST_CHECK(ExtractDestination(dataScript, address));
 
         // TX_WITNESS_V0_KEYHASH
         s.clear();

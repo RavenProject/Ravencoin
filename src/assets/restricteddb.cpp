@@ -148,13 +148,13 @@ bool CRestrictedDB::CheckForAddressRootQualifier(const std::string& address, con
     LogPrintf("%s : qualifier %s\n", __func__, qualifier);
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
-    pcursor->Seek(std::make_pair(QULAIFIER_ADDRESS_FLAG, std::make_pair(address, qualifier)));
+    pcursor->Seek(std::make_pair(ADDRESS_QULAIFIER_FLAG, std::make_pair(address, qualifier)));
 
     // Load all qualifiers related to that given address
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
         std::pair<char, std::pair<std::string, std::string> > key;
-        if (pcursor->GetKey(key) && key.first == QULAIFIER_ADDRESS_FLAG && key.second.first == address) {
+        if (pcursor->GetKey(key) && key.first == ADDRESS_QULAIFIER_FLAG && key.second.first == address) {
             LogPrintf("%s : searched %s\n", __func__, key.second.second);
             if (key.second.second == qualifier || key.second.second.rfind(std::string(qualifier + "/"), 0) == 0) {
                 LogPrintf("Found a database match for %s : %s\n", qualifier, key.second.second);

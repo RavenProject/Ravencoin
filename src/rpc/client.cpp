@@ -58,6 +58,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listmyassets", 1, "verbose" },
     { "listmyassets", 2, "count" },
     { "listmyassets", 3, "start"},
+    { "listmyassets", 4, "confs"},
     { "listassets", 1, "verbose" },
     { "listassets", 2, "count" },
     { "listassets", 3, "start" },

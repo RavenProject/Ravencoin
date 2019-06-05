@@ -240,8 +240,8 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
     } else if (whichType == TX_RESTRICTED_ASSET_DATA) {
         if (vSolutions.size()) {
             addressRet = CKeyID(uint160(vSolutions[0]));
+            return true;
         }
-        return true;
     }
      /** RVN END */
     // Multisig txns have more than one address...

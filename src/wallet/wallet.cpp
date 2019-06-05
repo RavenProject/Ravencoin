@@ -3363,7 +3363,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                                 std::string change_address = EncodeDestination(dest);
                                 bool fFoundValueChangeAddress = false;
                                 // Check the verifier string against the change address, if it fails, we will try to send the change back to the same input that created this transaction
-                                if (!CheckVerifierString(*passets, verifier.verifier_string, change_address, strFailReason)) {
+                                if (!ContextualCheckVerifierString(passets, verifier.verifier_string, change_address, strFailReason)) {
                                     // Loop through all assets that are inputs into the transaction
                                     for (auto asset: setAssets) {
                                         if (asset.txout.scriptPubKey.IsAssetScript()) {
@@ -3379,7 +3379,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
                                             std::string check_address = EncodeDestination(outputData.destination);
 
-                                            if (CheckVerifierString(*passets, verifier.verifier_string, check_address, strFailReason)) {
+                                            if (ContextualCheckVerifierString(passets, verifier.verifier_string, check_address, strFailReason)) {
                                                 fFoundValueChangeAddress = true;
 
                                                 CScript scriptAssetChange = GetScriptForDestination(outputData.destination);
