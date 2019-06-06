@@ -139,7 +139,7 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
     return ValueFromAmount(amount, units);
 }
 
-UniValue UpdateAddressQualifier(const JSONRPCRequest &request, const int8_t &flag)
+UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -222,7 +222,7 @@ UniValue UpdateAddressQualifier(const JSONRPCRequest &request, const int8_t &fla
     return result;
 }
 
-UniValue UpdateRestrictedAddress(const JSONRPCRequest &request, const int8_t &flag)
+UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &flag)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
     if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
@@ -1721,11 +1721,11 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue addqualifiertoaddress(const JSONRPCRequest& request)
+UniValue addtagtoaddress(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-                "addqualifiertoaddress tag_name address (change_address)\n"
+                "addtagtoaddress tag_name to_address (change_address)\n"
                 + RestrictedActivationWarning() +
                 "\nAssign a tag to a address\n"
 
@@ -1738,21 +1738,21 @@ UniValue addqualifiertoaddress(const JSONRPCRequest& request)
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("addqualifiertoaddress", "\"TAG_NAME\" \"myaddress\"")
-                + HelpExampleRpc("addqualifiertoaddress", "\"TAG_NAME\" \"myaddress\"")
-                + HelpExampleCli("addqualifiertoaddress", "\"TAG_NAME\" \"address\" \"change_address\"")
-                + HelpExampleRpc("addqualifiertoaddress", "\"TAG_NAME\" \"address\" \"change_address\"")
+                + HelpExampleCli("addtagtoaddress", "\"#TAG\" \"to_address\"")
+                + HelpExampleRpc("addtagtoaddress", "\"#TAG\" \"to_address\"")
+                + HelpExampleCli("addtagtoaddress", "\"#TAG\" \"to_address\" \"change_address\"")
+                + HelpExampleRpc("addtagtoaddress", "\"#TAG\" \"to_address\" \"change_address\"")
         );
 
     // 1 - on
-    return UpdateAddressQualifier(request, 1);
+    return UpdateAddressTag(request, 1);
 }
 
-UniValue removequalifierfromaddress(const JSONRPCRequest& request)
+UniValue removetagfromaddress(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-                "removequalifierfromaddress tag_name address (change_address)\n"
+                "removetagfromaddress tag_name to_address (change_address)\n"
                 + RestrictedActivationWarning() +
                 "\nRemove a tag from a address\n"
 
@@ -1765,14 +1765,14 @@ UniValue removequalifierfromaddress(const JSONRPCRequest& request)
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("removequalifierfromaddress", "\"TAG_NAME\" \"myaddress\"")
-                + HelpExampleRpc("removequalifierfromaddress", "\"TAG_NAME\" \"myaddress\"")
-                + HelpExampleCli("removequalifierfromaddress", "\"TAG_NAME\" \"address\" \"change_address\"")
-                + HelpExampleRpc("removequalifierfromaddress", "\"TAG_NAME\" \"address\" \"change_address\"")
+                + HelpExampleCli("removetagfromaddress", "\"#TAG\" \"to_address\"")
+                + HelpExampleRpc("removetagfromaddress", "\"#TAG\" \"to_address\"")
+                + HelpExampleCli("removetagfromaddress", "\"#TAG\" \"to_address\" \"change_address\"")
+                + HelpExampleRpc("removetagfromaddress", "\"#TAG\" \"to_address\" \"change_address\"")
         );
 
     // 0 = off
-    return UpdateAddressQualifier(request, 0);
+    return UpdateAddressTag(request, 0);
 }
 
 UniValue freezeaddress(const JSONRPCRequest& request)
@@ -1799,7 +1799,7 @@ UniValue freezeaddress(const JSONRPCRequest& request)
         );
 
     // 1 = Freeze
-    return UpdateRestrictedAddress(request, 1);
+    return UpdateAddressRestriction(request, 1);
 }
 
 UniValue unfreezeaddress(const JSONRPCRequest& request)
@@ -1826,7 +1826,7 @@ UniValue unfreezeaddress(const JSONRPCRequest& request)
         );
 
     // 0 = Unfreeze
-    return UpdateRestrictedAddress(request, 0);
+    return UpdateAddressRestriction(request, 0);
 }
 
 UniValue freezerestrictedasset(const JSONRPCRequest& request)
@@ -1881,26 +1881,26 @@ UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
     return UpdateGlobalRestrictedAsset(request, 0);
 }
 
-UniValue listqualifiersforaddress(const JSONRPCRequest &request)
+UniValue listtagsforaddress(const JSONRPCRequest &request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() !=1)
         throw std::runtime_error(
-                "listqualifiersforaddress address\n"
+                "listtagsforaddress address\n"
                 + RestrictedActivationWarning() +
-                "\nList all qualifiers assigned to an address\n"
+                "\nList all tags assigned to an address\n"
 
                 "\nArguments:\n"
-                "1. \"address\"          (string), required) the address to list qualifier for\n"
+                "1. \"address\"          (string), required) the address to list tags for\n"
 
                 "\nResult:\n"
                 "["
-                "\"qualifier_name\",        (string) The qualifier name\n"
+                "\"tag_name\",        (string) The tag name\n"
                 "...,\n"
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("listqualifiersforaddress", "\"address\"")
-                + HelpExampleRpc("listqualifiersforaddress", "\"address\"")
+                + HelpExampleCli("listtagsforaddress", "\"address\"")
+                + HelpExampleRpc("listtagsforaddress", "\"address\"")
         );
 
     if (!prestricteddb)
@@ -1928,16 +1928,16 @@ UniValue listqualifiersforaddress(const JSONRPCRequest &request)
     return ret;
 }
 
-UniValue listaddressesforqualifier(const JSONRPCRequest& request)
+UniValue listaddressesfortag(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() !=1)
         throw std::runtime_error(
-                "listaddressesforqualifier qualifier_name\n"
+                "listaddressesfortag tag_name\n"
                 + RestrictedActivationWarning() +
-                "\nList all addresses that have been assigned a given qualifier\n"
+                "\nList all addresses that have been assigned a given tag\n"
 
                 "\nArguments:\n"
-                "1. \"qualifier_name\"          (string), required) the qualifier asset name to search for\n"
+                "1. \"tag_name\"          (string), required) the tag asset name to search for\n"
 
                 "\nResult:\n"
                 "["
@@ -1946,8 +1946,8 @@ UniValue listaddressesforqualifier(const JSONRPCRequest& request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("listaddressesforqualifier", "\"#QUALIFIER\"")
-                + HelpExampleRpc("listaddressesforqualifier", "\"#QUALIFIER\"")
+                + HelpExampleCli("listaddressesfortag", "\"#TAG\"")
+                + HelpExampleRpc("listaddressesfortag", "\"#TAG\"")
         );
 
     if (!prestricteddb)
@@ -2061,19 +2061,19 @@ UniValue getverifierstring(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 1)
         throw std::runtime_error(
-                "getverifierstring\n"
+                "getverifierstring restricted_name\n"
                 + RestrictedActivationWarning() +
                 "\nThe verifier string belong to the given asset\n"
 
                 "\nArguments:\n"
-                "1. \"asset_name\"          (string), required) the asset_name\n"
+                "1. \"restricted_name\"          (string), required) the asset_name\n"
 
                 "\nResult:\n"
                 "\"verifier_string\", (string) The verifier for the asset\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("getverifierstring", "\"asset_name\"")
-                + HelpExampleRpc("getverifierstring", "\"asset_name\"")
+                + HelpExampleCli("getverifierstring", "\"restricted_name\"")
+                + HelpExampleRpc("getverifierstring", "\"restricted_name\"")
         );
 
     if (!prestricteddb)
@@ -2092,24 +2092,24 @@ UniValue getverifierstring(const JSONRPCRequest& request)
     return verifier.verifier_string;
 }
 
-UniValue checkaddressqualifier(const JSONRPCRequest& request)
+UniValue checkaddresstag(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 2)
         throw std::runtime_error(
-                "checkaddressqualifier\n"
+                "checkaddresstag address tag_name\n"
                 + RestrictedActivationWarning() +
-                "\nChecks to see if an address has the given qualifier\n"
+                "\nChecks to see if an address has the given tag\n"
 
                 "\nArguments:\n"
                 "1. \"address\"          (string), required) the RVN address to search\n"
-                "1. \"qualifier_name\"   (string), required) the qualifier to search\n"
+                "1. \"tag_name\"         (string), required) the tag to search\n"
 
                 "\nResult:\n"
                 "\"true/false\", (boolean) If the address has the tag\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("checkaddressqualifier", "\"address\" \"qualifier_name\"")
-                + HelpExampleRpc("checkaddressqualifier", "\"address\" \"qualifier_name\"")
+                + HelpExampleCli("checkaddresstag", "\"address\" \"tag_name\"")
+                + HelpExampleRpc("checkaddresstag", "\"address\" \"tag_name\"")
         );
 
     if (!prestricteddb)
@@ -2137,7 +2137,7 @@ UniValue checkaddressrestriction(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 2)
         throw std::runtime_error(
-                "checkaddressrestriction\n"
+                "checkaddressrestriction address restricted_name\n"
                 + RestrictedActivationWarning() +
                 "\nChecks to see if an address has been frozen by the given restricted asset\n"
 
@@ -2177,7 +2177,7 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 1)
         throw std::runtime_error(
-                "checkglobalrestriction\n"
+                "checkglobalrestriction restricted_name\n"
                 + RestrictedActivationWarning() +
                 "\nChecks to see if a restricted asset is globally frozen\n"
 
@@ -2206,11 +2206,11 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
     return passets->CheckForGlobalRestriction(restricted_name, true);
 }
 
-UniValue issuerestricted(const JSONRPCRequest& request)
+UniValue issuerestrictedasset(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 4 || request.params.size() > 9)
         throw std::runtime_error(
-                "issuerestricted \"asset_name\" qty \"verifier\" \"to_address\" \"( change_address )\" (units) ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
+                "issuerestrictedasset \"asset_name\" qty \"verifier\" \"to_address\" \"( change_address )\" (units) ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
                 + RestrictedActivationWarning() +
                 "\nIssue a restricted asset.\n"
                 "Restricted asset names must not conflict with any existing restricted asset.\n"
@@ -2232,11 +2232,11 @@ UniValue issuerestricted(const JSONRPCRequest& request)
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\"")
-                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\"")
-                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 5")
-                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 8 true")
-                + HelpExampleCli("issuerestricted", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 0 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
+                + HelpExampleCli("issuerestrictedasset", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\"")
+                + HelpExampleCli("issuerestrictedasset", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\"")
+                + HelpExampleCli("issuerestrictedasset", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 5")
+                + HelpExampleCli("issuerestrictedasset", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 8 true")
+                + HelpExampleCli("issuerestrictedasset", "\"$ASSET_NAME\" 1000 \"#KYC & !#AML\" \"myaddress\" \"changeaddress\" 0 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -2347,11 +2347,11 @@ UniValue issuerestricted(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue reissuerestricted(const JSONRPCRequest& request)
+UniValue reissuerestrictedasset(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 3 || request.params.size() > 9)
         throw std::runtime_error(
-                "reissuerestricted \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( to_address )\" \"( change_address )\" ( new_unit ) ( reissuable ) \"( ipfs_hash )\"\n"
+                "reissuerestrictedasset \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( to_address )\" \"( change_address )\" ( new_unit ) ( reissuable ) \"( ipfs_hash )\"\n"
                 + RestrictedActivationWarning() +
                 "\nReissue a already created restricted\n"
                 "Reissuable is true/false for whether additional asset quantity can be created, an changing the verifier string\n"
@@ -2371,11 +2371,11 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\"")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" ")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\"")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\" true")
-                + HelpExampleCli("reissuerestricted", "\"$ASSET_NAME\" 1000  \"myaddress\" false \"\" \"changeaddress\" -1 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\"")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" ")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\"")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\" true")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" false \"\" \"changeaddress\" -1 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -2483,11 +2483,11 @@ UniValue reissuerestricted(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue transferqualifierasset(const JSONRPCRequest& request)
+UniValue transferqualifier(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 6)
         throw std::runtime_error(
-                "transferqualifierasset \"qualifier_name\" qty \"to_address\" (\"change_address\") (\"message\") (expire_time) \n"
+                "transferqualifier \"qualifier_name\" qty \"to_address\" (\"change_address\") (\"message\") (expire_time) \n"
                 + RestrictedActivationWarning() +
                 "\nTransfer a qualifier asset owned by this wallet to the given address"
 
@@ -2506,8 +2506,8 @@ UniValue transferqualifierasset(const JSONRPCRequest& request)
                 "]\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("transferqualifierasset", "\"#QUALIFIER\" 20 \"to_address\" \"\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
-                + HelpExampleCli("transferqualifierasset", "\"#QUALIFIER\" 20 \"to_address\" \"change_address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
+                + HelpExampleCli("transferqualifier", "\"#QUALIFIER\" 20 \"to_address\" \"\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
+                + HelpExampleCli("transferqualifier", "\"#QUALIFIER\" 20 \"to_address\" \"change_address\" \"QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E\" 15863654")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -2594,11 +2594,11 @@ UniValue transferqualifierasset(const JSONRPCRequest& request)
     return result;
 }
 
-UniValue checkverifierstring(const JSONRPCRequest& request)
+UniValue isvalidverifierstring(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 1)
         throw std::runtime_error(
-                "checkverifierstring\n"
+                "isvalidverifierstring verifier_string\n"
                 + RestrictedActivationWarning() +
                 "\nChecks to see if the given verifier string is valid\n"
 
@@ -2609,8 +2609,8 @@ UniValue checkverifierstring(const JSONRPCRequest& request)
                 "\"xxxxxxx\", (string) If the verifier string is valid, and the reason\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("checkverifierstring", "\"verifier_string\"")
-                + HelpExampleRpc("checkverifierstring", "\"verifier_string\"")
+                + HelpExampleCli("isvalidverifierstring", "\"verifier_string\"")
+                + HelpExampleRpc("isvalidverifierstring", "\"verifier_string\"")
         );
 
     ObserveSafeMode();
@@ -2647,24 +2647,24 @@ static const CRPCCommand commands[] =
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
 
-    { "restricted assets",   "transferqualifierasset",     &transferqualifierasset,     {"qualifier_name", "qty", "to_address", "change_address", "message", "expire_time"}},
-    { "restricted assets",   "issuerestricted",            &issuerestricted,            {"asset_name","qty","verifier","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
-    { "restricted assets",   "reissuerestricted",          &reissuerestricted,          {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_unit", "reissuable", "ipfs_hash"}},
-    { "restricted assets",   "addqualifiertoaddress",      &addqualifiertoaddress,      {"tag_name", "to_address", "change_address"}},
-    { "restricted assets",   "removequalifierfromaddress", &removequalifierfromaddress, {"tag_name", "to_address", "change_address"}},
+    { "restricted assets",   "transferqualifier",          &transferqualifier,          {"qualifier_name", "qty", "to_address", "change_address", "message", "expire_time"}},
+    { "restricted assets",   "issuerestrictedasset",       &issuerestrictedasset,       {"asset_name","qty","verifier","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
+    { "restricted assets",   "reissuerestrictedasset",     &reissuerestrictedasset,     {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_unit", "reissuable", "ipfs_hash"}},
+    { "restricted assets",   "addtagtoaddress",            &addtagtoaddress,            {"tag_name", "to_address", "change_address"}},
+    { "restricted assets",   "removetagfromaddress",       &removetagfromaddress,       {"tag_name", "to_address", "change_address"}},
     { "restricted assets",   "freezeaddress",              &freezeaddress,              {"asset_name", "address", "change_address"}},
     { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address"}},
     { "restricted assets",   "freezerestrictedasset",      &freezerestrictedasset,      {"asset_name", "change_address"}},
     { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address"}},
-    { "restricted assets",   "listaddressesforqualifier",  &listaddressesforqualifier,  {"qualifier_name"}},
-    { "restricted assets",   "listqualifiersforaddress",   &listqualifiersforaddress,   {"address"}},
+    { "restricted assets",   "listaddressesfortag",        &listaddressesfortag,        {"tag_name"}},
+    { "restricted assets",   "listtagsforaddress",         &listtagsforaddress,         {"address"}},
     { "restricted assets",   "listaddressrestrictions",    &listaddressrestrictions,    {"address"}},
     { "restricted assets",   "listglobalrestrictions",     &listglobalrestrictions,     {}},
-    { "restricted assets",   "getverifierstring",          &getverifierstring,          {"asset_name"}},
-    { "restricted assets",   "checkaddressqualifier",      &checkaddressqualifier,      {"address", "qualifier_name"}},
+    { "restricted assets",   "getverifierstring",          &getverifierstring,          {"restricted_name"}},
+    { "restricted assets",   "checkaddresstag",            &checkaddresstag,            {"address", "tag_name"}},
     { "restricted assets",   "checkaddressrestriction",    &checkaddressrestriction,    {"address", "restricted_name"}},
     { "restricted assets",   "checkglobalrestriction",     &checkglobalrestriction,     {"restricted_name"}},
-    { "restricted assets",   "checkverifierstring",        &checkverifierstring,        {"verifier_string"}}
+    { "restricted assets",   "isvalidverifierstring",      &isvalidverifierstring,      {"verifier_string"}}
 
 };
 
