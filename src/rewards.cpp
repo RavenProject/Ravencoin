@@ -32,7 +32,7 @@ static bool gs_beginShutdown = false;
 static bool gs_shutdownCompleted = false;
 
 //  Number of seconds to wait for shutdown while processing rewards
-const unsigned int SECONDS_TO_WAIT_FOR_SHUTDOWN = 1;
+const unsigned int SECONDS_TO_WAIT_FOR_SHUTDOWN = 5;
 
 //  Addresses are delimited by commas
 static const std::string ADDRESS_COMMA_DELIMITER = ",";
