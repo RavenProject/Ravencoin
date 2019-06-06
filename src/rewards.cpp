@@ -372,6 +372,9 @@ bool GenerateBatchedTransactions(
             break;
         }
 
+        LogPrintf("Total non-exception amount is %d.%08d\n",
+            totalAssetAmt / tgtUnitMultiplier, totalAssetAmt % tgtUnitMultiplier);
+
         //  If the asset is indivisible, and there are fewer rewards than individual ownerships,
         //      fail the distribution, since it is not possible to reward all ownerships equally.
         if (srcIsIndivisible && p_paymentAmt < totalAssetAmt) {
@@ -379,9 +382,6 @@ bool GenerateBatchedTransactions(
                 p_payoutSrcName.c_str(), p_ownedAssetName.c_str());
             break;
         }
-
-        LogPrintf("Total non-exception amount is %d.%08d\n",
-            totalAssetAmt / tgtUnitMultiplier, totalAssetAmt % tgtUnitMultiplier);
 
 
         //  Step 1 - find out how many addresses currently exist
