@@ -268,13 +268,14 @@ void ProcessRewards()
 
             //  Generate batched transactions based on the owner addresses
             if (!GenerateBatchedTransactions(walletPtr, rewardEntry.totalPayoutAmt, rewardEntry.tgtAssetName, rewardEntry.payoutSrc, rewardEntry.exceptionAddresses)) {
-                LogPrintf("rewards_thread: Failed to retrieve payable owners of '%s'!\n",
-                    rewardEntry.payoutSrc.c_str());
+                LogPrintf("rewards_thread: Failed to process batched transactions for '%s'!\n",
+                    rewardEntry.tgtAssetName.c_str());
 
-                continue;
+                //  Regardless of success or failure, ensure that this reward entry is deleted
+                deleteReward = true;
             }
 
-            //  Indicate success
+            //  Delete the reward entry
             deleteReward = true;
         } while (false);
 
