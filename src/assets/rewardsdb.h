@@ -11,19 +11,21 @@
 #include <vector>
 #include <set>
 
+#include "amount.h"
+
 class CRewardsDBEntry
 {
 public:
     std::string walletName;
     int heightForPayout;
-    int64_t totalPayoutAmt;
+    CAmount totalPayoutAmt;
     std::string payoutSrc;
     std::string tgtAssetName;
     std::string exceptionAddresses;
 
     CRewardsDBEntry();
     CRewardsDBEntry(
-        const std::string & p_walletName, const int p_heightForPayout, const int64_t p_totalPayoutAmt,
+        const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
         const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
     );
 

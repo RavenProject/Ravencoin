@@ -34,6 +34,8 @@
 #include "wallet/walletdb.h"
 #include "assets/rewardsdb.h"
 
+CAmount AmountFromValue(bool p_isRVN, const UniValue& p_value);
+
 UniValue reward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 3)
         throw std::runtime_error(
@@ -74,8 +76,13 @@ UniValue reward(const JSONRPCRequest& request) {
     EnsureWalletIsUnlocked(walletPtr);
 
     //  Extract parameters
-    int64_t total_payout_amount = request.params[0].get_int64();
     std::string payout_source = request.params[1].get_str();
+
+    CAmount total_payout_amount = AmountFromValue(
+        (payout_source.compare("RVN") == 0), request.params[0]);
+    if (total_payout_amount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount to reward");
+
     std::string target_asset_name = request.params[2].get_str();
     std::string exception_addresses;
     if (request.params.size() > 3) {
@@ -129,4 +136,19 @@ void RegisterRewardsRPCCommands(CRPCTable &t)
 {
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         t.appendCommand(commands[vcidx].name, &commands[vcidx]);
+}
+
+CAmount AmountFromValue(bool p_isRVN, const UniValue& p_value)
+{
+    if (!p_value.isNum() && !p_value.isStr())
+        throw JSONRPCError(RPC_TYPE_ERROR, "Amount is not a number or string");
+
+    CAmount amount;
+    if (!ParseFixedPoint(p_value.getValStr(), 8, &amount))
+        throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Invalid amount (3): %s", p_value.getValStr()));
+
+    if (p_isRVN && !MoneyRange(amount))
+        throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Amount out of range: %s", amount));
+
+    return amount;
 }

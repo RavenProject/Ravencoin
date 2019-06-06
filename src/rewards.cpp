@@ -48,8 +48,8 @@ void ShutdownRewardsProcessing();
 //  Retrieves all of the payable owners for the specified asset, excluding those
 //      in the exception address list.
 bool GenerateBatchedTransactions(
-    CWallet * const p_walletPtr, const int64_t p_paymentAmt,
-    const std::string & p_assetName, const std::string & p_payoutSrc, const std::string & p_exceptionAddresses);
+    CWallet * const p_walletPtr, const CAmount p_paymentAmt,
+    const std::string & p_ownedAssetName, const std::string & p_payoutSrcName, const std::string & p_exceptionAddresses);
 
 //  Transfer the specified amount of the asset from the source to the target
 bool InitiateTransfer(
@@ -209,6 +209,10 @@ void ProcessRewards()
         LogPrintf("rewards_thread: Invalid rewards DB!\n");
         return;
     }
+    if (passets == nullptr) {
+        LogPrintf("rewards_thread: Invalid assets cache!\n");
+        return;
+    }
     if (passetsdb == nullptr) {
         LogPrintf("rewards_thread: Invalid assets DB!\n");
         return;
@@ -289,8 +293,8 @@ void ShutdownRewardsProcessing()
 }
 
 bool GenerateBatchedTransactions(
-    CWallet * const p_walletPtr, const int64_t p_paymentAmt,
-    const std::string & p_assetName, const std::string & p_payoutSrc, const std::string & p_exceptionAddresses)
+    CWallet * const p_walletPtr, const CAmount p_paymentAmt,
+    const std::string & p_ownedAssetName, const std::string & p_payoutSrcName, const std::string & p_exceptionAddresses)
 {
     bool fcnRetVal = false;
 
@@ -298,6 +302,52 @@ bool GenerateBatchedTransactions(
 
     // While condition is false to ensure a single pass through this logic
     do {
+        //  Get details on the specified source asset
+        CNewAsset srcAsset;
+        bool srcIsIndivisible = false;
+        CAmount srcUnitMultiplier = COIN;  //  Default to multiplier for RVN
+
+        if (p_payoutSrcName.compare("RVN") != 0) {
+            if (!passets->GetAssetMetaDataIfExists(p_payoutSrcName, srcAsset)) {
+                LogPrintf("Failed to retrieve asset details for '%s'\n", p_payoutSrcName.c_str());
+                break;
+            }
+
+            LogPrintf("Source asset '%s' has units %d and multiplier %d\n",
+                p_payoutSrcName.c_str(), srcAsset.units, srcUnitMultiplier);
+
+            //  If the token is indivisible, signal this to later code with a zero multiplier
+            if (srcAsset.units == 0) {
+                srcIsIndivisible = true;
+                srcUnitMultiplier = 1;
+            }
+            else {
+                srcUnitMultiplier = pow(10, srcAsset.units);
+            }
+        }
+        else {
+            LogPrintf("Source is RVN with multiplier %d\n", srcUnitMultiplier);
+        }
+
+        //  Get details on the target asset
+        CNewAsset tgtAsset;
+        CAmount tgtUnitMultiplier = 0;
+        if (!passets->GetAssetMetaDataIfExists(p_ownedAssetName, tgtAsset)) {
+            LogPrintf("Failed to retrieve asset details for '%s'\n", p_ownedAssetName.c_str());
+            break;
+        }
+
+        //  If the token is indivisible, signal this to later code with a zero multiplier
+        if (tgtAsset.units == 0) {
+            tgtUnitMultiplier = 1;
+        }
+        else {
+            tgtUnitMultiplier = pow(10, tgtAsset.units);
+        }
+
+        LogPrintf("Target asset '%s' has units %d and multiplier %d\n",
+            p_ownedAssetName.c_str(), tgtAsset.units, tgtUnitMultiplier);
+
         //  Split up the exception address string
         std::vector<std::string> exceptionAddressList;
         boost::split(exceptionAddressList, p_exceptionAddresses, boost::is_any_of(ADDRESS_COMMA_DELIMITER));
@@ -312,21 +362,32 @@ bool GenerateBatchedTransactions(
 
         CAmount totalAssetAmt = 0;
 
-        if (!passetsdb->AssetTotalAmountNotExcluded(p_assetName, exceptionAddressList, totalAssetAmt)) {
-            LogPrintf("Failed to retrieve total asset amount for '%s'\n", p_assetName.c_str());
+        if (!passetsdb->AssetTotalAmountNotExcluded(p_ownedAssetName, exceptionAddressList, totalAssetAmt)) {
+            LogPrintf("Failed to retrieve total asset amount for '%s'\n", p_ownedAssetName.c_str());
             break;
         }
         if (totalAssetAmt <= 0) {
-            LogPrintf("No instances of asset '%s' are owned by non-exception addresses\n", p_assetName.c_str());
+            LogPrintf("No instances of asset '%s' are owned by non-exception addresses\n", p_ownedAssetName.c_str());
             break;
         }
+
+        //  If the asset is indivisible, and there are fewer rewards than individual ownerships,
+        //      fail the distribution, since it is not possible to reward all ownerships equally.
+        if (srcIsIndivisible && p_paymentAmt < totalAssetAmt) {
+            LogPrintf("Source asset '%s' is indivisible, and not enough reward value was provided for all ownership of '%s'\n",
+                p_payoutSrcName.c_str(), p_ownedAssetName.c_str());
+            break;
+        }
+
+        LogPrintf("Total non-exception amount is %d.%08d\n",
+            totalAssetAmt / tgtUnitMultiplier, totalAssetAmt % tgtUnitMultiplier);
 
 
         //  Step 1 - find out how many addresses currently exist
         LogPrintf("Retrieving payable owners...\n");
 
-        if (!passetsdb->AssetAddressDir(addressAmtPairs, totalEntryCount, true, p_assetName, INT_MAX, 0)) {
-            LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
+        if (!passetsdb->AssetAddressDir(addressAmtPairs, totalEntryCount, true, p_ownedAssetName, INT_MAX, 0)) {
+            LogPrintf("Failed to retrieve assets directory for '%s'\n", p_ownedAssetName.c_str());
             break;
         }
 
@@ -338,8 +399,8 @@ bool GenerateBatchedTransactions(
             //  Retrieve the specified segment of addresses
             addressAmtPairs.clear();
 
-            if (!passetsdb->AssetAddressDir(addressAmtPairs, totalEntryCount, false, p_assetName, MAX_RETRIEVAL_COUNT, retrievalOffset)) {
-                LogPrintf("Failed to retrieve assets directory for '%s'\n", p_assetName.c_str());
+            if (!passetsdb->AssetAddressDir(addressAmtPairs, totalEntryCount, false, p_ownedAssetName, MAX_RETRIEVAL_COUNT, retrievalOffset)) {
+                LogPrintf("Failed to retrieve assets directory for '%s'\n", p_ownedAssetName.c_str());
                 break;
             }
 
@@ -377,13 +438,18 @@ bool GenerateBatchedTransactions(
             }
 
             //  Calculate the per-address payout amount based on their ownership
+            double floatingPaymentAmt = p_paymentAmt;
+            double floatingTotalAssetAmt = totalAssetAmt;
             for (auto & addressAmtPair : addressAmtPairs) {
                 //  Replace the ownership amount with the reward amount
-                CAmount rewardAmt = p_paymentAmt * addressAmtPair.second / totalAssetAmt;
+                double floatingCurrAssetAmt = addressAmtPair.second;
+                double floatingRewardAmt = floatingPaymentAmt * floatingCurrAssetAmt / floatingTotalAssetAmt;
+                CAmount rewardAmt = floatingRewardAmt;
 
-                LogPrintf("Found ownership address for '%s': '%s' owns %lld => reward %lld\n",
-                    p_assetName.c_str(), addressAmtPair.first.c_str(),
-                    static_cast<long long>(addressAmtPair.second), static_cast<long long>(rewardAmt));
+                LogPrintf("Found ownership address for '%s': '%s' owns %d.%08d => reward %d.%08d\n",
+                    p_ownedAssetName.c_str(), addressAmtPair.first.c_str(),
+                    addressAmtPair.second / tgtUnitMultiplier, addressAmtPair.second % tgtUnitMultiplier,
+                    rewardAmt / srcUnitMultiplier, rewardAmt % srcUnitMultiplier);
 
                 addressAmtPair.second = rewardAmt;
             }
@@ -394,7 +460,7 @@ bool GenerateBatchedTransactions(
 
             //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
             std::string transactionID;
-            if (!InitiateTransfer(p_walletPtr, p_payoutSrc, addressAmtPairs, transactionID)) {
+            if (!InitiateTransfer(p_walletPtr, p_payoutSrcName, addressAmtPairs, transactionID)) {
                 LogPrintf("rewards_thread: Transaction generation failed!\n");
             }
         }
@@ -489,6 +555,10 @@ bool InitiateTransfer(
             std::vector< std::pair<CAssetTransfer, std::string> > vDestinations;
 
             for (auto const & addrAmtPair : p_addrAmtPairs) {
+                LogPrintf("Sending asset '%s' to address '%s' as reward %d\n",
+                    p_src.c_str(), addrAmtPair.first.c_str(),
+                    addrAmtPair.second);
+
                 vDestinations.emplace_back(std::make_pair(CAssetTransfer(p_src, addrAmtPair.second, DecodeAssetData(""), 0), addrAmtPair.first));
             }
 
