@@ -111,6 +111,7 @@ public:
 
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
+    unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
 
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
@@ -164,6 +165,7 @@ protected:
 
     unsigned int nDGWActivationBlock;
     unsigned int nMessagingActivationBlock;
+    unsigned int nRestrictedActivationBlock;
 
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;

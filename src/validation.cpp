@@ -2213,6 +2213,9 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     if (AreMessagingDeployed())
         nVersion = VERSIONBITS_TOP_BITS_MESSAGING;
 
+    if (AreRestrictedAssetsDeployed())
+        nVersion = VERSIONBITS_TOP_BITS_RESTRICTED;
+
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
         ThresholdState state = VersionBitsState(pindexPrev, params, (Consensus::DeploymentPos)i, versionbitscache);
         if (state == THRESHOLD_LOCKED_IN || state == THRESHOLD_STARTED) {
@@ -2974,6 +2977,8 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
             ThresholdState state = checker.GetStateFor(pindex, chainParams.GetConsensus(), warningcache[bit]);
             if (state == THRESHOLD_ACTIVE || state == THRESHOLD_LOCKED_IN) {
                 const std::string strWarning = strprintf(_("Warning: unknown new rules activated (versionbit %i)"), bit);
+                if (bit == 28) // DUMMY TEST BIT
+                    continue;
                 if (state == THRESHOLD_ACTIVE) {
                     DoWarning(strWarning);
                 } else {
@@ -2985,7 +2990,7 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
+            if (pindex->nVersion > nExpectedVersion)
                 ++nUpgraded;
             pindex = pindex->pprev;
         }
@@ -3984,6 +3989,13 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     // Reject outdated version blocks once messages are active.
     if (IsMessagingActive(pindexPrev->nHeight+1)) {
         if (block.nVersion < VERSIONBITS_TOP_BITS_MESSAGING) {
+            return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
+                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
+        }
+    }
+
+    if (IsRestrictedActive(pindexPrev->nHeight+1)) {
+        if (block.nVersion < VERSIONBITS_TOP_BITS_RESTRICTED) {
             return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
                                  strprintf("rejected nVersion=0x%08x block", block.nVersion));
         }
@@ -5562,6 +5574,15 @@ bool IsMessagingActive(unsigned int nBlockNumber) {
         return nBlockNumber > Params().MessagingActivationBlock();
     } else {
         return AreMessagingDeployed();
+    }
+}
+
+bool IsRestrictedActive(unsigned int nBlockNumber)
+{
+    if (Params().RestrictedActivationBlock()) {
+        return nBlockNumber > Params().RestrictedActivationBlock();
+    } else {
+        return AreRestrictedAssetsDeployed();
     }
 }
 

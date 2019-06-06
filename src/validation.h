@@ -584,6 +584,7 @@ bool AreRestrictedAssetsDeployed();
 
 bool IsDGWActive(unsigned int nBlockNumber);
 bool IsMessagingActive(unsigned int nBlockNumber);
+bool IsRestrictedActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
 /** RVN END */

@@ -35,6 +35,10 @@ struct BIP9Deployment {
     int64_t nStartTime;
     /** Timeout/expiry MedianTime for the deployment attempt. */
     int64_t nTimeout;
+    /** Use to override the confirmation window on a specific BIP */
+    uint32_t nOverrideMinerConfirmationWindow;
+    /** Use to override the the activation threshold on a specific BIP */
+    uint32_t nOverrideRuleChangeActivationThreshold;
 };
 
 /**
