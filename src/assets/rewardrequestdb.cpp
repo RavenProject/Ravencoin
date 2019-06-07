@@ -2,17 +2,19 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "rewardsdb.h"
+#include <set>
+
+#include "rewardrequestdb.h"
 
 static const char SCHEDULEDREWARD_FLAG = 'S';
 
-CRewardsDBEntry::CRewardsDBEntry()
+CRewardRequestDBEntry::CRewardRequestDBEntry()
 {
     SetNull();
 }
 
-CRewardsDBEntry::CRewardsDBEntry(
-    const std::string & p_walletName, const int p_heightForPayout, const int64_t p_totalPayoutAmt,
+CRewardRequestDBEntry::CRewardRequestDBEntry(
+    const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
     const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
 )
 {
@@ -26,10 +28,10 @@ CRewardsDBEntry::CRewardsDBEntry(
     exceptionAddresses = p_exceptionAddresses;
 }
 
-CRewardsDB::CRewardsDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "rewards", nCacheSize, fMemory, fWipe) {
+CRewardRequestDB::CRewardRequestDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "rewardrequest", nCacheSize, fMemory, fWipe) {
 }
 
-bool CRewardsDB::SchedulePendingReward(const CRewardsDBEntry & p_newReward)
+bool CRewardRequestDB::SchedulePendingReward(const CRewardRequestDBEntry & p_newReward)
 {
     LogPrintf("%s : Scheduling reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
         __func__,
@@ -38,7 +40,7 @@ bool CRewardsDB::SchedulePendingReward(const CRewardsDBEntry & p_newReward)
         p_newReward.exceptionAddresses.c_str());
 
     //  Retrieve height-based entry which contains list of rewards to pay at that height
-    std::set<CRewardsDBEntry> entriesAtSpecifiedHeight;
+    std::set<CRewardRequestDBEntry> entriesAtSpecifiedHeight;
 
     //  Result doesn't matter, as this might be the first entry added at this height
     Read(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), entriesAtSpecifiedHeight);
@@ -56,7 +58,7 @@ bool CRewardsDB::SchedulePendingReward(const CRewardsDBEntry & p_newReward)
     return succeeded;
 }
 
-bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward)
+bool CRewardRequestDB::RemoveCompletedReward(const CRewardRequestDBEntry & p_completedReward)
 {
     LogPrintf("%s : Removing reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
         __func__,
@@ -65,7 +67,7 @@ bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward
         p_completedReward.exceptionAddresses.c_str());
 
     //  Retrieve height-based entry which contains list of rewards to pay at that height
-    std::set<CRewardsDBEntry> entriesAtSpecifiedHeight;
+    std::set<CRewardRequestDBEntry> entriesAtSpecifiedHeight;
 
     //  If this fails, bail, since we can't be sure we won't blow away valid entries
     if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout), entriesAtSpecifiedHeight)) {
@@ -82,10 +84,10 @@ bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward
     }
 
     //  Remove this entry from the list
-    std::set<CRewardsDBEntry>::iterator entryIT;
+    std::set<CRewardRequestDBEntry>::iterator entryIT;
 
     for (entryIT = entriesAtSpecifiedHeight.begin(); entryIT != entriesAtSpecifiedHeight.end(); ) {
-        if (entryIT->tgtAssetName.compare(p_completedReward.tgtAssetName) == 0) {
+        if (entryIT->tgtAssetName == p_completedReward.tgtAssetName) {
             entryIT = entriesAtSpecifiedHeight.erase(entryIT);
         }
         else {
@@ -114,11 +116,37 @@ bool CRewardsDB::RemoveCompletedReward(const CRewardsDBEntry & p_completedReward
     return succeeded;
 }
 
-bool CRewardsDB::LoadPayableRewards(
-    std::set<CRewardsDBEntry> & p_dbEntries, const int & p_maxBlockHeight)
+bool CRewardRequestDB::AreRewardsScheduledForHeight(const int & p_maxBlockHeight)
 {
     LogPrintf("%s : Looking for scheduled rewards below height %d!\n",
         __func__, p_maxBlockHeight);
+
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    pcursor->SeekToFirst();
+
+    // Find out if any pending rewards exist at or below the specified height
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, int> key;
+
+        //  Only retrieve entries earlier than the provided block height
+        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second <= p_maxBlockHeight) {
+            return true;
+        }
+
+        pcursor->Next();
+    }
+
+    return false;
+}
+
+bool CRewardRequestDB::LoadPayableRewardsForAsset(
+    const std::string & p_assetName, const int & p_blockHeight,
+    std::set<CRewardRequestDBEntry> & p_dbEntries)
+{
+    LogPrintf("%s : Looking for scheduled rewards for asset '%s' at height %d!\n",
+        __func__, p_assetName.c_str(), p_blockHeight);
 
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
@@ -129,13 +157,17 @@ bool CRewardsDB::LoadPayableRewards(
         boost::this_thread::interruption_point();
         std::pair<char, int> key;
 
-        //  Only retrieve entries earlier than the provided block height
-        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second <= p_maxBlockHeight) {
-            std::set<CRewardsDBEntry> dbEntrySet;
+        //  Only retrieve entries at the provided block height
+        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second == p_blockHeight) {
+            std::set<CRewardRequestDBEntry> dbEntrySet;
 
             if (pcursor->GetValue(dbEntrySet)) {
                 for (auto const & entry : dbEntrySet) {
-                    p_dbEntries.insert(entry);
+                    //  If an asset was specified, only add entries for it.
+                    //  Otherwise, retrieve all entries.
+                    if (p_assetName.length() == 0 || p_assetName == entry.tgtAssetName) {
+                        p_dbEntries.insert(entry);
+                    }
                 }
             } else {
                 LogPrintf("%s: Failed to read reward\n", __func__);

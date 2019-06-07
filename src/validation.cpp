@@ -56,7 +56,8 @@
 #include "assets/assets.h"
 #include "assets/assetdb.h"
 
-#include "assets/rewardsdb.h"
+#include "assets/rewardrequestdb.h"
+#include "assets/assetsnapshotdb.h"
 
 #if defined(NDEBUG)
 # error "Raven cannot be compiled without assertions."
@@ -211,7 +212,9 @@ CLRUCache<std::string, int> *pMessageSubscribedChannelsCache = nullptr;
 CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
-CRewardsDB *pRewardsDb = nullptr;
+CRewardRequestDB *pRewardRequestDb = nullptr;
+CAssetSnapshotDB *pAssetSnapshotDb = nullptr;
+CPayoutDB *pPayoutDb = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
@@ -3180,6 +3183,32 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     LogPrint(BCLog::BENCH, "- Connect block: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime6 - nTime1) * MILLI, nTimeTotal * MICRO, nTimeTotal * MILLI / nBlocksTotal);
 
     connectTrace.BlockConnected(pindexNew, std::move(pthisBlock));
+
+    /** RVN START */
+
+    //  Determine if the new block height has any pending reward payments,
+    //      and if so, capture a snapshot of the relevant target assets.
+    if (pRewardRequestDb != nullptr && pRewardRequestDb->AreRewardsScheduledForHeight(pindexNew->nHeight)) {
+        //  Retrieve the scheduled rewards
+        std::set<CRewardRequestDBEntry> dbEntriesToProcess;
+
+        if (pRewardRequestDb->LoadPayableRewardsForAsset("", pindexNew->nHeight, dbEntriesToProcess)) {
+            //  Loop through them
+            for (auto const & rewardEntry : dbEntriesToProcess) {
+                //  Add a snapshot entry for the target asset ownership
+                if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(rewardEntry.tgtAssetName, pindexNew->nHeight, rewardEntry.exceptionAddresses)) {
+                    LogPrintf("ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
+                        rewardEntry.tgtAssetName.c_str(), pindexNew->nHeight);
+                }
+            }
+        }
+        else {
+            LogPrintf("ConnectTip: Failed to load payable reward requests at height %d!\n", pindexNew->nHeight);
+        }
+    }
+
+    /** RVN END */
+
     return true;
 }
 

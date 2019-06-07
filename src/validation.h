@@ -37,6 +37,8 @@
 #include <assets/assetdb.h>
 #include <assets/messages.h>
 #include <assets/messagedb.h>
+#include <assets/assetsnapshotdb.h>
+#include <assets/payoutdb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -53,7 +55,7 @@ struct ChainTxData;
 
 class CAssetsDB;
 class CAssets;
-class CRewardsDB;
+class CRewardRequestDB;
 
 struct PrecomputedTransactionData;
 struct LockPoints;
@@ -515,8 +517,14 @@ extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
 extern CMessageDB *pmessagedb;
 extern CMessageChannelDB *pmessagechanneldb;
 
-/** Global variable that point to the active rewards database (protected by cs_main) */
-extern CRewardsDB *pRewardsDb;
+/** Global variable that point to the active reward request database (protected by cs_main) */
+extern CRewardRequestDB *pRewardRequestDb;
+
+/** Global variable that point to the active asset snapshot database (protected by cs_main) */
+extern CAssetSnapshotDB *pAssetSnapshotDb;
+
+/** Global variable that point to the active payout database (protected by cs_main) */
+extern CPayoutDB *pPayoutDb;
 /** RVN END */
 
 /**

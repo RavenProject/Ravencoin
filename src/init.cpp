@@ -47,8 +47,8 @@
 #include "validationinterface.h"
 #include "assets/assets.h"
 #include "assets/assetdb.h"
-#include "assets/rewardsdb.h"
-#include "rewards.h"
+#include "assets/rewardrequestdb.h"
+#include "assets/payoutdb.h"
 #ifdef ENABLE_WALLET
 #include "wallet/init.h"
 #include <wallet/wallet.h>
@@ -200,7 +200,6 @@ void PrepareShutdown()
     StopREST();
     StopRPC();
     StopHTTPServer();
-    ShutdownRewardsProcessorThread();
 #ifdef ENABLE_WALLET
     FlushWallets();
 #endif
@@ -277,8 +276,12 @@ void PrepareShutdown()
         delete pmessagechanneldb;
         pmessagechanneldb = nullptr;
 
-        delete pRewardsDb;
-        pRewardsDb = nullptr;
+        delete pRewardRequestDb;
+        pRewardRequestDb = nullptr;
+        delete pAssetSnapshotDb;
+        pAssetSnapshotDb = nullptr;
+        delete pPayoutDb;
+        pPayoutDb = nullptr;
     }
 #ifdef ENABLE_WALLET
     StopWallets();
@@ -1496,7 +1499,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete passetsCache;
                 delete pmessagedb;
                 delete pmessagechanneldb;
-                delete pRewardsDb;
+                delete pRewardRequestDb;
+                delete pAssetSnapshotDb;
+                delete pPayoutDb;
 
                 passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
                 passets = new CAssetsCache();
@@ -1506,7 +1511,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 pMessagesSeenAddressCache = new CLRUCache<std::string, int>(1000);
                 pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
                 pmessagechanneldb = new CMessageChannelDB(nBlockTreeDBCache, false, false);
-                pRewardsDb = new CRewardsDB(nBlockTreeDBCache, false, false);
+                pRewardRequestDb = new CRewardRequestDB(nBlockTreeDBCache, false, false);
+                pAssetSnapshotDb = new CAssetSnapshotDB(nBlockTreeDBCache, false, false);
+                pPayoutDb = new CPayoutDB(nBlockTreeDBCache, false, false);
 
 
                 // Read for fAssetIndex to make sure that we only load asset address balances if it if true
@@ -1875,14 +1882,6 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
             if (!ScanForMessageChannels(strLoadError))
                 return InitError(strLoadError);
             pmessagechanneldb->WriteFlag("init", true);
-        }
-    }
-
-    // If the rewards system is enabled, launch a background thread that will process scheduled reward payouts
-    if (gArgs.IsArgSet("-rewards") && gArgs.IsArgSet("-rewards_processor")) {
-        bool launchResult = LaunchRewardsProcessorThread();
-        if (!launchResult) {
-            return InitError("Failed to launch rewards processing thread.");
         }
     }
 

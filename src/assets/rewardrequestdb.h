@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVENCOIN_REWARDS_H
-#define RAVENCOIN_REWARDS_H
+#ifndef REWARDREQUESTDB_H
+#define REWARDREQUESTDB_H
 
 #include <dbwrapper.h>
 
@@ -13,7 +13,7 @@
 
 #include "amount.h"
 
-class CRewardsDBEntry
+class CRewardRequestDBEntry
 {
 public:
     std::string walletName;
@@ -23,8 +23,8 @@ public:
     std::string tgtAssetName;
     std::string exceptionAddresses;
 
-    CRewardsDBEntry();
-    CRewardsDBEntry(
+    CRewardRequestDBEntry();
+    CRewardRequestDBEntry(
         const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
         const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
     );
@@ -38,7 +38,7 @@ public:
         exceptionAddresses = "";
     }
 
-    bool operator<(const CRewardsDBEntry &rhs) const
+    bool operator<(const CRewardRequestDBEntry &rhs) const
     {
         return heightForPayout < rhs.heightForPayout;
     }
@@ -58,25 +58,30 @@ public:
     }
 };
 
-class CRewardsDB  : public CDBWrapper
+class CRewardRequestDB  : public CDBWrapper
 {
 public:
-    explicit CRewardsDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+    explicit CRewardRequestDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 
-    CRewardsDB(const CRewardsDB&) = delete;
-    CRewardsDB& operator=(const CRewardsDB&) = delete;
+    CRewardRequestDB(const CRewardRequestDB&) = delete;
+    CRewardRequestDB& operator=(const CRewardRequestDB&) = delete;
 
     // Schedule a pending reward payout
-    bool SchedulePendingReward(const CRewardsDBEntry & p_newReward);
+    bool SchedulePendingReward(const CRewardRequestDBEntry & p_newReward);
 
     // Remove a reward that has been paid out
-    bool RemoveCompletedReward(const CRewardsDBEntry & p_completedReward);
+    bool RemoveCompletedReward(const CRewardRequestDBEntry & p_completedReward);
 
-    // Retrieve all reward records lower than the provided block height
-    bool LoadPayableRewards(std::set<CRewardsDBEntry> & p_dbEntries, const int & p_minBlockHeight);
+    // Find out if any reward payments are scheduled at the specified height
+    bool AreRewardsScheduledForHeight(const int & p_blockHeight);
+
+    // Retrieve all reward records *for a specific asset* (if specified) at the provided block height
+    bool LoadPayableRewardsForAsset(
+        const std::string & p_assetName, const int & p_blockHeight,
+        std::set<CRewardRequestDBEntry> & p_dbEntries);
 
     bool Flush();
 };
 
 
-#endif //RAVENCOIN_REWARDS_H
+#endif //REWARDREQUESTDB_H

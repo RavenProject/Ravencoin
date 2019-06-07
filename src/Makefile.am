@@ -90,7 +90,9 @@ RAVEN_CORE_H = \
   assets/assettypes.h \
   assets/messages.h \
   assets/messagedb.h \
-  assets/rewardsdb.h \
+  assets/rewardrequestdb.h \
+  assets/assetsnapshotdb.h \
+  assets/payoutdb.h \
   base58.h \
   bloom.h \
   blockencodings.h \
@@ -139,7 +141,6 @@ RAVEN_CORE_H = \
   random.h \
   reverse_iterator.h \
   reverselock.h \
-  rewards.h \
   rpc/blockchain.h \
   rpc/client.h \
   rpc/mining.h \
@@ -219,7 +220,9 @@ libraven_server_a_SOURCES = \
   assets/assets.cpp \
   assets/assetdb.cpp \
   assets/assettypes.cpp \
-  assets/rewardsdb.cpp \
+  assets/rewardrequestdb.cpp \
+  assets/assetsnapshotdb.cpp \
+  assets/payoutdb.cpp \
   assets/messages.cpp \
   assets/messagedb.cpp \
   policy/fees.cpp \
@@ -227,7 +230,6 @@ libraven_server_a_SOURCES = \
   policy/rbf.cpp \
   pow.cpp \
   rest.cpp \
-  rewards.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
   rpc/messages.cpp \

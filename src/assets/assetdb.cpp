@@ -413,7 +413,7 @@ bool CAssetsDB::AssetTotalAmountNotExcluded(const std::string & p_assetName, con
             //  Ensure that this is not one of the excluded addresses
             bool excluded = false;
             for (auto const & excludedAddr : p_excludedAddresses) {
-                if (key.second.second.compare(excludedAddr) == 0) {
+                if (key.second.second == excludedAddr) {
                     excluded = true;
                     break;
                 }
