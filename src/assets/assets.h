@@ -359,6 +359,7 @@ CAmount GetIssueMsgChannelAssetBurnAmount();
 CAmount GetIssueQualifierAssetBurnAmount();
 CAmount GetIssueSubQualifierAssetBurnAmount();
 CAmount GetIssueRestrictedAssetBurnAmount();
+CAmount GetAddNullQualifierTagBurnAmount();
 CAmount GetBurnAmount(const AssetType type);
 CAmount GetBurnAmount(const int nType);
 

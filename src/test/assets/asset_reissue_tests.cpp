@@ -157,7 +157,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
         CReissueAsset reissue1("RVNASSET", CAmount(1 * COIN), 8, 1, DecodeAssetData("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
 
         std::string error;
-        BOOST_CHECK_MESSAGE(ContextualCheckReissueAsset(&cache, reissue1, error), "Reissue should of been valid");
+        BOOST_CHECK_MESSAGE(ContextualCheckReissueAsset(&cache, reissue1, error), "Reissue should have been valid");
 
         // Create a reissuance of the asset that is not valid
         CReissueAsset reissue2("NOTEXIST", CAmount(1 * COIN), 8, 1, DecodeAssetData("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
@@ -199,7 +199,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
         // Create a reissuance of the asset that is valid txid but messaging isn't active in unit tests
         CReissueAsset reissue7("DATAHASH", CAmount(1 * COIN), 8, 1, DecodeAssetData("9c2c8e121a0139ba39bffd3ca97267bca9d4c0c1e84ac0c34a883c28e7a912ca"));
 
-        BOOST_CHECK_MESSAGE(!ContextualCheckReissueAsset(&cache, reissue7, error), "Reissue should of been not valid because messaging isn't active yet, and txid aren't allowed until messaging is active");
+        BOOST_CHECK_MESSAGE(!ContextualCheckReissueAsset(&cache, reissue7, error), "Reissue should have been not valid because messaging isn't active yet, and txid aren't allowed until messaging is active");
     }
 
 

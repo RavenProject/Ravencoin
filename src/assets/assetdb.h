@@ -24,7 +24,7 @@ struct CBlockAssetUndo
     bool fChangedIPFS;
     bool fChangedUnits;
     std::string strIPFS;
-    int nUnits;
+    int32_t nUnits;
     int8_t version;
     bool fChangedVerifierString;
     std::string verifierString;

@@ -118,7 +118,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // The outputs are assigning a destination to only 100 Assets
         // This should fail because 900 Assets aren't being assigned a destination (Trying to burn 900 Assets)
         std::vector<std::pair<std::string, uint256>> vReissueAssets;
-        BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx, state, coins, nullptr, false, vReissueAssets, true), "CheckTxAssets should of failed");
+        BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx, state, coins, nullptr, false, vReissueAssets, true), "CheckTxAssets should have failed");
     }
 
     BOOST_AUTO_TEST_CASE(asset_tx_valid_multiple_outs_test)
@@ -240,7 +240,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // The outputs are assigning 100 Assets to 12 destinations (12 * 100 = 1200)
         // This test should fail because the Outputs are greater than the inputs
         std::vector<std::pair<std::string, uint256>> vReissueAssets;
-        BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx, state, coins, nullptr, false, vReissueAssets, true), "CheckTxAssets passed when it should of failed");
+        BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx, state, coins, nullptr, false, vReissueAssets, true), "CheckTxAssets passed when it should have failed");
     }
 
     BOOST_AUTO_TEST_CASE(asset_tx_multiple_assets_test)
@@ -413,7 +413,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // Check the transaction that contains inputs that are spending 1000 Assets for 3 different assets
         // While only outputs only contain 900 Assets being sent to a destination
         // This should fail because 100 of each Asset isn't being sent to a destination (Trying to burn 100 Assets each)
-        BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx2, state, coins, nullptr, false, vReissueAssets, true), "CheckTxAssets should of failed");
+        BOOST_CHECK_MESSAGE(!Consensus::CheckTxAssets(tx2, state, coins, nullptr, false, vReissueAssets, true), "CheckTxAssets should have failed");
     }
 
     BOOST_AUTO_TEST_CASE(asset_tx_issue_units_test)

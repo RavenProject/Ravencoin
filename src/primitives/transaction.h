@@ -343,6 +343,8 @@ public:
     bool IsNewRestrictedAsset() const;
     bool VerifyNewRestrictedAsset(std::string& strError) const;
 
+    bool CheckAddingTagBurnFee(const int& count) const;
+
     bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const;
     bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const;
 

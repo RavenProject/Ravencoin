@@ -30,7 +30,8 @@ enum class AssetType
     QUALIFIER = 7,
     SUB_QUALIFIER = 8,
     RESTRICTED = 9,
-    INVALID = 10
+    NULL_ADD_QUALIFIER = 10,
+    INVALID = 11
 };
 
 enum class QualifierType
@@ -45,7 +46,6 @@ enum class RestrictedType
     FREEZE_ADDRESS= 1,
     GLOBAL_UNFREEZE = 2,
     GLOBAL_FREEZE = 3
-
 };
 
 int IntFromAssetType(AssetType type);

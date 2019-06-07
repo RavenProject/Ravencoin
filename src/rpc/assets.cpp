@@ -1731,8 +1731,8 @@ UniValue addtagtoaddress(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"tag_name\"            (string, required) the name of the tag you are assigning to the address\n"
-                "2. \"to_address\"          (string), required) the address that will be assigned the tag\n"
-                "3. \"change_address\"      (string), optional) The change address for the qualifier token to be sent to\n"
+                "2. \"to_address\"          (string, required) the address that will be assigned the tag\n"
+                "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1758,8 +1758,8 @@ UniValue removetagfromaddress(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"tag_name\"            (string, required) the name of the tag you are removing from the address\n"
-                "2. \"to_address\"          (string), required) the address that the tag will be removed from\n"
-                "3. \"change_address\"      (string), optional) The change address for the qualifier token to be sent to\n"
+                "2. \"to_address\"          (string, required) the address that the tag will be removed from\n"
+                "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1785,8 +1785,8 @@ UniValue freezeaddress(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to freeze\n"
-                "2. \"address\"          (string), required) the address that will be frozen\n"
-                "3. \"change_address\"   (string), optional) The change address for the owner token of the restricted asset\n"
+                "2. \"address\"          (string, required) the address that will be frozen\n"
+                "3. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1812,8 +1812,8 @@ UniValue unfreezeaddress(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
-                "2. \"address\"          (string), required) the address that will be unfrozen\n"
-                "3. \"change_address\"   (string), optional) The change address for the owner token of the restricted asset\n"
+                "2. \"address\"          (string, required) the address that will be unfrozen\n"
+                "3. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1839,7 +1839,7 @@ UniValue freezerestrictedasset(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
-                "2. \"change_address\"   (string), optional) The change address for the owner token of the restricted asset\n"
+                "2. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1865,7 +1865,7 @@ UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
-                "2. \"change_address\"   (string), optional) The change address for the owner token of the restricted asset\n"
+                "2. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1890,7 +1890,7 @@ UniValue listtagsforaddress(const JSONRPCRequest &request)
                 "\nList all tags assigned to an address\n"
 
                 "\nArguments:\n"
-                "1. \"address\"          (string), required) the address to list tags for\n"
+                "1. \"address\"          (string, required) the address to list tags for\n"
 
                 "\nResult:\n"
                 "["
@@ -1937,7 +1937,7 @@ UniValue listaddressesfortag(const JSONRPCRequest& request)
                 "\nList all addresses that have been assigned a given tag\n"
 
                 "\nArguments:\n"
-                "1. \"tag_name\"          (string), required) the tag asset name to search for\n"
+                "1. \"tag_name\"          (string, required) the tag asset name to search for\n"
 
                 "\nResult:\n"
                 "["
@@ -2026,7 +2026,7 @@ UniValue listglobalrestrictions(const JSONRPCRequest& request)
         throw std::runtime_error(
                 "listglobalrestrictions\n"
                 + RestrictedActivationWarning() +
-                "\nList all global restricted assetse\n"
+                "\nList all global restricted assets\n"
 
 
                 "\nResult:\n"
@@ -2063,10 +2063,10 @@ UniValue getverifierstring(const JSONRPCRequest& request)
         throw std::runtime_error(
                 "getverifierstring restricted_name\n"
                 + RestrictedActivationWarning() +
-                "\nThe verifier string belong to the given asset\n"
+                "\nRetrieve the verifier string that belongs to the given restricted asset\n"
 
                 "\nArguments:\n"
-                "1. \"restricted_name\"          (string), required) the asset_name\n"
+                "1. \"restricted_name\"          (string, required) the asset_name\n"
 
                 "\nResult:\n"
                 "\"verifier_string\", (string) The verifier for the asset\n"
@@ -2101,8 +2101,8 @@ UniValue checkaddresstag(const JSONRPCRequest& request)
                 "\nChecks to see if an address has the given tag\n"
 
                 "\nArguments:\n"
-                "1. \"address\"          (string), required) the RVN address to search\n"
-                "1. \"tag_name\"         (string), required) the tag to search\n"
+                "1. \"address\"          (string, required) the RVN address to search\n"
+                "1. \"tag_name\"         (string, required) the tag to search\n"
 
                 "\nResult:\n"
                 "\"true/false\", (boolean) If the address has the tag\n"
@@ -2142,8 +2142,8 @@ UniValue checkaddressrestriction(const JSONRPCRequest& request)
                 "\nChecks to see if an address has been frozen by the given restricted asset\n"
 
                 "\nArguments:\n"
-                "1. \"address\"          (string), required) the RVN address to search\n"
-                "1. \"restricted_name\"   (string), required) the restricted asset to search\n"
+                "1. \"address\"          (string, required) the RVN address to search\n"
+                "1. \"restricted_name\"   (string, required) the restricted asset to search\n"
 
                 "\nResult:\n"
                 "\"true/false\", (boolean) If the address is frozen\n"
@@ -2182,7 +2182,7 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
                 "\nChecks to see if a restricted asset is globally frozen\n"
 
                 "\nArguments:\n"
-                "1. \"restricted_name\"   (string), required) the restricted asset to search\n"
+                "1. \"restricted_name\"   (string, required) the restricted asset to search\n"
 
                 "\nResult:\n"
                 "\"true/false\", (boolean) If the restricted asset is frozen globally\n"
@@ -2221,8 +2221,8 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
                 "1. \"asset_name\"            (string, required) a unique name, starts with '$'\n"
                 "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
                 "3. \"verifier\"              (string, required) the KYC string that is evaluated when restricted asset transfers are made\n"
-                "4. \"to_address\"            (string), required), address asset will be sent to, this address must obey the verifier rules\n"
-                "5. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+                "4. \"to_address\"            (string, required), address asset will be sent to, this address must obey the verifier rules\n"
+                "5. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
                 "6. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
                 "7. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
                 "8. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
@@ -2362,7 +2362,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
                 "3. \"to_address\"            (string, required) address asset will be sent to, this address must have the verifier string requirements\n"
                 "4. \"change_verifier\"       (boolean, optional, default=false) If the verifier string will get changed\n"
                 "5. \"verifier\"              (string, optional, default=\"\") the KYC string that is evaluated when restricted asset transfers are made\n"
-                "6. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+                "6. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
                 "7. \"new_unit\"              (numeric, optional, default=-1), the new units that will be associated with the asset\n"
                 "8. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
                 "9. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
@@ -2603,7 +2603,7 @@ UniValue isvalidverifierstring(const JSONRPCRequest& request)
                 "\nChecks to see if the given verifier string is valid\n"
 
                 "\nArguments:\n"
-                "1. \"verifier_string\"   (string), required) the verifier string to check\n"
+                "1. \"verifier_string\"   (string, required) the verifier string to check\n"
 
                 "\nResult:\n"
                 "\"xxxxxxx\", (string) If the verifier string is valid, and the reason\n"

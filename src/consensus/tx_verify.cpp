@@ -184,6 +184,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
     bool fContainsNewRestrictedAsset = false;
     bool fContainsRestrictedAssetReissue = false;
     bool fContainsNullAssetVerifierTx = false;
+    int nCountAddTagOuts = 0;
     for (const auto& txout : tx.vout)
     {
         if (txout.nValue < 0)
@@ -217,6 +218,13 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
 
                 if (mapNullDataTxCount.at(pair) > 1)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-null-data-only-one-change-per-asset-address");
+
+                // For each qualifier that is added, there is a burn fee
+                if (IsAssetNameAQualifier(data.asset_name)) {
+                    if (data.flag == (int)QualifierType::ADD_QUALIFIER) {
+                        nCountAddTagOuts++;
+                    }
+                }
 
             } else if (txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
                 if (!GlobalAssetNullDataFromScript(txout.scriptPubKey, data))
@@ -299,6 +307,11 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
         }
     }
 
+    // Check for Add Tag Burn Fee
+    if (nCountAddTagOuts) {
+        if (!tx.CheckAddingTagBurnFee(nCountAddTagOuts))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-doesn't-contain-required-burn-fee-for-adding-tags");
+    }
 
     for (auto entry: mapNullDataTxCount) {
         if (entry.first.first.front() == RESTRICTED_CHAR) {

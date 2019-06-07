@@ -5,6 +5,8 @@
 #include "restricteddb.h"
 #include "validation.h"
 
+#include <boost/thread.hpp>
+
 static const char DB_FLAG = 'D';
 static const char VERIFIER_FLAG = 'V';
 static const char ADDRESS_QULAIFIER_FLAG = 'T';
@@ -145,7 +147,6 @@ bool CRestrictedDB::GetQualifierAddresses(std::string& qualifier, std::vector<st
 
 bool CRestrictedDB::CheckForAddressRootQualifier(const std::string& address, const std::string& qualifier)
 {
-    LogPrintf("%s : qualifier %s\n", __func__, qualifier);
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
     pcursor->Seek(std::make_pair(ADDRESS_QULAIFIER_FLAG, std::make_pair(address, qualifier)));
@@ -155,9 +156,7 @@ bool CRestrictedDB::CheckForAddressRootQualifier(const std::string& address, con
         boost::this_thread::interruption_point();
         std::pair<char, std::pair<std::string, std::string> > key;
         if (pcursor->GetKey(key) && key.first == ADDRESS_QULAIFIER_FLAG && key.second.first == address) {
-            LogPrintf("%s : searched %s\n", __func__, key.second.second);
             if (key.second.second == qualifier || key.second.second.rfind(std::string(qualifier + "/"), 0) == 0) {
-                LogPrintf("Found a database match for %s : %s\n", qualifier, key.second.second);
                 return true;
             }
             pcursor->Next();

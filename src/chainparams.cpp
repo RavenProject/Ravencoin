@@ -227,7 +227,8 @@ public:
         nIssueMsgChannelAssetBurnAmount = 100 * COIN;
         nIssueQualifierAssetBurnAmount = 1000 * COIN;
         nIssueSubQualifierAssetBurnAmount = 100 * COIN;
-        nIssueRestrictedAssetBurnAmount = 10000 * COIN;
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN;
+        nAddNullQualifierTagBurnAmount = .1 * COIN;
 
         // Burn Addresses
         strIssueAssetBurnAddress = "RXissueAssetXXXXXXXXXXXXXXXXXhhZGt";
@@ -238,6 +239,7 @@ public:
         strIssueQualifierAssetBurnAddress = "RXissueQuaLifierXXXXXXXXXXXXUgEDbC";
         strIssueSubQualifierAssetBurnAddress = "RXissueSubQuaLifierXXXXXXXXXVTzvv5";
         strIssueRestrictedAssetBurnAddress = "RXissueRestrictedXXXXXXXXXXXXzJZ1q";
+        strAddNullQualifierTagBurnAddress = "RXaddTagBurnXXXXXXXXXXXXXXXXZQm5ya";
 
             //Global Burn Address
         strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
@@ -425,7 +427,8 @@ public:
         nIssueMsgChannelAssetBurnAmount = 100 * COIN;
         nIssueQualifierAssetBurnAmount = 1000 * COIN;
         nIssueSubQualifierAssetBurnAmount = 100 * COIN;
-        nIssueRestrictedAssetBurnAmount = 10000 * COIN;
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN;
+        nAddNullQualifierTagBurnAmount = .1 * COIN;
 
         // Burn Addresses
         strIssueAssetBurnAddress = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
@@ -436,6 +439,7 @@ public:
         strIssueQualifierAssetBurnAddress = "n1issueQuaLifierXXXXXXXXXXXXUysLTj";
         strIssueSubQualifierAssetBurnAddress = "n1issueSubQuaLifierXXXXXXXXXYffPLh";
         strIssueRestrictedAssetBurnAddress = "n1issueRestrictedXXXXXXXXXXXXZVT9V";
+        strAddNullQualifierTagBurnAddress = "n1addTagBurnXXXXXXXXXXXXXXXXX5oLMH";
 
         // Global Burn Address
         strGlobalBurnAddress = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
@@ -610,7 +614,8 @@ public:
         nIssueMsgChannelAssetBurnAmount = 100 * COIN;
         nIssueQualifierAssetBurnAmount = 1000 * COIN;
         nIssueSubQualifierAssetBurnAmount = 100 * COIN;
-        nIssueRestrictedAssetBurnAmount = 10000 * COIN;
+        nIssueRestrictedAssetBurnAmount = 1500 * COIN;
+        nAddNullQualifierTagBurnAmount = .1 * COIN;
 
         // Burn Addresses
         strIssueAssetBurnAddress = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
@@ -621,6 +626,7 @@ public:
         strIssueQualifierAssetBurnAddress = "n1issueQuaLifierXXXXXXXXXXXXUysLTj";
         strIssueSubQualifierAssetBurnAddress = "n1issueSubQuaLifierXXXXXXXXXYffPLh";
         strIssueRestrictedAssetBurnAddress = "n1issueRestrictedXXXXXXXXXXXXZVT9V";
+        strAddNullQualifierTagBurnAddress = "n1addTagBurnXXXXXXXXXXXXXXXXX5oLMH";
 
         // Global Burn Address
         strGlobalBurnAddress = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
