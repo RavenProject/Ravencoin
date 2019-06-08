@@ -118,7 +118,7 @@ bool CRewardRequestDB::RemoveCompletedReward(const CRewardRequestDBEntry & p_com
 
 bool CRewardRequestDB::AreRewardsScheduledForHeight(const int & p_maxBlockHeight)
 {
-    LogPrintf("%s : Looking for scheduled rewards below height %d!\n",
+    LogPrintf("%s : Looking for scheduled rewards at height %d!\n",
         __func__, p_maxBlockHeight);
 
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
@@ -172,11 +172,9 @@ bool CRewardRequestDB::LoadPayableRewardsForAsset(
             } else {
                 LogPrintf("%s: Failed to read reward\n", __func__);
             }
-
-            pcursor->Next();
-        } else {
-            break;
         }
+
+        pcursor->Next();
     }
 
     for (auto const & reward : p_dbEntries) {

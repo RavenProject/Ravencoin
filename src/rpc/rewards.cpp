@@ -135,7 +135,7 @@ UniValue reward(const JSONRPCRequest& request) {
 }
 
 UniValue payout(const JSONRPCRequest& request) {
-    if (request.fHelp || request.params.size() < 3)
+    if (request.fHelp || request.params.size() < 2)
         throw std::runtime_error(
                 "payout \"target_asset_name\" block_height\n"
                 "\nGenerates payment records for all rewards scheduled for the target asset\n"
@@ -226,6 +226,8 @@ UniValue payout(const JSONRPCRequest& request) {
                     //
                     //  Debug code to dump the payout info
                     //
+
+                    return "Payouts were successfully generated in the database";
                 }
             }
             else {
@@ -243,7 +245,7 @@ UniValue payout(const JSONRPCRequest& request) {
 
 
 UniValue execute(const JSONRPCRequest& request) {
-    if (request.fHelp || request.params.size() < 3)
+    if (request.fHelp || request.params.size() < 1)
         throw std::runtime_error(
                 "execute \"target_asset_name\"\n"
                 "\nGenerates transactions for all payment records tied to the target asset.\n"
@@ -311,8 +313,9 @@ UniValue execute(const JSONRPCRequest& request) {
                 LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
                     payout.assetName.c_str(), payout.srcAssetName.c_str());
             }
-
         }
+
+        return "Transactions were successfully executed in the database";
     }
 
     throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to payout specified rewards"));

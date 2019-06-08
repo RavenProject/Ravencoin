@@ -116,13 +116,18 @@ bool CAssetSnapshotDB::AddAssetOwnershipSnapshot(
     std::set<CAssetSnapshotDBEntry> snapshotEntries;
 
     if (!Read(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), snapshotEntries)) {
-        return false;
+        //  This is fine, snapshots won't always exist
     }
 
     snapshotEntries.insert(CAssetSnapshotDBEntry(p_height, p_assetName, totalAssetAmt, ownersAndAmounts));
 
     //  And save the list back to the DB
-    return Write(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), snapshotEntries);
+    if (Write(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), snapshotEntries)) {
+        LogPrintf("AddAssetOwnershipSnapshot: Successfully added snapshot for '%s' at height %d (totalAmt = %d, ownerCount = %d).\n",
+            p_assetName.c_str(), p_height, totalAssetAmt, ownersAndAmounts.size());
+        return true;
+    }
+    return false;
 }
 
 bool CAssetSnapshotDB::RetrieveOwnershipSnapshot(
