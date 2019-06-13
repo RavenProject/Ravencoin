@@ -240,8 +240,9 @@ bool CRewardRequestDB::LoadPayableRewardsForAsset(
     }
 
     for (auto const & reward : p_dbEntries) {
-        LogPrintf("%s : Found payable reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+        LogPrintf("%s : Found payable reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
             __func__,
+            reward.rewardID.c_str(),
             reward.walletName.c_str(), reward.heightForPayout, static_cast<long long>(reward.totalPayoutAmt),
             reward.payoutSrc.c_str(), reward.tgtAssetName.c_str(),
             reward.exceptionAddresses.c_str());
