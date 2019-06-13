@@ -182,5 +182,5 @@ bool CAssetSnapshotDB::RemoveOwnershipSnapshot(
     }
 
     //  Otherwise, erase it
-    return Erase(std::make_pair(SNAPSHOTCHECK_FLAG, p_height));
+    return Erase(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), true);
 }

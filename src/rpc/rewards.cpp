@@ -302,6 +302,7 @@ UniValue execute(const JSONRPCRequest& request) {
         UniValue batchResults(UniValue::VARR);
         bool atLeastOneTxnSucceeded = false;
         std::vector<CPayment> paymentVector;
+        std::set<CPayment> updatedPayments;
 
         for (auto & payment : payoutEntry.payments) {
             paymentVector.push_back(payment);
@@ -320,6 +321,11 @@ UniValue execute(const JSONRPCRequest& request) {
                 }
 
                 batchResults.push_back(batchResult);
+
+                //  Move the updated payments into a new set
+                for (auto const & payment : paymentVector) {
+                    updatedPayments.insert(payment);
+                }
 
                 //  Clear the vector after a batch is processed
                 paymentVector.clear();
@@ -343,9 +349,21 @@ UniValue execute(const JSONRPCRequest& request) {
 
             batchResults.push_back(batchResult);
 
+            //  Move the updated payments into a new set
+            for (auto const & payment : paymentVector) {
+                updatedPayments.insert(payment);
+            }
+
             //  Clear the vector after a batch is processed
             paymentVector.clear();
         }
+
+        //  Replace the existing set of payments with the updated one
+        payoutEntry.payments.clear();
+        for (auto const & payment : updatedPayments) {
+            payoutEntry.payments.insert(payment);
+        }
+        updatedPayments.clear();
 
         responseObj.push_back(Pair("Batch Results", batchResults));
 

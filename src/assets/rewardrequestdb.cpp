@@ -169,7 +169,7 @@ bool CRewardRequestDB::RemoveReward(const std::string & p_rewardID)
     }
 
     //  Otherwise, erase the entire entry since none are left.
-    bool succeeded = Erase(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout));
+    bool succeeded = Erase(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), true);
 
     LogPrintf("%s : Removal of last scheduled reward %s!\n",
         __func__,

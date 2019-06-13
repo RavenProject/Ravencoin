@@ -249,9 +249,11 @@ bool CPayoutDB::UpdatePayoutEntry(
 
     if (allPaymentsCompleted) {
         //  All payments completed for the payout, so remove the payout
-        return Erase(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID));
+        LogPrintf("UpdatePayoutEntry: Removing payout entry for reward '%s'\n", p_payoutEntry.rewardID.c_str());
+        return Erase(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID), true);
     }
 
     //  Otherwise, simply update the payout
+    LogPrintf("UpdatePayoutEntry: Updating payout entry for reward '%s'\n", p_payoutEntry.rewardID.c_str());
     return Write(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID), p_payoutEntry);
 }
