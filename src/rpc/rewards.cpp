@@ -11,6 +11,7 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/random_generator.hpp>
 
 #include "amount.h"
 #include "base58.h"
@@ -123,7 +124,8 @@ UniValue reward(const JSONRPCRequest& request) {
     const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 1; //  Select to hopefully be far enough forward to be safe from forks
 
     //  Build our reward record for scheduling
-    boost::uuids::uuid rewardUUID;
+    boost::uuids::random_generator uuidGenerator;
+    boost::uuids::uuid rewardUUID = uuidGenerator();
     CRewardRequestDBEntry entryToAdd;
     entryToAdd.rewardID = to_string(rewardUUID);
     entryToAdd.walletName = walletPtr->GetName();
