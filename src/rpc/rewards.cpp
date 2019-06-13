@@ -126,7 +126,7 @@ UniValue reward(const JSONRPCRequest& request) {
     //  Build our reward record for scheduling
     boost::uuids::random_generator uuidGenerator;
     boost::uuids::uuid rewardUUID = uuidGenerator();
-    CRewardRequestDBEntry entryToAdd;
+    CRewardRequest entryToAdd;
     entryToAdd.rewardID = to_string(rewardUUID);
     entryToAdd.walletName = walletPtr->GetName();
     entryToAdd.heightForPayout = chainActive.Height() + FUTURE_BLOCK_HEIGHT_OFFSET;
@@ -194,7 +194,7 @@ UniValue payout(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Payout database is not setup. Please restart wallet to try again"));
 
     //  Retrieve the specified reward
-    CRewardRequestDBEntry rewardEntry;
+    CRewardRequest rewardEntry;
 
     if (pRewardRequestDb->RetrieveRewardWithID(rewardID, rewardEntry)) {
         //  Retrieve the asset snapshot entry for the target asset at the specified height

@@ -13,7 +13,7 @@
 
 #include "amount.h"
 
-class CRewardRequestDBEntry
+class CRewardRequest
 {
 public:
     std::string rewardID;
@@ -24,8 +24,8 @@ public:
     std::string tgtAssetName;
     std::string exceptionAddresses;
 
-    CRewardRequestDBEntry();
-    CRewardRequestDBEntry(
+    CRewardRequest();
+    CRewardRequest(
         const std::string & p_rewardID,
         const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
         const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
@@ -41,9 +41,9 @@ public:
         exceptionAddresses = "";
     }
 
-    bool operator<(const CRewardRequestDBEntry &rhs) const
+    bool operator<(const CRewardRequest &rhs) const
     {
-        return heightForPayout < rhs.heightForPayout;
+        return rewardID < rhs.rewardID;
     }
 
     // Serialization methods
@@ -62,6 +62,36 @@ public:
     }
 };
 
+class CRewardRequestDBEntry
+{
+public:
+    std::set<CRewardRequest> requests;
+
+    CRewardRequestDBEntry();
+    CRewardRequestDBEntry(
+        const std::set<CRewardRequest> & p_requests
+    );
+
+    void SetNull()
+    {
+        requests.clear();
+    }
+
+    bool operator<(const CRewardRequestDBEntry &rhs) const
+    {
+        return requests.size() < rhs.requests.size();
+    }
+
+    // Serialization methods
+    ADD_SERIALIZE_METHODS;
+
+    template<typename Stream, typename Operation>
+    inline void SerializationOp(Stream &s, Operation ser_action)
+    {
+        READWRITE(requests);
+    }
+};
+
 class CRewardRequestDB  : public CDBWrapper
 {
 public:
@@ -71,11 +101,11 @@ public:
     CRewardRequestDB& operator=(const CRewardRequestDB&) = delete;
 
     // Schedule a pending reward payout
-    bool SchedulePendingReward(const CRewardRequestDBEntry & p_newReward);
+    bool SchedulePendingReward(const CRewardRequest & p_newReward);
 
     //  Find a reward using its ID
     bool RetrieveRewardWithID(
-        const std::string & p_rewardID, CRewardRequestDBEntry & p_reward);
+        const std::string & p_rewardID, CRewardRequest & p_reward);
 
     // Remove a reward
     bool RemoveReward(const std::string & p_rewardID);
@@ -86,7 +116,7 @@ public:
     // Retrieve all reward records *for a specific asset* (if specified) at the provided block height
     bool LoadPayableRewardsForAsset(
         const std::string & p_assetName, const int & p_blockHeight,
-        std::set<CRewardRequestDBEntry> & p_dbEntries);
+        std::set<CRewardRequest> & p_rewardRequests);
 
     bool Flush();
 };

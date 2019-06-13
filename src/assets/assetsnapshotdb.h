@@ -35,7 +35,9 @@ public:
 
     bool operator<(const CAssetSnapshotDBEntry &rhs) const
     {
-        return height < rhs.height;
+        std::string myHeightAndAsset = std::to_string(height) + assetName;
+        std::string theirHeightAndAsset = std::to_string(rhs.height) + rhs.assetName;
+        return myHeightAndAsset < theirHeightAndAsset;
     }
 
     // Serialization methods

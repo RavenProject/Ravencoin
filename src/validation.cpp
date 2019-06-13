@@ -3190,7 +3190,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     //      and if so, capture a snapshot of the relevant target assets.
     if (pRewardRequestDb != nullptr) {
         //  Retrieve the scheduled rewards
-        std::set<CRewardRequestDBEntry> dbEntriesToProcess;
+        std::set<CRewardRequest> dbEntriesToProcess;
 
         if (pRewardRequestDb->LoadPayableRewardsForAsset("", pindexNew->nHeight, dbEntriesToProcess)) {
             //  Loop through them

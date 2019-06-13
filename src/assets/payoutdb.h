@@ -77,7 +77,7 @@ public:
 
     bool operator<(const CPayoutDBEntry &rhs) const
     {
-        return assetName < rhs.assetName;
+        return rewardID < rhs.rewardID;
     }
 
     // Serialization methods
@@ -102,7 +102,7 @@ public:
 
     //  Add payout entries for the specified reward request
     bool GeneratePayouts(
-        const CRewardRequestDBEntry & p_rewardReq,
+        const CRewardRequest & p_rewardReq,
         const CAssetSnapshotDBEntry & p_assetSnapshot,
         CPayoutDBEntry & p_payoutEntry);
 

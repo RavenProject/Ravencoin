@@ -8,12 +8,12 @@
 
 static const char SCHEDULEDREWARD_FLAG = 'S';
 
-CRewardRequestDBEntry::CRewardRequestDBEntry()
+CRewardRequest::CRewardRequest()
 {
     SetNull();
 }
 
-CRewardRequestDBEntry::CRewardRequestDBEntry(
+CRewardRequest::CRewardRequest(
     const std::string & p_rewardID,
     const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
     const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
@@ -30,12 +30,28 @@ CRewardRequestDBEntry::CRewardRequestDBEntry(
     exceptionAddresses = p_exceptionAddresses;
 }
 
+CRewardRequestDBEntry::CRewardRequestDBEntry()
+{
+    SetNull();
+}
+
+CRewardRequestDBEntry::CRewardRequestDBEntry(
+    const std::set<CRewardRequest> & p_requests
+)
+{
+    SetNull();
+
+    for (auto const & currReq : p_requests) {
+        requests.insert(currReq);
+    }
+}
+
 CRewardRequestDB::CRewardRequestDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "rewardrequest", nCacheSize, fMemory, fWipe) {
 }
 
-bool CRewardRequestDB::SchedulePendingReward(const CRewardRequestDBEntry & p_newReward)
+bool CRewardRequestDB::SchedulePendingReward(const CRewardRequest & p_newReward)
 {
-    LogPrintf("%s : Scheduling reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+    LogPrintf("%s : Scheduling reward: rewardID='%s', wallet='%s', heigh t=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
         __func__,
         p_newReward.rewardID.c_str(),
         p_newReward.walletName.c_str(), p_newReward.heightForPayout, static_cast<long long>(p_newReward.totalPayoutAmt),
@@ -43,16 +59,28 @@ bool CRewardRequestDB::SchedulePendingReward(const CRewardRequestDBEntry & p_new
         p_newReward.exceptionAddresses.c_str());
 
     //  Retrieve height-based entry which contains list of rewards to pay at that height
-    std::set<CRewardRequestDBEntry> entriesAtSpecifiedHeight;
+    CRewardRequestDBEntry reqDbEntry;
 
     //  Result doesn't matter, as this might be the first entry added at this height
-    Read(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), entriesAtSpecifiedHeight);
+    if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), reqDbEntry)) {
+        LogPrintf("%s : Failed to read entry for height %d!\n",
+            __func__,
+            p_newReward.heightForPayout);
+    }
 
-    //  Add this entry to the list
-    entriesAtSpecifiedHeight.insert(p_newReward);
+    reqDbEntry.requests.insert(p_newReward);
+
+    for (auto const & reward : reqDbEntry.requests) {
+        LogPrintf("%s : Reward at height %d: rewardID='%s', wallet='%s', amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+            __func__,
+            reward.heightForPayout, reward.rewardID.c_str(),
+            reward.walletName.c_str(), static_cast<long long>(reward.totalPayoutAmt),
+            reward.payoutSrc.c_str(), reward.tgtAssetName.c_str(),
+            reward.exceptionAddresses.c_str());
+    }
 
     //  Overwrite the entry in the database
-    bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), entriesAtSpecifiedHeight);
+    bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), reqDbEntry);
 
     LogPrintf("%s : Scheduling reward %s %s!\n",
         __func__,
@@ -63,7 +91,7 @@ bool CRewardRequestDB::SchedulePendingReward(const CRewardRequestDBEntry & p_new
 }
 
 bool CRewardRequestDB::RetrieveRewardWithID(
-    const std::string & p_rewardID, CRewardRequestDBEntry & p_reward)
+    const std::string & p_rewardID, CRewardRequest & p_reward)
 {
     LogPrintf("%s : Looking for scheduled reward with ID '%s'\n",
         __func__, p_rewardID.c_str());
@@ -78,9 +106,11 @@ bool CRewardRequestDB::RetrieveRewardWithID(
         std::pair<char, int> key;
 
         if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG) {
-            std::set<CRewardRequestDBEntry> dbEntrySet;
+            std::set<CRewardRequest> dbEntrySet;
 
             if (pcursor->GetValue(dbEntrySet)) {
+                LogPrintf("%s: Current set has %d entries\n",
+                    __func__, dbEntrySet.size());
                 for (auto const & entry : dbEntrySet) {
                     //  Only retrieve the specified reward
                     if (p_rewardID == entry.rewardID) {
@@ -113,7 +143,7 @@ bool CRewardRequestDB::RemoveReward(const std::string & p_rewardID)
         __func__,
         p_rewardID.c_str());
 
-    CRewardRequestDBEntry rewardToRemove;
+    CRewardRequest rewardToRemove;
     if (!RetrieveRewardWithID(p_rewardID, rewardToRemove)) {
         LogPrintf("%s : Failed to find reward: rewardID='%s'!\n",
             __func__,
@@ -122,26 +152,26 @@ bool CRewardRequestDB::RemoveReward(const std::string & p_rewardID)
         return false;
     }
     //  Retrieve height-based entry which contains list of rewards to pay at that height
-    std::set<CRewardRequestDBEntry> entriesAtSpecifiedHeight;
+    CRewardRequestDBEntry reqDbEntry;
 
     //  If this fails, bail, since we can't be sure we won't blow away valid entries
-    if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), entriesAtSpecifiedHeight)) {
+    if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), reqDbEntry)) {
         LogPrintf("%s : Failed to read scheduled rewards at specified height!\n", __func__);
 
         return false;
     }
 
     //  If the list is empty, bail
-    if (entriesAtSpecifiedHeight.size() == 0) {
+    if (reqDbEntry.requests.size() == 0) {
         LogPrintf("%s : No scheduled reward exists at specified height!\n", __func__);
 
         return true;
     }
 
     //  Remove this entry from the list
-    std::set<CRewardRequestDBEntry>::iterator entryIT;
+    std::set<CRewardRequest>::iterator entryIT;
 
-    for (entryIT = entriesAtSpecifiedHeight.begin(); entryIT != entriesAtSpecifiedHeight.end(); ) {
+    for (entryIT = reqDbEntry.requests.begin(); entryIT != reqDbEntry.requests.end(); ) {
         if (entryIT->tgtAssetName == rewardToRemove.tgtAssetName) {
             LogPrintf("%s : Removing reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
                 __func__,
@@ -150,7 +180,7 @@ bool CRewardRequestDB::RemoveReward(const std::string & p_rewardID)
                 rewardToRemove.payoutSrc.c_str(), rewardToRemove.tgtAssetName.c_str(),
                 rewardToRemove.exceptionAddresses.c_str());
 
-            entryIT = entriesAtSpecifiedHeight.erase(entryIT);
+            entryIT = reqDbEntry.requests.erase(entryIT);
         }
         else {
             ++entryIT;
@@ -158,8 +188,8 @@ bool CRewardRequestDB::RemoveReward(const std::string & p_rewardID)
     }
 
     //  If the list still has entries, overwrite the record in the database
-    if (entriesAtSpecifiedHeight.size() > 0) {
-        bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), entriesAtSpecifiedHeight);
+    if (reqDbEntry.requests.size() > 0) {
+        bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), reqDbEntry);
 
         LogPrintf("%s : Removal of scheduled reward %s!\n",
             __func__,
@@ -205,7 +235,7 @@ bool CRewardRequestDB::AreRewardsScheduledForHeight(const int & p_maxBlockHeight
 
 bool CRewardRequestDB::LoadPayableRewardsForAsset(
     const std::string & p_assetName, const int & p_blockHeight,
-    std::set<CRewardRequestDBEntry> & p_dbEntries)
+    std::set<CRewardRequest> & p_rewardRequests)
 {
     LogPrintf("%s : Looking for scheduled rewards for asset '%s' at height %d!\n",
         __func__, p_assetName.c_str(), p_blockHeight);
@@ -221,14 +251,14 @@ bool CRewardRequestDB::LoadPayableRewardsForAsset(
 
         //  Only retrieve entries at the provided block height
         if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second == p_blockHeight) {
-            std::set<CRewardRequestDBEntry> dbEntrySet;
+            CRewardRequestDBEntry reqDbEntry;
 
-            if (pcursor->GetValue(dbEntrySet)) {
-                for (auto const & entry : dbEntrySet) {
+            if (pcursor->GetValue(reqDbEntry)) {
+                for (auto const & entry : reqDbEntry.requests) {
                     //  If an asset was specified, only add entries for it.
                     //  Otherwise, retrieve all entries.
                     if (p_assetName.length() == 0 || p_assetName == entry.tgtAssetName) {
-                        p_dbEntries.insert(entry);
+                        p_rewardRequests.insert(entry);
                     }
                 }
             } else {
@@ -239,7 +269,7 @@ bool CRewardRequestDB::LoadPayableRewardsForAsset(
         pcursor->Next();
     }
 
-    for (auto const & reward : p_dbEntries) {
+    for (auto const & reward : p_rewardRequests) {
         LogPrintf("%s : Found payable reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
             __func__,
             reward.rewardID.c_str(),

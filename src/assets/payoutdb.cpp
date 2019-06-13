@@ -57,7 +57,7 @@ CPayoutDB::CPayoutDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(G
 }
 
 bool CPayoutDB::GeneratePayouts(
-        const CRewardRequestDBEntry & p_rewardReq,
+        const CRewardRequest & p_rewardReq,
         const CAssetSnapshotDBEntry & p_assetSnapshot,
         CPayoutDBEntry & p_payoutEntry)
 {
