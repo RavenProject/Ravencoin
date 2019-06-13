@@ -9,6 +9,9 @@
 #include <map>
 #include "tinyformat.h"
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include "amount.h"
 #include "base58.h"
 #include "chain.h"
@@ -41,8 +44,8 @@ CAmount AmountFromValue(bool p_isRVN, const UniValue& p_value);
 //  Transfer the specified amount of the asset from the source to the target
 bool InitiateTransfer(
     CWallet * const p_walletPtr, const std::string & p_src,
-    const std::set<std::pair<std::string, CAmount>> & p_addrAmtPairs,
-    std::string & p_resultantTxID);
+    std::vector<CPayment> & p_payments,
+    UniValue & p_batchResult);
 
 UniValue reward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 3)
@@ -120,7 +123,9 @@ UniValue reward(const JSONRPCRequest& request) {
     const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 1; //  Select to hopefully be far enough forward to be safe from forks
 
     //  Build our reward record for scheduling
+    boost::uuids::uuid rewardUUID;
     CRewardRequestDBEntry entryToAdd;
+    entryToAdd.rewardID = to_string(rewardUUID);
     entryToAdd.walletName = walletPtr->GetName();
     entryToAdd.heightForPayout = chainActive.Height() + FUTURE_BLOCK_HEIGHT_OFFSET;
     entryToAdd.totalPayoutAmt = total_payout_amount;
@@ -128,27 +133,31 @@ UniValue reward(const JSONRPCRequest& request) {
     entryToAdd.payoutSrc = payout_source;
     entryToAdd.exceptionAddresses = exception_addresses;
 
-    if (pRewardRequestDb->SchedulePendingReward(entryToAdd))
-        return "Reward was successfully scheduled in the database";
+    if (pRewardRequestDb->SchedulePendingReward(entryToAdd)) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("Reward ID", entryToAdd.rewardID));
+        obj.push_back(Pair("Block Height", entryToAdd.heightForPayout));
+
+        return obj;
+    }
 
     throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to add scheduled reward to database"));
 }
 
 UniValue payout(const JSONRPCRequest& request) {
-    if (request.fHelp || request.params.size() < 2)
+    if (request.fHelp || request.params.size() < 1)
         throw std::runtime_error(
-                "payout \"target_asset_name\" block_height\n"
-                "\nGenerates payment records for all rewards scheduled for the target asset\n"
-                "\tat the specified height.\n"
+                "payout \"reward_id\"\n"
+                "\nGenerates payment records for the specified reward ID.\n"
 
                 "\nArguments:\n"
-                "target_asset_name:   (string, required) The asset name to whose owners the reward will be paid\n"
-                "block_height: (number, required) The block height at which to schedule the payout\n"
+                "reward_id:   (string, required) The ID for the reward that will be paid\n"
 
                 "\nResult:\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("payout", "\"TRONCO\" 12345")
+                + HelpExampleCli("payout", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
         );
 
     if (!fRewardsEnabled) {
@@ -171,16 +180,7 @@ UniValue payout(const JSONRPCRequest& request) {
     EnsureWalletIsUnlocked(walletPtr);
 
     //  Extract parameters
-    std::string target_asset_name = request.params[0].get_str();
-    int block_height = request.params[1].get_int();
-
-    AssetType tgtAssetType;
-
-    if (!IsAssetNameValid(target_asset_name, tgtAssetType))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid target_asset_name: Please use a valid target_asset_name"));
-
-    if (tgtAssetType == AssetType::UNIQUE || tgtAssetType == AssetType::OWNER || tgtAssetType == AssetType::MSGCHANNEL)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+    std::string rewardID = request.params[0].get_str();
 
     if (!passetsdb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Assets database is not setup. Please restart wallet to try again"));
@@ -191,53 +191,53 @@ UniValue payout(const JSONRPCRequest& request) {
     if (!pPayoutDb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Payout database is not setup. Please restart wallet to try again"));
 
-    //  Retrieve all scheduled rewards for the target asset at the specified height
-    std::set<CRewardRequestDBEntry> dbEntriesToProcess;
+    //  Retrieve the specified reward
+    CRewardRequestDBEntry rewardEntry;
 
-    if (pRewardRequestDb->LoadPayableRewardsForAsset(target_asset_name, block_height, dbEntriesToProcess)) {
-        //  Loop through them
-        for (auto const & rewardEntry : dbEntriesToProcess) {
-            //  Retrieve the asset snapshot entry for the target asset at the specified height
-            CAssetSnapshotDBEntry snapshotEntry;
+    if (pRewardRequestDb->RetrieveRewardWithID(rewardID, rewardEntry)) {
+        //  Retrieve the asset snapshot entry for the target asset at the specified height
+        CAssetSnapshotDBEntry snapshotEntry;
 
-            if (pAssetSnapshotDb->RetrieveOwnershipSnapshot(rewardEntry.tgtAssetName, block_height, snapshotEntry)) {
-                //  Generate payment transactions and store in the payments DB
-                if (!pPayoutDb->GeneratePayouts(rewardEntry, snapshotEntry)) {
-                    LogPrintf("Failed to payouts for '%s'!\n", rewardEntry.tgtAssetName.c_str());                
-                }
-                else {
-                    //
-                    //  Debug code to dump the payout info
-                    //
-                    std::set<CPayoutDBEntry> payoutEntries;
-                    if (!pPayoutDb->RetrievePayouts(rewardEntry.tgtAssetName, payoutEntries)) {
-                        LogPrintf("Failed to retrieve payouts for '%s'!\n",
-                            rewardEntry.tgtAssetName.c_str());                
-                    }
-                    else {
-                        for (auto const & payout : payoutEntries) {
-                            for (auto const & ownerAndPayout : payout.ownersAndPayouts) {
-                                LogPrintf("Found '%s' payout to '%s' of %d\n",
-                                    rewardEntry.tgtAssetName.c_str(), ownerAndPayout.first.c_str(),
-                                    ownerAndPayout.second);
-                            }
-                        }
-                    }
-                    //
-                    //  Debug code to dump the payout info
-                    //
-
-                    return "Payouts were successfully generated in the database";
-                }
+        if (pAssetSnapshotDb->RetrieveOwnershipSnapshot(rewardEntry.tgtAssetName, rewardEntry.heightForPayout, snapshotEntry)) {
+            //  Generate payment transactions and store in the payments DB
+            CPayoutDBEntry payoutEntry;
+            if (!pPayoutDb->GeneratePayouts(rewardEntry, snapshotEntry, payoutEntry)) {
+                LogPrintf("Failed to generate payouts for reward '%s'!\n", rewardEntry.rewardID.c_str());                
             }
             else {
-                LogPrintf("Failed to retrieve ownership snapshot for '%s' at height %d!\n",
-                    rewardEntry.tgtAssetName.c_str(), block_height);                
+                UniValue obj(UniValue::VOBJ);
+
+                obj.push_back(Pair("Reward ID", rewardEntry.rewardID));
+                obj.push_back(Pair("Target Asset", rewardEntry.tgtAssetName));
+                obj.push_back(Pair("Funding Asset", rewardEntry.payoutSrc));
+                obj.push_back(Pair("Payout Block Height", rewardEntry.heightForPayout));
+
+                UniValue entries(UniValue::VARR);
+                for (auto const & payment : payoutEntry.payments) {
+                    LogPrintf("Found '%s' payout to '%s' of %d\n",
+                        rewardEntry.tgtAssetName.c_str(), payment.address.c_str(),
+                        payment.payoutAmt);
+
+                    UniValue entry(UniValue::VOBJ);
+
+                    entry.push_back(Pair("Owner", payment.address));
+                    entry.push_back(Pair("Payout", payment.payoutAmt));
+
+                    entries.push_back(entry);
+                }
+
+                obj.push_back(Pair("Addresses and Amounts", entries));
+
+                return obj;
             }
+        }
+        else {
+            LogPrintf("Failed to retrieve ownership snapshot for '%s' at height %d!\n",
+                rewardEntry.tgtAssetName.c_str(), rewardEntry.heightForPayout);                
         }
     }
     else {
-        LogPrintf("Failed to payout reward requests at height %d!\n", block_height);
+        LogPrintf("Failed to retrieve specified reward '%s'!\n", rewardID.c_str());
     }
 
     throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to payout specified rewards"));
@@ -247,16 +247,16 @@ UniValue payout(const JSONRPCRequest& request) {
 UniValue execute(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 1)
         throw std::runtime_error(
-                "execute \"target_asset_name\"\n"
-                "\nGenerates transactions for all payment records tied to the target asset.\n"
+                "execute \"reward_id\"\n"
+                "\nGenerates transactions for all payment records tied to the specified reward.\n"
 
                 "\nArguments:\n"
-                "target_asset_name:   (string, required) The asset name to whose owners the reward will be paid\n"
+                "reward_id:   (string, required) The ID for the reward for which transactions will be generated\n"
 
                 "\nResult:\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("execute", "\"TRONCO\"")
+                + HelpExampleCli("execute", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
         );
 
     if (!fRewardsEnabled) {
@@ -279,43 +279,89 @@ UniValue execute(const JSONRPCRequest& request) {
     EnsureWalletIsUnlocked(walletPtr);
 
     //  Extract parameters
-    std::string target_asset_name = request.params[0].get_str();
-
-    AssetType tgtAssetType;
-
-    if (!IsAssetNameValid(target_asset_name, tgtAssetType))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid target_asset_name: Please use a valid target_asset_name"));
-
-    if (tgtAssetType == AssetType::UNIQUE || tgtAssetType == AssetType::OWNER || tgtAssetType == AssetType::MSGCHANNEL)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+    std::string rewardID = request.params[0].get_str();
 
     if (!pPayoutDb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Payout database is not setup. Please restart wallet to try again"));
 
     //  Retrieve all scheduled payouts for the target asset
-    std::set<CPayoutDBEntry> payoutEntries;
-    if (!pPayoutDb->RetrievePayouts(target_asset_name, payoutEntries)) {
-        LogPrintf("Failed to retrieve payouts for '%s'!\n",
-            target_asset_name.c_str());                
+    CPayoutDBEntry payoutEntry;
+    if (!pPayoutDb->RetrievePayoutEntry(rewardID, payoutEntry)) {
+        LogPrintf("Failed to retrieve payout entry for reward '%s'!\n",
+            rewardID.c_str());                
     }
     else {
-        //  Process all payouts registered for the specified asset
-        for (auto const & payout : payoutEntries) {
-            for (auto const & ownerAndPayout : payout.ownersAndPayouts) {
-                LogPrintf("Found '%s' payout to '%s' of %d\n",
-                    payout.assetName.c_str(), ownerAndPayout.first.c_str(),
-                    ownerAndPayout.second);
-            }
+        UniValue responseObj(UniValue::VOBJ);
 
-            //  Loop through each payable account for the asset, sending it the appropriate portion of the total payout amount
-            std::string transactionID;
-            if (!InitiateTransfer(walletPtr, payout.srcAssetName, payout.ownersAndPayouts, transactionID)) {
-                LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
-                    payout.assetName.c_str(), payout.srcAssetName.c_str());
+        responseObj.push_back(Pair("Reward ID", payoutEntry.rewardID));
+
+        //
+        //  Loop through the payout addresses and process them in batches
+        //
+        const int MAX_PAYMENTS_PER_TRANSACTION = 50;
+        UniValue batchResults(UniValue::VARR);
+        bool atLeastOneTxnSucceeded = false;
+        std::vector<CPayment> paymentVector;
+
+        for (auto & payment : payoutEntry.payments) {
+            paymentVector.push_back(payment);
+
+            //  Issue a transaction if we've hit the max payment count
+            if (paymentVector.size() >= MAX_PAYMENTS_PER_TRANSACTION) {
+                UniValue batchResult(UniValue::VOBJ);
+
+                //  Build a transaction for the current batch
+                if (InitiateTransfer(walletPtr, payoutEntry.srcAssetName, paymentVector, batchResult)) {
+                    atLeastOneTxnSucceeded = true;
+                }
+                else {
+                    LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
+                        payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
+                }
+
+                batchResults.push_back(batchResult);
+
+                //  Clear the vector after a batch is processed
+                paymentVector.clear();
             }
         }
 
-        return "Transactions were successfully executed in the database";
+        //
+        //  If any payments are left in the last batch, send them
+        //
+        if (paymentVector.size() > 0) {
+            UniValue batchResult(UniValue::VOBJ);
+
+            //  Build a transaction for the current batch
+            if (InitiateTransfer(walletPtr, payoutEntry.srcAssetName, paymentVector, batchResult)) {
+                atLeastOneTxnSucceeded = true;
+            }
+            else {
+                LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
+                    payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
+            }
+
+            batchResults.push_back(batchResult);
+
+            //  Clear the vector after a batch is processed
+            paymentVector.clear();
+        }
+
+        responseObj.push_back(Pair("Batch Results", batchResults));
+
+        //  Write the payment back to the database if anything succeded
+        if (atLeastOneTxnSucceeded) {
+            if (pPayoutDb->UpdatePayoutEntry(payoutEntry)) {
+                responseObj.push_back(Pair("Payout DB Update", "succeeded"));
+            }
+            else {
+                LogPrintf("Failed to update payout DB payment status for reward '%s'!\n",
+                    payoutEntry.rewardID.c_str());
+                responseObj.push_back(Pair("Payout DB Update", "failed"));
+            }
+        }
+
+        return responseObj;
     }
 
     throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to payout specified rewards"));
@@ -325,8 +371,8 @@ static const CRPCCommand commands[] =
     {           //  category    name                          actor (function)             argNames
                 //  ----------- ------------------------      -----------------------      ----------
             {   "rewards",      "reward",                     &reward,                     {"total_payout_amount", "payout_source", "target_asset_name", "exception_addresses"}},
-            {   "rewards",      "payout",                     &payout,                     {"target_asset_name", "block_height"}},
-            {   "rewards",      "execute",                     &execute,                     {"target_asset_name"}},
+            {   "rewards",      "payout",                     &payout,                     {"reward_id"}},
+            {   "rewards",      "execute",                    &execute,                    {"reward_id"}},
     };
 
 void RegisterRewardsRPCCommands(CRPCTable &t)
@@ -352,12 +398,15 @@ CAmount AmountFromValue(bool p_isRVN, const UniValue& p_value)
 
 bool InitiateTransfer(
     CWallet * const p_walletPtr, const std::string & p_src,
-    const std::set<std::pair<std::string, CAmount>> & p_addrAmtPairs,
-    std::string & p_resultantTxID)
+    std::vector<CPayment> & p_payments,
+    UniValue & p_batchResult)
 {
     bool fcnRetVal = false;
+    std::string transactionID;
+    size_t expectedCount = 0;
+    size_t actualCount = 0;
 
-    LogPrintf("Initiating transfer...\n");
+    LogPrintf("Initiating batch transfer...\n");
 
     // While condition is false to ensure a single pass through this logic
     do {
@@ -376,33 +425,36 @@ bool InitiateTransfer(
             }
 
             std::vector<CRecipient> vDestinations;
-            bool errorsOccurred = false;
             CAmount totalPaymentAmt = 0;
 
-            for (auto const & addrAmtPair : p_addrAmtPairs) {
+            for (auto & payment : p_payments) {
+                //  Have we already processed this payment?
+                if (payment.completed) {
+                    continue;
+                }
+
+                expectedCount++;
+
                 // Parse Raven address
-                CTxDestination dest = DecodeDestination(addrAmtPair.first);
+                CTxDestination dest = DecodeDestination(payment.address);
                 if (!IsValidDestination(dest)) {
-                    LogPrintf("Destination address '%s' is invalid.\n", addrAmtPair.first.c_str());
-                    errorsOccurred = true;
+                    LogPrintf("Destination address '%s' is invalid.\n", payment.address.c_str());
+                    payment.completed = true;
                     continue;
                 }
 
                 CScript scriptPubKey = GetScriptForDestination(dest);
-                CRecipient recipient = {scriptPubKey, addrAmtPair.second, false};
+                CRecipient recipient = {scriptPubKey, payment.payoutAmt, false};
                 vDestinations.emplace_back(recipient);
 
-                totalPaymentAmt += addrAmtPair.second;
-            }
-
-            if (errorsOccurred) {
-                LogPrintf("Breaking out due to invalid destination address(es)\n");
-                break;
+                totalPaymentAmt += payment.payoutAmt;
+                actualCount++;
             }
 
             //  Verify funds
             if (totalPaymentAmt > curBalance) {
-                LogPrintf("Insufficient funds\n");
+                LogPrintf("Insufficient funds: total payment %lld > available balance %lld\n",
+                    totalPaymentAmt, curBalance);
                 break;
             }
 
@@ -424,17 +476,25 @@ bool InitiateTransfer(
                 LogPrintf("Error: The transaction was rejected! Reason given: %s\n", state.GetRejectReason());
                 break;
             }
+
+            transactionID = transaction.GetHash().GetHex();
         }
         else {
             std::pair<int, std::string> error;
             std::vector< std::pair<CAssetTransfer, std::string> > vDestinations;
 
-            for (auto const & addrAmtPair : p_addrAmtPairs) {
-                LogPrintf("Sending asset '%s' to address '%s' as reward %d\n",
-                    p_src.c_str(), addrAmtPair.first.c_str(),
-                    addrAmtPair.second);
+            for (auto & payment : p_payments) {
+                //  Have we already processed this payment?
+                if (payment.completed) {
+                    continue;
+                }
 
-                vDestinations.emplace_back(std::make_pair(CAssetTransfer(p_src, addrAmtPair.second, DecodeAssetData(""), 0), addrAmtPair.first));
+                expectedCount++;
+
+                vDestinations.emplace_back(std::make_pair(
+                    CAssetTransfer(p_src, payment.payoutAmt, DecodeAssetData(""), 0), payment.address));
+
+                actualCount++;
             }
 
             CReserveKey reservekey(p_walletPtr);
@@ -447,7 +507,7 @@ bool InitiateTransfer(
             }
 
             // Send the Transaction to the network
-            if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, p_resultantTxID)) {
+            if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, transactionID)) {
                 LogPrintf("Failed to send asset transaction: %s\n", error.second.c_str());
                 break;
             }
@@ -455,10 +515,19 @@ bool InitiateTransfer(
 
         //  Indicate success
         fcnRetVal = true;
+        p_batchResult.push_back(Pair("Transaction ID", transactionID));
+
+        //  Post-process the payments in the batch to flag them as completed
+        for (auto & payment : p_payments) {
+            payment.completed = true;
+        }
     } while (false);
 
-    LogPrintf("Transfer processing %s.\n",
+    LogPrintf("Batch transfer processing %s.\n",
         fcnRetVal ? "succeeded" : "failed");
+    p_batchResult.push_back(Pair("Result", fcnRetVal ? "succeeded" : "failed"));
+    p_batchResult.push_back(Pair("Expected Count", expectedCount));
+    p_batchResult.push_back(Pair("Actual Count", actualCount));
 
     return fcnRetVal;
 }

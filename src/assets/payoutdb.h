@@ -13,25 +13,66 @@
 #include "rewardrequestdb.h"
 #include "amount.h"
 
-class CPayoutDBEntry
+class CPayment
 {
 public:
-    std::string assetName;
-    std::string srcAssetName;
-    std::set<std::pair<std::string, CAmount>> ownersAndPayouts;
+    std::string address;
+    CAmount payoutAmt;
+    bool completed;
 
-    CPayoutDBEntry();
-    CPayoutDBEntry(
-        const std::string & p_assetName,
-        const std::string & p_srcAssetName,
-        const std::set<std::pair<std::string, CAmount>> & p_ownersAndPayouts
+    CPayment();
+    CPayment(
+        const std::string & p_address,
+        const CAmount & p_payoutAmt,
+        bool p_completed
     );
 
     void SetNull()
     {
+        address = "";
+        payoutAmt = 0;
+        completed = false;
+    }
+
+    bool operator<(const CPayment &rhs) const
+    {
+        return address < rhs.address;
+    }
+
+    // Serialization methods
+    ADD_SERIALIZE_METHODS;
+
+    template<typename Stream, typename Operation>
+    inline void SerializationOp(Stream &s, Operation ser_action)
+    {
+        READWRITE(address);
+        READWRITE(payoutAmt);
+        READWRITE(completed);
+    }
+};
+
+class CPayoutDBEntry
+{
+public:
+    std::string rewardID;
+    std::string assetName;
+    std::string srcAssetName;
+    std::set<CPayment> payments;
+
+    CPayoutDBEntry();
+    CPayoutDBEntry(
+        const std::string & p_rewardID,
+        const std::string & p_assetName,
+        const std::string & p_srcAssetName,
+        const std::set<CPayment> & p_payments
+    );
+
+    void SetNull()
+    {
+        rewardID = "";
         assetName = "";
         srcAssetName = "";
-        ownersAndPayouts.clear();
+        payments.clear();
     }
 
     bool operator<(const CPayoutDBEntry &rhs) const
@@ -45,9 +86,10 @@ public:
     template<typename Stream, typename Operation>
     inline void SerializationOp(Stream &s, Operation ser_action)
     {
+        READWRITE(rewardID);
         READWRITE(assetName);
         READWRITE(srcAssetName);
-        READWRITE(ownersAndPayouts);
+        READWRITE(payments);
     }
 };
 
@@ -61,12 +103,17 @@ public:
     //  Add payout entries for the specified reward request
     bool GeneratePayouts(
         const CRewardRequestDBEntry & p_rewardReq,
-        const CAssetSnapshotDBEntry & p_assetSnapshot);
+        const CAssetSnapshotDBEntry & p_assetSnapshot,
+        CPayoutDBEntry & p_payoutEntry);
 
-    //  Retrieve payout entries for the specified asset
-    bool RetrievePayouts(
-        const std::string & p_assetName,
-        std::set<CPayoutDBEntry> & p_payoutEntries);
+    //  Retrieve payout entry for the specified reward
+    bool RetrievePayoutEntry(
+        const std::string & p_rewardID,
+        CPayoutDBEntry & p_payoutEntry);
+
+    //  Save the specified entry back to the database, including any modifications
+    bool UpdatePayoutEntry(
+        const CPayoutDBEntry & p_payoutEntry);
 
     bool Flush();
 };

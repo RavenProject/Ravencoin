@@ -152,3 +152,35 @@ bool CAssetSnapshotDB::RetrieveOwnershipSnapshot(
 
     return false;
 }
+
+bool CAssetSnapshotDB::RemoveOwnershipSnapshot(
+        const std::string & p_assetName, const int & p_height)
+{
+    std::set<CAssetSnapshotDBEntry> snapshotEntries;
+
+    //  Load up the snapshot entries at this height
+    if (!Read(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), snapshotEntries)) {
+        //  If it doesn't exist (what?!) that's fine.
+        return true;
+    }
+
+    //  Find out if this specific asset ownership entry for this height exists
+    std::set<CAssetSnapshotDBEntry>::iterator entryIT;
+
+    for (entryIT = snapshotEntries.begin(); entryIT != snapshotEntries.end(); ) {
+        if (entryIT->assetName == p_assetName) {
+            entryIT = snapshotEntries.erase(entryIT);
+        }
+        else {
+            ++entryIT;
+        }
+    }
+
+    //  If it is non-empty, write it back out
+    if (snapshotEntries.size() > 0) {
+        return Write(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), snapshotEntries);
+    }
+
+    //  Otherwise, erase it
+    return Erase(std::make_pair(SNAPSHOTCHECK_FLAG, p_height));
+}

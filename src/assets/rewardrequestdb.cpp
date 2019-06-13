@@ -14,12 +14,14 @@ CRewardRequestDBEntry::CRewardRequestDBEntry()
 }
 
 CRewardRequestDBEntry::CRewardRequestDBEntry(
+    const std::string & p_rewardID,
     const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
     const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
 )
 {
     SetNull();
 
+    rewardID = p_rewardID;
     walletName = p_walletName;
     heightForPayout = p_heightForPayout;
     totalPayoutAmt = p_totalPayoutAmt;
@@ -33,8 +35,9 @@ CRewardRequestDB::CRewardRequestDB(size_t nCacheSize, bool fMemory, bool fWipe) 
 
 bool CRewardRequestDB::SchedulePendingReward(const CRewardRequestDBEntry & p_newReward)
 {
-    LogPrintf("%s : Scheduling reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+    LogPrintf("%s : Scheduling reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
         __func__,
+        p_newReward.rewardID.c_str(),
         p_newReward.walletName.c_str(), p_newReward.heightForPayout, static_cast<long long>(p_newReward.totalPayoutAmt),
         p_newReward.payoutSrc.c_str(), p_newReward.tgtAssetName.c_str(),
         p_newReward.exceptionAddresses.c_str());
@@ -51,26 +54,78 @@ bool CRewardRequestDB::SchedulePendingReward(const CRewardRequestDBEntry & p_new
     //  Overwrite the entry in the database
     bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_newReward.heightForPayout), entriesAtSpecifiedHeight);
 
-    LogPrintf("%s : Scheduling %s!\n",
+    LogPrintf("%s : Scheduling reward %s %s!\n",
         __func__,
+        p_newReward.rewardID.c_str(),
         succeeded ? "succeeded" : "failed");
 
     return succeeded;
 }
 
-bool CRewardRequestDB::RemoveCompletedReward(const CRewardRequestDBEntry & p_completedReward)
+bool CRewardRequestDB::RetrieveRewardWithID(
+    const std::string & p_rewardID, CRewardRequestDBEntry & p_reward)
 {
-    LogPrintf("%s : Removing reward: wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
-        __func__,
-        p_completedReward.walletName.c_str(), p_completedReward.heightForPayout, static_cast<long long>(p_completedReward.totalPayoutAmt),
-        p_completedReward.payoutSrc.c_str(), p_completedReward.tgtAssetName.c_str(),
-        p_completedReward.exceptionAddresses.c_str());
+    LogPrintf("%s : Looking for scheduled reward with ID '%s'\n",
+        __func__, p_rewardID.c_str());
 
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    pcursor->SeekToFirst();
+
+    // Load all pending rewards
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, int> key;
+
+        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG) {
+            std::set<CRewardRequestDBEntry> dbEntrySet;
+
+            if (pcursor->GetValue(dbEntrySet)) {
+                for (auto const & entry : dbEntrySet) {
+                    //  Only retrieve the specified reward
+                    if (p_rewardID == entry.rewardID) {
+                        LogPrintf("%s : Found reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+                            __func__,
+                            entry.rewardID.c_str(),
+                            entry.walletName.c_str(), entry.heightForPayout, static_cast<long long>(entry.totalPayoutAmt),
+                            entry.payoutSrc.c_str(), entry.tgtAssetName.c_str(),
+                            entry.exceptionAddresses.c_str());
+
+                        p_reward = entry;
+
+                        return true;
+                    }
+                }
+            } else {
+                LogPrintf("%s: Failed to read reward\n", __func__);
+            }
+        }
+
+        pcursor->Next();
+    }
+
+    return false;
+}
+
+bool CRewardRequestDB::RemoveReward(const std::string & p_rewardID)
+{
+    LogPrintf("%s : Attempting to remove reward: rewardID='%s'\n",
+        __func__,
+        p_rewardID.c_str());
+
+    CRewardRequestDBEntry rewardToRemove;
+    if (!RetrieveRewardWithID(p_rewardID, rewardToRemove)) {
+        LogPrintf("%s : Failed to find reward: rewardID='%s'!\n",
+            __func__,
+            p_rewardID.c_str());
+
+        return false;
+    }
     //  Retrieve height-based entry which contains list of rewards to pay at that height
     std::set<CRewardRequestDBEntry> entriesAtSpecifiedHeight;
 
     //  If this fails, bail, since we can't be sure we won't blow away valid entries
-    if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout), entriesAtSpecifiedHeight)) {
+    if (!Read(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), entriesAtSpecifiedHeight)) {
         LogPrintf("%s : Failed to read scheduled rewards at specified height!\n", __func__);
 
         return false;
@@ -87,7 +142,14 @@ bool CRewardRequestDB::RemoveCompletedReward(const CRewardRequestDBEntry & p_com
     std::set<CRewardRequestDBEntry>::iterator entryIT;
 
     for (entryIT = entriesAtSpecifiedHeight.begin(); entryIT != entriesAtSpecifiedHeight.end(); ) {
-        if (entryIT->tgtAssetName == p_completedReward.tgtAssetName) {
+        if (entryIT->tgtAssetName == rewardToRemove.tgtAssetName) {
+            LogPrintf("%s : Removing reward: rewardID='%s', wallet='%s', height=%d, amt=%lld, srcAsset='%s', tgtAsset='%s', exceptions='%s'\n",
+                __func__,
+                rewardToRemove.rewardID.c_str(),
+                rewardToRemove.walletName.c_str(), rewardToRemove.heightForPayout, static_cast<long long>(rewardToRemove.totalPayoutAmt),
+                rewardToRemove.payoutSrc.c_str(), rewardToRemove.tgtAssetName.c_str(),
+                rewardToRemove.exceptionAddresses.c_str());
+
             entryIT = entriesAtSpecifiedHeight.erase(entryIT);
         }
         else {
@@ -97,7 +159,7 @@ bool CRewardRequestDB::RemoveCompletedReward(const CRewardRequestDBEntry & p_com
 
     //  If the list still has entries, overwrite the record in the database
     if (entriesAtSpecifiedHeight.size() > 0) {
-        bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout), entriesAtSpecifiedHeight);
+        bool succeeded = Write(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout), entriesAtSpecifiedHeight);
 
         LogPrintf("%s : Removal of scheduled reward %s!\n",
             __func__,
@@ -107,7 +169,7 @@ bool CRewardRequestDB::RemoveCompletedReward(const CRewardRequestDBEntry & p_com
     }
 
     //  Otherwise, erase the entire entry since none are left.
-    bool succeeded = Erase(std::make_pair(SCHEDULEDREWARD_FLAG, p_completedReward.heightForPayout));
+    bool succeeded = Erase(std::make_pair(SCHEDULEDREWARD_FLAG, rewardToRemove.heightForPayout));
 
     LogPrintf("%s : Removal of last scheduled reward %s!\n",
         __func__,

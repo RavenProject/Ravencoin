@@ -16,6 +16,7 @@
 class CRewardRequestDBEntry
 {
 public:
+    std::string rewardID;
     std::string walletName;
     int heightForPayout;
     CAmount totalPayoutAmt;
@@ -25,12 +26,14 @@ public:
 
     CRewardRequestDBEntry();
     CRewardRequestDBEntry(
+        const std::string & p_rewardID,
         const std::string & p_walletName, const int p_heightForPayout, const CAmount p_totalPayoutAmt,
         const std::string & p_payoutSrc, const std::string & p_tgtAssetName, const std::string & p_exceptionAddresses
     );
 
     void SetNull()
     {
+        rewardID = "";
         walletName = "";
         heightForPayout = 0;
         totalPayoutAmt = 0;
@@ -49,6 +52,7 @@ public:
     template<typename Stream, typename Operation>
     inline void SerializationOp(Stream &s, Operation ser_action)
     {
+        READWRITE(rewardID);
         READWRITE(walletName);
         READWRITE(heightForPayout);
         READWRITE(totalPayoutAmt);
@@ -69,8 +73,12 @@ public:
     // Schedule a pending reward payout
     bool SchedulePendingReward(const CRewardRequestDBEntry & p_newReward);
 
-    // Remove a reward that has been paid out
-    bool RemoveCompletedReward(const CRewardRequestDBEntry & p_completedReward);
+    //  Find a reward using its ID
+    bool RetrieveRewardWithID(
+        const std::string & p_rewardID, CRewardRequestDBEntry & p_reward);
+
+    // Remove a reward
+    bool RemoveReward(const std::string & p_rewardID);
 
     // Find out if any reward payments are scheduled at the specified height
     bool AreRewardsScheduledForHeight(const int & p_blockHeight);

@@ -68,6 +68,10 @@ public:
         const std::string & p_assetName, const int & p_height,
         CAssetSnapshotDBEntry & p_snapshotEntry);
 
+    //  Remove the asset snapshot at the specified height
+    bool RemoveOwnershipSnapshot(
+        const std::string & p_assetName, const int & p_height);
+
     bool Flush();
 };
 
