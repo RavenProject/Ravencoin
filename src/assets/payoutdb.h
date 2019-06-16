@@ -111,9 +111,11 @@ public:
         const std::string & p_rewardID,
         CPayoutDBEntry & p_payoutEntry);
 
+    //  Remove the payout entry for the specified reward
+    bool RemovePayoutEntry(const std::string & p_rewardID);
+
     //  Save the specified entry back to the database, including any modifications
-    bool UpdatePayoutEntry(
-        const CPayoutDBEntry & p_payoutEntry);
+    bool UpdatePayoutEntry(const CPayoutDBEntry & p_payoutEntry);
 
     bool Flush();
 };

@@ -75,6 +75,13 @@ public:
         const std::string & p_assetName, const int & p_height);
 
     bool Flush();
+
+private:
+    //  Removes asset entries from the provided snapshot entries
+    //      and writes the remainder back to the DB.
+    bool RemoveAssetFromEntries(
+        const std::string & p_assetName, int p_height,
+        std::set<CAssetSnapshotDBEntry> & p_snapshotEntries);
 };
 
 

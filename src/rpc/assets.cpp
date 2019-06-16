@@ -1385,6 +1385,117 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
     return result;
 }
 
+UniValue getsnapshot(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 2)
+        throw std::runtime_error(
+                "getsnapshot \"asset_name\" block_height\n"
+                + AssetActivationWarning() +
+                "\nReturns details for the asset snapshot, at the specified height\n"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"               (string, required) the name of the asset\n"
+                "2. block_height                 (int, required) the block height of the snapshot\n"
+
+                "\nResult:\n"
+                "{\n"
+                "  name: (string),\n"
+                "  height: (number),\n"
+                "  total_ownership_amount: (number),\n"
+                "  owners: [\n"
+                "    {\n"
+                "      address: (string),\n"
+                "      amount_owned: (number),\n"
+                "    }\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleRpc("getsnapshot", "\"ASSET_NAME\", 28546")
+        );
+
+
+    std::string asset_name = request.params[0].get_str();
+    int block_height = request.params[1].get_int();
+
+    if (!pAssetSnapshotDb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Asset Snapshot database is not setup. Please restart wallet to try again"));
+
+    LOCK(cs_main);
+    UniValue result (UniValue::VOBJ);
+
+    CAssetSnapshotDBEntry snapshotDbEntry;
+
+    if (pAssetSnapshotDb->RetrieveOwnershipSnapshot(asset_name, block_height, snapshotDbEntry)) {
+        result.push_back(Pair("name", snapshotDbEntry.assetName));
+        result.push_back(Pair("height", snapshotDbEntry.height));
+        result.push_back(Pair("total_ownership_amount", snapshotDbEntry.totalAmountOwned));
+
+        UniValue entries(UniValue::VARR);
+        for (auto const & ownerAndAmt : snapshotDbEntry.ownersAndAmounts) {
+            UniValue entry(UniValue::VOBJ);
+
+            entry.push_back(Pair("address", ownerAndAmt.first));
+            entry.push_back(Pair("amount_owned", ownerAndAmt.second));
+
+            entries.push_back(entry);
+        }
+
+        result.push_back(Pair("owners", entries));
+
+        return result;
+    }
+
+    return NullUniValue;
+}
+
+UniValue purgesnapshot(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1)
+        throw std::runtime_error(
+                "getassetdata \"asset_name\" ( block_height )\n"
+                + AssetActivationWarning() +
+                "\nReturns assets metadata if that asset exists\n"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"               (string, required) the name of the asset\n"
+                "2. block_height                 (int, optional) the block height of the snapshot\n"
+
+                "\nResult:\n"
+                "{\n"
+                "  name: (string),\n"
+                "  height: (number),\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("purgesnapshot", "\"ASSET_NAME\"")
+                + HelpExampleRpc("purgesnapshot", "\"ASSET_NAME\", 28546")
+        );
+
+
+    std::string asset_name = request.params[0].get_str();
+    int block_height = 0;
+    if (request.params.size() > 1) {
+        block_height = request.params[2].get_int();
+    }
+
+    if (!pAssetSnapshotDb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Asset Snapshot database is not setup. Please restart wallet to try again"));
+
+    LOCK(cs_main);
+    UniValue result (UniValue::VOBJ);
+
+    if (pAssetSnapshotDb->RemoveOwnershipSnapshot(asset_name, block_height)) {
+        result.push_back(Pair("name", asset_name));
+        if (block_height > 0) {
+            result.push_back(Pair("height", block_height));
+        }
+
+        return result;
+    }
+
+    return NullUniValue;
+}
+
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
   //  ----------- ------------------------      -----------------------      ----------
@@ -1399,7 +1510,9 @@ static const CRPCCommand commands[] =
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
-    { "assets",   "getcacheinfo",               &getcacheinfo,               {}}
+    { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
+    { "assets",   "getsnapshot",                &getsnapshot,                {"asset_name", "block_height"}},
+    { "assets",   "purgesnapshot",              &purgesnapshot,              {"asset_name", "block_height"}},
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

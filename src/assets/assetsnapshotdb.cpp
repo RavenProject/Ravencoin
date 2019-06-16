@@ -156,6 +156,43 @@ bool CAssetSnapshotDB::RetrieveOwnershipSnapshot(
 bool CAssetSnapshotDB::RemoveOwnershipSnapshot(
         const std::string & p_assetName, const int & p_height)
 {
+    //  Find out if we're nuking all snapshots for the current asset
+    if (p_height == 0) {
+        LogPrintf("%s : Removing all snapshots for asset '%s'!\n",
+            __func__, p_assetName.c_str());
+
+        std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+        pcursor->SeekToFirst();
+
+        // Find out if any pending rewards exist at or below the specified height
+        while (pcursor->Valid()) {
+            boost::this_thread::interruption_point();
+            std::pair<char, int> key;
+
+            //  Retrieve entries at the current node and remove this asset, if present
+            if (pcursor->GetKey(key) && key.first == SNAPSHOTCHECK_FLAG) {
+                std::set<CAssetSnapshotDBEntry> snapshotEntries;
+                if (pcursor->GetValue(snapshotEntries)) {
+                    if (!RemoveAssetFromEntries(p_assetName, key.second, snapshotEntries)) {
+                        LogPrintf("%s : Failed to remove entries for asset '%s' at height %d!\n",
+                            __func__, p_assetName.c_str(), key.second);
+                    }
+                }
+            }
+
+            pcursor->Next();
+        }
+
+        //  Always return true, even if failures occur.
+        //  User can cleanup their snapshot DB by nuking it if something goes wrong.
+        return true;
+    }
+
+    LogPrintf("%s : Removing snapshots for asset '%s' at height %d!\n",
+        __func__, p_assetName.c_str(), p_height);
+
+    //  Or just those at a specific height
     std::set<CAssetSnapshotDBEntry> snapshotEntries;
 
     //  Load up the snapshot entries at this height
@@ -164,12 +201,19 @@ bool CAssetSnapshotDB::RemoveOwnershipSnapshot(
         return true;
     }
 
+    return RemoveAssetFromEntries(p_assetName, p_height, snapshotEntries);
+}
+
+bool CAssetSnapshotDB::RemoveAssetFromEntries(
+    const std::string & p_assetName, int p_height,
+    std::set<CAssetSnapshotDBEntry> & p_snapshotEntries)
+{
     //  Find out if this specific asset ownership entry for this height exists
     std::set<CAssetSnapshotDBEntry>::iterator entryIT;
 
-    for (entryIT = snapshotEntries.begin(); entryIT != snapshotEntries.end(); ) {
+    for (entryIT = p_snapshotEntries.begin(); entryIT != p_snapshotEntries.end(); ) {
         if (entryIT->assetName == p_assetName) {
-            entryIT = snapshotEntries.erase(entryIT);
+            entryIT = p_snapshotEntries.erase(entryIT);
         }
         else {
             ++entryIT;
@@ -177,8 +221,8 @@ bool CAssetSnapshotDB::RemoveOwnershipSnapshot(
     }
 
     //  If it is non-empty, write it back out
-    if (snapshotEntries.size() > 0) {
-        return Write(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), snapshotEntries);
+    if (p_snapshotEntries.size() > 0) {
+        return Write(std::make_pair(SNAPSHOTCHECK_FLAG, p_height), p_snapshotEntries);
     }
 
     //  Otherwise, erase it

@@ -48,29 +48,33 @@ bool InitiateTransfer(
     std::vector<CPayment> & p_payments,
     UniValue & p_batchResult);
 
-UniValue reward(const JSONRPCRequest& request) {
+UniValue schedulereward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 3)
         throw std::runtime_error(
-                "reward total_payout_amount \"payout_source\" \"target_asset_name\" ( \"exception_addresses\" )\n"
-                "\nSchedules a payout for the specified amount, using either RVN or the specified source asset name,\n"
+                "schedulereward total_payout_amount \"funding_asset\" \"target_asset\" ( \"exception_addresses\" )\n"
+                "\nSchedules a reward for the specified amount, using either RVN or the specified source asset name,\n"
                 "\tto all owners of the specified asset, excluding the exception addresses.\n"
 
                 "\nArguments:\n"
                 "total_payout_amount: (number, required) The amount of the source asset to distribute amongst owners of the target asset\n"
-                "payout_source: (string, required) Either RVN or the asset name to distribute as the reward\n"
-                "target_asset_name:   (string, required) The asset name to whose owners the reward will be paid\n"
+                "funding_asset: (string, required) Either RVN or the asset name to distribute as the reward\n"
+                "target_asset: (string, required) The asset name to whose owners the reward will be paid\n"
                 "exception_addresses: (comma-delimited string, optional) A list of exception addresses that should not receive rewards\n"
 
                 "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  snapshot_height: (number),\n"
+                "}\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("reward", "100 \"RVN\" \"TRONCO\"")
-                + HelpExampleRpc("reward", "1000 \"BLACKCO\" \"TRONCO\" \"RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H,RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD\"")
+                + HelpExampleCli("schedulereward", "100 \"RVN\" \"TRONCO\"")
+                + HelpExampleRpc("schedulereward", "1000 \"BLACKCO\" \"TRONCO\" \"RBQ5A9wYKcebZtTSrJ5E4bKgPRbNmr8M2H,RCqsnXo2Uc1tfNxwnFzkTYXfjKP21VX5ZD\"")
         );
 
     if (!fRewardsEnabled) {
         UniValue ret(UniValue::VSTR);
-        ret.push_back("Rewards system is required to schedule a reward. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
         return ret;
     }
 
@@ -88,10 +92,10 @@ UniValue reward(const JSONRPCRequest& request) {
     EnsureWalletIsUnlocked(walletPtr);
 
     //  Extract parameters
-    std::string payout_source = request.params[1].get_str();
+    std::string funding_asset = request.params[1].get_str();
 
     CAmount total_payout_amount = AmountFromValue(
-        (payout_source == "RVN"), request.params[0]);
+        (funding_asset == "RVN"), request.params[0]);
     if (total_payout_amount <= 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount to reward");
 
@@ -101,14 +105,14 @@ UniValue reward(const JSONRPCRequest& request) {
         exception_addresses = request.params[3].get_str();
     }
 
-    AssetType srcAssetType;
+    AssetType fndAssetType;
     AssetType tgtAssetType;
 
-    if (payout_source != "RVN") {
-        if (!IsAssetNameValid(payout_source, srcAssetType))
-            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid payout_source: Please use a valid payout_source"));
+    if (funding_asset != "RVN") {
+        if (!IsAssetNameValid(funding_asset, fndAssetType))
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid funding_asset: Please use a valid funding_asset"));
 
-        if (srcAssetType == AssetType::UNIQUE || srcAssetType == AssetType::OWNER || srcAssetType == AssetType::MSGCHANNEL)
+        if (fndAssetType == AssetType::UNIQUE || fndAssetType == AssetType::OWNER || fndAssetType == AssetType::MSGCHANNEL)
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
     }
 
@@ -132,14 +136,14 @@ UniValue reward(const JSONRPCRequest& request) {
     entryToAdd.heightForPayout = chainActive.Height() + FUTURE_BLOCK_HEIGHT_OFFSET;
     entryToAdd.totalPayoutAmt = total_payout_amount;
     entryToAdd.tgtAssetName = target_asset_name;
-    entryToAdd.payoutSrc = payout_source;
+    entryToAdd.payoutSrc = funding_asset;
     entryToAdd.exceptionAddresses = exception_addresses;
 
     if (pRewardRequestDb->SchedulePendingReward(entryToAdd)) {
         UniValue obj(UniValue::VOBJ);
 
-        obj.push_back(Pair("Reward ID", entryToAdd.rewardID));
-        obj.push_back(Pair("Block Height", entryToAdd.heightForPayout));
+        obj.push_back(Pair("reward_id", entryToAdd.rewardID));
+        obj.push_back(Pair("snapshot_height", entryToAdd.heightForPayout));
 
         return obj;
     }
@@ -147,24 +151,141 @@ UniValue reward(const JSONRPCRequest& request) {
     throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to add scheduled reward to database"));
 }
 
-UniValue payout(const JSONRPCRequest& request) {
+UniValue getreward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 1)
         throw std::runtime_error(
-                "payout \"reward_id\"\n"
-                "\nGenerates payment records for the specified reward ID.\n"
+                "getreward \"reward_id\"\n"
+                "\nRetrieves the specified reward request details.\n"
 
                 "\nArguments:\n"
-                "reward_id:   (string, required) The ID for the reward that will be paid\n"
+                "reward_id:   (string, required) The ID for the reward that will be returned\n"
 
                 "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  wallet_name: (string),\n"
+                "  payout_height: (number),\n"
+                "  total_amount: (number),\n"
+                "  target_asset: (string),\n"
+                "  funding_asset: (string),\n"
+                "  exception_addresses: (string),\n"
+                "}\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("payout", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
+                + HelpExampleCli("getreward", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
         );
 
     if (!fRewardsEnabled) {
         UniValue ret(UniValue::VSTR);
-        ret.push_back("Rewards system is required to payout a reward. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        return ret;
+    }
+
+    //  Extract parameters
+    std::string rewardID = request.params[0].get_str();
+
+    if (!pRewardRequestDb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Reward Request database is not setup. Please restart wallet to try again"));
+
+    //  Retrieve the specified reward
+    CRewardRequest rewardEntry;
+
+    if (pRewardRequestDb->RetrieveRewardWithID(rewardID, rewardEntry)) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("reward_id", rewardEntry.rewardID));
+        obj.push_back(Pair("wallet_name", rewardEntry.walletName));
+        obj.push_back(Pair("payout_height", rewardEntry.heightForPayout));
+        obj.push_back(Pair("total_amount", rewardEntry.totalPayoutAmt));
+        obj.push_back(Pair("target_asset", rewardEntry.tgtAssetName));
+        obj.push_back(Pair("funding_asset", rewardEntry.payoutSrc));
+        obj.push_back(Pair("exception_addresses", rewardEntry.exceptionAddresses));
+
+        return obj;
+    }
+    else {
+        LogPrintf("Failed to retrieve specified reward '%s'!\n", rewardID.c_str());
+    }
+
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to retrieve specified reward"));
+}
+
+UniValue cancelreward(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() < 1)
+        throw std::runtime_error(
+                "cancelreward \"reward_id\"\n"
+                "\nCancels the specified reward request.\n"
+
+                "\nArguments:\n"
+                "reward_id:   (string, required) The ID for the reward that will be cancelled\n"
+
+                "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  reward_status: (string),\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("cancelreward", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
+        );
+
+    if (!fRewardsEnabled) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        return ret;
+    }
+
+    //  Extract parameters
+    std::string rewardID = request.params[0].get_str();
+
+    if (!pRewardRequestDb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Reward Request database is not setup. Please restart wallet to try again"));
+
+    //  Retrieve the specified reward
+    if (pRewardRequestDb->RemoveReward(rewardID)) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("reward_id", rewardID));
+        obj.push_back(Pair("reward_status", "Removed"));
+
+        return obj;
+    }
+    else {
+        LogPrintf("Failed to cancel specified reward '%s'!\n", rewardID.c_str());
+    }
+
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to remove specified reward"));
+}
+
+UniValue calculatepayments(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() < 1)
+        throw std::runtime_error(
+                "calculatepayments \"reward_id\"\n"
+                "\nGenerates payment records for the specified reward ID.\n"
+
+                "\nArguments:\n"
+                "reward_id:   (string, required) The ID for the reward that will be calculated\n"
+
+                "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  target_asset: (string),\n"
+                "  funding_asset: (string),\n"
+                "  payout_height: (number),\n"
+                "  payouts: [\n"
+                "    {\n"
+                "      address: (string),\n"
+                "      payout_amount: (number),\n"
+                "    }\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("calculatepayments", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
+        );
+
+    if (!fRewardsEnabled) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
         return ret;
     }
 
@@ -209,26 +330,22 @@ UniValue payout(const JSONRPCRequest& request) {
             else {
                 UniValue obj(UniValue::VOBJ);
 
-                obj.push_back(Pair("Reward ID", rewardEntry.rewardID));
-                obj.push_back(Pair("Target Asset", rewardEntry.tgtAssetName));
-                obj.push_back(Pair("Funding Asset", rewardEntry.payoutSrc));
-                obj.push_back(Pair("Payout Block Height", rewardEntry.heightForPayout));
+                obj.push_back(Pair("reward_id", rewardEntry.rewardID));
+                obj.push_back(Pair("target_asset", rewardEntry.tgtAssetName));
+                obj.push_back(Pair("funding_asset", rewardEntry.payoutSrc));
+                obj.push_back(Pair("payout_height", rewardEntry.heightForPayout));
 
                 UniValue entries(UniValue::VARR);
                 for (auto const & payment : payoutEntry.payments) {
-                    LogPrintf("Found '%s' payout to '%s' of %d\n",
-                        rewardEntry.tgtAssetName.c_str(), payment.address.c_str(),
-                        payment.payoutAmt);
-
                     UniValue entry(UniValue::VOBJ);
 
-                    entry.push_back(Pair("Owner", payment.address));
-                    entry.push_back(Pair("Payout", payment.payoutAmt));
+                    entry.push_back(Pair("address", payment.address));
+                    entry.push_back(Pair("payout_amount", payment.payoutAmt));
 
                     entries.push_back(entry);
                 }
 
-                obj.push_back(Pair("Addresses and Amounts", entries));
+                obj.push_back(Pair("payouts", entries));
 
                 return obj;
             }
@@ -242,28 +359,156 @@ UniValue payout(const JSONRPCRequest& request) {
         LogPrintf("Failed to retrieve specified reward '%s'!\n", rewardID.c_str());
     }
 
-    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to payout specified rewards"));
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to calculate payments specified reward"));
 }
 
-
-UniValue execute(const JSONRPCRequest& request) {
+UniValue getpayments(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 1)
         throw std::runtime_error(
-                "execute \"reward_id\"\n"
+                "getpayments \"reward_id\"\n"
+                "\nRetrieves payment records for the specified reward ID.\n"
+
+                "\nArguments:\n"
+                "reward_id:   (string, required) The ID for the reward that will be retrieved\n"
+
+                "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  target_asset: (string),\n"
+                "  funding_asset: (string),\n"
+                "  payout_height: (number),\n"
+                "  payouts: [\n"
+                "    {\n"
+                "      address: (string),\n"
+                "      payout_amount: (number),\n"
+                "    }\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("getpayments", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
+        );
+
+    if (!fRewardsEnabled) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        return ret;
+    }
+
+    //  Extract parameters
+    std::string rewardID = request.params[0].get_str();
+
+    if (!pPayoutDb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Payout database is not setup. Please restart wallet to try again"));
+
+    //  Retrieve the specified payout entry
+    CPayoutDBEntry payoutEntry;
+
+    if (pPayoutDb->RetrievePayoutEntry(rewardID, payoutEntry)) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("reward_id", payoutEntry.rewardID));
+        obj.push_back(Pair("target_asset", payoutEntry.assetName));
+        obj.push_back(Pair("funding_asset", payoutEntry.srcAssetName));
+
+        UniValue entries(UniValue::VARR);
+        for (auto const & payment : payoutEntry.payments) {
+            UniValue entry(UniValue::VOBJ);
+
+            entry.push_back(Pair("address", payment.address));
+            entry.push_back(Pair("payout_amount", payment.payoutAmt));
+
+            entries.push_back(entry);
+        }
+
+        obj.push_back(Pair("payouts", entries));
+
+        return obj;
+    }
+    else {
+        LogPrintf("Failed to retrieve payment set for reward '%s'!\n", rewardID.c_str());
+    }
+
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to calculate payments specified reward"));
+}
+
+UniValue cancelpayments(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() < 1)
+        throw std::runtime_error(
+                "cancelpayments \"reward_id\"\n"
+                "\nRemoves payment records for the specified reward ID.\n"
+
+                "\nArguments:\n"
+                "reward_id:   (string, required) The ID for the reward whose payments will be removed\n"
+
+                "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  payment_status: (string),\n"
+                "}\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("cancelpayments", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
+        );
+
+    if (!fRewardsEnabled) {
+        UniValue ret(UniValue::VSTR);
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        return ret;
+    }
+
+    //  Extract parameters
+    std::string rewardID = request.params[0].get_str();
+
+    if (!pPayoutDb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Payout database is not setup. Please restart wallet to try again"));
+
+    //  Retrieve the specified payout entry
+    CPayoutDBEntry payoutEntry;
+
+    if (pPayoutDb->RemovePayoutEntry(rewardID)) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("reward_id", rewardID));
+        obj.push_back(Pair("payment_status", "Removed"));
+
+        return obj;
+    }
+    else {
+        LogPrintf("Failed to retrieve payment set for reward '%s'!\n", rewardID.c_str());
+    }
+
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to calculate payments specified reward"));
+}
+
+UniValue executepayments(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() < 1)
+        throw std::runtime_error(
+                "executepayments \"reward_id\"\n"
                 "\nGenerates transactions for all payment records tied to the specified reward.\n"
 
                 "\nArguments:\n"
                 "reward_id:   (string, required) The ID for the reward for which transactions will be generated\n"
 
                 "\nResult:\n"
+                "{\n"
+                "  reward_id: (string),\n"
+                "  batch_results: [\n"
+                "    {\n"
+                "      transaction_id: (string),\n"
+                "      result: (string),\n"
+                "      expected_count: (number),\n"
+                "      actual_count: (number),\n"
+                "    }\n"
+                "  payout_db_update: (string),\n"
+                "}\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("execute", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
+                + HelpExampleCli("executepayments", "\"de5c1822-6556-42da-b86f-deb8ccd78565\"")
         );
 
     if (!fRewardsEnabled) {
         UniValue ret(UniValue::VSTR);
-        ret.push_back("Rewards system is required to payout a reward. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
+        ret.push_back("Rewards system is required. To enable rewards, run the wallet with -rewards or add rewards from your raven.conf and perform a -reindex");
         return ret;
     }
 
@@ -295,7 +540,7 @@ UniValue execute(const JSONRPCRequest& request) {
     else {
         UniValue responseObj(UniValue::VOBJ);
 
-        responseObj.push_back(Pair("Reward ID", payoutEntry.rewardID));
+        responseObj.push_back(Pair("reward_id", payoutEntry.rewardID));
 
         //
         //  Loop through the payout addresses and process them in batches
@@ -367,32 +612,36 @@ UniValue execute(const JSONRPCRequest& request) {
         }
         updatedPayments.clear();
 
-        responseObj.push_back(Pair("Batch Results", batchResults));
+        responseObj.push_back(Pair("batch_results", batchResults));
 
         //  Write the payment back to the database if anything succeded
         if (atLeastOneTxnSucceeded) {
             if (pPayoutDb->UpdatePayoutEntry(payoutEntry)) {
-                responseObj.push_back(Pair("Payout DB Update", "succeeded"));
+                responseObj.push_back(Pair("payout_db_update", "succeeded"));
             }
             else {
                 LogPrintf("Failed to update payout DB payment status for reward '%s'!\n",
                     payoutEntry.rewardID.c_str());
-                responseObj.push_back(Pair("Payout DB Update", "failed"));
+                responseObj.push_back(Pair("payout_db_update", "failed"));
             }
         }
 
         return responseObj;
     }
 
-    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to payout specified rewards"));
+    throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to execute payments specified reward"));
 }
 
 static const CRPCCommand commands[] =
     {           //  category    name                          actor (function)             argNames
                 //  ----------- ------------------------      -----------------------      ----------
-            {   "rewards",      "reward",                     &reward,                     {"total_payout_amount", "payout_source", "target_asset_name", "exception_addresses"}},
-            {   "rewards",      "payout",                     &payout,                     {"reward_id"}},
-            {   "rewards",      "execute",                    &execute,                    {"reward_id"}},
+            {   "rewards",      "schedulereward",             &schedulereward,             {"total_payout_amount", "payout_source", "target_asset_name", "exception_addresses"}},
+            {   "rewards",      "getreward",                  &getreward,                  {"reward_id"}},
+            {   "rewards",      "cancelreward",               &cancelreward,               {"reward_id"}},
+            {   "rewards",      "calculatepayments",          &calculatepayments,          {"reward_id"}},
+            {   "rewards",      "getpayments",                &getpayments,                {"reward_id"}},
+            {   "rewards",      "cancelpayments",             &cancelpayments,             {"reward_id"}},
+            {   "rewards",      "executepayments",            &executepayments,            {"reward_id"}},
     };
 
 void RegisterRewardsRPCCommands(CRPCTable &t)
@@ -535,7 +784,7 @@ bool InitiateTransfer(
 
         //  Indicate success
         fcnRetVal = true;
-        p_batchResult.push_back(Pair("Transaction ID", transactionID));
+        p_batchResult.push_back(Pair("transaction_id", transactionID));
 
         //  Post-process the payments in the batch to flag them as completed
         for (auto & payment : p_payments) {
@@ -545,9 +794,9 @@ bool InitiateTransfer(
 
     LogPrintf("Batch transfer processing %s.\n",
         fcnRetVal ? "succeeded" : "failed");
-    p_batchResult.push_back(Pair("Result", fcnRetVal ? "succeeded" : "failed"));
-    p_batchResult.push_back(Pair("Expected Count", expectedCount));
-    p_batchResult.push_back(Pair("Actual Count", actualCount));
+    p_batchResult.push_back(Pair("result", fcnRetVal ? "Succeeded" : "Failed"));
+    p_batchResult.push_back(Pair("expected_count", expectedCount));
+    p_batchResult.push_back(Pair("actual_count", actualCount));
 
     return fcnRetVal;
 }

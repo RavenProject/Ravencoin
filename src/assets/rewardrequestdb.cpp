@@ -223,7 +223,7 @@ bool CRewardRequestDB::AreRewardsScheduledForHeight(const int & p_maxBlockHeight
         std::pair<char, int> key;
 
         //  Only retrieve entries earlier than the provided block height
-        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second <= p_maxBlockHeight) {
+        if (pcursor->GetKey(key) && key.first == SCHEDULEDREWARD_FLAG && key.second == p_maxBlockHeight) {
             return true;
         }
 

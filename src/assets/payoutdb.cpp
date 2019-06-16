@@ -234,8 +234,14 @@ bool CPayoutDB::RetrievePayoutEntry(
     return Read(std::make_pair(PAYOUT_FLAG, p_rewardID), p_payoutEntry);
 }
 
-bool CPayoutDB::UpdatePayoutEntry(
-    const CPayoutDBEntry & p_payoutEntry)
+bool CPayoutDB::RemovePayoutEntry(const std::string & p_rewardID)
+{
+    //  Delete the payout
+    LogPrintf("RemovePayoutEntry: Removing payout entry for reward '%s'\n", p_rewardID.c_str());
+    return Erase(std::make_pair(PAYOUT_FLAG, p_rewardID), true);
+}
+
+bool CPayoutDB::UpdatePayoutEntry(const CPayoutDBEntry & p_payoutEntry)
 {
     //  If all payments have been completed, delete the payout
     bool allPaymentsCompleted = true;
