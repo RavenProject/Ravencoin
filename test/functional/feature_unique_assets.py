@@ -120,7 +120,7 @@ class UniqueAssetTest(RavenTestFramework):
         # invalidate
         n0.invalidateblock(block_hash)
         assert(root in n0.listmyassets())
-        assert_does_not_contain_key(asset_name, n0.listmyassets())
+        assert_does_not_contain_key(asset_name, n0.listmyassets(asset="*", verbose=False, count=100000, start=0, confs=1))
 
         # reconsider
         n0.reconsiderblock(block_hash)

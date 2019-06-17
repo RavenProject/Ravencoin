@@ -30,6 +30,12 @@ RAVEN_TESTS =\
   test/assets/asset_tx_tests.cpp \
   test/assets/cache_tests.cpp \
   test/assets/asset_reissue_tests.cpp \
+  test/assets/messaging_tests.cpp \
+  test/assets/null_asset_data_tests.cpp \
+  test/assets/restricted_tests.cpp \
+  test/assets/qualifier_tests.cpp \
+  test/assets/unique_tests.cpp \
+  test/assets/verifier_string_tests.cpp \
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \
   test/addrman_tests.cpp \

@@ -663,6 +663,10 @@ public:
     bool IsReissueAsset() const;
     bool IsTransferAsset() const;
     bool IsAsset() const;
+    bool IsNullAsset() const; // Checks all three of the NULL Asset Tx types
+    bool IsNullAssetTxDataScript() const;
+    bool IsNullAssetVerifierTxDataScript() const;
+    bool IsNullGlobalRestrictionAssetTxDataScript() const;
     /** RVN END */
 
     /** Used for obsolete pay-to-pubkey addresses indexing. */
