@@ -81,6 +81,8 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
     case TX_NONSTANDARD:
     case TX_NULL_DATA:
         return false;
+    case TX_RESTRICTED_ASSET_DATA:
+        return false;
     /** RVN START */
     case TX_NEW_ASSET:
         keyID = CKeyID(uint160(vSolutions[0]));
@@ -346,6 +348,11 @@ static Stacks CombineSignatures(const CScript& scriptPubKey, const BaseSignature
     {
     case TX_NONSTANDARD:
     case TX_NULL_DATA:
+        // Don't know anything about this, assume bigger one is correct:
+        if (sigs1.script.size() >= sigs2.script.size())
+            return sigs1;
+        return sigs2;
+    case TX_RESTRICTED_ASSET_DATA:
         // Don't know anything about this, assume bigger one is correct:
         if (sigs1.script.size() >= sigs2.script.size())
             return sigs1;

@@ -2647,9 +2647,10 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("unlocked_until", pwallet->nRelockTime));
     }
     obj.push_back(Pair("paytxfee",      ValueFromAmount(payTxFee.GetFeePerK())));
-    if (!seed_id.IsNull())
-         obj.push_back(Pair("hdseedid", seed_id.GetHex()));
-         obj.push_back(Pair("hdmasterkeyid", seed_id.GetHex()));
+    if (!seed_id.IsNull()) {
+        obj.push_back(Pair("hdseedid", seed_id.GetHex()));
+        obj.push_back(Pair("hdmasterkeyid", seed_id.GetHex()));
+    }
     return obj;
 }
 

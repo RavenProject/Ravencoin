@@ -260,7 +260,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-bad-asset-script",
+        assert_raises_rpc_error(-26, "bad-txns-op-rvn-asset-not-in-right-script-location",
                                 n0.sendrawtransaction, tx_bad_issue_signed)
 
         ########################################
@@ -270,8 +270,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         n0.generate(1)
         assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used",
                                 get_tx_issue_hex, n0, asset_name, 55)  # intermittent failure "Invalid amount" -- out of funds so change is negative?
-        assert_raises_rpc_error(-26, f"bad-txns-issue-Invalid parameter: asset_name '{asset_name}' has already been used",
-                                n0.sendrawtransaction, tx_duplicate_issue_hex)
+        assert_raises_rpc_error(-25, f"Missing inputs", n0.sendrawtransaction, tx_duplicate_issue_hex)
 
 
     def issue_reissue_transfer_test(self):
@@ -1061,7 +1060,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         burn = 500
         outputs = {
             issue_burn: burn,
-            change_address: truncate(float(unspent['amount']) - (burn + 0.0001)),
+            change_address: truncate(float(unspent['amount']) - (burn + 0.001)),
             multiple_to_address: {
                 'issue': {
                     'asset_name':       asset_name_multiple,
@@ -1208,7 +1207,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-tx-asset-inputs-size-does-not-match-outputs-size", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-new-asset-missing-owner-asset", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1230,7 +1229,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-tx-asset-inputs-size-does-not-match-outputs-size", \
+        assert_raises_rpc_error(-26, "bad-txns-issue-new-asset-missing-owner-asset", \
                                 n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1408,7 +1407,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 tx.vout[n].scriptPubKey = hex_str_to_bytes(tampered_script)
         tx_bad_transfer = bytes_to_hex_str(tx.serialize())
         tx_bad_transfer_signed = n0.signrawtransaction(tx_bad_transfer)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-transfer-not-valid Invalid parameter: asset amount can't be equal to or less than zero.",
+        assert_raises_rpc_error(-26, "Invalid parameter: asset amount can't be equal to or less than zero.",
                                 n0.sendrawtransaction, tx_bad_transfer_signed)
 
         signed_hex = n0.signrawtransaction(tx_transfer_hex)['hex']
