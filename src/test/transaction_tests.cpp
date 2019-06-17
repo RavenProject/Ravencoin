@@ -761,6 +761,19 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         BOOST_CHECK_EQUAL(MAX_OP_RETURN_RELAY + 1, t.vout[0].scriptPubKey.size());
         BOOST_CHECK(!IsStandardTx(t, reason));
 
+        // MAX_OP_RETURN_RELAY-byte TX_RESTRICTED_ASSET_DATA(standard)
+        // The text after OP_RVN_ASSET, will be an address if it isn't another OP_RVN_ASSET
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET
+                                           << ParseHex("04678fdab0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef3804678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
+        BOOST_CHECK_EQUAL(MAX_OP_RETURN_RELAY, t.vout[0].scriptPubKey.size());
+        BOOST_CHECK(IsStandardTx(t, reason));
+
+        // MAX_OP_RETURN_RELAY+1-byte TX_RESTRICTED_ASSET_DATA (non-standard)
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET
+                                           << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef3804678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef3800");
+        BOOST_CHECK_EQUAL(MAX_OP_RETURN_RELAY + 1, t.vout[0].scriptPubKey.size());
+        BOOST_CHECK(!IsStandardTx(t, reason));
+
         // Data payload can be encoded in any way...
         t.vout[0].scriptPubKey = CScript() << OP_RETURN << ParseHex("");
         BOOST_CHECK(IsStandardTx(t, reason));
@@ -800,6 +813,59 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         t.vout[0].scriptPubKey = CScript() << OP_RETURN;
         t.vout[1].scriptPubKey = CScript() << OP_RETURN;
         BOOST_CHECK(!IsStandardTx(t, reason));
+
+        // Asset data checks
+        // Data payload can be encoded in any way...
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << ParseHex("");
+        BOOST_CHECK(IsStandardTx(t, reason));
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << ParseHex("00") << ParseHex("01");
+        BOOST_CHECK(IsStandardTx(t, reason));
+        // OP_RESERVED *is* considered to be a PUSHDATA type opcode by IsPushOnly()!
+        t.vout[0].scriptPubKey =
+                CScript() << OP_RVN_ASSET << OP_RESERVED << -1 << 0 << ParseHex("01") << 2 << 3 << 4 << 5 << 6 << 7 << 8
+                          << 9 << 10 << 11 << 12 << 13 << 14 << 15 << 16;
+        BOOST_CHECK(IsStandardTx(t, reason));
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << 0 << ParseHex("01") << 2
+                                           << ParseHex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        BOOST_CHECK(IsStandardTx(t, reason));
+
+        // ...so long as it only contains PUSHDATA's don't check the first three bytes on OP_RVN_ASSET TX's
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << OP_RESERVED;
+        BOOST_CHECK(IsStandardTx(t, reason));
+
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET << OP_RESERVED << OP_RESERVED << OP_RVN_ASSET;
+        BOOST_CHECK(!IsStandardTx(t, reason));
+
+        // TX_RESTRICTED_ASSET_DATA w/o PUSHDATA
+        t.vout.resize(1);
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET;
+        BOOST_CHECK(IsStandardTx(t, reason));
+
+        // Only ten TX_RESTRICTED_ASSET_DATA permitted in all cases
+        t.vout.resize(11);
+        for (int i = 0; i < 11; i++) {
+            t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET
+                                               << ParseHex(
+                                                       "04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
+        }
+        BOOST_CHECK(!IsStandardTx(t, reason));
+
+        t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET
+                                           << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
+        for (int i = 1; i < 11; i++) {
+            t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
+        }
+        BOOST_CHECK(!IsStandardTx(t, reason));
+
+        for (int i = 0; i < 11; i++)
+            t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
+        BOOST_CHECK(!IsStandardTx(t, reason));
+
+        t.vout.clear();
+        t.vout.resize(10);
+        for (int i = 0; i < 10; i++)
+            t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
+        BOOST_CHECK(IsStandardTx(t, reason));
     }
 
 BOOST_AUTO_TEST_SUITE_END()

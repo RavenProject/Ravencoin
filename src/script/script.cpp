@@ -322,6 +322,37 @@ bool CScript::IsTransferAsset() const
 
     return false;
 }
+
+bool CScript::IsNullAsset() const
+{
+    return IsNullAssetTxDataScript() || IsNullGlobalRestrictionAssetTxDataScript() || IsNullAssetVerifierTxDataScript();
+}
+
+bool CScript::IsNullAssetTxDataScript() const
+{
+    return (this->size() > 23 &&
+            (*this)[0] == OP_RVN_ASSET &&
+            (*this)[1] == 0x14);
+}
+
+bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
+{
+    // 1 OP_RVN_ASSET followed by two OP_RESERVED + atleast 4 characters for the restricted name $ABC
+    return (this->size() > 6 &&
+            (*this)[0] == OP_RVN_ASSET &&
+            (*this)[1] == OP_RESERVED &&
+            (*this)[2] == OP_RESERVED);
+}
+
+
+bool CScript::IsNullAssetVerifierTxDataScript() const
+{
+    // 1 OP_RVN_ASSET followed by one OP_RESERVED
+    return (this->size() > 3 &&
+            (*this)[0] == OP_RVN_ASSET &&
+            (*this)[1] == OP_RESERVED &&
+            (*this)[2] != OP_RESERVED);
+}
 /** RVN END */
 
 bool CScript::IsPayToWitnessScriptHash() const
@@ -349,6 +380,7 @@ bool CScript::IsWitnessProgram(int& version, std::vector<unsigned char>& program
     }
     return false;
 }
+
 bool CScript::IsPayToPublicKey() const
 {
     // Test for pay-to-pubkey CScript with both
@@ -372,12 +404,14 @@ bool CScript::IsPushOnly(const_iterator pc) const
         opcodetype opcode;
         if (!GetOp(pc, opcode))
             return false;
+
         // Note that IsPushOnly() *does* consider OP_RESERVED to be a
         // push-type opcode, however execution of OP_RESERVED fails, so
         // it's not relevant to P2SH/BIP62 as the scriptSig would fail prior to
         // the P2SH special validation code being executed.
         if (opcode > OP_16)
             return false;
+
     }
     return true;
 }
@@ -415,7 +449,7 @@ bool CScript::HasValidOps() const
 bool CScript::IsUnspendable() const
 {
     CAmount nAmount;
-    return (size() > 0 && *begin() == OP_RETURN) || (size() > MAX_SCRIPT_SIZE) || (GetAssetAmountFromScript(*this, nAmount) && nAmount == 0);
+    return (size() > 0 && *begin() == OP_RETURN) || (size() > 0 && *begin() == OP_RVN_ASSET) || (size() > MAX_SCRIPT_SIZE) || (GetAssetAmountFromScript(*this, nAmount) && nAmount == 0);
 }
 
 //!--------------------------------------------------------------------------------------------------------------------------!//

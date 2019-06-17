@@ -49,7 +49,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             isminetype mine = wallet->IsMine(txout);
 
             /** RVN START */
-            if (txout.scriptPubKey.IsAssetScript())
+            if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
                 continue;
             /** RVN START */
 
@@ -97,7 +97,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         for (const CTxOut& txout : wtx.tx->vout)
         {
             /** RVN START */
-            if (txout.scriptPubKey.IsAssetScript())
+            if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
                 continue;
             /** RVN START */
 
@@ -184,7 +184,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 for (unsigned int nOut = 0; nOut < wtx.tx->vout.size(); nOut++) {
                     const CTxOut &txout = wtx.tx->vout[nOut];
 
-                    if (txout.scriptPubKey.IsAssetScript()) {
+                    if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
                         fIsMixedDebit = false;
                         break;
                     }

@@ -95,16 +95,25 @@ public:
     const CAmount& IssueSubAssetBurnAmount() const { return nIssueSubAssetBurnAmount; }
     const CAmount& IssueUniqueAssetBurnAmount() const { return nIssueUniqueAssetBurnAmount; }
     const CAmount& IssueMsgChannelAssetBurnAmount() const { return nIssueMsgChannelAssetBurnAmount; }
+    const CAmount& IssueQualifierAssetBurnAmount() const { return nIssueQualifierAssetBurnAmount; }
+    const CAmount& IssueSubQualifierAssetBurnAmount() const { return nIssueSubQualifierAssetBurnAmount; }
+    const CAmount& IssueRestrictedAssetBurnAmount() const { return nIssueRestrictedAssetBurnAmount; }
+    const CAmount& AddNullQualifierTagBurnAmount() const { return nAddNullQualifierTagBurnAmount; }
 
     const std::string& IssueAssetBurnAddress() const { return strIssueAssetBurnAddress; }
     const std::string& ReissueAssetBurnAddress() const { return strReissueAssetBurnAddress; }
     const std::string& IssueSubAssetBurnAddress() const { return strIssueSubAssetBurnAddress; }
     const std::string& IssueUniqueAssetBurnAddress() const { return strIssueUniqueAssetBurnAddress; }
     const std::string& IssueMsgChannelAssetBurnAddress() const { return strIssueMsgChannelAssetBurnAddress; }
+    const std::string& IssueQualifierAssetBurnAddress() const { return strIssueQualifierAssetBurnAddress; }
+    const std::string& IssueSubQualifierAssetBurnAddress() const { return strIssueSubQualifierAssetBurnAddress; }
+    const std::string& IssueRestrictedAssetBurnAddress() const { return strIssueRestrictedAssetBurnAddress; }
+    const std::string& AddNullQualifierTagBurnAddress() const { return strAddNullQualifierTagBurnAddress; }
     const std::string& GlobalBurnAddress() const { return strGlobalBurnAddress; }
 
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
+    unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
 
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
@@ -139,6 +148,10 @@ protected:
     CAmount nIssueSubAssetBurnAmount;
     CAmount nIssueUniqueAssetBurnAmount;
     CAmount nIssueMsgChannelAssetBurnAmount;
+    CAmount nIssueQualifierAssetBurnAmount;
+    CAmount nIssueSubQualifierAssetBurnAmount;
+    CAmount nIssueRestrictedAssetBurnAmount;
+    CAmount nAddNullQualifierTagBurnAmount;
 
     // Burn Addresses
     std::string strIssueAssetBurnAddress;
@@ -146,12 +159,17 @@ protected:
     std::string strIssueSubAssetBurnAddress;
     std::string strIssueUniqueAssetBurnAddress;
     std::string strIssueMsgChannelAssetBurnAddress;
+    std::string strIssueQualifierAssetBurnAddress;
+    std::string strIssueSubQualifierAssetBurnAddress;
+    std::string strIssueRestrictedAssetBurnAddress;
+    std::string strAddNullQualifierTagBurnAddress;
 
     // Global Burn Address
     std::string strGlobalBurnAddress;
 
     unsigned int nDGWActivationBlock;
     unsigned int nMessagingActivationBlock;
+    unsigned int nRestrictedActivationBlock;
 
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;

@@ -241,7 +241,7 @@ bool ScanForMessageChannels(std::string& strError)
                                 if (fOwner || type == AssetType::MSGCHANNEL) {
                                     AddChannel(assetData.assetName);
                                     AddAddressSeen(EncodeDestination(assetData.destination));
-                                } else if (type == AssetType::ROOT || type == AssetType::SUB) {
+                                } else if (type == AssetType::ROOT || type == AssetType::SUB || type == AssetType::RESTRICTED) {
                                     AddChannel(assetData.assetName + "!");
                                     AddAddressSeen(EncodeDestination(assetData.destination));
                                 }

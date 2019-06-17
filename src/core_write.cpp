@@ -212,6 +212,34 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
 
         out.pushKV("asset", assetInfo);
     }
+
+    if (type == TX_RESTRICTED_ASSET_DATA) {
+        UniValue assetInfo(UniValue::VOBJ);
+        CNullAssetTxData data;
+        CNullAssetTxVerifierString verifierData;
+        std::string address;
+        if (AssetNullDataFromScript(scriptPubKey, data, address)) {
+            AssetType type;
+            IsAssetNameValid(data.asset_name, type);
+            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                assetInfo.pushKV("asset_name", data.asset_name);
+                assetInfo.pushKV("qualifier_type", data.flag ? "adding qualifier" : "removing qualifier");
+                assetInfo.pushKV("address", address);
+            } else if (type == AssetType::RESTRICTED) {
+                assetInfo.pushKV("asset_name", data.asset_name);
+                assetInfo.pushKV("restricted_type", data.flag ? "freezing address" : "unfreezing address");
+                assetInfo.pushKV("address", address);
+            }
+        } else if (GlobalAssetNullDataFromScript(scriptPubKey, data)) {
+            assetInfo.pushKV("restricted_name", data.asset_name);
+            assetInfo.pushKV("restricted_type", data.flag ? "freezing" : "unfreezing");
+            assetInfo.pushKV("address", "all addresses");
+        } else if (AssetNullVerifierDataFromScript(scriptPubKey, verifierData)) {
+            assetInfo.pushKV("verifier_string", verifierData.verifier_string);
+        }
+
+        out.pushKV("asset_data", assetInfo);
+    }
      /** RVN END */
 
     UniValue a(UniValue::VARR);
