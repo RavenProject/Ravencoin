@@ -55,6 +55,7 @@
 
 #include "assets/assets.h"
 #include "assets/assetdb.h"
+#include "base58.h"
 
 #include "assets/rewardrequestdb.h"
 #include "assets/assetsnapshotdb.h"
@@ -98,6 +99,8 @@ size_t nCoinCacheUsage = 5000 * 300;
 uint64_t nPruneTarget = 0;
 int64_t nMaxTipAge = DEFAULT_MAX_TIP_AGE;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
+
+bool fUnitTest = false;
 
 uint256 hashAssumeValid;
 arith_uint256 nMinimumChainWork;
@@ -215,6 +218,12 @@ CMessageChannelDB *pmessagechanneldb = nullptr;
 CRewardRequestDB *pRewardRequestDb = nullptr;
 CAssetSnapshotDB *pAssetSnapshotDb = nullptr;
 CPayoutDB *pPayoutDb = nullptr;
+
+CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsRestrictionCache = nullptr;
+CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache = nullptr;
+CRestrictedDB *prestricteddb = nullptr;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
@@ -488,8 +497,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
-    auto currentActiveAssetCache = GetCurrentAssetCache();
-    if (!CheckTransaction(tx, state, currentActiveAssetCache, true, true))
+    if (!CheckTransaction(tx, state))
         return false; // state filled in by CheckTransaction
 
     // Coinbase is only valid in a block, not as a loose transaction
@@ -625,7 +633,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         if (AreAssetsDeployed()) {
-            if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets, false, nullptr, 0, GetCurrentAssetCache()))
+            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets))
                 return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                              FormatStateMessage(state));
         }
@@ -950,6 +958,41 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
                     if (data.type == TX_NEW_ASSET && !IsAssetNameAnOwner(data.assetName)) {
                         pool.mapAssetToHash[data.assetName] = hash;
                         pool.mapHashToAsset[hash] = data.assetName;
+                    }
+
+                    // Keep track of all restricted assets tx that can become invalid if qualifier or verifiers are changed
+                    if (AreRestrictedAssetsDeployed()) {
+                        if (IsAssetNameAnRestricted(data.assetName)) {
+                            std::string address = EncodeDestination(data.destination);
+                            pool.mapAddressesQualifiersChanged[address].insert(hash);
+                            pool.mapHashQualifiersChanged[hash].insert(address);
+
+                            pool.mapAssetVerifierChanged[data.assetName].insert(hash);
+                            pool.mapHashVerifierChanged[hash].insert(data.assetName);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Keep track of all restricted assets tx that can become invalid if address or assets are marked as frozen
+        if (AreRestrictedAssetsDeployed()) {
+            for (auto in : tx.vin) {
+                const Coin coin = pcoinsTip->AccessCoin(in.prevout);
+
+                if (!coin.IsAsset())
+                    continue;
+
+                CAssetOutputEntry data;
+                if (GetAssetData(coin.out.scriptPubKey, data)) {
+
+                    if (IsAssetNameAnRestricted(data.assetName)) {
+                        pool.mapAssetMarkedGlobalFrozen[data.assetName].insert(hash);
+                        pool.mapHashMarkedGlobalFrozen[hash].insert(data.assetName);
+
+                        auto pair = std::make_pair(EncodeDestination(data.destination), data.assetName);
+                        pool.mapAddressesMarkedFrozen[pair].insert(hash);
+                        pool.mapHashToAddressMarkedFrozen[hash].insert(pair);
                     }
                 }
             }
@@ -1723,8 +1766,8 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
         bool is_coinbase = tx.IsCoinBase();
 
         std::vector<int> vAssetTxIndex;
+        std::vector<int> vNullAssetTxIndex;
         if (fAddressIndex) {
-
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
                 const CTxOut &out = tx.vout[k];
 
@@ -1781,6 +1824,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
 
         // Check that all outputs are available and match the outputs in the block itself
         // exactly.
+        int indexOfRestrictedAssetVerifierString = -1;
         for (size_t o = 0; o < tx.vout.size(); o++) {
             if (!tx.vout[o].scriptPubKey.IsUnspendable()) {
                 COutPoint out(hash, o);
@@ -1798,6 +1842,18 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     }
                 }
                 /** RVN START */
+            } else {
+                if(AreRestrictedAssetsDeployed()) {
+                    if (assetsCache) {
+                        if (tx.vout[o].scriptPubKey.IsNullAsset()) {
+                            if (tx.vout[o].scriptPubKey.IsNullAssetVerifierTxDataScript()) {
+                                indexOfRestrictedAssetVerifierString = o;
+                            } else {
+                                vNullAssetTxIndex.emplace_back(o);
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -1886,6 +1942,54 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             return DISCONNECT_FAILED;
                         }
                     }
+                } else if (tx.IsNewQualifierAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!QualifierAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get qualifier asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Qualifier Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+                } else if (tx.IsNewRestrictedAsset()) {
+                    CNewAsset asset;
+                    std::string strAddress;
+
+                    if (!RestrictedAssetFromTransaction(tx, asset, strAddress)) {
+                        error("%s : Failed to get restricted asset from transaction. TXID : %s", __func__,
+                              tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (assetsCache->ContainsAsset(asset.strName)) {
+                        if (!assetsCache->RemoveNewAsset(asset, strAddress)) {
+                            error("%s : Failed to Undo Restricted Asset. Asset Name : %s", __func__, asset.strName);
+                            return DISCONNECT_FAILED;
+                        }
+                    }
+
+                    if (indexOfRestrictedAssetVerifierString < 0) {
+                        error("%s : Failed to find the restricted asset verifier string index from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    CNullAssetTxVerifierString verifier;
+                    if (!AssetNullVerifierDataFromScript(tx.vout[indexOfRestrictedAssetVerifierString].scriptPubKey, verifier)) {
+                        error("%s : Failed to get the restricted asset verifier string from trasaction. TxID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
+
+                    if (!assetsCache->RemoveRestrictedVerifier(asset.strName, verifier.verifier_string)){
+                        error("%s : Failed to Remove Restricted Verifier from transaction. TXID : %s", __func__, tx.GetHash().GetHex());
+                        return DISCONNECT_FAILED;
+                    }
                 }
 
                 for (auto index : vAssetTxIndex) {
@@ -1912,6 +2016,59 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         LOCK(cs_messaging);
                         if (IsChannelSubscribed(transfer.strName)) {
                             OrphanMessage(COutPoint(hash, index));
+                        }
+                    }
+                }
+
+                if (AreRestrictedAssetsDeployed()) {
+                    // Because of the strict rules for allowing the null asset tx types into a transaction.
+                    // We know that if these are in a transaction, that they are valid null asset tx, and can be reversed
+                    for (auto index: vNullAssetTxIndex) {
+                        CScript script = tx.vout[index].scriptPubKey;
+
+                        if (script.IsNullAssetTxDataScript()) {
+                            CNullAssetTxData data;
+                            std::string address;
+                            if (!AssetNullDataFromScript(script, data, address)) {
+                                error("%s : Failed to get null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            AssetType type;
+                            IsAssetNameValid(data.asset_name, type);
+
+                            // Handle adding qualifiers to addresses
+                            if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
+                                if (!assetsCache->RemoveQualifierAddress(data.asset_name, address, data.flag ? QualifierType::ADD_QUALIFIER : QualifierType::REMOVE_QUALIFIER)) {
+                                    error("%s : Failed to remove qualifier from address, Qualifier : %s, Flag Removing : %d, Address : %s",
+                                          __func__, data.asset_name, data.flag, address);
+                                    return DISCONNECT_FAILED;
+                                }
+                            // Handle adding restrictions to addresses
+                            } else if (type == AssetType::RESTRICTED) {
+                                if (!assetsCache->RemoveRestrictedAddress(data.asset_name, address, data.flag ? RestrictedType::FREEZE_ADDRESS : RestrictedType::UNFREEZE_ADDRESS)) {
+                                    error("%s : Failed to remove restriction from address, Restriction : %s, Flag Removing : %d, Address : %s",
+                                          __func__, data.asset_name, data.flag, address);
+                                    return DISCONNECT_FAILED;
+                                }
+                            }
+                        } else if (script.IsNullGlobalRestrictionAssetTxDataScript()) {
+                            CNullAssetTxData data;
+                            std::string address;
+                            if (!GlobalAssetNullDataFromScript(script, data)) {
+                                error("%s : Failed to get global null asset data from transaction. CTxOut : %s", __func__,
+                                      tx.vout[index].ToString());
+                                return DISCONNECT_FAILED;
+                            }
+
+                            if (!assetsCache->RemoveGlobalRestricted(data.asset_name, data.flag ? RestrictedType::GLOBAL_FREEZE : RestrictedType::GLOBAL_UNFREEZE)) {
+                                error("%s : Failed to remove global restriction from cache. Asset Name: %s, Flag Removing %d", __func__, data.asset_name, data.flag);
+                                return DISCONNECT_FAILED;
+                            }
+                        } else if (script.IsNullAssetVerifierTxDataScript()) {
+                            // These are handled in the undo restricted asset issuance, and restricted asset reissuance
+                            continue;
                         }
                     }
                 }
@@ -2063,6 +2220,9 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     if (AreMessagingDeployed())
         nVersion = VERSIONBITS_TOP_BITS_MESSAGING;
 
+    if (AreRestrictedAssetsDeployed())
+        nVersion = VERSIONBITS_TOP_BITS_RESTRICTED;
+
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
         ThresholdState state = VersionBitsState(pindexPrev, params, (Consensus::DeploymentPos)i, versionbitscache);
         if (state == THRESHOLD_LOCKED_IN || state == THRESHOLD_STARTED) {
@@ -2159,8 +2319,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTimeStart = GetTimeMicros();
 
     // Check it again in case a previous version let a bad block in
-    if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck, !fJustCheck,
-                    !fJustCheck)) // Force the check of asset duplicates when connecting the block
+    if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck, !fJustCheck)) // Force the check of asset duplicates when connecting the block
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
 
     // verify that the view's current state corresponds to the previous block
@@ -2301,11 +2460,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                 for (auto out : tx.vout)
                     if (out.scriptPubKey.IsAssetScript())
                         return state.DoS(100, error("%s : Received Block with tx that contained an asset when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-assets-not-active");
+                    else if (out.scriptPubKey.IsNullAsset())
+                        return state.DoS(100, error("%s : Received Block with tx that contained an null asset data tx when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-null-data-assets-not-active");
             }
 
             if (AreAssetsDeployed()) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                if (!Consensus::CheckTxAssets(tx, state, view, vReissueAssets, false, &setMessages, block.nTime, assetsCache)) {
+                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime)) {
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
                 }
@@ -2413,89 +2574,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             control.Add(vChecks);
         }
 
-        /** RVN START */
-        if (assetsCache) {
-            if (tx.IsNewAsset())
-            {
-                if (!AreAssetsDeployed())
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-asset-when-assets-is-not-active");
-
-                std::string strError = "";
-                if (!tx.VerifyNewAsset(strError))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-failed-verify");
-
-                CNewAsset asset;
-                std::string strAddress;
-                if (!AssetFromTransaction(tx, asset, strAddress))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-asset-serialization");
-
-
-                if(!IsNewOwnerTxValid(tx, asset.strName, strAddress, strError))
-                    return state.DoS(100, false, REJECT_INVALID, strError);
-
-                if (!asset.IsValid(strError, *assetsCache))
-                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-asset");
-            }
-            else if (tx.IsReissueAsset())
-            {
-                if (!AreAssetsDeployed())
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-when-assets-is-not-active");
-
-                std::string strError;
-                if (!tx.VerifyReissueAsset(strError))
-                    return state.DoS(100, false, REJECT_INVALID, strError);
-                
-                CReissueAsset reissue;
-                std::string strAddress;
-                if (!ReissueAssetFromTransaction(tx, reissue, strAddress))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset-serialization");
-
-                if (!reissue.IsValid(strError, *assetsCache))
-                    return state.DoS(100, false, REJECT_INVALID, strError);
-            }
-            else if (tx.IsNewUniqueAsset())
-            {
-                if (!AreAssetsDeployed())
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-when-assets-is-not-active");
-
-                std::string error;
-                if (!tx.VerifyNewUniqueAsset(error))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset-failed-verify");
-
-                for (auto out : tx.vout)
-                {
-                    if (IsScriptNewUniqueAsset(out.scriptPubKey))
-                    {
-                        CNewAsset asset;
-                        std::string strAddress;
-                        if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-connect-block-issue-unique-asset-serialization");
-
-                        std::string strError = "";
-                        if (!asset.IsValid(strError, *assetsCache))
-                            return state.DoS(100, false, REJECT_INVALID, strError);
-                    }
-                }
-            }
-            else if (tx.IsNewMsgChannelAsset())
-            {
-                if (!AreMessagingDeployed())
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-new-msgchannel-when-assets-is-not-active");
-
-                std::string strError = "";
-                if (!tx.VerifyNewMsgChannelAsset(strError))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-failed-verify");
-
-                CNewAsset asset;
-                std::string strAddress;
-                if (!MsgChannelAssetFromTransaction(tx, asset, strAddress))
-                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-serialization");
-
-                if (!asset.IsValid(strError, *assetsCache))
-                    return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID, "bad-txns-issue-msgchannel");
-            }
-        }
-        /** RVN END */
         if (fAddressIndex) {
             for (unsigned int k = 0; k < tx.vout.size(); k++) {
                 const CTxOut &out = tx.vout[k];
@@ -2906,6 +2984,8 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
             ThresholdState state = checker.GetStateFor(pindex, chainParams.GetConsensus(), warningcache[bit]);
             if (state == THRESHOLD_ACTIVE || state == THRESHOLD_LOCKED_IN) {
                 const std::string strWarning = strprintf(_("Warning: unknown new rules activated (versionbit %i)"), bit);
+                if (bit == 28) // DUMMY TEST BIT
+                    continue;
                 if (state == THRESHOLD_ACTIVE) {
                     DoWarning(strWarning);
                 } else {
@@ -2917,7 +2997,7 @@ void static UpdateTip(CBlockIndex *pindexNew, const CChainParams& chainParams) {
         for (int i = 0; i < 100 && pindex != nullptr; i++)
         {
             int32_t nExpectedVersion = ComputeBlockVersion(pindex->pprev, chainParams.GetConsensus());
-            if (pindex->nVersion > VERSIONBITS_LAST_OLD_BLOCK_VERSION && (pindex->nVersion & ~nExpectedVersion) != 0)
+            if (pindex->nVersion > nExpectedVersion)
                 ++nUpgraded;
             pindex = pindex->pprev;
         }
@@ -3104,7 +3184,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
 
     /** RVN START */
     // Initialize sets used from removing asset entries from the mempool
-    std::set<CAssetCacheNewAsset> setNewAssetsAddedInBlock;
+    ConnectedBlockAssetData assetDataFromBlock;
     /** RVN END */
 
     {
@@ -3128,15 +3208,10 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         int64_t nTimeConnectDone = GetTimeMicros();
         LogPrint(BCLog::BENCH, "  - Connect Block only time: %.2fms [%.2fs (%.2fms/blk)]\n", (nTimeConnectDone - nTimeConnectStart) * MILLI, nTimeConnectTotal * MICRO, nTimeConnectTotal * MILLI / nBlocksTotal);
 
-
         int64_t nTimeAssetsStart = GetTimeMicros();
         /** RVN START */
         // Get the newly created assets, from the connectblock assetCache so we can remove the correct assets from the mempool
-        setNewAssetsAddedInBlock = assetCache.setNewAssetsToAdd;
-        for (auto it : passets->setNewAssetsToAdd) {
-            if (setNewAssetsAddedInBlock.count(it))
-                setNewAssetsAddedInBlock.erase(it);
-        }
+        assetDataFromBlock = {assetCache.setNewAssetsToAdd, assetCache.setNewRestrictedVerifierToAdd, assetCache.setNewRestrictedAddressToAdd, assetCache.setNewRestrictedGlobalToAdd, assetCache.setNewQualifierAddressToAdd};
 
         // Remove all tx hashes, that were marked as reissued script from the mapReissuedTx.
         // Without this check, you wouldn't be able to reissue for those assets again, as this maps block it
@@ -3173,7 +3248,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     int64_t nTime5 = GetTimeMicros(); nTimeChainState += nTime5 - nTime4;
     LogPrint(BCLog::BENCH, "  - Writing chainstate: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime5 - nTime4) * MILLI, nTimeChainState * MICRO, nTimeChainState * MILLI / nBlocksTotal);
     // Remove conflicting transactions from the mempool.;
-    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, setNewAssetsAddedInBlock);
+    mempool.removeForBlock(blockConnecting.vtx, pindexNew->nHeight, assetDataFromBlock);
     disconnectpool.removeForBlock(blockConnecting.vtx);
     // Update chainActive & related variables.
     UpdateTip(pindexNew, chainparams);
@@ -3750,7 +3825,7 @@ static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state,
     return true;
 }
 
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckAssetDuplicate, bool fForceDuplicateCheck)
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
 {
     // These are checks that are independent of context.
 
@@ -3795,9 +3870,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
 
     // Check transactions
-    auto currentActiveAssetCache = GetCurrentAssetCache();
     for (const auto& tx : block.vtx)
-        if (!CheckTransaction(*tx, state, currentActiveAssetCache, true, false, fCheckAssetDuplicate, fForceDuplicateCheck))
+        if (!CheckTransaction(*tx, state))
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(), state.GetDebugMessage(), state.GetRejectReason()));
 
@@ -3953,6 +4027,13 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
         }
     }
 
+    if (IsRestrictedActive(pindexPrev->nHeight+1)) {
+        if (block.nVersion < VERSIONBITS_TOP_BITS_RESTRICTED) {
+            return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
+                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
+        }
+    }
+
     return true;
 }
 
@@ -3974,25 +4055,6 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
     for (const auto& tx : block.vtx) {
         if (!IsFinalTx(*tx, nHeight, nLockTimeCutoff)) {
             return state.DoS(10, false, REJECT_INVALID, "bad-txns-nonfinal", false, "non-final transaction");
-        }
-
-        if (tx->IsReissueAsset()) {
-            CReissueAsset reissue;
-            std::string strAddress;
-            if (!ReissueAssetFromTransaction(*tx, reissue, strAddress))
-                return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-asset");
-        }
-
-        if (tx->IsNewUniqueAsset()) {
-            for (auto out : tx->vout) {
-                CNewAsset asset;
-                std::string strAddress;
-
-                if (IsScriptNewUniqueAsset(out.scriptPubKey)) {
-                    if (!AssetFromScript(out.scriptPubKey, asset, strAddress))
-                        return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-asset");
-                }
-            }
         }
     }
 
@@ -4167,7 +4229,7 @@ static bool AcceptBlock(const std::shared_ptr<const CBlock>& pblock, CValidation
 
     auto currentActiveAssetCache = GetCurrentAssetCache();
     // Dont force the CheckBlock asset duplciates when checking from this state
-    if (!CheckBlock(block, state, chainparams.GetConsensus(), true, true, true, false) ||
+    if (!CheckBlock(block, state, chainparams.GetConsensus(), true, true) ||
         !ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindex->pprev, currentActiveAssetCache)) {
         if (state.IsInvalid() && !state.CorruptionPossible()) {
             pindex->nStatus |= BLOCK_FAILED_VALID;
@@ -4215,7 +4277,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
 
         // Ensure that CheckBlock() passes before calling AcceptBlock, as
         // belt-and-suspenders.
-        bool ret = CheckBlock(*pblock, state, chainparams.GetConsensus(), true, true, true, false);
+        bool ret = CheckBlock(*pblock, state, chainparams.GetConsensus(), true, true);
 
         LOCK(cs_main);
 
@@ -4255,7 +4317,7 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
     // NOTE: CheckBlockHeader is called by CheckBlock
     if (!ContextualCheckBlockHeader(block, state, chainparams, pindexPrev, GetAdjustedTime()))
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__, FormatStateMessage(state));
-    if (!CheckBlock(block, state, chainparams.GetConsensus(), fCheckPOW, fCheckMerkleRoot, true, true))
+    if (!CheckBlock(block, state, chainparams.GetConsensus(), fCheckPOW, fCheckMerkleRoot))
         return error("%s: Consensus::CheckBlock: %s", __func__, FormatStateMessage(state));
     if (!ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindexPrev, &assetCache))
         return error("%s: Consensus::ContextualCheckBlock: %s", __func__, FormatStateMessage(state));
@@ -4682,7 +4744,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
         if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), true, true, false, true)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
+        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), true, true)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
             return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                          pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
@@ -5543,6 +5605,18 @@ bool AreMessagingDeployed() {
     return fMessagesIsActive;
 }
 
+bool AreRestrictedAssetsDeployed() {
+
+    if (fRestrictedAssetsIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_RESTRICTED_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        fRestrictedAssetsIsActive = true;
+
+    return fRestrictedAssetsIsActive;
+}
+
 bool IsDGWActive(unsigned int nBlockNumber) {
     return nBlockNumber >= Params().DGWActivationBlock();
 }
@@ -5552,6 +5626,15 @@ bool IsMessagingActive(unsigned int nBlockNumber) {
         return nBlockNumber > Params().MessagingActivationBlock();
     } else {
         return AreMessagingDeployed();
+    }
+}
+
+bool IsRestrictedActive(unsigned int nBlockNumber)
+{
+    if (Params().RestrictedActivationBlock()) {
+        return nBlockNumber > Params().RestrictedActivationBlock();
+    } else {
+        return AreRestrictedAssetsDeployed();
     }
 }
 

@@ -778,6 +778,12 @@ void ReissueAssetDialog::onReissueAssetClicked()
         return;
     }
 
+    std::string strError = "";
+    if (!ContextualCheckReissueAsset(passets, reissueAsset, strError, *tx.tx.get())) {
+        showMessage("Invalid: " + QString::fromStdString(strError));
+        return;
+    }
+
     // Format confirmation message
     QStringList formatted;
 

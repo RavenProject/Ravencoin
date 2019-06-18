@@ -27,7 +27,25 @@ enum class AssetType
     MSGCHANNEL = 4,
     VOTE = 5,
     REISSUE = 6,
-    INVALID = 7
+    QUALIFIER = 7,
+    SUB_QUALIFIER = 8,
+    RESTRICTED = 9,
+    NULL_ADD_QUALIFIER = 10,
+    INVALID = 11
+};
+
+enum class QualifierType
+{
+    REMOVE_QUALIFIER = 0,
+    ADD_QUALIFIER = 1
+};
+
+enum class RestrictedType
+{
+    UNFREEZE_ADDRESS = 0,
+    FREEZE_ADDRESS= 1,
+    GLOBAL_UNFREEZE = 2,
+    GLOBAL_FREEZE = 3
 };
 
 int IntFromAssetType(AssetType type);
@@ -108,9 +126,6 @@ public:
     }
 
     bool IsNull() const;
-
-    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fCheckMempool = false, bool fCheckDuplicateInputs = true, bool fForceDuplicateCheck = true) const;
-
     std::string ToString();
 
     void ConstructTransaction(CScript& script) const;
@@ -215,6 +230,7 @@ public:
     CAssetTransfer(const std::string& strAssetName, const CAmount& nAmount, const std::string& message = "", const int64_t& nExpireTime = 0);
     bool IsValid(std::string& strError) const;
     void ConstructTransaction(CScript& script) const;
+    bool ContextualCheckAgainstVerifyString(CAssetsCache *assetCache, const std::string& address, std::string& strError) const;
 };
 
 class CReissueAsset
@@ -253,11 +269,67 @@ public:
     }
 
     CReissueAsset(const std::string& strAssetName, const CAmount& nAmount, const int& nUnits, const int& nReissuable, const std::string& strIPFSHash);
-    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fForceCheckPrimaryAssetExists = true) const;
     void ConstructTransaction(CScript& script) const;
     bool IsNull() const;
 };
 
+class CNullAssetTxData {
+public:
+    std::string asset_name;
+    int8_t flag; // on/off but could be used to determine multiple options later on
+
+    CNullAssetTxData()
+    {
+        SetNull();
+    }
+
+    void SetNull()
+    {
+        flag = -1;
+        asset_name = "";
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(asset_name);
+        READWRITE(flag);
+    }
+
+    CNullAssetTxData(const std::string& strAssetname, const int8_t& nFlag);
+    bool IsValid(std::string& strError, CAssetsCache& assetCache, bool fForceCheckPrimaryAssetExists) const;
+    void ConstructTransaction(CScript& script) const;
+    void ConstructGlobalRestrictionTransaction(CScript &script) const;
+};
+
+class CNullAssetTxVerifierString {
+
+public:
+    std::string verifier_string;
+
+    CNullAssetTxVerifierString()
+    {
+        SetNull();
+    }
+
+    void SetNull()
+    {
+        verifier_string ="";
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(verifier_string);
+    }
+
+    CNullAssetTxVerifierString(const std::string& verifier);
+    void ConstructTransaction(CScript& script) const;
+};
 
 /** THESE ARE ONLY TO BE USED WHEN ADDING THINGS TO THE CACHE DURING CONNECT AND DISCONNECT BLOCK */
 struct CAssetCacheNewAsset
@@ -368,6 +440,97 @@ struct CAssetCacheSpendAsset
         this->assetName = assetName;
         this->address = address;
         this->nAmount = nAmount;
+    }
+};
+
+struct CAssetCacheQualifierAddress {
+    std::string assetName;
+    std::string address;
+    QualifierType type;
+
+    CAssetCacheQualifierAddress(const std::string &assetName, const std::string &address, const QualifierType &type) {
+        this->assetName = assetName;
+        this->address = address;
+        this->type = type;
+    }
+
+    bool operator<(const CAssetCacheQualifierAddress &rhs) const {
+        return assetName < rhs.assetName || (assetName == rhs.assetName && address < rhs.address);
+    }
+
+    uint256 GetHash();
+};
+
+struct CAssetCacheRootQualifierChecker {
+    std::string rootAssetName;
+    std::string address;
+
+    CAssetCacheRootQualifierChecker(const std::string &assetName, const std::string &address) {
+        this->rootAssetName = assetName;
+        this->address = address;
+    }
+
+    bool operator<(const CAssetCacheRootQualifierChecker &rhs) const {
+        return rootAssetName < rhs.rootAssetName || (rootAssetName == rhs.rootAssetName && address < rhs.address);
+    }
+
+    uint256 GetHash();
+};
+
+struct CAssetCacheRestrictedAddress
+{
+    std::string assetName;
+    std::string address;
+    RestrictedType type;
+
+    CAssetCacheRestrictedAddress(const std::string& assetName, const std::string& address, const RestrictedType& type)
+    {
+        this->assetName = assetName;
+        this->address = address;
+        this->type = type;
+    }
+
+    bool operator<(const CAssetCacheRestrictedAddress& rhs) const
+    {
+        return assetName < rhs.assetName || (assetName == rhs.assetName && address < rhs.address);
+    }
+
+    uint256 GetHash();
+};
+
+struct CAssetCacheRestrictedGlobal
+{
+    std::string assetName;
+    RestrictedType type;
+
+    CAssetCacheRestrictedGlobal(const std::string& assetName, const RestrictedType& type)
+    {
+        this->assetName = assetName;
+        this->type = type;
+    }
+
+    bool operator<(const CAssetCacheRestrictedGlobal& rhs) const
+    {
+        return assetName < rhs.assetName;
+    }
+};
+
+struct CAssetCacheRestrictedVerifiers
+{
+    std::string assetName;
+    std::string verifier;
+    bool fUndoingRessiue;
+
+    CAssetCacheRestrictedVerifiers(const std::string& assetName, const std::string& verifier)
+    {
+        this->assetName = assetName;
+        this->verifier = verifier;
+        fUndoingRessiue = false;
+    }
+
+    bool operator<(const CAssetCacheRestrictedVerifiers& rhs) const
+    {
+        return assetName < rhs.assetName;
     }
 };
 

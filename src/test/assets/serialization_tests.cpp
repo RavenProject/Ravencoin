@@ -151,4 +151,28 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(strOwnerName == ownerName.str(), "Asset names weren't equal");
     }
 
+    BOOST_AUTO_TEST_CASE(restricted_assets_deserialization)
+    {
+        SelectParams(CBaseChainParams::MAIN);
+
+        CNewAsset restricted_asset("$RESTRICTED", 1000, 8, 0, 1, "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4");
+
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        restricted_asset.ConstructTransaction(scriptPubKey);
+
+        BOOST_CHECK_MESSAGE(IsScriptNewRestrictedAsset(scriptPubKey), "Script wasn't a restricted asset");
+    }
+
+    BOOST_AUTO_TEST_CASE(message_channel_deserialization)
+    {
+        SelectParams(CBaseChainParams::MAIN);
+
+        CNewAsset message_channel("RESTRICTED~CHANNEL", 1000, 0, 0, 1, "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4");
+
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        message_channel.ConstructTransaction(scriptPubKey);
+
+        BOOST_CHECK_MESSAGE(IsScriptNewMsgChannelAsset(scriptPubKey), "Script wasn't a message channel");
+    }
+
 BOOST_AUTO_TEST_SUITE_END()

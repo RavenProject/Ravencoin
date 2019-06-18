@@ -90,6 +90,7 @@ RAVEN_CORE_H = \
   assets/assettypes.h \
   assets/messages.h \
   assets/messagedb.h \
+  assets/restricteddb.h \
   assets/rewardrequestdb.h \
   assets/assetsnapshotdb.h \
   assets/payoutdb.h \
@@ -220,11 +221,12 @@ libraven_server_a_SOURCES = \
   assets/assets.cpp \
   assets/assetdb.cpp \
   assets/assettypes.cpp \
+  assets/messages.cpp \
+  assets/messagedb.cpp \
+  assets/restricteddb.cpp \
   assets/rewardrequestdb.cpp \
   assets/assetsnapshotdb.cpp \
   assets/payoutdb.cpp \
-  assets/messages.cpp \
-  assets/messagedb.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   policy/rbf.cpp \
@@ -376,7 +378,9 @@ libraven_consensus_a_SOURCES = \
   uint256.h \
   utilstrencodings.cpp \
   utilstrencodings.h \
-  version.h
+  version.h \
+  LibBoolEE.cpp \
+  LibBoolEE.h
 
 # common: shared between ravend, and raven-qt and non-server tools
 libraven_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)

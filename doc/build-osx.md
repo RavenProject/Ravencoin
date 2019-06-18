@@ -1,11 +1,11 @@
-Mac OS X Build Instructions and Notes
+macOS Build Instructions and Notes
 ====================================
 The commands in this guide should be executed in a Terminal application.
 The built-in one is located in `/Applications/Utilities/Terminal.app`.
 
 Preparation
 -----------
-Install the OS X command line tools:
+Install the macOS command line tools:
 
 `xcode-select --install`
 
@@ -16,7 +16,7 @@ Then install [Homebrew](https://brew.sh).
 Dependencies
 ----------------------
 
-    brew install automake berkeley-db4 libtool boost --c++11 miniupnpc openssl pkg-config protobuf python3 qt libevent
+    brew install automake berkeley-db4 libtool boost miniupnpc openssl pkg-config protobuf python qt libevent qrencode
 
 See [dependencies.md](dependencies.md) for a complete overview.
 

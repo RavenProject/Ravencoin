@@ -37,6 +37,7 @@
 #include <assets/assetdb.h>
 #include <assets/messages.h>
 #include <assets/messagedb.h>
+#include <assets/restricteddb.h>
 #include <assets/assetsnapshotdb.h>
 #include <assets/payoutdb.h>
 
@@ -212,6 +213,8 @@ extern CFeeRate minRelayTxFee;
 extern CAmount maxTxFee;
 /** A fee rate smaller than this is considered zero fee (for relaying, mining and transaction creation) */
 extern CFeeRate minRelayTxFeeV2;
+
+extern bool fUnitTest;
 
 
 /** If the tip is older than this (in seconds), the node is considered to be in initial block download. */
@@ -451,7 +454,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 /** Functions for validating blocks and updating the block tree */
 
 /** Context-independent validity checks */
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true, bool fCheckAssetDuplicate = true, bool fForceDuplicateCheck = true);
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
 
 /** Check a block is completely valid from start to finish (only works on top of our current best block, with cs_main held) */
 bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW = true, bool fCheckMerkleRoot = true);
@@ -504,18 +507,45 @@ extern CCoinsViewCache *pcoinsTip;
 extern CBlockTreeDB *pblocktree;
 
 /** RVN START */
-/** Global variable that point to the active assets database (protexted by cs_main) */
+
+/** Global variable that point to the active assets database (protected by cs_main) */
 extern CAssetsDB *passetsdb;
-/** Global variable that point to the active assets (protexted by cs_main) */
+
+/** Global variable that point to the active assets (protected by cs_main) */
 extern CAssetsCache *passets;
-/** Global variable that point to the assets LRU Cache (protexted by cs_main) */
+
+/** Global variable that point to the assets metadata LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
 
+/** Global variable that points to the subscribed channel LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, CMessage> *pMessagesCache;
+
+/** Global variable that points to the subscribed channel LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, int> *pMessageSubscribedChannelsCache;
+
+/** Global variable that points to the address seen LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, int> *pMessagesSeenAddressCache;
+
+/** Global variable that points to the messages database (protected by cs_main) */
 extern CMessageDB *pmessagedb;
+
+/** Global variable that points to the message channel database (protected by cs_main) */
 extern CMessageChannelDB *pmessagechanneldb;
+
+/** Global variable that points to the active restricted asset database (protected by cs_main) */
+extern CRestrictedDB *prestricteddb;
+
+/** Global variable that points to the asset verifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache;
+
+/** Global variable that points to the asset address qualifier LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsQualifierCache; // hash(address,qualifier_name) ->int8_t
+
+/** Global variable that points to the asset address restriction LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsRestrictionCache; // hash(address,qualifier_name) ->int8_t
+
+/** Global variable that points to the global asset restriction LRU Cache (protected by cs_main) */
+extern CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache;
 
 /** Global variable that point to the active reward request database (protected by cs_main) */
 extern CRewardRequestDB *pRewardRequestDb;
@@ -525,6 +555,7 @@ extern CAssetSnapshotDB *pAssetSnapshotDb;
 
 /** Global variable that point to the active payout database (protected by cs_main) */
 extern CPayoutDB *pPayoutDb;
+
 /** RVN END */
 
 /**
@@ -563,8 +594,11 @@ bool AreAssetsDeployed();
 
 bool AreMessagingDeployed();
 
+bool AreRestrictedAssetsDeployed();
+
 bool IsDGWActive(unsigned int nBlockNumber);
 bool IsMessagingActive(unsigned int nBlockNumber);
+bool IsRestrictedActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
 /** RVN END */
