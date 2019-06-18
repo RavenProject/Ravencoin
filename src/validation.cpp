@@ -3263,7 +3263,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
 
     //  Determine if the new block height has any pending reward payments,
     //      and if so, capture a snapshot of the relevant target assets.
-    if (pRewardRequestDb != nullptr) {
+    if (fRewardsEnabled && pRewardRequestDb != nullptr) {
         //  Retrieve the scheduled rewards
         std::set<CRewardRequest> dbEntriesToProcess;
 
