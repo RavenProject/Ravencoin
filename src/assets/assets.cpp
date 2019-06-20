@@ -801,6 +801,7 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
     vchReissueAsset.insert(vchReissueAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
     CDataStream ssReissue(vchReissueAsset, SER_NETWORK, PROTOCOL_VERSION);
 
+    
     try {
         ssReissue >> reissue;
     } catch(std::exception& e) {
@@ -5242,7 +5243,19 @@ bool CheckReissueAsset(const CReissueAsset& asset, std::string& strError)
         return false;
     }
 
-    if (asset.nReissuable != 0 && asset.nReissuable != 1) {
+    /// -------- TESTNET ONLY ---------- ///
+    // Testnet has a couple blocks that have invalid nReissue values before constriants were created
+    bool fSkip = false;
+    if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+        if (asset.strName == "GAMINGWEB" && asset.nReissuable == 109) {
+            fSkip = true;
+        } else if (asset.strName == "UINT8" && asset.nReissuable == -47) {
+            fSkip = true;
+        }
+    }
+    /// -------- TESTNET ONLY ---------- ///
+
+    if (!fSkip && asset.nReissuable != 0 && asset.nReissuable != 1) {
         strError = _("Unable to reissue asset: reissuable must be 0 or 1");
         return false;
     }
