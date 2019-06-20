@@ -125,7 +125,7 @@ UniValue schedulereward(const JSONRPCRequest& request) {
     if (!pRewardRequestDb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Reward Request database is not setup. Please restart wallet to try again"));
 
-    const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 1; //  Select to hopefully be far enough forward to be safe from forks
+    const int64_t FUTURE_BLOCK_HEIGHT_OFFSET = 61; //  Select to hopefully be far enough forward to be safe from forks
 
     //  Build our reward record for scheduling
     boost::uuids::random_generator uuidGenerator;
