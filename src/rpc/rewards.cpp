@@ -40,13 +40,44 @@
 #include "assets/assetsnapshotdb.h"
 #include "assets/payoutdb.h"
 
+//  Collect information about transactions that are pending commit
+struct PendingTransaction
+{
+    std::string id;
+    std::shared_ptr<CWalletTx> ptr;
+    std::shared_ptr<CReserveKey> reserveKey;
+    std::shared_ptr<UniValue> result;
+    CAmount fee;
+    CAmount totalAmt;
+    std::vector<CPayment> payments;
+
+    PendingTransaction(
+        std::string p_txnID,
+        std::shared_ptr<CWalletTx> p_txnPtr,
+        std::shared_ptr<CReserveKey> p_reserveKey,
+        std::shared_ptr<UniValue> p_result,
+        CAmount p_txnFee,
+        CAmount p_txnAmount,
+        std::vector<CPayment> p_payments
+    )
+    {
+        id = p_txnID;
+        ptr = p_txnPtr;
+        reserveKey = p_reserveKey;
+        result = p_result;
+        fee = p_txnFee;
+        totalAmt = p_txnAmount;
+        payments = std::move(p_payments);
+    }
+};
+
 CAmount AmountFromValue(bool p_isRVN, const UniValue& p_value);
 
 //  Transfer the specified amount of the asset from the source to the target
-bool InitiateTransfer(
+bool GenerateTransaction(
     CWallet * const p_walletPtr, const std::string & p_src,
     std::vector<CPayment> & p_payments,
-    UniValue & p_batchResult);
+    std::vector<PendingTransaction> & p_pendingTxns);
 
 UniValue schedulereward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 3)
@@ -492,14 +523,20 @@ UniValue executepayments(const JSONRPCRequest& request) {
                 "\nResult:\n"
                 "{\n"
                 "  reward_id: (string),\n"
+                "  error_txn_gen_failed: (string),\n"
+                "  error_nsf: (string),\n"
+                "  error_rejects: (string),\n"
+                "  error_db_update: (string),\n"
                 "  batch_results: [\n"
                 "    {\n"
                 "      transaction_id: (string),\n"
-                "      result: (string),\n"
+                "      error_txn_rejected: (string),\n"
+                "      total_amount: (number),\n"
+                "      fee: (number),\n"
                 "      expected_count: (number),\n"
                 "      actual_count: (number),\n"
                 "    }\n"
-                "  payout_db_update: (string),\n"
+                "  ]\n"
                 "}\n"
 
                 "\nExamples:\n"
@@ -545,37 +582,23 @@ UniValue executepayments(const JSONRPCRequest& request) {
         //
         //  Loop through the payout addresses and process them in batches
         //
-        const int MAX_PAYMENTS_PER_TRANSACTION = 50;
-        UniValue batchResults(UniValue::VARR);
-        bool atLeastOneTxnSucceeded = false;
+        const int MAX_PAYMENTS_PER_TRANSACTION = 200;
         std::vector<CPayment> paymentVector;
-        std::set<CPayment> updatedPayments;
+        std::vector<PendingTransaction> pendingTxns;
+        bool someGenerationsFailed = false;
 
         for (auto & payment : payoutEntry.payments) {
             paymentVector.push_back(payment);
 
             //  Issue a transaction if we've hit the max payment count
             if (paymentVector.size() >= MAX_PAYMENTS_PER_TRANSACTION) {
-                UniValue batchResult(UniValue::VOBJ);
-
                 //  Build a transaction for the current batch
-                if (InitiateTransfer(walletPtr, payoutEntry.srcAssetName, paymentVector, batchResult)) {
-                    atLeastOneTxnSucceeded = true;
-                }
-                else {
+                if (!GenerateTransaction(walletPtr, payoutEntry.srcAssetName, paymentVector, pendingTxns)) {
                     LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
                         payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
+
+                    someGenerationsFailed = true;
                 }
-
-                batchResults.push_back(batchResult);
-
-                //  Move the updated payments into a new set
-                for (auto const & payment : paymentVector) {
-                    updatedPayments.insert(payment);
-                }
-
-                //  Clear the vector after a batch is processed
-                paymentVector.clear();
             }
         }
 
@@ -583,46 +606,93 @@ UniValue executepayments(const JSONRPCRequest& request) {
         //  If any payments are left in the last batch, send them
         //
         if (paymentVector.size() > 0) {
-            UniValue batchResult(UniValue::VOBJ);
-
             //  Build a transaction for the current batch
-            if (InitiateTransfer(walletPtr, payoutEntry.srcAssetName, paymentVector, batchResult)) {
-                atLeastOneTxnSucceeded = true;
-            }
-            else {
+            if (!GenerateTransaction(walletPtr, payoutEntry.srcAssetName, paymentVector, pendingTxns)) {
                 LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
                     payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
+
+                    someGenerationsFailed = true;
             }
-
-            batchResults.push_back(batchResult);
-
-            //  Move the updated payments into a new set
-            for (auto const & payment : paymentVector) {
-                updatedPayments.insert(payment);
-            }
-
-            //  Clear the vector after a batch is processed
-            paymentVector.clear();
         }
 
-        //  Replace the existing set of payments with the updated one
-        payoutEntry.payments.clear();
-        for (auto const & payment : updatedPayments) {
-            payoutEntry.payments.insert(payment);
+        if (someGenerationsFailed) {
+            responseObj.push_back(Pair("error_txn_gen_failed", "Failed to generate transaction(s) for some payouts"));
         }
-        updatedPayments.clear();
 
-        responseObj.push_back(Pair("batch_results", batchResults));
+        //  Walk through the entire set of transactions to find out if the fees can be covered
+        CAmount totalFees = 0;
+        CAmount totalAmount = 0;
+        for (auto const & pendingTxn : pendingTxns) {
+            totalFees += pendingTxn.fee;
+            totalAmount += pendingTxn.totalAmt;
+        }
 
-        //  Write the payment back to the database if anything succeded
-        if (atLeastOneTxnSucceeded) {
-            if (pPayoutDb->UpdatePayoutEntry(payoutEntry)) {
-                responseObj.push_back(Pair("payout_db_update", "succeeded"));
+        CAmount curBalance = walletPtr->GetBalance();
+        if (curBalance < totalAmount + totalFees) {
+            //  Not Sufficient Funds
+            std::string strError = strprintf("Insufficient funds (%s) to cover payout (%s) as well as fees (%s)!",
+                FormatMoney(curBalance), FormatMoney(totalAmount), FormatMoney(totalFees));
+            LogPrintf("Error: %s\n", strError.c_str());
+
+            responseObj.push_back(Pair("error_nsf", strError));
+        }
+        else {
+            //
+            //  Sufficient Funds... Proceed with transaction commits
+            //
+            bool errorsOccurred = false;
+            bool atLeastOneTxnSucceeded = false;
+            UniValue batchResults(UniValue::VARR);
+
+            //  These will be replaced with processed versions after transactions are committed
+            payoutEntry.payments.clear();
+
+            for (auto & pendingTxn : pendingTxns) {
+                CValidationState state;
+
+                if (!walletPtr->CommitTransaction(*pendingTxn.ptr.get(), *pendingTxn.reserveKey.get(), g_connman.get(), state)) {
+                    LogPrintf("Error: The transaction was rejected! Reason given: %s\n", state.GetRejectReason());
+
+                    pendingTxn.result->push_back(Pair("error_txn_rejected", state.GetRejectReason()));
+
+                    errorsOccurred = true;
+                }
+                else {
+                    atLeastOneTxnSucceeded = true;
+
+                    //  Post-process the payments in the batch to flag them as completed
+                    for (auto & payment : pendingTxn.payments) {
+                        payment.completed = true;
+                    }
+                }
+
+                batchResults.push_back(*pendingTxn.result.get());
+
+                //  Move payments regardless of success or failure
+                for (auto const & payment : pendingTxn.payments) {
+                    payoutEntry.payments.insert(payment);
+                }
+                pendingTxn.payments.clear();
+            }
+
+            if (errorsOccurred) {
+                responseObj.push_back(Pair("error_rejects", "One or more transactions were rejected"));
+            }
+
+            responseObj.push_back(Pair("batch_results", batchResults));
+
+            //  Write the payment back to the database if anything succeeded
+            if (atLeastOneTxnSucceeded) {
+                if (!pPayoutDb->UpdatePayoutEntry(payoutEntry)) {
+                    LogPrintf("Failed to update payout DB payment status for reward '%s'!\n",
+                        payoutEntry.rewardID.c_str());
+
+                    responseObj.push_back(Pair("error_db_update", "Payout DB update failed"));
+                }
             }
             else {
-                LogPrintf("Failed to update payout DB payment status for reward '%s'!\n",
+                LogPrintf("All transactions failed for reward '%s'!\n",
                     payoutEntry.rewardID.c_str());
-                responseObj.push_back(Pair("payout_db_update", "failed"));
             }
         }
 
@@ -665,23 +735,26 @@ CAmount AmountFromValue(bool p_isRVN, const UniValue& p_value)
     return amount;
 }
 
-bool InitiateTransfer(
+bool GenerateTransaction(
     CWallet * const p_walletPtr, const std::string & p_src,
     std::vector<CPayment> & p_payments,
-    UniValue & p_batchResult)
+    std::vector<PendingTransaction> & p_pendingTxns)
 {
     bool fcnRetVal = false;
-    std::string transactionID;
     size_t expectedCount = 0;
     size_t actualCount = 0;
 
-    LogPrintf("Initiating batch transfer...\n");
+    LogPrintf("Generating transactions for payments...\n");
 
     // While condition is false to ensure a single pass through this logic
     do {
         //  Transfer the specified amount of the asset from the source to the target
         CCoinControl ctrl;
-        CWalletTx transaction;
+        std::shared_ptr<CWalletTx> txnPtr = std::make_shared<CWalletTx>();
+        std::shared_ptr<CReserveKey> reserveKeyPtr = std::make_shared<CReserveKey>(p_walletPtr);
+        std::shared_ptr<UniValue> batchResult = std::make_shared<UniValue>(UniValue::VOBJ);
+        CAmount nFeeRequired = 0;
+        CAmount totalPaymentAmt = 0;
 
         //  Handle payouts using RVN differently from those using an asset
         if (p_src == "RVN") {
@@ -694,7 +767,6 @@ bool InitiateTransfer(
             }
 
             std::vector<CRecipient> vDestinations;
-            CAmount totalPaymentAmt = 0;
 
             for (auto & payment : p_payments) {
                 //  Have we already processed this payment?
@@ -728,25 +800,15 @@ bool InitiateTransfer(
             }
 
             // Create and send the transaction
-            CReserveKey reservekey(p_walletPtr);
-            CAmount nFeeRequired;
             std::string strError;
             int nChangePosRet = -1;
 
-            if (!p_walletPtr->CreateTransaction(vDestinations, transaction, reservekey, nFeeRequired, nChangePosRet, strError, ctrl)) {
+            if (!p_walletPtr->CreateTransaction(vDestinations, *txnPtr.get(), *reserveKeyPtr.get(), nFeeRequired, nChangePosRet, strError, ctrl)) {
                 if (totalPaymentAmt + nFeeRequired > curBalance)
                     strError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
                 LogPrintf("%s\n", strError.c_str());
                 break;
             }
-
-            CValidationState state;
-            if (!p_walletPtr->CommitTransaction(transaction, reservekey, g_connman.get(), state)) {
-                LogPrintf("Error: The transaction was rejected! Reason given: %s\n", state.GetRejectReason());
-                break;
-            }
-
-            transactionID = transaction.GetHash().GetHex();
         }
         else {
             std::pair<int, std::string> error;
@@ -766,37 +828,29 @@ bool InitiateTransfer(
                 actualCount++;
             }
 
-            CReserveKey reservekey(p_walletPtr);
-            CAmount nRequiredFee;
-
             // Create the Transaction
-            if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vDestinations, "", error, transaction, reservekey, nRequiredFee)) {
+            if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vDestinations, "", error, *txnPtr.get(), *reserveKeyPtr.get(), nFeeRequired)) {
                 LogPrintf("Failed to create transfer asset transaction: %s\n", error.second.c_str());
-                break;
-            }
-
-            // Send the Transaction to the network
-            if (!SendAssetTransaction(p_walletPtr, transaction, reservekey, error, transactionID)) {
-                LogPrintf("Failed to send asset transaction: %s\n", error.second.c_str());
                 break;
             }
         }
 
         //  Indicate success
         fcnRetVal = true;
-        p_batchResult.push_back(Pair("transaction_id", transactionID));
+        std::string txnID = txnPtr->GetHash().GetHex();
 
-        //  Post-process the payments in the batch to flag them as completed
-        for (auto & payment : p_payments) {
-            payment.completed = true;
-        }
+        batchResult->push_back(Pair("transaction_id", txnID));
+        batchResult->push_back(Pair("total_amount", totalPaymentAmt));
+        batchResult->push_back(Pair("fee", nFeeRequired));
+        batchResult->push_back(Pair("expected_count", expectedCount));
+        batchResult->push_back(Pair("actual_count", actualCount));
+
+        p_pendingTxns.push_back(
+            PendingTransaction(txnID, txnPtr, reserveKeyPtr, batchResult, nFeeRequired, totalPaymentAmt, p_payments));
     } while (false);
 
-    LogPrintf("Batch transfer processing %s.\n",
+    LogPrintf("Transaction generation %s.\n",
         fcnRetVal ? "succeeded" : "failed");
-    p_batchResult.push_back(Pair("result", fcnRetVal ? "Succeeded" : "Failed"));
-    p_batchResult.push_back(Pair("expected_count", expectedCount));
-    p_batchResult.push_back(Pair("actual_count", actualCount));
 
     return fcnRetVal;
 }
