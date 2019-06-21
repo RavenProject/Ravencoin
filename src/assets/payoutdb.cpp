@@ -122,7 +122,12 @@ bool CPayoutDB::GeneratePayouts(
 
     //  If the asset is indivisible, and there are fewer rewards than individual ownerships,
     //      fail the distribution, since it is not possible to reward all ownerships equally.
-    if (srcIsIndivisible && p_rewardReq.totalPayoutAmt < p_assetSnapshot.totalAmountOwned) {
+    if (srcIsIndivisible
+        && (
+            p_rewardReq.totalPayoutAmt < p_assetSnapshot.totalAmountOwned   //  Fail, not enough
+            || p_rewardReq.totalPayoutAmt % p_assetSnapshot.totalAmountOwned != 0   //  Fail, can't distribute evenly
+        )
+    ) {
         LogPrintf("GeneratePayouts: Source asset '%s' is indivisible, and not enough reward value was provided for all ownership of '%s'\n",
             p_rewardReq.payoutSrc.c_str(), p_rewardReq.tgtAssetName.c_str());
         return false;
@@ -165,7 +170,7 @@ bool CPayoutDB::GeneratePayouts(
 
     //  Make sure we have some addresses to pay to
     if (nonExceptionPayments.size() == 0) {
-        LogPrintf("GeneratePayouts: Ownership of '%s' includes only exception addresses.\n",
+        LogPrintf("GeneratePayouts: Ownership of '%s' includes only exception/burn addresses.\n",
             p_rewardReq.tgtAssetName.c_str());
         return false;
     }
