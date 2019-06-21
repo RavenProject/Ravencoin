@@ -584,20 +584,30 @@ UniValue executepayments(const JSONRPCRequest& request) {
         //
         const int MAX_PAYMENTS_PER_TRANSACTION = 200;
         std::vector<CPayment> paymentVector;
+        std::vector<CPayment> unprocessedPaymentVector;
         std::vector<PendingTransaction> pendingTxns;
         bool someGenerationsFailed = false;
 
         for (auto & payment : payoutEntry.payments) {
-            paymentVector.push_back(payment);
+            //  Only process un-completed payments
+            if (!payment.completed) {
+                paymentVector.push_back(payment);
 
-            //  Issue a transaction if we've hit the max payment count
-            if (paymentVector.size() >= MAX_PAYMENTS_PER_TRANSACTION) {
-                //  Build a transaction for the current batch
-                if (!GenerateTransaction(walletPtr, payoutEntry.srcAssetName, paymentVector, pendingTxns)) {
-                    LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
-                        payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
+                //  Issue a transaction if we've hit the max payment count
+                if (paymentVector.size() >= MAX_PAYMENTS_PER_TRANSACTION) {
+                    //  Build a transaction for the current batch
+                    //  If this succeeds, the payment vector elements will have been moved into
+                    //      a new PendingTransaction element in the pendingTxns vector.
+                    if (!GenerateTransaction(walletPtr, payoutEntry.srcAssetName, paymentVector, pendingTxns)) {
+                        LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
+                            payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
 
-                    someGenerationsFailed = true;
+                        //  Move the unprocessed payments so they can be written back to the DB entry
+                        std::move(paymentVector.begin(), paymentVector.end(), unprocessedPaymentVector.end());
+                        paymentVector.clear();
+
+                        someGenerationsFailed = true;
+                    }
                 }
             }
         }
@@ -611,12 +621,24 @@ UniValue executepayments(const JSONRPCRequest& request) {
                 LogPrintf("Transaction generation failed for '%s' using source '%s'!\n",
                     payoutEntry.assetName.c_str(), payoutEntry.srcAssetName.c_str());
 
-                    someGenerationsFailed = true;
+                //  Move the unprocessed payments so they can be written back to the DB entry
+                std::move(paymentVector.begin(), paymentVector.end(), unprocessedPaymentVector.end());
+                paymentVector.clear();
+
+                someGenerationsFailed = true;
             }
         }
 
         if (someGenerationsFailed) {
             responseObj.push_back(Pair("error_txn_gen_failed", "Failed to generate transaction(s) for some payouts"));
+        }
+
+        //  If we haven't generated any transactions, bail out.
+        if (pendingTxns.size() == 0) {
+            LogPrintf("Failed to generate any transactions for reward '%s'!\n",
+                payoutEntry.rewardID.c_str());
+
+            throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Failed to execute payments specified reward"));
         }
 
         //  Walk through the entire set of transactions to find out if the fees can be covered
@@ -645,8 +667,18 @@ UniValue executepayments(const JSONRPCRequest& request) {
             UniValue batchResults(UniValue::VARR);
 
             //  These will be replaced with processed versions after transactions are committed
+            //  Already-completed payments will not be present in the pending transactions,
+            //      and so will intentionally be erased by this logic.
             payoutEntry.payments.clear();
 
+            //  Move all unprocessed payments back into the main set
+            for (auto const & payment : unprocessedPaymentVector) {
+                if (!payment.completed) {
+                    payoutEntry.payments.insert(payment);
+                }
+            }
+
+            //  Attempt to commit all generated transactions
             for (auto & pendingTxn : pendingTxns) {
                 CValidationState state;
 
@@ -660,17 +692,18 @@ UniValue executepayments(const JSONRPCRequest& request) {
                 else {
                     atLeastOneTxnSucceeded = true;
 
-                    //  Post-process the payments in the batch to flag them as completed
-                    for (auto & payment : pendingTxn.payments) {
-                        payment.completed = true;
-                    }
+                    //  Remove all successfully processed payments
+                    pendingTxn.payments.clear();
                 }
 
                 batchResults.push_back(*pendingTxn.result.get());
 
-                //  Move payments regardless of success or failure
+                //  Move any failed payments back into the main set
+                //  If the commit succeeded, the txn payments vector will be empty.
                 for (auto const & payment : pendingTxn.payments) {
-                    payoutEntry.payments.insert(payment);
+                    if (!payment.completed) {
+                        payoutEntry.payments.insert(payment);
+                    }
                 }
                 pendingTxn.payments.clear();
             }
@@ -768,12 +801,8 @@ bool GenerateTransaction(
 
             std::vector<CRecipient> vDestinations;
 
+            //  This should (due to external logic) only include pending payments
             for (auto & payment : p_payments) {
-                //  Have we already processed this payment?
-                if (payment.completed) {
-                    continue;
-                }
-
                 expectedCount++;
 
                 // Parse Raven address
@@ -814,12 +843,8 @@ bool GenerateTransaction(
             std::pair<int, std::string> error;
             std::vector< std::pair<CAssetTransfer, std::string> > vDestinations;
 
+            //  This should (due to external logic) only include pending payments
             for (auto & payment : p_payments) {
-                //  Have we already processed this payment?
-                if (payment.completed) {
-                    continue;
-                }
-
                 expectedCount++;
 
                 vDestinations.emplace_back(std::make_pair(
@@ -828,7 +853,7 @@ bool GenerateTransaction(
                 actualCount++;
             }
 
-            // Create the Transaction
+            // Create the Transaction (this also verifies dest address)
             if (!CreateTransferAssetTransaction(p_walletPtr, ctrl, vDestinations, "", error, *txnPtr.get(), *reserveKeyPtr.get(), nFeeRequired)) {
                 LogPrintf("Failed to create transfer asset transaction: %s\n", error.second.c_str());
                 break;
@@ -845,6 +870,7 @@ bool GenerateTransaction(
         batchResult->push_back(Pair("expected_count", expectedCount));
         batchResult->push_back(Pair("actual_count", actualCount));
 
+        //  This call results in the movement of all p_payments records into the PendingTransaction object
         p_pendingTxns.push_back(
             PendingTransaction(txnID, txnPtr, reserveKeyPtr, batchResult, nFeeRequired, totalPaymentAmt, p_payments));
     } while (false);

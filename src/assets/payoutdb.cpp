@@ -243,23 +243,26 @@ bool CPayoutDB::RemovePayoutEntry(const std::string & p_rewardID)
 
 bool CPayoutDB::UpdatePayoutEntry(const CPayoutDBEntry & p_payoutEntry)
 {
-    //  If all payments have been completed, delete the payout
-    bool allPaymentsCompleted = true;
+    //  If any payments are still pending, update the payout entry
+    bool pendingPaymentsPresent = false;
 
+    //  In practice, where completed payments have already been removed prior to this call,
+    //      this loop will exit quickly indicating that payments are still pending,
+    //      or exit quickly because it is empty.
     for (auto const & payment : p_payoutEntry.payments) {
         if (!payment.completed) {
-            allPaymentsCompleted = false;
+            pendingPaymentsPresent = true;
             break;
         }
     }
 
-    if (allPaymentsCompleted) {
-        //  All payments completed for the payout, so remove the payout
-        LogPrintf("UpdatePayoutEntry: Removing payout entry for reward '%s'\n", p_payoutEntry.rewardID.c_str());
-        return Erase(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID), true);
+    //  There are still pending payments, so write them back to the DB
+    if (pendingPaymentsPresent) {
+        LogPrintf("UpdatePayoutEntry: Updating payout entry for reward '%s'\n", p_payoutEntry.rewardID.c_str());
+        return Write(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID), p_payoutEntry);
     }
 
-    //  Otherwise, simply update the payout
-    LogPrintf("UpdatePayoutEntry: Updating payout entry for reward '%s'\n", p_payoutEntry.rewardID.c_str());
-    return Write(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID), p_payoutEntry);
+    //  Otherwise, everything has been completed, so erase the DB entry
+    LogPrintf("UpdatePayoutEntry: Removing payout entry for reward '%s'\n", p_payoutEntry.rewardID.c_str());
+    return Erase(std::make_pair(PAYOUT_FLAG, p_payoutEntry.rewardID), true);
 }
