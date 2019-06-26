@@ -55,4 +55,27 @@ BOOST_FIXTURE_TEST_SUITE(messaging_tests, BasicTestingSetup)
     }
 
 
+    BOOST_AUTO_TEST_CASE(message_encoding_check)
+    {
+        std::string hash1 = "0000002a7eea17df5164b3dd8f49bbc3dc268d92c39bf62e17b4e07326a11609";
+        std::string hash2 = "6d539a227b256e0fce13c57d75a9135aa133533d10a0bde055e9322c6bac9435";
+
+        std::string ipfs1 = "QmVUXZ1UiwGVuKMPuBagveHexGiRRTQLN8JDrBKauECSFQ";
+        std::string ipfs2 = "QmX6972nFtqu1Y15qy1jyQm5mkDQx7JSoF2LEAqtnvGYyv";
+
+        auto decoded1 = DecodeAssetData(hash1);
+        auto decoded2 = DecodeAssetData(hash2);
+
+        auto ipfsdecoded1 = DecodeAssetData(ipfs1);
+        auto ipfsdecoded2 = DecodeAssetData(ipfs2);
+
+        std::string error = "";
+        BOOST_CHECK_MESSAGE(IsHex(hash1) && hash1.length() == 64, "Test 1 Failed"); // need to check the inside of CheckEncoded for regular hashes
+        BOOST_CHECK_MESSAGE(IsHex(hash2) && hash2.length() == 64, "Test 2 Failed "); // need to check the inside of CheckEncoded for regular hashes
+        BOOST_CHECK_MESSAGE(CheckEncoded(ipfsdecoded1, error), "Test 3 Failed - " +  error);
+        BOOST_CHECK_MESSAGE(CheckEncoded(ipfsdecoded2, error), "Test 4 Failed - " +  error);
+
+    }
+
+
 BOOST_AUTO_TEST_SUITE_END()

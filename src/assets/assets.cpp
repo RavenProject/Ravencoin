@@ -4286,7 +4286,7 @@ bool CheckEncoded(const std::string& hash, std::string& strError) {
     }
 
     if (AreMessagingDeployed()) {
-        if (IsHex(hash) && encodedStr.length() == 64) {
+        if (IsHex(encodedStr) && encodedStr.length() == 64) {
             return true;
         }
     }
