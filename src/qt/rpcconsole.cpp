@@ -826,12 +826,26 @@ void RPCConsole::setMempoolSize(long numberOfTxs, size_t dynUsage)
         ui->mempoolSize->setText(QString::number(dynUsage/1000000.0, 'f', 2) + " MB");
 }
 
+bool ImportKeyConditionAccepted(QWidget * parent, QString& cmd)
+{
+
+    if(!cmd.trimmed().startsWith("importprivkey")) return true;
+
+    std::string msg = "the imported private keys are not recoverable with mnemonic words.\n"
+                      "you have to backup your private key in order  to use them as a recovery when needed\n"
+                      "or to backup the whole wallet.dat file";
+
+    return QMessageBox::warning(parent, "Warning", msg.c_str() , QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Ok;
+}
+
 void RPCConsole::on_lineEdit_returnPressed()
 {
     QString cmd = ui->lineEdit->text();
 
     if(!cmd.isEmpty())
     {
+        if(!ImportKeyConditionAccepted(this, cmd))
+            return;
         std::string strFilteredCmd;
         try {
             std::string dummy;
