@@ -1102,7 +1102,7 @@ UniValue transfer(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 6)
         throw std::runtime_error(
-                "transfer \"asset_name\" qty \"to_address\" \"message\" expire_time\n"
+                "transfer \"asset_name\" qty \"to_address\" \"message\" expire_time \"change_address\"\n"
                 + AssetActivationWarning() +
                 "\nTransfers a quantity of an owned asset to a given address"
 
@@ -1110,9 +1110,9 @@ UniValue transfer(const JSONRPCRequest& request)
                 "1. \"asset_name\"               (string, required) name of asset\n"
                 "2. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
-                "4. \"change_address\"           (string, optional, default = \"\") the transaction change will be sent to this address\n"
-                "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
-                "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
+                "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
+                "5. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
+                "6. \"change_address\"           (string, optional, default = \"\") the transaction change will be sent to this address\n"
 
                 "\nResult:\n"
                 "txid"
@@ -1148,38 +1148,41 @@ UniValue transfer(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
-    std::string change_address = "";
-    if(request.params.size() > 3) {
-        change_address = request.params[3].get_str();
+    bool fMessageCheck = false;
+    std::string message = "";
+    if (request.params.size() > 3) {
+        message = request.params[3].get_str();
+        if (!message.empty())
+            fMessageCheck = true;
+    }
 
-        CTxDestination change_dest = DecodeDestination(change_address);
-        if (!IsValidDestination(change_dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
+    int64_t expireTime = 0;
+    if (!message.empty()) {
+        if (request.params.size() > 4) {
+            expireTime = request.params[4].get_int64();
         }
     }
 
-    if (request.params.size() > 4) {
+    if (!message.empty() || expireTime > 0) {
         if (!AreMessagingDeployed()) {
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Unable to send messages until Messaging RIP5 is enabled"));
         }
     }
 
-    bool fMessageCheck = false;
-    std::string message = "";
-    if (request.params.size() > 4) {
-        fMessageCheck = true;
-        message = request.params[4].get_str();
-    }
-
-    int64_t expireTime = 0;
-    if (!message.empty()) {
-        if (request.params.size() > 5) {
-            expireTime = request.params[5].get_int64();
-        }
-    }
-
     if (fMessageCheck)
         CheckIPFSTxidMessage(message, expireTime);
+
+    std::string change_address = "";
+    if(request.params.size() > 5) {
+        change_address = request.params[5].get_str();
+
+        if (!change_address.empty()) {
+            CTxDestination change_dest = DecodeDestination(change_address);
+            if (!IsValidDestination(change_dest)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
+            }
+        }
+    }
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -2642,7 +2645,7 @@ static const CRPCCommand commands[] =
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
     { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address", "message", "expire_time"}},
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address", "message", "expire_time"}},
-    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "change_address", "message", "expire_time"}},
+    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time", "change_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
