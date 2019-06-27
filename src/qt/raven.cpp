@@ -649,6 +649,7 @@ int main(int argc, char *argv[])
     // - Needs to be done before createOptionsModel
 
     // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
+    LogPrintf("$$$$$$$$$$$ \n\n CH£AIN = %s \n\n", ChainNameFromCommandLine());
     try {
         SelectParams(ChainNameFromCommandLine());
     } catch(std::exception &e) {

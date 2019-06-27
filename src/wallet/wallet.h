@@ -1171,6 +1171,8 @@ public:
     bool SetHDChain(const CHDChain& chain, bool memonly);
     const CHDChain& GetHDChain() const { return hdChain; }
 
+    void UseBip44( bool b = true)    { hdChain.UseBip44(b);}
+
     /* Returns true if HD is enabled */
     bool IsHDEnabled() const;
 
