@@ -778,13 +778,13 @@ public:
     unsigned int nMasterKeyMaxID;
 
     // Create wallet with dummy database handle
-    CWallet(): dbw(new CWalletDBWrapper())
+    CWallet(): hdChain(this), dbw(new CWalletDBWrapper())
     {
         SetNull();
     }
 
     // Create wallet with passed-in database handle
-    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : dbw(std::move(dbw_in))
+    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : hdChain(this), dbw(std::move(dbw_in))
     {
         SetNull();
     }

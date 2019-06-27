@@ -32,6 +32,7 @@
 #include "ui_interface.h"
 #include "utilmoneystr.h"
 #include "wallet/fees.h"
+#include "wallet/bip39.h"
 
 #include <assert.h>
 
@@ -174,17 +175,12 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
 void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKey& secret, bool internal)
 {
     // for now we use a fixed keypath scheme of m/0'/0'/k
-    CKey seed;                     //seed (256bit)
     CExtKey masterKey;             //hd master key
     CExtKey accountKey;            //key at m/0'
     CExtKey chainChildKey;         //key at m/0'/0' (external) or m/0'/1' (internal)
     CExtKey childKey;              //key at m/0'/0'/<n>'
 
-    // try to get the seed
-    if (!GetKey(hdChain.seed_id, seed))
-        throw std::runtime_error(std::string(__func__) + ": seed not found");
-
-    masterKey.SetSeed(seed.begin(), seed.size());
+    masterKey.SetSeed(hdChain.vchSeed.data(), hdChain.vchSeed.size());
 
     // derive m/0'
     // use hardened derivation (child keys >= 0x80000000 are hardened after bip32)
@@ -1394,9 +1390,50 @@ CAmount CWallet::GetChange(const CTransaction& tx) const
 
 CPubKey CWallet::GenerateNewSeed()
 {
-    CKey key;
-    key.MakeNewKey(true);
-    return DeriveNewSeed(key);
+
+    CHDChain newHdChain(this);
+	//newHdChain.UseBip44(hdChain.IsBip44());
+    std::string strSeed = gArgs.GetArg("-hdseed", "not hex");
+
+
+    if(IsHex(strSeed)) { // that means gArgs.IsArgSet("-hdseed") == true
+		std::vector<unsigned char> vchSeed = ParseHex(strSeed);
+
+		SecureVector svchSeed(vchSeed.begin(), vchSeed.end());
+		CPubKey seed(vchSeed.begin(), vchSeed.end());
+
+		newHdChain.vchSeed = svchSeed;
+		newHdChain.seed_id = seed.GetID();
+		// TODO OMARI how to verify the seed
+
+		SetHDChain(newHdChain, false);
+
+		return seed;
+	}
+
+    if (gArgs.IsArgSet("-hdseed") && !IsHex(strSeed))
+       LogPrintf("CWallet::GenerateNewHDChain -- Incorrect seed, generating random one instead\n");
+
+	// NOTE: empty mnemonic means "generate a new one for me"
+	std::string strMnemonic = gArgs.GetArg("-mnemonic", "");
+	// NOTE: default mnemonic passphrase is an empty string
+	std::string strMnemonicPassphrase = gArgs.GetArg("-mnemonicpassphrase", "");
+
+	SecureString vchMnemonic(strMnemonic.begin(), strMnemonic.end());
+	SecureString vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
+
+	SecureVector& vchSeed = newHdChain.vchSeed;
+	if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, vchSeed))
+		throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
+
+	CPubKey seed(vchSeed.begin(), vchSeed.end());
+
+	newHdChain.seed_id = seed.GetID();
+
+	SetHDChain(newHdChain, false);
+
+	return seed;
+
 }
 
 CPubKey CWallet::DeriveNewSeed(const CKey& key)
@@ -1432,7 +1469,7 @@ bool CWallet::SetHDSeed(const CPubKey& seed)
     // store the keyid (hash160) together with
     // the child index counter in the database
     // as a hdchain object
-    CHDChain newHdChain;
+    CHDChain newHdChain(this);
     newHdChain.nVersion = CanSupportFeature(FEATURE_HD_SPLIT) ? CHDChain::VERSION_HD_CHAIN_SPLIT : CHDChain::VERSION_HD_BASE;
     newHdChain.seed_id = seed.GetID();
     SetHDChain(newHdChain, false);
@@ -4566,9 +4603,8 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
         walletInstance->SetMinVersion(FEATURE_NO_DEFAULT_KEY);
 
         // generate a new seed
-        CPubKey seed = walletInstance->GenerateNewSeed();
-        if (!walletInstance->SetHDSeed(seed))
-            throw std::runtime_error(std::string(__func__) + ": Storing HD seed failed");
+        walletInstance->GenerateNewSeed();
+
 
         // Top up the keypool
         if (!walletInstance->TopUpKeyPool()) {

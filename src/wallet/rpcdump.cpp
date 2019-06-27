@@ -659,16 +659,25 @@ UniValue dumpwallet(const JSONRPCRequest& request)
     CKeyID seed_id = pwallet->GetHDChain().seed_id;
     if (!seed_id.IsNull())
     {
-        CKey seed;
-        if (pwallet->GetKey(seed_id, seed)) {
-            CExtKey masterKey;
-            masterKey.SetSeed(seed.begin(), seed.size());
+		CExtKey masterKey;
+		masterKey.SetSeed(&pwallet->GetHDChain().vchSeed[0], pwallet->GetHDChain().vchSeed.size());
 
-            CRavenExtKey b58extkey;
-            b58extkey.SetKey(masterKey);
+		CRavenExtKey b58extkey;
+		b58extkey.SetKey(masterKey);
 
-            file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
-        }
+		file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+
+		if(pwallet->GetHDChain().vchMnemonic.size() > 0)
+		{
+			SecureString ssMnemonic(pwallet->GetHDChain().vchMnemonic.begin(), pwallet->GetHDChain().vchMnemonic.end());
+			SecureString ssMnemonicPassphrase(pwallet->GetHDChain().vchMnemonicPassphrase.begin(), pwallet->GetHDChain().vchMnemonicPassphrase.end());
+
+
+			//hdChainCurrent.GetMnemonic(ssMnemonic, ssMnemonicPassphrase);
+			file << "# HD seed: " << HexStr(pwallet->GetHDChain().vchSeed) << "\n";
+			file << "# mnemonic: " << ssMnemonic << "\n";
+			file << "# mnemonic passphrase: " << ssMnemonicPassphrase << "\n\n";
+		}
     }
     for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
         const CKeyID &keyid = it->second;
