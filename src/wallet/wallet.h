@@ -780,13 +780,13 @@ public:
     unsigned int nMasterKeyMaxID;
 
     // Create wallet with dummy database handle
-    CWallet(): dbw(new CWalletDBWrapper())
+    CWallet(): hdChain(this), dbw(new CWalletDBWrapper())
     {
         SetNull();
     }
 
     // Create wallet with passed-in database handle
-    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : dbw(std::move(dbw_in))
+    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : hdChain(this), dbw(std::move(dbw_in))
     {
         SetNull();
     }
@@ -1182,6 +1182,8 @@ public:
     /* Set the HD chain model (chain child index counters) */
     bool SetHDChain(const CHDChain& chain, bool memonly);
     const CHDChain& GetHDChain() const { return hdChain; }
+
+    void UseBip44( bool b = true)    { hdChain.UseBip44(b);}
 
     /* Returns true if HD is enabled */
     bool IsHDEnabled() const;

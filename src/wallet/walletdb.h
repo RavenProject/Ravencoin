@@ -11,6 +11,7 @@
 #include "primitives/transaction.h"
 #include "wallet/db.h"
 #include "key.h"
+#include "wallet/bip39.h"
 
 #include <list>
 #include <stdint.h>
@@ -65,12 +66,21 @@ public:
     uint32_t nInternalChainCounter;
     CKeyID seed_id; //!< seed hash160
 
+    bool bUse_bip44;
+    SecureVector vchMnemonic;
+    SecureVector vchMnemonicPassphrase;
+    SecureVector vchSeed;
+
     static const int VERSION_HD_BASE        = 1;
     static const int VERSION_HD_CHAIN_SPLIT = 2;
-    static const int CURRENT_VERSION        = VERSION_HD_CHAIN_SPLIT;
+    static const int VERSION_HD_BIP44_BIP39 = 3;
+    static const int CURRENT_VERSION        = VERSION_HD_BIP44_BIP39;
     int nVersion;
 
-    CHDChain() { SetNull(); }
+    CWallet* pwallet;
+
+    CHDChain(CWallet* pw): pwallet(pw) { SetNull(); }
+
     ADD_SERIALIZE_METHODS;
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action)
@@ -80,7 +90,26 @@ public:
         READWRITE(seed_id);
         if (this->nVersion >= VERSION_HD_CHAIN_SPLIT)
             READWRITE(nInternalChainCounter);
+
+        if(VERSION_HD_BIP44_BIP39 == nVersion) {
+            READWRITE(bUse_bip44);
+            READWRITE(vchMnemonic);
+            READWRITE(vchMnemonicPassphrase);
+            READWRITE(vchSeed);
+        }
+        else
+        {
+        	// when loading an old bip32 only wallet, get vchSeed from seed_id
+        	if(ser_action.ForRead())
+        	{
+        		SetSeedFromSeedId();
+        	}
+        }
+
     }
+
+    void SetSeedFromSeedId();
+
 
     void SetNull()
     {
@@ -89,6 +118,40 @@ public:
         nInternalChainCounter = 0;
         seed_id.SetNull();
     }
+
+    bool IsNull() { return seed_id.IsNull();}
+
+
+    void UseBip44( bool b = true)   { bUse_bip44 = b;}
+    bool IsBip44() const            { return bUse_bip44 == true;}
+
+
+    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, SecureVector& vchSeed)
+ 	{
+ 		SecureString ssMnemonicTmp = ssMnemonic;
+
+		// can't (re)set mnemonic if seed was already set
+		if (!IsNull())
+			return false;
+
+		// empty mnemonic i.e. "generate a new one"
+		if (ssMnemonic.empty()) {
+			ssMnemonicTmp = CMnemonic::Generate(bUse_bip44 ? 128 : 256);
+		}
+		// NOTE: default mnemonic passphrase is an empty string
+
+		// printf("mnemonic: %s\n", ssMnemonicTmp.c_str());
+		if (!CMnemonic::Check(ssMnemonicTmp)) {
+			throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
+		}
+
+		CMnemonic::ToSeed(ssMnemonicTmp, ssMnemonicPassphrase, vchSeed);
+
+ 		vchMnemonic = SecureVector(ssMnemonicTmp.begin(), ssMnemonicTmp.end());
+ 		vchMnemonicPassphrase = SecureVector(ssMnemonicPassphrase.begin(), ssMnemonicPassphrase.end());
+
+ 		return true;
+ 	}
 };
 
 class CKeyMetadata
