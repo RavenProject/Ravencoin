@@ -1258,7 +1258,7 @@ UniValue verifychain(const JSONRPCRequest& request)
 }
 
 /** Implementation of IsSuperMajority with better feedback */
-// static UniValue SoftForkMajorityDesc(int version, CBlockIndex* pindex, const Consensus::Params& consensusParams)
+// static UniValue SoftForkMajorityDesc(int version, CBlockIndex* pindex, const Consensus::ConsensusParams& consensusParams)
 // {
 //     UniValue rv(UniValue::VOBJ);
 //     bool activated = false;
@@ -1278,7 +1278,7 @@ UniValue verifychain(const JSONRPCRequest& request)
 //     return rv;
 // }
 
-// static UniValue SoftForkDesc(const std::string &name, int version, CBlockIndex* pindex, const Consensus::Params& consensusParams)
+// static UniValue SoftForkDesc(const std::string &name, int version, CBlockIndex* pindex, const Consensus::ConsensusParams& consensusParams)
 // {
 //     UniValue rv(UniValue::VOBJ);
 //     rv.push_back(Pair("id", name));
@@ -1287,7 +1287,7 @@ UniValue verifychain(const JSONRPCRequest& request)
 //     return rv;
 // }
 
-static UniValue BIP9SoftForkDesc(const Consensus::Params& consensusParams, Consensus::DeploymentPos id)
+static UniValue BIP9SoftForkDesc(const Consensus::ConsensusParams& consensusParams, Consensus::DeploymentPos id)
 {
     UniValue rv(UniValue::VOBJ);
     const ThresholdState thresholdState = VersionBitsTipState(consensusParams, id);
@@ -1319,7 +1319,7 @@ static UniValue BIP9SoftForkDesc(const Consensus::Params& consensusParams, Conse
     return rv;
 }
 
-void BIP9SoftForkDescPushBack(UniValue& bip9_softforks, const std::string &name, const Consensus::Params& consensusParams, Consensus::DeploymentPos id)
+void BIP9SoftForkDescPushBack(UniValue& bip9_softforks, const std::string &name, const Consensus::ConsensusParams& consensusParams, Consensus::DeploymentPos id)
 {
     // Deployments with timeout value of 0 are hidden.
     // A timeout value of 0 guarantees a softfork will never be activated.
@@ -1417,7 +1417,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
         }
     }
 
-    const Consensus::Params& consensusParams = Params().GetConsensus();
+    const Consensus::ConsensusParams& consensusParams = Params().GetConsensus();
     //CBlockIndex* tip = chainActive.Tip();
 
 

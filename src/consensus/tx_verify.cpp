@@ -8,6 +8,7 @@
 #include <util.h>
 #include <validation.h>
 #include "tx_verify.h"
+#include "chainparams.h"
 
 #include "consensus.h"
 #include "primitives/transaction.h"

@@ -13,6 +13,7 @@
 #include <string>
 #include <set>
 
+struct NewAssetInfo;
 class CBlockIndex;
 class CCoinsViewCache;
 class CTransaction;

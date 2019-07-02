@@ -16,7 +16,7 @@
 int32_t TestTime(int nHeight)
 { return 1415926536 + 600 * nHeight; }
 
-static const Consensus::Params paramsDummy = Consensus::Params();
+static const Consensus::ConsensusParams paramsDummy = Consensus::ConsensusParams();
 
 class TestConditionChecker : public AbstractThresholdConditionChecker
 {
@@ -24,19 +24,19 @@ private:
     mutable ThresholdConditionCache cache;
 
 public:
-    int64_t BeginTime(const Consensus::Params &params) const override
+    int64_t BeginTime(const Consensus::ConsensusParams &params) const override
     { return TestTime(10000); }
 
-    int64_t EndTime(const Consensus::Params &params) const override
+    int64_t EndTime(const Consensus::ConsensusParams &params) const override
     { return TestTime(20000); }
 
-    int Period(const Consensus::Params &params) const override
+    int Period(const Consensus::ConsensusParams &params) const override
     { return 1000; }
 
-    int Threshold(const Consensus::Params &params) const override
+    int Threshold(const Consensus::ConsensusParams &params) const override
     { return 900; }
 
-    bool Condition(const CBlockIndex *pindex, const Consensus::Params &params) const override
+    bool Condition(const CBlockIndex *pindex, const Consensus::ConsensusParams &params) const override
     { return (pindex->nVersion & 0x100); }
 
     ThresholdState GetStateFor(const CBlockIndex *pindexPrev) const
@@ -252,7 +252,7 @@ BOOST_FIXTURE_TEST_SUITE(versionbits_tests, TestingSetup)
 
         // Sanity checks of version bit deployments
         const auto chainParams = CreateChainParams(CBaseChainParams::MAIN);
-        const Consensus::Params &mainnetParams = chainParams->GetConsensus();
+        const Consensus::ConsensusParams &mainnetParams = chainParams->GetConsensus();
         for (int i = 0; i < (int) Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++)
         {
             uint32_t bitmask = VersionBitsMask(mainnetParams, (Consensus::DeploymentPos) i);
@@ -284,7 +284,7 @@ BOOST_FIXTURE_TEST_SUITE(versionbits_tests, TestingSetup)
         // Check that ComputeBlockVersion will set the appropriate bit correctly
         // on mainnet.
         const auto chainParams = CreateChainParams(CBaseChainParams::MAIN);
-        const Consensus::Params &mainnetParams = chainParams->GetConsensus();
+        const Consensus::ConsensusParams &mainnetParams = chainParams->GetConsensus();
 
         // Use the TESTDUMMY deployment for testing purposes.
         int64_t bit = mainnetParams.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit;

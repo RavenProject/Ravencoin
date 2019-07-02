@@ -1695,8 +1695,8 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
     }
 
     // If we got the address and the assetName, proceed to remove it from the database, and in memory objects
-    if (address != "" && assetName != "" && nAmount > 0) {
-        if (fAssetIndex) {
+    if (address != "" && assetName != "") {
+        if (fAssetIndex && nAmount > 0) {
             CAssetCacheSpendAsset spend(assetName, address, nAmount);
             if (GetBestAssetAddressAmount(*this, assetName, address)) {
                 auto pair = make_pair(assetName, address);

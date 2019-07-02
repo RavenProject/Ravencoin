@@ -58,7 +58,7 @@ public:
         MAX_BASE58_TYPES
     };
 
-    const Consensus::Params& GetConsensus() const { return consensus; }
+    const Consensus::ConsensusParams& GetConsensus() const { return consensus; }
     const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
     int GetDefaultPort() const { return nDefaultPort; }
 
@@ -115,17 +115,20 @@ public:
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
     unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
 
+
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
     int MinReorganizationAge() const { return nMinReorganizationAge; }
 
     int GetAssetActivationHeight() const { return nAssetActivationHeight; }
+
+    uint32_t X16RV2ActivationTime() const { return nX16RV2ActivationTime; }
     /** RVN End **/
 
 protected:
     CChainParams() {}
 
-    Consensus::Params consensus;
+    Consensus::ConsensusParams consensus;
     CMessageHeader::MessageStartChars pchMessageStart;
     int nDefaultPort;
     uint64_t nPruneAfterHeight;
@@ -176,6 +179,8 @@ protected:
     int nMinReorganizationAge;
 
     int nAssetActivationHeight;
+
+    uint32_t nX16RV2ActivationTime;
     /** RVN End **/
 };
 
