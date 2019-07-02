@@ -1,5 +1,5 @@
 # Copyright (c) 2013-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -82,12 +82,57 @@ endif
 RAVEN_CORE_H = \
   addrdb.h \
   addressindex.h \
+  algo/sph_groestl.h \
+  algo/sph_types.h \
+  algo/sph_blake.h \
+  algo/sph_bmw.h \
+  algo/sph_jh.h \
+  algo/sph_keccak.h \
+  algo/sph_skein.h \
+  algo/sph_luffa.h \
+  algo/sph_cubehash.h \
+  algo/sph_simd.h \
+  algo/sph_echo.h \
+  algo/sph_shavite.h \
+  algo/sph_sha2.h \
+  algo/sph_haval.h \
+  algo/sph_tiger.h \
+  algo/lyra2.h \
+  algo/sponge.h \
+  algo/gost_streebog.h \
+  algo/hash_algos.h \
+  algo/groestl.c \
+  algo/blake.c \
+  algo/bmw.c \
+  algo/cubehash.c \
+  algo/echo.c \
+  algo/jh.c \
+  algo/keccak.c \
+  algo/luffa.c \
+  algo/shavite.c \
+  algo/simd.c \
+  algo/skein.c \
+  algo/hamsi.c \
+  algo/whirlpool.c \
+  algo/shabal.c \
+  algo/fugue.c \
+  algo/sha2.c \
+  algo/extra.c \
+  algo/extra.h \
+  algo/sph_sha2big.c \
+  algo/haval.c \
+  algo/tiger.cpp \
+  algo/lyra2.cpp \
+  algo/sponge.cpp \
+  algo/sph_sha2.c \
+  algo/gost_streebog.c \
   spentindex.h \
   timestampindex.h \
   addrman.h \
   assets/assets.h \
   assets/assetdb.h \
   assets/assettypes.h \
+  assets/restricteddb.h \
   base58.h \
   bloom.h \
   blockencodings.h \
@@ -281,49 +326,12 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/hmac_sha512.h \
   crypto/ripemd160.cpp \
   crypto/aes_helper.c \
-  crypto/blake.c \
-  crypto/bmw.c \
-  crypto/cubehash.c \
-  crypto/echo.c \
-  crypto/groestl.c \
-  crypto/jh.c \
-  crypto/keccak.c \
-  crypto/luffa.c \
-  crypto/shavite.c \
-  crypto/simd.c \
-  crypto/skein.c \
-  crypto/sph_hamsi.c \
-  crypto/sph_hamsi_helper.c \
-  crypto/sph_fugue.c \
-  crypto/sph_shabal.c \
-  crypto/sph_whirlpool.c \
-  crypto/sph_sha2.c \
-  crypto/sph_sha512.c \
-  crypto/ripemd160.h \
   crypto/sha1.cpp \
   crypto/sha1.h \
   crypto/sha256.cpp \
   crypto/sha256.h \
   crypto/sha512.h \
-  crypto/sph_blake.h \
-  crypto/sph_bmw.h \
-  crypto/sph_cubehash.h \
-  crypto/sph_echo.h \
-  crypto/sph_groestl.h \
-  crypto/sph_jh.h \
-  crypto/sph_keccak.h \
-  crypto/sph_luffa.h \
-  crypto/sph_shavite.h \
-  crypto/sph_simd.h \
-  crypto/sph_skein.h \
-  crypto/sph_hamsi.h \
-  crypto/sph_fugue.h \
-  crypto/sph_shabal.h \
-  crypto/sph_whirlpool.h \
-  crypto/sph_sha2.h \
-  crypto/sph_types.h \
-  crypto/sha512.cpp \
-  crypto/sha512.h
+  crypto/sha512.cpp
 
 if USE_ASM
 crypto_libraven_crypto_a_SOURCES += crypto/sha256_sse4.cpp
@@ -342,6 +350,7 @@ libraven_consensus_a_SOURCES = \
   consensus/validation.h \
   hash.cpp \
   hash.h \
+  algo/hashx21s.h \
   prevector.h \
   primitives/block.cpp \
   primitives/block.h \
@@ -364,7 +373,8 @@ libraven_consensus_a_SOURCES = \
   uint256.h \
   utilstrencodings.cpp \
   utilstrencodings.h \
-  version.h
+  version.h \
+  $(RAVEN_CORE_H)
 
 # common: shared between ravend, and raven-qt and non-server tools
 libraven_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)

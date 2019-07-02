@@ -58,7 +58,7 @@ public:
         MAX_BASE58_TYPES
     };
 
-    const Consensus::Params& GetConsensus() const { return consensus; }
+    const Consensus::ConsensusParams& GetConsensus() const { return consensus; }
     const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
     int GetDefaultPort() const { return nDefaultPort; }
 
@@ -102,6 +102,7 @@ public:
     const std::string& GlobalBurnAddress() const { return strGlobalBurnAddress; }
 
     unsigned int DGWActivationBlock() const { return nDGWActivationBlock; }
+    uint32_t X16RV2ActivationTime() const { return nX16RV2ActivationTime; }
 
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
@@ -111,7 +112,7 @@ public:
 protected:
     CChainParams() {}
 
-    Consensus::Params consensus;
+    Consensus::ConsensusParams consensus;
     CMessageHeader::MessageStartChars pchMessageStart;
     int nDefaultPort;
     uint64_t nPruneAfterHeight;
@@ -144,6 +145,7 @@ protected:
     std::string strGlobalBurnAddress;
 
     unsigned int nDGWActivationBlock;
+    uint32_t nX16RV2ActivationTime;
 
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;

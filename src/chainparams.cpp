@@ -138,6 +138,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1540944000; // Oct 31, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1572480000; // Oct 31, 2019
 
+
+
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
 
@@ -168,7 +170,7 @@ public:
 
         genesis = CreateGenesisBlock(1514999494, 25023712, 0x1e00ffff, 4, 5000 * COIN);
 
-        consensus.hashGenesisBlock = genesis.GetHash();
+        consensus.hashGenesisBlock = genesis.GetX16RHash();
 
         assert(consensus.hashGenesisBlock == uint256S("0000006b444bc2f2ffe627be9d9e7e7a0730000870ef6eb6da46c8eae389df90"));
         assert(genesis.hashMerkleRoot == uint256S("28ff00a867739a352523808d301f504bc4547699398d70faf2266a8bae5f3516"));
@@ -223,6 +225,7 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 338778;
+        nX16RV2ActivationTime = 1569945600; //Tue Oct 01 2019 16:00:00 UTC
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
@@ -292,6 +295,7 @@ public:
 //        for (int i=0;i<40000000;i++) {
 //            genesis = CreateGenesisBlock(nGenesisTime, i, 0x1e00ffff, 2, 5000 * COIN);
 //            //genesis.hashPrevBlock = TempHashHolding;
+//            // Depending on when the timestamp is on the genesis block. You will need to use GetX16RHash or GetX16RV2Hash. Replace GetHash() with these below
 //            consensus.hashGenesisBlock = genesis.GetHash();
 //
 //            arith_uint256 BestBlockHashArith = UintToArith256(BestBlockHash);
@@ -337,7 +341,7 @@ public:
 //        /////////////////////////////////////////////////////////////////
 
         genesis = CreateGenesisBlock(nGenesisTime, 15615880, 0x1e00ffff, 2, 5000 * COIN);
-        consensus.hashGenesisBlock = genesis.GetHash();
+        consensus.hashGenesisBlock = genesis.GetX16RHash();
 
         //Test MerkleRoot and GenesisBlock
         assert(consensus.hashGenesisBlock == uint256S("0x000000ecfc5e6324a079542221d00e10362bdc894d56500c414060eea8a3ad5a"));
@@ -395,6 +399,7 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
+        nX16RV2ActivationTime = 1569931200;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
@@ -430,6 +435,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 999999999999ULL;
+
+
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -506,7 +513,7 @@ public:
 
 
         genesis = CreateGenesisBlock(1524179366, 1, 0x207fffff, 4, 5000 * COIN);
-        consensus.hashGenesisBlock = genesis.GetHash();
+        consensus.hashGenesisBlock = genesis.GetX16RHash();
 
         assert(consensus.hashGenesisBlock == uint256S("0x0b2c703dc93bb63a36c4e33b85be4855ddbca2ac951a7a0a29b8de0408200a3c "));
         assert(genesis.hashMerkleRoot == uint256S("0x28ff00a867739a352523808d301f504bc4547699398d70faf2266a8bae5f3516"));
@@ -554,6 +561,7 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
+        nX16RV2ActivationTime = 1566571889;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;

@@ -385,7 +385,7 @@ void JSONRPCRequest::parse(const UniValue& valRequest)
     else if (valParams.isNull())
         params = UniValue(UniValue::VARR);
     else
-        throw JSONRPCError(RPC_INVALID_REQUEST, "Params must be an array or object");
+        throw JSONRPCError(RPC_INVALID_REQUEST, "ConsensusParams must be an array or object");
 }
 
 bool IsDeprecatedRPCEnabled(const std::string& method)
