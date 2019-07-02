@@ -6,7 +6,7 @@
 """Test the invalidateblock RPC."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (connect_nodes_bi, sync_blocks, time, assert_equal)
 
 class InvalidateTest(RavenTestFramework):
     def set_test_params(self):

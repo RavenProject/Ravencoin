@@ -13,12 +13,46 @@ each test.
 """
 
 from test_framework.test_framework import ComparisonTestFramework
-from test_framework.util import *
-from test_framework.comptool import TestManager, TestInstance, RejectResult
-from test_framework.blocktools import *
+from test_framework.util import assert_equal
+from test_framework.comptool import (TestManager, TestInstance, RejectResult)
+from test_framework.blocktools import (CBlock, 
+                                        copy, 
+                                        NetworkThread, 
+                                        create_transaction, 
+                                        create_coinbase, 
+                                        create_block, 
+                                        CBlockHeader,
+                                        MAX_BLOCK_BASE_SIZE,
+                                        CTxIn,
+                                        CTxOut, 
+                                        COutPoint,
+                                        get_legacy_sigopcount_block,
+                                        uint256_from_compact,
+                                        COIN)
 import time
 from test_framework.key import CECKey
-from test_framework.script import *
+from test_framework.script import (CTransaction, 
+                                    CScript, 
+                                    OP_TRUE, 
+                                    SignatureHash, 
+                                    SIGHASH_ALL, 
+                                    OP_CHECKSIG, 
+                                    OP_CHECKMULTISIG, 
+                                    OP_CHECKMULTISIGVERIFY,
+                                    OP_CHECKSIGVERIFY,
+                                    OP_2DUP,
+                                    hash160,
+                                    OP_HASH160,
+                                    OP_EQUAL,
+                                    ser_uint256,
+                                    uint256_from_str,
+                                    MAX_SCRIPT_ELEMENT_SIZE,
+                                    OP_IF,
+                                    OP_INVALIDOPCODE,
+                                    OP_ELSE,
+                                    OP_ENDIF,
+                                    OP_FALSE, 
+                                    OP_RETURN)
 import struct
 
 class PreviousSpendableOutput():
@@ -88,7 +122,7 @@ class FullBlockTest(ComparisonTestFramework):
         if (scriptPubKey[0] == OP_TRUE):  # an anyone-can-spend
             tx.vin[0].scriptSig = CScript()
             return
-        (sighash, err) = SignatureHash(spend_tx.vout[n].scriptPubKey, tx, 0, SIGHASH_ALL)
+        (sighash, _) = SignatureHash(spend_tx.vout[n].scriptPubKey, tx, 0, SIGHASH_ALL)
         tx.vin[0].scriptSig = CScript([self.coinbase_key.sign(sighash) + bytes(bytearray([SIGHASH_ALL]))])
 
     def create_and_sign_transaction(self, spend_tx, n, value, script=CScript([OP_TRUE])):
@@ -561,7 +595,7 @@ class FullBlockTest(ComparisonTestFramework):
             # second input is corresponding P2SH output from b39
             tx.vin.append(CTxIn(COutPoint(b39.vtx[i].sha256, 0), b''))
             # Note: must pass the redeem_script (not p2sh_script) to the signature hash function
-            (sighash, err) = SignatureHash(redeem_script, tx, 1, SIGHASH_ALL)
+            (sighash, _) = SignatureHash(redeem_script, tx, 1, SIGHASH_ALL)
             sig = self.coinbase_key.sign(sighash) + bytes(bytearray([SIGHASH_ALL]))
             scriptSig = CScript([sig, redeem_script])
 
@@ -655,7 +689,7 @@ class FullBlockTest(ComparisonTestFramework):
         self.tip = b46
         assert 46 not in self.blocks
         self.blocks[46] = b46
-        s = ser_uint256(b46.hashMerkleRoot)
+        ser_uint256(b46.hashMerkleRoot)
         yield rejected(RejectResult(16, b'bad-blk-length'))
 
         # A block with invalid work
@@ -690,9 +724,9 @@ class FullBlockTest(ComparisonTestFramework):
 
         # A block with two coinbase txns
         tip(44)
-        b51 = block(51)
+        block(51)
         cb2 = create_coinbase(51, self.coinbase_pubkey)
-        b51 = update_block(51, [cb2])
+        update_block(51, [cb2])
         yield rejected(RejectResult(16, b'bad-cb-multiple'))
 
         # A block w/ duplicate txns
@@ -804,20 +838,20 @@ class FullBlockTest(ComparisonTestFramework):
 
         # tx with prevout.n out of range
         tip(57)
-        b58 = block(58, spend=out[17])
+        block(58, spend=out[17])
         tx = CTransaction()
         assert(len(out[17].tx.vout) < 42)
         tx.vin.append(CTxIn(COutPoint(out[17].tx.sha256, 42), CScript([OP_TRUE]), 0xffffffff))
         tx.vout.append(CTxOut(0, b""))
         tx.calc_sha256()
-        b58 = update_block(58, [tx])
+        update_block(58, [tx])
         yield rejected(RejectResult(16, b'bad-txns-inputs-missingorspent'))
 
         # tx with output value > input value out of range
         tip(57)
-        b59 = block(59)
+        block(59)
         tx = create_and_sign_tx(out[17].tx, out[17].n, 51*COIN)
-        b59 = update_block(59, [tx])
+        update_block(59, [tx])
         yield rejected(RejectResult(16, b'bad-txns-in-belowout'))
 
         # reset to good chain
@@ -850,7 +884,7 @@ class FullBlockTest(ComparisonTestFramework):
         #                                                                                     \-> b62 (18)
         #
         tip(60)
-        b62 = block(62)
+        block(62)
         tx = CTransaction()
         tx.nLockTime = 0xffffffff  #this locktime is non-final
         assert(out[18].n < len(out[18].tx.vout))
@@ -858,7 +892,7 @@ class FullBlockTest(ComparisonTestFramework):
         tx.vout.append(CTxOut(0, CScript([OP_TRUE])))
         assert(tx.vin[0].nSequence < 0xffffffff)
         tx.calc_sha256()
-        b62 = update_block(62, [tx])
+        update_block(62, [tx])
         yield rejected(RejectResult(16, b'bad-txns-nonfinal'))
 
 
@@ -1076,7 +1110,7 @@ class FullBlockTest(ComparisonTestFramework):
         #
         #
         tip(72)
-        b74 = block(74)
+        block(74)
         size = MAX_BLOCK_SIGOPS - 1 + MAX_SCRIPT_ELEMENT_SIZE + 42 # total = 20,561
         a = bytearray([OP_CHECKSIG] * size)
         a[MAX_BLOCK_SIGOPS] = 0x4e
@@ -1085,11 +1119,11 @@ class FullBlockTest(ComparisonTestFramework):
         a[MAX_BLOCK_SIGOPS+3] = 0xff
         a[MAX_BLOCK_SIGOPS+4] = 0xff
         tx = create_and_sign_tx(out[22].tx, 0, 1, CScript(a))
-        b74 = update_block(74, [tx])
+        update_block(74, [tx])
         yield rejected(RejectResult(16, b'bad-blk-sigops'))
 
         tip(72)
-        b75 = block(75)
+        block(75)
         size = MAX_BLOCK_SIGOPS - 1 + MAX_SCRIPT_ELEMENT_SIZE + 42
         a = bytearray([OP_CHECKSIG] * size)
         a[MAX_BLOCK_SIGOPS-1] = 0x4e
@@ -1098,18 +1132,18 @@ class FullBlockTest(ComparisonTestFramework):
         a[MAX_BLOCK_SIGOPS+2] = 0xff
         a[MAX_BLOCK_SIGOPS+3] = 0xff
         tx = create_and_sign_tx(out[22].tx, 0, 1, CScript(a))
-        b75 = update_block(75, [tx])
+        update_block(75, [tx])
         yield accepted()
         save_spendable_output()
 
         # Check that if we push an element filled with CHECKSIGs, they are not counted
         tip(75)
-        b76 = block(76)
+        block(76)
         size = MAX_BLOCK_SIGOPS - 1 + MAX_SCRIPT_ELEMENT_SIZE + 1 + 5
         a = bytearray([OP_CHECKSIG] * size)
         a[MAX_BLOCK_SIGOPS-1] = 0x4e # PUSHDATA4, but leave the following bytes as just checksigs
         tx = create_and_sign_tx(out[23].tx, 0, 1, CScript(a))
-        b76 = update_block(76, [tx])
+        update_block(76, [tx])
         yield accepted()
         save_spendable_output()
 

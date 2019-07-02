@@ -7,7 +7,7 @@
 import os
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import assert_equal, wait_until, connect_nodes_bi
+from test_framework.util import (assert_equal, wait_until, connect_nodes_bi)
 
 class NotificationsTest(RavenTestFramework):
     def set_test_params(self):

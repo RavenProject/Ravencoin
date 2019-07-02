@@ -6,7 +6,7 @@
 """Test the wallet accounts properly when there are cloned transactions with malleated scriptsigs."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (disconnect_nodes, assert_equal, sync_blocks, connect_nodes)
 
 class TxnMallTest(RavenTestFramework):
     def set_test_params(self):

@@ -32,16 +32,10 @@ import random
 import sys
 import time
 
-from test_framework.mininode import *
-from test_framework.script import *
+from test_framework.mininode import (CTxIn, COutPoint, COIN, ToHex)
+from test_framework.script import (CTransaction, CTxOut)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-
-HTTP_DISCONNECT_ERRORS = [http.client.CannotSendRequest]
-try:
-    HTTP_DISCONNECT_ERRORS.append(http.client.RemoteDisconnected)
-except AttributeError:
-    pass
+from test_framework.util import (create_confirmed_utxos, hex_str_to_bytes, assert_equal)
 
 class ChainstateWriteCrashTest(RavenTestFramework):
     def set_test_params(self):
@@ -107,15 +101,8 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         try:
             self.nodes[node_index].submitblock(block)
             return True
-        except http.client.BadStatusLine as e:
-            # Prior to 3.5 BadStatusLine('') was raised for a remote disconnect error.
-            if sys.version_info[0] == 3 and sys.version_info[1] < 5 and e.line == "''":
-                self.log.debug("node %d submitblock raised exception: %s", node_index, e)
-                return False
-            else:
-                raise
-        except tuple(HTTP_DISCONNECT_ERRORS) as e:
-            self.log.debug("node %d submitblock raised exception: %s", node_index, e)
+        except (http.client.CannotSendRequest, http.client.RemoteDisconnected) as e:
+            self.log.debug("node %d submitblock raised HTTP exception: %s", node_index, e)
             return False
         except OSError as e:
             self.log.debug("node %d submitblock raised OSError exception: errno=%s", node_index, e.errno)
@@ -193,7 +180,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         while len(utxo_list) >= 2 and num_transactions < count:
             tx = CTransaction()
             input_amount = 0
-            for i in range(2):
+            for _ in range(2):
                 utxo = utxo_list.pop()
                 tx.vin.append(CTxIn(COutPoint(int(utxo['txid'], 16), utxo['vout'])))
                 input_amount += int(utxo['amount'] * COIN)
@@ -203,7 +190,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 # Sanity check -- if we chose inputs that are too small, skip
                 continue
 
-            for i in range(3):
+            for _ in range(3):
                 tx.vout.append(CTxOut(output_amount, hex_str_to_bytes(utxo['scriptPubKey'])))
 
             # Sign and send the transaction to get into the mempool

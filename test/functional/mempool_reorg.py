@@ -10,7 +10,7 @@ that spend (directly or indirectly) coinbase transactions.
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, create_tx, assert_raises_rpc_error)
 
 # Create one-input, one-output, no-fee transaction:
 class MempoolCoinbaseTest(RavenTestFramework):

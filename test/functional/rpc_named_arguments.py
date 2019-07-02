@@ -6,10 +6,7 @@
 """Test using named arguments for RPCs."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_raises_rpc_error,
-)
+from test_framework.util import (assert_equal, assert_raises_rpc_error)
 
 class NamedArgumentTest(RavenTestFramework):
     def set_test_params(self):
