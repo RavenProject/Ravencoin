@@ -20,10 +20,10 @@ class NotificationsTest(RavenTestFramework):
         self.tx_filename = os.path.join(self.options.tmpdir, "transactions.txt")
 
         # -alertnotify and -blocknotify on node0, walletnotify on node1
-        self.extra_args = [["-blockversion=2",
+        self.extra_args = [["-blockversion=536870912",
                             "-alertnotify=echo %%s >> %s" % self.alert_filename,
                             "-blocknotify=echo %%s >> %s" % self.block_filename],
-                           ["-blockversion=211",
+                           ["-blockversion=1610612736",
                             "-rescan",
                             "-walletnotify=echo %%s >> %s" % self.tx_filename]]
         super().setup_network()

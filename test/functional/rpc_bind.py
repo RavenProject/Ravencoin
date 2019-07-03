@@ -9,7 +9,7 @@ import socket
 import sys
 
 from test_framework.test_framework import (RavenTestFramework, SkipTest)
-from test_framework.util import (assert_equal, get_rpc_proxy, rpc_url, get_datadir_path, rpc_port)
+from test_framework.util import (assert_equal, get_rpc_proxy, rpc_url, get_datadir_path, rpc_port, assert_raises_rpc_error)
 from test_framework.netutil import (addr_to_hex, get_bind_addrs, all_interfaces)
 
 class RPCBindTest(RavenTestFramework):
