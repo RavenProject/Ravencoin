@@ -8,6 +8,7 @@
 #define RAVEN_HASH_H
 #include <iostream>
 #include <chrono>
+#include "crypto/generic-ops.h"
 #include "crypto/ripemd160.h"
 #include "crypto/sha256.h"
 #include "prevector.h"
@@ -357,6 +358,32 @@ extern double algoHashTotal[16];
 extern int algoHashHits[16];
 
 
+// Cryptonight
+namespace crypto {
+    extern "C" {
+#include "crypto/hash-ops.h"
+    }
+
+    #pragma pack(push, 1)
+    struct hash {
+        char data[HASH_SIZE];
+    };
+#pragma pack(pop)
+
+    static_assert(sizeof(hash) == HASH_SIZE, "Invalid structure size");
+
+    inline void cn_slow_hash(const void *data, std::size_t length, hash &hash, int variant = 0, uint64_t height = 0) {
+        cn_slow_hash(data, length, reinterpret_cast<char *>(&hash), variant, 0/*prehashed*/, height);
+    }
+//    inline std::ostream &operator <<(std::ostream &o, const crypto::hash &v) {
+//        epee::to_hex::formatted(o, epee::as_byte_span(v)); return o;
+//    }
+//    const static crypto::hash null_hash = boost::value_initialized<crypto::hash>();
+}
+CRYPTO_MAKE_HASHABLE(hash)
+
+
+// X16R
 template<typename T1>
 inline uint256 HashX16R(const T1 pbegin, const T1 pend, const uint256 PrevBlockHash)
 {
