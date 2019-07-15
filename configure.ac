@@ -1302,6 +1302,16 @@ case ${OS} in
    ;;
 esac
 
+dnl add assembly support for cn4 hashing
+AM_PROG_AS
+case $host in
+    x86_64-*)
+        CFLAGS="$CFLAGS -maes"
+        CPPFLAGS="$CPPFLAGS -maes"
+        CXXFLAGS="$CXXFLAGS -maes"
+    ;;
+esac
+
 echo
 echo "Options used to compile and link:"
 echo "  build raven-cli = $build_raven_cli"

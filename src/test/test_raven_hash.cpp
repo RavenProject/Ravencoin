@@ -46,9 +46,11 @@ int main(int argc, char **argv)
         V4_Data d;
         d.data = &rawHeader;
         d.length = rawHeader.size();
-        // get height from test data
+
+        // get height from test data / command line (using 0 for now)
 //        get(input, d.height);
         d.height = 0;
+
         chash actual;
 
         cn_slow_hash_4(&d, 0, (char *) &actual);

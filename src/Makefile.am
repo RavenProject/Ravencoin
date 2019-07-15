@@ -330,7 +330,23 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/sph_sha2.h \
   crypto/sph_types.h \
   crypto/sha512.cpp \
-  crypto/sha512.h
+  crypto/sha512.h \
+  crypto/generic-ops.h \
+  crypto/hash-ops.h \
+  crypto/int-util.h \
+  crypto/oaes_config.h \
+  crypto/oaes_lib.c \
+  crypto/oaes_lib.h \
+  crypto/slow-hash.c \
+  crypto/variant2_int_sqrt.h \
+  crypto/variant4_random_math.h \
+  crypto/warnings.h
+
+# ???
+#  crypto/CryptonightR_JIT.c
+#  crypto/CryptonightR_JIT.h
+#  crypto/CryptonightR_template.S
+#  crypto/CryptonightR_template.h
 
 if USE_ASM
 crypto_libraven_crypto_a_SOURCES += crypto/sha256_sse4.cpp
