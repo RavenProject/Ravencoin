@@ -337,7 +337,6 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/oaes_config.h \
   crypto/oaes_lib.c \
   crypto/oaes_lib.h \
-  crypto/slow-hash.c \
   crypto/variant2_int_sqrt.h \
   crypto/variant4_random_math.h \
   crypto/warnings.h
