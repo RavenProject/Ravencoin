@@ -4706,16 +4706,11 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name,
     return false;
 }
 
-void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag)
+void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers)
 {
     std::string s(verifier);
 
-    std::regex regexSearch;
-    if (fWithTag)
-        regexSearch = std::regex(R"(#[A-Z0-9_.]+)");
-    else
-        regexSearch = std::regex(R"([A-Z0-9_.]+)");
-
+    std::regex regexSearch = std::regex(R"([A-Z0-9_.]+)");
     std::smatch match;
 
     while (std::regex_search(s,match,regexSearch)) {
@@ -4736,7 +4731,7 @@ std::string GetStrippedVerifierString(const std::string& verifier)
     return str_without_qualifier_tags;
 }
 
-bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError, bool fWithTags)
+bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError)
 {
     // If verifier string is true, always return true
     if (verifier == "true") {
@@ -4759,7 +4754,7 @@ bool CheckVerifierString(const std::string& verifier, std::set<std::string>& set
     }
 
     // Extract the qualifiers from the verifier string
-    ExtractVerifierStringQualifiers(verifier, setFoundQualifiers, fWithTags);
+    ExtractVerifierStringQualifiers(strippedVerifier, setFoundQualifiers);
 
     // Create an object that stores if an address contains a qualifier
     LibBoolEE::Vals vals;
@@ -4770,11 +4765,9 @@ bool CheckVerifierString(const std::string& verifier, std::set<std::string>& set
     for (auto qualifier : setFoundQualifiers) {
 
         std::string edited_qualifier;
-        if (!fWithTags)
-            edited_qualifier = QUALIFIER_CHAR + qualifier;
-        else {
-            edited_qualifier = qualifier;
-        }
+
+        // Qualifer string was stripped above, so we need to add back the #
+        edited_qualifier = QUALIFIER_CHAR + qualifier;
 
         if (!IsQualifierNameValid(edited_qualifier)) {
             strError = "bad-txns-null-verifier-invalid-asset-name-" + qualifier;
@@ -4976,7 +4969,7 @@ bool ContextualCheckVerifierAssetTxOut(const CTxOut& txout, CAssetsCache* assetC
     return true;
 }
 
-bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError, bool fWithTags)
+bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError)
 {
     // If verifier is set to true, return true
     if (verifier == "true")
@@ -4984,14 +4977,12 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
 
     // Check against the non contextual changes first
     std::set<std::string> setFoundQualifiers;
-    if (!CheckVerifierString(verifier, setFoundQualifiers, strError, fWithTags))
+    if (!CheckVerifierString(verifier, setFoundQualifiers, strError))
         return false;
 
     // Loop through each qualifier and make sure that the asset exists
     for(auto qualifier : setFoundQualifiers) {
-        std::string search = qualifier;
-        if (!fWithTags)
-            search = QUALIFIER_CHAR + qualifier;
+        std::string search = QUALIFIER_CHAR + qualifier;
         if (!cache->CheckIfAssetExists(search, true)) {
             strError = "bad-txns-null-verifier-contains-non-issued-qualifier";
             return false;
@@ -5008,9 +4999,7 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
 
     // Add the qualifiers into the vals object
     for (auto qualifier : setFoundQualifiers) {
-        std::string search = qualifier;
-        if (!fWithTags)
-            search = QUALIFIER_CHAR + qualifier;
+        std::string search = QUALIFIER_CHAR + qualifier;
 
         // Check to see if the address contains the qualifier
         bool has_qualifier = cache->CheckForAddressQualifier(search, check_address, true);
@@ -5341,7 +5330,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
             if (fNotFound) {
                 CNullAssetTxVerifierString current_verifier;
                 if (assetCache->GetAssetVerifierStringIfExists(reissue_asset.strName, current_verifier)) {
-                    if (!ContextualCheckVerifierString(assetCache, current_verifier.verifier_string, strAddress, strError, false))
+                    if (!ContextualCheckVerifierString(assetCache, current_verifier.verifier_string, strAddress, strError))
                         return false;
                 } else {
                     // This should happen, but if it does. The wallet needs to shutdown,
@@ -5351,7 +5340,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
                     return false;
                 }
             } else {
-                if (!ContextualCheckVerifierString(assetCache, new_verifier.verifier_string, strAddress, strError, false))
+                if (!ContextualCheckVerifierString(assetCache, new_verifier.verifier_string, strAddress, strError))
                     return false;
             }
         }

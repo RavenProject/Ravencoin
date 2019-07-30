@@ -154,6 +154,16 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     // Check asset name and infer assetType
     std::string tag_name = request.params[0].get_str();
 
+    if (!IsAssetNameAQualifier(tag_name)) {
+        std::string temp = QUALIFIER_CHAR + tag_name;
+
+        auto index = temp.find("/");
+        if (index != std::string::npos) {
+            temp.insert(index+1, "#");
+        }
+        tag_name = temp;
+    }
+
     AssetType assetType;
     std::string assetError = "";
     if (!IsAssetNameValid(tag_name, assetType, assetError)) {
@@ -236,6 +246,11 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
 
     // Check asset name and infer assetType
     std::string restricted_name = request.params[0].get_str();
+
+    if (!IsAssetNameAnRestricted(restricted_name)) {
+        std::string temp = RESTRICTED_CHAR + restricted_name;
+        restricted_name = temp;
+    }
 
     AssetType assetType;
     std::string assetError = "";
@@ -1793,7 +1808,7 @@ UniValue addtagtoaddress(const JSONRPCRequest& request)
                 "\nAssign a tag to a address\n"
 
                 "\nArguments:\n"
-                "1. \"tag_name\"            (string, required) the name of the tag you are assigning to the address\n"
+                "1. \"tag_name\"            (string, required) the name of the tag you are assigning to the address, if it doens't have '#' at the front it will be added\n"
                 "2. \"to_address\"          (string, required) the address that will be assigned the tag\n"
                 "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
 
@@ -2281,7 +2296,7 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
                 "Reissuable is true/false for whether additional assets can be created and if the verifier string can be changed\n"
 
                 "\nArguments:\n"
-                "1. \"asset_name\"            (string, required) a unique name, starts with '$'\n"
+                "1. \"asset_name\"            (string, required) a unique name, starts with '$' if '$' is not there it will be added automatically\n"
                 "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
                 "3. \"verifier\"              (string, required) the KYC string that is evaluated when restricted asset transfers are made\n"
                 "4. \"to_address\"            (string, required), address asset will be sent to, this address must obey the verifier rules\n"
@@ -2316,13 +2331,21 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
     std::string assetName = request.params[0].get_str();
     AssetType assetType;
     std::string assetError = "";
+
+    if (!IsAssetNameAnRestricted(assetName))
+    {
+        std::string temp = RESTRICTED_CHAR + assetName;
+        assetName = temp;
+    }
+
     if (!IsAssetNameValid(assetName, assetType, assetError)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName + std::string("\nError: ") + assetError);
     }
 
     // Check for unsupported asset types, only restricted assets are allowed for this rpc call
     if (assetType != AssetType::RESTRICTED) {
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
+        if (assetType != AssetType::RESTRICTED)
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
     // Get the remaining three required parameters
@@ -2336,9 +2359,12 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
+
+    std::string verifierStripped = GetStrippedVerifierString(verifier_string);
+
     // Validate the verifier string with the given to_address
     std::string strError = "";
-    if (!ContextualCheckVerifierString(passets, verifier_string, to_address, strError, true))
+    if (!ContextualCheckVerifierString(passets, verifierStripped, to_address, strError))
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
 
     // Get the change address if one was given
@@ -2393,8 +2419,6 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
 
     CCoinControl crtl;
     crtl.destChange = DecodeDestination(change_address);
-
-    std::string verifierStripped = GetStrippedVerifierString(verifier_string);
 
     // Create the Transaction
     if (!CreateAssetTransaction(pwallet, crtl, asset, to_address, error, transaction, reservekey, nRequiredFee, &verifierStripped))
@@ -2684,8 +2708,10 @@ UniValue isvalidverifierstring(const JSONRPCRequest& request)
 
     std::string verifier_string = request.params[0].get_str();
 
+    std::string stripped_verifier_string = GetStrippedVerifierString(verifier_string);
+
     std::string strError;
-    if (!ContextualCheckVerifierString(passets, verifier_string, "", strError, true)) {
+    if (!ContextualCheckVerifierString(passets, stripped_verifier_string, "", strError)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
     }
 
