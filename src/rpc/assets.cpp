@@ -1100,9 +1100,9 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
 
 UniValue transfer(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 6)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 3 || request.params.size() > 7)
         throw std::runtime_error(
-                "transfer \"asset_name\" qty \"to_address\" \"message\" expire_time \"change_address\"\n"
+                "transfer \"asset_name\" qty \"to_address\" \"message\" expire_time \"change_address\" \"asset_change_address\"\n"
                 + AssetActivationWarning() +
                 "\nTransfers a quantity of an owned asset to a given address"
 
@@ -1112,7 +1112,8 @@ UniValue transfer(const JSONRPCRequest& request)
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
                 "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "5. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
-                "6. \"change_address\"           (string, optional, default = \"\") the transaction change will be sent to this address\n"
+                "6. \"change_address\"       (string, optional, default = \"\") the transactions RVN change will be sent to this address\n"
+                "7. \"asset_change_address\"     (string, optional, default = \"\") the transactions Asset change will be sent to this address\n"
 
                 "\nResult:\n"
                 "txid"
@@ -1172,17 +1173,23 @@ UniValue transfer(const JSONRPCRequest& request)
     if (fMessageCheck)
         CheckIPFSTxidMessage(message, expireTime);
 
-    std::string change_address = "";
-    if(request.params.size() > 5) {
-        change_address = request.params[5].get_str();
-
-        if (!change_address.empty()) {
-            CTxDestination change_dest = DecodeDestination(change_address);
-            if (!IsValidDestination(change_dest)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
-            }
-        }
+    std::string rvn_change_address = "";
+    if (request.params.size() > 6) {
+        rvn_change_address = request.params[6].get_str();
     }
+
+    std::string asset_change_address = "";
+    if (request.params.size() > 7) {
+        asset_change_address = request.params[7].get_str();
+    }
+
+    CTxDestination rvn_change_dest = DecodeDestination(rvn_change_address);
+    if (!rvn_change_address.empty() && !IsValidDestination(rvn_change_dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + rvn_change_address);
+
+    CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
+    if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -1195,7 +1202,8 @@ UniValue transfer(const JSONRPCRequest& request)
     CAmount nRequiredFee;
 
     CCoinControl ctrl;
-    ctrl.destChange = DecodeDestination(change_address);
+    ctrl.destChange = rvn_change_dest;
+    ctrl.assetDestChange = asset_change_dest;
 
     // Create the Transaction
     if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
@@ -1217,9 +1225,9 @@ UniValue transfer(const JSONRPCRequest& request)
 
 UniValue transferfromaddresses(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 4 || request.params.size() > 6)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 4 || request.params.size() > 8)
         throw std::runtime_error(
-            "transferfromaddresses \"asset_name\" [\"from_addresses\"] qty \"to_address\" \"message\" expire_time\n"
+            "transferfromaddresses \"asset_name\" [\"from_addresses\"] qty \"to_address\" \"message\" expire_time \"rvn_change_address\" \"asset_change_address\"\n"
             + AssetActivationWarning() +
             "\nTransfer a quantity of an owned asset in specific address(es) to a given address"
 
@@ -1230,6 +1238,8 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
             "4. \"to_address\"               (string, required) address to send the asset to\n"
             "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
             "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
+            "7. \"rvn_change_address\"       (string, optional, default = \"\") the transactions RVN change will be sent to this address\n"
+            "8. \"asset_change_address\"     (string, optional, default = \"\") the transactions Asset change will be sent to this address\n"
 
             "\nResult:\n"
             "txid"
@@ -1279,8 +1289,9 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     bool fMessageCheck = false;
     std::string message = "";
     if (request.params.size() > 4) {
-        fMessageCheck = true;
         message = request.params[4].get_str();
+        if (!message.empty())
+            fMessageCheck = true;
     }
 
     int64_t expireTime = 0;
@@ -1293,6 +1304,24 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     if (fMessageCheck)
         CheckIPFSTxidMessage(message, expireTime);
 
+    std::string rvn_change_address = "";
+    if (request.params.size() > 6) {
+        rvn_change_address = request.params[6].get_str();
+    }
+
+    std::string asset_change_address = "";
+    if (request.params.size() > 7) {
+        asset_change_address = request.params[7].get_str();
+    }
+
+    CTxDestination rvn_change_dest = DecodeDestination(rvn_change_address);
+    if (!rvn_change_address.empty() && !IsValidDestination(rvn_change_dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + rvn_change_address);
+
+    CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
+    if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
@@ -1304,6 +1333,10 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     CCoinControl ctrl;
     std::map<std::string, std::vector<COutput> > mapAssetCoins;
     pwallet->AvailableAssets(mapAssetCoins);
+
+    // Set the change addresses
+    ctrl.destChange = rvn_change_dest;
+    ctrl.assetDestChange = asset_change_dest;
 
     if (!mapAssetCoins.count(asset_name)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
@@ -1345,9 +1378,9 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
 UniValue transferfromaddress(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 4 || request.params.size() > 6)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 4 || request.params.size() > 8)
         throw std::runtime_error(
-                "transferfromaddress \"asset_name\" \"from_address\" qty \"to_address\" \"message\" expire_time\n"
+                "transferfromaddress \"asset_name\" \"from_address\" qty \"to_address\" \"message\" expire_time \"rvn_change_address\" \"asset_change_address\"\n"
                 + AssetActivationWarning() +
                 "\nTransfer a quantity of an owned asset in a specific address to a given address"
 
@@ -1358,6 +1391,8 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
                 "4. \"to_address\"               (string, required) address to send the asset to\n"
                 "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
+                "7. \"rvn_change_address\"       (string, optional, default = \"\") the transaction RVN change will be sent to this address\n"
+                "8. \"asset_change_address\"     (string, optional, default = \"\") the transaction Asset change will be sent to this address\n"
 
                 "\nResult:\n"
                 "txid"
@@ -1397,8 +1432,10 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
     bool fMessageCheck = false;
     std::string message = "";
     if (request.params.size() > 4) {
-        fMessageCheck = true;
+
         message = request.params[4].get_str();
+        if (!message.empty())
+            fMessageCheck = true;
     }
 
     int64_t expireTime = 0;
@@ -1411,6 +1448,25 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
     if (fMessageCheck)
         CheckIPFSTxidMessage(message, expireTime);
 
+    std::string rvn_change_address = "";
+    if (request.params.size() > 6) {
+        rvn_change_address = request.params[6].get_str();
+    }
+
+    std::string asset_change_address = "";
+    if (request.params.size() > 7) {
+        asset_change_address = request.params[7].get_str();
+    }
+
+    CTxDestination rvn_change_dest = DecodeDestination(rvn_change_address);
+    if (!rvn_change_address.empty() && !IsValidDestination(rvn_change_dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + rvn_change_address);
+
+    CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
+    if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+
+
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
@@ -1422,6 +1478,10 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
     CCoinControl ctrl;
     std::map<std::string, std::vector<COutput> > mapAssetCoins;
     pwallet->AvailableAssets(mapAssetCoins);
+
+    // Set the change addresses
+    ctrl.destChange = rvn_change_dest;
+    ctrl.assetDestChange = asset_change_dest;
 
     if (!mapAssetCoins.count(asset_name)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
@@ -2643,9 +2703,9 @@ static const CRPCCommand commands[] =
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
     { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start", "confs"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
-    { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address" "qty", "to_address", "message", "expire_time"}},
-    { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses" "qty", "to_address", "message", "expire_time"}},
-    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time", "change_address"}},
+    { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
+    { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
+    { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time", "change_address", "asset_change_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
