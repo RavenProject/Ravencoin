@@ -947,7 +947,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     // Check the restricted asset destination address, and make sure it validates with the verifier string
                     std::string strError = "";
-                    if (!ContextualCheckVerifierString(currentActiveAssetCache, strippedVerifierString, EncodeDestination(destination), strError, false))
+                    if (!ContextualCheckVerifierString(currentActiveAssetCache, strippedVerifierString, EncodeDestination(destination), strError))
                         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parmeter, verifier string is not. Please check the syntax. Error Msg - " + strError));
 
 

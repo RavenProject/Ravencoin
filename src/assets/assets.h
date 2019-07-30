@@ -515,8 +515,8 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
 bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount);
 
 /** Helper method for extracting #TAGS from a verifier string */
-void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag = true);
-bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError, bool fWithTags = false);
+void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers);
+bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError);
 std::string GetStrippedVerifierString(const std::string& verifier);
 
 /** Helper methods that validate changes to null asset data transaction databases */
@@ -534,7 +534,7 @@ bool CheckReissueAsset(const CReissueAsset& asset, std::string& strError);
 bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError);
 bool ContextualCheckGlobalAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError);
 bool ContextualCheckVerifierAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError);
-bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError, bool fWithTags = false);
+bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError);
 bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, std::string& strError, bool fCheckMempool = false);
 bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError);
 bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& reissue_asset, std::string& strError, const CTransaction& tx);
