@@ -453,6 +453,11 @@ UniValue issue(const JSONRPCRequest& request)
         throw (JSONRPCError(RPC_INVALID_PARAMETER, std::string("Use the rpc call issuerestricted to issue a restricted asset")));
     }
 
+    // Push the user to use the issue restrictd rpc call if they are trying to issue a restricted asset
+    if (assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER  ) {
+        throw (JSONRPCError(RPC_INVALID_PARAMETER, std::string("Use the rpc call issuequalifierasset to issue a qualifier asset")));
+    }
+
     // Check for unsupported asset types
     if (assetType == AssetType::VOTE || assetType == AssetType::REISSUE || assetType == AssetType::OWNER || assetType == AssetType::INVALID) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
@@ -2284,6 +2289,163 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
     return passets->CheckForGlobalRestriction(restricted_name, true);
 }
 
+UniValue issuequalifierasset(const JSONRPCRequest& request)
+{
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 5)
+        throw std::runtime_error(
+                "issuequalifierasset \"asset_name\" qty \"( to_address )\" \"( change_address )\" ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
+                + RestrictedActivationWarning() +
+                "\nIssue an qualifier or sub qualifier asset\n"
+                "If the '#' character isn't added, it will be added automatically\n"
+                "Amount is a number between 1 and 10"
+                "Asset name must not conflict with any existing asset.\n"
+                "Unit is always set to Zero (0) for qualifier assets\n"
+                "Reissuable is always set to false for qualifier assets\n"
+
+                "\nArguments:\n"
+                "1. \"asset_name\"            (string, required) a unique name\n"
+                "2. \"qty\"                   (numeric, optional, default=1) the number of units to be issued\n"
+                "3. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
+                "4. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+                "5. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
+                "6. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
+
+                "\nResult:\n"
+                "\"txid\"                     (string) The transaction id\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("issuequalifierasset", "\"#ASSET_NAME\" 1000")
+                + HelpExampleCli("issuequalifierasset", "\"ASSET_NAME\" 1000 \"myaddress\"")
+                + HelpExampleCli("issuequalifierasset", "\"#ASSET_NAME\" 1000 \"myaddress\" \"changeaddress\"")
+                + HelpExampleCli("issuequalifierasset", "\"ASSET_NAME\" 1000 \"myaddress\" \"changeaddress\"")
+                + HelpExampleCli("issuequalifierasset", "\"#ASSET_NAME\" 1000 \"myaddress\" \"changeaddress\" true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
+                + HelpExampleCli("issuequalifierasset", "\"ASSET_NAME/SUB_QUALIFIER\" 1000 \"myaddress\" \"changeaddress\"")
+                + HelpExampleCli("issuequalifierasset", "\"#ASSET_NAME\"")
+        );
+
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    // Check asset name and infer assetType
+    std::string assetName = request.params[0].get_str();
+
+    if (!IsAssetNameAQualifier(assetName)) {
+        std::string temp = QUALIFIER_CHAR + assetName;
+        assetName = temp;
+    }
+
+    AssetType assetType;
+    std::string assetError = "";
+    if (!IsAssetNameValid(assetName, assetType, assetError)) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName + std::string("\nError: ") + assetError);
+    }
+
+    if (assetType != AssetType::QUALIFIER && assetType != AssetType::SUB_QUALIFIER) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType) +  " Please use a valid qualifier name" );
+    }
+
+    CAmount nAmount = COIN;
+    if (request.params.size() > 1)
+        nAmount = AmountFromValue(request.params[1]);
+
+    if (nAmount < QUALIFIER_ASSET_MIN_AMOUNT || nAmount > QUALIFIER_ASSET_MAX_AMOUNT) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameters for issuing a qualifier asset. Amount must be between 1 and 10"));
+    }
+
+    std::string address = "";
+    if (request.params.size() > 2)
+        address = request.params[2].get_str();
+
+    if (!address.empty()) {
+        CTxDestination destination = DecodeDestination(address);
+        if (!IsValidDestination(destination)) {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        }
+    } else {
+        // Create a new address
+        std::string strAccount;
+
+        if (!pwallet->IsLocked()) {
+            pwallet->TopUpKeyPool();
+        }
+
+        // Generate a new key that is added to wallet
+        CPubKey newKey;
+        if (!pwallet->GetKeyFromPool(newKey)) {
+            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        }
+        CKeyID keyID = newKey.GetID();
+
+        pwallet->SetAddressBook(keyID, strAccount, "receive");
+
+        address = EncodeDestination(keyID);
+    }
+
+    std::string change_address = "";
+    if (request.params.size() > 3) {
+        change_address = request.params[3].get_str();
+        if (!change_address.empty()) {
+            CTxDestination destination = DecodeDestination(change_address);
+            if (!IsValidDestination(destination)) {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                                   std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+            }
+        }
+    }
+
+    int units = 0;
+    bool reissuable = false;
+
+    bool has_ipfs = false;
+    if (request.params.size() > 4)
+        has_ipfs = request.params[4].get_bool();
+
+    // Check the ipfs
+    std::string ipfs_hash = "";
+    bool fMessageCheck = false;
+    if (request.params.size() > 5 && has_ipfs) {
+        fMessageCheck = true;
+        ipfs_hash = request.params[5].get_str();
+    }
+
+    // Reissues don't have an expire time
+    int64_t expireTime = 0;
+
+    // Check the message data
+    if (fMessageCheck)
+        CheckIPFSTxidMessage(ipfs_hash, expireTime);
+
+    CNewAsset asset(assetName, nAmount, units, reissuable ? 1 : 0, has_ipfs ? 1 : 0, DecodeAssetData(ipfs_hash));
+
+    CReserveKey reservekey(pwallet);
+    CWalletTx transaction;
+    CAmount nRequiredFee;
+    std::pair<int, std::string> error;
+
+    CCoinControl crtl;
+    crtl.destChange = DecodeDestination(change_address);
+
+    // Create the Transaction
+    if (!CreateAssetTransaction(pwallet, crtl, asset, address, error, transaction, reservekey, nRequiredFee))
+        throw JSONRPCError(error.first, error.second);
+
+    // Send the Transaction to the network
+    std::string txid;
+    if (!SendAssetTransaction(pwallet, transaction, reservekey, error, txid))
+        throw JSONRPCError(error.first, error.second);
+
+    UniValue result(UniValue::VARR);
+    result.push_back(txid);
+    return result;
+}
+
 UniValue issuerestrictedasset(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 4 || request.params.size() > 9)
@@ -2344,7 +2506,6 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
 
     // Check for unsupported asset types, only restricted assets are allowed for this rpc call
     if (assetType != AssetType::RESTRICTED) {
-        if (assetType != AssetType::RESTRICTED)
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
@@ -2738,6 +2899,7 @@ static const CRPCCommand commands[] =
 
     { "restricted assets",   "transferqualifier",          &transferqualifier,          {"qualifier_name", "qty", "to_address", "change_address", "message", "expire_time"}},
     { "restricted assets",   "issuerestrictedasset",       &issuerestrictedasset,       {"asset_name","qty","verifier","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
+    { "restricted assets",   "issuequalifierasset",        &issuequalifierasset,        {"asset_name","qty","to_address","change_address","has_ipfs","ipfs_hash"} },
     { "restricted assets",   "reissuerestrictedasset",     &reissuerestrictedasset,     {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_unit", "reissuable", "ipfs_hash"}},
     { "restricted assets",   "addtagtoaddress",            &addtagtoaddress,            {"tag_name", "to_address", "change_address"}},
     { "restricted assets",   "removetagfromaddress",       &removetagfromaddress,       {"tag_name", "to_address", "change_address"}},
