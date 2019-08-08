@@ -655,6 +655,31 @@
            </layout>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <item>
+             <widget class="QLabel" name="labelVerifierString">
+              <property name="text">
+               <string>Verifier String:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditVerifierString">
+              <property name="placeholderText">
+               <string>Create a verifier string built from Qualifier names e.g (#KYC &amp; #VALID). Leave blank not change this</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelReissueVerifierStringErrorMessage">
+            <property name="text">
+             <string>Warning:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <property name="spacing">
              <number>34</number>

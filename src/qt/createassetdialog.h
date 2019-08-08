@@ -46,6 +46,10 @@ public:
     void setupFeeControl(const PlatformStyle *platformStyle);
 
     void updateAssetList();
+    void updateAssetListForRestrictedIssuance();
+    void updateAssetListForSubQualifierIssuance();
+    void restrictedAssetSelected();
+    void restrictedAssetNotSelected();
 
     void clear();
     void selectTypeName(int type, QString name);
@@ -67,6 +71,8 @@ private:
     void setUpValues();
     void showMessage(QString string);
     void showValidMessage(QString string);
+    void showInvalidVerifierStringMessage(QString string);
+    void hideInvalidVerifierStringMessage();
     void hideMessage();
     void disableCreateButton();
     void enableCreateButton();
@@ -77,6 +83,7 @@ private:
     void UpdateAssetNameMaxSize();
     void UpdateAssetNameToUpper();
     void setUniqueSelected();
+    void setQualifierSelected();
     void clearSelected();
 
     //CoinControl
@@ -102,6 +109,7 @@ private Q_SLOTS:
     void onAssetTypeActivated(int index);
     void onAssetListActivated(int index);
     void onClearButtonClicked();
+    void onVerifierStringChanged(QString verifier);
 
     //CoinControl
     void coinControlFeatureChanged(bool);

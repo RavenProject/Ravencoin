@@ -97,6 +97,30 @@ public:
     }
 };
 
+struct ErrorReport {
+
+    enum ErrorType {
+        NotSetError = 0,
+        InvalidQualifierName = 1,
+        EmptyString = 2,
+        LengthToLarge = 3,
+        InvalidSubExpressionFormula = 4,
+        InvalidSyntax = 5,
+        AssetDoesntExist = 6,
+        FailedToVerifyAgainstAddress = 7,
+        EmptySubExpression = 8,
+        UnknownOperator = 9,
+        ParenthesisParity = 10,
+        VariableNotFound = 11
+    };
+
+    ErrorType type;
+    std::string strDevData;
+    std::vector<std::string> vecUserData;
+};
+
+std::string GetUserErrorString(const ErrorReport& report);
+
 class CAssetsCache : public CAssets
 {
 private:
@@ -384,7 +408,7 @@ bool IsAssetNameAnOwner(const std::string& name);
 bool IsAssetNameAnRestricted(const std::string& name);
 
 //! Check if an asset is a qualifier asset or sub qualifier
-bool IsAssetNameAQualifier(const std::string& name);
+bool IsAssetNameAQualifier(const std::string& name, bool fOnlyQualifiers = false);
 
 //! Check if an asset is a sub qualifier
 bool IsAssetNameASubQualifier(const std::string& name);
@@ -392,8 +416,13 @@ bool IsAssetNameASubQualifier(const std::string& name);
 //! Check if an asset is a message channel
 bool IsAssetNameAnMsgChannel(const std::string& name);
 
+bool IsAssetNameARoot(const std::string& name);
+
 //! Get the root name of an asset
 std::string GetParentName(const std::string& name); // Gets the parent name of a subasset TEST/TESTSUB would return TEST
+
+//! Get the owner token name belonging to a restricted asset
+std::string RestrictedNameToOwnerName(const std::string& name);
 
 //! Build a unique asset buy giving the root name, and the tag name (ROOT, TAG) => ROOT#TAG
 std::string GetUniqueAssetName(const std::string& parent, const std::string& tag);
@@ -516,7 +545,7 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
 
 /** Helper method for extracting #TAGS from a verifier string */
 void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers);
-bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError);
+bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError, ErrorReport* errorReport = nullptr);
 std::string GetStrippedVerifierString(const std::string& verifier);
 
 /** Helper methods that validate changes to null asset data transaction databases */
@@ -534,7 +563,7 @@ bool CheckReissueAsset(const CReissueAsset& asset, std::string& strError);
 bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError);
 bool ContextualCheckGlobalAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError);
 bool ContextualCheckVerifierAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError);
-bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError);
+bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError, ErrorReport* errorReport = nullptr);
 bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, std::string& strError, bool fCheckMempool = false);
 bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError);
 bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& reissue_asset, std::string& strError, const CTransaction& tx);
