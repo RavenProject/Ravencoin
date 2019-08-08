@@ -555,8 +555,9 @@ void SubstituteFonts(const QString& language)
     bool SyncWarningMessage::showTransactionSyncWarningMessage()
     {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, tr("Blockchain is currently syncing blocks."), tr("Sending a transaction while not fully synced is not recommended. Are you sure you would like to proceed with this transaction?"),
+        reply = QMessageBox::warning(this, tr("Warning: transaction while syncing wallet!"), tr("You are trying to send a transaction while your wallet is not fully synced. This is not recommended because the transaction might get stuck in your wallet. Are you sure you want to proceed?\n\nRecommended action: Fully sync your wallet before sending a transaction.\n"),
                                       QMessageBox::Yes|QMessageBox::No);
+
         if (reply == QMessageBox::Yes) {
             return true;
         } else {
