@@ -239,6 +239,13 @@ void RestrictedAssetsDialog::freezeAddressClicked()
         return;
     }
 
+    if (IsInitialBlockDownload()) {
+        GUIUtil::SyncWarningMessage syncWarning(this);
+        bool sendTransaction = syncWarning.showTransactionSyncWarningMessage();
+        if (!sendTransaction)
+            return;
+    }
+
     // Create the Transaction
     if (!CreateTransferAssetTransaction(model->getWallet(), ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee, &vecFreezeAddressTxData, &vecFreezeGlobalTxData)) {
         QMessageBox createTransactionBox;

@@ -546,6 +546,25 @@ void SubstituteFonts(const QString& language)
 #endif
 }
 
+    SyncWarningMessage::SyncWarningMessage(QWidget *parent) :
+        QDialog(parent)
+{
+
+}
+
+    bool SyncWarningMessage::showTransactionSyncWarningMessage()
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, tr("Blockchain is currently syncing blocks."), tr("Sending a transaction while not fully synced is not recommended. Are you sure you would like to proceed with this transaction?"),
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 ToolTipToRichTextFilter::ToolTipToRichTextFilter(int _size_threshold, QObject *parent) :
     QObject(parent),
     size_threshold(_size_threshold)

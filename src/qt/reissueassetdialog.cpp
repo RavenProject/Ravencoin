@@ -906,6 +906,13 @@ void ReissueAssetDialog::onReissueAssetClicked()
         verifier_string = stripped;
     }
 
+    if (IsInitialBlockDownload()) {
+        GUIUtil::SyncWarningMessage syncWarning(this);
+        bool sendTransaction = syncWarning.showTransactionSyncWarningMessage();
+        if (!sendTransaction)
+            return;
+    }
+
     // Create the transaction
     if (!CreateReissueAssetTransaction(model->getWallet(), ctrl, reissueAsset, address.toStdString(), error, tx, reservekey, nFeeRequired, fReissueRestrictedAsset ? &verifier_string : nullptr)) {
         showMessage("Invalid: " + QString::fromStdString(error.second));

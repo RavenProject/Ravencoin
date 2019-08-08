@@ -657,7 +657,7 @@ void CreateAssetDialog::onNameChanged(QString name)
             showMessage(tr(error.c_str()));
             ui->availabilityButton->setDisabled(true);
         }
-    } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE)) {
+    } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::MSGCHANNEL)) {
         if (name.size() == 0) {
             hideMessage();
             ui->availabilityButton->setDisabled(true);
@@ -779,6 +779,13 @@ void CreateAssetDialog::onCreateAssetClicked()
         address = model->getAddressTableModel()->addRow(AddressTableModel::Receive, "", "");
     } else {
         address = ui->addressText->text();
+    }
+
+    if (IsInitialBlockDownload()) {
+        GUIUtil::SyncWarningMessage syncWarning(this);
+        bool sendTransaction = syncWarning.showTransactionSyncWarningMessage();
+        if (!sendTransaction)
+            return;
     }
 
     // Create the transaction
@@ -909,15 +916,14 @@ void CreateAssetDialog::onAssetTypeActivated(int index)
     disableCreateButton();
     checkedAvailablity = false;
 
-
     int nCurrentType = type;
     // Update the selected type
     type = index;
 
-    bool fOrginalTypeAsset = type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE);
+    bool fOrginalTypeAsset = type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::MSGCHANNEL);
     bool fRestrictedTypeAsset = type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::RESTRICTED);
 
-    bool fShowList = type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::RESTRICTED);
+    bool fShowList = type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::RESTRICTED) || type == IntFromAssetType(AssetType::MSGCHANNEL);
 
     // Make sure the type is only the the supported issue types
     if(!(fOrginalTypeAsset || fRestrictedTypeAsset)) {
@@ -925,7 +931,7 @@ void CreateAssetDialog::onAssetTypeActivated(int index)
     }
 
     // If the type is UNIQUE, set the units and amount to the correct value, and disable them.
-    if (type == IntFromAssetType(AssetType::UNIQUE)) {
+    if (type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::MSGCHANNEL)) {
         setUniqueSelected();
     } else if (type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER)) {
         setQualifierSelected();
@@ -1009,6 +1015,8 @@ QString CreateAssetDialog::GetSpecialCharacter()
         return "/";
     else if (type == IntFromAssetType(AssetType::UNIQUE))
         return "#";
+    else if (type == IntFromAssetType(AssetType::MSGCHANNEL))
+        return "~";
 
     return "";
 }
@@ -1021,6 +1029,8 @@ QString CreateAssetDialog::GetAssetName()
         return ui->assetList->currentText() + "/" + ui->nameText->text();
     else if (type == IntFromAssetType(AssetType::UNIQUE))
         return ui->assetList->currentText() + "#" + ui->nameText->text();
+    else if (type == IntFromAssetType(AssetType::MSGCHANNEL))
+        return ui->assetList->currentText() + "~" + ui->nameText->text();
     else if (type == IntFromAssetType(AssetType::RESTRICTED))
         return ui->nameText->text();
     else if (type == IntFromAssetType(AssetType::QUALIFIER))
@@ -1041,7 +1051,7 @@ void CreateAssetDialog::UpdateAssetNameMaxSize()
 
 void CreateAssetDialog::UpdateAssetNameToUpper()
 {
-    if (type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::RESTRICTED) || type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER)) {
+    if (type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::RESTRICTED) || type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::MSGCHANNEL)) {
         ui->nameText->setText(ui->nameText->text().toUpper());
     }
 }

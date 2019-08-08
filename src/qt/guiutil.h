@@ -136,6 +136,18 @@ namespace GUIUtil
     // and which side the concatenated string is on (default left)
     void concatenate(QPainter* painter, QString& strToCon, int static_width, int left_side, int right_size);
 
+
+    class SyncWarningMessage : public QDialog
+    {
+        Q_OBJECT
+
+    public:
+        explicit SyncWarningMessage(QWidget *parent = 0);
+
+        bool showTransactionSyncWarningMessage();
+    };
+
+
     /** Qt event filter that intercepts ToolTipChange events, and replaces the tooltip with a rich text
       representation if needed. This assures that Qt can word-wrap long tooltip messages.
       Tooltips longer than the provided size threshold (in characters) are wrapped.
