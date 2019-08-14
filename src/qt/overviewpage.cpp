@@ -389,7 +389,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     // Trigger the call to show the assets table if assets are active
     showAssets();
 
-
     // context menu actions
     sendAction = new QAction(tr("Send Asset"), this);
     QAction *copyAmountAction = new QAction(tr("Copy Amount"), this);
@@ -397,7 +396,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     issueSub = new QAction(tr("Issue Sub Asset"), this);
     issueUnique = new QAction(tr("Issue Unique Asset"), this);
     reissue = new QAction(tr("Reissue Asset"), this);
-
 
     sendAction->setObjectName("Send");
     issueSub->setObjectName("Sub");
@@ -427,8 +425,6 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 void OverviewPage::handleAssetClicked(const QModelIndex &index)
 {
     if(assetFilter) {
-
-
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
         bool fOwner = false;
         if (IsAssetNameAnOwner(name.toStdString())) {

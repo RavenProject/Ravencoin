@@ -49,4 +49,5 @@ protected:
     void closeEvent(QCloseEvent *event);
 };
 
+
 #endif // RAVEN_QT_UTILITYDIALOG_H
