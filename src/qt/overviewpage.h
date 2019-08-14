@@ -45,11 +45,11 @@ public:
     void showAssets();
 
 public Q_SLOTS:
-    void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
-                    const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+            void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
+                            const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
 
-Q_SIGNALS:
-    void transactionClicked(const QModelIndex &index);
+    Q_SIGNALS:
+            void transactionClicked(const QModelIndex &index);
     void assetSendClicked(const QModelIndex &index);
     void assetIssueSubClicked(const QModelIndex &index);
     void assetIssueUniqueClicked(const QModelIndex &index);
@@ -80,7 +80,7 @@ private:
 
 
 private Q_SLOTS:
-    void updateDisplayUnit();
+            void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
     void handleAssetClicked(const QModelIndex &index);
     void updateAlerts(const QString &warnings);

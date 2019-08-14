@@ -8,12 +8,11 @@ import configparser
 import os
 import struct
 
-from test_framework.test_framework import RavenTestFramework, SkipTest
+from test_framework.test_framework import (RavenTestFramework, SkipTest)
 from test_framework.util import (assert_equal,
                                  bytes_to_hex_str,
                                  hash256,
-                                 hash_block,
-                                )
+                                 hash_block)
 
 class ZMQSubscriber:
     def __init__(self, socket, topic):

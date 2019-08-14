@@ -58,11 +58,24 @@ work on its chain).
 
 """
 
-from test_framework.mininode import *
+from test_framework.mininode import (NodeConn, 
+                                    NodeConnCB, 
+                                    NetworkThread, 
+                                    msg_block, 
+                                    msg_headers, 
+                                    CBlockHeader, 
+                                    mininode_lock, 
+                                    msg_inv, 
+                                    CInv)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (os, 
+                                p2p_port, 
+                                assert_equal, 
+                                assert_raises_rpc_error, 
+                                connect_nodes, 
+                                sync_blocks)
 import time
-from test_framework.blocktools import create_block, create_coinbase
+from test_framework.blocktools import (create_block, create_coinbase)
 
 class AcceptBlockTest(RavenTestFramework):
     def add_options(self, parser):

@@ -7,7 +7,11 @@
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, 
+                                assert_raises_rpc_error, 
+                                assert_contains, 
+                                assert_does_not_contain, 
+                                assert_contains_pair)
 
 class MessagingTest(RavenTestFramework):
     def set_test_params(self):
@@ -17,7 +21,7 @@ class MessagingTest(RavenTestFramework):
 
     def activate_messaging(self):
         self.log.info("Generating RVN for node[0] and activating messaging...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         n0.generate(1)
         self.sync_all()
@@ -27,7 +31,7 @@ class MessagingTest(RavenTestFramework):
 
     def test_messaging(self):
         self.log.info("Testing messaging!")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0, n1 = self.nodes[0], self.nodes[1]
 
         spam_name = "SPAM"
         asset_name = "MESSAGING"

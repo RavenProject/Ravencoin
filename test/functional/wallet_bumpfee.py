@@ -19,7 +19,14 @@ from feature_segwit import send_to_witness
 from test_framework.test_framework import RavenTestFramework
 from test_framework import blocktools
 from test_framework.mininode import CTransaction
-from test_framework.util import *
+from test_framework.util import (connect_nodes_bi, 
+                                assert_equal, 
+                                Decimal, 
+                                sync_mempools, 
+                                assert_raises_rpc_error, 
+                                assert_greater_than, 
+                                bytes_to_hex_str, 
+                                hex_str_to_bytes)
 
 import io
 
@@ -54,7 +61,7 @@ class BumpFeeTest(RavenTestFramework):
         self.log.info("Mining blocks...")
         peer_node.generate(110)
         self.sync_all()
-        for i in range(25):
+        for _ in range(25):
             peer_node.sendtoaddress(rbf_node_address, 0.001)
         self.sync_all()
         peer_node.generate(1)

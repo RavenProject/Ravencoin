@@ -11,7 +11,12 @@ This test takes 30 mins or more (up to 2 hours)
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (connect_nodes, 
+                                sync_blocks, 
+                                mine_large_block, 
+                                assert_equal, 
+                                assert_raises_rpc_error, 
+                                assert_greater_than)
 import time
 import os
 
@@ -65,7 +70,7 @@ class PruneTest(RavenTestFramework):
         sync_blocks(self.nodes[0:2])
         self.nodes[0].generate(150)
         # Then mine enough full blocks to create more than 550MiB of data
-        for i in range(645):
+        for _ in range(645):
             mine_large_block(self.nodes[0], self.utxo_cache_0)
 
         sync_blocks(self.nodes[0:5])
@@ -77,7 +82,7 @@ class PruneTest(RavenTestFramework):
         self.log.info("Though we're already using more than 550MiB, current usage: %d" % calc_usage(self.prunedir))
         self.log.info("Mining 25 more blocks should cause the first block file to be pruned")
         # Pruning doesn't run until we're allocating another chunk, 20 full blocks past the height cutoff will ensure this
-        for i in range(25):
+        for _ in range(25):
             mine_large_block(self.nodes[0], self.utxo_cache_0)
 
         waitstart = time.time()
@@ -103,7 +108,7 @@ class PruneTest(RavenTestFramework):
             self.stop_node(0)
             self.start_node(0, extra_args=self.full_node_default_args)
             # Mine 24 blocks in node 1
-            for i in range(24):
+            for _ in range(24):
                 if j == 0:
                     mine_large_block(self.nodes[1], self.utxo_cache_1)
                 else:
@@ -113,7 +118,7 @@ class PruneTest(RavenTestFramework):
                     self.nodes[1].generate(1) #tx's already in mempool from previous disconnects
 
             # Reorg back with 25 block chain from node 0
-            for i in range(25):
+            for _ in range(25):
                 mine_large_block(self.nodes[0], self.utxo_cache_0)
 
             # Create connections in the order so both nodes can see the reorg at the same time
@@ -171,7 +176,7 @@ class PruneTest(RavenTestFramework):
         # mined blocks from being too small.
         self.nodes[0].resendwallettransactions()
 
-        for i in range(22):
+        for _ in range(22):
             # This can be slow, so do this in multiple RPC calls to avoid
             # RPC timeouts.
             self.nodes[0].generate(10) #node 0 has many large tx's in its mempool from the disconnects

@@ -40,7 +40,7 @@ import os
 import time
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, Decimal, wait_until, assert_raises_rpc_error)
 
 class MempoolPersistTest(RavenTestFramework):
     def set_test_params(self):
@@ -56,7 +56,7 @@ class MempoolPersistTest(RavenTestFramework):
         self.sync_all()
 
         self.log.debug("Send 5 transactions from node2 (to its own address)")
-        for i in range(5):
+        for _ in range(5):
             self.nodes[2].sendtoaddress(self.nodes[2].getnewaddress(), Decimal("10"))
         self.sync_all()
 

@@ -6,10 +6,22 @@
 """Test the rawtransaction RPCs for asset transactions.
 """
 from io import BytesIO
-from pprint import *
+from pprint import re
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
+from test_framework.util import (assert_equal, 
+                                assert_raises_rpc_error, 
+                                assert_is_hash_string, 
+                                assert_does_not_contain_key, 
+                                assert_contains_key, 
+                                assert_contains_pair)
+from test_framework.mininode import (CTransaction, 
+                                    hex_str_to_bytes, 
+                                    bytes_to_hex_str, 
+                                    CScriptReissue, 
+                                    CScriptOwner, 
+                                    CScriptTransfer, 
+                                    CTxOut, 
+                                    CScriptIssue)
 import math
 
 
@@ -49,7 +61,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def activate_assets(self):
         self.log.info("Generating RVN for node[0] and activating assets...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         n0.generate(1)
         self.sync_all()
@@ -60,7 +72,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
     def reissue_tampering_test(self):
         self.log.info("Tampering with raw reissues...")
 
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         ########################################
         # issue a couple of assets
@@ -169,7 +181,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
     def issue_tampering_test(self):
         self.log.info("Tampering with raw issues...")
 
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         ########################################
         # get issue tx
@@ -275,7 +287,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def issue_reissue_transfer_test(self):
         self.log.info("Doing a big issue-reissue-transfer test...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0, n1 = self.nodes[0], self.nodes[1]
 
         ########################################
         # issue
@@ -522,7 +534,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def unique_assets_test(self):
         self.log.info("Testing unique assets...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         bad_burn = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP"
         unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
@@ -581,7 +593,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
 
@@ -594,7 +606,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def unique_assets_via_issue_test(self):
         self.log.info("Testing unique assets via issue...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         root = "RINGU2"
         owner = f"{root}!"
@@ -720,7 +732,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def issue_invalid_address_test(self):
         self.log.info("Testing issue with invalid burn and address...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
         issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
@@ -841,14 +853,14 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
 
 
     def issue_sub_invalid_address_test(self):
         self.log.info("Testing issue sub invalid amount and address...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
 
         unique_burn = "n1issueUniqueAssetXXXXXXXXXXS4695i"
@@ -1031,14 +1043,14 @@ class RawAssetTransactionsTest(RavenTestFramework):
         }
         hex = n0.createrawtransaction(inputs, outputs)
         signed_hex = n0.signrawtransaction(hex)['hex']
-        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
 
 
     def issue_multiple_outputs_test(self):
         self.log.info("Testing issue with extra issues in the tx...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
 
@@ -1090,7 +1102,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def issue_sub_multiple_outputs_test(self):
         self.log.info("Testing issue with an extra sub asset issue in the tx...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         issue_burn = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ"
         sub_burn = "n1issueSubAssetXXXXXXXXXXXXXbNiH6v"
@@ -1335,7 +1347,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         # Sign and create the valid sub asset transaction
         signed_hex = n0.signrawtransaction(tx_issue_sub_hex)['hex']
-        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
 
@@ -1346,7 +1358,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def transfer_asset_tampering_test(self):
         self.log.info("Testing trasnfer of asset transaction tampering...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0, n1 = self.nodes[0], self.nodes[1]
 
         ########################################
         # create the root asset that the sub asset will try to be created from
@@ -1411,7 +1423,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
                                 n0.sendrawtransaction, tx_bad_transfer_signed)
 
         signed_hex = n0.signrawtransaction(tx_transfer_hex)['hex']
-        tx_hash = n0.sendrawtransaction(signed_hex)
+        n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
 
@@ -1422,7 +1434,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
     def transfer_asset_inserting_tampering_test(self):
         self.log.info("Testing of asset issue inserting tampering...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         # create the root asset that the sub asset will try to be created from
         root = "TRANSFER_ASSET_INSERTING"
@@ -1706,7 +1718,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         asset_section = asset_out_script['asset']
         assert_equal(asset_name, asset_section['name'])
         assert_equal(asset_amount, asset_section['amount'])
-        assert_equal(units, asset_section['units']);
+        assert_equal(units, asset_section['units'])
         assert_equal(reissuable, asset_section['reissuable'])
         assert_equal(ipfs_hash, asset_section['ipfs_hash'])
 
@@ -1783,12 +1795,12 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # issue asset
         n0.issue(asset_name, asset_amount)
         n0.generate(1)
-        for n in range(0, 5):
+        for _ in range(0, 5):
             n0.transfer(asset_name, asset_amount / 5, n2_address)
         n0.generate(1)
         self.sync_all()
 
-        for n in range(0, 5):
+        for _ in range(0, 5):
             n0.sendtoaddress(n2_address, rvn_amount / 5)
         n0.generate(1)
         self.sync_all()

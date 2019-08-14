@@ -7,12 +7,10 @@
 import time
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_raises_rpc_error,
-    connect_nodes_bi,
-    wait_until,
-)
+from test_framework.util import (assert_equal,
+                                assert_raises_rpc_error,
+                                connect_nodes_bi,
+                                wait_until)
 
 class DisconnectBanTest(RavenTestFramework):
     def set_test_params(self):

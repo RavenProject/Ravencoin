@@ -293,6 +293,12 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType)
     return IsAssetNameValid(name, assetType, _error);
 }
 
+bool IsAssetNameARoot(const std::string& name)
+{
+    AssetType type;
+    return IsAssetNameValid(name, type) && type == AssetType::ROOT;
+}
+
 bool IsAssetNameAnOwner(const std::string& name)
 {
     return IsAssetNameValid(name) && std::regex_match(name, OWNER_INDICATOR);
@@ -303,8 +309,12 @@ bool IsAssetNameAnRestricted(const std::string& name)
     return IsAssetNameValid(name) && std::regex_match(name, RESTRICTED_INDICATOR);
 }
 
-bool IsAssetNameAQualifier(const std::string& name)
+bool IsAssetNameAQualifier(const std::string& name, bool fOnlyQualifiers)
 {
+    if (fOnlyQualifiers) {
+        return IsAssetNameValid(name) && std::regex_match(name, QUALIFIER_INDICATOR);
+    }
+
     return IsAssetNameValid(name) && (std::regex_match(name, QUALIFIER_INDICATOR) || std::regex_match(name, SUB_QUALIFIER_INDICATOR));
 }
 
@@ -361,6 +371,18 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
         if (!valid) { error = "Name contains invalid characters (Valid characters are: A-Z 0-9 _ .) (special characters can't be the first or last characters)";  return false; }
         return true;
     }
+}
+
+std::string RestrictedNameToOwnerName(const std::string& name)
+{
+    if (!IsAssetNameAnRestricted(name)) {
+        return "";
+    }
+
+    std::string temp_owner = name.substr(1,name.length());
+    temp_owner = temp_owner + OWNER_TAG;
+
+    return temp_owner;
 }
 
 std::string GetParentName(const std::string& name)
@@ -801,7 +823,6 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
     vchReissueAsset.insert(vchReissueAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
     CDataStream ssReissue(vchReissueAsset, SER_NETWORK, PROTOCOL_VERSION);
 
-    
     try {
         ssReissue >> reissue;
     } catch(std::exception& e) {
@@ -1906,7 +1927,7 @@ bool CAssetsCache::AddReissueAsset(const CReissueAsset& reissue, const std::stri
     }
 
     return true;
-    
+
 }
 
 //! Changes Memory Only
@@ -4161,12 +4182,15 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 std::string change_address = EncodeDestination(coinControl.destChange);
                 // If this is a transfer of a restricted asset, check the destination address against the verifier string
                 CNullAssetTxVerifierString verifier;
-                if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier))
-                    throw JSONRPCError(RPC_DATABASE_ERROR, _("Unable to get restricted assets verifier string. Database out of sync. Reindex required"));
+                if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier)) {
+                    error = std::make_pair(RPC_DATABASE_ERROR, _("Unable to get restricted assets verifier string. Database out of sync. Reindex required"));
+                    return false;
+                }
 
-                if (!ContextualCheckVerifierString(passets, verifier.verifier_string, change_address, strError))
-                    throw JSONRPCError(RPC_DATABASE_ERROR,
-                                       std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
+                if (!ContextualCheckVerifierString(passets, verifier.verifier_string, change_address, strError)) {
+                    error = std::make_pair(RPC_DATABASE_ERROR, std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
+                    return false;
+                }
             }
         }
 
@@ -4188,14 +4212,17 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         for (auto pair : *nullAssetTxData) {
 
             if (IsAssetNameAQualifier(pair.first.asset_name)) {
-                if (!VerifyQualifierChange(*passets, pair.first, pair.second, strError))
-                    throw JSONRPCError(RPC_INVALID_REQUEST, strError);
-
+                if (!VerifyQualifierChange(*passets, pair.first, pair.second, strError)) {
+                    error = std::make_pair(RPC_INVALID_REQUEST, strError);
+                    return false;
+                }
                 if (pair.first.flag == (int)QualifierType::ADD_QUALIFIER)
                     nAddTagCount++;
             } else if (IsAssetNameAnRestricted(pair.first.asset_name)) {
-                if (!VerifyRestrictedAddressChange(*passets, pair.first, pair.second, strError))
-                    throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+                if (!VerifyRestrictedAddressChange(*passets, pair.first, pair.second, strError)) {
+                    error = std::make_pair(RPC_INVALID_REQUEST, strError);
+                    return false;
+                }
             }
 
             CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
@@ -4218,8 +4245,10 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         std::string strError = "";
         for (auto dataObject : *nullGlobalRestrictionData) {
 
-            if (!VerifyGlobalRestrictedChange(*passets, dataObject, strError))
-                throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+            if (!VerifyGlobalRestrictedChange(*passets, dataObject, strError)) {
+                error = std::make_pair(RPC_INVALID_REQUEST, strError);
+                return false;
+            }
 
             CScript dataScript;
             dataObject.ConstructGlobalRestrictionTransaction(dataScript);
@@ -4706,16 +4735,11 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name,
     return false;
 }
 
-void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers, bool fWithTag)
+void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers)
 {
     std::string s(verifier);
 
-    std::regex regexSearch;
-    if (fWithTag)
-        regexSearch = std::regex(R"(#[A-Z0-9_.]+)");
-    else
-        regexSearch = std::regex(R"([A-Z0-9_.]+)");
-
+    std::regex regexSearch = std::regex(R"([A-Z0-9_.]+)");
     std::smatch match;
 
     while (std::regex_search(s,match,regexSearch)) {
@@ -4736,7 +4760,7 @@ std::string GetStrippedVerifierString(const std::string& verifier)
     return str_without_qualifier_tags;
 }
 
-bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError, bool fWithTags)
+bool CheckVerifierString(const std::string& verifier, std::set<std::string>& setFoundQualifiers, std::string& strError, ErrorReport* errorReport)
 {
     // If verifier string is true, always return true
     if (verifier == "true") {
@@ -4746,6 +4770,10 @@ bool CheckVerifierString(const std::string& verifier, std::set<std::string>& set
     // If verifier string is empty, return false
     if (verifier.empty()) {
         strError = _("Verifier string can not be empty. To default to true, use \"true\"");
+        if (errorReport) {
+            errorReport->type = ErrorReport::ErrorType::EmptyString;
+            errorReport->strDevData = "bad-txns-null-verifier-empty";
+        }
         return false;
     }
 
@@ -4755,11 +4783,16 @@ bool CheckVerifierString(const std::string& verifier, std::set<std::string>& set
     // Check the stripped size to make sure it isn't over 80
     if (strippedVerifier.length() > 80){
         strError = _("Verifier string has length greater than 80 after whitespaces and '#' are removed");
+        if (errorReport) {
+            errorReport->type = ErrorReport::ErrorType::LengthToLarge;
+            errorReport->strDevData = "bad-txns-null-verifier-length-greater-than-max-length";
+            errorReport->vecUserData.emplace_back(strippedVerifier);
+        }
         return false;
     }
 
     // Extract the qualifiers from the verifier string
-    ExtractVerifierStringQualifiers(verifier, setFoundQualifiers, fWithTags);
+    ExtractVerifierStringQualifiers(strippedVerifier, setFoundQualifiers);
 
     // Create an object that stores if an address contains a qualifier
     LibBoolEE::Vals vals;
@@ -4770,14 +4803,17 @@ bool CheckVerifierString(const std::string& verifier, std::set<std::string>& set
     for (auto qualifier : setFoundQualifiers) {
 
         std::string edited_qualifier;
-        if (!fWithTags)
-            edited_qualifier = QUALIFIER_CHAR + qualifier;
-        else {
-            edited_qualifier = qualifier;
-        }
+
+        // Qualifer string was stripped above, so we need to add back the #
+        edited_qualifier = QUALIFIER_CHAR + qualifier;
 
         if (!IsQualifierNameValid(edited_qualifier)) {
             strError = "bad-txns-null-verifier-invalid-asset-name-" + qualifier;
+            if (errorReport) {
+                errorReport->type = ErrorReport::ErrorType::InvalidQualifierName;
+                errorReport->vecUserData.emplace_back(edited_qualifier);
+                errorReport->strDevData = "bad-txns-null-verifier-invalid-asset-name-" + qualifier;
+            }
             return false;
         }
 
@@ -4785,9 +4821,16 @@ bool CheckVerifierString(const std::string& verifier, std::set<std::string>& set
     }
 
     try {
-        LibBoolEE::resolve(verifier, vals);
+        LibBoolEE::resolve(verifier, vals, errorReport);
         return true;
     } catch (const std::runtime_error& run_error) {
+        if (errorReport) {
+            if (errorReport->type == ErrorReport::ErrorType::NotSetError) {
+                errorReport->type = ErrorReport::ErrorType::InvalidSyntax;
+                errorReport->vecUserData.emplace_back(run_error.what());
+                errorReport->strDevData = "bad-txns-null-verifier-failed-syntax-check";
+            }
+        }
         strError = "bad-txns-null-verifier-failed-syntax-check";
         return error("%s : Verifier string failed to resolve. Please check string syntax - exception: %s\n", __func__, run_error.what());
     }
@@ -4976,7 +5019,7 @@ bool ContextualCheckVerifierAssetTxOut(const CTxOut& txout, CAssetsCache* assetC
     return true;
 }
 
-bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError, bool fWithTags)
+bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verifier, const std::string& check_address, std::string& strError, ErrorReport* errorReport)
 {
     // If verifier is set to true, return true
     if (verifier == "true")
@@ -4984,15 +5027,18 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
 
     // Check against the non contextual changes first
     std::set<std::string> setFoundQualifiers;
-    if (!CheckVerifierString(verifier, setFoundQualifiers, strError, fWithTags))
+    if (!CheckVerifierString(verifier, setFoundQualifiers, strError, errorReport))
         return false;
 
     // Loop through each qualifier and make sure that the asset exists
     for(auto qualifier : setFoundQualifiers) {
-        std::string search = qualifier;
-        if (!fWithTags)
-            search = QUALIFIER_CHAR + qualifier;
+        std::string search = QUALIFIER_CHAR + qualifier;
         if (!cache->CheckIfAssetExists(search, true)) {
+            if (errorReport) {
+                errorReport->type = ErrorReport::ErrorType::AssetDoesntExist;
+                errorReport->vecUserData.emplace_back(search);
+                errorReport->strDevData = "bad-txns-null-verifier-contains-non-issued-qualifier";
+            }
             strError = "bad-txns-null-verifier-contains-non-issued-qualifier";
             return false;
         }
@@ -5008,9 +5054,7 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
 
     // Add the qualifiers into the vals object
     for (auto qualifier : setFoundQualifiers) {
-        std::string search = qualifier;
-        if (!fWithTags)
-            search = QUALIFIER_CHAR + qualifier;
+        std::string search = QUALIFIER_CHAR + qualifier;
 
         // Check to see if the address contains the qualifier
         bool has_qualifier = cache->CheckForAddressQualifier(search, check_address, true);
@@ -5020,14 +5064,31 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
     }
 
     try {
-        bool ret = LibBoolEE::resolve(verifier, vals);
+        bool ret = LibBoolEE::resolve(verifier, vals, errorReport);
         if (!ret) {
+            if (errorReport) {
+                if (errorReport->type == ErrorReport::ErrorType::NotSetError) {
+                    errorReport->type = ErrorReport::ErrorType::FailedToVerifyAgainstAddress;
+                }
+                errorReport->vecUserData.emplace_back(check_address);
+                errorReport->strDevData = "bad-txns-null-verifier-address-failed-verification";
+            }
+
             error("%s : The address %s failed to verify against: %s", __func__, check_address, verifier);
             strError = "bad-txns-null-verifier-address-failed-verification";
         }
         return ret;
 
     } catch (const std::runtime_error& run_error) {
+
+        if (errorReport) {
+            if (errorReport->type == ErrorReport::ErrorType::NotSetError) {
+                errorReport->type = ErrorReport::ErrorType::InvalidSyntax;
+                errorReport->vecUserData.emplace_back(run_error.what());
+                errorReport->strDevData = "bad-txns-null-verifier-failed-contexual-syntax-check";
+            }
+        }
+
         strError = "bad-txns-null-verifier-failed-contexual-syntax-check";
         return error("%s : Verifier string failed to resolve. Please check string syntax - exception: %s\n", __func__, run_error.what());
     }
@@ -5341,7 +5402,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
             if (fNotFound) {
                 CNullAssetTxVerifierString current_verifier;
                 if (assetCache->GetAssetVerifierStringIfExists(reissue_asset.strName, current_verifier)) {
-                    if (!ContextualCheckVerifierString(assetCache, current_verifier.verifier_string, strAddress, strError, false))
+                    if (!ContextualCheckVerifierString(assetCache, current_verifier.verifier_string, strAddress, strError))
                         return false;
                 } else {
                     // This should happen, but if it does. The wallet needs to shutdown,
@@ -5351,7 +5412,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
                     return false;
                 }
             } else {
-                if (!ContextualCheckVerifierString(assetCache, new_verifier.verifier_string, strAddress, strError, false))
+                if (!ContextualCheckVerifierString(assetCache, new_verifier.verifier_string, strAddress, strError))
                     return false;
             }
         }
@@ -5440,4 +5501,24 @@ bool ContextualCheckUniqueAsset(CAssetsCache* assetCache, const CNewAsset& uniqu
         return false;
 
     return true;
+}
+
+std::string GetUserErrorString(const ErrorReport& report)
+{
+    switch (report.type) {
+        case ErrorReport::ErrorType::NotSetError: return _("Error not set");
+        case ErrorReport::ErrorType::InvalidQualifierName: return _("Invalid Qualifier Name: ") + report.vecUserData[0];
+        case ErrorReport::ErrorType::EmptyString: return _("Verifier string is empty");
+        case ErrorReport::ErrorType::LengthToLarge: return _("Length is to large. Please use a smaller length");
+        case ErrorReport::ErrorType::InvalidSubExpressionFormula: return _("Invalid expressions in verifier string: ") + report.vecUserData[0];
+        case ErrorReport::ErrorType::InvalidSyntax: return _("Invalid syntax: ") + report.vecUserData[0];
+        case ErrorReport::ErrorType::AssetDoesntExist: return _("Asset doesn't exist: ") + report.vecUserData[0];
+        case ErrorReport::ErrorType::FailedToVerifyAgainstAddress: return _("This address doesn't contain the correct tags to pass the verifier string check: ");
+        case ErrorReport::ErrorType::EmptySubExpression: return _("The verifier string has two operators without a tag between them");
+        case ErrorReport::ErrorType::UnknownOperator: return _("The symbol: '") + report.vecUserData[0] + _("' is not a valid character in the expression: ") + report.vecUserData[1];
+        case ErrorReport::ErrorType::ParenthesisParity: return _("Every '(' must have a corresponding ')' in the expression: ") + report.vecUserData[0];
+        case ErrorReport::ErrorType::VariableNotFound: return _("Variable is not allow in the expression: '") + report.vecUserData[0] + "'";;
+        default:
+            return _("Error not set");
+    }
 }

@@ -18,9 +18,22 @@ TestNode behaves as follows:
     on_getdata: provide blocks via BlockStore
 """
 
-from .mininode import *
-from .blockstore import BlockStore, TxStore
-from .util import p2p_port, wait_until
+from .mininode import (NodeConn, 
+                        CBlock, 
+                        msg_inv, 
+                        CInv, 
+                        msg_headers, 
+                        msg_mempool, 
+                        mininode_lock, 
+                        NodeConnCB, 
+                        msg_getheaders, 
+                        msg_ping, 
+                        msg_block, 
+                        CBlockHeader, 
+                        MAX_INV_SZ, 
+                        CTransaction)
+from .blockstore import (BlockStore, TxStore)
+from .util import (p2p_port, wait_until)
 
 import logging
 
