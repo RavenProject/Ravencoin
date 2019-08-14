@@ -377,6 +377,13 @@ void AssetsDialog::on_sendButton_clicked()
     std::pair<int, std::string> error;
     CAmount nFeeRequired;
 
+    if (IsInitialBlockDownload()) {
+        GUIUtil::SyncWarningMessage syncWarning(this);
+        bool sendTransaction = syncWarning.showTransactionSyncWarningMessage();
+        if (!sendTransaction)
+            return;
+    }
+
     if (!CreateTransferAssetTransaction(model->getWallet(), ctrl, vTransfers, "", error, tx, reservekey, nFeeRequired)) {
         QMessageBox msgBox;
         msgBox.setText(QString::fromStdString(error.second));

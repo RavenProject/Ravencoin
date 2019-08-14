@@ -134,6 +134,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     manageAssetAction(0),
     messagingAction(0),
     votingAction(0),
+    restrictedAssetAction(0),
     headerWidget(0),
     labelCurrentMarket(0),
     labelCurrentPrice(0),
@@ -432,6 +433,14 @@ void RavenGUI::createActions()
     votingAction->setFont(font);
     tabGroup->addAction(votingAction);
 
+    restrictedAssetAction = new QAction(platformStyle->SingleColorIcon(":/icons/edit"), tr("&Restricted Assets"), this);
+    restrictedAssetAction->setStatusTip(tr("Manage restricted assets"));
+    restrictedAssetAction->setToolTip(restrictedAssetAction->statusTip());
+    restrictedAssetAction->setCheckable(true);
+//    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    restrictedAssetAction->setFont(font);
+    tabGroup->addAction(restrictedAssetAction);
+
     /** RVN END */
 
 #ifdef ENABLE_WALLET
@@ -455,6 +464,8 @@ void RavenGUI::createActions()
     connect(createAssetAction, SIGNAL(triggered()), this, SLOT(gotoCreateAssetsPage()));
     connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(manageAssetAction, SIGNAL(triggered()), this, SLOT(gotoManageAssetsPage()));
+    connect(restrictedAssetAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(restrictedAssetAction, SIGNAL(triggered()), this, SLOT(gotoRestrictedAssetsPage()));
     // TODO add messaging actions to go to messaging page when clicked
     // TODO add voting actions to go to voting page when clicked
 #endif // ENABLE_WALLET
@@ -619,6 +630,7 @@ void RavenGUI::createToolBars()
         toolbar->addAction(manageAssetAction);
 //        toolbar->addAction(messagingAction);
 //        toolbar->addAction(votingAction);
+        toolbar->addAction(restrictedAssetAction);
 
         QString openSansFontString = "font: normal 22pt \"Open Sans\";";
         QString normalString = "font: normal 22pt \"Arial\";";
@@ -897,6 +909,7 @@ void RavenGUI::setWalletActionsEnabled(bool enabled)
     manageAssetAction->setEnabled(false);
     messagingAction->setEnabled(false);
     votingAction->setEnabled(false);
+    restrictedAssetAction->setEnabled(false);
     /** RVN END */
 }
 
@@ -1065,6 +1078,12 @@ void RavenGUI::gotoManageAssetsPage()
 {
     manageAssetAction->setChecked(true);
     if (walletFrame) walletFrame->gotoManageAssetsPage();
+};
+
+void RavenGUI::gotoRestrictedAssetsPage()
+{
+    restrictedAssetAction->setChecked(true);
+    if (walletFrame) walletFrame->gotoRestrictedAssetsPage();
 };
 /** RVN END */
 #endif // ENABLE_WALLET
@@ -1374,6 +1393,15 @@ void RavenGUI::checkAssets()
         createAssetAction->setToolTip(tr("Assets not yet active"));
         manageAssetAction->setDisabled(true);
         }
+
+    if (AreRestrictedAssetsDeployed) {
+        restrictedAssetAction->setDisabled(false);
+        restrictedAssetAction->setToolTip(tr("Manage restricted assets"));
+
+    } else {
+        restrictedAssetAction->setDisabled(true);
+        restrictedAssetAction->setToolTip(tr("Restricted Assets not yet active"));
+    }
 }
 #endif // ENABLE_WALLET
 

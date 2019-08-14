@@ -17,7 +17,7 @@ bool AssetFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &source
 
     QString assetName = index.data(AssetTableModel::AssetNameRole).toString();
 
-    if(!assetName.contains(assetNamePrefix, Qt::CaseInsensitive))
+    if(!assetName.startsWith(assetNamePrefix, Qt::CaseInsensitive))
         return false;
 
     return true;

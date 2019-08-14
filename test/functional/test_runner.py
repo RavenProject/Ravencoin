@@ -154,6 +154,7 @@ BASE_SCRIPTS= [
     'p2p_mempool.py',
     'rpc_named_arguments.py',
     'rpc_uptime.py',
+    'rpc_assettransfer.py'
     # Don't append tests at the end to avoid merge conflicts
     # Put them in a random line within the section that fits their approximate run-time
 ]

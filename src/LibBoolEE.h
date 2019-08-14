@@ -31,6 +31,8 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 ///
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include "assets/assets.h"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -43,7 +45,7 @@ public:
     typedef std::pair<std::string, bool> Val; ///< A single proposition valuation
 
     // @return	true iff the formula is true under the valuation (where the valuation are pairs (variable,value))
-    static bool resolve(const std::string & source, const Vals & valuation);
+    static bool resolve(const std::string & source, const Vals & valuation,  ErrorReport* errorReport = nullptr);
 
     // @return  new string made from the source by removing whitespaces
     static std::string removeWhitespaces(const std::string & source);
@@ -52,13 +54,13 @@ public:
     static std::string removeCharacter(const std::string &source, const char ch);
 
 private:
-    static std::vector<std::string> singleParse(const std::string & formula, const char op);
+    static std::vector<std::string> singleParse(const std::string & formula, const char op, ErrorReport* errorReport = nullptr);
 
     // @return	true iff ch is possibly part of a valid name
     static bool belongsToName(const char ch);
 
     // @return	true iff the formula is true under the valuation (where the valuation are pairs (variable,value))---used internally
-    static bool resolveRec(const std::string & source, const Vals & valuation);
+    static bool resolveRec(const std::string & source, const Vals & valuation, ErrorReport* errorReport = nullptr);
 
 
     // @return	new string made from the source by removing the leading and trailing white spaces

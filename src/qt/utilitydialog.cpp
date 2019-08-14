@@ -161,6 +161,8 @@ void HelpMessageDialog::on_okButton_accepted()
 }
 
 
+
+
 /** "Shutdown" window */
 ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
     QWidget(parent, f)
@@ -188,7 +190,11 @@ QWidget *ShutdownWindow::showShutdownWindow(RavenGUI *window)
     return shutdownWindow;
 }
 
+
+
 void ShutdownWindow::closeEvent(QCloseEvent *event)
 {
     event->ignore();
 }
+
+

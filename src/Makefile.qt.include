@@ -117,6 +117,9 @@ QT_FORMS_UI = \
   qt/forms/assetsdialog.ui \
   qt/forms/createassetdialog.ui \
   qt/forms/reissueassetdialog.ui \
+  qt/forms/restrictedassetsdialog.ui \
+  qt/forms/restrictedassignqualifier.ui \
+  qt/forms/restrictedfreezeaddress.ui \
   qt/forms/sendassetsentry.ui
 
 QT_MOC_CPP = \
@@ -174,6 +177,9 @@ QT_MOC_CPP = \
   qt/moc_assetsdialog.cpp \
   qt/moc_createassetdialog.cpp \
   qt/moc_reissueassetdialog.cpp \
+  qt/moc_restrictedassetsdialog.cpp \
+  qt/moc_restrictedassignqualifier.cpp \
+  qt/moc_restrictedfreezeaddress.cpp \
   qt/moc_sendassetsentry.cpp
 
 RAVEN_MM = \
@@ -242,6 +248,9 @@ RAVEN_QT_H = \
   qt/receiverequestdialog.h \
   qt/recentrequeststablemodel.h \
   qt/reissueassetdialog.h \
+  qt/restrictedassetsdialog.h \
+  qt/restrictedassignqualifier.h \
+  qt/restrictedfreezeaddress.h \
   qt/rpcconsole.h \
   qt/sendassetsentry.h \
   qt/sendcoinsdialog.h \
@@ -417,6 +426,9 @@ RAVEN_QT_WALLET_CPP = \
   qt/receiverequestdialog.cpp \
   qt/recentrequeststablemodel.cpp \
   qt/reissueassetdialog.cpp \
+  qt/restrictedassetsdialog.cpp \
+  qt/restrictedassignqualifier.cpp \
+  qt/restrictedfreezeaddress.cpp \
   qt/sendassetsentry.cpp \
   qt/sendcoinsdialog.cpp \
   qt/sendcoinsentry.cpp \
