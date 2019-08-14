@@ -287,7 +287,6 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/hmac_sha512.cpp \
   crypto/hmac_sha512.h \
   crypto/ripemd160.cpp \
-  crypto/aes_helper.c \
   crypto/blake.c \
   crypto/bmw.c \
   crypto/cubehash.c \
@@ -300,7 +299,6 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/simd.c \
   crypto/skein.c \
   crypto/sph_hamsi.c \
-  crypto/sph_hamsi_helper.c \
   crypto/sph_fugue.c \
   crypto/sph_shabal.c \
   crypto/sph_whirlpool.c \
@@ -408,7 +406,6 @@ libraven_util_a_SOURCES = \
   clientversion.cpp \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
-  compat/strnlen.cpp \
   fs.cpp \
   random.cpp \
   rpc/protocol.cpp \

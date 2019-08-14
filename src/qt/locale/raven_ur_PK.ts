@@ -1,4 +1,6 @@
-<TS language="ur_PK" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="ur_PK">
 <context>
     <name>AddressBookPage</name>
     <message>

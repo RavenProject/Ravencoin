@@ -658,7 +658,9 @@ bool AddOrphanTx(const CTransactionRef& tx, NodeId peer) EXCLUSIVE_LOCKS_REQUIRE
 
     auto ret = mapOrphanTransactions.emplace(hash, COrphanTx{tx, peer, GetTime() + ORPHAN_TX_EXPIRE_TIME});
     assert(ret.second);
-    for (const CTxIn& txin : tx->vin) {
+    for (const CTxIn& txin : tx->vin)
+    {
+#pragma GCC diagnostic ignored "-Wuser-defined-warnings"
         mapOrphanTransactionsByPrev[txin.prevout].insert(ret.first);
     }
 

@@ -83,7 +83,7 @@ public:
 
         painter->setFont(GUIUtil::getSubLabelFont());
         // Concatenate the strings if needed before painting
-        GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
+        GUIUtil::concatenate(painter, address, painter->fontMetrics().horizontalAdvance(amountText), addressRect.left(), addressRect.right());
 
         painter->setPen(foreground);
         QRect boundingRect;
@@ -115,7 +115,7 @@ public:
         QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
 
         // Concatenate the strings if needed before painting
-        GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+        GUIUtil::concatenate(painter, assetName, painter->fontMetrics().horizontalAdvance(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
 
         painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
 
@@ -247,7 +247,7 @@ public:
         // Get the width in pixels that the amount takes up (because they are different font,
         // we need to do this before we call the concatenate function
         painter->setFont(amountFont);
-        int amount_width = painter->fontMetrics().width(amountText);
+        int amount_width = painter->fontMetrics().horizontalAdvance(amountText);
 
         // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
         painter->setFont(nameFont);

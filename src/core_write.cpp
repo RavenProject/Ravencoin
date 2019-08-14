@@ -179,6 +179,17 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
             assetInfo.pushKV("amount", ValueFromAmount(amount));
 
             switch (type) {
+                case TX_NONSTANDARD:
+                case TX_PUBKEY:
+                case TX_PUBKEYHASH:
+                case TX_SCRIPTHASH:
+                case TX_MULTISIG:
+                case TX_NULL_DATA:
+                case TX_WITNESS_V0_SCRIPTHASH:
+                case TX_WITNESS_V0_KEYHASH:
+                case TX_RESTRICTED_ASSET_DATA:
+                default:
+                    break;
                 case TX_NEW_ASSET:
                     if (IsAssetNameAnOwner(name)) {
                         // pwnd n00b

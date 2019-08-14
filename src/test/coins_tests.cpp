@@ -548,8 +548,8 @@ BOOST_FIXTURE_TEST_SUITE(coins_tests, BasicTestingSetup)
         Coin cc1;
         ss1 >> cc1;
         BOOST_CHECK_EQUAL(cc1.fCoinBase, false);
-        BOOST_CHECK_EQUAL(cc1.nHeight, 203998);
-        BOOST_CHECK_EQUAL(cc1.out.nValue, 60000000000ULL);
+        BOOST_CHECK_EQUAL(cc1.nHeight, (uint64_t)203998);
+        BOOST_CHECK_EQUAL(cc1.out.nValue, (int64_t)60000000000ULL);
         BOOST_CHECK_EQUAL(HexStr(cc1.out.scriptPubKey), HexStr(GetScriptForDestination(CKeyID(uint160(ParseHex("816115944e077fe7c803cfa57f29b36bf87c1d35"))))));
 
         // Good example
@@ -557,7 +557,7 @@ BOOST_FIXTURE_TEST_SUITE(coins_tests, BasicTestingSetup)
         Coin cc2;
         ss2 >> cc2;
         BOOST_CHECK_EQUAL(cc2.fCoinBase, true);
-        BOOST_CHECK_EQUAL(cc2.nHeight, 120891);
+        BOOST_CHECK_EQUAL(cc2.nHeight, (uint64_t)120891);
         BOOST_CHECK_EQUAL(cc2.out.nValue, 110397);
         BOOST_CHECK_EQUAL(HexStr(cc2.out.scriptPubKey), HexStr(GetScriptForDestination(CKeyID(uint160(ParseHex("8c988f1a4a4de2161e0f50aac7f17e7f9555caa4"))))));
 
@@ -566,9 +566,9 @@ BOOST_FIXTURE_TEST_SUITE(coins_tests, BasicTestingSetup)
         Coin cc3;
         ss3 >> cc3;
         BOOST_CHECK_EQUAL(cc3.fCoinBase, false);
-        BOOST_CHECK_EQUAL(cc3.nHeight, 0);
+        BOOST_CHECK_EQUAL(cc3.nHeight, (uint64_t)0);
         BOOST_CHECK_EQUAL(cc3.out.nValue, 0);
-        BOOST_CHECK_EQUAL(cc3.out.scriptPubKey.size(), 0);
+        BOOST_CHECK_EQUAL(cc3.out.scriptPubKey.size(), (uint64_t)0);
 
         // scriptPubKey that ends beyond the end of the stream
         CDataStream ss4(ParseHex("000007"), SER_DISK, CLIENT_VERSION);

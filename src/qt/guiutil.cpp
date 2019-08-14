@@ -1091,7 +1091,7 @@ void concatenate(QPainter* painter, QString& catString, int static_width, int le
     int start_name_length = catString.size();
 
     // Get the length of the dots
-    int dots_width = painter->fontMetrics().width("...");
+    int dots_width = painter->fontMetrics().horizontalAdvance("...");
 
     // Add the dots width to the amount width
     static_width += dots_width;
@@ -1099,7 +1099,7 @@ void concatenate(QPainter* painter, QString& catString, int static_width, int le
     // Start concatenation loop, end loop if name is at three characters
     while (catString.size() > 3) {
         // Get the text width of the current name
-        int text_width = painter->fontMetrics().width(catString);
+        int text_width = painter->fontMetrics().horizontalAdvance(catString);
 
         // Check to see if the text width is going to overlap the amount width if it doesn't break the loop
         if (left_side + text_width < right_size - static_width)
