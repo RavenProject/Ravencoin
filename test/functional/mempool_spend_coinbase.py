@@ -14,7 +14,7 @@ but less mature coinbase spends are NOT.
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, create_tx, assert_raises_rpc_error)
 
 # Create one-input, one-output, no-fee transaction:
 class MempoolSpendCoinbaseTest(RavenTestFramework):

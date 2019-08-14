@@ -14,10 +14,10 @@ if uploadtarget has been reached.
 from collections import defaultdict
 import time
 
-from pprint import *
-from test_framework.mininode import *
+from pprint import re
+from test_framework.mininode import (NodeConn, NodeConnCB, NetworkThread, msg_getdata, CInv)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (p2p_port, mine_large_block, assert_equal)
 
 class TestNode(NodeConnCB):
     def __init__(self):

@@ -9,7 +9,7 @@ This streams the combined log output to stdout. Use combine_logs.py > outputfile
 to write to an outputfile."""
 
 import argparse
-from collections import defaultdict, namedtuple
+from collections import (defaultdict, namedtuple)
 import heapq
 import itertools
 import os

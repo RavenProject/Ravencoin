@@ -6,9 +6,9 @@
 """Test the RBF code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
+from test_framework.util import (satoshi_round, assert_raises_rpc_error, assert_equal, Decimal)
+from test_framework.script import CScript
+from test_framework.mininode import (bytes_to_hex_str, COIN, CTransaction, CTxIn, COutPoint, CTxOut)
 
 MAX_REPLACEMENT_LIMIT = 100
 
@@ -233,7 +233,7 @@ class ReplaceByFeeTest(RavenTestFramework):
 
             txid = int(txid, 16)
 
-            for i, txout in enumerate(tx.vout):
+            for i, _ in enumerate(tx.vout):
                 for x in branch(COutPoint(txid, i), txout_value,
                                   max_txs,
                                   tree_width=tree_width, fee=fee,

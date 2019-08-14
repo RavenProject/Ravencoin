@@ -9,12 +9,10 @@
 import random
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_contains,
-    assert_does_not_contain_key,
-    assert_equal,
-    assert_raises_rpc_error,
-)
+from test_framework.util import (assert_contains,
+                                assert_does_not_contain_key,
+                                assert_equal,
+                                assert_raises_rpc_error)
 
 
 def gen_root_asset_name():
@@ -54,7 +52,7 @@ class UniqueAssetTest(RavenTestFramework):
         n0.issue(asset_name=root)
         n0.generate(1)
         asset_name = gen_unique_asset_name(root)
-        tx_hash = n0.issue(asset_name=asset_name)
+        n0.issue(asset_name=asset_name)
         n0.generate(1)
         assert_equal(1, n0.listmyassets()[asset_name])
 
@@ -63,9 +61,9 @@ class UniqueAssetTest(RavenTestFramework):
         n0, n1 = self.nodes[0], self.nodes[1]
         n1.generate(10)
         self.sync_all()
-
         root = gen_root_asset_name()
         asset_name = gen_unique_asset_name(root)
+        
 
         # no root
         assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {root}!", n0.issue, asset_name)

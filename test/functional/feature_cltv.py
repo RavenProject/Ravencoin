@@ -10,10 +10,19 @@ Test that the CHECKLOCKTIMEVERIFY soft-fork activates at (regtest) block height
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
+from test_framework.util import (p2p_port, assert_equal)
+from test_framework.mininode import (ToHex, 
+                                    CTransaction, 
+                                    hex_str_to_bytes, 
+                                    NodeConn, 
+                                    NodeConnCB, 
+                                    NetworkThread, 
+                                    msg_block, 
+                                    wait_until,
+                                    mininode_lock,
+                                    msg_tx)
 from test_framework.blocktools import create_coinbase, create_block
-from test_framework.script import CScript, OP_1NEGATE, OP_CHECKLOCKTIMEVERIFY, OP_DROP, CScriptNum
+from test_framework.script import (CScript, OP_1NEGATE, OP_CHECKLOCKTIMEVERIFY, OP_DROP, CScriptNum)
 from io import BytesIO
 
 CLTV_HEIGHT = 1351

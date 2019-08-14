@@ -18,9 +18,9 @@ and don't receive a VERACK. Unsupported service bits are currently 1 << 5 and
 UPDATE: Raven RIP-2 uses bit 1 << 5.  Currently there are no unsupported service bits.
 """
 
-from test_framework.mininode import *
+from test_framework.mininode import (NodeConnCB, NodeConn, msg_verack, msg_ping, msg_getaddr, NetworkThread, mininode_lock)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (logger, p2p_port, wait_until, time)
 
 banscore = 10
 
@@ -52,7 +52,7 @@ class CLazyNode(NodeConnCB):
     def on_headers(self, conn, message): self.bad_message(message)
     def on_getheaders(self, conn, message): self.bad_message(message)
     def on_ping(self, conn, message): self.bad_message(message)
-    def on_mempool(self, conn): self.bad_message(message)
+    def on_mempool(self, conn, message): self.bad_message(message)
     def on_pong(self, conn, message): self.bad_message(message)
     def on_feefilter(self, conn, message): self.bad_message(message)
     def on_sendheaders(self, conn, message): self.bad_message(message)
@@ -68,7 +68,7 @@ class CNodeNoVersionBan(CLazyNode):
     # NOTE: implementation-specific check here. Remove if ravend ban behavior changes
     def on_open(self, conn):
         super().on_open(conn)
-        for i in range(banscore):
+        for _ in range(banscore):
             self.send_message(msg_verack())
 
     def on_reject(self, conn, message): pass
@@ -104,8 +104,8 @@ class P2PLeakTest(RavenTestFramework):
         no_version_bannode = CNodeNoVersionBan()
         no_version_idlenode = CNodeNoVersionIdle()
         no_verack_idlenode = CNodeNoVerackIdle()
-        unsupported_service_bit5_node = CLazyNode()
-        unsupported_service_bit7_node = CLazyNode()
+        CLazyNode()
+        CLazyNode()
 
         connections = []
         connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_version_bannode, send_version=False))

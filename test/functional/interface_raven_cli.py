@@ -5,7 +5,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test raven-cli"""
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import assert_equal, assert_raises_process_error, get_auth_cookie
+from test_framework.util import (assert_equal, assert_raises_process_error, get_auth_cookie)
 
 class TestRavenCli(RavenTestFramework):
 

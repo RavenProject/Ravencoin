@@ -7,9 +7,9 @@
 
   (Wallet now has DEFAULT_TRANSACTION_MINFEE = 0.00050000"""
 
-from test_framework.mininode import *
+from test_framework.mininode import (mininode_lock, NodeConnCB, NodeConn, NetworkThread, msg_feefilter)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (sync_blocks, p2p_port, Decimal, sync_mempools)
 import time
 
 
@@ -18,7 +18,7 @@ def hashToHex(hash):
 
 # Wait up to 60 secs to see if the testnode has received all the expected invs
 def allInvsMatch(invsExpected, testnode):
-    for x in range(60):
+    for _ in range(60):
         with mininode_lock:
             if (sorted(invsExpected) == sorted(testnode.txinvs)):
                 return True

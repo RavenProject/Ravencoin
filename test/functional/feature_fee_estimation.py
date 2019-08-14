@@ -6,9 +6,9 @@
 """Test fee estimation code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE
-from test_framework.mininode import CTransaction, CTxIn, CTxOut, COutPoint, ToHex, COIN
+from test_framework.util import (satoshi_round, Decimal, connect_nodes, random, sync_mempools, sync_blocks)
+from test_framework.script import (CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE)
+from test_framework.mininode import (CTransaction, CTxIn, CTxOut, COutPoint, ToHex, COIN)
 
 # Construct 2 trivial P2SH's and the ScriptSigs that spend them
 # So we can create many transactions without needing to spend
@@ -168,9 +168,9 @@ class EstimateFeeTest(RavenTestFramework):
         # We shuffle our confirmed txout set before each set of transactions
         # small_txpuzzle_randfee will use the transactions that have inputs already in the chain when possible
         # resorting to tx's that depend on the mempool when those run out
-        for i in range(numblocks):
+        for _ in range(numblocks):
             random.shuffle(self.confutxo)
-            for j in range(random.randrange(100-50,100+50)):
+            for _ in range(random.randrange(100-50,100+50)):
                 from_index = random.randint(1,2)
                 (txhex, fee) = small_txpuzzle_randfee(self.nodes[from_index], self.confutxo,
                                                       self.memutxo, Decimal("0.005"), min_fee, min_fee)
@@ -239,7 +239,7 @@ class EstimateFeeTest(RavenTestFramework):
         self.confutxo = self.txouts # Start with the set of confirmed txouts after splitting
         self.log.info("Will output estimates for 1/2/3/6/15/25 blocks")
 
-        for i in range(2):
+        for _ in range(2):
             self.log.info("Creating transactions and mining them with a block size that can't keep up")
             # Create transactions and mine 10 small blocks with node 2, but create txs faster than we can mine
             self.transact_and_mine(10, self.nodes[2])

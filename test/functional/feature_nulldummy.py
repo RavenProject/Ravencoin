@@ -15,9 +15,9 @@ Generate 427 more blocks.
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import CTransaction, NetworkThread
-from test_framework.blocktools import create_coinbase, create_block, add_witness_commitment
+from test_framework.util import (bytes_to_hex_str, assert_raises_rpc_error, hex_str_to_bytes, assert_equal)
+from test_framework.mininode import (CTransaction, NetworkThread)
+from test_framework.blocktools import (create_coinbase, create_block, add_witness_commitment)
 from test_framework.script import CScript
 from io import BytesIO
 import time
