@@ -14,11 +14,7 @@ Two nodes. Node1 is under test. Node0 is providing transactions and generating b
 import shutil
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    connect_nodes_bi,
-    sync_blocks,
-)
+from test_framework.util import (assert_equal, connect_nodes_bi, sync_blocks)
 
 class KeypoolRestoreTest(RavenTestFramework):
     def set_test_params(self):

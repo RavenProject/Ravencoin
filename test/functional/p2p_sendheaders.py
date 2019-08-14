@@ -74,10 +74,22 @@ e. Announce one more that doesn't connect.
    Expect: disconnect.
 """
 
-from test_framework.mininode import *
+from test_framework.mininode import (NodeConnCB, 
+                                    mininode_lock, 
+                                    msg_getdata, 
+                                    msg_getheaders, 
+                                    msg_headers, 
+                                    NodeConn, 
+                                    NetworkThread, 
+                                    msg_block, 
+                                    CInv, 
+                                    msg_inv, 
+                                    CBlockHeader, 
+                                    msg_getblocks, 
+                                    msg_sendheaders)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.blocktools import create_block, create_coinbase
+from test_framework.util import (wait_until, sync_blocks, p2p_port, assert_equal)
+from test_framework.blocktools import (create_block, create_coinbase)
 
 
 direct_fetch_response_time = 0.05
@@ -289,7 +301,7 @@ class SendHeadersTest(RavenTestFramework):
             # with block header, even though the blocks are never requested
             for j in range(2):
                 blocks = []
-                for b in range(i+1):
+                for _ in range(i+1):
                     blocks.append(create_block(tip, create_coinbase(height), block_time))
                     blocks[-1].solve()
                     tip = blocks[-1].sha256
@@ -401,7 +413,7 @@ class SendHeadersTest(RavenTestFramework):
 
         # Create 2 blocks.  Send the blocks, then send the headers.
         blocks = []
-        for b in range(2):
+        for _ in range(2):
             blocks.append(create_block(tip, create_coinbase(height), block_time))
             blocks[-1].solve()
             tip = blocks[-1].sha256
@@ -419,7 +431,7 @@ class SendHeadersTest(RavenTestFramework):
 
         # This time, direct fetch should work
         blocks = []
-        for b in range(3):
+        for _ in range(3):
             blocks.append(create_block(tip, create_coinbase(height), block_time))
             blocks[-1].solve()
             tip = blocks[-1].sha256
@@ -440,7 +452,7 @@ class SendHeadersTest(RavenTestFramework):
         blocks = []
 
         # Create extra blocks for later
-        for b in range(20):
+        for _ in range(20):
             blocks.append(create_block(tip, create_coinbase(height), block_time))
             blocks[-1].solve()
             tip = blocks[-1].sha256

@@ -10,9 +10,9 @@
 
 import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
+from test_framework.util import (connect_nodes_bi, assert_equal)
+from test_framework.script import (CScript, OP_HASH160, OP_EQUAL, OP_DUP, OP_EQUALVERIFY, OP_CHECKSIG)
+from test_framework.mininode import (CTransaction, CTxIn, CTxOut, COutPoint)
 import binascii
 
 class AddressIndexTest(RavenTestFramework):
@@ -216,9 +216,9 @@ class AddressIndexTest(RavenTestFramework):
         # Check sorting of utxos
         self.nodes[2].generate(150)
 
-        txidsort1 = self.nodes[2].sendtoaddress(address2, 50)
+        self.nodes[2].sendtoaddress(address2, 50)
         self.nodes[2].generate(1)
-        txidsort2 = self.nodes[2].sendtoaddress(address2, 50)
+        self.nodes[2].sendtoaddress(address2, 50)
         self.nodes[2].generate(1)
         self.sync_all()
 
@@ -235,7 +235,7 @@ class AddressIndexTest(RavenTestFramework):
         address3 = "mw4ynwhS7MmrQ27hr82kgqu7zryNDK26JB"
         addressHash3 = bytes([170,152,114,181,187,205,181,17,216,158,14,17,170,39,218,115,253,44,63,80])
         scriptPubKey3 = CScript([OP_DUP, OP_HASH160, addressHash3, OP_EQUALVERIFY, OP_CHECKSIG])
-        address4 = "2N8oFVB2vThAKury4vnLquW2zVjsYjjAkYQ"
+        #address4 = "2N8oFVB2vThAKury4vnLquW2zVjsYjjAkYQ"
         scriptPubKey4 = CScript([OP_HASH160, addressHash3, OP_EQUAL])
         unspent = self.nodes[2].listunspent()
 
@@ -272,8 +272,8 @@ class AddressIndexTest(RavenTestFramework):
         assert_equal(mempool[2]["txid"], memtxid2)
         assert_equal(mempool[2]["index"], 1)
 
-        blk_hashes = self.nodes[2].generate(1);
-        self.sync_all();
+        self.nodes[2].generate(1)
+        self.sync_all()
         mempool2 = self.nodes[2].getaddressmempool({"addresses": [address3]})
         assert_equal(len(mempool2), 0)
 
@@ -286,7 +286,7 @@ class AddressIndexTest(RavenTestFramework):
         tx.rehash()
         self.nodes[2].importprivkey(privKey3)
         signed_tx3 = self.nodes[2].signrawtransaction(binascii.hexlify(tx.serialize()).decode("utf-8"))
-        memtxid3 = self.nodes[2].sendrawtransaction(signed_tx3["hex"], True)
+        self.nodes[2].sendrawtransaction(signed_tx3["hex"], True)
         time.sleep(2)
 
         mempool3 = self.nodes[2].getaddressmempool({"addresses": [address3]})
@@ -318,7 +318,7 @@ class AddressIndexTest(RavenTestFramework):
         tx.rehash()
         self.nodes[0].importprivkey(privkey1)
         signed_tx = self.nodes[0].signrawtransaction(binascii.hexlify(tx.serialize()).decode("utf-8"))
-        mem_txid = self.nodes[0].sendrawtransaction(signed_tx["hex"], True)
+        self.nodes[0].sendrawtransaction(signed_tx["hex"], True)
 
         self.sync_all()
         mempool_deltas = self.nodes[2].getaddressmempool({"addresses": [address1]})
@@ -333,15 +333,15 @@ class AddressIndexTest(RavenTestFramework):
             "end": 200,
             "chainInfo": True
         })
-        start_block_hash = self.nodes[1].getblockhash(1);
-        end_block_hash = self.nodes[1].getblockhash(200);
+        start_block_hash = self.nodes[1].getblockhash(1)
+        end_block_hash = self.nodes[1].getblockhash(200)
         assert_equal(deltas_with_info["start"]["height"], 1)
         assert_equal(deltas_with_info["start"]["hash"], start_block_hash)
         assert_equal(deltas_with_info["end"]["height"], 200)
         assert_equal(deltas_with_info["end"]["hash"], end_block_hash)
 
         utxos_with_info = self.nodes[1].getaddressutxos({"addresses": [address2], "chainInfo": True})
-        expected_tip_block_hash = self.nodes[1].getblockhash(267);
+        expected_tip_block_hash = self.nodes[1].getblockhash(267)
         assert_equal(utxos_with_info["height"], 267)
         assert_equal(utxos_with_info["hash"], expected_tip_block_hash)
 

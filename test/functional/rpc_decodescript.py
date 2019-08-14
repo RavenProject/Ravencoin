@@ -6,8 +6,8 @@
 """Test decoding scripts via decodescript RPC command."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
+from test_framework.util import assert_equal
+from test_framework.mininode import (CTransaction, hex_str_to_bytes, bytes_to_hex_str)
 from io import BytesIO
 
 class DecodeScriptTest(RavenTestFramework):

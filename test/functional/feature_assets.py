@@ -7,7 +7,7 @@
 
 """
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, assert_is_hash_string, assert_does_not_contain_key, assert_raises_rpc_error, JSONRPCException, Decimal)
 
 
 import string
@@ -20,7 +20,7 @@ class AssetTest(RavenTestFramework):
 
     def activate_assets(self):
         self.log.info("Generating RVN for node[0] and activating assets...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         n0.generate(1)
         self.sync_all()
@@ -30,7 +30,7 @@ class AssetTest(RavenTestFramework):
 
     def big_test(self):
         self.log.info("Running big test!")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0, n1 = self.nodes[0], self.nodes[1]
 
         self.log.info("Calling issue()...")
         address0 = n0.getnewaddress()
@@ -172,17 +172,17 @@ class AssetTest(RavenTestFramework):
 
     def issue_param_checks(self):
         self.log.info("Checking bad parameter handling!")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0 = self.nodes[0]
 
         # just plain bad asset name
         assert_raises_rpc_error(-8, "Invalid asset name: bad-asset-name", \
-            n0.issue, "bad-asset-name");
+            n0.issue, "bad-asset-name")
 
         # trying to issue things that can't be issued
         assert_raises_rpc_error(-8, "Unsupported asset type: OWNER", \
-            n0.issue, "AN_OWNER!");
+            n0.issue, "AN_OWNER!")
         assert_raises_rpc_error(-8, "Unsupported asset type: VOTE", \
-            n0.issue, "A_VOTE^PEDRO");
+            n0.issue, "A_VOTE^PEDRO")
 
         # check bad unique params
         assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
@@ -194,7 +194,7 @@ class AssetTest(RavenTestFramework):
 
     def chain_assets(self):
         self.log.info("Issuing chained assets in depth issue()...")
-        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+        n0, n1 = self.nodes[0], self.nodes[1]
 
         chain_address = n0.getnewaddress()
         ipfs_hash = "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"
@@ -342,7 +342,7 @@ class AssetTest(RavenTestFramework):
         a = n0.generate(1)[0]
 
         n0.reissue(asset_name, 500, n0.getnewaddress())
-        b = n0.generate(1)[0]
+        n0.generate(1)[0]
 
         self.log.info(f"Invalidating {a}...")
         n0.invalidateblock(a)

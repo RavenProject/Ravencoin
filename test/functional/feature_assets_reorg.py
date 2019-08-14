@@ -7,7 +7,7 @@
 
 """
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, disconnect_all_nodes, connect_all_nodes_bi)
 
 
 import string

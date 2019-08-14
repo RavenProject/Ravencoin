@@ -6,7 +6,7 @@
 """Test resurrection of mined transactions when the blockchain is re-organized."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (create_tx, assert_equal)
 
 # Create one-input, one-output, no-fee transaction:
 class MempoolCoinbaseTest(RavenTestFramework):

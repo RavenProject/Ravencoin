@@ -9,9 +9,9 @@ Test that nodes are disconnected if they send mempool messages when bloom
 filters are not enabled.
 """
 
-from test_framework.mininode import *
+from test_framework.mininode import (NodeConn, NodeConnCB, NetworkThread, msg_mempool)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (p2p_port, assert_equal)
 
 class P2PMempoolTests(RavenTestFramework):
     def set_test_params(self):

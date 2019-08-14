@@ -12,22 +12,17 @@ the node should pretend that it does not have it to avoid fingerprinting.
 import time
 
 from test_framework.blocktools import (create_block, create_coinbase)
-from test_framework.mininode import (
-    CInv,
-    NetworkThread,
-    NodeConn,
-    NodeConnCB,
-    msg_headers,
-    msg_block,
-    msg_getdata,
-    msg_getheaders,
-    wait_until,
-)
+from test_framework.mininode import (CInv,
+                                     NetworkThread,
+                                     NodeConn,
+                                     NodeConnCB,
+                                     msg_headers,
+                                     msg_block,
+                                     msg_getdata,
+                                     msg_getheaders,
+                                     wait_until)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    p2p_port,
-)
+from test_framework.util import (assert_equal, p2p_port,)
 
 class P2PFingerprintTest(RavenTestFramework):
     def set_test_params(self):

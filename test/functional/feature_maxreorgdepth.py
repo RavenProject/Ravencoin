@@ -8,8 +8,13 @@
 import sys
 import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
+from test_framework.util import (connect_all_nodes_bi, 
+                                set_node_times, 
+                                assert_equal, 
+                                connect_nodes_bi, 
+                                assert_contains_pair, 
+                                assert_does_not_contain_key) 
+from test_framework.mininode import wait_until
 
 
 class MaxReorgTest(RavenTestFramework):
