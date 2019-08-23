@@ -350,7 +350,6 @@ libraven_consensus_a_SOURCES = \
   consensus/validation.h \
   hash.cpp \
   hash.h \
-  algo/hashx21s.h \
   prevector.h \
   primitives/block.cpp \
   primitives/block.h \

@@ -4,7 +4,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <chainparams.h>
 #include "versionbits.h"
 #include "primitives/block.h"
 
@@ -14,10 +13,37 @@
 #include "crypto/common.h"
 
 
+static const uint32_t MAINNET_X16RV2ACTIVATIONTIME = 1569945600;
+static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1569931200;
+static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
+
+
+BlockNetwork bNetwork = BlockNetwork();
+
+BlockNetwork::BlockNetwork()
+{
+    fOnTestnet = false;
+    fOnRegtest = false;
+}
+
+void BlockNetwork::SetNetwork(const std::string& net)
+{
+    if (net == "test") {
+        fOnTestnet = true;
+    } else if (net == "regtest") {
+        fOnRegtest = true;
+    }
+}
 
 uint256 CBlockHeader::GetHash() const
 {
-    if (nTime >= Params().X16RV2ActivationTime()) {
+    uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;
+    if (bNetwork.fOnTestnet) {
+        nTimeToUse = TESTNET_X16RV2ACTIVATIONTIME;
+    } else if (bNetwork.fOnRegtest) {
+        nTimeToUse = REGTEST_X16RV2ACTIVATIONTIME;
+    }
+    if (nTime >= nTimeToUse) {
         return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
     }
 
