@@ -6,8 +6,8 @@
 """Test the prioritisetransaction mining RPC."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import COIN, MAX_BLOCK_BASE_SIZE
+from test_framework.util import (gen_return_txouts, create_confirmed_utxos, create_lots_of_big_transactions, assert_raises_rpc_error, assert_equal, time)
+from test_framework.mininode import (COIN, MAX_BLOCK_BASE_SIZE)
 
 class PrioritiseTransactionTest(RavenTestFramework):
     def set_test_params(self):

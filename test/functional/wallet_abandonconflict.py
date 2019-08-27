@@ -12,7 +12,7 @@
  no effect on transactions which are already conflicted or abandoned.
 """
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (sync_blocks, Decimal, sync_mempools, disconnect_nodes, assert_equal, connect_nodes)
 
 class AbandonConflictTest(RavenTestFramework):
     def set_test_params(self):

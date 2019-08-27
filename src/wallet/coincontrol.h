@@ -18,6 +18,10 @@ class CCoinControl
 {
 public:
     CTxDestination destChange;
+
+    //! If set, all asset change will be sent to this address, if not destChange will be used
+    CTxDestination assetDestChange;
+
     //! If false, allows unselected inputs, but requires all selected inputs be used
     bool fAllowOtherInputs;
     //! Includes watch only addresses which match the ISMINE_WATCH_SOLVABLE criteria
@@ -46,6 +50,7 @@ public:
     void SetNull()
     {
         destChange = CNoDestination();
+        assetDestChange = CNoDestination();
         fAllowOtherInputs = false;
         fAllowWatchOnly = false;
         setSelected.clear();

@@ -35,7 +35,7 @@ from random import randint
 import shutil
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (connect_nodes, Decimal, sync_mempools, sync_blocks, os, assert_equal)
 
 class WalletBackupTest(RavenTestFramework):
     def set_test_params(self):
@@ -113,7 +113,7 @@ class WalletBackupTest(RavenTestFramework):
 
         self.log.info("Creating transactions")
         # Five rounds of sending each other transactions.
-        for i in range(5):
+        for _ in range(5):
             self.do_one_round()
 
         self.log.info("Backing up")
@@ -126,7 +126,7 @@ class WalletBackupTest(RavenTestFramework):
         self.nodes[2].dumpwallet(tmpdir + "/node2/wallet.dump")
 
         self.log.info("More transactions")
-        for i in range(5):
+        for _ in range(5):
             self.do_one_round()
 
         # Generate 101 more blocks, so any fees paid mature

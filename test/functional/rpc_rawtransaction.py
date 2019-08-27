@@ -14,7 +14,7 @@ Test the following RPCs:
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (connect_nodes_bi, assert_raises_rpc_error, assert_equal, Decimal)
 
 # Create one-input, one-output, no-fee transaction:
 class RawTransactionsTest(RavenTestFramework):

@@ -6,8 +6,21 @@
 """Test BIP68 implementation."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.blocktools import *
+from test_framework.util import (   satoshi_round, 
+                                    assert_raises_rpc_error, 
+                                    get_bip9_status, 
+                                    assert_equal, 
+                                    assert_greater_than, 
+                                    sync_blocks)
+from test_framework.blocktools import ( CTransaction,
+                                        COIN,
+                                        CTxIn,
+                                        COutPoint,
+                                        CTxOut,
+                                        CScript,
+                                        create_block,
+                                        create_coinbase)
+from test_framework.mininode import (ToHex, FromHex)
 
 SEQUENCE_LOCKTIME_DISABLE_FLAG = (1<<31)
 SEQUENCE_LOCKTIME_TYPE_FLAG = (1<<22) # this means use time (0 means height)
@@ -227,7 +240,7 @@ class BIP68Test(RavenTestFramework):
         # Use prioritisetransaction to lower the effective feerate to 0
         self.nodes[0].prioritisetransaction(txid=tx2.hash, fee_delta=int(-self.relayfee*COIN))
         cur_time = int(time.time())
-        for i in range(10):
+        for _ in range(10):
             self.nodes[0].setmocktime(cur_time + 600)
             self.nodes[0].generate(1)
             cur_time += 600
@@ -287,7 +300,7 @@ class BIP68Test(RavenTestFramework):
         # tx3 to be removed.
         tip = int(self.nodes[0].getblockhash(self.nodes[0].getblockcount()-1), 16)
         height = self.nodes[0].getblockcount()
-        for i in range(2):
+        for _ in range(2):
             block = create_block(tip, create_coinbase(height), cur_time)
             block.nVersion = 3
             block.rehash()

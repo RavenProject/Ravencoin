@@ -99,6 +99,7 @@ public Q_SLOTS:
     void gotoAssetsPage();
     void gotoCreateAssetsPage();
     void gotoManageAssetsPage();
+    void gotoRestrictedAssetsPage();
     /** RVN END */
 };
 

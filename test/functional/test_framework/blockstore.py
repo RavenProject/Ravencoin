@@ -5,7 +5,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """BlockStore and TxStore helper classes."""
 
-from .mininode import *
+from .mininode import (logging, CBlock, msg_headers, CBlockHeader, msg_generic, CBlockLocator)
 from io import BytesIO
 import dbm.dumb as dbmd
 
@@ -88,8 +88,8 @@ class BlockStore():
         block.calc_sha256()
         try:
             self.blockDB[repr(block.sha256)] = bytes(block.serialize())
-        except TypeError as e:
-            logger.exception("Unexpected error")
+        except TypeError:
+            logger.exception("Unexpected Add Block Error")
         self.currentBlock = block.sha256
         self.headers_map[block.sha256] = CBlockHeader(block)
 
@@ -117,7 +117,7 @@ class BlockStore():
         lastBlock = self.get_block(current_tip)
         while lastBlock is not None:
             r.append(lastBlock.hashPrevBlock)
-            for i in range(step):
+            for _ in range(step):
                 lastBlock = self.get_block(lastBlock.hashPrevBlock)
                 if lastBlock is None:
                     break
@@ -148,8 +148,8 @@ class TxStore():
         tx.calc_sha256()
         try:
             self.txDB[repr(tx.sha256)] = bytes(tx.serialize())
-        except TypeError as e:
-            logger.exception("Unexpected error")
+        except TypeError:
+            logger.exception("Unexpected Add Transaction Error")
 
     def get_transactions(self, inv):
         responses = []

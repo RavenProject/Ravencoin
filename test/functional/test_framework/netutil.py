@@ -14,7 +14,7 @@ import fcntl
 import struct
 import array
 import os
-from binascii import unhexlify, hexlify
+from binascii import (unhexlify, hexlify)
 
 # STATE_ESTABLISHED = '01'
 # STATE_SYN_SENT  = '02'

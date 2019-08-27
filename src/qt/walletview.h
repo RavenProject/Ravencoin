@@ -23,6 +23,7 @@ class AddressBookPage;
 class AssetsDialog;
 class CreateAssetDialog;
 class ReissueAssetDialog;
+class RestrictedAssetsDialog;
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -79,6 +80,7 @@ private:
     AssetsDialog *assetsPage;
     CreateAssetDialog *createAssetsPage;
     ReissueAssetDialog *manageAssetsPage;
+    RestrictedAssetsDialog *restrictedAssetsPage;
     /** RVN END */
 
 public Q_SLOTS:
@@ -130,6 +132,7 @@ public Q_SLOTS:
     void gotoAssetsPage();
     void gotoCreateAssetsPage();
     void gotoManageAssetsPage();
+    void gotoRestrictedAssetsPage();
     /** RVN END */
 
 Q_SIGNALS:

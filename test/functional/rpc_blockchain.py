@@ -23,15 +23,13 @@ import http.client
 import subprocess
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_greater_than,
-    assert_greater_than_or_equal,
-    assert_raises,
-    assert_raises_rpc_error,
-    assert_is_hex_string,
-    assert_is_hash_string,
-)
+from test_framework.util import (assert_equal, 
+                                assert_greater_than, 
+                                assert_greater_than_or_equal,
+                                assert_raises,
+                                assert_raises_rpc_error,
+                                assert_is_hex_string,
+                                assert_is_hash_string,)
 
 class BlockchainTest(RavenTestFramework):
     def set_test_params(self):

@@ -35,7 +35,7 @@ import struct
 import subprocess
 import sys
 import time
-from threading import RLock, Thread
+from threading import (RLock, Thread)
 
 from test_framework.siphash import siphash256
 from test_framework.util import hex_str_to_bytes, bytes_to_hex_str, wait_until
@@ -127,7 +127,7 @@ def deser_uint256(f):
 
 def ser_uint256(u):
     rs = b""
-    for i in range(8):
+    for _ in range(8):
         rs += struct.pack("<I", u & 0xFFFFFFFF)
         u >>= 32
     return rs
@@ -150,7 +150,7 @@ def uint256_from_compact(c):
 def deser_vector(f, c):
     nit = deser_compact_size(f)
     r = []
-    for i in range(nit):
+    for _ in range(nit):
         t = c()
         t.deserialize(f)
         r.append(t)
@@ -173,7 +173,7 @@ def ser_vector(l, ser_function_name=None):
 def deser_uint256_vector(f):
     nit = deser_compact_size(f)
     r = []
-    for i in range(nit):
+    for _ in range(nit):
         t = deser_uint256(f)
         r.append(t)
     return r
@@ -189,7 +189,7 @@ def ser_uint256_vector(l):
 def deser_string_vector(f):
     nit = deser_compact_size(f)
     r = []
-    for i in range(nit):
+    for _ in range(nit):
         t = deser_string(f)
         r.append(t)
     return r
@@ -205,7 +205,7 @@ def ser_string_vector(l):
 def deser_int_vector(f):
     nit = deser_compact_size(f)
     r = []
-    for i in range(nit):
+    for _ in range(nit):
         t = struct.unpack("<i", f.read(4))[0]
         r.append(t)
     return r
@@ -573,7 +573,7 @@ class CTransaction():
             if (len(self.wit.vtxinwit) != len(self.vin)):
                 # vtxinwit must have the same length as vin
                 self.wit.vtxinwit = self.wit.vtxinwit[:len(self.vin)]
-                for i in range(len(self.wit.vtxinwit), len(self.vin)):
+                for _ in range(len(self.wit.vtxinwit), len(self.vin)):
                     self.wit.vtxinwit.append(CTxInWitness())
             r += self.wit.serialize()
         r += struct.pack("<I", self.nLockTime)
@@ -867,7 +867,7 @@ class P2PHeaderAndShortIDs():
         self.header.deserialize(f)
         self.nonce = struct.unpack("<Q", f.read(8))[0]
         self.shortids_length = deser_compact_size(f)
-        for i in range(self.shortids_length):
+        for _ in range(self.shortids_length):
             # shortids are defined to be 6 bytes in the spec, so append
             # two zero bytes and read it in as an 8-byte number
             self.shortids.append(struct.unpack("<Q", f.read(6) + b'\x00\x00')[0])
@@ -976,7 +976,7 @@ class BlockTransactionsRequest():
     def deserialize(self, f):
         self.blockhash = deser_uint256(f)
         indexes_length = deser_compact_size(f)
-        for i in range(indexes_length):
+        for _ in range(indexes_length):
             self.indexes.append(deser_compact_size(f))
 
     def serialize(self):
@@ -1860,7 +1860,7 @@ class NodeConn(asyncore.dispatcher):
                     logger.warning("Received unknown command from %s:%d: '%s' %s" % (self.dstaddr, self.dstport, command, repr(msg)))
                     raise ValueError("Unknown command: '%s'" % (command))
         except Exception as e:
-            logger.exception('got_data:', repr(e))
+            logger.exception('got_data: %s', repr(e))
             raise
 
     def send_message(self, message, pushbuf=False):
@@ -1919,7 +1919,7 @@ class NetworkThread(Thread):
             # loop to workaround the behavior of asyncore when using
             # select
             disconnected = []
-            for fd, obj in mininode_socket_map.items():
+            for _, obj in mininode_socket_map.items():
                 if obj.disconnect:
                     disconnected.append(obj)
             [ obj.handle_close() for obj in disconnected ]

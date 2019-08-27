@@ -13,9 +13,9 @@ re-requested.
 """
 
 from test_framework.test_framework import ComparisonTestFramework
-from test_framework.util import *
-from test_framework.comptool import TestManager, TestInstance, RejectResult
-from test_framework.blocktools import *
+from test_framework.util import assert_equal
+from test_framework.comptool import (TestManager, TestInstance, RejectResult)
+from test_framework.blocktools import (NetworkThread, create_block, create_coinbase, create_transaction, COIN)
 import copy
 import time
 
@@ -58,7 +58,7 @@ class InvalidBlockRequestTest(ComparisonTestFramework):
         Now we need that block to mature so we can spend the coinbase.
         '''
         test = TestInstance(sync_every_block=False)
-        for i in range(100):
+        for _ in range(100):
             block = create_block(self.tip, create_coinbase(height), self.block_time)
             block.solve()
             self.tip = block.sha256
