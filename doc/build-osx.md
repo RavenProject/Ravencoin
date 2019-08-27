@@ -26,25 +26,6 @@ If you want to build the disk image with `make deploy` (.dmg / optional), you ne
 
 NOTE: Building with Qt4 is still supported, however, could result in a broken UI. Building with Qt5 is recommended.
 
-NOTE: At this time it is highly recommended that developers wishing to compile the Raven Core binaries **DO NOT** upgrade to 
-OS X Mojave Beta 10.14.  Currently there is a compatibility issue with OS X Mojave, Command-Line-Tools 10.0.0 (clang), and 
-Berkeley-db version 4.8.3.  Binaries compiled using this combination will crash with a segmentation-fault during initialization. 
-Binaries compiled by previous versions will run on OS X Mojave with no-known issues.  It is possible to work-around this issue by 
-upgrading Berkeley-db to version 18.1.25 or newer (currently 18.1.25 is the only known version to work).  To compile and run with 
-newer versions of Berkeley-db it is recommended that Berkeley-db 4.8.3 be uninstalled and the latest version installed.  There are 
-unknown wallet compatability ramifications to this solution so it is highly recommended that any local wallets be backed-up before
-opening them using binaries compiled with this solution.
-
-Use the following commands to compile a working version of Raven Core on Mojave (assuming that the instructions in the section "Build 
-Raven Core" has already been followed).  Uninstall Berkeley-db 4.8.3, install the latest version, and _configure_ with the 
-incompatible-bdb flag:
-
-    brew remove berkeley-db@4
-    brew install berkeley-db
-    ./autogen.sh
-    ./configure --with-incompatible-bdb
-    make
-
 
 Build Raven Core
 ------------------------
