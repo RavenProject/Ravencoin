@@ -45,11 +45,11 @@ bip112tx_special - test negative argument to OP_CSV
 """
 
 from test_framework.test_framework import ComparisonTestFramework
-from test_framework.util import *
-from test_framework.mininode import ToHex, CTransaction, NetworkThread
-from test_framework.blocktools import create_coinbase, create_block
-from test_framework.comptool import TestInstance, TestManager
-from test_framework.script import *
+from test_framework.util import (Decimal, hex_str_to_bytes, assert_equal, get_bip9_status)
+from test_framework.mininode import (ToHex, CTransaction, NetworkThread)
+from test_framework.blocktools import (create_coinbase, create_block)
+from test_framework.comptool import (TestInstance, TestManager)
+from test_framework.script import (OP_DROP, CScript, OP_CHECKSEQUENCEVERIFY)
 from io import BytesIO
 import time
 
@@ -126,7 +126,7 @@ class BIP68_112_113Test(ComparisonTestFramework):
         return tx
 
     def generate_blocks(self, number, version, test_blocks = []):
-        for i in range(number):
+        for _ in range(number):
             block = self.create_test_block([], version)
             test_blocks.append([block, True])
             self.last_block_time += 600
@@ -245,20 +245,20 @@ class BIP68_112_113Test(ComparisonTestFramework):
         # Note we reuse inputs for v1 and v2 txs so must test these separately
         # 16 normal inputs
         bip68inputs = []
-        for i in range(16):
+        for _ in range(16):
             bip68inputs.append(self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks))
         # 2 sets of 16 inputs with 10 OP_CSV OP_DROP (actually will be prepended to spending scriptSig)
         bip112basicinputs = []
-        for j in range(2):
+        for _ in range(2):
             inputs = []
-            for i in range(16):
+            for _ in range(16):
                 inputs.append(self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks))
             bip112basicinputs.append(inputs)
         # 2 sets of 16 varied inputs with (relative_lock_time) OP_CSV OP_DROP (actually will be prepended to spending scriptSig)
         bip112diverseinputs = []
-        for j in range(2):
+        for _ in range(2):
             inputs = []
-            for i in range(16):
+            for _ in range(16):
                 inputs.append(self.send_generic_input_tx(self.nodes[0], self.coinbase_blocks))
             bip112diverseinputs.append(inputs)
         # 1 special input with -1 OP_CSV OP_DROP (actually will be prepended to spending scriptSig)

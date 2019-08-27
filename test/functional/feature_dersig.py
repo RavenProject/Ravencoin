@@ -9,9 +9,17 @@ Test that the DERSIG soft-fork activates at (regtest) height 1251.
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
-from test_framework.blocktools import create_coinbase, create_block
+from test_framework.util import (p2p_port, assert_equal)
+from test_framework.mininode import (CTransaction, 
+                                    hex_str_to_bytes, 
+                                    NodeConnCB, 
+                                    NodeConn, 
+                                    NetworkThread, 
+                                    msg_block, 
+                                    wait_until, 
+                                    mininode_lock, 
+                                    msg_tx)
+from test_framework.blocktools import (create_coinbase, create_block)
 from test_framework.script import CScript
 from io import BytesIO
 

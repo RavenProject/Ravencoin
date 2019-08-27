@@ -6,8 +6,8 @@
 """Test listmyassets RPC command."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
+from test_framework.util import (assert_equal, assert_contains_pair)
+from test_framework.mininode import CInv
 from io import BytesIO
 
 class ListMyAssetsTest(RavenTestFramework):

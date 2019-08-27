@@ -5,7 +5,16 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the wallet."""
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (connect_nodes_bi, 
+                                assert_fee_amount, 
+                                assert_equal, 
+                                assert_raises_rpc_error, 
+                                Decimal, 
+                                count_bytes, 
+                                sync_mempools, 
+                                sync_blocks, 
+                                time, 
+                                assert_array_result)
 
 class WalletTest(RavenTestFramework):
     def set_test_params(self):
@@ -397,7 +406,7 @@ class WalletTest(RavenTestFramework):
         # So we should be able to generate exactly chainlimit txs for each original output
         sending_addr = self.nodes[1].getnewaddress()
         txid_list = []
-        for i in range(chainlimit*2):
+        for _ in range(chainlimit*2):
             txid_list.append(self.nodes[0].sendtoaddress(sending_addr, Decimal('0.0001')))
         assert_equal(self.nodes[0].getmempoolinfo()['size'], chainlimit*2)
         assert_equal(len(txid_list), chainlimit*2)

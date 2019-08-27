@@ -6,6 +6,8 @@
 #include "messages.h"
 #include <boost/thread.hpp>
 
+#include <boost/thread.hpp>
+
 static const char MESSAGE_FLAG = 'Z'; // Message
 static const char MY_MESSAGE_CHANNEL = 'C'; // My followed Channels
 static const char MY_SEEN_ADDRESSES = 'S'; // Addresses that have been seen on the chain

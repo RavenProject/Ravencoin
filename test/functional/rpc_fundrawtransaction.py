@@ -6,8 +6,15 @@
 """Test the fundrawtransaction RPC."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from pprint import *
+from test_framework.util import (connect_nodes_bi, 
+                                assert_equal, 
+                                Decimal, 
+                                assert_raises_rpc_error, 
+                                assert_greater_than, 
+                                count_bytes, 
+                                assert_fee_amount, 
+                                assert_greater_than_or_equal)
+from pprint import pprint
 
 
 def get_unspent(listunspent, amount):

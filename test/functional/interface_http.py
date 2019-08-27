@@ -6,7 +6,7 @@
 """Test the RPC HTTP basics."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (str_to_b64str, assert_equal)
 
 import http.client
 import urllib.parse

@@ -525,7 +525,7 @@ def create_confirmed_utxos(fee, node, count):
     addr2 = node.getnewaddress()
     if iterations <= 0:
         return utxos
-    for i in range(iterations):
+    for _ in range(iterations):
         t = utxos.pop()
         inputs = []
         inputs.append({"txid": t["txid"], "vout": t["vout"]})
@@ -551,11 +551,11 @@ def gen_return_txouts():
     # So we have big transactions (and therefore can't fit very many into each block)
     # create one script_pubkey
     script_pubkey = "6a4d0200"  # OP_RETURN OP_PUSH2 512 bytes
-    for i in range(512):
+    for _ in range(512):
         script_pubkey = script_pubkey + "01"
     # concatenate 128 txouts of above script_pubkey which we'll insert before the txout for change
     txouts = "81"
-    for k in range(128):
+    for _ in range(128):
         # add txout value
         txouts = txouts + "0000000000000000"
         # add length of script_pubkey

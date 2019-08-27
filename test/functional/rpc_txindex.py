@@ -10,9 +10,9 @@
 
 import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
+from test_framework.util import (connect_nodes_bi, assert_equal)
+from test_framework.script import (CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG)
+from test_framework.mininode import (CTransaction, CTxIn, CTxOut, COutPoint)
 import binascii
 
 class TxIndexTest(RavenTestFramework):
@@ -48,8 +48,8 @@ class TxIndexTest(RavenTestFramework):
 
         print("Testing transaction index...")
 
-        privkey = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
-        address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
+        #privkey = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
+        #address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
         addressHash = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
         scriptPubKey = CScript([OP_DUP, OP_HASH160, addressHash, OP_EQUALVERIFY, OP_CHECKSIG])
         unspent = self.nodes[0].listunspent()
@@ -60,14 +60,14 @@ class TxIndexTest(RavenTestFramework):
         tx.rehash()
 
         signed_tx = self.nodes[0].signrawtransaction(binascii.hexlify(tx.serialize()).decode("utf-8"))
-        txid = self.nodes[0].sendrawtransaction(signed_tx["hex"], True)
+        self.nodes[0].sendrawtransaction(signed_tx["hex"], True)
         self.nodes[0].generate(1)
         self.sync_all()
 
         # Check verbose raw transaction results
         verbose = self.nodes[3].getrawtransaction(unspent[0]["txid"], 1)
-        assert_equal(verbose["vout"][0]["valueSat"], 500000000000);
-        assert_equal(verbose["vout"][0]["value"], 5000);
+        assert_equal(verbose["vout"][0]["valueSat"], 500000000000)
+        assert_equal(verbose["vout"][0]["value"], 5000)
 
         print("Passed\n")
 

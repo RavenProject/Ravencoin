@@ -10,9 +10,9 @@
 
 import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
+from test_framework.util import (connect_nodes_bi, assert_equal)
+from test_framework.script import (CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG)
+from test_framework.mininode import (CTransaction, CTxIn, COutPoint, CTxOut)
 import binascii
 
 class SpentIndexTest(RavenTestFramework):
@@ -51,7 +51,7 @@ class SpentIndexTest(RavenTestFramework):
 
         feeSatoshis = 10000
         privkey = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
-        address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
+        #address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
         addressHash = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
         scriptPubKey = CScript([OP_DUP, OP_HASH160, addressHash, OP_EQUALVERIFY, OP_CHECKSIG])
         unspent = self.nodes[0].listunspent()
@@ -88,13 +88,13 @@ class SpentIndexTest(RavenTestFramework):
         assert_equal(txVerbose2["vin"][0]["valueSat"], amount + feeSatoshis)
 
         # Check that verbose raw transaction includes address values and input values
-        privkey2 = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
+        #privkey2 = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
         address2 = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
         addressHash2 = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
         scriptPubKey2 = CScript([OP_DUP, OP_HASH160, addressHash2, OP_EQUALVERIFY, OP_CHECKSIG])
         tx2 = CTransaction()
         tx2.vin = [CTxIn(COutPoint(int(txid, 16), 0))]
-        amount = int(amount - feeSatoshis);
+        amount = int(amount - feeSatoshis)
         tx2.vout = [CTxOut(amount, scriptPubKey2)]
         tx.rehash()
         self.nodes[0].importprivkey(privkey)

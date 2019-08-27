@@ -16,7 +16,7 @@ this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "LibBoolEE.h"
 
-std::vector<std::string> LibBoolEE::singleParse(const std::string & formula, const char op) {
+std::vector<std::string> LibBoolEE::singleParse(const std::string & formula, const char op, ErrorReport* errorReport) {
     int start_pos = -1;
     int parity_count = 0;
     std::vector<std::string> subexpressions;
@@ -42,6 +42,12 @@ std::vector<std::string> LibBoolEE::singleParse(const std::string & formula, con
                     start_pos = i+1;
                 }
                 else if (formula[i] != '&' && formula[i] != '|') {
+                    if (errorReport) {
+                        errorReport->type = ErrorReport::ErrorType::EmptySubExpression;
+                        errorReport->vecUserData.emplace_back(std::string(1, formula[i]));
+                        errorReport->vecUserData.emplace_back(formula);
+                        errorReport->strDevData = "invalid-verifier-unknown-operator-in-expression";
+                    }
                     throw std::runtime_error("Unknown operator '" + std::string(1, formula[i]) + "' in the (sub)expression '" + formula + "'.");
                 }
             }
@@ -51,41 +57,57 @@ std::vector<std::string> LibBoolEE::singleParse(const std::string & formula, con
         subexpressions.push_back(formula.substr(start_pos, formula.size() - start_pos));
     }
     if (parity_count != 0) {
+        if (errorReport) {
+            errorReport->type = ErrorReport::ErrorType::ParenthesisParity;
+            errorReport->vecUserData.emplace_back(formula);
+            errorReport->strDevData = "invalid-verifier-parenthesis-parity";
+        }
         throw std::runtime_error("Wrong parenthesis parity in the (sub)expression '" + formula + "'.");
     }
     return subexpressions;
 }
 
-bool LibBoolEE::resolve(const std::string &source, const Vals & valuation) {
-    return resolveRec(removeWhitespaces(source), valuation);
+bool LibBoolEE::resolve(const std::string &source, const Vals & valuation, ErrorReport* errorReport) {
+    return resolveRec(removeWhitespaces(source), valuation, errorReport);
 }
 
-bool LibBoolEE::resolveRec(const std::string &source, const Vals & valuation) {
+bool LibBoolEE::resolveRec(const std::string &source, const Vals & valuation, ErrorReport* errorReport) {
     if (source.empty()) {
+        if (errorReport) {
+            errorReport->type = ErrorReport::ErrorType::EmptySubExpression;
+            errorReport->vecUserData.emplace_back(source);
+            errorReport->strDevData = "bad-txns-null-verifier-empty-sub-expression";
+        }
         throw std::runtime_error("An empty subexpression was encountered");
     }
 
     std::string formula = source;
     char current_op = '|';
     // Try to divide by |
-    std::vector<std::string> subexpressions = singleParse(source, current_op);
+    std::vector<std::string> subexpressions = singleParse(source, current_op, errorReport);
     // No | on the top level
     if (subexpressions.size() == 1) {
         current_op = '&';
-        subexpressions = singleParse(source, current_op);
+        subexpressions = singleParse(source, current_op, errorReport);
     }
 
     // No valid name found
     if (subexpressions.size() == 0) {
+        if (errorReport) {
+            errorReport->type = ErrorReport::ErrorType::InvalidQualifierName;
+            errorReport->vecUserData.emplace_back(source);
+            errorReport->strDevData = "bad-txns-null-verifier-no-sub-expressions";
+        }
         throw std::runtime_error("The subexpression " + source + " is not a valid formula.");
     }
+
     // No binary top level operator found
     else if (subexpressions.size() == 1) {
         if (source[0] == '!') {
-            return !resolve(source.substr(1), valuation);
+            return !resolve(source.substr(1), valuation, errorReport);
         }
         else if (source[0] == '(') {
-            return resolve(source.substr(1, source.size() - 2), valuation);
+            return resolve(source.substr(1, source.size() - 2), valuation, errorReport);
         }
         else if (source == "1") {
             return true;
@@ -94,6 +116,11 @@ bool LibBoolEE::resolveRec(const std::string &source, const Vals & valuation) {
             return false;
         }
         else if (valuation.count(source) == 0) {
+            if (errorReport) {
+                errorReport->type = ErrorReport::ErrorType::VariableNotFound;
+                errorReport->vecUserData.emplace_back(source);
+                errorReport->strDevData = "bad-txns-null-verifier-variable-not-found";
+            }
             throw std::runtime_error("Variable '" + source + "' not found in the interpretation.");
         }
         else {
@@ -104,14 +131,14 @@ bool LibBoolEE::resolveRec(const std::string &source, const Vals & valuation) {
         if (current_op == '|') {
             bool result = false;
             for (std::vector<std::string>::iterator it = subexpressions.begin(); it != subexpressions.end(); it++) {
-                result |= resolve(*it, valuation);
+                result |= resolve(*it, valuation, errorReport);
             }
             return result;
         }
         else { // The operator was set to &
             bool result = true;
             for (std::vector<std::string>::iterator it = subexpressions.begin(); it != subexpressions.end(); it++) {
-                result &= resolve(*it, valuation);
+                result &= resolve(*it, valuation, errorReport);
             }
             return result;
         }

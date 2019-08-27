@@ -423,7 +423,7 @@ class RavenTestFramework():
             block_time = self.mocktime - (201 * 1 * 60)
             for i in range(2):
                 for peer in range(4):
-                    for j in range(25):
+                    for _ in range(25):
                         set_node_times(self.nodes, block_time)
                         self.nodes[peer].generate(1)
                         block_time += 1 * 60

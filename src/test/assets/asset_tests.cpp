@@ -352,7 +352,8 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         std::string valid_verifier_syntax = "((#KYC & !#ABC) | #DEF & #GHI & #RET) | (#TEST)";
 
         std::set<std::string> setQualifiers;
-        ExtractVerifierStringQualifiers(valid_verifier_syntax, setQualifiers);
+        std::string stripped_valid_verifier_syntax  = GetStrippedVerifierString(valid_verifier_syntax);
+        ExtractVerifierStringQualifiers(stripped_valid_verifier_syntax, setQualifiers);
 
         vals.clear();
 
@@ -360,7 +361,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK(LibBoolEE::resolve(valid_verifier_syntax, vals));
+        BOOST_CHECK(LibBoolEE::resolve(stripped_valid_verifier_syntax, vals));
 
         // Clear the vals, and insert them with false, this should make the resolve return false
         vals.clear();
@@ -368,103 +369,116 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
             vals.insert(make_pair(item, false));
         }
 
-        BOOST_CHECK(!LibBoolEE::resolve(valid_verifier_syntax, vals));
+        BOOST_CHECK(!LibBoolEE::resolve(stripped_valid_verifier_syntax, vals));
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax #DEF#XXX won't work
-        std::string not_valid_qualifier = "((#KYC & !#ABC) | #DEF#XXX & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_qualifier, setQualifiers);
+        std::string not_valid_qualifier = "((#KYC & !#ABC) | #DEF$XXX & #GHI & #RET)";
+        std::string stripped_not_valid_qualifier  = GetStrippedVerifierString(not_valid_qualifier);
+        ExtractVerifierStringQualifiers(stripped_not_valid_qualifier, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_qualifier, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_qualifier, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, missing a parenthesis '(' at the beginning
         std::string not_valid_missing_parenthesis = "(#KYC & !#ABC) | #DEF & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_missing_parenthesis, setQualifiers);
+        std::string stripped_not_valid_missing_parenthesis  = GetStrippedVerifierString(not_valid_missing_parenthesis);
+        ExtractVerifierStringQualifiers(stripped_not_valid_missing_parenthesis, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_missing_parenthesis, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_missing_parenthesis, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, has two & in a row
         std::string not_valid_double_and = "((#KYC && !#ABC) | #DEF & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_double_and, setQualifiers);
+        std::string stripped_not_valid_double_and = GetStrippedVerifierString(not_valid_double_and);
+        ExtractVerifierStringQualifiers(stripped_not_valid_double_and, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_double_and, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_double_and, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, has two | in a row
         std::string not_valid_double_or = "((#KYC & !#ABC) || #DEF & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_double_or, setQualifiers);
+        std::string stripped_not_valid_double_or = GetStrippedVerifierString(not_valid_double_or);
+        ExtractVerifierStringQualifiers(stripped_not_valid_double_or, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_double_or, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_double_or, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, has & | without a qualifier inbetween
         std::string not_valid_missing_qualifier = "((#KYC & | !#ABC) | #DEF & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_missing_qualifier, setQualifiers);
+        std::string stripped_not_valid_missing_qualifier = GetStrippedVerifierString(not_valid_missing_qualifier);
+        ExtractVerifierStringQualifiers(stripped_not_valid_missing_qualifier, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_missing_qualifier, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_missing_qualifier, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, has () without qualifier inside them
         std::string not_valid_open_close = "()((#KYC & !#ABC) | #DEF & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_open_close, setQualifiers);
+
+        std::string stripped_not_valid_open_close = GetStrippedVerifierString(not_valid_open_close);
+        ExtractVerifierStringQualifiers(stripped_not_valid_open_close, setQualifiers);
+
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_open_close, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_open_close, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, has (#YES) followed by no comparator
         std::string not_valid_open_close_no_comparator = "((#KYC & !#ABC) | (#YES) #DEF & #GHI & #RET)";
-        ExtractVerifierStringQualifiers(not_valid_open_close_no_comparator, setQualifiers);
+        std::string stripped_not_valid_open_close_no_comparator = GetStrippedVerifierString(not_valid_open_close_no_comparator);
+        ExtractVerifierStringQualifiers(stripped_not_valid_open_close_no_comparator, setQualifiers);
+
+        ExtractVerifierStringQualifiers(stripped_not_valid_open_close_no_comparator, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(not_valid_open_close_no_comparator, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_not_valid_open_close_no_comparator, vals), std::runtime_error);
 
         vals.clear();
         setQualifiers.clear();
 
         //! Check for invalid syntax, could return true on the #KYC, but is missing a ending parenthesis
         std::string bad_syntax_after_true_statement = "((#KYC) | #GHI";
-        ExtractVerifierStringQualifiers(bad_syntax_after_true_statement, setQualifiers);
+
+        std::string stripped_bad_syntax_after_true_statement = GetStrippedVerifierString(bad_syntax_after_true_statement);
+        ExtractVerifierStringQualifiers(stripped_bad_syntax_after_true_statement, setQualifiers);
         for (auto item : setQualifiers) {
             vals.insert(make_pair(item, true));
         }
 
-        BOOST_CHECK_THROW(LibBoolEE::resolve(bad_syntax_after_true_statement, vals), std::runtime_error);
+        BOOST_CHECK_THROW(LibBoolEE::resolve(stripped_bad_syntax_after_true_statement, vals), std::runtime_error);
     }
 
     BOOST_AUTO_TEST_CASE(asset_valid_check_tests)
