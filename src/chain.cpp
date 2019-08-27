@@ -133,7 +133,7 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
     return (~bnTarget / (bnTarget + 1)) + 1;
 }
 
-int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::Params& params)
+int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::ConsensusParams& params)
 {
     arith_uint256 r;
     int sign = 1;

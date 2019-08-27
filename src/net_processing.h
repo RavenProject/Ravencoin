@@ -63,7 +63,7 @@ public:
     bool SendMessages(CNode* pto, std::atomic<bool>& interrupt) override;
 
     void ConsiderEviction(CNode *pto, int64_t time_in_seconds);
-    void CheckForStaleTipAndEvictPeers(const Consensus::Params &consensusParams);
+    void CheckForStaleTipAndEvictPeers(const Consensus::ConsensusParams &consensusParams);
     void EvictExtraOutboundPeers(int64_t time_in_seconds);
 
 private:

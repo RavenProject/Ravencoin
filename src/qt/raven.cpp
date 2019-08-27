@@ -643,20 +643,20 @@ int main(int argc, char *argv[])
     }
 
     /// 7. Determine network (and switch to network specific options)
-    // - Do not call Params() before this step
+    // - Do not call ConsensusParams() before this step
     // - Do this after parsing the configuration file, as the network can be switched there
     // - QSettings() will use the new application name after this, resulting in network-specific settings
     // - Needs to be done before createOptionsModel
 
-    // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
+    // Check for -testnet or -regtest parameter (ConsensusParams() calls are only valid after this clause)
     try {
-        SelectParams(ChainNameFromCommandLine());
+        SelectParams(ChainNameFromCommandLine(), true);
     } catch(std::exception &e) {
         QMessageBox::critical(0, QObject::tr(PACKAGE_NAME), QObject::tr("Error: %1").arg(e.what()));
         return EXIT_FAILURE;
     }
 #ifdef ENABLE_WALLET
-    // Parse URIs on command line -- this can affect Params()
+    // Parse URIs on command line -- this can affect ConsensusParams()
     PaymentServer::ipcParseCommandLine(argc, argv);
 #endif
 
