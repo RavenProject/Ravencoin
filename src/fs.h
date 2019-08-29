@@ -11,7 +11,10 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+
+#ifdef WIN32
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
+#endif
 
 /** Filesystem operations and types */
 namespace fs = boost::filesystem;
