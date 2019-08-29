@@ -786,7 +786,7 @@ PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn, CScheduler &schedu
     // Initialize global variables that cannot be constructed at startup.
     recentRejects.reset(new CRollingBloomFilter(120000, 0.000001));
 
-    const Consensus::Params& consensusParams = Params().GetConsensus();
+    const Consensus::Params& consensusParams = GetParams().GetConsensus();
     // Stale tip checking and peer eviction are on two different timers, but we
     // don't want them to get out of sync due to drift in the scheduler, so we
     // combine them in one function and schedule at the quicker (peer-eviction)
@@ -845,7 +845,7 @@ void PeerLogicValidation::NewPoWValidBlock(const CBlockIndex *pindex, const std:
         return;
     nHighestFastAnnounce = pindex->nHeight;
 
-    bool fWitnessEnabled = IsWitnessEnabled(pindex->pprev, Params().GetConsensus());
+    bool fWitnessEnabled = IsWitnessEnabled(pindex->pprev, GetParams().GetConsensus());
     uint256 hashBlock(pblock->GetHash());
 
     {
@@ -1064,7 +1064,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         // In this case, we need to run ActivateBestChain prior to checking the relay
                         // conditions below.
                         CValidationState dummy;
-                        ActivateBestChain(dummy, Params(), a_recent_block);
+                        ActivateBestChain(dummy, GetParams(), a_recent_block);
                     }
                     if (chainActive.Contains(mi->second)) {
                         send = true;
@@ -1073,7 +1073,8 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         // chain if they are valid, and no more than a max reorg depth than the best header
                         // chain we know about.
                         send = mi->second->IsValid(BLOCK_VALID_SCRIPTS) &&
-                            StaleBlockRequestAllowed(mi->second, consensusParams) && (chainActive.Height() - (mi->second->nHeight-1) < Params().MaxReorganizationDepth());
+                            StaleBlockRequestAllowed(mi->second, consensusParams) && (chainActive.Height() - (mi->second->nHeight-1) <
+                                GetParams().MaxReorganizationDepth());
                         if (!send) {
                             LogPrintf("%s: ignoring request from peer=%i for old block that isn't in the main chain\n", __func__, pfrom->GetId());
                         }
@@ -2023,7 +2024,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 a_recent_block = most_recent_block;
             }
             CValidationState dummy;
-            ActivateBestChain(dummy, Params(), a_recent_block);
+            ActivateBestChain(dummy, GetParams(), a_recent_block);
         }
 
         LOCK(cs_main);
@@ -2964,7 +2965,7 @@ static bool SendRejectsAndCheckIfBanned(CNode* pnode, CConnman* connman)
 
 bool PeerLogicValidation::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgProc)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     //
     // Message format
     //  (4) message start
@@ -3230,7 +3231,7 @@ public:
 
 bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptMsgProc)
 {
-    const Consensus::Params& consensusParams = Params().GetConsensus();
+    const Consensus::Params& consensusParams = GetParams().GetConsensus();
     {
         // Don't send anything until the version handshake is complete
         if (!pto->fSuccessfullyConnected || pto->fDisconnect)

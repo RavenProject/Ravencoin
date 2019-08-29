@@ -637,6 +637,10 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
         }
 
+        AssetInfo assetInfo;
+        assetInfo.nTimeAdded = 0;
+        assetInfo.fFromMempool = true;
+
         /** RVN START */
         if (!AreAssetsDeployed()) {
             for (auto out : tx.vout) {
@@ -646,7 +650,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         if (AreAssetsDeployed()) {
-            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets))
+            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets, false, nullptr, 0, &assetInfo))
                 return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                              FormatStateMessage(state));
         }
@@ -898,7 +902,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // There is a similar check in CreateNewBlock() to prevent creating
         // invalid blocks (using TestBlockValidity), however allowing such
         // transactions into the mempool can be exploited as a DoS attack.
-        unsigned int currentBlockScriptVerifyFlags = GetBlockScriptFlags(chainActive.Tip(), Params().GetConsensus());
+        unsigned int currentBlockScriptVerifyFlags = GetBlockScriptFlags(chainActive.Tip(), GetParams().GetConsensus());
         if (!CheckInputsFromMempoolAndCache(tx, state, view, pool, currentBlockScriptVerifyFlags, true, txdata))
         {
             // If we're using promiscuousmempoolflags, we may hit this normally
@@ -1038,7 +1042,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransa
                         bool* pfMissingInputs, std::list<CTransactionRef>* plTxnReplaced,
                         bool bypass_limits, const CAmount nAbsurdFee)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     return AcceptToMemoryPoolWithTime(chainparams, pool, state, tx, pfMissingInputs, GetTime(), plTxnReplaced, bypass_limits, nAbsurdFee);
 }
 
@@ -2449,6 +2453,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
 
+    AssetInfo assetInfo;
+    assetInfo.nTimeAdded = block.nTime;
+    assetInfo.fFromMempool = false;
+
     std::set<CMessage> setMessages;
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
@@ -2480,7 +2488,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
             if (AreAssetsDeployed()) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime)) {
+                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime, &assetInfo)) {
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
                 }
@@ -2958,14 +2966,14 @@ bool static FlushStateToDisk(const CChainParams& chainparams, CValidationState &
 
 void FlushStateToDisk() {
     CValidationState state;
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     FlushStateToDisk(chainparams, state, FLUSH_STATE_ALWAYS);
 }
 
 void PruneAndFlush() {
     CValidationState state;
     fCheckForPruning = true;
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     FlushStateToDisk(chainparams, state, FLUSH_STATE_NONE);
 }
 
@@ -3967,9 +3975,9 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     const int nHeight = pindexPrev->nHeight + 1;
 
     //If this is a reorg, check that it is not too deep
-    int nMaxReorgDepth = gArgs.GetArg("-maxreorg", Params().MaxReorganizationDepth());
-    int nMinReorgPeers = gArgs.GetArg("-minreorgpeers", Params().MinReorganizationPeers());
-    int nMinReorgAge = gArgs.GetArg("-minreorgage", Params().MinReorganizationAge());
+    int nMaxReorgDepth = gArgs.GetArg("-maxreorg", GetParams().MaxReorganizationDepth());
+    int nMinReorgPeers = gArgs.GetArg("-minreorgpeers", GetParams().MinReorganizationPeers());
+    int nMinReorgAge = gArgs.GetArg("-minreorgage", GetParams().MinReorganizationAge());
     bool fGreaterThanMaxReorg = (chainActive.Height() - (nHeight - 1)) >= nMaxReorgDepth;
     if (fGreaterThanMaxReorg && g_connman) {
         int nCurrentNodeCount = g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL);
@@ -4437,7 +4445,7 @@ static void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPr
 void PruneBlockFilesManual(int nManualPruneHeight)
 {
     CValidationState state;
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     FlushStateToDisk(chainparams, state, FLUSH_STATE_NONE, nManualPruneHeight);
 }
 
@@ -5447,7 +5455,7 @@ static const uint64_t MEMPOOL_DUMP_VERSION = 1;
 
 bool LoadMempool(void)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     int64_t nExpiryTimeout = gArgs.GetArg("-mempoolexpiry", DEFAULT_MEMPOOL_EXPIRY) * 60 * 60;
     FILE* filestr = fsbridge::fopen(GetDataDir() / "mempool.dat", "rb");
     CAutoFile file(filestr, SER_DISK, CLIENT_VERSION);
@@ -5594,7 +5602,7 @@ bool AreAssetsDeployed() {
     if (fAssetsIsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
     if (thresholdState == THRESHOLD_ACTIVE)
         fAssetsIsActive = true;
 
@@ -5606,7 +5614,7 @@ bool AreMessagingDeployed() {
     if (fMessagesIsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_MESSAGING);
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_MESSAGING);
     if (thresholdState == THRESHOLD_ACTIVE)
         fMessagesIsActive = true;
 
@@ -5618,7 +5626,7 @@ bool AreRestrictedAssetsDeployed() {
     if (fRestrictedAssetsIsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_RESTRICTED_ASSETS);
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_RESTRICTED_ASSETS);
     if (thresholdState == THRESHOLD_ACTIVE)
         fRestrictedAssetsIsActive = true;
 
@@ -5626,12 +5634,12 @@ bool AreRestrictedAssetsDeployed() {
 }
 
 bool IsDGWActive(unsigned int nBlockNumber) {
-    return nBlockNumber >= Params().DGWActivationBlock();
+    return nBlockNumber >= GetParams().DGWActivationBlock();
 }
 
 bool IsMessagingActive(unsigned int nBlockNumber) {
-    if (Params().MessagingActivationBlock()) {
-        return nBlockNumber > Params().MessagingActivationBlock();
+    if (GetParams().MessagingActivationBlock()) {
+        return nBlockNumber > GetParams().MessagingActivationBlock();
     } else {
         return AreMessagingDeployed();
     }
@@ -5639,8 +5647,8 @@ bool IsMessagingActive(unsigned int nBlockNumber) {
 
 bool IsRestrictedActive(unsigned int nBlockNumber)
 {
-    if (Params().RestrictedActivationBlock()) {
-        return nBlockNumber > Params().RestrictedActivationBlock();
+    if (GetParams().RestrictedActivationBlock()) {
+        return nBlockNumber > GetParams().RestrictedActivationBlock();
     } else {
         return AreRestrictedAssetsDeployed();
     }

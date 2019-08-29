@@ -18,7 +18,7 @@ BOOST_FIXTURE_TEST_SUITE(restricted_tests, BasicTestingSetup)
 
         CMutableTransaction mutableTransaction;
 
-        CScript newRestrictedScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript newRestrictedScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
 
         CNewAsset restricted_asset("$RESTRICTED_NAME", 5);
         restricted_asset.ConstructTransaction(newRestrictedScript);
@@ -34,7 +34,7 @@ BOOST_FIXTURE_TEST_SUITE(restricted_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(RestrictedAssetFromTransaction(tx, fetched_asset, address), "Failed to get restricted from transaction");
         BOOST_CHECK_MESSAGE(fetched_asset.strName == restricted_asset.strName, "Restricted Tests: Failed asset names check");
         BOOST_CHECK_MESSAGE(fetched_asset.nAmount == restricted_asset.nAmount, "Restricted Tests: Failed amount check");
-        BOOST_CHECK_MESSAGE(address == Params().GlobalBurnAddress(), "Restricted Tests: Failed address check");
+        BOOST_CHECK_MESSAGE(address == GetParams().GlobalBurnAddress(), "Restricted Tests: Failed address check");
     }
 
     BOOST_AUTO_TEST_CASE(restricted_from_transaction_fail_test)
@@ -43,7 +43,7 @@ BOOST_FIXTURE_TEST_SUITE(restricted_tests, BasicTestingSetup)
 
         CMutableTransaction mutableTransaction;
 
-        CScript newRestrictedScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript newRestrictedScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
 
         CNewAsset restricted_asset("NOT_RESTRICTED_NAME", 5);
         restricted_asset.ConstructTransaction(newRestrictedScript);
@@ -64,7 +64,7 @@ BOOST_FIXTURE_TEST_SUITE(restricted_tests, BasicTestingSetup)
 
         /// Create CTxOut to use in the tests ///
         // Create filler rvn tx
-        CScript rvnTransfer = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript rvnTransfer = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         CTxOut rvnOut(1*COIN, rvnTransfer);
 
         // Create transaction and add burn to it
@@ -73,7 +73,7 @@ BOOST_FIXTURE_TEST_SUITE(restricted_tests, BasicTestingSetup)
 
         // Add the parent transaction for sub qualifier tx
         CAssetTransfer parentTransfer("RESTRICTED_NAME!", OWNER_ASSET_AMOUNT);
-        CScript parentScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript parentScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         parentTransfer.ConstructTransaction(parentScript);
         CTxOut parentOut(0, parentScript);
 
@@ -84,13 +84,13 @@ BOOST_FIXTURE_TEST_SUITE(restricted_tests, BasicTestingSetup)
         CTxOut verifierOut(0, verifierScript);
 
         // Create the new restricted Script
-        CScript newRestrictedScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript newRestrictedScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         CNewAsset restricted_asset("$RESTRICTED_NAME", 5 * COIN, 0, 0, 0, "");
         restricted_asset.ConstructTransaction(newRestrictedScript);
         CTxOut assetOut(0, newRestrictedScript);
 
         // Create a fake owner script
-        CScript newRestrictedAssetOwnerScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript newRestrictedAssetOwnerScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         restricted_asset.ConstructOwnerTransaction(newRestrictedAssetOwnerScript);
         CTxOut ownerOut(0, newRestrictedAssetOwnerScript);
         /// Finish Creating CTxOut to use in the tests ///

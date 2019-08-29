@@ -579,7 +579,7 @@ void static RavenMiner(const CChainParams& chainparams)
 
 
 
-            std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(coinbaseScript->reserveScript));
+            std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(GetParams()).CreateNewBlock(coinbaseScript->reserveScript));
 
             if (!pblocktemplate.get())
             {

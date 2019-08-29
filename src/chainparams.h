@@ -115,11 +115,14 @@ public:
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
     unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
 
+
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
     int MinReorganizationAge() const { return nMinReorganizationAge; }
 
     int GetAssetActivationHeight() const { return nAssetActivationHeight; }
+
+    uint32_t X16RV2ActivationTime() const { return nX16RV2ActivationTime; }
     /** RVN End **/
 
 protected:
@@ -176,6 +179,8 @@ protected:
     int nMinReorganizationAge;
 
     int nAssetActivationHeight;
+
+    uint32_t nX16RV2ActivationTime;
     /** RVN End **/
 };
 
@@ -190,13 +195,13 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
  * Return the currently selected parameters. This won't change after app
  * startup, except for unit tests.
  */
-const CChainParams &Params();
+const CChainParams &GetParams();
 
 /**
  * Sets the params returned by Params() to those for the given BIP70 chain name.
  * @throws std::runtime_error when the chain is not supported.
  */
-void SelectParams(const std::string& chain);
+void SelectParams(const std::string& chain, bool fForceBlockNetwork = false);
 
 /**
  * Allows modifying the Version Bits regtest parameters.

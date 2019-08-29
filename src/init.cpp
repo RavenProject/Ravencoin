@@ -201,7 +201,7 @@ void PrepareShutdown()
 #ifdef ENABLE_WALLET
     FlushWallets();
 #endif
-    GenerateRavens(false, 0, Params());
+    GenerateRavens(false, 0, GetParams());
 
     MapPort(false);
 
@@ -700,7 +700,7 @@ void CleanupBlockRevFiles()
 
 void ThreadImport(std::vector<fs::path> vImportFiles)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     RenameThread("raven-loadblk");
 
     {
@@ -970,7 +970,7 @@ bool AppInitBasicSetup()
 
 bool AppInitParameterInteraction()
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     // ********************************************************* Step 2: parameter interactions
 
     // also see: InitParameterInteraction()
@@ -1290,7 +1290,7 @@ bool AppInitLockDataDirectory()
 
 bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 {
-    const CChainParams& chainparams = Params();
+    const CChainParams& chainparams = GetParams();
     // ********************************************************* Step 4a: application initialization
 #ifndef WIN32
     CreatePidFile(GetPidFile(), getpid());

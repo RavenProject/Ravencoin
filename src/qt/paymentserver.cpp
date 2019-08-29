@@ -760,12 +760,12 @@ void PaymentServer::handlePaymentACK(const QString& paymentACKMsg)
 
 bool PaymentServer::verifyNetwork(const payments::PaymentDetails& requestDetails)
 {
-    bool fVerified = requestDetails.network() == Params().NetworkIDString();
+    bool fVerified = requestDetails.network() == GetParams().NetworkIDString();
     if (!fVerified) {
         qWarning() << QString("PaymentServer::%1: Payment request network \"%2\" doesn't match client network \"%3\".")
             .arg(__func__)
             .arg(QString::fromStdString(requestDetails.network()))
-            .arg(QString::fromStdString(Params().NetworkIDString()));
+            .arg(QString::fromStdString(GetParams().NetworkIDString()));
     }
     return fVerified;
 }

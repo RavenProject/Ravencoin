@@ -197,11 +197,11 @@ bool ScanForMessageChannels(std::string& strError)
         return false;
     }
 
-    CBlockIndex* blockIndex = chainActive[Params().GetAssetActivationHeight()];
+    CBlockIndex* blockIndex = chainActive[GetParams().GetAssetActivationHeight()];
 
     while (blockIndex) {
         CBlock block;
-        if (!ReadBlockFromDisk(block, blockIndex, Params().GetConsensus())) {
+        if (!ReadBlockFromDisk(block, blockIndex, GetParams().GetConsensus())) {
             strError = "Block not found on disk";
             return false;
         }

@@ -180,7 +180,7 @@ void ReissueAssetDialog::setModel(WalletModel *_model)
 
         // fee section
         for (const int &n : confTargets) {
-            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n*Params().GetConsensus().nPowTargetSpacing)).arg(n));
+            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * GetParams().GetConsensus().nPowTargetSpacing)).arg(n));
         }
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(updateSmartFeeLabel()));
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(coinControlUpdateLabels()));
@@ -932,7 +932,7 @@ void ReissueAssetDialog::onReissueAssetClicked()
     QString amount = "<b>" + QString::fromStdString(ValueFromAmountString(GetReissueAssetBurnAmount(), 8)) + " RVN";
     amount.append("</b>");
     // generate monospace address string
-    QString addressburn = "<span style='font-family: monospace;'>" + QString::fromStdString(Params().ReissueAssetBurnAddress());
+    QString addressburn = "<span style='font-family: monospace;'>" + QString::fromStdString(GetParams().ReissueAssetBurnAddress());
     addressburn.append("</span>");
 
     QString recipientElement1;

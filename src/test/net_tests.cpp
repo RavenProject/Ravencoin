@@ -65,7 +65,7 @@ public:
 CDataStream AddrmanToStream(CAddrManSerializationMock &_addrman)
 {
     CDataStream ssPeersIn(SER_DISK, CLIENT_VERSION);
-    ssPeersIn << FLATDATA(Params().MessageStart());
+    ssPeersIn << FLATDATA(GetParams().MessageStart());
     ssPeersIn << _addrman;
     std::string str = ssPeersIn.str();
     std::vector<unsigned char> vchData(str.begin(), str.end());
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_SUITE(net_tests, BasicTestingSetup)
 
         // test default
         unsigned short port = GetListenPort();
-        BOOST_CHECK(port == Params().GetDefaultPort());
+        BOOST_CHECK(port == GetParams().GetDefaultPort());
         // test set port
         unsigned short altPort = 12345;
         gArgs.SoftSetArg("-port", std::to_string(altPort));

@@ -1695,8 +1695,8 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
     }
 
     // If we got the address and the assetName, proceed to remove it from the database, and in memory objects
-    if (address != "" && assetName != "" && nAmount > 0) {
-        if (fAssetIndex) {
+    if (address != "" && assetName != "") {
+        if (fAssetIndex && nAmount > 0) {
             CAssetCacheSpendAsset spend(assetName, address, nAmount);
             if (GetBestAssetAddressAmount(*this, assetName, address)) {
                 auto pair = make_pair(assetName, address);
@@ -3080,7 +3080,7 @@ bool CheckReissueBurnTx(const CTxOut& txOut)
         return false;
 
     // Check destination address is the correct burn address
-    if (EncodeDestination(destination) != Params().ReissueAssetBurnAddress())
+    if (EncodeDestination(destination) != GetParams().ReissueAssetBurnAddress())
         return false;
 
     return true;
@@ -3549,47 +3549,47 @@ void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, int nMinC
 
 CAmount GetIssueAssetBurnAmount()
 {
-    return Params().IssueAssetBurnAmount();
+    return GetParams().IssueAssetBurnAmount();
 }
 
 CAmount GetReissueAssetBurnAmount()
 {
-    return Params().ReissueAssetBurnAmount();
+    return GetParams().ReissueAssetBurnAmount();
 }
 
 CAmount GetIssueSubAssetBurnAmount()
 {
-    return Params().IssueSubAssetBurnAmount();
+    return GetParams().IssueSubAssetBurnAmount();
 }
 
 CAmount GetIssueUniqueAssetBurnAmount()
 {
-    return Params().IssueUniqueAssetBurnAmount();
+    return GetParams().IssueUniqueAssetBurnAmount();
 }
 
 CAmount GetIssueMsgChannelAssetBurnAmount()
 {
-    return Params().IssueMsgChannelAssetBurnAmount();
+    return GetParams().IssueMsgChannelAssetBurnAmount();
 }
 
 CAmount GetIssueQualifierAssetBurnAmount()
 {
-    return Params().IssueQualifierAssetBurnAmount();
+    return GetParams().IssueQualifierAssetBurnAmount();
 }
 
 CAmount GetIssueSubQualifierAssetBurnAmount()
 {
-    return Params().IssueSubQualifierAssetBurnAmount();
+    return GetParams().IssueSubQualifierAssetBurnAmount();
 }
 
 CAmount GetIssueRestrictedAssetBurnAmount()
 {
-    return Params().IssueRestrictedAssetBurnAmount();
+    return GetParams().IssueRestrictedAssetBurnAmount();
 }
 
 CAmount GetAddNullQualifierTagBurnAmount()
 {
-    return Params().AddNullQualifierTagBurnAmount();
+    return GetParams().AddNullQualifierTagBurnAmount();
 }
 
 CAmount GetBurnAmount(const int nType)
@@ -3636,27 +3636,27 @@ std::string GetBurnAddress(const AssetType type)
 {
     switch (type) {
         case AssetType::ROOT:
-            return Params().IssueAssetBurnAddress();
+            return GetParams().IssueAssetBurnAddress();
         case AssetType::SUB:
-            return Params().IssueSubAssetBurnAddress();
+            return GetParams().IssueSubAssetBurnAddress();
         case AssetType::MSGCHANNEL:
-            return Params().IssueMsgChannelAssetBurnAddress();
+            return GetParams().IssueMsgChannelAssetBurnAddress();
         case AssetType::OWNER:
             return "";
         case AssetType::UNIQUE:
-            return Params().IssueUniqueAssetBurnAddress();
+            return GetParams().IssueUniqueAssetBurnAddress();
         case AssetType::VOTE:
             return "";
         case AssetType::REISSUE:
-            return Params().ReissueAssetBurnAddress();
+            return GetParams().ReissueAssetBurnAddress();
         case AssetType::QUALIFIER:
-            return Params().IssueQualifierAssetBurnAddress();
+            return GetParams().IssueQualifierAssetBurnAddress();
         case AssetType::SUB_QUALIFIER:
-            return Params().IssueSubQualifierAssetBurnAddress();
+            return GetParams().IssueSubQualifierAssetBurnAddress();
         case AssetType::RESTRICTED:
-            return Params().IssueRestrictedAssetBurnAddress();
+            return GetParams().IssueRestrictedAssetBurnAddress();
         case AssetType::NULL_ADD_QUALIFIER:
-            return Params().AddNullQualifierTagBurnAddress();
+            return GetParams().AddNullQualifierTagBurnAddress();
         default:
             return "";
     }
@@ -4093,7 +4093,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     }
 
     // Get the script for the burn address
-    CScript scriptPubKeyBurn = GetScriptForDestination(DecodeDestination(Params().ReissueAssetBurnAddress()));
+    CScript scriptPubKeyBurn = GetScriptForDestination(DecodeDestination(GetParams().ReissueAssetBurnAddress()));
 
     // Create and send the transaction
     CRecipient recipient = {scriptPubKeyBurn, burnAmount, fSubtractFeeFromAmount};
@@ -5094,7 +5094,7 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
     }
 }
 
-bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError)
+bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError, AssetInfo* assetInfo)
 {
     strError = "";
     AssetType assetType;
@@ -5103,7 +5103,22 @@ bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer
         return false;
     }
 
+    if (assetInfo) {
+        if (transfer.nAmount <= 0) {
+            if (assetInfo->fFromMempool) {
+                strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
+                return false;
+            }
+
+            if (assetInfo->nTimeAdded >= GetParams().X16RV2ActivationTime()) {
+                strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
+                return false;
+            }
+        }
+    }
+
     if (AreMessagingDeployed()) {
+        // This is for the current testnet6 only.
         if (transfer.nAmount <= 0) {
             strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
             return false;
@@ -5307,7 +5322,7 @@ bool CheckReissueAsset(const CReissueAsset& asset, std::string& strError)
     /// -------- TESTNET ONLY ---------- ///
     // Testnet has a couple blocks that have invalid nReissue values before constriants were created
     bool fSkip = false;
-    if (Params().NetworkIDString() == CBaseChainParams::TESTNET) {
+    if (GetParams().NetworkIDString() == CBaseChainParams::TESTNET) {
         if (asset.strName == "GAMINGWEB" && asset.nReissuable == 109) {
             fSkip = true;
         } else if (asset.strName == "UINT8" && asset.nReissuable == -47) {
