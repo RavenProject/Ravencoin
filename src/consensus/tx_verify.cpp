@@ -568,7 +568,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
 }
 
 //! Check to make sure that the inputs and outputs CAmount match exactly.
-bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime)
+bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime, AssetInfo* assetInfo)
 {
     // are the actual inputs available?
     if (!inputs.HaveInputs(tx)) {
@@ -653,7 +653,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
                 return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize");
 
-            if (!ContextualCheckTransferAsset(assetCache, transfer, address, strError))
+            if (!ContextualCheckTransferAsset(assetCache, transfer, address, strError, assetInfo))
                 return state.DoS(100, false, REJECT_INVALID, strError);
 
             // Add to the total value of assets in the outputs
@@ -728,24 +728,26 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             AssetType assetType;
             IsAssetNameValid(asset.strName, assetType);
 
-            if (AreRestrictedAssetsDeployed()) {
-                if (assetType == AssetType::SUB) {
-                    std::string root = GetParentName(asset.strName);
-                    bool fOwnerOutFound = false;
-                    for (auto out : tx.vout) {
-                        CAssetTransfer transfer;
-                        std::string transferAddress;
-                        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
-                            if (root + OWNER_TAG == transfer.strName) {
-                                fOwnerOutFound = true;
-                                break;
-                            }
+            if (assetType == AssetType::SUB) {
+                std::string root = GetParentName(asset.strName);
+                bool fOwnerOutFound = false;
+                for (auto out : tx.vout) {
+                    CAssetTransfer transfer;
+                    std::string transferAddress;
+                    if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+                        if (root + OWNER_TAG == transfer.strName) {
+                            fOwnerOutFound = true;
+                            break;
                         }
                     }
+                }
 
-                    if (!fOwnerOutFound) {
+                if (!fOwnerOutFound) {
+                    if (assetInfo && assetInfo->fFromMempool)
+                        return state.DoS(0, false, REJECT_INVALID, "bad-txns-issue-new-asset-missing-owner-asset");
+
+                    if (assetInfo && assetInfo->nTimeAdded >= GetParams().X16RV2ActivationTime())
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-new-asset-missing-owner-asset");
-                    }
                 }
             }
 

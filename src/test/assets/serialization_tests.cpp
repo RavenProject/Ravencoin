@@ -157,7 +157,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
         CNewAsset restricted_asset("$RESTRICTED", 1000, 8, 0, 1, "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4");
 
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         restricted_asset.ConstructTransaction(scriptPubKey);
 
         BOOST_CHECK_MESSAGE(IsScriptNewRestrictedAsset(scriptPubKey), "Script wasn't a restricted asset");
@@ -169,7 +169,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
 
         CNewAsset message_channel("RESTRICTED~CHANNEL", 1000, 0, 0, 1, "QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4");
 
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         message_channel.ConstructTransaction(scriptPubKey);
 
         BOOST_CHECK_MESSAGE(IsScriptNewMsgChannelAsset(scriptPubKey), "Script wasn't a message channel");

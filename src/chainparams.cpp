@@ -13,7 +13,6 @@
 #include "arith_uint256.h"
 
 #include <assert.h>
-
 #include "chainparamsseeds.h"
 
 //TODO: Take these out
@@ -248,6 +247,7 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 338778;
+        //! If you change this value, you must update the value in primitives/block.cpp
         nX16RV2ActivationTime = 1569945600; //Tue Oct 01 2019 16:00:00 UTC
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
@@ -450,7 +450,8 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
-        nX16RV2ActivationTime = 1569931200;
+        //! If you change this value, you must update the value in primitives/block.cpp
+        nX16RV2ActivationTime = 1567533600; // Tuesday, September 3, 2019 18:00:00 UTC
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
@@ -458,7 +459,7 @@ public:
 
         nAssetActivationHeight = 6048; // Asset activated block height
         nMessagingActivationBlock = 249984; // Messaging activated block height
-        nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on testnet
+        nRestrictedActivationBlock = 308448; // Restricted activated block height // TODO after restricted goes active on testnet
         /** RVN End **/
 
     }
@@ -640,6 +641,7 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
+        //! If you change this value, you must update the value in primitives/block.cpp
         nX16RV2ActivationTime = 1566571889;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
@@ -655,7 +657,7 @@ public:
 
 static std::unique_ptr<CChainParams> globalChainParams;
 
-const CChainParams &Params() {
+const CChainParams &GetParams() {
     assert(globalChainParams);
     return *globalChainParams;
 }
@@ -671,9 +673,12 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain)
     throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
 }
 
-void SelectParams(const std::string& network)
+void SelectParams(const std::string& network, bool fForceBlockNetwork)
 {
     SelectBaseParams(network);
+    if (fForceBlockNetwork) {
+        bNetwork.SetNetwork(network);
+    }
     globalChainParams = CreateChainParams(network);
 }
 

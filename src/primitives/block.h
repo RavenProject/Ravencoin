@@ -18,6 +18,19 @@
  * in the block is a special one that creates a new coin owned by the creator
  * of the block.
  */
+
+class BlockNetwork
+{
+public:
+    BlockNetwork();
+    bool fOnRegtest;
+    bool fOnTestnet;
+    void SetNetwork(const std::string& network);
+};
+
+extern BlockNetwork bNetwork;
+
+
 class CBlockHeader
 {
 public:

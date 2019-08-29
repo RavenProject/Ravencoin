@@ -58,7 +58,7 @@ public:
         MAX_BASE58_TYPES
     };
 
-    const Consensus::ConsensusParams& GetConsensus() const { return consensus; }
+    const Consensus::Params& GetConsensus() const { return consensus; }
     const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
     int GetDefaultPort() const { return nDefaultPort; }
 
@@ -128,7 +128,7 @@ public:
 protected:
     CChainParams() {}
 
-    Consensus::ConsensusParams consensus;
+    Consensus::Params consensus;
     CMessageHeader::MessageStartChars pchMessageStart;
     int nDefaultPort;
     uint64_t nPruneAfterHeight;
@@ -195,13 +195,13 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
  * Return the currently selected parameters. This won't change after app
  * startup, except for unit tests.
  */
-const CChainParams &Params();
+const CChainParams &GetParams();
 
 /**
  * Sets the params returned by Params() to those for the given BIP70 chain name.
  * @throws std::runtime_error when the chain is not supported.
  */
-void SelectParams(const std::string& chain);
+void SelectParams(const std::string& chain, bool fForceBlockNetwork = false);
 
 /**
  * Allows modifying the Version Bits regtest parameters.
