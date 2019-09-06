@@ -1284,6 +1284,7 @@ UniValue ListReceived(CWallet * const pwallet, const UniValue& params, bool fByA
         if(params[2].get_bool())
             filter = filter | ISMINE_WATCH_ONLY;
 
+    LogPrintf("%s : Testing calling mapWallet\n", __func__);
     // Tally
     std::map<CTxDestination, tallyitem> mapTally;
     for (const std::pair<uint256, CWalletTx>& pairWtx : pwallet->mapWallet) {
@@ -1315,6 +1316,7 @@ UniValue ListReceived(CWallet * const pwallet, const UniValue& params, bool fByA
         }
     }
 
+    LogPrintf("%s : Testing calling mapAddressBook\n", __func__);
     // Reply
     UniValue ret(UniValue::VARR);
     std::map<std::string, tallyitem> mapAccountTally;
@@ -1322,8 +1324,10 @@ UniValue ListReceived(CWallet * const pwallet, const UniValue& params, bool fByA
         const CTxDestination& dest = item.first;
         const std::string& strAccount = item.second.name;
         std::map<CTxDestination, tallyitem>::iterator it = mapTally.find(dest);
-        if (it == mapTally.end() && !fIncludeEmpty)
+        if (it == mapTally.end() && !fIncludeEmpty) {
+            LogPrintf("%s : Testing found in mapAddressBook but not in mapTalley: %s\n", __func__, EncodeDestination(dest));
             continue;
+        }
 
         CAmount nAmount = 0;
         int nConf = std::numeric_limits<int>::max();
@@ -1365,6 +1369,24 @@ UniValue ListReceived(CWallet * const pwallet, const UniValue& params, bool fByA
             ret.push_back(obj);
         }
     }
+
+    for (const auto& item : mapTally) {
+        if (!pwallet) {
+            LogPrintf("%s : Testing wallet not found\n", __func__);
+            break;
+        }
+
+        if (pwallet && !pwallet->mapAddressBook.count(item.first)) {
+            LogPrintf("%s : Testing mapTally has dest that mapAddressBook doesn't have %s\n", __func__, EncodeDestination(item.first));
+
+            if (IsValidDestination(item.first)) {
+                LogPrintf("%s : Testing inserting address into addressbook %s\n", __func__, EncodeDestination(item.first));
+
+                pwallet->SetAddressBook(item.first, "", "receive");
+            }
+        }
+    }
+
 
     if (fByAccounts)
     {
