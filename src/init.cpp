@@ -590,6 +590,7 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-rpcworkqueue=<n>", strprintf("Set the depth of the work queue to service RPC calls (default: %d)", DEFAULT_HTTP_WORKQUEUE));
         strUsage += HelpMessageOpt("-rpcservertimeout=<n>", strprintf("Timeout during HTTP requests (default: %d)", DEFAULT_HTTP_SERVER_TIMEOUT));
     }
+    strUsage += HelpMessageOpt("-txrelay=<n>", _("If this node should relay transactions (default: 1 (true))"));
 
     return strUsage;
 }
@@ -1466,6 +1467,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // ********************************************************* Step 7: load block chain
 
     fReindex = gArgs.GetBoolArg("-reindex", false);
+
     bool fReindexChainState = gArgs.GetBoolArg("-reindex-chainstate", false);
 
     // block tree db settings
