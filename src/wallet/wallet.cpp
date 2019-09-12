@@ -1678,11 +1678,9 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, CBlock
 void CWallet::ReacceptWalletTransactions()
 {
     // If transactions aren't being broadcasted, don't let them into local mempool either
-    // Commented out. There are circumstances where you want to accept transactions but you don't
-    // want to forward them along.
+    if (!fBroadcastTransactions && gArgs.GetArg("-walletbroadcast", 1) != 0)
+        return;
 
-    // if (!fBroadcastTransactions)
-    //    return;
     LOCK2(cs_main, cs_wallet);
     std::map<int64_t, CWalletTx*> mapSorted;
 
