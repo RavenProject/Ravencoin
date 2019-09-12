@@ -979,6 +979,11 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 
 static void RelayTransaction(const CTransaction& tx, CConnman* connman)
 {
+    if (gArgs.GetArg("-walletbroadcast", 1) == 0) {
+        LogPrintf("walletbroadcast=0, skipping transaction relay\n");
+        return;
+    }
+
     CInv inv(MSG_TX, tx.GetHash());
     connman->ForEachNode([&inv](CNode* pnode)
     {
@@ -3367,7 +3372,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
         // Resend wallet transactions that haven't gotten in a block yet
         // Except during reindex, importing and IBD, when old wallet
         // transactions become unconfirmed and spams other nodes.
-        if (!fReindex && !fImporting && !IsInitialBlockDownload())
+        if (!fReindex && !fImporting && !IsInitialBlockDownload() && gArgs.GetArg("-walletbroadcast", 1) != 0)
         {
             GetMainSignals().Broadcast(nTimeBestReceived, connman);
         }
