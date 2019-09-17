@@ -68,7 +68,7 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
-#if QT_VERSION < 0x050000
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QTextDocument>
 #include <QUrl>
 #else
@@ -76,7 +76,10 @@
 #include <validation.h>
 #include <tinyformat.h>
 #include <QFontDatabase>
+#endif
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
 #endif
 
 const std::string RavenGUI::DEFAULT_UIPLATFORM =
@@ -1621,7 +1624,11 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     const QFontMetrics fm(font());
     for (const RavenUnits::Unit unit : units)
     {
-        max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
+    	#ifndef QTversionPreFiveEleven
+        	max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
+        #else
+        	max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
+        #endif
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);
