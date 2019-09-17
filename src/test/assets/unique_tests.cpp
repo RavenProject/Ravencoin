@@ -18,7 +18,7 @@ BOOST_FIXTURE_TEST_SUITE(unique_tests, BasicTestingSetup)
 
         CMutableTransaction mutableTransaction;
 
-        CScript newUniqueScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript newUniqueScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
 
         CNewAsset unique_asset("ROOT#UNIQUE1", 1 , 0 , 0, 0, "");
         unique_asset.ConstructTransaction(newUniqueScript);
@@ -34,7 +34,7 @@ BOOST_FIXTURE_TEST_SUITE(unique_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(UniqueAssetFromTransaction(tx, fetched_asset,address), "Failed to get qualifier from transaction");
         BOOST_CHECK_MESSAGE(fetched_asset.strName == unique_asset.strName, "Unique Tests: Failed asset names check");
         BOOST_CHECK_MESSAGE(fetched_asset.nAmount== unique_asset.nAmount, "Unique Tests: Failed amount check");
-        BOOST_CHECK_MESSAGE(address == Params().GlobalBurnAddress(), "Unique Tests: Failed address check");
+        BOOST_CHECK_MESSAGE(address == GetParams().GlobalBurnAddress(), "Unique Tests: Failed address check");
         BOOST_CHECK_MESSAGE(fetched_asset.nReissuable == unique_asset.nReissuable, "Unique Tests: Failed reissuable check");
     }
 
@@ -44,7 +44,7 @@ BOOST_FIXTURE_TEST_SUITE(unique_tests, BasicTestingSetup)
 
         CMutableTransaction mutableTransaction;
 
-        CScript newUniqueScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript newUniqueScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
 
         CNewAsset unique_asset("$NOT_UNIQUE", 1 , 0 , 0, 0, "");
         unique_asset.ConstructTransaction(newUniqueScript);

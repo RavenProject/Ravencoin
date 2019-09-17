@@ -228,7 +228,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKey
         CAssetTransfer asset("RAVEN", 1000);
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CTxOut txOut;
@@ -249,7 +249,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // Create the asset scriptPubKey
         CNewAsset asset("RAVEN", 1000, 8, 1, 0, "");
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
         CTxOut txOut;
@@ -699,7 +699,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         // Create the script for addinga  tag to an address
         CNullAssetTxData addTagData("#TAG", 1);
-        CScript addTagScript = GetScriptForDestination(DecodeDestination(Params().GlobalBurnAddress()));
+        CScript addTagScript = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         addTagData.ConstructTransaction(addTagScript);
 
         // Create the txOut and add it to the mutable transaction

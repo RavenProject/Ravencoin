@@ -4,10 +4,11 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <arith_uint256.h>
-#include <hash.h>
+#include "algo/hash_algos.h"
 #include <stdio.h>
 #include <string.h>
 #include <utilstrencodings.h>
+#include <iostream>
 
 int main(int argc, char **argv)
 {

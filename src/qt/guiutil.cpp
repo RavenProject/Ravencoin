@@ -211,7 +211,7 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
     // We don't want translators to use own addresses in translations
     // and this is the only place, where this address is supplied.
     widget->setPlaceholderText(QObject::tr("Enter a Raven address (e.g. %1)").arg(
-        QString::fromStdString(DummyAddress(Params()))));
+        QString::fromStdString(DummyAddress(GetParams()))));
 #endif
     widget->setValidator(new RavenAddressEntryValidator(parent));
     widget->setCheckValidator(new RavenAddressCheckValidator(parent));

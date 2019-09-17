@@ -1134,7 +1134,7 @@ void RavenGUI::updateHeadersSyncProgressLabel()
 {
     int64_t headersTipTime = clientModel->getHeaderTipTime();
     int headersTipHeight = clientModel->getHeaderTipHeight();
-    int estHeadersLeft = (GetTime() - headersTipTime) / Params().GetConsensus().nPowTargetSpacing;
+    int estHeadersLeft = (GetTime() - headersTipTime) / GetParams().GetConsensus().nPowTargetSpacing;
     if (estHeadersLeft > HEADER_HEIGHT_DELTA_SYNC)
         progressBarLabel->setText(tr("Syncing Headers (%1%)...").arg(QString::number(100.0 / (headersTipHeight+estHeadersLeft)*headersTipHeight, 'f', 1)));
 }
@@ -1397,7 +1397,7 @@ void RavenGUI::checkAssets()
         manageAssetAction->setDisabled(true);
         }
 
-    if (AreRestrictedAssetsDeployed) {
+    if (AreRestrictedAssetsDeployed()) {
         restrictedAssetAction->setDisabled(false);
         restrictedAssetAction->setToolTip(tr("Manage restricted assets"));
 

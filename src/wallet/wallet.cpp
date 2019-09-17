@@ -1627,7 +1627,7 @@ int64_t CWallet::RescanFromTime(int64_t startTime, bool update)
 CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, CBlockIndex* pindexStop, bool fUpdate)
 {
     int64_t nNow = GetTime();
-    const CChainParams& chainParams = Params();
+    const CChainParams& chainParams = GetParams();
 
     if (pindexStop) {
         assert(pindexStop->nHeight >= pindexStart->nHeight);
@@ -1653,7 +1653,7 @@ CBlockIndex* CWallet::ScanForWalletTransactions(CBlockIndex* pindexStart, CBlock
             }
 
             CBlock block;
-            if (ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
+            if (ReadBlockFromDisk(block, pindex, GetParams().GetConsensus())) {
                 for (size_t posInBlock = 0; posInBlock < block.vtx.size(); ++posInBlock) {
                     AddToWalletIfInvolvingMe(block.vtx[posInBlock], pindex, posInBlock, fUpdate);
                 }
