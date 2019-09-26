@@ -19,6 +19,8 @@ static const int INIT_PROTO_VERSION = 209;
 static const int GETHEADERS_VERSION = 31800;
 
 //! assetdata network request is allowed for this version
+//!!! Anytime this value is changed please also update the "MY_VERSION" value to match in the
+//!!! ./test/functional/test_framework/mininode.py file. Not doing so will cause verack to fail!
 static const int ASSETDATA_VERSION = 70017;
 
 //! disconnect from peers older than this proto version
