@@ -2339,13 +2339,13 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
 
 UniValue issuequalifierasset(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 5)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 6)
         throw std::runtime_error(
-                "issuequalifierasset \"asset_name\" qty \"( to_address )\" \"( change_address )\" ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
+                "issuequalifierasset \"asset_name\" qty \"( to_address )\" \"( change_address )\" ( has_ipfs ) \"( ipfs_hash )\"\n"
                 + RestrictedActivationWarning() +
                 "\nIssue an qualifier or sub qualifier asset\n"
                 "If the '#' character isn't added, it will be added automatically\n"
-                "Amount is a number between 1 and 10"
+                "Amount is a number between 1 and 10\n"
                 "Asset name must not conflict with any existing asset.\n"
                 "Unit is always set to Zero (0) for qualifier assets\n"
                 "Reissuable is always set to false for qualifier assets\n"

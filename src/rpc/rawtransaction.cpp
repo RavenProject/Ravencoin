@@ -446,7 +446,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "               \"asset_name\":\"asset-name\",(string, required) new asset name\n"
             "               \"asset_quantity\":n,         (number, required) the number of raw units to issue\n"
             "               \"verifier_string\":\"text\", (string, required) the verifier string to be used for a restricted asset transfer verification\n"
-            "               \"units\":[1-8],              (number, required) display units, between 1 (integral) to 8 (max precision)\n"
+            "               \"units\":[0-8],              (number, required) display units, between 0 (integral) and 8 (max precision)\n"
             "               \"reissuable\":[0-1],         (number, required) 1=reissuable asset\n"
             "               \"has_ipfs\":[0-1],           (number, required) 1=passing ipfs_hash\n"
             "               \"ipfs_hash\":\"hash\",       (string, optional) an ipfs hash for discovering asset metadata\n"
