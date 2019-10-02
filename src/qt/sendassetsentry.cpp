@@ -234,7 +234,7 @@ bool SendAssetsEntry::validate()
     }
 
     if (!ui->memoBox->text().isEmpty()) {
-        if (!AreMessagingDeployed()) {
+        if (!AreMessagesDeployed()) {
             ui->messageTextLabel->show();
             ui->messageTextLabel->setText(tr("Memos can only be added once RIP5 is voted in"));
             ui->memoBox->setStyleSheet(STYLE_INVALID);
@@ -244,7 +244,7 @@ bool SendAssetsEntry::validate()
         size_t size = ui->memoBox->text().size();
 
         if (size != 46) {
-            if (!AreMessagingDeployed()) {
+            if (!AreMessagesDeployed()) {
 
                 ui->memoBox->setStyleSheet(STYLE_INVALID);
                 retval = false;

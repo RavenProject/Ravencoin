@@ -35,11 +35,11 @@
 
 std::string MessageActivationWarning()
 {
-    return AreMessagingDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/RavenProject/rips/blob/master/rip-0005.mediawiki\n";
+    return AreMessagesDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/RavenProject/rips/blob/master/rip-0005.mediawiki\n";
 }
 
 UniValue viewallmessages(const JSONRPCRequest& request) {
-    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 0)
+    if (request.fHelp || !AreMessagesDeployed() || request.params.size() != 0)
         throw std::runtime_error(
                 "viewallmessages \n"
                 + MessageActivationWarning() +
@@ -221,7 +221,7 @@ UniValue subscribetochannel(const JSONRPCRequest& request) {
 
 
 UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
-    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 1)
+    if (request.fHelp || !AreMessagesDeployed() || request.params.size() != 1)
         throw std::runtime_error(
                 "unsubscribefromchannel \n"
                 + MessageActivationWarning() +
@@ -271,7 +271,7 @@ UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
 }
 
 UniValue clearmessages(const JSONRPCRequest& request) {
-    if (request.fHelp || !AreMessagingDeployed() || request.params.size() != 0)
+    if (request.fHelp || !AreMessagesDeployed() || request.params.size() != 0)
         throw std::runtime_error(
                 "clearmessages \n"
                 + MessageActivationWarning() +
@@ -305,7 +305,7 @@ UniValue clearmessages(const JSONRPCRequest& request) {
 }
 
 UniValue sendmessage(const JSONRPCRequest& request) {
-    if (request.fHelp || !AreMessagingDeployed() || request.params.size() < 2 || request.params.size() > 3)
+    if (request.fHelp || !AreMessagesDeployed() || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
                 "sendmessage \"channel_name\" \"ipfs_hash\" (expire_time)\n"
                 + MessageActivationWarning() +

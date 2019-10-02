@@ -140,18 +140,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1572480000; // Oct 31, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1814;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 7;  //Messaging (RIP5)
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 5544116233; // TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 5544116233; //TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nOverrideRuleChangeActivationThreshold = 1613; // TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nOverrideMinerConfirmationWindow = 2016; // TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].bit = 8;  // Restricted assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nStartTime = 5544116233; // TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nTimeout = 5544116233; //TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nOverrideRuleChangeActivationThreshold = 1613; //TODO Update when ready
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nOverrideMinerConfirmationWindow = 2016; //TODO Update when ready
-
-
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // Assets (RIP5)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 5544116233; // GMT: Sun Mar 3, 2019 5:00:00 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 5544116233; // UTC: Wed Dec 25 2019 07:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1814;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = 2016;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -207,6 +200,7 @@ public:
                 { 535721, uint256S("0x000000000001217f58a594ca742c8635ecaaaf695d1a63f6ab06979f1c159e04")},
                 { 697376, uint256S("0x000000000000499bf4ebbe61541b02e4692b33defc7109d8f12d2825d4d2dfa0")},
                 { 740000, uint256S("0x00000000000027d11bf1e7a3b57d3c89acc1722f39d6e08f23ac3a07e16e3172")},
+                { 909251, uint256S("0x000000000000694c9a363eff06518aa7399f00014ce667b9762f9a4e7a49f485")}
             }
         };
 
@@ -247,8 +241,6 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 338778;
-        //! If you change this value, you must update the value in primitives/block.cpp
-        nX16RV2ActivationTime = 1569945600; //Tue Oct 01 2019 16:00:00 UTC
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
@@ -262,7 +254,7 @@ public:
 };
 
 /**
- * Testnet (v6)
+ * Testnet (v7)
  */
 class CTestNetParams : public CChainParams {
 public:
@@ -288,21 +280,15 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nOverrideRuleChangeActivationThreshold = 1310;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nOverrideMinerConfirmationWindow = 2016;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1533924000; // GMT: Friday, August 10, 2018 6:00:00 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1538351999; // GMT: Sunday, September 30, 2018 11:59:59 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1533924000; // UTC: Fri Aug 10 2018 18:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1577257200; // UTC: Wed Dec 25 2019 07:00:00
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 1310;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 2016;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 6;  //Assets (RIP5)
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 1551657600; // GMT: Sun Mar 3, 2019 5:00:00 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 1579480000; // GMT: Sun Jan 19 2020 05:26:40 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nOverrideRuleChangeActivationThreshold = 1310;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nOverrideMinerConfirmationWindow = 2016;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].bit = 7;  // Restricted assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nStartTime = 1559908800; // GMT Sun, Jun 07 2019 6:00:00 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nTimeout = 1591531200; // GMT Sun, Jun 07 2020 6:00:00 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nOverrideRuleChangeActivationThreshold = 1310;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nOverrideMinerConfirmationWindow = 2016;
-
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 6;  //Assets (RIP5)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 1570428000; // UTC: Mon Oct 07 2019 06:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 1577257200; // UTC: Wed Dec 25 2019 07:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 1310;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = 2016;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -409,8 +395,8 @@ public:
         fMiningRequiresPeers = true;
 
         checkpointData = (CCheckpointData) {
-            {
-            }
+                {
+                }
         };
 
         chainTxData = ChainTxData{
@@ -449,19 +435,16 @@ public:
         strGlobalBurnAddress = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
 
         // DGW Activation
-        nDGWActivationBlock = 200;
-        //! If you change this value, you must update the value in primitives/block.cpp
-        nX16RV2ActivationTime = 1567533600; // Tuesday, September 3, 2019 18:00:00 UTC
+        nDGWActivationBlock = 1;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
 
-        nAssetActivationHeight = 6048; // Asset activated block height
-        nMessagingActivationBlock = 249984; // Messaging activated block height
-        nRestrictedActivationBlock = 308448; // Restricted activated block height // TODO after restricted goes active on testnet
+        nAssetActivationHeight = 0; // Asset activated block height
+        nMessagingActivationBlock = 0; // Messaging activated block height
+        nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on testnet
         /** RVN End **/
-
     }
 };
 
@@ -495,18 +478,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 999999999999ULL;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideRuleChangeActivationThreshold = 108;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nOverrideMinerConfirmationWindow = 144;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nStartTime = 1551989903;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nTimeout = 999999999999ULL;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nOverrideRuleChangeActivationThreshold = 108;
-        consensus.vDeployments[Consensus::DEPLOYMENT_MESSAGING].nOverrideMinerConfirmationWindow = 144;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].bit = 8;  // Restricted assets
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nStartTime = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nTimeout = 999999999999ULL;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nOverrideRuleChangeActivationThreshold = 108;
-        consensus.vDeployments[Consensus::DEPLOYMENT_RESTRICTED_ASSETS].nOverrideMinerConfirmationWindow = 144;
-
-
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].bit = 7;  // Assets (RIP5)
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nStartTime = 0; // GMT: Sun Mar 3, 2019 5:00:00 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nTimeout = 999999999999ULL; // UTC: Wed Dec 25 2019 07:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideRuleChangeActivationThreshold = 108;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MSG_REST_ASSETS].nOverrideMinerConfirmationWindow = 144;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
@@ -641,8 +617,6 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
-        //! If you change this value, you must update the value in primitives/block.cpp
-        nX16RV2ActivationTime = 1566571889;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;

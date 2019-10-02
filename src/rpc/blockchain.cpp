@@ -1420,7 +1420,6 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     const Consensus::Params& consensusParams = GetParams().GetConsensus();
     //CBlockIndex* tip = chainActive.Tip();
 
-
     UniValue softforks(UniValue::VARR);
     UniValue bip9_softforks(UniValue::VOBJ);
     // softforks.push_back(SoftForkDesc("bip34", 2, tip, consensusParams));
@@ -1429,8 +1428,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     // BIP9SoftForkDescPushBack(bip9_softforks, "csv", consensusParams, Consensus::DEPLOYMENT_CSV);
     //BIP9SoftForkDescPushBack(bip9_softforks, "segwit", consensusParams, Consensus::DEPLOYMENT_SEGWIT);
     BIP9SoftForkDescPushBack(bip9_softforks, "assets", consensusParams, Consensus::DEPLOYMENT_ASSETS);
-    BIP9SoftForkDescPushBack(bip9_softforks, "messaging", consensusParams, Consensus::DEPLOYMENT_MESSAGING);
-    BIP9SoftForkDescPushBack(bip9_softforks, "restricted_assets", consensusParams, Consensus::DEPLOYMENT_RESTRICTED_ASSETS);
+    BIP9SoftForkDescPushBack(bip9_softforks, "messaging_restricted", consensusParams, Consensus::DEPLOYMENT_MSG_REST_ASSETS);
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
 

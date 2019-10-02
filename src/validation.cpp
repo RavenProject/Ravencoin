@@ -104,8 +104,6 @@ arith_uint256 nMinimumChainWork;
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 
-CFeeRate minRelayTxFeeV2 = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE_V2);
-
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
 
@@ -637,10 +635,6 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
             return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
         }
 
-        AssetInfo assetInfo;
-        assetInfo.nTimeAdded = 0;
-        assetInfo.fFromMempool = true;
-
         /** RVN START */
         if (!AreAssetsDeployed()) {
             for (auto out : tx.vout) {
@@ -650,7 +644,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         if (AreAssetsDeployed()) {
-            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets, false, nullptr, 0, &assetInfo))
+            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets))
                 return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                              FormatStateMessage(state));
         }
@@ -700,9 +694,8 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         // No transactions are allowed below minRelayTxFee except from disconnected blocks
-        if (!bypass_limits && nModifiedFees < (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize))) {
-
-            LogPrintf("Modifed fees: %u, minrelayfee: %u\n", nModifiedFees, (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nSize) : ::minRelayTxFee.GetFee(nSize)));
+        if (!bypass_limits && nModifiedFees < ::minRelayTxFee.GetFee(nSize)) {
+            LogPrintf("Modifed fees: %u, minrelayfee: %u\n", nModifiedFees, ::minRelayTxFee.GetFee(nSize));
             return state.DoS(0, false, REJECT_INSUFFICIENTFEE, "min relay fee not met");
         }
 
@@ -2028,7 +2021,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     }
 
                     // Undo messages
-                    if (AreMessagingDeployed() && fMessaging && databaseMessaging && !transfer.message.empty() &&
+                    if (AreMessagesDeployed() && fMessaging && databaseMessaging && !transfer.message.empty() &&
                         (IsAssetNameAnOwner(transfer.strName) || IsAssetNameAnMsgChannel(transfer.strName))) {
 
                         LOCK(cs_messaging);
@@ -2234,12 +2227,6 @@ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Para
     /** If the assets are deployed now. We need to use the correct block version */
     if (AreAssetsDeployed())
         nVersion = VERSIONBITS_TOP_BITS_ASSETS;
-
-    if (AreMessagingDeployed())
-        nVersion = VERSIONBITS_TOP_BITS_MESSAGING;
-
-    if (AreRestrictedAssetsDeployed())
-        nVersion = VERSIONBITS_TOP_BITS_RESTRICTED;
 
     for (int i = 0; i < (int)Consensus::MAX_VERSION_BITS_DEPLOYMENTS; i++) {
         ThresholdState state = VersionBitsState(pindexPrev, params, (Consensus::DeploymentPos)i, versionbitscache);
@@ -2453,10 +2440,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
 
-    AssetInfo assetInfo;
-    assetInfo.nTimeAdded = block.nTime;
-    assetInfo.fFromMempool = false;
-
     std::set<CMessage> setMessages;
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
@@ -2488,7 +2471,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
             if (AreAssetsDeployed()) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime, &assetInfo)) {
+                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime)) {
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
                 }
@@ -2758,7 +2741,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             return AbortNode(state, "Failed to write blockhash index");
     }
 
-    if (AreMessagingDeployed() && fMessaging && setMessages.size()) {
+    if (AreMessagesDeployed() && fMessaging && setMessages.size()) {
         LOCK(cs_messaging);
         for (auto message : setMessages) {
             int nHeight = 0;
@@ -4031,21 +4014,6 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
     // Reject outdated version blocks once assets are active.
     if (AreAssetsDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_ASSETS)
         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block", block.nVersion));
-
-    // Reject outdated version blocks once messages are active.
-    if (IsMessagingActive(pindexPrev->nHeight+1)) {
-        if (block.nVersion < VERSIONBITS_TOP_BITS_MESSAGING) {
-            return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
-                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
-        }
-    }
-
-    if (IsRestrictedActive(pindexPrev->nHeight+1)) {
-        if (block.nVersion < VERSIONBITS_TOP_BITS_RESTRICTED) {
-            return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion),
-                                 strprintf("rejected nVersion=0x%08x block", block.nVersion));
-        }
-    }
 
     return true;
 }
@@ -5609,28 +5577,26 @@ bool AreAssetsDeployed() {
     return fAssetsIsActive;
 }
 
-bool AreMessagingDeployed() {
-
-    if (fMessagesIsActive)
+bool IsRip5Active()
+{
+    if (fRip5IsActive)
         return true;
 
-    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_MESSAGING);
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_MSG_REST_ASSETS);
     if (thresholdState == THRESHOLD_ACTIVE)
-        fMessagesIsActive = true;
+        fRip5IsActive = true;
 
-    return fMessagesIsActive;
+    return fRip5IsActive;
+}
+
+bool AreMessagesDeployed() {
+
+    return IsRip5Active();
 }
 
 bool AreRestrictedAssetsDeployed() {
 
-    if (fRestrictedAssetsIsActive)
-        return true;
-
-    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_RESTRICTED_ASSETS);
-    if (thresholdState == THRESHOLD_ACTIVE)
-        fRestrictedAssetsIsActive = true;
-
-    return fRestrictedAssetsIsActive;
+    return IsRip5Active();
 }
 
 bool IsDGWActive(unsigned int nBlockNumber) {
@@ -5641,7 +5607,7 @@ bool IsMessagingActive(unsigned int nBlockNumber) {
     if (GetParams().MessagingActivationBlock()) {
         return nBlockNumber > GetParams().MessagingActivationBlock();
     } else {
-        return AreMessagingDeployed();
+        return AreMessagesDeployed();
     }
 }
 

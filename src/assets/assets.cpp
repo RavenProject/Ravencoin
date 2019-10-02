@@ -1079,6 +1079,26 @@ bool CTransaction::VerifyNewAsset(std::string& strError) const {
         return false;
     }
 
+    if (assetType == AssetType::SUB) {
+        std::string root = GetParentName(asset.strName);
+        bool fOwnerOutFound = false;
+        for (auto out : this->vout) {
+            CAssetTransfer transfer;
+            std::string transferAddress;
+            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+                if (root + OWNER_TAG == transfer.strName) {
+                    fOwnerOutFound = true;
+                    break;
+                }
+            }
+        }
+
+        if (!fOwnerOutFound) {
+            strError = "bad-txns-issue-new-asset-missing-owner-asset";
+            return false;
+        }
+    }
+
     // Loop through all of the vouts and make sure only the expected asset creations are taking place
     int nTransfers = 0;
     int nOwners = 0;
@@ -4314,7 +4334,7 @@ bool CheckEncoded(const std::string& hash, std::string& strError) {
         return true;
     }
 
-    if (AreMessagingDeployed()) {
+    if (AreMessagesDeployed()) {
         if (IsHex(encodedStr) && encodedStr.length() == 64) {
             return true;
         }
@@ -5094,7 +5114,7 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
     }
 }
 
-bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError, AssetInfo* assetInfo)
+bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError)
 {
     strError = "";
     AssetType assetType;
@@ -5103,21 +5123,12 @@ bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer
         return false;
     }
 
-    if (assetInfo) {
-        if (transfer.nAmount <= 0) {
-            if (assetInfo->fFromMempool) {
-                strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
-                return false;
-            }
-
-            if (assetInfo->nTimeAdded >= GetParams().X16RV2ActivationTime()) {
-                strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
-                return false;
-            }
-        }
+    if (transfer.nAmount <= 0) {
+        strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
+        return false;
     }
 
-    if (AreMessagingDeployed()) {
+    if (AreMessagesDeployed()) {
         // This is for the current testnet6 only.
         if (transfer.nAmount <= 0) {
             strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
@@ -5141,7 +5152,7 @@ bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer
 
     // If the transfer is a message channel asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
     if (assetType == AssetType::MSGCHANNEL) {
-        if (!AreMessagingDeployed()) {
+        if (!AreMessagesDeployed()) {
             strError = "bad-txns-transfer-msgchannel-before-messaging-is-active";
             return false;
         }
@@ -5286,7 +5297,7 @@ bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, s
 
     // Check the ipfs hash as it changes when messaging goes active
     if (asset.nHasIPFS && asset.strIPFSHash.size() != 34) {
-        if (!AreMessagingDeployed()) {
+        if (!AreMessagesDeployed()) {
             strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
             return false;
         } else {
@@ -5390,7 +5401,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
     }
 
     // Check the ipfs hash
-    if (reissue_asset.strIPFSHash != "" && reissue_asset.strIPFSHash.size() != 34 && (AreMessagingDeployed() && reissue_asset.strIPFSHash.size() != 32)) {
+    if (reissue_asset.strIPFSHash != "" && reissue_asset.strIPFSHash.size() != 34 && (AreMessagesDeployed() && reissue_asset.strIPFSHash.size() != 32)) {
         strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 32 bytes");
         return false;
     }
@@ -5476,7 +5487,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
     }
 
     // Check the ipfs hash
-    if (reissue_asset.strIPFSHash != "" && reissue_asset.strIPFSHash.size() != 34 && (AreMessagingDeployed() && reissue_asset.strIPFSHash.size() != 32)) {
+    if (reissue_asset.strIPFSHash != "" && reissue_asset.strIPFSHash.size() != 34 && (AreMessagesDeployed() && reissue_asset.strIPFSHash.size() != 32)) {
         strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 32 bytes");
         return false;
     }

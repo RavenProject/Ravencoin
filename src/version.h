@@ -10,7 +10,7 @@
  * network protocol versioning
  */
 
-static const int PROTOCOL_VERSION = 70025;
+static const int PROTOCOL_VERSION = 70026;
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 209;
@@ -23,8 +23,11 @@ static const int GETHEADERS_VERSION = 31800;
 //!!! ./test/functional/test_framework/mininode.py file. Not doing so will cause verack to fail!
 static const int ASSETDATA_VERSION = 70017;
 
+//! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
+static const int X16RV2_VERSION = 70025;
+
 //! disconnect from peers older than this proto version
-static const int MIN_PEER_PROTO_VERSION = ASSETDATA_VERSION;
+static const int MIN_PEER_PROTO_VERSION = X16RV2_VERSION;
 
 //! nTime field added to CAddress, starting with this version;
 //! if possible, avoid requesting addresses nodes older than this
@@ -51,10 +54,7 @@ static const int INVALID_CB_NO_BAN_VERSION = 70015;
 //! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
 static const int ASSETDATA_VERSION_UPDATED = 70020;
 
-//! In this veresion, 'asset messaging' was introduced
-static const int ASSET_MESSAGING_VERSION = 70022;
-
-//! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
-static const int X16RV2_VERSION = 70025;
+//! In this version, 'rip5 (messaging and restricted assets)' was introduced
+static const int MESSAGING_RESTRICTED_ASSETS_VERSION = 70026;
 
 #endif // RAVEN_VERSION_H

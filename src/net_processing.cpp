@@ -1631,10 +1631,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             return false;
         }
 
-        if (AreMessagingDeployed() && nVersion < ASSET_MESSAGING_VERSION) {
-            LogPrintf("peer=%d using obsolete version %i; disconnecting because messaging is active\n", pfrom->GetId(), nVersion);
+        if (IsRip5Active() && nVersion < MESSAGING_RESTRICTED_ASSETS_VERSION) {
+            LogPrintf("peer=%d using obsolete version %i; disconnecting because peer isn't signalling protocol version for restricted and messaging assets\n", pfrom->GetId(), nVersion);
             connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                                                                              strprintf("Version must be %d or greater", ASSET_MESSAGING_VERSION)));
+                                                                              strprintf("Version must be %d or greater", MESSAGING_RESTRICTED_ASSETS_VERSION)));
             pfrom->fDisconnect = true;
             return false;
         }
@@ -3768,7 +3768,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
                 static FeeFilterRounder filterRounder(default_feerate);
                 CAmount filterToSend = filterRounder.round(currentFilter);
                 // We always have a fee filter of at least minRelayTxFee
-                filterToSend = std::max(filterToSend, (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFeePerK() : ::minRelayTxFee.GetFeePerK()));
+                filterToSend = std::max(filterToSend, ::minRelayTxFee.GetFeePerK());
                 if (filterToSend != pto->lastSentFeeFilter) {
                     connman->PushMessage(pto, msgMaker.Make(NetMsgType::FEEFILTER, filterToSend));
                     pto->lastSentFeeFilter = filterToSend;

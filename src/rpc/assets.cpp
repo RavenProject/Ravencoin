@@ -40,7 +40,7 @@ void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
 {
     size_t msglen = message.length();
     if (msglen == 46 || msglen == 64) {
-        if (msglen == 64 && !AreMessagingDeployed()) {
+        if (msglen == 64 && !AreMessagesDeployed()) {
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until RIP5 is activated"));
         }
     } else {
@@ -51,7 +51,7 @@ void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
     bool fNotIPFS = false;
     if (message.substr(0, 2) != "Qm") {
         fNotIPFS = true;
-        if (!AreMessagingDeployed())
+        if (!AreMessagesDeployed())
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid ipfs hash. Please use a valid ipfs hash. They usually start with Qm"));
     }
 
@@ -1185,7 +1185,7 @@ UniValue transfer(const JSONRPCRequest& request)
     }
 
     if (!message.empty() || expireTime > 0) {
-        if (!AreMessagingDeployed()) {
+        if (!AreMessagesDeployed()) {
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Unable to send messages until Messaging RIP5 is enabled"));
         }
     }
@@ -2792,7 +2792,7 @@ UniValue transferqualifier(const JSONRPCRequest& request)
     }
 
     if (request.params.size() > 4) {
-        if (!AreMessagingDeployed()) {
+        if (!AreMessagesDeployed()) {
             throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Unable to send messages until Messaging RIP5 is enabled"));
         }
     }
