@@ -121,8 +121,6 @@ public:
     int MinReorganizationAge() const { return nMinReorganizationAge; }
 
     int GetAssetActivationHeight() const { return nAssetActivationHeight; }
-
-    uint32_t X16RV2ActivationTime() const { return nX16RV2ActivationTime; }
     /** RVN End **/
 
 protected:
@@ -179,8 +177,6 @@ protected:
     int nMinReorganizationAge;
 
     int nAssetActivationHeight;
-
-    uint32_t nX16RV2ActivationTime;
     /** RVN End **/
 };
 

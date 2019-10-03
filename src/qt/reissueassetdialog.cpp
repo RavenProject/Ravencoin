@@ -784,7 +784,7 @@ void ReissueAssetDialog::onVerifierStringChanged(QString verifier)
 bool ReissueAssetDialog::checkIPFSHash(QString hash)
 {
     if (!hash.isEmpty()) {
-        if (!AreMessagingDeployed()) {
+        if (!AreMessagesDeployed()) {
             if (hash.length() > 46) {
                 showMessage(tr("Only IPFS Hashes allowed until RIP5 is activated"));
                 disableReissueButton();

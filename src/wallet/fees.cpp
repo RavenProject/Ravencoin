@@ -16,7 +16,7 @@
 
 CAmount GetRequiredFee(unsigned int nTxBytes)
 {
-    return std::max(CWallet::minTxFee.GetFee(nTxBytes), (AreMessagingDeployed() ? ::minRelayTxFeeV2.GetFee(nTxBytes) : ::minRelayTxFee.GetFee(nTxBytes)));
+    return std::max(CWallet::minTxFee.GetFee(nTxBytes), ::minRelayTxFee.GetFee(nTxBytes));
 }
 
 
