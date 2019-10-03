@@ -395,8 +395,9 @@ public:
         fMiningRequiresPeers = true;
 
         checkpointData = (CCheckpointData) {
-                {
-                }
+            {
+                { 225, uint256S("0x000003465e3e0167322eb8269ce91246bbc211e293bc5fbf6f0a0d12c1ccb363")},
+            }
         };
 
         chainTxData = ChainTxData{
