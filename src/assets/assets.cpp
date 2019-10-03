@@ -3537,6 +3537,7 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
     return false;
 }
 
+#ifdef ENABLE_WALLET
 void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names, int nMinConf)
 {
     if(!pwallet)
@@ -3566,6 +3567,7 @@ void GetAllMyAssets(CWallet* pwallet, std::vector<std::string>& names, int nMinC
         }
     }
 }
+#endif
 
 CAmount GetIssueAssetBurnAmount()
 {
@@ -3710,6 +3712,7 @@ bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName
     return false;
 }
 
+#ifdef ENABLE_WALLET
 //! sets _balances_ with the total quantity of each owned asset
 bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations, const std::string& prefix) {
 
@@ -3735,6 +3738,7 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
 
     return true;
 }
+#endif
 
 // 46 char base58 --> 34 char KAW compatible
 std::string DecodeAssetData(std::string encoded)
@@ -3783,6 +3787,7 @@ std::string EncodeIPFS(std::string decoded){
     return EncodeBase58(unsignedCharData);
 };
 
+#ifdef ENABLE_WALLET
 bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string)
 {
     std::vector<CNewAsset> assets;
@@ -4321,6 +4326,8 @@ bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::str
     pairError = std::make_pair(RPC_INVALID_REQUEST, strprintf("Wallet doesn't have asset: %s", asset_name));
     return false;
 }
+
+#endif
 
 // Return true if the amount is valid with the units passed in
 bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits)

@@ -46,7 +46,9 @@ void RemoveMessage(const COutPoint &out);
 void OrphanMessage(const CMessage &message);
 void OrphanMessage(const COutPoint &out);
 
+#ifdef ENABLE_WALLET
 bool ScanForMessageChannels(std::string& strError);
+#endif
 bool IsAddressSeen(const std::string &address); // Has this address already been sent an asset before
 void AddAddressSeen(const std::string &address);
 

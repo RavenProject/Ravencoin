@@ -129,10 +129,12 @@ public Q_SLOTS:
 
     /** RVN START */
     /** Switch to assets page */
+
     void gotoAssetsPage();
     void gotoCreateAssetsPage();
     void gotoManageAssetsPage();
     void gotoRestrictedAssetsPage();
+
     /** RVN END */
 
 Q_SIGNALS:

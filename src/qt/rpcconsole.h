@@ -92,9 +92,11 @@ public Q_SLOTS:
     void setFontSize(int newSize);
 
     /** Wallet repair options */
+#ifdef ENABLE_WALLET
     void walletRescan();
     void walletZaptxes1();
     void walletReindex();
+#endif
 
     /** Append the message to the message widget */
     void message(int category, const QString &message, bool html = false);

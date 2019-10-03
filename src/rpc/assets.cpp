@@ -139,6 +139,7 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
     return ValueFromAmount(amount, units);
 }
 
+#ifdef ENABLE_WALLET
 UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -318,6 +319,7 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     result.push_back(txid);
     return result;
 }
+
 
 UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t &flag)
 {
@@ -715,6 +717,7 @@ UniValue issueunique(const JSONRPCRequest& request)
     result.push_back(txid);
     return result;
 }
+#endif
 
 UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
 {
@@ -869,6 +872,7 @@ void safe_advance(Iter& curr, const Iter& end, Incr n)
     std::advance(curr, n);
 };
 
+#ifdef ENABLE_WALLET
 UniValue listmyassets(const JSONRPCRequest &request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 5)
@@ -1045,6 +1049,8 @@ UniValue listmyassets(const JSONRPCRequest &request)
     return result;
 }
 
+#endif
+
 UniValue listaddressesbyasset(const JSONRPCRequest &request)
 {
     if (!fAssetIndex) {
@@ -1117,6 +1123,7 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
 
     return result;
 }
+#ifdef ENABLE_WALLET
 
 UniValue transfer(const JSONRPCRequest& request)
 {
@@ -1641,6 +1648,7 @@ UniValue reissue(const JSONRPCRequest& request)
     result.push_back(txid);
     return result;
 }
+#endif
 
 UniValue listassets(const JSONRPCRequest& request)
 {
@@ -1804,6 +1812,7 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
     return result;
 }
 
+#ifdef ENABLE_WALLET
 UniValue addtagtoaddress(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
@@ -1963,6 +1972,7 @@ UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
     // 0 = Unfreeze all trading
     return UpdateGlobalRestrictedAsset(request, 0);
 }
+#endif
 
 UniValue listtagsforaddress(const JSONRPCRequest &request)
 {
@@ -2288,6 +2298,8 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
 
     return passets->CheckForGlobalRestriction(restricted_name, true);
 }
+
+#ifdef ENABLE_WALLET
 
 UniValue issuequalifierasset(const JSONRPCRequest& request)
 {
@@ -2841,6 +2853,7 @@ UniValue transferqualifier(const JSONRPCRequest& request)
     result.push_back(txid);
     return result;
 }
+#endif
 
 UniValue isvalidverifierstring(const JSONRPCRequest& request)
 {
@@ -2884,19 +2897,24 @@ UniValue isvalidverifierstring(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
   //  ----------- ------------------------      -----------------------      ----------
+#ifdef ENABLE_WALLET
     { "assets",   "issue",                      &issue,                      {"asset_name","qty","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
     { "assets",   "issueunique",                &issueunique,                {"root_name", "asset_tags", "ipfs_hashes", "to_address", "change_address"}},
+    { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start", "confs"}},
+#endif
     { "assets",   "listassetbalancesbyaddress", &listassetbalancesbyaddress, {"address", "onlytotal", "count", "start"} },
     { "assets",   "getassetdata",               &getassetdata,               {"asset_name"}},
-    { "assets",   "listmyassets",               &listmyassets,               {"asset", "verbose", "count", "start", "confs"}},
     { "assets",   "listaddressesbyasset",       &listaddressesbyasset,       {"asset_name", "onlytotal", "count", "start"}},
+#ifdef ENABLE_WALLET
     { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time", "change_address", "asset_change_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
+#endif
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
 
+#ifdef ENABLE_WALLET
     { "restricted assets",   "transferqualifier",          &transferqualifier,          {"qualifier_name", "qty", "to_address", "change_address", "message", "expire_time"}},
     { "restricted assets",   "issuerestrictedasset",       &issuerestrictedasset,       {"asset_name","qty","verifier","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
     { "restricted assets",   "issuequalifierasset",        &issuequalifierasset,        {"asset_name","qty","to_address","change_address","has_ipfs","ipfs_hash"} },
@@ -2907,6 +2925,7 @@ static const CRPCCommand commands[] =
     { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address"}},
     { "restricted assets",   "freezerestrictedasset",      &freezerestrictedasset,      {"asset_name", "change_address"}},
     { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address"}},
+#endif
     { "restricted assets",   "listaddressesfortag",        &listaddressesfortag,        {"tag_name"}},
     { "restricted assets",   "listtagsforaddress",         &listtagsforaddress,         {"address"}},
     { "restricted assets",   "listaddressrestrictions",    &listaddressrestrictions,    {"address"}},

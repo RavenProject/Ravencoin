@@ -35,6 +35,7 @@ public:
     QList<AssetRecord> cachedBalances;
 
     // loads all current balances into cache
+#ifdef ENABLE_WALLET
     void refreshWallet() {
         qDebug() << "AssetTablePriv::refreshWallet";
         cachedBalances.clear();
@@ -86,6 +87,7 @@ public:
             }
         }
     }
+#endif
 
 
     int size() {
@@ -107,8 +109,9 @@ AssetTableModel::AssetTableModel(WalletModel *parent) :
         priv(new AssetTablePriv(this))
 {
     columns << tr("Name") << tr("Quantity");
-
+#ifdef ENABLE_WALLET
     priv->refreshWallet();
+#endif
 };
 
 AssetTableModel::~AssetTableModel()
@@ -120,7 +123,9 @@ void AssetTableModel::checkBalanceChanged() {
     qDebug() << "AssetTableModel::CheckBalanceChanged";
     // TODO: optimize by 1) updating cache incrementally; and 2) emitting more specific dataChanged signals
     Q_EMIT layoutAboutToBeChanged();
+#ifdef ENABLE_WALLET
     priv->refreshWallet();
+#endif
     Q_EMIT dataChanged(index(0, 0, QModelIndex()), index(priv->size(), columns.length()-1, QModelIndex()));
     Q_EMIT layoutChanged();
 }

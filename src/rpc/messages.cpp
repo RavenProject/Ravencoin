@@ -304,6 +304,7 @@ UniValue clearmessages(const JSONRPCRequest& request) {
     return "Erased " + std::to_string(count) + " Messages from the database and cache";
 }
 
+#ifdef ENABLE_WALLET
 UniValue sendmessage(const JSONRPCRequest& request) {
     if (request.fHelp || !AreMessagesDeployed() || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
@@ -396,6 +397,7 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     result.push_back(txid);
     return result;
 }
+#endif
 
 static const CRPCCommand commands[] =
     {           //  category    name                          actor (function)             argNames
@@ -404,7 +406,9 @@ static const CRPCCommand commands[] =
             { "messages",       "viewallmessagechannels",     &viewallmessagechannels,     {}},
             { "messages",       "subscribetochannel",         &subscribetochannel,         {"channel_name"}},
             { "messages",       "unsubscribefromchannel",     &unsubscribefromchannel,     {"channel_name"}},
+#ifdef ENABLE_WALLET
             { "messages",       "sendmessage",                &sendmessage,                {"channel", "ipfs_hash", "expire_time"}},
+#endif
             { "messages",       "clearmessages",              &clearmessages,              {}},
     };
 
