@@ -186,6 +186,7 @@ void OrphanMessage(const CMessage& message)
     mapDirtyMessagesAdd.erase(message.out);
 }
 
+#ifdef ENABLE_WALLET
 bool ScanForMessageChannels(std::string& strError)
 {
     LOCK2(cs_messaging, cs_main);
@@ -263,6 +264,7 @@ bool ScanForMessageChannels(std::string& strError)
     LogPrintf("\n");
     return true;
 }
+#endif
 
 bool IsAddressSeen(const std::string &address)
 {

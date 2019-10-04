@@ -277,6 +277,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                                       tx.vout[i].ToString());
 
                         /** Subscribe to new message channels if they are sent to a new address, or they are the owner token or message channel */
+#ifdef ENABLE_WALLET
                         if (fMessaging && pMessageSubscribedChannelsCache) {
                             LOCK(cs_messaging);
                             if (vpwallets.size() && vpwallets[0]->IsMine(tx.vout[i]) == ISMINE_SPENDABLE) {
@@ -296,8 +297,10 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                                 }
                             }
                         }
+#endif
                     } else if (assetData.type == TX_NEW_ASSET) {
                         /** Subscribe to new message channels if they are assets you created, or are new msgchannels of channels already being watched */
+#ifdef ENABLE_WALLET
                         if (fMessaging && pMessageSubscribedChannelsCache) {
                             LOCK(cs_messaging);
                             if (vpwallets.size()) {
@@ -320,6 +323,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                                 }
                             }
                         }
+#endif
                     }
                 }
 

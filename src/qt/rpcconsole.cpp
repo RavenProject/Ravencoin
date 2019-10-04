@@ -723,6 +723,7 @@ void RPCConsole::setFontSize(int newSize)
     ui->messagesWidget->verticalScrollBar()->setValue(oldPosFactor * ui->messagesWidget->verticalScrollBar()->maximum());
 }
 
+#ifdef ENABLE_WALLET
 /** Restart wallet with "-rescan" */
 void RPCConsole::walletRescan()
 {
@@ -752,6 +753,7 @@ void RPCConsole::walletReindex()
 
   buildParameterlist(REINDEX);
 }
+#endif
 
 /** Build command-line parameter list for restart */
 void RPCConsole::buildParameterlist(QString arg)

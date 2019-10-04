@@ -516,16 +516,16 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data);
 
 bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName, const std::string& address);
 
-bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations = 0, const std::string& prefix = "");
-
-/** Verifies that this wallet owns the give asset */
-bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
 
 //! Decode and Encode IPFS hashes, or OIP hashes
 std::string DecodeAssetData(std::string encoded);
 std::string EncodeAssetData(std::string decoded);
 std::string DecodeIPFS(std::string encoded);
 std::string EncodeIPFS(std::string decoded);
+
+#ifdef ENABLE_WALLET
+
+bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations = 0, const std::string& prefix = "");
 
 //! Creates new asset issuance transaction
 bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string = nullptr);
@@ -534,11 +534,16 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 //! Create a reissue asset transaction
 bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string = nullptr);
 
+
 //! Create a transfer asset transaction
 bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData = nullptr, std::vector<CNullAssetTxData>* nullGlobalRestrictionData = nullptr);
 
 //! Send any type of asset transaction to the network
 bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey& reserveKey, std::pair<int, std::string>& error, std::string& txid);
+
+/** Verifies that this wallet owns the give asset */
+bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
+#endif
 
 /** Helper method for extracting address bytes, asset name and amount from an asset script */
 bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount);

@@ -498,6 +498,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 }
 
 CWallet *GetFirstWallet() {
+#ifdef ENABLE_WALLET
     while(vpwallets.size() == 0){
         MilliSleep(100);
 
@@ -505,6 +506,8 @@ CWallet *GetFirstWallet() {
     if (vpwallets.size() == 0)
         return(NULL);
     return(vpwallets[0]);
+#endif
+    return(NULL);
 }
 
 void static RavenMiner(const CChainParams& chainparams)
@@ -518,13 +521,14 @@ void static RavenMiner(const CChainParams& chainparams)
 
     CWallet * pWallet = NULL;
 
-    #ifdef ENABLE_WALLET
-        pWallet = GetFirstWallet();
-    #endif
+#ifdef ENABLE_WALLET
+    pWallet = GetFirstWallet();
+
 
     if (!EnsureWalletIsAvailable(pWallet, false)) {
         LogPrintf("RavenMiner -- Wallet not available\n");
     }
+#endif
 
     if (pWallet == NULL)
     {
@@ -561,6 +565,7 @@ void static RavenMiner(const CChainParams& chainparams)
                 // Busy-wait for the network to come online so we don't waste time mining
                 // on an obsolete chain. In regtest mode we expect to fly solo.
                 do {
+                    break;
                     if ((g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) > 0) && !IsInitialBlockDownload()) {
                         break;
                     }

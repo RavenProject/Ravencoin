@@ -732,7 +732,9 @@ void RavenGUI::createToolBars()
         // Create the layout for widget to the right of the tool bar
         QVBoxLayout* mainFrameLayout = new QVBoxLayout(mainWalletWidget);
         mainFrameLayout->addWidget(headerWidget);
+#ifdef ENABLE_WALLET
         mainFrameLayout->addWidget(walletFrame);
+#endif
         mainFrameLayout->setDirection(QBoxLayout::TopToBottom);
         mainFrameLayout->setContentsMargins(QMargins());
 

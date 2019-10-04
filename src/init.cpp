@@ -1902,7 +1902,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
 #ifdef ENABLE_WALLET
     StartWallets(scheduler);
-#endif
+
 
     // ********************************************************* Step 12: Init Msg Channel list
     if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
@@ -1915,6 +1915,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
             pmessagechanneldb->WriteFlag("init", true);
         }
     }
+#endif
 
     // ********************************************************* Step 13: finished
     uiInterface.InitMessage(_("Done Loading"));
