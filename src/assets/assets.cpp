@@ -4084,24 +4084,33 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         if (verifier_string) {
             if (reissueAsset.nAmount > 0) {
                 std::string strError = "";
-                if (!ContextualCheckVerifierString(passets, *verifier_string, address, strError))
-                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                ErrorReport report;
+                if (!ContextualCheckVerifierString(passets, *verifier_string, address, strError, &report)) {
+                    error = std::make_pair(RPC_INVALID_PARAMETER, strError);
+                    return false;
+                }
             } else {
                 // If we aren't adding any assets but we are changing the verifier string, Check to make sure the verifier string parses correctly
                 std::string strError = "";
-                if (!ContextualCheckVerifierString(passets, *verifier_string, "", strError))
-                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                if (!ContextualCheckVerifierString(passets, *verifier_string, "", strError)) {
+                    error = std::make_pair(RPC_INVALID_PARAMETER, strError);
+                    return false;
+                }
             }
         } else {
             // If the user is reissuing more assets, and they aren't changing the verifier string, check it against the current verifier string
             if (reissueAsset.nAmount > 0) {
                 CNullAssetTxVerifierString verifier;
-                if (!passets->GetAssetVerifierStringIfExists(reissueAsset.strName, verifier))
-                    throw JSONRPCError(RPC_DATABASE_ERROR, "Failed to get the assets cache pointer");
+                if (!passets->GetAssetVerifierStringIfExists(reissueAsset.strName, verifier)) {
+                    error = std::make_pair(RPC_DATABASE_ERROR, "Failed to get the assets cache pointer");
+                    return false;
+                }
 
                 std::string strError = "";
-                if (!ContextualCheckVerifierString(passets, verifier.verifier_string, address, strError))
-                    throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                if (!ContextualCheckVerifierString(passets, verifier.verifier_string, address, strError)) {
+                    error = std::make_pair(RPC_INVALID_PARAMETER, strError);
+                    return false;
+                }
             }
         }
 
@@ -4733,7 +4742,7 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name,
     }
 
     setIterator = setNewRestrictedGlobalToAdd.find(cachedRestrictedGlobal);
-    if (fSkipTempCache && setIterator != setNewRestrictedGlobalToAdd.end()) {
+    if (!fSkipTempCache && setIterator != setNewRestrictedGlobalToAdd.end()) {
         // Return true if we are adding a freeze command
         return setIterator->type == RestrictedType::GLOBAL_FREEZE;
     }

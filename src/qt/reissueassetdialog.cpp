@@ -897,10 +897,8 @@ void ReissueAssetDialog::onReissueAssetClicked()
     std::pair<int, std::string> error;
     CAmount nFeeRequired;
 
-    std::string verifier_string;
-    bool fReissueRestrictedAsset = false;
+    std::string verifier_string = "";
     if (IsAssetNameAnRestricted(name.toStdString())) {
-        fReissueRestrictedAsset = true;
         verifier_string = ui->lineEditVerifierString->text().toStdString();
         std::string stripped = GetStrippedVerifierString(verifier_string);
         verifier_string = stripped;
@@ -914,7 +912,7 @@ void ReissueAssetDialog::onReissueAssetClicked()
     }
 
     // Create the transaction
-    if (!CreateReissueAssetTransaction(model->getWallet(), ctrl, reissueAsset, address.toStdString(), error, tx, reservekey, nFeeRequired, fReissueRestrictedAsset ? &verifier_string : nullptr)) {
+    if (!CreateReissueAssetTransaction(model->getWallet(), ctrl, reissueAsset, address.toStdString(), error, tx, reservekey, nFeeRequired, verifier_string.empty() ? nullptr : &verifier_string)) {
         showMessage("Invalid: " + QString::fromStdString(error.second));
         return;
     }

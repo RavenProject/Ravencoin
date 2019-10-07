@@ -2652,6 +2652,13 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
     std::string assetName = request.params[0].get_str();
     AssetType assetType;
     std::string assetError = "";
+
+    if (!IsAssetNameAnRestricted(assetName))
+    {
+        std::string temp = RESTRICTED_CHAR + assetName;
+        assetName = temp;
+    }
+
     if (!IsAssetNameValid(assetName, assetType, assetError)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset name: ") + assetName + std::string("\nError: ") + assetError);
     }
