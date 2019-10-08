@@ -1424,6 +1424,7 @@ void CreateAssetDialog::clear()
     ui->assetFullName->clear();
     ui->unitBox->setDisabled(false);
     ui->quantitySpinBox->setDisabled(false);
+    ui->nameText->setEnabled(true);
 
     ui->reissuableBox->setDisabled(false);
     hideMessage();
