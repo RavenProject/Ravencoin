@@ -752,7 +752,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             if (!MsgChannelAssetFromTransaction(tx, asset, strAddress))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-msgchannel-serialzation-failed");
 
-            if (!ContextualCheckNewAsset(assetCache, asset, strError))
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
                 return state.DoS(100, error("%s: %s", __func__, strError), REJECT_INVALID,
                                  "bad-txns-issue-msgchannel-contextual-" + strError);
         } else if (tx.IsNewQualifierAsset()) {
@@ -764,7 +764,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             if (!QualifierAssetFromTransaction(tx, asset, strAddress))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualifier-serialzation-failed");
 
-            if (!ContextualCheckNewAsset(assetCache, asset, strError))
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-qualfier-contextual" + strError);
 
         } else if (tx.IsNewRestrictedAsset()) {
@@ -777,7 +777,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             if (!RestrictedAssetFromTransaction(tx, asset, strAddress))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-serialzation-failed");
 
-            if (!ContextualCheckNewAsset(assetCache, asset, strError))
+            if (!ContextualCheckNewAsset(assetCache, asset, strError, fCheckMempool))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-restricted-contextual" + strError);
 
             // Get verifier string

@@ -336,7 +336,8 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     std::string asset_name = widget->getUI()->assetComboBox->currentData(AssetTableModel::RoleIndex::AssetNameRole).toString().toStdString();
     std::string change_address = widget->getUI()->checkBoxChangeAddress->isChecked() ? widget->getUI()->lineEditChangeAddress->text().toStdString(): "";
 
-    int flag = widget->getUI()->checkBoxRemoveQualifier->isChecked() ? 0 : 1;
+    int flag = widget->getUI()->assignTypeComboBox->currentIndex() ? 0 : 1;
+    qDebug() << "current index " << flag;
 
     CReserveKey reservekey(model->getWallet());
     CWalletTx transaction;

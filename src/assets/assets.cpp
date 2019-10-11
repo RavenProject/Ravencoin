@@ -3501,6 +3501,21 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
             data.destination = DecodeDestination(address);
             data.assetName = asset.strName;
             return true;
+        } else if (MsgChannelAssetFromScript(script, asset, address)) {
+            data.type = TX_NEW_ASSET;
+            data.nAmount = asset.nAmount;
+            data.destination = DecodeDestination(address);
+            data.assetName = asset.strName;
+        } else if (QualifierAssetFromScript(script, asset, address)) {
+            data.type = TX_NEW_ASSET;
+            data.nAmount = asset.nAmount;
+            data.destination = DecodeDestination(address);
+            data.assetName = asset.strName;
+        } else if (RestrictedAssetFromScript(script, asset, address)) {
+            data.type = TX_NEW_ASSET;
+            data.nAmount = asset.nAmount;
+            data.destination = DecodeDestination(address);
+            data.assetName = asset.strName;
         }
     } else if (type == TX_TRANSFER_ASSET) {
         CAssetTransfer transfer;
@@ -5105,12 +5120,12 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
             if (errorReport) {
                 if (errorReport->type == ErrorReport::ErrorType::NotSetError) {
                     errorReport->type = ErrorReport::ErrorType::FailedToVerifyAgainstAddress;
+                    errorReport->vecUserData.emplace_back(check_address);
+                    errorReport->strDevData = "bad-txns-null-verifier-address-failed-verification";
                 }
-                errorReport->vecUserData.emplace_back(check_address);
-                errorReport->strDevData = "bad-txns-null-verifier-address-failed-verification";
             }
 
-            error("%s : The address %s failed to verify against: %s", __func__, check_address, verifier);
+            error("%s : The address %s failed to verify against: %s. Is null %d", __func__, check_address, verifier, errorReport ? 0 : 1);
             strError = "bad-txns-null-verifier-address-failed-verification";
         }
         return ret;
@@ -5120,9 +5135,10 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
         if (errorReport) {
             if (errorReport->type == ErrorReport::ErrorType::NotSetError) {
                 errorReport->type = ErrorReport::ErrorType::InvalidSyntax;
-                errorReport->vecUserData.emplace_back(run_error.what());
-                errorReport->strDevData = "bad-txns-null-verifier-failed-contexual-syntax-check";
             }
+
+            errorReport->vecUserData.emplace_back(run_error.what());
+            errorReport->strDevData = "bad-txns-null-verifier-failed-contexual-syntax-check";
         }
 
         strError = "bad-txns-null-verifier-failed-contexual-syntax-check";
@@ -5555,7 +5571,7 @@ std::string GetUserErrorString(const ErrorReport& report)
         case ErrorReport::ErrorType::InvalidSubExpressionFormula: return _("Invalid expressions in verifier string: ") + report.vecUserData[0];
         case ErrorReport::ErrorType::InvalidSyntax: return _("Invalid syntax: ") + report.vecUserData[0];
         case ErrorReport::ErrorType::AssetDoesntExist: return _("Asset doesn't exist: ") + report.vecUserData[0];
-        case ErrorReport::ErrorType::FailedToVerifyAgainstAddress: return _("This address doesn't contain the correct tags to pass the verifier string check: ");
+        case ErrorReport::ErrorType::FailedToVerifyAgainstAddress: return _("This address doesn't contain the correct tags to pass the verifier string check: ") + report.vecUserData[0];
         case ErrorReport::ErrorType::EmptySubExpression: return _("The verifier string has two operators without a tag between them");
         case ErrorReport::ErrorType::UnknownOperator: return _("The symbol: '") + report.vecUserData[0] + _("' is not a valid character in the expression: ") + report.vecUserData[1];
         case ErrorReport::ErrorType::ParenthesisParity: return _("Every '(' must have a corresponding ')' in the expression: ") + report.vecUserData[0];
