@@ -37,10 +37,10 @@ AssignQualifier::AssignQualifier(const PlatformStyle *_platformStyle, QWidget *p
     connect(ui->buttonCheck, SIGNAL(clicked()), this, SLOT(check()));
     connect(ui->lineEditAddress, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
     connect(ui->lineEditChangeAddress, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
-    connect(ui->checkBoxRemoveQualifier, SIGNAL(stateChanged(int)), this, SLOT(dataChanged()));
     connect(ui->checkBoxChangeAddress, SIGNAL(stateChanged(int)), this, SLOT(dataChanged()));
     connect(ui->checkBoxChangeAddress, SIGNAL(stateChanged(int)), this, SLOT(changeAddressChanged(int)));
     connect(ui->assetComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(dataChanged()));
+    connect(ui->assignTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(dataChanged()));
 
     ui->labelQualifier->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelQualifier->setFont(GUIUtil::getTopLabelFont());
@@ -48,7 +48,9 @@ AssignQualifier::AssignQualifier(const PlatformStyle *_platformStyle, QWidget *p
     ui->labelAddress->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelAddress->setFont(GUIUtil::getTopLabelFont());
 
-    ui->checkBoxRemoveQualifier->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
+    ui->labelAssignType->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssignType ->setFont(GUIUtil::getTopLabelFont());
+
     ui->checkBoxChangeAddress->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
 
     ui->lineEditChangeAddress->hide();
@@ -77,6 +79,9 @@ void AssignQualifier::setWalletModel(WalletModel *model)
     assetFilterProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
     ui->assetComboBox->setModel(assetFilterProxy);
+
+    ui->assignTypeComboBox->addItem(tr("Assign Qualifier"));
+    ui->assignTypeComboBox->addItem(tr("Remove Qualifier"));
 }
 
 bool AssignQualifier::eventFilter(QObject* object, QEvent* event)
@@ -121,10 +126,10 @@ void AssignQualifier::hideWarning()
 void AssignQualifier::clear()
 {
     ui->lineEditAddress->clear();
-    ui->checkBoxRemoveQualifier->setChecked(false);
     ui->buttonSubmit->setDisabled(true);
     ui->lineEditAddress->setStyleSheet(STYLE_VALID);
     ui->lineEditChangeAddress->setStyleSheet(STYLE_VALID);
+    ui->assignTypeComboBox->setCurrentIndex(0);
     hideWarning();
 }
 
@@ -150,7 +155,7 @@ void AssignQualifier::check()
 {
     QString qualifier = ui->assetComboBox->currentData(AssetTableModel::RoleIndex::AssetNameRole).toString();
     QString address = ui->lineEditAddress->text();
-    bool removing = ui->checkBoxRemoveQualifier->isChecked();
+    bool removing = ui->assignTypeComboBox->currentIndex() == 1;
 
     bool failed = false;
     if (!IsAssetNameAQualifier(qualifier.toStdString())){

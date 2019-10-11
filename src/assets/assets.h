@@ -114,7 +114,7 @@ struct ErrorReport {
         VariableNotFound = 11
     };
 
-    ErrorType type;
+    ErrorType type = ErrorType::NotSetError;
     std::string strDevData;
     std::vector<std::string> vecUserData;
 };
