@@ -1800,9 +1800,29 @@ UniValue savemempool(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+UniValue clearmempool(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0) {
+        throw std::runtime_error(
+                "clearmempool\n"
+                "\nRemoves all transaction from the mempool\n"
+                "\nExamples:\n"
+                + HelpExampleCli("clearmempool", "")
+                + HelpExampleRpc("clearmempool", "")
+        );
+    }
+
+    LOCK(mempool.cs);
+    mempool.clear();
+
+    return _("Mempool cleared");
+}
+
+
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
+    { "blockchain",         "clearmempool",           &clearmempool,           {} },
     { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      {} },
     { "blockchain",         "getchaintxstats",        &getchaintxstats,        {"nblocks", "blockhash"} },
     { "blockchain",         "getbestblockhash",       &getbestblockhash,       {} },

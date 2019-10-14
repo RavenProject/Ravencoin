@@ -193,6 +193,18 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     CValidationState state;
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
+        if (state.IsTransactionError()) {
+            if (gArgs.GetBoolArg("-autofixmempool", false)) {
+                {
+                    TRY_LOCK(mempool.cs, fLockMempool);
+                    if (fLockMempool) {
+                        LogPrintf("%s failed because of a transaction %s. Clearing the mempool.", __func__,
+                                  state.GetFailedTransaction().GetHex());
+                        mempool.clear();
+                    }
+                }
+            }
+        }
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
     int64_t nTime2 = GetTimeMicros();
