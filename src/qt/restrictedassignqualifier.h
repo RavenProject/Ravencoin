@@ -50,6 +50,8 @@ public:
     AssetFilterProxy *assetFilterProxy;
     QCompleter* completer;
 
+    void clear();
+
 private:
     Ui::AssignQualifier *ui;
     ClientModel *clientModel;
@@ -57,7 +59,6 @@ private:
     const PlatformStyle *platformStyle;
 
 private Q_SLOTS:
-    void clear();
     void check();
     void dataChanged();
     void changeAddressChanged(int);

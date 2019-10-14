@@ -180,6 +180,7 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     std::string asset_name = widget->getUI()->assetComboBox->currentData(AssetTableModel::RoleIndex::AssetNameRole).toString().toStdString();
     std::string address = widget->getUI()->lineEditAddress->text().toStdString();
     std::string change_address = widget->getUI()->checkBoxChangeAddress->isChecked() ? widget->getUI()->lineEditChangeAddress->text().toStdString(): "";
+    std::string decodedAssetData = DecodeAssetData(widget->getUI()->lineEditAssetData->text().toStdString());
 
     // Get the single address options
     bool fFreezeAddress = widget->getUI()->radioButtonFreezeAddress->isChecked();
@@ -221,7 +222,7 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     // We have to send the owner token for the asset in order to perform a restriction
     std::string asset_owner_token = RestrictedNameToOwnerName(asset_name);
 
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_owner_token, 1 * COIN), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_owner_token, 1 * COIN, decodedAssetData), change_address));
 
     int flag = -1;
     if (fFreezeAddress || fUnfreezeAddress) {
@@ -319,6 +320,8 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     std::string totalMsg = strprintf("%s: %s",sentMsg, txid);
     txidMsgBox.setText(QString::fromStdString(totalMsg));
     txidMsgBox.exec();
+
+    widget->clear();
 }
 
 void RestrictedAssetsDialog::assignQualifierClicked()
@@ -335,9 +338,9 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     std::string address = widget->getUI()->lineEditAddress->text().toStdString();
     std::string asset_name = widget->getUI()->assetComboBox->currentData(AssetTableModel::RoleIndex::AssetNameRole).toString().toStdString();
     std::string change_address = widget->getUI()->checkBoxChangeAddress->isChecked() ? widget->getUI()->lineEditChangeAddress->text().toStdString(): "";
+    std::string decodedAssetData = DecodeAssetData(widget->getUI()->lineEditAssetData->text().toStdString());
 
     int flag = widget->getUI()->assignTypeComboBox->currentIndex() ? 0 : 1;
-    qDebug() << "current index " << flag;
 
     CReserveKey reservekey(model->getWallet());
     CWalletTx transaction;
@@ -364,7 +367,7 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     // Always transfer 1 of the qualifier tokens to the change address
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, 1 * COIN), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_name, 1 * COIN, decodedAssetData), change_address));
 
     // Add the asset data with the flag to remove or add the tag 1 = Add, 0 = Remove
     std::vector< std::pair<CNullAssetTxData, std::string> > vecAssetData;
@@ -436,6 +439,8 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     std::string totalMsg = strprintf("%s: %s",sentMsg, txid);
     txidMsgBox.setText(QString::fromStdString(totalMsg));
     txidMsgBox.exec();
+
+    widget->clear();
 }
 
 

@@ -33,10 +33,12 @@ AssignQualifier::AssignQualifier(const PlatformStyle *_platformStyle, QWidget *p
     ui->buttonSubmit->setDisabled(true);
     ui->lineEditAddress->installEventFilter(this);
     ui->lineEditChangeAddress->installEventFilter(this);
+    ui->lineEditAssetData->installEventFilter(this);
     connect(ui->buttonClear, SIGNAL(clicked()), this, SLOT(clear()));
     connect(ui->buttonCheck, SIGNAL(clicked()), this, SLOT(check()));
     connect(ui->lineEditAddress, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
     connect(ui->lineEditChangeAddress, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
+    connect(ui->lineEditAssetData, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
     connect(ui->checkBoxChangeAddress, SIGNAL(stateChanged(int)), this, SLOT(dataChanged()));
     connect(ui->checkBoxChangeAddress, SIGNAL(stateChanged(int)), this, SLOT(changeAddressChanged(int)));
     connect(ui->assetComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(dataChanged()));
@@ -50,6 +52,9 @@ AssignQualifier::AssignQualifier(const PlatformStyle *_platformStyle, QWidget *p
 
     ui->labelAssignType->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelAssignType ->setFont(GUIUtil::getTopLabelFont());
+
+    ui->labelAssetData->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetData ->setFont(GUIUtil::getTopLabelFont());
 
     ui->checkBoxChangeAddress->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
 
@@ -86,7 +91,7 @@ void AssignQualifier::setWalletModel(WalletModel *model)
 
 bool AssignQualifier::eventFilter(QObject* object, QEvent* event)
 {
-    if((object == ui->lineEditAddress || object == ui->lineEditChangeAddress) && event->type() == QEvent::FocusIn) {
+    if((object == ui->lineEditAddress || object == ui->lineEditChangeAddress || object == ui->lineEditAssetData) && event->type() == QEvent::FocusIn) {
         static_cast<QLineEdit*>(object)->setStyleSheet(STYLE_VALID);
         // bring up your custom edit
         return false; // lets the event continue to the edit
@@ -126,9 +131,12 @@ void AssignQualifier::hideWarning()
 void AssignQualifier::clear()
 {
     ui->lineEditAddress->clear();
+    ui->lineEditAssetData->clear();
+    ui->lineEditChangeAddress->clear();
     ui->buttonSubmit->setDisabled(true);
     ui->lineEditAddress->setStyleSheet(STYLE_VALID);
     ui->lineEditChangeAddress->setStyleSheet(STYLE_VALID);
+    ui->lineEditAssetData->setStyleSheet(STYLE_VALID);
     ui->assignTypeComboBox->setCurrentIndex(0);
     hideWarning();
 }
@@ -178,6 +186,15 @@ void AssignQualifier::check()
                 ui->lineEditChangeAddress->setStyleSheet(STYLE_INVALID);
                 failed = true;
             }
+        }
+    }
+
+    if (ui->lineEditAssetData->text().size()) {
+        std::string strAssetData = ui->lineEditAssetData->text().toStdString();
+
+        if (DecodeAssetData(strAssetData).empty()) {
+            ui->lineEditAssetData->setStyleSheet(STYLE_INVALID);
+            failed = true;
         }
     }
 
