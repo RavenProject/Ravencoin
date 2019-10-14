@@ -33,10 +33,12 @@ FreezeAddress::FreezeAddress(const PlatformStyle *_platformStyle, QWidget *paren
     ui->buttonSubmit->setDisabled(true);
     ui->lineEditAddress->installEventFilter(this);
     ui->lineEditChangeAddress->installEventFilter(this);
+    ui->lineEditAssetData->installEventFilter(this);
     connect(ui->buttonClear, SIGNAL(clicked()), this, SLOT(clear()));
     connect(ui->buttonCheck, SIGNAL(clicked()), this, SLOT(check()));
     connect(ui->lineEditAddress, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
     connect(ui->lineEditChangeAddress, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
+    connect(ui->lineEditAssetData, SIGNAL(textChanged(QString)), this, SLOT(dataChanged()));
     connect(ui->radioButtonFreezeAddress, SIGNAL(clicked()), this, SLOT(dataChanged()));
     connect(ui->radioButtonUnfreezeAddress, SIGNAL(clicked()), this, SLOT(dataChanged()));
     connect(ui->radioButtonGlobalFreeze, SIGNAL(clicked()), this, SLOT(dataChanged()));
@@ -52,6 +54,9 @@ FreezeAddress::FreezeAddress(const PlatformStyle *_platformStyle, QWidget *paren
 
     ui->labelAddress->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelAddress->setFont(GUIUtil::getTopLabelFont());
+
+    ui->labelAssetData->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelAssetData->setFont(GUIUtil::getTopLabelFont());
 
     ui->checkBoxChangeAddress->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
 
@@ -85,7 +90,7 @@ void FreezeAddress::setWalletModel(WalletModel *model)
 
 bool FreezeAddress::eventFilter(QObject* object, QEvent* event)
 {
-    if((object == ui->lineEditAddress || object == ui->lineEditChangeAddress) && event->type() == QEvent::FocusIn) {
+    if((object == ui->lineEditAddress || object == ui->lineEditChangeAddress || object == ui->lineEditAssetData) && event->type() == QEvent::FocusIn) {
         static_cast<QLineEdit*>(object)->setStyleSheet(STYLE_VALID);
         // bring up your custom edit
         return false; // lets the event continue to the edit
@@ -125,9 +130,12 @@ void FreezeAddress::hideWarning()
 void FreezeAddress::clear()
 {
     ui->lineEditAddress->clear();
+    ui->lineEditChangeAddress->clear();
+    ui->lineEditAssetData->clear();
     ui->buttonSubmit->setDisabled(true);
     ui->lineEditAddress->setStyleSheet(STYLE_VALID);
     ui->lineEditChangeAddress->setStyleSheet(STYLE_VALID);
+    ui->lineEditAssetData->setStyleSheet(STYLE_VALID);
     ui->radioButtonFreezeAddress->setChecked(true);
     hideWarning();
 }
@@ -190,6 +198,15 @@ void FreezeAddress::check()
                 ui->lineEditChangeAddress->setStyleSheet(STYLE_INVALID);
                 failed = true;
             }
+        }
+    }
+
+    if (ui->lineEditAssetData->text().size()) {
+        std::string strAssetData = ui->lineEditAssetData->text().toStdString();
+
+        if (DecodeAssetData(strAssetData).empty()) {
+            ui->lineEditAssetData->setStyleSheet(STYLE_INVALID);
+            failed = true;
         }
     }
 

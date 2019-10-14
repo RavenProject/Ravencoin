@@ -191,6 +191,16 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
         }
     }
 
+    // Get the optional asset data
+    std::string asset_data = "";
+    if (request.params.size() > 3) {
+        asset_data = request.params[3].get_str();
+        asset_data = DecodeAssetData(asset_data);
+
+        if (asset_data.empty())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset data hash"));
+    }
+
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -212,7 +222,7 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     // Always transfer 1 of the qualifier tokens to the change address
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(tag_name, 1 * COIN), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(tag_name, 1 * COIN, asset_data), change_address));
 
     // Add the asset data with the flag to remove or add the tag 1 = Add, 0 = Remove
     std::vector< std::pair<CNullAssetTxData, std::string> > vecAssetData;
@@ -279,6 +289,16 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
         }
     }
 
+    // Get the optional asset data
+    std::string asset_data = "";
+    if (request.params.size() > 3) {
+        asset_data = request.params[3].get_str();
+        asset_data = DecodeAssetData(asset_data);
+
+        if (asset_data.empty())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset data hash"));
+    }
+
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -299,7 +319,7 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
 
     // Always transfer 1 of the restricted tokens to the change address
     // Use the ROOT owner token to make this change occur. if $TOKEN -> Use TOKEN!
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN, asset_data), change_address));
 
     // Add the asset data with the flag to remove or add the tag 1 = Freeze, 0 = Unfreeze
     std::vector< std::pair<CNullAssetTxData, std::string> > vecAssetData;
@@ -356,6 +376,16 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
         }
     }
 
+    // Get the optional asset data
+    std::string asset_data = "";
+    if (request.params.size() > 2) {
+        asset_data = request.params[2].get_str();
+        asset_data = DecodeAssetData(asset_data);
+
+        if (asset_data.empty())
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset data hash"));
+    }
+
     CReserveKey reservekey(pwallet);
     CWalletTx transaction;
     CAmount nRequiredFee;
@@ -376,7 +406,7 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
 
     // Always transfer 1 of the restricted tokens to the change address
     // Use the ROOT owner token to make this change occur. if $TOKEN -> Use TOKEN!
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN, asset_data), change_address));
 
     // Add the global asset data, 1 = Freeze all transfers, 0 = Allow transfers
     std::vector<CNullAssetTxData> vecGlobalAssetData;
@@ -1815,9 +1845,9 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
 #ifdef ENABLE_WALLET
 UniValue addtagtoaddress(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-                "addtagtoaddress tag_name to_address (change_address)\n"
+                "addtagtoaddress tag_name to_address (change_address) (asset_data)\n"
                 + RestrictedActivationWarning() +
                 "\nAssign a tag to a address\n"
 
@@ -1825,6 +1855,7 @@ UniValue addtagtoaddress(const JSONRPCRequest& request)
                 "1. \"tag_name\"            (string, required) the name of the tag you are assigning to the address, if it doens't have '#' at the front it will be added\n"
                 "2. \"to_address\"          (string, required) the address that will be assigned the tag\n"
                 "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
+                "4. \"asset_data\"          (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the qualifier token\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1842,9 +1873,9 @@ UniValue addtagtoaddress(const JSONRPCRequest& request)
 
 UniValue removetagfromaddress(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-                "removetagfromaddress tag_name to_address (change_address)\n"
+                "removetagfromaddress tag_name to_address (change_address) (asset_data)\n"
                 + RestrictedActivationWarning() +
                 "\nRemove a tag from a address\n"
 
@@ -1852,6 +1883,7 @@ UniValue removetagfromaddress(const JSONRPCRequest& request)
                 "1. \"tag_name\"            (string, required) the name of the tag you are removing from the address\n"
                 "2. \"to_address\"          (string, required) the address that the tag will be removed from\n"
                 "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
+                "4. \"asset_data\"          (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the qualifier token\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1869,9 +1901,9 @@ UniValue removetagfromaddress(const JSONRPCRequest& request)
 
 UniValue freezeaddress(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-                "freezeaddress asset_name address (change_address)\n"
+                "freezeaddress asset_name address (change_address) (asset_data)\n"
                 + RestrictedActivationWarning() +
                 "\nFreeze an address from transferring a restricted asset\n"
 
@@ -1879,6 +1911,7 @@ UniValue freezeaddress(const JSONRPCRequest& request)
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to freeze\n"
                 "2. \"address\"          (string, required) the address that will be frozen\n"
                 "3. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "4. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1896,9 +1929,9 @@ UniValue freezeaddress(const JSONRPCRequest& request)
 
 UniValue unfreezeaddress(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 3)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 2 || request.params.size() > 4)
         throw std::runtime_error(
-                "unfreezeaddress asset_name address (change_address)\n"
+                "unfreezeaddress asset_name address (change_address) (asset_data)\n"
                 + RestrictedActivationWarning() +
                 "\nUnfreeze an address from transferring a restricted asset\n"
 
@@ -1906,6 +1939,7 @@ UniValue unfreezeaddress(const JSONRPCRequest& request)
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
                 "2. \"address\"          (string, required) the address that will be unfrozen\n"
                 "3. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "4. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1923,15 +1957,16 @@ UniValue unfreezeaddress(const JSONRPCRequest& request)
 
 UniValue freezerestrictedasset(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 1 || request.params.size() > 2)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 1 || request.params.size() > 3)
         throw std::runtime_error(
-                "freezerestrictedasset asset_name (change_address)\n"
+                "freezerestrictedasset asset_name (change_address) (asset_data)\n"
                 + RestrictedActivationWarning() +
                 "\nFreeze all trading for a specific restricted asset\n"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
                 "2. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "3. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -1949,15 +1984,16 @@ UniValue freezerestrictedasset(const JSONRPCRequest& request)
 
 UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 1 || request.params.size() > 2)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 1 || request.params.size() > 3)
         throw std::runtime_error(
-                "unfreezerestrictedasset asset_name (change_address)\n"
+                "unfreezerestrictedasset asset_name (change_address) (asset_data)\n"
                 + RestrictedActivationWarning() +
                 "\nUnfreeze all trading for a specific restricted asset\n"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
                 "2. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "4. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -2926,12 +2962,12 @@ static const CRPCCommand commands[] =
     { "restricted assets",   "issuerestrictedasset",       &issuerestrictedasset,       {"asset_name","qty","verifier","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
     { "restricted assets",   "issuequalifierasset",        &issuequalifierasset,        {"asset_name","qty","to_address","change_address","has_ipfs","ipfs_hash"} },
     { "restricted assets",   "reissuerestrictedasset",     &reissuerestrictedasset,     {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_unit", "reissuable", "ipfs_hash"}},
-    { "restricted assets",   "addtagtoaddress",            &addtagtoaddress,            {"tag_name", "to_address", "change_address"}},
-    { "restricted assets",   "removetagfromaddress",       &removetagfromaddress,       {"tag_name", "to_address", "change_address"}},
-    { "restricted assets",   "freezeaddress",              &freezeaddress,              {"asset_name", "address", "change_address"}},
-    { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address"}},
-    { "restricted assets",   "freezerestrictedasset",      &freezerestrictedasset,      {"asset_name", "change_address"}},
-    { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address"}},
+    { "restricted assets",   "addtagtoaddress",            &addtagtoaddress,            {"tag_name", "to_address", "change_address", "asset_data"}},
+    { "restricted assets",   "removetagfromaddress",       &removetagfromaddress,       {"tag_name", "to_address", "change_address", "asset_data"}},
+    { "restricted assets",   "freezeaddress",              &freezeaddress,              {"asset_name", "address", "change_address", "asset_data"}},
+    { "restricted assets",   "unfreezeaddress",            &unfreezeaddress,            {"asset_name", "address", "change_address", "asset_data"}},
+    { "restricted assets",   "freezerestrictedasset",      &freezerestrictedasset,      {"asset_name", "change_address", "asset_data"}},
+    { "restricted assets",   "unfreezerestrictedasset",    &unfreezerestrictedasset,    {"asset_name", "change_address", "asset_data"}},
 #endif
     { "restricted assets",   "listaddressesfortag",        &listaddressesfortag,        {"tag_name"}},
     { "restricted assets",   "listtagsforaddress",         &listtagsforaddress,         {"address"}},
