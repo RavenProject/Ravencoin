@@ -1596,7 +1596,7 @@ UniValue reissue(const JSONRPCRequest& request)
                 "4. \"change_address\"           (string, optional) address that the change of the transaction will be sent to\n"
                 "5. \"reissuable\"               (boolean, optional, default=true), whether future reissuance is allowed\n"
                 "6. \"new_unit\"                 (numeric, optional, default=-1), the new units that will be associated with the asset\n"
-                "6. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
+                "7. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
