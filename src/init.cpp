@@ -285,6 +285,9 @@ void PrepareShutdown()
         delete pmessagedb;
         pmessagedb = nullptr;
 
+        delete pmyrestricteddb;
+        pmyrestricteddb = nullptr;
+
         delete passetsVerifierCache;
         passetsVerifierCache = nullptr;
 
@@ -1523,6 +1526,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     delete pMessagesSeenAddressCache;
                     delete pMessageSubscribedChannelsCache;
 
+                    // My restricted assets
+                    delete pmyrestricteddb;
+
                     // Restricted assets
                     delete prestricteddb;
                     delete passetsVerifierCache;
@@ -1541,6 +1547,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     pMessagesSeenAddressCache = new CLRUCache<std::string, int>(1000);
                     pmessagedb = new CMessageDB(nBlockTreeDBCache, false, false);
                     pmessagechanneldb = new CMessageChannelDB(nBlockTreeDBCache, false, false);
+
+                    // My restricted assets
+                    pmyrestricteddb = new CMyRestrictedDB(nBlockTreeDBCache, false, false);
 
                     // Restricted assets
                     prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset);

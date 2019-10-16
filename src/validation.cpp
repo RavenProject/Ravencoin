@@ -229,6 +229,7 @@ CLRUCache<std::string, int> *pMessageSubscribedChannelsCache = nullptr;
 CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
+CMyRestrictedDB *pmyrestricteddb = nullptr;
 
 CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
 CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
@@ -2313,7 +2314,7 @@ static int64_t nBlocksTotal = 0;
  *  Validity checks that depend on the UTXO set are also done; ConnectBlock()
  *  can fail if those validity checks fail (among other reasons). */
 static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex,
-                  CCoinsViewCache& view, const CChainParams& chainparams, CAssetsCache* assetsCache = nullptr, bool fJustCheck = false, bool ignoreAddressIndex = false, std::set<CMessage>* messageCache = nullptr)
+                  CCoinsViewCache& view, const CChainParams& chainparams, CAssetsCache* assetsCache = nullptr, bool fJustCheck = false, bool ignoreAddressIndex = false)
 {
 
     AssertLockHeld(cs_main);
@@ -2441,6 +2442,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
 
     std::set<CMessage> setMessages;
+    std::vector<std::pair<std::string, CNullAssetTxData>> myNullAssetData;
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
         const CTransaction &tx = *(block.vtx[i]);
@@ -2471,7 +2473,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
             if (AreAssetsDeployed()) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime)) {
+                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime, &myNullAssetData)) {
                     state.SetFailedTransaction(tx.GetHash());
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
@@ -2758,6 +2760,23 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             }
         }
     }
+#ifdef ENABLE_WALLET
+    if (AreRestrictedAssetsDeployed() && myNullAssetData.size() && pmyrestricteddb) {
+        for (auto item : myNullAssetData) {
+            if (IsAssetNameAQualifier(item.second.asset_name)) {
+                // TODO we can add block height to this data also, and use it to pull more info on when this was tagged/untagged
+                pmyrestricteddb->WriteTaggedAddress(item.first, item.second.asset_name, item.second.flag ? true : false, block.nTime);
+            } else if (IsAssetNameAnRestricted(item.second.asset_name)) {
+                pmyrestricteddb->WriteRestrictedAddress(item.first, item.second.asset_name, item.second.flag ? true : false, block.nTime);
+            }
+
+
+            if (vpwallets.size())
+                vpwallets[0]->UpdateMyRestrictedAssets(item.first, item.second.asset_name, item.second.flag, block.nTime);
+
+        }
+    }
+#endif
 
     assert(pindex->phashBlock);
     // add this block to the view's block chain
@@ -3200,6 +3219,7 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         // All new data will be added to the cache, and will be flushed back into passets after a successful
         // Connect Block cycle
         CAssetsCache assetCache;
+        std::vector<std::pair<std::string, CNullAssetTxData>> myNullAssetData;
         /** RVN END */
 
         int64_t nTimeConnectStart = GetTimeMicros();

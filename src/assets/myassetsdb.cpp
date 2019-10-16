@@ -2,7 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "validation.h"
-#include "messagedb.h"
+#include "myassetsdb.h"
 #include "messages.h"
 #include <boost/thread.hpp>
 
@@ -12,6 +12,9 @@ static const char MESSAGE_FLAG = 'Z'; // Message
 static const char MY_MESSAGE_CHANNEL = 'C'; // My followed Channels
 static const char MY_SEEN_ADDRESSES = 'S'; // Addresses that have been seen on the chain
 static const char DB_FLAG = 'D'; // Database Flags
+
+static const char MY_TAGGED_ADDRESSES = 'T'; // Addresses that have been tagged
+static const char MY_RESTRICTED_ADDRESSES = 'R'; // Addresses that have been restricted
 
 CMessageDB::CMessageDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "messages" / "messages", nCacheSize, fMemory, fWipe) {
 }
@@ -233,5 +236,109 @@ bool CMessageChannelDB::Flush() {
         return error("%s : %s ", __func__, std::string("System error while flushing messagechannels: ") + e.what());
     }
 
+    return true;
+}
+
+
+CMyRestrictedDB::CMyRestrictedDB(size_t nCacheSize, bool fMemory, bool fWipe) : CDBWrapper(GetDataDir() / "myrestricted", nCacheSize, fMemory, fWipe) {
+}
+
+bool CMyRestrictedDB::WriteTaggedAddress(const std::string& address, const std::string& tag_name, const bool fAdd, const uint32_t& nHeight)
+{
+    return Write(std::make_pair(MY_TAGGED_ADDRESSES, std::make_pair(address, tag_name)), std::make_pair(fAdd ? 1 : 0, nHeight));
+}
+bool CMyRestrictedDB::ReadTaggedAddress(const std::string& address, const std::string& tag_name, bool& fAdd, uint32_t& nHeight)
+{
+    std::pair<int, uint32_t> value;
+    bool ret = Read(std::make_pair(MY_TAGGED_ADDRESSES, std::make_pair(address, tag_name)), value);
+    fAdd = value.first;
+    nHeight = value.second;
+    return ret;
+}
+bool CMyRestrictedDB::EraseTaggedAddress(const std::string& address, const std::string& tag_name)
+{
+    return Erase(std::make_pair(MY_TAGGED_ADDRESSES, std::make_pair(address, tag_name)));
+}
+bool CMyRestrictedDB::LoadMyTaggedAddresses(std::vector<std::tuple<std::string, std::string, bool, uint32_t> >& vecTaggedAddresses)
+{
+    vecTaggedAddresses.clear();
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    pcursor->Seek(std::make_pair(MY_TAGGED_ADDRESSES, std::make_pair(std::string(), std::string())));
+
+    // Load messages
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, std::pair<std::string, std::string>> key;
+        if (pcursor->GetKey(key) && key.first == MY_TAGGED_ADDRESSES) {
+            std::pair<int, uint32_t> value;
+            if (pcursor->GetValue(value)) {
+                vecTaggedAddresses.emplace_back(std::make_tuple(key.second.first, key.second.second, value.first ? true : false, value.second));
+            }
+            pcursor->Next();
+        } else {
+            break;
+        }
+    }
+
+    return true;
+}
+
+bool CMyRestrictedDB::WriteRestrictedAddress(const std::string& address, const std::string& tag_name, const bool fAdd, const uint32_t& nHeight)
+{
+    return Write(std::make_pair(MY_RESTRICTED_ADDRESSES, std::make_pair(address, tag_name)), std::make_pair(fAdd ? 1 : 0, nHeight));
+}
+
+bool CMyRestrictedDB::ReadRestrictedAddress(const std::string& address, const std::string& tag_name, bool& fAdd, uint32_t& nHeight)
+{
+    std::pair<int, uint32_t> value;
+    bool ret = Read(std::make_pair(MY_RESTRICTED_ADDRESSES, std::make_pair(address, tag_name)), value);
+    fAdd = value.first;
+    nHeight = value.second;
+    return ret;
+}
+
+bool CMyRestrictedDB::EraseRestrictedAddress(const std::string& address, const std::string& tag_name)
+{
+    return Erase(std::make_pair(MY_RESTRICTED_ADDRESSES, std::make_pair(address, tag_name)));
+}
+
+bool CMyRestrictedDB::LoadMyRestrictedAddresses(std::vector<std::tuple<std::string, std::string, bool, uint32_t> >& vecRestrictedAddresses)
+{
+    vecRestrictedAddresses.clear();
+    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    pcursor->Seek(std::make_pair(MY_RESTRICTED_ADDRESSES, std::make_pair(std::string(), std::string())));
+
+    // Load messages
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, std::pair<std::string, std::string>> key;
+        if (pcursor->GetKey(key) && key.first == MY_RESTRICTED_ADDRESSES) {
+            std::pair<int, uint32_t> value;
+            if (pcursor->GetValue(value)) {
+                vecRestrictedAddresses.emplace_back(std::make_tuple(key.second.first, key.second.second, value.first ? true : false, value.second));
+            }
+            pcursor->Next();
+        } else {
+            break;
+        }
+    }
+
+    return true;
+}
+
+
+bool CMyRestrictedDB::WriteFlag(const std::string &name, bool fValue)
+{
+    return Write(std::make_pair(DB_FLAG, name), fValue ? '1' : '0');
+}
+
+bool CMyRestrictedDB::ReadFlag(const std::string &name, bool &fValue)
+{
+    char ch;
+    if (!Read(std::make_pair(DB_FLAG, name), ch))
+        return false;
+    fValue = ch == '1';
     return true;
 }

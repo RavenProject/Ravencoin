@@ -8,7 +8,7 @@
 #include <script/ismine.h>
 #include <base58.h>
 #include "messages.h"
-#include "messagedb.h"
+#include "myassetsdb.h"
 #include <primitives/block.h>
 
 

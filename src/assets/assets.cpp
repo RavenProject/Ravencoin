@@ -5006,7 +5006,7 @@ bool CheckVerifierAssetTxOut(const CTxOut& txout, std::string& strError)
     return true;
 }
 ///////////////
-bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError)
+bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache, std::string& strError, std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData)
 {
     // Get the data from the script
     CNullAssetTxData data;
@@ -5031,6 +5031,14 @@ bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache
             return false;
         }
     }
+
+#ifdef ENABLE_WALLET
+    if (myNullAssetData && vpwallets.size()) {
+        if (IsMine(*vpwallets[0], DecodeDestination(address)) & ISMINE_ALL) {
+            myNullAssetData->emplace_back(std::make_pair(address, data));
+        }
+    }
+#endif
     return true;
 }
 

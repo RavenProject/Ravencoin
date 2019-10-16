@@ -167,7 +167,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QListView" name="addressList"/>
+           <widget class="QTableView" name="myAddressList"/>
           </item>
          </layout>
         </item>
