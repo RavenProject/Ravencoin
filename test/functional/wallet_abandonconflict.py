@@ -131,7 +131,7 @@ class AbandonConflictTest(RavenTestFramework):
         inputs =[]
         inputs.append({"txid":txA, "vout":nA})
         outputs = {}
-        outputs[self.nodes[1].getnewaddress()] = Decimal("9.9999")
+        outputs[self.nodes[1].getnewaddress()] = Decimal("9.998")
         tx = self.nodes[0].createrawtransaction(inputs, outputs)
         signed = self.nodes[0].signrawtransaction(tx)
         self.nodes[1].sendrawtransaction(signed["hex"])

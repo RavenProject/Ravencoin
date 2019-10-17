@@ -155,14 +155,14 @@ class RawTransactionsTest(RavenTestFramework):
         outputs = { self.nodes[0].getnewaddress() : 2.19 }
         rawTx2 = self.nodes[2].createrawtransaction(inputs, outputs)
         rawTxPartialSigned1 = self.nodes[1].signrawtransaction(rawTx2, inputs)
-        self.log.info(rawTxPartialSigned1)
+        self.log.debug(rawTxPartialSigned1)
         assert_equal(rawTxPartialSigned['complete'], False) #node1 only has one key, can't comp. sign the tx
 
         rawTxPartialSigned2 = self.nodes[2].signrawtransaction(rawTx2, inputs)
-        self.log.info(rawTxPartialSigned2)
+        self.log.debug(rawTxPartialSigned2)
         assert_equal(rawTxPartialSigned2['complete'], False) #node2 only has one key, can't comp. sign the tx
         rawTxComb = self.nodes[2].combinerawtransaction([rawTxPartialSigned1['hex'], rawTxPartialSigned2['hex']])
-        self.log.info(rawTxComb)
+        self.log.debug(rawTxComb)
         self.nodes[2].sendrawtransaction(rawTxComb)
         rawTx2 = self.nodes[0].decoderawtransaction(rawTxComb)
         self.sync_all()

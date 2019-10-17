@@ -72,7 +72,7 @@ class TestNode():
             # Should only happen on test failure
             # Avoid using logger, as that may have already been shutdown when
             # this destructor is called.
-            print("Cleaning up leftover process")
+            self.log.info("Cleaning up leftover process")
             self.process.kill()
 
     def __getattr__(self, *args, **kwargs):
@@ -97,7 +97,7 @@ class TestNode():
         for _ in range(poll_per_s * self.rpc_timeout):
             assert self.process.poll() is None, "ravend exited with status %i during initialization" % self.process.returncode
             try:
-                self.rpc = get_rpc_proxy(rpc_url(self.datadir, self.index, self.rpchost), self.index, timeout=self.rpc_timeout, coveragedir=self.coverage_dir)
+                self.rpc = get_rpc_proxy(rpc_url(self.datadir, self.index, self.rpchost), self.index, timeout=self.rpc_timeout, coverage_dir=self.coverage_dir)
                 self.rpc.getblockcount()
                 # If the call to getblockcount() succeeds then the RPC connection is up
                 self.rpc_connected = True
@@ -153,7 +153,7 @@ class TestNode():
         return True
 
     def wait_until_stopped(self, timeout=RAVEND_PROC_WAIT_TIMEOUT):
-        wait_until(self.is_node_stopped, timeout=timeout)
+        wait_until(self.is_node_stopped, err_msg="Wait until Stopped", timeout=timeout)
 
     def node_encrypt_wallet(self, passphrase):
         """"Encrypts the wallet.

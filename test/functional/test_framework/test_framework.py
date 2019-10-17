@@ -141,7 +141,7 @@ class RavenTestFramework():
             self.log.warning("Exiting after keyboard interrupt")
 
         if success == TestStatus.FAILED and self.options.pdbonfailure:
-            print("Testcase failed. Attaching python debugger. Enter ? for help")
+            self.log.info("Testcase failed. Attaching python debugger. Enter ? for help")
             pdb.set_trace()
 
         if not self.options.noshutdown:
@@ -151,7 +151,7 @@ class RavenTestFramework():
         else:
             for node in self.nodes:
                 node.cleanup_on_exit = False
-            self.log.info("Note: ravends were not stopped and may still be running")
+            self.log.info("Note: ravend's were not stopped and may still be running")
 
         if not self.options.nocleanup and not self.options.noshutdown and success != TestStatus.FAILED:
             self.log.info("Cleaning up")
@@ -205,7 +205,7 @@ class RavenTestFramework():
         extra_args = None
         if hasattr(self, "extra_args"):
             extra_args = self.extra_args
-        self.add_nodes(self.num_nodes, extra_args)
+        self.add_nodes(self.num_nodes, extra_args, False)
         self.start_nodes()
 
     def run_test(self):
@@ -301,7 +301,9 @@ class RavenTestFramework():
                 raise AssertionError(assert_msg)
 
     def wait_for_node_exit(self, i, timeout):
+        self.log.debug("Waiting for node %d exit start: %s", i, time.ctime())
         self.nodes[i].process.wait(timeout)
+        self.log.debug("Waiting for node %d exit end: %s", i, time.ctime())
 
     def split_network(self):
         """
