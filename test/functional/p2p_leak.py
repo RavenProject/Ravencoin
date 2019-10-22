@@ -117,9 +117,9 @@ class P2PLeakTest(RavenTestFramework):
 
         NetworkThread().start()  # Start up network handling in another thread
 
-        wait_until(lambda: no_version_bannode.ever_connected, timeout=10, lock=mininode_lock)
-        wait_until(lambda: no_version_idlenode.ever_connected, timeout=10, lock=mininode_lock)
-        wait_until(lambda: no_verack_idlenode.version_received, timeout=10, lock=mininode_lock)
+        wait_until(lambda: no_version_bannode.ever_connected, err_msg="Wait for no Version BanNode", timeout=10, lock=mininode_lock)
+        wait_until(lambda: no_version_idlenode.ever_connected, err_msg="Wait for no Version IdleNode", timeout=10, lock=mininode_lock)
+        wait_until(lambda: no_verack_idlenode.version_received, err_msg="Wait for VerAck IdleNode", timeout=10, lock=mininode_lock)
 
         # Mine a block and make sure that it's not sent to the connected nodes
         self.nodes[0].generate(1)
@@ -133,7 +133,7 @@ class P2PLeakTest(RavenTestFramework):
         [conn.disconnect_node() for conn in connections]
 
         # Wait until all connections are closed
-        wait_until(lambda: len(self.nodes[0].getpeerinfo()) == 0)
+        wait_until(lambda: len(self.nodes[0].getpeerinfo()) == 0, err_msg="Wait for Connection Close")
 
         # Make sure no unexpected messages came in
         assert(no_version_bannode.unexpected_msg == False)

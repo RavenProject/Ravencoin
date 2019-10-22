@@ -27,7 +27,7 @@ class MessagingTest(RavenTestFramework):
         self.sync_all()
         n0.generate(431)
         self.sync_all()
-        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['messaging']['status'])
+        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['messaging_restricted']['status'])
 
     def test_messaging(self):
         self.log.info("Testing messaging!")

@@ -82,8 +82,8 @@ class MaxReorgTest(RavenTestFramework):
 
         self.log.info(f"Miners are mining {height} blocks...")
         subject.generate(height)
-        wait_until(lambda: [n.getblockcount() for n in self.nodes[1:]] == [height+start] * (peers-1))
-        print([start] + [n.getblockcount() for n in self.nodes[1:]])
+        wait_until(lambda: [n.getblockcount() for n in self.nodes[1:]] == [height+start] * (peers-1), err_msg="Wait for BlockCount")
+        self.log.info("BlockCount: " + str([start] + [n.getblockcount() for n in self.nodes[1:]]))
 
         self.log.info("Restarting adversary node...")
         self.start_node(0)
@@ -98,15 +98,15 @@ class MaxReorgTest(RavenTestFramework):
             adversary.generate(1)
         assert(adversary.getblockcount() - start == (subject.getblockcount() - start) * 2)
         besttimes = [n.getblock(n.getbestblockhash())['time'] for n in self.nodes]
-        print(besttimes)
-        print(f"adversary: {besttimes[0]}; subject: {besttimes[-1]}; difference: {besttimes[0] - besttimes[-1]}; expected gte: {tip_age}")
+        self.log.info("BestTimes: " + str(besttimes))
+        self.log.info(f"Adversary: {besttimes[0]}; subject: {besttimes[-1]}; difference: {besttimes[0] - besttimes[-1]}; expected gte: {tip_age}")
         assert(besttimes[0] - besttimes[-1] >= tip_age)
 
-        print([n.getblockcount() for n in self.nodes])
+        self.log.info("BlockCount: " + str([n.getblockcount() for n in self.nodes]))
 
         self.log.info("Reconnecting the network and syncing the chain...")
         for i in range(1, peers):
-            connect_nodes_bi(self.nodes, 0, i)
+            connect_nodes_bi(self.nodes, 0, i, should_reorg)
 
         expected_height = start + height
         subject_owns_asset = True
@@ -121,7 +121,7 @@ class MaxReorgTest(RavenTestFramework):
             wait_until(lambda: [n.getblockcount() for n in self.nodes] == [expected_height] * peers, timeout=5)
         except:
             pass
-        print([n.getblockcount() for n in self.nodes])
+        self.log.info("BlockCount: " +str([n.getblockcount() for n in self.nodes]))
         assert_equal(subject.getblockcount(), expected_height)
         assert_contains_pair(asset_name + '!', 1, adversary.listmyassets())
         if subject_owns_asset:

@@ -24,11 +24,11 @@ class TxIndexTest(RavenTestFramework):
     def setup_network(self):
         self.add_nodes(4, [
             # Nodes 0/1 are "wallet" nodes
-            ["-debug"],
-            ["-debug", "-txindex"],
+            [],
+            ["-txindex"],
             # Nodes 2/3 are used for testing
-            ["-debug", "-txindex"],
-            ["-debug", "-txindex"]])
+            ["-txindex"],
+            ["-txindex"]])
 
         self.start_nodes()
 
@@ -39,14 +39,14 @@ class TxIndexTest(RavenTestFramework):
         self.sync_all()
 
     def run_test(self):
-        print("Mining blocks...")
+        self.log.info("Mining blocks...")
         self.nodes[0].generate(105)
         self.sync_all()
 
         chain_height = self.nodes[1].getblockcount()
         assert_equal(chain_height, 105)
 
-        print("Testing transaction index...")
+        self.log.info("Testing transaction index...")
 
         #privkey = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
         #address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
@@ -69,7 +69,7 @@ class TxIndexTest(RavenTestFramework):
         assert_equal(verbose["vout"][0]["valueSat"], 500000000000)
         assert_equal(verbose["vout"][0]["value"], 5000)
 
-        print("Passed\n")
+        self.log.info("All Tests Passed")
 
 
 if __name__ == '__main__':

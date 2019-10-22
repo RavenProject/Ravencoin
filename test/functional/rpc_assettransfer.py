@@ -24,8 +24,8 @@ class AssetTransferTest(RavenTestFramework):
     def setup_network(self):
         self.add_nodes(2, [
             # Nodes 0/1 are "wallet" nodes
-            ["-debug", "-assetindex"],
-            ["-debug", "-assetindex"]])
+            ["-assetindex"],
+            ["-assetindex"]])
 
         self.start_nodes()
 
@@ -34,7 +34,7 @@ class AssetTransferTest(RavenTestFramework):
         self.sync_all()
 
     def run_test(self):
-        print("Mining blocks...")
+        self.log.info("Mining blocks...")
         self.nodes[0].generate(250)
         self.sync_all()
         self.nodes[1].generate(250)
@@ -47,17 +47,17 @@ class AssetTransferTest(RavenTestFramework):
 
         n0, n1 = self.nodes[0], self.nodes[1]
 
-        print("Calling issue()...")
+        self.log.info("Calling issue()...")
         address0 = n0.getnewaddress()
         ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
         n0.issue(asset_name="TRANSFER_TEST", qty=1000, to_address=address0, change_address="", \
                  units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
-        n0.generate(1);
+        n0.generate(1)
 
-        self.sync_all();
+        self.sync_all()
 
-        print("Testing transfer with dedicated asset change address...")
+        self.log.info("Testing transfer with dedicated asset change address...")
 
         n1_address = n1.getnewaddress()
 
@@ -72,7 +72,7 @@ class AssetTransferTest(RavenTestFramework):
         assert_equal(n0.listassetbalancesbyaddress(n1_address)["TRANSFER_TEST"], 200)
         assert_equal(n0.listassetbalancesbyaddress(n0_asset_change)["TRANSFER_TEST"], 800)
 
-        print("Testing transferfromaddress with dedicated asset change address...")
+        self.log.info("Testing transferfromaddress with dedicated asset change address...")
 
         n0_from_address = n0_asset_change
         n1_already_received_address = n1_address
@@ -90,7 +90,7 @@ class AssetTransferTest(RavenTestFramework):
         assert_equal(n0.listassetbalancesbyaddress(n1_address)["TRANSFER_TEST"], 200)
         assert_equal(n0.listassetbalancesbyaddress(n0_asset_change)["TRANSFER_TEST"], 600)
 
-        print("Testing transferfromaddresses with dedicated asset change address...")
+        self.log.info("Testing transferfromaddresses with dedicated asset change address...")
 
         # transfer some assets into another address node0 controls
         n0_new_address = n0.getnewaddress()
@@ -118,7 +118,7 @@ class AssetTransferTest(RavenTestFramework):
         assert_equal(n0.listassetbalancesbyaddress(n1_address)["TRANSFER_TEST"], 450)
         assert_equal(n0.listassetbalancesbyaddress(n0_asset_change)["TRANSFER_TEST"], 150)
 
-        print("Testing transferfromaddresses with not enough funds...")
+        self.log.info("Testing transferfromaddresses with not enough funds...")
 
         # Add the address the only contain 150 TRANSFER_TEST assets
         n0_from_addresses = [n0_asset_change]
@@ -140,7 +140,7 @@ class AssetTransferTest(RavenTestFramework):
         assert_equal(n1.listassetbalancesbyaddress(n1_address)["TRANSFER_TEST"], 450)
         assert_equal(n1.listassetbalancesbyaddress(n0_asset_change)["TRANSFER_TEST"], 150)
 
-        print("Passed\n")
+        self.log.info("All Tests Passed")
 
 
 if __name__ == '__main__':

@@ -19,14 +19,14 @@ static const int INIT_PROTO_VERSION = 209;
 static const int GETHEADERS_VERSION = 31800;
 
 //! assetdata network request is allowed for this version
-//!!! Anytime this value is changed please also update the "MY_VERSION" value to match in the
-//!!! ./test/functional/test_framework/mininode.py file. Not doing so will cause verack to fail!
 static const int ASSETDATA_VERSION = 70017;
 
 //! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
 static const int X16RV2_VERSION = 70025;
 
 //! disconnect from peers older than this proto version
+//!!! Anytime this value is changed please also update the "MY_VERSION" value to match in the
+//!!! ./test/functional/test_framework/mininode.py file. Not doing so will cause verack to fail!
 static const int MIN_PEER_PROTO_VERSION = X16RV2_VERSION;
 
 //! nTime field added to CAddress, starting with this version;

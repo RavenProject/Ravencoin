@@ -29,7 +29,6 @@
 import errno
 import http.client
 import random
-import sys
 import time
 
 from test_framework.mininode import (CTxIn, COutPoint, COIN, ToHex)
@@ -37,7 +36,9 @@ from test_framework.script import (CTransaction, CTxOut)
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import (create_confirmed_utxos, hex_str_to_bytes, assert_equal)
 
+
 class ChainstateWriteCrashTest(RavenTestFramework):
+
     def set_test_params(self):
         self.num_nodes = 4
         self.setup_clean_chain = False
@@ -49,9 +50,9 @@ class ChainstateWriteCrashTest(RavenTestFramework):
 
         # Set different crash ratios and cache sizes.  Note that not all of
         # -dbcache goes to pcoinsTip.
-        self.node0_args = ["-dbcrashratio=8", "-dbcache=4"] + self.base_args
-        self.node1_args = ["-dbcrashratio=16", "-dbcache=8"] + self.base_args
-        self.node2_args = ["-dbcrashratio=24", "-dbcache=16"] + self.base_args
+        self.node0_args = ["-dbcrashratio=4", "-dbcache=2"] + self.base_args
+        self.node1_args = ["-dbcrashratio=8", "-dbcache=4"] + self.base_args
+        self.node2_args = ["-dbcrashratio=16", "-dbcache=8"] + self.base_args
 
         # Node3 is a normal node with default args, except will mine full blocks
         self.node3_args = ["-blockmaxweight=4000000"]
@@ -59,7 +60,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
 
     def setup_network(self):
         # Need a bit of extra time for the nodes to start up for this test
-        self.add_nodes(self.num_nodes, extra_args=self.extra_args, timewait=90)
+        self.add_nodes(self.num_nodes, extra_args=self.extra_args, timewait=60)
         self.start_nodes()
         # Leave them unconnected, we'll use submitblock directly in this test
 
@@ -68,7 +69,6 @@ class ChainstateWriteCrashTest(RavenTestFramework):
 
         Exceptions on startup should indicate node crash (due to -dbcrashratio), in which case we try again. Give up
         after 60 seconds. Returns the utxo hash of the given node."""
-
         time_start = time.time()
         while time.time() - time_start < 120:
             try:
@@ -81,6 +81,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 # An exception here should mean the node is about to crash.
                 # If ravend exits, then try again.  wait_for_node_exit()
                 # should raise an exception if ravend doesn't exit.
+                self.log.debug("Wait for node exit ~~ during restart, node: %s", node_index)
                 self.wait_for_node_exit(node_index, timeout=10)
             self.crashed_on_restart += 1
             time.sleep(1)
@@ -111,6 +112,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 return False
             else:
                 # Unexpected exception, raise
+                self.log.info("Unexpected exception on node: %d", node_index)
                 raise
 
     def sync_node3blocks(self, block_hashes):
@@ -137,7 +139,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 if not self.submit_block_catch_error(i, block):
                     # TODO: more carefully check that the crash is due to -dbcrashratio
                     # (change the exit code perhaps, and check that here?)
-                    self.wait_for_node_exit(i, timeout=30)
+                    self.wait_for_node_exit(i, timeout=10)
                     self.log.debug("Restarting node %d after block hash %s", i, block_hash)
                     nodei_utxo_hash = self.restart_node(i, block_hash)
                     assert nodei_utxo_hash is not None
@@ -174,7 +176,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
             assert_equal(nodei_utxo_hash, node3_utxo_hash)
 
     def generate_small_transactions(self, node, count, utxo_list):
-        FEE = 1000000  # TODO: replace this with node relay fee based calculation
+        fee = 100000000  # TODO: replace this with node relay fee based calculation
         num_transactions = 0
         random.shuffle(utxo_list)
         while len(utxo_list) >= 2 and num_transactions < count:
@@ -184,7 +186,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 utxo = utxo_list.pop()
                 tx.vin.append(CTxIn(COutPoint(int(utxo['txid'], 16), utxo['vout'])))
                 input_amount += int(utxo['amount'] * COIN)
-            output_amount = (input_amount - FEE) // 3
+            output_amount = (input_amount - fee) // 3
 
             if output_amount <= 0:
                 # Sanity check -- if we chose inputs that are too small, skip
@@ -205,7 +207,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
 
         # Start by creating a lot of utxos on node3
         initial_height = self.nodes[3].getblockcount()
-        utxo_list = create_confirmed_utxos(self.nodes[3].getnetworkinfo()['relayfee'] * 1000, self.nodes[3], 5000)
+        utxo_list = create_confirmed_utxos(self.nodes[3].getnetworkinfo()['relayfee'], self.nodes[3], 5000)
         self.log.info("Prepped %d utxo entries", len(utxo_list))
 
         # Sync these blocks with the other nodes
@@ -222,8 +224,8 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         # Main test loop:
         # each time through the loop, generate a bunch of transactions,
         # and then either mine a single new block on the tip, or some-sized reorg.
-        for i in range(40):
-            self.log.info("Iteration %d, generating 2500 transactions %s", i, self.restart_counts)
+        for i in range(20):
+            self.log.info("Iteration %d, generating 2,500 transactions %s", i, self.restart_counts)
             # Generate a bunch of small-ish transactions
             self.generate_small_transactions(self.nodes[3], 2500, utxo_list)
             # Pick a random block between current tip, and starting tip
@@ -264,7 +266,8 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         # Warn if any of the nodes escaped restart.
         for i in range(3):
             if self.restart_counts[i] == 0:
-                self.log.warn("Node %d never crashed during utxo flush!", i)
+                self.log.warning("Node %d never crashed during utxo flush!", i)
+
 
 if __name__ == "__main__":
     ChainstateWriteCrashTest().main()

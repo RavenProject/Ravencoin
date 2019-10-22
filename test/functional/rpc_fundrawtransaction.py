@@ -14,8 +14,6 @@ from test_framework.util import (connect_nodes_bi,
                                 count_bytes, 
                                 assert_fee_amount, 
                                 assert_greater_than_or_equal)
-from pprint import pprint
-
 
 def get_unspent(listunspent, amount):
     for utx in listunspent:
@@ -623,7 +621,6 @@ class RawTransactionsTest(RavenTestFramework):
 
         inputs = []
         outputs = {self.nodes[3].getnewaddress() : 1}
-        pprint(self.nodes[3].getbalance())
         rawtx = self.nodes[3].createrawtransaction(inputs, outputs)
         result = self.nodes[3].fundrawtransaction(rawtx) # uses DEFAULT_TRANSACTION_MINFEE
         result2 = self.nodes[3].fundrawtransaction(rawtx, {"feeRate": 2*0.01})
