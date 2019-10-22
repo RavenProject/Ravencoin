@@ -133,7 +133,7 @@ RAVEN_CORE_H = \
   assets/assetdb.h \
   assets/assettypes.h \
   assets/messages.h \
-  assets/messagedb.h \
+  assets/myassetsdb.h \
   assets/restricteddb.h \
   base58.h \
   bloom.h \
@@ -263,7 +263,7 @@ libraven_server_a_SOURCES = \
   assets/assetdb.cpp \
   assets/assettypes.cpp \
   assets/messages.cpp \
-  assets/messagedb.cpp \
+  assets/myassetsdb.cpp \
   assets/restricteddb.cpp \
   policy/fees.cpp \
   policy/policy.cpp \

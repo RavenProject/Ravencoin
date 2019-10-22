@@ -568,7 +568,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
 }
 
 //! Check to make sure that the inputs and outputs CAmount match exactly.
-bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime)
+bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime,   std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData)
 {
     // are the actual inputs available?
     if (!inputs.HaveInputs(tx)) {
@@ -633,7 +633,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                                      "bad-tx-null-asset-data-before-restricted-assets-activated");
 
                 if (txout.scriptPubKey.IsNullAssetTxDataScript()) {
-                    if (!ContextualCheckNullAssetTxOut(txout, assetCache, strError))
+                    if (!ContextualCheckNullAssetTxOut(txout, assetCache, strError, myNullAssetData))
                         return state.DoS(100, false, REJECT_INVALID, strError);
                 } else if (txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
                     if (!ContextualCheckGlobalAssetTxOut(txout, assetCache, strError))

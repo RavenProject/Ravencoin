@@ -36,7 +36,7 @@
 #include <assets/assets.h>
 #include <assets/assetdb.h>
 #include <assets/messages.h>
-#include <assets/messagedb.h>
+#include <assets/myassetsdb.h>
 #include <assets/restricteddb.h>
 
 class CBlockIndex;
@@ -524,6 +524,9 @@ extern CMessageDB *pmessagedb;
 
 /** Global variable that points to the message channel database (protected by cs_main) */
 extern CMessageChannelDB *pmessagechanneldb;
+
+/** Global variable that points to my wallets restricted database (protected by cs_main) */
+extern CMyRestrictedDB *pmyrestricteddb;
 
 /** Global variable that points to the active restricted asset database (protected by cs_main) */
 extern CRestrictedDB *prestricteddb;

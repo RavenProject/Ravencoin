@@ -18,6 +18,9 @@ class SendAssetsEntry;
 class SendCoinsRecipient;
 class AssetFilterProxy;
 class AssignQualifier;
+class MyRestrictedAssetsTableModel;
+class MyRestrictedAssetsFilterProxy;
+class QSortFilterProxyModel;
 
 
 namespace Ui {
@@ -55,6 +58,9 @@ private:
     WalletModel *model;
     const PlatformStyle *platformStyle;
     AssetFilterProxy *assetFilterProxy;
+    QSortFilterProxyModel *myRestrictedAssetsFilterProxy;
+
+    MyRestrictedAssetsTableModel *myRestrictedAssetsModel;
 
 private Q_SLOTS:
     void updateDisplayUnit();

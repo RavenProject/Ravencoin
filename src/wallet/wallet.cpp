@@ -4742,6 +4742,12 @@ bool CWallet::BackupWallet(const std::string& strDest)
     return dbw->Backup(strDest);
 }
 
+void CWallet::UpdateMyRestrictedAssets(std::string& address, std::string& asset_name, int type, uint32_t date)
+{
+    LOCK(cs_wallet);
+    NotifyMyRestrictedAssetsChanged(this, address, asset_name, type, date);
+}
+
 CKeyPool::CKeyPool()
 {
     nTime = GetTime();
@@ -4802,3 +4808,5 @@ bool CMerkleTx::AcceptToMemoryPool(const CAmount& nAbsurdFee, CValidationState& 
     return ::AcceptToMemoryPool(mempool, state, tx, nullptr /* pfMissingInputs */,
                                 nullptr /* plTxnReplaced */, false /* bypass_limits */, nAbsurdFee);
 }
+
+

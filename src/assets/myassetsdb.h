@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVENCOIN_MESSAGEDB_H
-#define RAVENCOIN_MESSAGEDB_H
+#ifndef RAVENCOIN_MYASSETSDB_H
+#define RAVENCOIN_MYASSETSDB_H
 
 #include <dbwrapper.h>
 
@@ -56,5 +56,27 @@ public:
     bool Flush();
 };
 
+class CMyRestrictedDB : public CDBWrapper {
+public:
+    explicit CMyRestrictedDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
 
-#endif //RAVENCOIN_MESSAGEDB_H
+    CMyRestrictedDB(const CMyRestrictedDB&) = delete;
+    CMyRestrictedDB& operator=(const CMyRestrictedDB&) = delete;
+
+    bool WriteTaggedAddress(const std::string& address, const std::string& tag_name, const bool fAdd, const uint32_t& nHeight);
+    bool ReadTaggedAddress(const std::string& address, const std::string& tag_name, bool& fAdd, uint32_t& nHeight);
+    bool EraseTaggedAddress(const std::string& address, const std::string& tag_name);
+    bool LoadMyTaggedAddresses(std::vector<std::tuple<std::string, std::string, bool, uint32_t> >& vecTaggedAddresses);
+
+    bool WriteRestrictedAddress(const std::string& address, const std::string& tag_name, const bool fAdd, const uint32_t& nHeight);
+    bool ReadRestrictedAddress(const std::string& address, const std::string& tag_name, bool& fAdd, uint32_t& nHeight);
+    bool EraseRestrictedAddress(const std::string& address, const std::string& tag_name);
+    bool LoadMyRestrictedAddresses(std::vector<std::tuple<std::string, std::string, bool, uint32_t> >& vecRestrictedAddresses);
+
+    // Write / Read Database flags
+    bool WriteFlag(const std::string &name, bool fValue);
+    bool ReadFlag(const std::string &name, bool &fValue);
+};
+
+
+#endif //RAVENCOIN_MYASSETSDB_H

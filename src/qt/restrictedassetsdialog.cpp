@@ -28,6 +28,7 @@
 #include "restrictedfreezeaddress.h"
 #include "ui_restrictedfreezeaddress.h"
 #include "sendcoinsdialog.h"
+#include "myrestrictedassettablemodel.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QFontMetrics>
@@ -82,6 +83,22 @@ void RestrictedAssetsDialog::setModel(WalletModel *_model)
         assetFilterProxy->setAssetNamePrefix("$");
         assetFilterProxy->setSortCaseSensitivity(Qt::CaseInsensitive);
         assetFilterProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+        myRestrictedAssetsFilterProxy = new QSortFilterProxyModel(this);
+        myRestrictedAssetsFilterProxy->setSourceModel(_model->getMyRestrictedAssetsTableModel());
+        myRestrictedAssetsFilterProxy->setDynamicSortFilter(true);
+        myRestrictedAssetsFilterProxy->setSortCaseSensitivity(Qt::CaseInsensitive);
+        myRestrictedAssetsFilterProxy->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+        myRestrictedAssetsFilterProxy->setSortRole(Qt::EditRole);
+
+        ui->myAddressList->setModel(myRestrictedAssetsFilterProxy);
+        ui->myAddressList->horizontalHeader()->setStretchLastSection(true);
+        ui->myAddressList->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        ui->myAddressList->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        ui->myAddressList->setAlternatingRowColors(true);
+        ui->myAddressList->setSortingEnabled(true);
+        ui->myAddressList->verticalHeader()->hide();
 
         ui->listAssets->setModel(assetFilterProxy);
         ui->listAssets->horizontalHeader()->setStretchLastSection(true);

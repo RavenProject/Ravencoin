@@ -5,7 +5,7 @@
 #include "assets/assets.h"
 #include "assets/assetdb.h"
 #include "assets/messages.h"
-#include "assets/messagedb.h"
+#include "assets/myassetsdb.h"
 #include <map>
 #include "tinyformat.h"
 
@@ -397,6 +397,93 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     result.push_back(txid);
     return result;
 }
+
+UniValue viewmytaggedaddresses(const JSONRPCRequest& request) {
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 0)
+        throw std::runtime_error(
+                "viewmytaggedaddresses \n"
+                + MessageActivationWarning() +
+                "\nView all addresses this wallet owns that have been tagged\n"
+
+                "\nResult:\n"
+                "{\n"
+                "\"Address:\"                        (string) The address that was tagged\n"
+                "\"Tag Name:\"                       (string) The asset name\n"
+                "\"Assign/Removed:\"                 (Date) The time as a date in the format (YY-mm-dd Hour-minute-second)\n"
+                "}...\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("viewmytaggedaddresses", "")
+                + HelpExampleRpc("viewmytaggedaddresses", "")
+        );
+
+    std::vector<std::tuple<std::string, std::string, bool, uint32_t> > myTaggedAddresses;
+
+    if (!pmyrestricteddb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, "My restricted database is not available");
+
+    pmyrestricteddb->LoadMyTaggedAddresses(myTaggedAddresses);
+    UniValue myTags(UniValue::VARR);
+
+    for (auto item : myTaggedAddresses) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("Address", std::get<0>(item)));
+        obj.push_back(Pair("Tag Name", std::get<1>(item)));
+        if (std::get<2>(item))
+            obj.push_back(Pair("Assigned", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
+        else
+            obj.push_back(Pair("Removed", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
+
+        myTags.push_back(obj);
+    }
+
+    return myTags;
+}
+
+UniValue viewmyrestrictedaddresses(const JSONRPCRequest& request) {
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 0)
+        throw std::runtime_error(
+                "viewmyrestrictedaddresses \n"
+                + MessageActivationWarning() +
+                "\nView all addresses this wallet owns that have been restricted\n"
+
+                "\nResult:\n"
+                "{\n"
+                "\"Address:\"                        (string) The address that was tagged\n"
+                "\"Tag Name:\"                       (string) The asset name\n"
+                "\"Restricted/Restriction Removed:\"                 (Date) The time as a date in the format (YY-mm-dd Hour-minute-second)\n"
+                "}...\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("viewmyrestrictedaddresses", "")
+                + HelpExampleRpc("viewmyrestrictedaddresses", "")
+        );
+
+    std::vector<std::tuple<std::string, std::string, bool, uint32_t> > myRestrictedAddresses;
+
+    if (!pmyrestricteddb)
+        throw JSONRPCError(RPC_DATABASE_ERROR, "My restricted database is not available");
+
+    pmyrestricteddb->LoadMyRestrictedAddresses(myRestrictedAddresses);
+    UniValue myRestricted(UniValue::VARR);
+
+    for (auto item : myRestrictedAddresses) {
+        UniValue obj(UniValue::VOBJ);
+
+        obj.push_back(Pair("Address", std::get<0>(item)));
+        obj.push_back(Pair("Restricted Name", std::get<1>(item)));
+        if (std::get<2>(item))
+            obj.push_back(Pair("Restricted", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
+        else
+            obj.push_back(Pair("Restriction Removed", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
+
+        myRestricted.push_back(obj);
+    }
+
+    return myRestricted;
+}
+
 #endif
 
 static const CRPCCommand commands[] =
@@ -408,6 +495,8 @@ static const CRPCCommand commands[] =
             { "messages",       "unsubscribefromchannel",     &unsubscribefromchannel,     {"channel_name"}},
 #ifdef ENABLE_WALLET
             { "messages",       "sendmessage",                &sendmessage,                {"channel", "ipfs_hash", "expire_time"}},
+            {"restricted",        "viewmytaggedaddresses",      &viewmytaggedaddresses,       {}},
+            {"restricted",        "viewmyrestrictedaddresses",  &viewmyrestrictedaddresses,   {}},
 #endif
             { "messages",       "clearmessages",              &clearmessages,              {}},
     };
