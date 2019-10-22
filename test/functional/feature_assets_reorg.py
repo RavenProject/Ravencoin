@@ -29,7 +29,7 @@ class AssetReorgTest(RavenTestFramework):
         n1.generate(216)
         self.sync_all()
         assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
-        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['restricted_assets']['status'])
+        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['messaging_restricted']['status'])
 
 
     def issue_reorg_test(self):
@@ -58,18 +58,18 @@ class AssetReorgTest(RavenTestFramework):
         assert_equal(True, node_0_hash is not n1.getbestblockhash())
 
         # Uncomment to debug
-        # print(f"{n0.getblockcount()}: {n0.getbestblockhash()}")
-        # print(f"{n1.getblockcount()}: {n1.getbestblockhash()}")
-        # print(n0.listmyassets())
-        # print(n1.listmyassets())
+        # self.log.info(f"{n0.getblockcount()}: {n0.getbestblockhash()}")
+        # self.log.info(f"{n1.getblockcount()}: {n1.getbestblockhash()}")
+        # self.log.info(n0.listmyassets())
+        # self.log.info(n1.listmyassets())
         # Connect the nodes together, and force a reorg to occur
         connect_all_nodes_bi(self.nodes)
 
         # Uncomment to debug
-        # print(f"{n0.getblockcount()}: {n0.getbestblockhash()}")
-        # print(f"{n1.getblockcount()}: {n1.getbestblockhash()}")
-        # print(n0.listmyassets())
-        # print(n1.listmyassets())
+        # self.log.info(f"{n0.getblockcount()}: {n0.getbestblockhash()}")
+        # self.log.info(f"{n1.getblockcount()}: {n1.getbestblockhash()}")
+        # self.log.info(n0.listmyassets())
+        # self.log.info(n1.listmyassets())
 
         # Verify that node1 reorged to the node0 chain and that node0 has the asset and not node1
         assert_equal(node_0_height, n1.getblockcount())
@@ -126,14 +126,14 @@ class AssetReorgTest(RavenTestFramework):
         assert_equal(True, (node_1_height_44 - node_0_height) == 4)
 
         # Connect the nodes together, and force a reorg to occur
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         node_0_hash_after_reorg = n0.getbestblockhash()
         node_0_height_after_reorg = n0.getblockcount()
 
         # Uncomment to debug
-        # print('Node 0 after reorg ' + str(node_0_height_after_reorg) + ' ' + node_0_hash_after_reorg)
-        # print('Node 1 after reorg ' + str(node_1_height_44) + ' ' + node_1_hash_44)
+        # self.log.info('Node 0 after reorg ' + str(node_0_height_after_reorg) + ' ' + node_0_hash_after_reorg)
+        # self.log.info('Node 1 after reorg ' + str(node_1_height_44) + ' ' + node_1_hash_44)
 
         # Make sure the reorg was successful
         assert_equal(True, node_0_hash_after_reorg == node_1_hash_44)

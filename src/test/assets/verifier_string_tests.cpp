@@ -14,8 +14,7 @@
 
 #include "LibBoolEE.h"
 
-BOOST_FIXTURE_TEST_SUITE(
-        , BasicTestingSetup)
+BOOST_FIXTURE_TEST_SUITE(verifier_string_tests, BasicTestingSetup)
 
     BOOST_AUTO_TEST_CASE(boolean_expression_evaluator_test)
     {

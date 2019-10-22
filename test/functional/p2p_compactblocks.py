@@ -24,7 +24,7 @@ from test_framework.mininode import (NodeConnCB,
                                     msg_sendheaders,
                                     P2PHeaderAndShortIDs,
                                     PrefilledTransaction,
-                                    FromHex,
+                                    from_hex,
                                     CBlock,
                                     HeaderAndShortIDs,
                                     CInv,
@@ -310,7 +310,7 @@ class CompactBlocksTest(RavenTestFramework):
         for _ in range(num_transactions):
             txid = node.sendtoaddress(address, 0.1)
             hex_tx = node.gettransaction(txid)["hex"]
-            tx = FromHex(CTransaction(), hex_tx)
+            tx = from_hex(CTransaction(), hex_tx)
             if not tx.wit.is_null():
                 segwit_tx_generated = True
 
@@ -329,7 +329,7 @@ class CompactBlocksTest(RavenTestFramework):
         block_hash = int(node.generate(1)[0], 16)
 
         # Store the raw block in our internal format.
-        block = FromHex(CBlock(), node.getblock("%02x" % block_hash, False))
+        block = from_hex(CBlock(), node.getblock("%02x" % block_hash, False))
         for tx in block.vtx:
             tx.calc_sha256()
         block.rehash()
@@ -625,7 +625,7 @@ class CompactBlocksTest(RavenTestFramework):
         current_height = chain_height
         while (current_height >= chain_height - MAX_GETBLOCKTXN_DEPTH):
             block_hash = node.getblockhash(current_height)
-            block = FromHex(CBlock(), node.getblock(block_hash, False))
+            block = from_hex(CBlock(), node.getblock(block_hash, False))
 
             msg = msg_getblocktxn()
             msg.block_txn_request = BlockTransactionsRequest(int(block_hash, 16), [])

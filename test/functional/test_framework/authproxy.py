@@ -47,6 +47,7 @@ USER_AGENT = "AuthServiceProxy/0.1"
 
 log = logging.getLogger("RavenRPC")
 
+
 class JSONRPCException(Exception):
     def __init__(self, rpc_error):
         try:
@@ -61,6 +62,7 @@ def EncodeDecimal(o):
     if isinstance(o, decimal.Decimal):
         return str(o)
     raise TypeError(repr(o) + " is not JSON serializable")
+
 
 class AuthServiceProxy():
     __id_count = 0
@@ -162,6 +164,9 @@ class AuthServiceProxy():
                            'using larger timeout for calls that take '
                            'longer to return.' % (self._service_name,
                                                   self.__conn.timeout)})
+        except http.client.RemoteDisconnected as e:
+            log.debug("~~~~~~~ _get_response Remote Disconnected Exception: %s ~~~~~~~~~~~", e)
+            raise
         if http_response is None:
             raise JSONRPCException({
                 'code': -342, 'message': 'missing HTTP response from server'})

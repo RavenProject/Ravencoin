@@ -70,7 +70,7 @@ class MempoolPersistTest(RavenTestFramework):
         self.start_node(1)
         # Give ravend a second to reload the mempool
         time.sleep(1)
-        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5)
+        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5, err_msg="Wait for getRawMempool")
         assert_equal(len(self.nodes[1].getrawmempool()), 0)
 
         self.log.debug("Stop-start node0 with -persistmempool=0. Verify that it doesn't load its mempool.dat file.")
@@ -83,7 +83,7 @@ class MempoolPersistTest(RavenTestFramework):
         self.log.debug("Stop-start node0. Verify that it has the transactions in its mempool.")
         self.stop_nodes()
         self.start_node(0)
-        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5)
+        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5, err_msg="Wait for getRawMempool")
 
         mempooldat0 = os.path.join(self.options.tmpdir, 'node0', 'regtest', 'mempool.dat')
         mempooldat1 = os.path.join(self.options.tmpdir, 'node1', 'regtest', 'mempool.dat')
@@ -96,7 +96,7 @@ class MempoolPersistTest(RavenTestFramework):
         os.rename(mempooldat0, mempooldat1)
         self.stop_nodes()
         self.start_node(1, extra_args=[])
-        wait_until(lambda: len(self.nodes[1].getrawmempool()) == 5)
+        wait_until(lambda: len(self.nodes[1].getrawmempool()) == 5, err_msg="Wait for getRawMempool")
 
         self.log.debug("Prevent ravend from writing mempool.dat to disk. Verify that `savemempool` fails")
         # to test the exception we are setting bad permissions on a tmp file called mempool.dat.new

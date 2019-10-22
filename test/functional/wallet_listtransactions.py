@@ -13,7 +13,7 @@ from io import BytesIO
 
 
 
-def txFromHex(hexstring):
+def from_hex(hexstring):
     tx = CTransaction()
     f = BytesIO(hex_str_to_bytes(hexstring))
     tx.deserialize(f)

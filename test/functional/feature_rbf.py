@@ -111,7 +111,7 @@ class ReplaceByFeeTest(RavenTestFramework):
         self.log.info("Running test prioritised transactions...")
         self.test_prioritised_transactions()
 
-        self.log.info("Passed")
+        self.log.info("All Tests Passed")
 
     def test_simple_doublespend(self):
         """Simple doublespend"""

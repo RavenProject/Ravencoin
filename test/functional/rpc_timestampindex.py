@@ -23,11 +23,11 @@ class TimestampIndexTest(RavenTestFramework):
     def setup_network(self):
         self.add_nodes(4, [
             # Nodes 0/1 are "wallet" nodes
-            ["-debug"],
-            ["-debug", "-timestampindex"],
+            [],
+            ["-timestampindex"],
             # Nodes 2/3 are used for testing
-            ["-debug"],
-            ["-debug", "-timestampindex"]])
+            [],
+            ["-timestampindex"]])
 
         self.start_nodes()
 
@@ -38,26 +38,26 @@ class TimestampIndexTest(RavenTestFramework):
         self.sync_all()
 
     def run_test(self):
-        print("Mining 25 blocks...")
+        self.log.info("Mining 25 blocks...")
         blockhashes = self.nodes[0].generate(25)
         time.sleep(3)
-        print("Mining 25 blocks...")
+        self.log.info("Mining 25 blocks...")
         blockhashes.extend(self.nodes[0].generate(25))
         time.sleep(3)
-        print("Mining 25 blocks...")
+        self.log.info("Mining 25 blocks...")
         blockhashes.extend(self.nodes[0].generate(25))
         self.sync_all()
         low = self.nodes[1].getblock(blockhashes[0])["time"]
         high = low + 76
 
-        print("Checking timestamp index...")
+        self.log.info("Checking timestamp index...")
         hashes = self.nodes[1].getblockhashes(high, low)
 
         assert_equal(len(hashes), len(blockhashes))
 
         assert_equal(hashes, blockhashes)
 
-        print("Passed\n")
+        self.log.info("All Tests Passed")
 
 
 if __name__ == '__main__':

@@ -100,8 +100,8 @@ class VersionBitsWarningTest(RavenTestFramework):
         # have gotten a different alert due to more than 51/100 blocks
         # being of unexpected version.
         # Check that get*info() shows some kind of error.
-        print(self.nodes[0].getinfo()["errors"])
-       # assert(WARN_UNKNOWN_RULES_MINED in self.nodes[0].getinfo()["errors"])
+        self.log.info(self.nodes[0].getinfo()["errors"])
+        #assert(WARN_UNKNOWN_RULES_MINED in self.nodes[0].getinfo()["errors"])
         #assert(WARN_UNKNOWN_RULES_MINED in self.nodes[0].getmininginfo()["warnings"])
         #assert(WARN_UNKNOWN_RULES_MINED in self.nodes[0].getnetworkinfo()["warnings"])
 

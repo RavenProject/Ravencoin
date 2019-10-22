@@ -55,7 +55,7 @@ class ZapWalletTXesTest (RavenTestFramework):
         self.stop_node(0)
         self.start_node(0, ["-persistmempool=1", "-zapwallettxes=2"])
 
-        wait_until(lambda: self.nodes[0].getmempoolinfo()['size'] == 1, timeout=3)
+        wait_until(lambda: self.nodes[0].getmempoolinfo()['size'] == 1, err_msg="Wait for getMempoolInfo", timeout=3)
 
         assert_equal(self.nodes[0].gettransaction(txid1)['txid'], txid1)
         assert_equal(self.nodes[0].gettransaction(txid2)['txid'], txid2)

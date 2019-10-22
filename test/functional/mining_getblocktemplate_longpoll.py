@@ -18,7 +18,7 @@ class LongpollThread(threading.Thread):
         self.longpollid = templat['longpollid']
         # create a new connection to the node, we can't use the same
         # connection from two threads
-        self.node = get_rpc_proxy(node.url, 1, timeout=600, coveragedir=node.coverage_dir)
+        self.node = get_rpc_proxy(node.url, 1, timeout=600, coverage_dir=node.coverage_dir)
 
     def run(self):
         self.node.getblocktemplate({'longpollid':self.longpollid})
