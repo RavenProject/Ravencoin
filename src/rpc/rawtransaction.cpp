@@ -347,7 +347,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-            "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":(amount or object),\"data\":\"hex\",...} ( locktime ) ( replaceable )\n"
+            "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":(amount or object),\"data\":\"hex\",...}\n"
+            "                     ( locktime ) ( replaceable )\n"
             "\nCreate a transaction spending the given inputs and creating new outputs.\n"
             "Outputs are addresses (paired with a RVN amount, data or object specifying an asset operation) or data.\n"
             "Returns hex-encoded raw transaction.\n"
@@ -356,22 +357,47 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
             "\nPaying for Asset Operations:\n"
             "  Some operations require an amount of RVN to be sent to a burn address:\n"
-            "    transfer:       0\n"
-            "    issue:        500 to Issue Burn Address\n"
-            "    issue_unique    5 to Issue Unique Burn Address\n"
-            "    reissue:      100 to Reissue Burn Address\n"
-            "    transferwithmessage:       0\n"
+            "\n"
+            "    Operation          Amount + Burn Address\n"
+            "    transfer                 0\n"
+            "    transferwithmessage      0\n"
+            "    issue                  " + i64tostr(GetBurnAmount(AssetType::ROOT) / COIN) + " to " + GetBurnAddress(AssetType::ROOT) + "\n"
+            "    issue (subasset)       " + i64tostr(GetBurnAmount(AssetType::SUB) / COIN) + " to " + GetBurnAddress(AssetType::SUB) + "\n"
+            "    issue_unique             " + i64tostr(GetBurnAmount(AssetType::UNIQUE) / COIN) + " to " + GetBurnAddress(AssetType::UNIQUE) + "\n"
+            "    reissue                " + i64tostr(GetBurnAmount(AssetType::REISSUE) / COIN) + " to " + GetBurnAddress(AssetType::REISSUE) + "\n"
+            "    issue_restricted      " + i64tostr(GetBurnAmount(AssetType::RESTRICTED) / COIN) + " to " + GetBurnAddress(AssetType::RESTRICTED) + "\n"
+            "    reissue_restricted     " + i64tostr(GetBurnAmount(AssetType::REISSUE) / COIN) + " to " + GetBurnAddress(AssetType::REISSUE) + "\n"
+            "    issue_qualifier       " + i64tostr(GetBurnAmount(AssetType::QUALIFIER) / COIN) + " to " + GetBurnAddress(AssetType::QUALIFIER) + "\n"
+            "    issue_qualifier (sub)  " + i64tostr(GetBurnAmount(AssetType::SUB_QUALIFIER) / COIN) + " to " + GetBurnAddress(AssetType::SUB_QUALIFIER) + "\n"
+            "    tag_addresses          " + "0.1 to " + GetBurnAddress(AssetType::NULL_ADD_QUALIFIER) + " (per address)\n"
+            "    untag_addresses        " + "0.1 to " + GetBurnAddress(AssetType::NULL_ADD_QUALIFIER) + " (per address)\n"
+            "    freeze_addresses         0\n"
+            "    unfreeze_addresses       0\n"
+            "    freeze_asset             0\n"
+            "    unfreeze_asset           0\n"
 
-            "\nOwnership:\n"
-            "  These operations require an ownership token input for the asset being operated upon:\n"
-            "    issue_unique\n"
-            "    reissue\n"
+            "\nAssets For Authorization:\n"
+            "  These operations require a specific asset input for authorization:\n"
+            "    Root Owner Token:\n"
+            "      reissue\n"
+            "      issue_unique\n"
+            "      issue_restricted\n"
+            "      reissue_restricted\n"
+            "      freeze_addresses\n"
+            "      unfreeze_addresses\n"
+            "      freeze_asset\n"
+            "      unfreeze_asset\n"
+            "    Root Qualifier Token:\n"
+            "      issue_qualifier (when issuing subqualifier)\n"
+            "    Qualifier Token:\n"
+            "      tag_addresses\n"
+            "      untag_addresses\n"
 
             "\nOutput Ordering:\n"
             "  Asset operations require the following:\n"
             "    1) All coin outputs come first (including the burn output).\n"
             "    2) The owner token change output comes next (if required).\n"
-            "    3) An issue, issue_unique, reissue or any number of transfers comes last\n"
+            "    3) An issue, reissue, or any number of transfers comes last\n"
             "       (different types can't be mixed in a single transaction).\n"
 
             "\nArguments:\n"
@@ -386,7 +412,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "     ]\n"
             "2. \"outputs\"                               (object, required) a json object with outputs\n"
             "     {\n"
-            "       \"address\":                          (string, required) The destination raven address.  Each output must have a different address.\n"
+            "       \"address\":                          (string, required) The destination raven address.\n"
+            "                                               Each output must have a different address.\n"
             "         x.xxx                             (number or string, required) The RVN amount\n"
             "           or\n"
             "         {                                 (object) A json object of assets to send\n"
@@ -416,41 +443,132 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "               \"units\":[1-8],              (number, required) display units, between 1 (integral) to 8 (max precision)\n"
             "               \"reissuable\":[0-1],         (number, required) 1=reissuable asset\n"
             "               \"has_ipfs\":[0-1],           (number, required) 1=passing ipfs_hash\n"
-            "               \"ipfs_hash\":\"hash\"        (string, optional) an ipfs hash for discovering asset metadata\n"
+            "               \"ipfs_hash\":\"hash\"          (string, optional) an ipfs hash for discovering asset metadata\n"
             "             }\n"
             "         }\n"
             "           or\n"
             "         {                                 (object) A json object describing new unique assets to issue\n"
             "           \"issue_unique\":\n"
             "             {\n"
-            "               \"root_name\":\"root-name\",         (string, required) name of the asset the unique asset(s) are being issued under\n"
+            "               \"root_name\":\"root-name\",         (string, required) name of the asset the unique asset(s) \n"
+            "                                                      are being issued under\n"
             "               \"asset_tags\":[\"asset_tag\", ...], (array, required) the unique tag for each asset which is to be issued\n"
-            "               \"ipfs_hashes\":[\"hash\", ...],     (array, optional) ipfs hashes corresponding to each supplied tag (should be same size as \"asset_tags\")\n"
+            "               \"ipfs_hashes\":[\"hash\", ...],     (array, optional) ipfs hashes corresponding to each supplied tag \n"
+            "                                                      (should be same size as \"asset_tags\")\n"
             "             }\n"
             "         }\n"
             "           or\n"
-            "         {                                 (object) A json object describing follow-on asset issue.  Requires matching ownership input.\n"
+            "         {                                 (object) A json object describing follow-on asset issue.\n"
             "           \"reissue\":\n"
             "             {\n"
             "               \"asset_name\":\"asset-name\", (string, required) name of asset to be reissued\n"
             "               \"asset_quantity\":n,          (number, required) the number of raw units to issue\n"
             "               \"reissuable\":[0-1],          (number, optional) default is 1, 1=reissuable asset\n"
-            "               \"ipfs_hash\":\"hash\",        (string, optional) An ipfs hash for discovering asset metadata, Overrides the current ipfs hash if given\n"
-            "               \"owner_change_address\"       (string, optional) the address where the owner token will be sent to. If not given, it will be sent to the output address\n"
+            "               \"ipfs_hash\":\"hash\",        (string, optional) An ipfs hash for discovering asset metadata, \n"
+            "                                                Overrides the current ipfs hash if given\n"
+            "               \"owner_change_address\"       (string, optional) the address where the owner token will be sent to. \n"
+            "                                                If not given, it will be sent to the output address\n"
             "             }\n"
             "         }\n"
-            "         or\n"
+            "           or\n"
             "         {                                 (object) A json object describing how restricted asset to issue\n"
             "           \"issue_restricted\":\n"
             "             {\n"
             "               \"asset_name\":\"asset-name\",(string, required) new asset name\n"
             "               \"asset_quantity\":n,         (number, required) the number of raw units to issue\n"
-            "               \"verifier_string\":\"text\", (string, required) the verifier string to be used for a restricted asset transfer verification\n"
-            "               \"units\":[1-8],              (number, required) display units, between 1 (integral) to 8 (max precision)\n"
+            "               \"verifier_string\":\"text\", (string, required) the verifier string to be used for a restricted \n"
+            "                                               asset transfer verification\n"
+            "               \"units\":[0-8],              (number, required) display units, between 0 (integral) and 8 (max precision)\n"
             "               \"reissuable\":[0-1],         (number, required) 1=reissuable asset\n"
             "               \"has_ipfs\":[0-1],           (number, required) 1=passing ipfs_hash\n"
             "               \"ipfs_hash\":\"hash\",       (string, optional) an ipfs hash for discovering asset metadata\n"
-            "               \"owner_change_address\"      (string, optional) the address where the owner token will be sent to. If not given, it will be sent to the output address\n"
+            "               \"owner_change_address\"      (string, optional) the address where the owner token will be sent to. \n"
+            "                                               If not given, it will be sent to the output address\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing follow-on asset issue.\n"
+            "           \"reissue_restricted\":\n"
+            "             {\n"
+            "               \"asset_name\":\"asset-name\", (string, required) name of asset to be reissued\n"
+            "               \"asset_quantity\":n,          (number, required) the number of raw units to issue\n"
+            "               \"reissuable\":[0-1],          (number, optional) default is 1, 1=reissuable asset\n"
+            "               \"verifier_string\":\"text\",  (string, optional) the verifier string to be used for a restricted asset \n"
+            "                                                transfer verification\n"
+            "               \"ipfs_hash\":\"hash\",        (string, optional) An ipfs hash for discovering asset metadata, \n"
+            "                                                Overrides the current ipfs hash if given\n"
+            "               \"owner_change_address\"       (string, optional) the address where the owner token will be sent to. \n"
+            "                                                If not given, it will be sent to the output address\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing a new qualifier to issue.\n"
+            "           \"issue_qualifier\":\n"
+            "             {\n"
+            "               \"asset_name\":\"asset_name\", (string, required) a qualifier name (starts with '#')\n"
+            "               \"asset_quantity\":n,          (numeric, optional, default=1) the number of units to be issued (1 to 10)\n"
+            "               \"has_ipfs\":[0-1],            (boolean, optional, default=false), whether ifps hash is going \n"
+            "                                                to be added to the asset\n"
+            "               \"ipfs_hash\":\"hash\",        (string, optional but required if has_ipfs = 1), an ipfs hash or a \n"
+            "                                                txid hash once RIP5 is activated\n"
+            "               \"root_change_address\"        (string, optional) Only applies when issuing subqualifiers.\n"
+            "                                                The address where the root qualifier will be sent.\n"
+            "                                                If not specified, it will be sent to the output address.\n"
+            "               \"change_quantity\":\"qty\"    (numeric, optional) the asset change amount (defaults to 1)\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing addresses to be tagged.\n"
+            "                                             The address in the key will used as the asset change address.\n"
+            "           \"tag_addresses\":\n"
+            "             {\n"
+            "               \"qualifier\":\"qualifier\",          (string, required) a qualifier name (starts with '#')\n"
+            "               \"addresses\":[\"addr\", ...],        (array, required) the addresses to be tagged (up to 10)\n"
+            "               \"change_quantity\":\"qty\",          (numeric, optional) the asset change amount (defaults to 1)\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing addresses to be untagged.\n"
+            "                                             The address in the key will be used as the asset change address.\n"
+            "           \"untag_addresses\":\n"
+            "             {\n"
+            "               \"qualifier\":\"qualifier\",          (string, required) a qualifier name (starts with '#')\n"
+            "               \"addresses\":[\"addr\", ...],        (array, required) the addresses to be untagged (up to 10)\n"
+            "               \"change_quantity\":\"qty\",          (numeric, optional) the asset change amount (defaults to 1)\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing addresses to be frozen.\n"
+            "                                             The address in the key will used as the owner change address.\n"
+            "           \"freeze_addresses\":\n"
+            "             {\n"
+            "               \"asset_name\":\"asset_name\",        (string, required) a restricted asset name (starts with '$')\n"
+            "               \"addresses\":[\"addr\", ...],        (array, required) the addresses to be frozen (up to 10)\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing addresses to be frozen.\n"
+            "                                             The address in the key will be used as the owner change address.\n"
+            "           \"unfreeze_addresses\":\n"
+            "             {\n"
+            "               \"asset_name\":\"asset_name\",        (string, required) a restricted asset name (starts with '$')\n"
+            "               \"addresses\":[\"addr\", ...],        (array, required) the addresses to be untagged (up to 10)\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing an asset to be frozen.\n"
+            "                                             The address in the key will used as the owner change address.\n"
+            "           \"freeze_asset\":\n"
+            "             {\n"
+            "               \"asset_name\":\"asset_name\",        (string, required) a restricted asset name (starts with '$')\n"
+            "             }\n"
+            "         }\n"
+            "           or\n"
+            "         {                                 (object) A json object describing an asset to be frozen.\n"
+            "                                             The address in the key will be used as the owner change address.\n"
+            "           \"unfreeze_asset\":\n"
+            "             {\n"
+            "               \"asset_name\":\"asset_name\",        (string, required) a restricted asset name (starts with '$')\n"
             "             }\n"
             "         }\n"
             "           or\n"
@@ -990,8 +1108,347 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     rawTx.vout.push_back(owner_change);
                     rawTx.vout.push_back(resissue);
 
+                } else if (assetKey_ == "reissue_restricted") {
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string(
+                                "Invalid parameter, the format must follow { \"reissue_restricted\": {\"key\": value}, ...}"));
+
+                    // Get the asset data object from the json
+                    auto reissueData = asset_.getValues()[0].get_obj();
+
+                    CReissueAsset reissueObj;
+
+                    /**-------Process the reissue data-------**/
+                    const UniValue &asset_name = find_value(reissueData, "asset_name");
+                    if (!asset_name.isStr())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                           "Invalid parameter, missing reissue data for key: asset_name");
+
+                    const UniValue &asset_quantity = find_value(reissueData, "asset_quantity");
+                    if (!asset_quantity.isNum())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                           "Invalid parameter, missing reissue data for key: asset_quantity");
+
+                    const UniValue &reissuable = find_value(reissueData, "reissuable");
+                    if (!reissuable.isNull()) {
+                        if (!reissuable.isNum())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, missing reissue metadata for key: reissuable");
+
+                        int nReissuable = reissuable.get_int();
+                        if (nReissuable > 1 || nReissuable < 0)
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, reissuable data must be a 0 or 1");
+
+                        reissueObj.nReissuable = int8_t(nReissuable);
+                    }
+
+                    bool fHasVerifier = false;
+                    const UniValue &verifier = find_value(reissueData, "verifier_string");
+                    if (!verifier.isNull()) {
+                        if (!verifier.isStr()) {
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, verifier_string must be a string");
+                        }
+                        fHasVerifier = true;
+                    }
+
+                    const UniValue &ipfs_hash = find_value(reissueData, "ipfs_hash");
+                    if (!ipfs_hash.isNull()) {
+                        if (!ipfs_hash.isStr())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, missing reissue metadata for key: ipfs_hash");
+                        reissueObj.strIPFSHash = DecodeAssetData(ipfs_hash.get_str());
+                    }
+
+                    bool fHasOwnerChange = false;
+                    const UniValue &owner_change_address = find_value(reissueData, "owner_change_address");
+                    if (!owner_change_address.isNull()) {
+                        if (!owner_change_address.isStr())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, owner_change_address must be a string");
+                        fHasOwnerChange = true;
+                    }
+
+                    if (fHasOwnerChange && !IsValidDestinationString(owner_change_address.get_str()))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                           "Invalid parameter, owner_change_address is not a valid Ravencoin address");
+
+                    std::string strAssetName = asset_name.get_str();
+
+                    if (!IsAssetNameAnRestricted(strAssetName))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                           "Invalid parameter, asset_name must be a restricted asset name. e.g $ASSET_NAME");
+
+                    std::string strippedVerifierString;
+                    if (fHasVerifier) {
+                        // Strip the white spaces from the verifier string
+                        strippedVerifierString = GetStrippedVerifierString(verifier.get_str());
+
+                        // Check the restricted asset destination address, and make sure it validates with the verifier string
+                        std::string strError = "";
+                        if (!ContextualCheckVerifierString(currentActiveAssetCache, strippedVerifierString,
+                                                           EncodeDestination(destination), strError))
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string(
+                                    "Invalid parmeter, verifier string is not. Please check the syntax. Error Msg - " +
+                                    strError));
+                    }
+
+                    // Add the received data into the reissue object
+                    reissueObj.strName = asset_name.get_str();
+                    reissueObj.nAmount = AmountFromValue(asset_quantity);
+
+                    // Validate the the object is valid
+                    std::string strError;
+                    if (!ContextualCheckReissueAsset(currentActiveAssetCache, reissueObj, strError))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+
+                    // Create the scripts for the change of the ownership token
+                    CScript owner_asset_transfer_script;
+                    if (fHasOwnerChange)
+                        owner_asset_transfer_script = GetScriptForDestination(
+                                DecodeDestination(owner_change_address.get_str()));
+                    else
+                        owner_asset_transfer_script = GetScriptForDestination(destination);
+
+                    CAssetTransfer transfer_owner(RestrictedNameToOwnerName(asset_name.get_str()), OWNER_ASSET_AMOUNT);
+                    transfer_owner.ConstructTransaction(owner_asset_transfer_script);
+
+                    // Create the scripts for the reissued assets
+                    CScript scriptReissueAsset = GetScriptForDestination(destination);
+                    reissueObj.ConstructTransaction(scriptReissueAsset);
+
+                    // Construct the verifier string script
+                    CScript verifier_string_script;
+                    if (fHasVerifier) {
+                        CNullAssetTxVerifierString verifierString(strippedVerifierString);
+                        verifierString.ConstructTransaction(verifier_string_script);
+                    }
+
+                    // Create the CTxOut for the verifier script
+                    CTxOut out_verifier(0, verifier_string_script);
+                    rawTx.vout.push_back(out_verifier);
+
+                    // Create the CTxOut for the owner token
+                    CTxOut out_owner(0, owner_asset_transfer_script);
+                    rawTx.vout.push_back(out_owner);
+
+                    // Create the CTxOut for the reissue asset
+                    CTxOut out_reissuance(0, scriptReissueAsset);
+                    rawTx.vout.push_back(out_reissuance);
+
+                } else if (assetKey_ == "issue_qualifier") {
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"issue_qualifier\": {\"key\": value}, ...}"));
+
+                    // Get the asset data object from the json
+                    auto assetData = asset_.getValues()[0].get_obj();
+
+                    /**-------Process the assets data-------**/
+                    const UniValue& asset_name = find_value(assetData, "asset_name");
+                    if (!asset_name.isStr())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset data for key: asset_name");
+
+                    const UniValue& asset_quantity = find_value(assetData, "asset_quantity");
+                    if (!asset_quantity.isNum())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset data for key: asset_quantity");
+
+                    const UniValue& has_ipfs = find_value(assetData, "has_ipfs");
+                    if (!has_ipfs.isNum())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset metadata for key: has_ipfs");
+
+                    bool fHasIpfs = false;
+                    UniValue ipfs_hash = "";
+                    if (has_ipfs.get_int() == 1) {
+                        fHasIpfs = true;
+                        ipfs_hash = find_value(assetData, "ipfs_hash");
+                        if (!ipfs_hash.isStr())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset metadata for key: has_ipfs");
+                    }
+
+                    std::string strAssetName = asset_name.get_str();
+                    if (!IsAssetNameAQualifier(strAssetName))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, asset_name must be a qualifier or subqualifier name. e.g #MY_QUALIFIER or #MY_ROOT/#MY_SUB");
+                    bool isSubQualifier = IsAssetNameASubQualifier(strAssetName);
+
+                    bool fHasRootChange = false;
+                    const UniValue& root_change_address = find_value(assetData, "root_change_address");
+                    if (!root_change_address.isNull()) {
+                        if (!isSubQualifier)
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, root_change_address only allowed when issuing a subqualifier.");
+                        if (!root_change_address.isStr())
+                            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                                               "Invalid parameter, root_change_address must be a string");
+                        fHasRootChange = true;
+                    }
+
+                    if (fHasRootChange && !IsValidDestinationString(root_change_address.get_str()))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, root_change_address is not a valid Ravencoin address");
+
+                    CAmount nAmount = AmountFromValue(asset_quantity);
+                    if (nAmount < QUALIFIER_ASSET_MIN_AMOUNT || nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, qualifiers are only allowed to be issued in quantities between 1 and 10.");
+
+                    CAmount changeQty = COIN;
+                    const UniValue& change_qty = find_value(assetData, "change_quantity");
+                    if (!change_qty.isNull()) {
+                        if (!change_qty.isNum() || AmountFromValue(change_qty) < COIN)
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, change_amount must be a positive number");
+                        changeQty = AmountFromValue(change_qty);
+                    }
+
+                    int units = 0;
+                    bool reissuable = false;
+
+                    // Create a new qualifier asset
+                    CNewAsset asset(strAssetName, nAmount, units, reissuable ? 1 : 0, fHasIpfs ? 1 : 0, DecodeAssetData(ipfs_hash.get_str()));
+
+                    // Verify the new asset data
+                    std::string strError = "";
+                    if (!ContextualCheckNewAsset(currentActiveAssetCache, asset, strError)) {
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+                    }
+
+                    // Construct the issuance script
+                    CScript issuance_script = GetScriptForDestination(destination);
+                    asset.ConstructTransaction(issuance_script);
+
+                    // Construct the root change script if issuing subqualifier
+                    CScript root_asset_transfer_script;
+                    if (isSubQualifier) {
+                        if (fHasRootChange)
+                            root_asset_transfer_script = GetScriptForDestination(
+                                    DecodeDestination(root_change_address.get_str()));
+                        else
+                            root_asset_transfer_script = GetScriptForDestination(destination);
+
+                        CAssetTransfer transfer_root(GetParentName(strAssetName), changeQty);
+                        transfer_root.ConstructTransaction(root_asset_transfer_script);
+                    }
+
+                    // Create the CTxOut for each script we need to issue
+                    CTxOut issue(0, issuance_script);
+                    CTxOut root_change;
+                    if (isSubQualifier)
+                        root_change = CTxOut(0, root_asset_transfer_script);
+
+                    // Push the scriptPubKey into the vouts.
+                    if (isSubQualifier)
+                        rawTx.vout.push_back(root_change);
+                    rawTx.vout.push_back(issue);
+
+                } else if (assetKey_ == "tag_addresses" || assetKey_ == "untag_addresses") {
+                    int8_t tag_op = assetKey_ == "tag_addresses" ? 1 : 0;
+
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"[tag|untag]_addresses\": {\"key\": value}, ...}"));
+                    auto assetData = asset_.getValues()[0].get_obj();
+
+                    const UniValue& qualifier = find_value(assetData, "qualifier");
+                    if (!qualifier.isStr())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing data for key: qualifier");
+                    std::string strQualifier = qualifier.get_str();
+                    if (!IsAssetNameAQualifier(strQualifier))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, a valid qualifier name must be provided, e.g. #MY_QUALIFIER");
+
+                    const UniValue& addresses = find_value(assetData, "addresses");
+                    if (!addresses.isArray() || addresses.size() < 1 || addresses.size() > 10)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, value for key address must be an array of size 1 to 10");
+                    for (int i = 0; i < (int)addresses.size(); i++) {
+                        if (!IsValidDestinationString(addresses[i].get_str()))
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, supplied address is not a valid Ravencoin address");
+                    }
+
+                    CAmount changeQty = COIN;
+                    const UniValue& change_qty = find_value(assetData, "change_quantity");
+                    if (!change_qty.isNull()) {
+                        if (!change_qty.isNum() || AmountFromValue(change_qty) < COIN)
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, change_amount must be a positive number");
+                        changeQty = AmountFromValue(change_qty);
+                    }
+
+                    // change
+                    CScript change_script = GetScriptForDestination(destination);
+                    CAssetTransfer transfer_change(strQualifier, changeQty);
+                    transfer_change.ConstructTransaction(change_script);
+                    CTxOut out_change(0, change_script);
+                    rawTx.vout.push_back(out_change);
+
+                    // tagging
+                    for (int i = 0; i < (int)addresses.size(); i++) {
+                        CScript tag_string_script = GetScriptForNullAssetDataDestination(DecodeDestination(addresses[i].get_str()));
+                        CNullAssetTxData tagString(strQualifier, tag_op);
+                        tagString.ConstructTransaction(tag_string_script);
+                        CTxOut out_tag(0, tag_string_script);
+                        rawTx.vout.push_back(out_tag);
+                    }
+                } else if (assetKey_ == "freeze_addresses" || assetKey_ == "unfreeze_addresses") {
+                    int8_t freeze_op = assetKey_ == "freeze_addresses" ? 1 : 0;
+
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"[freeze|unfreeze]_addresses\": {\"key\": value}, ...}"));
+                    auto assetData = asset_.getValues()[0].get_obj();
+
+                    const UniValue& asset_name = find_value(assetData, "asset_name");
+                    if (!asset_name.isStr())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing data for key: asset_name");
+                    std::string strAssetName = asset_name.get_str();
+                    if (!IsAssetNameAnRestricted(strAssetName))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, a valid restricted asset name must be provided, e.g. $MY_ASSET");
+
+                    const UniValue& addresses = find_value(assetData, "addresses");
+                    if (!addresses.isArray() || addresses.size() < 1 || addresses.size() > 10)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, value for key address must be an array of size 1 to 10");
+                    for (int i = 0; i < (int)addresses.size(); i++) {
+                        if (!IsValidDestinationString(addresses[i].get_str()))
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, supplied address is not a valid Ravencoin address");
+                    }
+
+                    // owner change
+                    CScript change_script = GetScriptForDestination(destination);
+                    CAssetTransfer transfer_change(RestrictedNameToOwnerName(strAssetName), OWNER_ASSET_AMOUNT);
+                    transfer_change.ConstructTransaction(change_script);
+                    CTxOut out_change(0, change_script);
+                    rawTx.vout.push_back(out_change);
+
+                    // freezing
+                    for (int i = 0; i < (int)addresses.size(); i++) {
+                        CScript freeze_string_script = GetScriptForNullAssetDataDestination(DecodeDestination(addresses[i].get_str()));
+                        CNullAssetTxData freezeString(strAssetName, freeze_op);
+                        freezeString.ConstructTransaction(freeze_string_script);
+                        CTxOut out_freeze(0, freeze_string_script);
+                        rawTx.vout.push_back(out_freeze);
+                    }
+                } else if (assetKey_ == "freeze_asset" || assetKey_ == "unfreeze_asset") {
+                    int8_t freeze_op = assetKey_ == "freeze_asset" ? 1 : 0;
+
+                    if (asset_[0].type() != UniValue::VOBJ)
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, the format must follow { \"[freeze|unfreeze]_asset\": {\"key\": value}, ...}"));
+                    auto assetData = asset_.getValues()[0].get_obj();
+
+                    const UniValue& asset_name = find_value(assetData, "asset_name");
+                    if (!asset_name.isStr())
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing data for key: asset_name");
+                    std::string strAssetName = asset_name.get_str();
+                    if (!IsAssetNameAnRestricted(strAssetName))
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, a valid restricted asset name must be provided, e.g. $MY_ASSET");
+
+                    // owner change
+                    CScript change_script = GetScriptForDestination(destination);
+                    CAssetTransfer transfer_change(RestrictedNameToOwnerName(strAssetName), OWNER_ASSET_AMOUNT);
+                    transfer_change.ConstructTransaction(change_script);
+                    CTxOut out_change(0, change_script);
+                    rawTx.vout.push_back(out_change);
+
+                    // freezing
+                    CScript freeze_string_script;
+                    CNullAssetTxData freezeString(strAssetName, freeze_op);
+                    freezeString.ConstructGlobalRestrictionTransaction(freeze_string_script);
+                    CTxOut out_freeze(0, freeze_string_script);
+                    rawTx.vout.push_back(out_freeze);
+
                 } else {
-                    throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, unknown output type (should be 'issue', 'issue_restricted', 'reissue', 'transfer' or 'transferwithmessage'): " + assetKey_));
+                    throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, unknown output type: " + assetKey_));
                 }
             } else {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, Output must be of the type object"));

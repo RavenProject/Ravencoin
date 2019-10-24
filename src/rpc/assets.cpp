@@ -1596,7 +1596,7 @@ UniValue reissue(const JSONRPCRequest& request)
                 "4. \"change_address\"           (string, optional) address that the change of the transaction will be sent to\n"
                 "5. \"reissuable\"               (boolean, optional, default=true), whether future reissuance is allowed\n"
                 "6. \"new_unit\"                 (numeric, optional, default=-1), the new units that will be associated with the asset\n"
-                "6. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
+                "7. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -2339,13 +2339,13 @@ UniValue checkglobalrestriction(const JSONRPCRequest& request)
 
 UniValue issuequalifierasset(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 5)
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() < 1 || request.params.size() > 6)
         throw std::runtime_error(
-                "issuequalifierasset \"asset_name\" qty \"( to_address )\" \"( change_address )\" ( reissuable ) ( has_ipfs ) \"( ipfs_hash )\"\n"
+                "issuequalifierasset \"asset_name\" qty \"( to_address )\" \"( change_address )\" ( has_ipfs ) \"( ipfs_hash )\"\n"
                 + RestrictedActivationWarning() +
                 "\nIssue an qualifier or sub qualifier asset\n"
                 "If the '#' character isn't added, it will be added automatically\n"
-                "Amount is a number between 1 and 10"
+                "Amount is a number between 1 and 10\n"
                 "Asset name must not conflict with any existing asset.\n"
                 "Unit is always set to Zero (0) for qualifier assets\n"
                 "Reissuable is always set to false for qualifier assets\n"
