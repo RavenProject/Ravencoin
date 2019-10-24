@@ -23,7 +23,7 @@ class RestrictedAssetsTest(RavenTestFramework):
         n0.sendtoaddress(n1.getnewaddress(), 2500)
         n0.generate(1)
         self.sync_all()
-        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['restricted_assets']['status'])
+        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['messaging_restricted']['status'])
 
     def issuerestrictedasset(self):
         self.log.info("Testing issuerestrictedasset() with required params...")
@@ -152,8 +152,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         # valid params
         assert_raises_rpc_error(None, "Invalid asset name",
                                 n0.reissuerestrictedasset, "$!N\/AL!D", qty, to_address)
-        assert_raises_rpc_error(None, "Unsupported asset type",
-                                n0.reissuerestrictedasset, "ROOT_ASSET", qty, to_address)
         assert_raises_rpc_error(None, "Wallet doesn't have asset",
                                 n0.reissuerestrictedasset, foreign_asset_name, qty, to_address)
         assert_raises_rpc_error(None, "Invalid Raven address",

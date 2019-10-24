@@ -269,7 +269,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         n0.sendtoaddress(n1.getnewaddress(), 2500)
         n0.generate(1)
         self.sync_all()
-        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['restricted_assets']['status'])
+        assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['messaging_restricted']['status'])
 
     def issue_restricted_test(self):
         self.log.info("Testing raw issue_restricted...")
