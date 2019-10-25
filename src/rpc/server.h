@@ -189,6 +189,9 @@ extern CAmount AmountFromValue(const UniValue& value);
 extern std::string HelpExampleCli(const std::string& methodname, const std::string& args);
 extern std::string HelpExampleRpc(const std::string& methodname, const std::string& args);
 
+
+void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime);
+
 bool StartRPC();
 void InterruptRPC();
 void StopRPC();
