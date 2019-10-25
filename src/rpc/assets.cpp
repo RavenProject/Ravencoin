@@ -36,32 +36,6 @@
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
 
-void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
-{
-    size_t msglen = message.length();
-    if (msglen == 46 || msglen == 64) {
-        if (msglen == 64 && !AreMessagesDeployed()) {
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until RIP5 is activated"));
-        }
-    } else {
-        if (msglen)
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters), Txid hashes (must be 64 characters)"));
-    }
-
-    bool fNotIPFS = false;
-    if (message.substr(0, 2) != "Qm") {
-        fNotIPFS = true;
-        if (!AreMessagesDeployed())
-            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid ipfs hash. Please use a valid ipfs hash. They usually start with Qm"));
-    }
-
-    if (fNotIPFS && !IsHex(message))
-        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
-
-    if (expireTime < 0)
-        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Expire time must be a positive number"));
-}
-
 void CheckRestrictedAssetTransferInputs(const CWalletTx& transaction, const std::string& asset_name) {
     // Do a validity check before commiting the transaction
     if (IsAssetNameAnRestricted(asset_name)) {

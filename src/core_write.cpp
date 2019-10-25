@@ -14,6 +14,7 @@
 #include "streams.h"
 #include <univalue.h>
 #include <iomanip>
+#include <wallet/wallet.h>
 #include "util.h"
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
@@ -170,17 +171,20 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
     if (type == TX_NEW_ASSET || type == TX_TRANSFER_ASSET || type == TX_REISSUE_ASSET) {
         UniValue assetInfo(UniValue::VOBJ);
 
-        std::string name;
-        CAmount amount;
         std::string _assetAddress;
 
-        if (GetAssetInfoFromScript(scriptPubKey, name, amount)) {
-            assetInfo.pushKV("name", name);
-            assetInfo.pushKV("amount", ValueFromAmount(amount));
+        CAssetOutputEntry data;
+        if (GetAssetData(scriptPubKey, data)) {
+            assetInfo.pushKV("name", data.assetName);
+            assetInfo.pushKV("amount", ValueFromAmount(data.nAmount));
+            if (!data.message.empty())
+                assetInfo.pushKV("message", EncodeAssetData(data.message));
+            if(data.expireTime)
+                assetInfo.pushKV("expire_time", data.expireTime);
 
             switch (type) {
                 case TX_NEW_ASSET:
-                    if (IsAssetNameAnOwner(name)) {
+                    if (IsAssetNameAnOwner(data.assetName)) {
                         // pwnd n00b
                     } else {
                         CNewAsset asset;

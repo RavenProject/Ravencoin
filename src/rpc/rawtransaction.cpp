@@ -444,6 +444,8 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "               \"reissuable\":[0-1],         (number, required) 1=reissuable asset\n"
             "               \"has_ipfs\":[0-1],           (number, required) 1=passing ipfs_hash\n"
             "               \"ipfs_hash\":\"hash\"          (string, optional) an ipfs hash for discovering asset metadata\n"
+            // TODO if we decide to remove the consensus check from issue 675 https://github.com/RavenProject/Ravencoin/issues/675
+   //TODO"               \"custom_owner_address\": \"addr\" (string, optional) owner token will get sent to this address if set\n"
             "             }\n"
             "         }\n"
             "           or\n"
@@ -719,6 +721,17 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     const UniValue& has_ipfs = find_value(assetData, "has_ipfs");
                     if (!has_ipfs.isNum())
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset metadata for key: has_ipfs");
+// TODO, if we decide to remove the consensus check https://github.com/RavenProject/Ravencoin/issues/675, remove or add the code (requires consensus change)
+//                    const UniValue& custom_owner_address = find_value(assetData, "custom_owner_address");
+//                    if (!custom_owner_address.isNull()) {
+//                        CTxDestination dest = DecodeDestination(custom_owner_address.get_str());
+//                        if (!IsValidDestination(dest)) {
+//                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, invalid destination: custom_owner_address");
+//                        }
+//
+//                        ownerPubKey = GetScriptForDestination(dest);
+//                    }
+
 
                     UniValue ipfs_hash = "";
                     if (has_ipfs.get_int() == 1) {
@@ -726,6 +739,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         if (!ipfs_hash.isStr())
                             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset metadata for key: has_ipfs");
                     }
+
 
                     if (IsAssetNameAnRestricted(asset_name.get_str()))
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, asset_name can't be a restricted asset name. Please use issue_restricted with the correct parameters");
@@ -1504,6 +1518,11 @@ UniValue decoderawtransaction(const JSONRPCRequest& request)
             "         \"hex\" : \"hex\",          (string) the hex\n"
             "         \"reqSigs\" : n,            (numeric) The required sigs\n"
             "         \"type\" : \"pubkeyhash\",  (string) The type, eg 'pubkeyhash'\n"
+            "         \"asset\" : {               (json object) optional\n"
+            "           \"name\" : \"name\",      (string) the asset name\n"
+            "           \"amount\" : n,           (numeric) the amount of asset that was sent\n"
+            "           \"message\" : \"message\", (string optional) the message if one was sent\n"
+            "           \"expire_time\" : n,      (numeric optional) the message epoch expiration time if one was set\n"
             "         \"addresses\" : [           (json array of string)\n"
             "           \"12tvKAXCxZjSmdNbao16dKXC8tRWfcF5oc\"   (string) raven address\n"
             "           ,...\n"
@@ -1546,6 +1565,11 @@ UniValue decodescript(const JSONRPCRequest& request)
             "  \"asm\":\"asm\",   (string) Script public key\n"
             "  \"hex\":\"hex\",   (string) hex encoded public key\n"
             "  \"type\":\"type\", (string) The output type\n"
+            "  \"asset\" : {               (json object) optional\n"
+            "     \"name\" : \"name\",      (string) the asset name\n"
+            "     \"amount\" : n,           (numeric) the amount of asset that was sent\n"
+            "     \"message\" : \"message\", (string optional) the message if one was sent\n"
+            "     \"expire_time\" : n,      (numeric optional ) the message epoch expiration time if one was set\n"
             "  \"reqSigs\": n,    (numeric) The required signatures\n"
             "  \"addresses\": [   (json array of string)\n"
             "     \"address\"     (string) raven address\n"
@@ -1600,6 +1624,10 @@ UniValue decodescript(const JSONRPCRequest& request)
 
         r.push_back(Pair("asset_name", transfer.strName));
         r.push_back(Pair("amount", ValueFromAmount(transfer.nAmount)));
+        if (!transfer.message.empty())
+            r.push_back(Pair("message", transfer.message));
+        if (transfer.nExpireTime)
+            r.push_back(Pair("expire_time", transfer.nExpireTime));
 
     } else if (type.isStr() && type.get_str() == ASSET_REISSUE_STRING) {
         if (!AreAssetsDeployed())

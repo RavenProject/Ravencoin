@@ -335,7 +335,6 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
         }
     }
 
-
     /** RVN END */
 
     if (fCheckDuplicateInputs) {
