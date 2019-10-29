@@ -114,6 +114,14 @@ class AuthServiceProxy():
                 return self._get_response()
             else:
                 raise
+        except http.client.UnknownProtocol as e:
+            if e.line == "''":  # if connection was closed, try again
+                self.__conn.close()
+                self.__conn.request(method, path, postdata, headers)
+                print("~~~~~~~~~~~~~~~~~ Protocol Exception ~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                return self._get_response()
+            else:
+                raise
         except (BrokenPipeError, ConnectionResetError):
             # Python 3.5+ raises BrokenPipeError instead of BadStatusLine when the connection was reset
             # ConnectionResetError happens on FreeBSD with Python 3.4
@@ -166,6 +174,9 @@ class AuthServiceProxy():
                                                   self.__conn.timeout)})
         except http.client.RemoteDisconnected as e:
             log.debug("~~~~~~~ _get_response Remote Disconnected Exception: %s ~~~~~~~~~~~", e)
+            raise
+        except http.client.UnknownProtocol as e:
+            log.debug("~~~~~~~ _get_response Unknown Protocol Exception: %s ~~~~~~~~~~~", e)
             raise
         if http_response is None:
             raise JSONRPCException({

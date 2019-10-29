@@ -6,7 +6,6 @@
 """Test the rawtransaction RPCs for asset transactions.
 """
 from io import BytesIO
-from pprint import re
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import (assert_equal,
                                  assert_raises_rpc_error,
@@ -30,10 +29,20 @@ def truncate(number, digits=8):
     return math.trunc(stepper * number) / stepper
 
 
-def get_tx_issue_hex(node, asset_name, asset_quantity, asset_units=0):
+def get_first_unspent(self: object, node: object, needed: object = 500.1) -> object:
+    # Find the first unspent with enough required for transaction
+    for n in range(0, len(node.listunspent())):
+        unspent = node.listunspent()[n]
+        if float(unspent['amount']) > needed:
+            self.log.info("Found unspent index %d with more than %s available.", n, needed)
+            return unspent
+    assert (float(unspent['amount']) < needed)
+
+
+def get_tx_issue_hex(self, node, asset_name, asset_quantity, asset_units=0):
     to_address = node.getnewaddress()
     change_address = node.getnewaddress()
-    unspent = node.listunspent()[0]
+    unspent = get_first_unspent(self, node)
     inputs = [{k: unspent[k] for k in ['txid', 'vout']}]
     outputs = {
         'n1issueAssetXXXXXXXXXXXXXXXXWdnemQ': 500,
@@ -81,14 +90,14 @@ class RawAssetTransactionsTest(RavenTestFramework):
         owner_name = f"{asset_name}!"
         alternate_asset_name = 'ANOTHER_ASSET'
         alternate_owner_name = f"{alternate_asset_name}!"
-        n0.sendrawtransaction(get_tx_issue_hex(n0, asset_name, 1000))
-        n0.sendrawtransaction(get_tx_issue_hex(n0, alternate_asset_name, 1000))
+        n0.sendrawtransaction(get_tx_issue_hex(self, n0, asset_name, 1000))
+        n0.sendrawtransaction(get_tx_issue_hex(self, n0, alternate_asset_name, 1000))
         n0.generate(1)
 
         ########################################
         # try a reissue with no owner input
         to_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         inputs = [
             {k: unspent[k] for k in ['txid', 'vout']},
         ]
@@ -160,7 +169,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.deserialize(f)
         rvnt = '72766e74'  # rvnt
         # remove the owner output from vout
-        bad_vout = list(filter(lambda out: rvnt not in bytes_to_hex_str(out.scriptPubKey), tx.vout))
+        bad_vout = list(filter(lambda out_script: rvnt not in bytes_to_hex_str(out_script.scriptPubKey), tx.vout))
         tx.vout = bad_vout
         tx_hex_bad = bytes_to_hex_str(tx.serialize())
         tx_signed = n0.signrawtransaction(tx_hex_bad)['hex']
@@ -187,7 +196,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         ########################################
         # get issue tx
         asset_name = 'TAMPER_TEST_ASSET'
-        tx_issue_hex = get_tx_issue_hex(n0, asset_name, 1000)
+        tx_issue_hex = get_tx_issue_hex(self, n0, asset_name, 1000)
 
         ########################################
         # try tampering to issue an asset with no owner output
@@ -196,7 +205,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.deserialize(f)
         rvno = '72766e6f'  # rvno
         # remove the owner output from vout
-        bad_vout = list(filter(lambda out: rvno not in bytes_to_hex_str(out.scriptPubKey), tx.vout))
+        bad_vout = list(filter(lambda out_script: rvno not in bytes_to_hex_str(out_script.scriptPubKey), tx.vout))
         tx.vout = bad_vout
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
@@ -210,7 +219,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.deserialize(f)
         rvno = '72766e6f'  # rvno
         # find the owner output from vout and insert a duplicate back in
-        owner_vout = list(filter(lambda out: rvno in bytes_to_hex_str(out.scriptPubKey), tx.vout))[0]
+        owner_vout = list(filter(lambda out_script: rvno in bytes_to_hex_str(out_script.scriptPubKey), tx.vout))[0]
         tx.vout.insert(-1, owner_vout)
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
@@ -224,7 +233,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.deserialize(f)
         rvnq = '72766e71'  # rvnq
         # remove the owner output from vout
-        bad_vout = list(filter(lambda out: rvnq not in bytes_to_hex_str(out.scriptPubKey), tx.vout))
+        bad_vout = list(filter(lambda out_script: rvnq not in bytes_to_hex_str(out_script.scriptPubKey), tx.vout))
         tx.vout = bad_vout
         tx_bad_issue = bytes_to_hex_str(tx.serialize())
         tx_bad_issue_signed = n0.signrawtransaction(tx_bad_issue)['hex']
@@ -278,12 +287,10 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         ########################################
         # try to generate and issue an asset that already exists
-        tx_duplicate_issue_hex = get_tx_issue_hex(n0, asset_name, 42)
+        tx_duplicate_issue_hex = get_tx_issue_hex(self, n0, asset_name, 42)
         n0.sendrawtransaction(tx_issue_hex)
         n0.generate(1)
-        assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used",
-                                get_tx_issue_hex, n0, asset_name,
-                                55)  # intermittent failure "Invalid amount" -- out of funds so change is negative?
+        assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used", get_tx_issue_hex, self, n0, asset_name, 55)
         assert_raises_rpc_error(-25, f"Missing inputs", n0.sendrawtransaction, tx_duplicate_issue_hex)
 
     def issue_reissue_transfer_test(self):
@@ -294,7 +301,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         # issue
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         inputs = [{k: unspent[k] for k in ['txid', 'vout']}]
         outputs = {
             'n1issueAssetXXXXXXXXXXXXXXXXWdnemQ': 500,
@@ -322,7 +329,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         ########################################
         # reissue
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset_owner = n0.listmyassets('TEST_ASSET!', True)['TEST_ASSET!']['outpoints'][0]
 
         inputs = [
@@ -357,7 +364,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         ########################################
         # transfer
         remote_to_address = n1.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset = n0.listmyassets('TEST_ASSET', True)['TEST_ASSET']['outpoints'][0]
         inputs = [
             {k: unspent[k] for k in ['txid', 'vout']},
@@ -512,7 +519,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         tx.deserialize(f)
         rvnt = '72766e74'  # rvnt
         # remove the transfer output from vout
-        bad_vout = list(filter(lambda out: rvnt not in bytes_to_hex_str(out.scriptPubKey), tx.vout))
+        bad_vout = list(filter(lambda out_script: rvnt not in bytes_to_hex_str(out_script.scriptPubKey), tx.vout))
         tx.vout = bad_vout
         tampered_hex = bytes_to_hex_str(tx.serialize())
         assert_raises_rpc_error(-26, "bad-tx-asset-inputs-size-does-not-match-outputs-size",
@@ -547,7 +554,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
 
         inputs = [
@@ -570,10 +577,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-unique-asset-burn-outpoints-not-found", \
-                                n0.sendrawtransaction, signed_hex)
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-unique-asset-burn-outpoints-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
         # switch to proper burn address
@@ -588,8 +594,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
@@ -614,7 +620,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
         owner_change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
 
         inputs = [
@@ -664,8 +670,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         ########################################
         # ok
-        hex = n0.signrawtransaction(n0.createrawtransaction(inputs, outputs))['hex']
-        n0.sendrawtransaction(hex)
+        hex_data = n0.signrawtransaction(n0.createrawtransaction(inputs, outputs))['hex']
+        n0.sendrawtransaction(hex_data)
         n0.generate(1)
         assert_equal(1, n0.listmyassets()[root])
         assert_equal(1, n0.listmyassets()[asset_name])
@@ -679,7 +685,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         owner = f"{asset_name}!"
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         bad_hash = "RncvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
 
         ########################################
@@ -703,8 +709,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         ########################################
         # reissue
-        n0.issue(asset_name=asset_name, qty=1000, to_address=to_address, change_address=change_address, \
-                 units=0, reissuable=True, has_ipfs=False)
+        n0.issue(asset_name=asset_name, qty=1000, to_address=to_address, change_address=change_address, units=0, reissuable=True, has_ipfs=False)
         n0.generate(1)
         unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
         inputs = [
@@ -736,7 +741,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
 
         inputs = [
             {k: unspent[k] for k in ['txid', 'vout']},
@@ -759,10 +764,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
-                                n0.sendrawtransaction, signed_hex)
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
         # switch to invalid burn amount again
@@ -781,10 +785,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
-                                n0.sendrawtransaction, signed_hex)
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
         # switch to valid burn amount, but sending it to the sub asset burn address
@@ -803,10 +806,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
-                                n0.sendrawtransaction, signed_hex)
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
         # switch burn address to unique address
@@ -824,10 +826,9 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
-        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", \
-                                n0.sendrawtransaction, signed_hex)
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
+        assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
         # switch to valid burn address, and valid burn amount
@@ -845,8 +846,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
@@ -869,7 +870,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
         owner_change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
 
         inputs = [
@@ -901,8 +902,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -927,8 +928,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -953,8 +954,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -978,8 +979,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1003,8 +1004,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-burn-not-found", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1028,8 +1029,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         n0.sendrawtransaction(signed_hex)
         n0.generate(1)
         self.sync_all()
@@ -1045,7 +1046,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
 
         multiple_to_address = n0.getnewaddress()
 
@@ -1080,9 +1081,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-failed-issue-asset-formatting-check", n0.sendrawtransaction, signed_hex)
 
     def issue_sub_multiple_outputs_test(self):
@@ -1106,7 +1106,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         sub_multiple_to_address = n0.getnewaddress()
         change_address = n0.getnewaddress()
         owner_change_address = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset_owner = n0.listmyassets(owner, True)[owner]['outpoints'][0]
 
         inputs = [
@@ -1146,9 +1146,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-failed-issue-asset-formatting-check", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1179,8 +1178,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-tx-inputs-outputs-mismatch Bad Transaction - Assets would be burnt ISSUE_SUB_MULTIPLE_TEST!", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1199,8 +1198,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-new-asset-missing-owner-asset", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1220,8 +1219,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-issue-new-asset-missing-owner-asset", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1245,8 +1244,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
                 }
             }
         }
-        hex = n0.createrawtransaction(inputs, outputs)
-        signed_hex = n0.signrawtransaction(hex)['hex']
+        hex_data = n0.createrawtransaction(inputs, outputs)
+        signed_hex = n0.signrawtransaction(hex_data)['hex']
         assert_raises_rpc_error(-26, "bad-txns-transfer-owner-amount-was-not-1", n0.sendrawtransaction, signed_hex)
 
         ############################################
@@ -1346,7 +1345,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         to_address = n1.getnewaddress()
         change_address = n0.getnewaddress()
         asset_change = n0.getnewaddress()
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset = n0.listmyassets(root, True)[root]['outpoints'][0]
 
         inputs = [
@@ -1419,7 +1418,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
 
         change_address = n0.getnewaddress()
         to_address = n0.getnewaddress()  # back to n0 from n0
-        unspent = n0.listunspent()[0]
+        unspent = get_first_unspent(self, n0)
         unspent_asset = n0.listmyassets(root, True)[root]['outpoints'][0]
 
         inputs = [
@@ -1512,9 +1511,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
         amount = 400
         fee = 0.01
 
-        unspent1 = n1.listunspent()[0]
+        unspent1 = get_first_unspent(self, n1, price + fee)
         unspent_amount1 = float(unspent1['amount'])
-        assert (unspent_amount1 > price + fee)
 
         unspent_asset2 = n2.listmyassets(anduin, True)[anduin]['outpoints'][0]
         unspent_asset_amount2 = unspent_asset2['amount']
@@ -1563,7 +1561,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         balance1 = newbalance1
         balance2 = newbalance2
 
-        unspent2 = next(u for u in n2.listunspent() if u['amount'] > price + fee)
+        unspent2 = get_first_unspent(self, n2, price + fee)
         unspent_amount2 = float(unspent2['amount'])
 
         unspent_owner1 = n1.listmyassets(jaina_owner, True)[jaina_owner]['outpoints'][0]
@@ -1607,9 +1605,8 @@ class RawAssetTransactionsTest(RavenTestFramework):
         amount = 300
         amount_owner = 1
         balance1 = newbalance1
-        balance2 = newbalance2
 
-        unspent1 = n1.listunspent()[0]
+        unspent1 = get_first_unspent(self, n1)
         unspent_amount1 = float(unspent1['amount'])
         assert (unspent_amount1 > fee)
 
