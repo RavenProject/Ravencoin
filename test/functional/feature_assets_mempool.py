@@ -46,7 +46,7 @@ class AssetMempoolTest(RavenTestFramework):
         # Issue asset on chain 2 but keep it in the mempool. No mining
         n1.issue(asset_name)
 
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         # Assert that the reorg was successful
         assert_equal(n0.getblockcount(), n1.getblockcount())
