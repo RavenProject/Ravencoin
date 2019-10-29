@@ -339,15 +339,12 @@ UniValue sendmessage(const JSONRPCRequest& request) {
     std::string asset_name = request.params[0].get_str();
     std::string ipfs_hash = request.params[1].get_str();
 
-    if (ipfs_hash.length() != 46)
-        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters)"));
-    if (ipfs_hash.substr(0, 2) != "Qm")
-        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (doesn't start with 'Qm')"));
-
     int64_t expire_time = 0;
     if (request.params.size() > 2) {
         expire_time = request.params[2].get_int64();
     }
+
+    CheckIPFSTxidMessage(ipfs_hash, expire_time);
 
     AssetType type;
     std::string strNameError;
