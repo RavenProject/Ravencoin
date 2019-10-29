@@ -150,7 +150,7 @@ class AssetMempoolTest(RavenTestFramework):
     def run_test(self):
         self.activate_assets()
         self.issue_mempool_test()
-        self.issue_mempool_test_extended()te
+        self.issue_mempool_test_extended()
         self.issue_mempool_test_extended_sub()
 
 if __name__ == '__main__':
