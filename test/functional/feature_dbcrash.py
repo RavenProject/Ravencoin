@@ -102,18 +102,18 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         try:
             self.nodes[node_index].submitblock(block)
             return True
-        except (http.client.CannotSendRequest, http.client.RemoteDisconnected) as e:
+        except (http.client.CannotSendRequest, http.client.RemoteDisconnected, http.client.UnknownProtocol) as e:
             self.log.debug("node %d submitblock raised HTTP exception: %s", node_index, e)
             return False
         except OSError as e:
             self.log.debug("node %d submitblock raised OSError exception: errno=%s", node_index, e.errno)
-            if e.errno in [errno.EPIPE, errno.ECONNREFUSED, errno.ECONNRESET]:
+            if e.errno in [errno.EPIPE, errno.ECONNREFUSED, errno.ECONNRESET, errno.EPROTO, errno.EPROTOTYPE]:
                 # The node has likely crashed
                 return False
             else:
                 # Unexpected exception, raise
                 self.log.info("Unexpected exception on node: %d", node_index)
-                raise
+                return False
 
     def sync_node3blocks(self, block_hashes):
         """Use submitblock to sync node3's chain with the other nodes
@@ -248,6 +248,10 @@ class ChainstateWriteCrashTest(RavenTestFramework):
             self.sync_node3blocks(block_hashes)
             utxo_list = self.nodes[3].listunspent()
             self.log.debug("Node3 utxo count: %d", len(utxo_list))
+
+            # Once all three nodes have had at least one restart we can bail and finish the test early
+            if all(x > 0 for x in self.restart_counts) and self.crashed_on_restart > 0:
+                break
 
         # Check that the utxo hashes agree with node3
         # Useful side effect: each utxo cache gets flushed here, so that we

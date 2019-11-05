@@ -63,7 +63,7 @@ class AssetReorgTest(RavenTestFramework):
         # self.log.info(n0.listmyassets())
         # self.log.info(n1.listmyassets())
         # Connect the nodes together, and force a reorg to occur
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         # Uncomment to debug
         # self.log.info(f"{n0.getblockcount()}: {n0.getbestblockhash()}")
@@ -94,7 +94,7 @@ class AssetReorgTest(RavenTestFramework):
         assert_equal(True, n0.listmyassets('DOUBLE_TROUBLE2*') == n1.listmyassets('DOUBLE_TROUBLE2*'))
 
         # Connect the nodes together, and force a reorg to occur
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         # Verify that node0 reorged to the node1 chain and that node1 has the asset and not node0
         assert_equal(n0.getblockcount(), node_1_height)

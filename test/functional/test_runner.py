@@ -29,28 +29,45 @@ import re
 import logging
 
 # Formatting. Default colors to empty strings.
-BOLD, BLUE, RED, GREY = ("", ""), ("", ""), ("", ""), ("", "")
+BOLD, GREEN, RED, GREY = ("", ""), ("", ""), ("", ""), ("", "")
 try:
     # Make sure python thinks it can write unicode to its stdout
     "\u2713".encode("utf_8").decode(sys.stdout.encoding)
     TICK = "✓ "
     CROSS = "✖ "
     CIRCLE = "○ "
+    DASH = "- "
 except UnicodeDecodeError:
     TICK = "P "
     CROSS = "x "
     CIRCLE = "o "
+    DASH = "- "
 
 if os.name == 'posix':
     # primitive formatting on supported
     # terminal via ANSI escape sequences:
     BOLD = ('\033[0m', '\033[1m')
-    BLUE = ('\033[0m', '\033[0;34m')
+    GREEN = ('\033[0m', '\033[0;32m')
     RED = ('\033[0m', '\033[0;31m')
     GREY = ('\033[0m', '\033[1;30m')
 
 TEST_EXIT_PASSED = 0
 TEST_EXIT_SKIPPED = 77
+
+EXTENDED_SCRIPTS = [
+    # These tests are not run by the travis build process.
+    # Longest test should go first, to favor running tests in parallel
+    # 'p2p_acceptblock.py',
+    # 'feature_rbf.py',
+    # 'feature_assumevalid.py',
+    # 'mempool_packages.py',
+    # 'feature_bip_softforks.py', # use this for future soft fork testing
+    # 'feature_pruning.py',
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 20m vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    'feature_fee_estimation.py',
+    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 5m vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    'feature_dbcrash.py',
+]
 
 BASE_SCRIPTS= [
     # Scripts that are run by the travis build process.
@@ -161,21 +178,6 @@ BASE_SCRIPTS= [
     # Put them in a random line within the section that fits their approximate run-time
 ]
 
-EXTENDED_SCRIPTS = [
-    # These tests are not run by the travis build process.
-    # Longest test should go first, to favor running tests in parallel
-    # 'p2p_acceptblock.py',
-    # 'feature_rbf.py',
-    # 'feature_assumevalid.py',
-    # 'mempool_packages.py',
-    # 'feature_bip_softforks.py', # use this for future soft fork testing
-    # 'feature_pruning.py',
-    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 20m vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    'feature_fee_estimation.py',
-    # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 5m vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    'feature_dbcrash.py',
-]
-
 # Place EXTENDED_SCRIPTS first since it has the 3 longest running tests
 ALL_SCRIPTS = EXTENDED_SCRIPTS + BASE_SCRIPTS
 
@@ -192,21 +194,32 @@ def main():
     parser = argparse.ArgumentParser(add_help=False,
                                      usage='%(prog)s [test_runner.py options] [script options] [scripts]',
                                      description=__doc__,
-                                     epilog='''
-    Help text and arguments for individual test script:''',
+                                     epilog='Help text and arguments for individual test script:',
                                      formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--combinedlogslen', '-c', type=int, default=0, help='print a combined log (of length n lines) from all test nodes and test framework to the console on failure.')
+    parser.add_argument('--ansi', action='store_true', default=sys.stdout.isatty(), help="Use ANSI colors and dots in output (enabled by default when standard output is a TTY)")
+    parser.add_argument('--combinedlogslen', type=int, default=0, metavar='n', help='On failure, print a log (of length n lines) to the console, combined from the test framework and all test nodes.')
     parser.add_argument('--coverage', action='store_true', help='generate a basic coverage report for the RPC interface')
-    parser.add_argument('--exclude', '-x', help='specify a comma-separated-list of scripts to exclude.')
+    parser.add_argument('--exclude', help='specify a comma-separated-list of scripts to exclude.')
     parser.add_argument('--extended', action='store_true', help='run the extended test suite in addition to the basic tests')
+    parser.add_argument('--failfast', action='store_true', help='stop execution after the first test failure')
+    parser.add_argument('--filter', help='filter scripts to run by regular expression')
+    parser.add_argument('--force', action='store_true', help='run tests even on platforms where they are disabled by default (e.g. windows).')
+    parser.add_argument('--help', action='store_true', help='print help text and exit')
+    parser.add_argument('--jobs', type=int, default=get_cpu_count(), help='how many test scripts to run in parallel. Default=.' + str(get_cpu_count()))
+    parser.add_argument('--keepcache', action='store_true', help='the default behavior is to flush the cache directory on startup. --keepcache retains the cache from the previous test-run.')
     parser.add_argument('--onlyextended', action='store_true', help='run only the extended test suite')
-    parser.add_argument('--force', '-f', action='store_true', help='run tests even on platforms where they are disabled by default (e.g. windows).')
-    parser.add_argument('--help', '-h', '-?', action='store_true', help='print help text and exit')
-    parser.add_argument('--jobs', '-j', type=int, default=2, help='how many test scripts to run in parallel. Default=2.')
-    parser.add_argument('--keepcache', '-k', action='store_true', help='the default behavior is to flush the cache directory on startup. --keepcache retains the cache from the previous testrun.')
-    parser.add_argument('--quiet', '-q', action='store_true', help='only print results summary and failure logs')
-    parser.add_argument('--tmpdirprefix', '-t', default=tempfile.gettempdir(), help="Root directory for datadirs")
+    parser.add_argument('--quiet',  action='store_true', help='only print results summary and failure logs')
+    parser.add_argument('--tmpdirprefix', default=tempfile.gettempdir(), help="Root directory for data")
+
+
+    # Setup colours for ANSI terminals
     args, unknown_args = parser.parse_known_args()
+    if not args.ansi:
+        global BOLD, GREEN, RED, GREY
+        BOLD = ("", "")
+        GREEN = ("", "")
+        RED = ("", "")
+        GREY = ("", "")
 
     # args to be passed on always start with two dashes; tests are the remaining unknown args
     tests = [arg for arg in unknown_args if arg[:2] != "--"]
@@ -216,7 +229,6 @@ def main():
     config = configparser.ConfigParser()
     configfile = os.path.abspath(os.path.dirname(__file__)) + "/../config.ini"
     config.read_file(open(configfile, encoding="utf8"))
-
     passon_args.append("--configfile=%s" % configfile)
 
     # Set up logging
@@ -226,54 +238,66 @@ def main():
     # Create base test directory
     tmpdir = "%s/raven_test_runner_%s" % (args.tmpdirprefix, datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
     os.makedirs(tmpdir)
-
     logging.debug("Temporary test directory at %s" % tmpdir)
 
-    enable_wallet = config["components"].getboolean("ENABLE_WALLET")
-    enable_cli = config["components"].getboolean("ENABLE_UTILS")
-    enable_ravend = config["components"].getboolean("ENABLE_RAVEND")
-
+    # Don't run tests on Windows by default
     if config["environment"]["EXEEXT"] == ".exe" and not args.force:
         # https://github.com/RavenProject/Ravencoin/commit/d52802551752140cf41f0d9a225a43e84404d3e9
         # https://github.com/RavenProject/Ravencoin/pull/5677#issuecomment-136646964
         print("Tests currently disabled on Windows by default. Use --force option to enable")
         sys.exit(0)
 
+    # Check that the build was configured with wallet, utils, and ravend
+    enable_wallet = config["components"].getboolean("ENABLE_WALLET")
+    enable_cli = config["components"].getboolean("ENABLE_UTILS")
+    enable_ravend = config["components"].getboolean("ENABLE_RAVEND")
     if not (enable_wallet and enable_cli and enable_ravend):
         print("No functional tests to run. Wallet, utils, and ravend must all be enabled")
         print("Rerun `configure` with --enable-wallet, --with-cli and --with-daemon and rerun make")
         sys.exit(0)
 
     # Build list of tests
+    test_list = []
     if tests:
         # Individual tests have been specified. Run specified tests that exist
-        # in the ALL_SCRIPTS list. Accept the name with or without .py extension.
-        tests = [re.sub(r"\.py$", "", t) + ".py" for t in tests]
-        test_list = []
-        for t in tests:
-            if t in ALL_SCRIPTS:
-                test_list.append(t)
+        # in the ALL_SCRIPTS list. Accept names with or without a .py extension.
+        # Specified tests can contain wildcards, but in that case the supplied
+        # paths should be coherent, e.g. the same path as that provided to call
+        # test_runner.py. Examples:
+        #   `test/functional/test_runner.py test/functional/wallet*`
+        #   `test/functional/test_runner.py ./test/functional/wallet*`
+        #   `test_runner.py wallet*`
+        #   but not:
+        #   `test/functional/test_runner.py wallet*`
+        # Multiple wildcards can be passed:
+        #   `test_runner.py tool* mempool*`
+        for test in tests:
+            script = test.split("/")[-1]
+            script = script + ".py" if ".py" not in script else script
+            if script in ALL_SCRIPTS:
+                test_list.append(script)
             else:
-                print("{}WARNING!{} Test '{}' not found in full test list.".format(BOLD[1], BOLD[0], t))
+                print("{}WARNING!{} Test '{}' not found in full test list.".format(BOLD[1], BOLD[0], test))
+    elif args.extended:
+        # Include extended tests
+        test_list += ALL_SCRIPTS
     else:
-        # No individual tests have been specified.
-        # Run all base tests, and optionally run extended tests.
-        test_list = BASE_SCRIPTS
-        if args.extended:
-            # place the EXTENDED_SCRIPTS first since the longest ones
-            # are there and the list is shorter
-            test_list = EXTENDED_SCRIPTS + test_list
-        elif args.onlyextended:
-            test_list = EXTENDED_SCRIPTS
+        # Run base tests only
+        test_list += BASE_SCRIPTS
 
     # Remove the test cases that the user has explicitly asked to exclude.
     if args.exclude:
-        tests_excl = [re.sub(r"\.py$", "", t) + ".py" for t in args.exclude.split(',')]
-        for exclude_test in tests_excl:
-            if exclude_test in test_list:
-                test_list.remove(exclude_test)
-            else:
+        exclude_tests = [test.split('.py')[0] for test in args.exclude.split(',')]
+        for exclude_test in exclude_tests:
+            # Remove <test_name>.py and <test_name>.py --arg from the test list
+            exclude_list = [test for test in test_list if test.split('.py')[0] == exclude_test]
+            for exclude_item in exclude_list:
+                test_list.remove(exclude_item)
+            if not exclude_list:
                 print("{}WARNING!{} Test '{}' not found in current test list.".format(BOLD[1], BOLD[0], exclude_test))
+
+    if args.filter:
+        test_list = list(filter(re.compile(args.filter).search, test_list))
 
     if not test_list:
         print("No valid test scripts specified. Check that your test is in one "
@@ -292,11 +316,25 @@ def main():
     if not args.keepcache:
         shutil.rmtree("%s/test/cache" % config["environment"]["BUILDDIR"], ignore_errors=True)
 
-    run_tests(test_list, config["environment"]["SRCDIR"], config["environment"]["BUILDDIR"], config["environment"]["EXEEXT"], tmpdir, args.jobs, args.coverage, passon_args, args.combinedlogslen)
+    run_tests(
+        test_list=test_list,
+        src_dir=config["environment"]["SRCDIR"],
+        build_dir=config["environment"]["BUILDDIR"],
+        exeext=config["environment"]["EXEEXT"],
+        tmpdir=tmpdir,
+        use_term_control=args.ansi,
+        jobs=args.jobs,
+        enable_coverage=args.coverage,
+        args=passon_args,
+        combined_logs_len=args.combinedlogslen,
+        failfast=args.failfast
+    )
 
 
-def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_coverage=False, args=[], combined_logs_len=0):
+def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, use_term_control, jobs=1, enable_coverage=False, args=None, combined_logs_len=0, failfast=False):
     # Warn if ravend is already running (unix only)
+    if args is None:
+        args = []
     try:
         if subprocess.check_output(["pidof", "ravend"]) is not None:
             print("%sWARNING!%s There is already a ravend process running on this system. Tests may fail unexpectedly due to resource contention!" % (BOLD[1], BOLD[0]))
@@ -314,6 +352,8 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_cove
         os.environ["RAVENCLI"] = build_dir + '/src/raven-cli' + exeext
 
     tests_dir = src_dir + '/test/functional/'
+
+    print("Using: ", jobs, " threads")
 
     flags = ["--srcdir={}/src".format(build_dir)] + args
     flags.append("--cachedir=%s" % cache_dir)
@@ -341,22 +381,31 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_cove
             raise
 
     #Run Tests
-    job_queue = TestHandler(jobs, tests_dir, tmpdir, test_list, flags)
-    time0 = time.time()
+    job_queue = TestHandler(
+        num_tests_parallel=jobs,
+        tests_dir=tests_dir,
+        tmpdir=tmpdir,
+        use_term_control=use_term_control,
+        test_list=test_list,
+        flags=flags
+    )
+
+    start_time = time.time()
     test_results = []
 
     max_len_name = len(max(test_list, key=len))
+    test_count = len(test_list)
 
-    for _ in range(len(test_list)):
+    for _ in range(test_count):
         test_result, testdir, stdout, stderr = job_queue.get_next()
         test_results.append(test_result)
+        done_str = "{}/{} - {}{}{}".format(_ + 1, test_count, BOLD[1], test_result.name, BOLD[0])
         if test_result.status == "Passed":
-            logging.debug("\n%s%s%s passed, Duration: %s s" % (BOLD[1], test_result.name, BOLD[0], test_result.time))
+            logging.debug("%s passed, Duration: %s s" % (done_str, test_result.time))
         elif test_result.status == "Skipped":
-            logging.debug("\n%s%s%s skipped" % (BOLD[1], test_result.name, BOLD[0]))
+            logging.debug("%s skipped" % done_str)
         else:
-            logging.debug("\n%s%s%s failed, Duration: %s s\n" % (BOLD[1], test_result.name, BOLD[0], test_result.time))
-            print("\n%s%s%s failed, Duration: %s s\n" % (BOLD[1], test_result.name, BOLD[0], test_result.time))
+            print("%s failed, Duration: %s s\n" % (done_str, test_result.time))
             print(BOLD[1] + 'stdout:\n' + BOLD[0] + stdout + '\n')
             print(BOLD[1] + 'stderr:\n' + BOLD[0] + stderr + '\n')
 
@@ -366,25 +415,35 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_cove
                 print('\n============')
                 print('{}Combined log for {}:{}'.format(BOLD[1], testdir, BOLD[0]))
                 print('============\n')
-                combined_logs, _ = subprocess.Popen([os.path.join(tests_dir, 'combine_logs.py'), '-c', testdir], universal_newlines=True, stdout=subprocess.PIPE).communicate()
-                print("\n".join(deque(combined_logs.splitlines(), 4000)))
+                combined_logs_args = [sys.executable, os.path.join(tests_dir, 'combine_logs.py'), testdir]
+                if BOLD[0]:
+                    combined_logs_args += ['--color']
+                combined_logs, _ = subprocess.Popen(combined_logs_args, universal_newlines=True, stdout=subprocess.PIPE).communicate()
                 print("\n".join(deque(combined_logs.splitlines(), combined_logs_len)))
 
-        logging.debug("%s / %s tests ran" % (job_queue.num_finished, job_queue.num_jobs))
+            if failfast:
+                logging.debug("Early exit after test failure...")
+                break
 
-    print_results(test_results, max_len_name, (int(time.time() - time0)))
+    print_results(test_results, max_len_name, (int(time.time() - start_time)))
 
     if coverage:
-        coverage.report_rpc_coverage()
+        coverage_passed = coverage.report_rpc_coverage()
 
         logging.debug("Cleaning up coverage data")
         coverage.cleanup()
+    else:
+        coverage_passed = True
 
     # Clear up the temp directory if all subdirectories are gone
     if not os.listdir(tmpdir):
         os.rmdir(tmpdir)
 
-    all_passed = all(map(lambda test_result: test_result.was_successful, test_results))
+    all_passed = all(map(lambda test_res: test_res.was_successful, test_results)) and coverage_passed
+
+    # This will be a no-op unless failfast is True in which case there may be dangling
+    # processes which need to be killed.
+    job_queue.kill_and_join()
 
     sys.exit(not all_passed)
 
@@ -392,7 +451,7 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, jobs=1, enable_cove
 def print_results(test_results, max_len_name, runtime):
     results = "\n" + BOLD[1] + "%s | %s | %s\n\n" % ("TEST".ljust(max_len_name), "STATUS   ", "DURATION") + BOLD[0]
 
-    test_results.sort(key=lambda result: result.name.lower())
+    test_results.sort(key=TestResult.sort_key)
     all_passed = True
     time_sum = 0
 
@@ -403,8 +462,12 @@ def print_results(test_results, max_len_name, runtime):
         results += str(test_result)
 
     status = TICK + "Passed" if all_passed else CROSS + "Failed"
+    if not all_passed:
+        results += RED[1]
     results += BOLD[1] + "\n%s | %s | %s s (accumulated) \n" % ("ALL".ljust(max_len_name), status.ljust(9), time_sum) + BOLD[0]
-    results += "Runtime: %s s\n" % (runtime)
+    if not all_passed:
+        results += RED[0]
+    results += "Runtime: %s s\n" % runtime
     print(results)
 
 
@@ -413,50 +476,55 @@ class TestHandler:
     Trigger the test scripts passed in via the list.
     """
 
-
-    def __init__(self, num_tests_parallel, tests_dir, tmpdir, test_list=None, flags=None):
+    def __init__(self, num_tests_parallel, tests_dir, tmpdir, use_term_control, test_list=None, flags=None):
         assert(num_tests_parallel >= 1)
-        self.num_parallel_jobs = num_tests_parallel
+        self.num_jobs = num_tests_parallel
         self.tests_dir = tests_dir
         self.tmpdir = tmpdir
+        self.use_term_control = use_term_control
         self.test_list = test_list
         self.flags = flags
         self.num_running = 0
-        self.num_finished = 0
-        self.num_jobs = len(test_list)
         self.jobs = []
 
 
     def get_next(self):
-        while self.num_running < self.num_parallel_jobs and self.test_list:
+        while self.num_running < self.num_jobs and self.test_list:
             # Add tests
             self.num_running += 1
-            t = self.test_list.pop(0)
-            portseed = len(self.test_list)
-            portseed_arg = ["--portseed={}".format(portseed)]
+            test = self.test_list.pop(0)
+            port_seed = len(self.test_list)
+            port_seed_arg = ["--portseed={}".format(port_seed)]
             log_stdout = tempfile.SpooledTemporaryFile(max_size=2**16)
             log_stderr = tempfile.SpooledTemporaryFile(max_size=2**16)
-            test_argv = t.split()
-            testdir = "{}/{}_{}".format(self.tmpdir, re.sub(".py$", "", test_argv[0]), portseed)
-            tmpdir_arg = ["--tmpdir={}".format(testdir)]
-            self.jobs.append((t,
+            test_argv = test.split()
+            test_dir = "{}/{}_{}".format(self.tmpdir, re.sub(".py$", "", test_argv[0]), port_seed)
+            tmpdir_arg = ["--tmpdir={}".format(test_dir)]
+            self.jobs.append((test,
                               time.time(),
-                              subprocess.Popen([self.tests_dir + test_argv[0]] + test_argv[1:] + self.flags + portseed_arg + tmpdir_arg,
-                                               universal_newlines=True, stdout=log_stdout, stderr=log_stderr), testdir, log_stdout,log_stderr))
+                              subprocess.Popen([self.tests_dir + test_argv[0]] + test_argv[1:] + self.flags + port_seed_arg + tmpdir_arg,
+                                               universal_newlines=True,
+                                               stdout=log_stdout,
+                                               stderr=log_stderr),
+                              test_dir,
+                              log_stdout,
+                              log_stderr))
         if not self.jobs:
             raise IndexError('pop from empty list')
+
+        dot_count = 0
         while True:
             # Return first proc that finishes
             time.sleep(.5)
-            for j in self.jobs:
-                (name, time0, proc, testdir, log_out, log_err) = j
-                if os.getenv('TRAVIS') == 'true' and int(time.time() - time0) > 20 * 60:
-                    # In travis, timeout individual tests after 20 minutes (to stop tests hanging and not
+            for job in self.jobs:
+                (name, start_time, proc, test_dir, log_out, log_err) = job
+                if os.getenv('TRAVIS') == 'true' and int(time.time() - start_time) > 20 * 60:
+                    # Timeout individual tests after 20 minutes (to stop tests hanging and not
                     # providing useful output.
                     proc.send_signal(signal.SIGINT)
                 if proc.poll() is not None:
                     log_out.seek(0), log_err.seek(0)
-                    [stdout, stderr] = [l.read().decode('utf-8') for l in (log_out, log_err)]
+                    [stdout, stderr] = [log_file.read().decode('utf-8') for log_file in (log_out, log_err)]
                     log_out.close(), log_err.close()
                     if proc.returncode == TEST_EXIT_PASSED and stderr == "":
                         status = "Passed"
@@ -465,23 +533,45 @@ class TestHandler:
                     else:
                         status = "Failed"
                     self.num_running -= 1
-                    self.num_finished += 1
-                    self.jobs.remove(j)
+                    self.jobs.remove(job)
+                    if self.use_term_control:
+                        clear_line = '\r' + (' ' * dot_count) + '\r'
+                        print(clear_line, end='', flush=True)
+                    dot_count = 0
 
-                    return TestResult(name, status, int(time.time() - time0)), testdir, stdout, stderr
-            print('.', end='', flush=True)
+                    return TestResult(name, status, int(time.time() - start_time)), test_dir, stdout, stderr
+            if self.use_term_control:
+                print('.', end='', flush=True)
+            dot_count += 1
 
+    def kill_and_join(self):
+        """Send SIGKILL to all jobs and block until all have ended."""
+        process = [i[2] for i in self.jobs]
 
-class TestResult():
-    def __init__(self, name, status, time):
+        for p in process:
+            p.kill()
+
+        for p in process:
+            p.wait()
+
+class TestResult:
+    def __init__(self, name, status, result_time):
         self.name = name
         self.status = status
-        self.time = time
+        self.time = result_time
         self.padding = 0
+
+    def sort_key(self):
+        if self.status == "Passed":
+            return 0, self.name.lower()
+        elif self.status == "Failed":
+            return 2, self.name.lower()
+        elif self.status == "Skipped":
+            return 1, self.name.lower()
 
     def __repr__(self):
         if self.status == "Passed":
-            color = BLUE
+            color = GREEN
             glyph = TICK
         elif self.status == "Failed":
             color = RED
@@ -489,12 +579,34 @@ class TestResult():
         elif self.status == "Skipped":
             color = GREY
             glyph = CIRCLE
+        else:
+            color = BOLD
+            glyph = DASH
 
         return color[1] + "%s | %s%s | %s s\n" % (self.name.ljust(self.padding), glyph, self.status.ljust(7), self.time) + color[0]
 
     @property
     def was_successful(self):
         return self.status != "Failed"
+
+
+def check_script_prefixes():
+    """Check that no more than `expected_violation_count` of the
+       test scripts don't start with one of the allowed name prefixes."""
+    expected_violation_count = 0
+    # leeway is provided as a transition measure, so that pull-requests
+    # that introduce new tests that don't conform with the naming
+    # convention don't immediately cause the tests to fail.
+    leeway = 1
+    good_prefixes_re = re.compile("(example|feature|interface|mempool|mining|p2p|rpc|wallet)_")
+    bad_script_names = [script for script in ALL_SCRIPTS if good_prefixes_re.match(script) is None]
+    if len(bad_script_names) < expected_violation_count:
+        print("{}HURRAY!{} Number of functional tests violating naming convention reduced!".format(BOLD[1], BOLD[0]))
+        print("Consider reducing expected_violation_count from %d to %d" % (expected_violation_count, len(bad_script_names)))
+    elif len(bad_script_names) > expected_violation_count:
+        print("WARNING: %d tests not meeting naming conventions.  Please rename with allowed prefix. (expected %d):" % (len(bad_script_names), expected_violation_count))
+        print("  %s" % ("\n  ".join(sorted(bad_script_names))))
+        assert len(bad_script_names) <= expected_violation_count + leeway, "Too many tests not following naming convention! (%d found, expected: <= %d)" % (len(bad_script_names), expected_violation_count)
 
 
 def check_script_list(src_dir):
@@ -512,26 +624,15 @@ def check_script_list(src_dir):
             sys.exit(1)
 
 
-def check_script_prefixes():
-    """Check that no more than `EXPECTED_VIOLATION_COUNT` of the
-       test scripts don't start with one of the allowed name prefixes."""
-    EXPECTED_VIOLATION_COUNT = 0
-    # LEEWAY is provided as a transition measure, so that pull-requests
-    # that introduce new tests that don't conform with the naming
-    # convention don't immediately cause the tests to fail.
-    LEEWAY = 1
-    good_prefixes_re = re.compile("(example|feature|interface|mempool|mining|p2p|rpc|wallet)_")
-    bad_script_names = [script for script in ALL_SCRIPTS if good_prefixes_re.match(script) is None]
-    if len(bad_script_names) < EXPECTED_VIOLATION_COUNT:
-        print("{}HURRAY!{} Number of functional tests violating naming convention reduced!".format(BOLD[1], BOLD[0]))
-        print("Consider reducing EXPECTED_VIOLATION_COUNT from %d to %d" % (EXPECTED_VIOLATION_COUNT, len(bad_script_names)))
-    elif len(bad_script_names) > EXPECTED_VIOLATION_COUNT:
-        print("WARNING: %d tests not meeting naming conventions.  Please rename with allowed prefix. (expected %d):" % (len(bad_script_names), EXPECTED_VIOLATION_COUNT))
-        print("  %s" % ("\n  ".join(sorted(bad_script_names))))
-        assert len(bad_script_names) <= EXPECTED_VIOLATION_COUNT + LEEWAY, "Too many tests not following naming convention! (%d found, expected: <= %d)" % (len(bad_script_names), EXPECTED_VIOLATION_COUNT)
+def get_cpu_count():
+    try:
+        import multiprocessing
+        return multiprocessing.cpu_count()
+    except:
+        return 4
 
 
-class RPCCoverage():
+class RPCCoverage:
     """
     Coverage reporting utilities for test_runner.
 
@@ -559,9 +660,11 @@ class RPCCoverage():
 
         if uncovered:
             print("Uncovered RPC commands:")
-            print("".join(("  - %s\n" % i) for i in sorted(uncovered)))
+            print("".join(("  - %s\n" % command) for command in sorted(uncovered)))
+            return False
         else:
             print("All RPC commands covered.")
+            return True
 
     def cleanup(self):
         return shutil.rmtree(self.dir)
@@ -583,17 +686,17 @@ class RPCCoverage():
         if not os.path.isfile(coverage_ref_filename):
             raise RuntimeError("No coverage reference found")
 
-        with open(coverage_ref_filename, 'r', encoding="utf8") as f:
-            all_cmds.update([i.strip() for i in f.readlines()])
+        with open(coverage_ref_filename, 'r', encoding="utf8") as coverage_ref_file:
+            all_cmds.update([line.strip() for line in coverage_ref_file.readlines()])
 
-        for root, dirs, files in os.walk(self.dir):
+        for root, _, files in os.walk(self.dir):
             for filename in files:
-                if filename.startswith(coverage_file_prefix) and dirs is not None:
+                if filename.startswith(coverage_file_prefix):
                     coverage_filenames.add(os.path.join(root, filename))
 
         for filename in coverage_filenames:
-            with open(filename, 'r', encoding="utf8") as f:
-                covered_cmds.update([i.strip() for i in f.readlines()])
+            with open(filename, 'r', encoding="utf8") as coverage_file:
+                covered_cmds.update([line.strip() for line in coverage_file.readlines()])
 
         return all_cmds - covered_cmds
 

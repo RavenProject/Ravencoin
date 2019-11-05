@@ -43,7 +43,7 @@ class NetTest(RavenTestFramework):
         # the bytes sent/received should change
         # note ping and pong are 32 bytes each
         self.nodes[0].ping()
-        time.sleep(0.1)
+        time.sleep(1)
         peer_info_after_ping = self.nodes[0].getpeerinfo()
         net_totals_after_ping = self.nodes[0].getnettotals()
         for before, after in zip(peer_info, peer_info_after_ping):

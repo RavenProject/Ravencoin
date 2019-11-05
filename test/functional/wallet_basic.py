@@ -360,26 +360,14 @@ class WalletTest(RavenTestFramework):
         self.nodes[0].ensure_ascii = True # restore to default
 
         # maintenance tests
-        maintenance = [
-            '-rescan',
-            '-reindex',
-            '-zapwallettxes=1',
-            '-zapwallettxes=2',
-            # disabled until issue is fixed: https://github.com/RavenProject/Ravencoin/issues/7463
-            # '-salvagewallet',
-        ]
-        chainlimit = 6
-        for m in maintenance:
-            self.log.info("check " + m)
-
+        maintenance = "-rescan -reindex -zapwallettxes=1 -zapwallettxes=2"
+        chain_limit = 6
+        self.log.info("check " + maintenance)
         self.stop_nodes()
         # set lower ancestor limit for later
-        self.start_node(0, [m, "-limitancestorcount="+str(chainlimit)])
-        self.start_node(1, [m, "-limitancestorcount="+str(chainlimit)])
-        self.start_node(2, [m, "-limitancestorcount="+str(chainlimit)])
-        while m == '-reindex' and [block_count] * 3 != [self.nodes[i].getblockcount() for i in range(3)]:
-            # reindex will leave rpc warm up "early"; Wait for it to finish
-            time.sleep(0.1)
+        self.start_node(0, [maintenance, "-limitancestorcount="+str(chain_limit)])
+        self.start_node(1, [maintenance, "-limitancestorcount="+str(chain_limit)])
+        self.start_node(2, [maintenance, "-limitancestorcount="+str(chain_limit)])
         assert_equal(balance_nodes, [self.nodes[i].getbalance() for i in range(3)])
 
         # Exercise listsinceblock with the last two blocks
@@ -408,10 +396,10 @@ class WalletTest(RavenTestFramework):
         # So we should be able to generate exactly chainlimit txs for each original output
         sending_addr = self.nodes[1].getnewaddress()
         txid_list = []
-        for _ in range(chainlimit*2):
+        for _ in range(chain_limit*2):
             txid_list.append(self.nodes[0].sendtoaddress(sending_addr, Decimal('0.0001')))
-        assert_equal(self.nodes[0].getmempoolinfo()['size'], chainlimit*2)
-        assert_equal(len(txid_list), chainlimit*2)
+        assert_equal(self.nodes[0].getmempoolinfo()['size'], chain_limit*2)
+        assert_equal(len(txid_list), chain_limit*2)
 
         # Without walletrejectlongchains, we will still generate a txid
         # The tx will be stored in the wallet but not accepted to the mempool
@@ -425,14 +413,14 @@ class WalletTest(RavenTestFramework):
         # Try with walletrejectlongchains
         # Double chain limit but require combining inputs, so we pass SelectCoinsMinConf
         self.stop_node(0)
-        self.start_node(0, extra_args=["-walletrejectlongchains", "-limitancestorcount="+str(2*chainlimit)])
+        self.start_node(0, extra_args=["-walletrejectlongchains", "-limitancestorcount="+str(2*chain_limit)])
 
         # wait for loadmempool
         timeout = 10
-        while timeout > 0 and len(self.nodes[0].getrawmempool()) < chainlimit*2:
+        while timeout > 0 and len(self.nodes[0].getrawmempool()) < chain_limit*2:
             time.sleep(0.5)
             timeout -= 0.5
-        assert_equal(len(self.nodes[0].getrawmempool()), chainlimit*2)
+        assert_equal(len(self.nodes[0].getrawmempool()), chain_limit*2)
 
         node0_balance = self.nodes[0].getbalance()
         # With walletrejectlongchains we will not create the tx and store it in our wallet.
