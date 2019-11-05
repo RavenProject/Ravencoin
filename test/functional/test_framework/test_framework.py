@@ -14,7 +14,6 @@ import shutil
 import sys
 import tempfile
 import time
-import traceback
 
 from .authproxy import JSONRPCException
 from . import coverage
@@ -25,9 +24,7 @@ from .util import (
     assert_equal,
     check_json_precision,
     connect_nodes_bi,
-    connect_all_nodes_bi,
     disconnect_nodes,
-    disconnect_all_nodes,
     initialize_datadir,
     log_filename,
     p2p_port,
@@ -48,7 +45,7 @@ TEST_EXIT_FAILED = 1
 TEST_EXIT_SKIPPED = 77
 
 
-class RavenTestFramework():
+class RavenTestFramework:
     """Base class for a raven test script.
 
     Individual raven test scripts should subclass this class and override the set_test_params() and run_test() methods.
@@ -75,31 +72,19 @@ class RavenTestFramework():
 
     def main(self):
         """Main function. This should not be overridden by the subclass test scripts."""
-
         parser = optparse.OptionParser(usage="%prog [options]")
-        parser.add_option("--nocleanup", dest="nocleanup", default=False, action="store_true",
-                          help="Leave ravends and test.* datadir on exit or error")
-        parser.add_option("--noshutdown", dest="noshutdown", default=False, action="store_true",
-                          help="Don't stop ravends after the test execution")
-        parser.add_option("--srcdir", dest="srcdir",
-                          default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../../src"),
-                          help="Source directory containing ravend/raven-cli (default: %default)")
-        parser.add_option("--cachedir", dest="cachedir",
-                          default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../cache"),
-                          help="Directory for caching pregenerated datadirs")
+        parser.add_option("--cachedir", dest="cachedir", default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../cache"), help="Directory for caching pregenerated datadirs")
+        parser.add_option("--coveragedir", dest="coveragedir", help="Write tested RPC commands into this directory")
+        parser.add_option("--configfile", dest="configfile", help="Location of the test framework config file")
+        parser.add_option("--loglevel", dest="loglevel", default="INFO", help="log events at this level and higher to the console. Can be set to DEBUG, INFO, WARNING, ERROR or CRITICAL. Passing --loglevel DEBUG will output all logs to console. Note that logs at all levels are always written to the test_framework.log file in the temporary test directory.")
+        parser.add_option("--nocleanup", dest="nocleanup", default=False, action="store_true", help="Leave ravends and test.* datadir on exit or error")
+        parser.add_option("--noshutdown", dest="noshutdown", default=False, action="store_true", help="Don't stop ravends after the test execution")
+        parser.add_option("--pdbonfailure", dest="pdbonfailure", default=False, action="store_true", help="Attach a python debugger if test fails")
+        parser.add_option("--portseed", dest="port_seed", default=os.getpid(), type='int', help="The seed to use for assigning port numbers (default: current process id)")
+        parser.add_option("--srcdir", dest="srcdir", default=os.path.normpath(os.path.dirname(os.path.realpath(__file__)) + "/../../../src"), help="Source directory containing ravend/raven-cli (default: %default)")
         parser.add_option("--tmpdir", dest="tmpdir", help="Root directory for datadirs")
-        parser.add_option("-l", "--loglevel", dest="loglevel", default="INFO",
-                          help="log events at this level and higher to the console. Can be set to DEBUG, INFO, WARNING, ERROR or CRITICAL. Passing --loglevel DEBUG will output all logs to console. Note that logs at all levels are always written to the test_framework.log file in the temporary test directory.")
-        parser.add_option("--tracerpc", dest="trace_rpc", default=False, action="store_true",
-                          help="Print out all RPC calls as they are made")
-        parser.add_option("--portseed", dest="port_seed", default=os.getpid(), type='int',
-                          help="The seed to use for assigning port numbers (default: current process id)")
-        parser.add_option("--coveragedir", dest="coveragedir",
-                          help="Write tested RPC commands into this directory")
-        parser.add_option("--configfile", dest="configfile",
-                          help="Location of the test framework config file")
-        parser.add_option("--pdbonfailure", dest="pdbonfailure", default=False, action="store_true",
-                          help="Attach a python debugger if test fails")
+        parser.add_option("--tracerpc", dest="trace_rpc", default=False, action="store_true", help="Print out all RPC calls as they are made")
+
         self.add_options(parser)
         (self.options, self.args) = parser.parse_args()
 
@@ -127,18 +112,18 @@ class RavenTestFramework():
             self.run_test()
             success = TestStatus.PASSED
         except JSONRPCException as e:
-            self.log.exception("JSONRPC error")
+            self.log.exception("JSONRPC error: %s", e.message)
         except SkipTest as e:
             self.log.warning("Test Skipped: %s" % e.message)
             success = TestStatus.SKIPPED
         except AssertionError as e:
-            self.log.exception("Assertion failed")
+            self.log.exception("Assertion failed: %s", e.message)
         except KeyError as e:
-            self.log.exception("Key error")
+            self.log.exception("Key error: %s", e.message)
         except Exception as e:
-            self.log.exception("Unexpected exception caught during testing")
+            self.log.exception("Unexpected exception caught during testing: %s", e.message)
         except KeyboardInterrupt as e:
-            self.log.warning("Exiting after keyboard interrupt")
+            self.log.warning("Exiting after keyboard interrupt: %s", e.message)
 
         if success == TestStatus.FAILED and self.options.pdbonfailure:
             self.log.info("Testcase failed. Attaching python debugger. Enter ? for help")

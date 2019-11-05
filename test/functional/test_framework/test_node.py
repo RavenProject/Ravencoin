@@ -24,7 +24,7 @@ from .authproxy import JSONRPCException
 
 RAVEND_PROC_WAIT_TIMEOUT = 60
 
-class TestNode():
+class TestNode:
     """A class for representing a ravend node under test.
 
     This class contains:
@@ -163,7 +163,7 @@ class TestNode():
         self.encryptwallet(passphrase)
         self.wait_until_stopped()
 
-class TestNodeCLI():
+class TestNodeCLI:
     """Interface to raven-cli for an individual node"""
 
     def __init__(self, binary, datadir):
@@ -172,10 +172,10 @@ class TestNodeCLI():
         self.datadir = datadir
         self.input = None
 
-    def __call__(self, *args, input=None):
+    def __call__(self, *args, input_data=None):
         # TestNodeCLI is callable with raven-cli command-line args
         self.args = [str(arg) for arg in args]
-        self.input = input
+        self.input = input_data
         return self
 
     def __getattr__(self, command):
