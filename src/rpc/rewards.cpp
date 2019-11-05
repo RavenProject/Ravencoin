@@ -638,8 +638,8 @@ bool GenerateTransaction(
     std::vector<PendingTransaction> & p_pendingTxns)
 {
     bool fcnRetVal = false;
-    size_t expectedCount = 0;
-    size_t actualCount = 0;
+    int expectedCount = 0;
+    int actualCount = 0;
 
     LogPrint(BCLog::REWARDS, "Generating transactions for payments...\n");
 
