@@ -36,6 +36,8 @@
 #include "assets/snapshotrequestdb.h"
 #include "assets/assetsnapshotdb.h"
 
+#ifdef ENABLE_WALLET
+
 //  Addresses are delimited by commas
 static const std::string ADDRESS_COMMA_DELIMITER = ",";
 
@@ -629,6 +631,7 @@ bool GeneratePayments(
     return true;
 }
 
+
 bool GenerateTransaction(
     CWallet * const p_walletPtr, const std::string & p_src,
     std::vector<OwnerAndAmount> & p_pendingPayments,
@@ -735,15 +738,19 @@ bool GenerateTransaction(
 
     return fcnRetVal;
 }
+#endif
+
 
 
 static const CRPCCommand commands[] =
     {           //  category    name                          actor (function)             argNames
                 //  ----------- ------------------------      -----------------------      ----------
+#ifdef ENABLE_WALLET
             {   "rewards",      "requestsnapshot",            &requestsnapshot,            {"asset_name", "block_height"}},
             {   "rewards",      "getsnapshotrequest",         &getsnapshotrequest,         {"asset_name", "block_height"}},
             {   "rewards",      "cancelsnapshotrequest",      &cancelsnapshotrequest,      {"asset_name", "block_height"}},
             {   "rewards",      "distributereward",           &distributereward,           {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}},
+#endif
     };
 
 void RegisterRewardsRPCCommands(CRPCTable &t)
@@ -751,3 +758,5 @@ void RegisterRewardsRPCCommands(CRPCTable &t)
     for (unsigned int vcidx = 0; vcidx < ARRAYLEN(commands); vcidx++)
         t.appendCommand(commands[vcidx].name, &commands[vcidx]);
 }
+
+
