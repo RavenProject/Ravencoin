@@ -448,9 +448,10 @@ UniValue viewmyrestrictedaddresses(const JSONRPCRequest& request) {
 
                 "\nResult:\n"
                 "{\n"
-                "\"Address:\"                        (string) The address that was tagged\n"
-                "\"Tag Name:\"                       (string) The asset name\n"
-                "\"Restricted/Restriction Removed:\"                 (Date) The time as a date in the format (YY-mm-dd Hour-minute-second)\n"
+                "\"Address:\"                        (string) The address that was restricted\n"
+                "\"Asset Name:\"                     (string) The asset that the restriction applies to\n"
+                "\"[Restricted|Derestricted]:\"      (Date) The UTC datetime of the restriction or derestriction in the format (YY-mm-dd HH:MM:SS))\n"
+                "                                         (Only the most recent restriction/derestriction event will be returned for each address)\n"
                 "}...\n"
 
                 "\nExamples:\n"
@@ -470,11 +471,11 @@ UniValue viewmyrestrictedaddresses(const JSONRPCRequest& request) {
         UniValue obj(UniValue::VOBJ);
 
         obj.push_back(Pair("Address", std::get<0>(item)));
-        obj.push_back(Pair("Restricted Name", std::get<1>(item)));
+        obj.push_back(Pair("Asset Name", std::get<1>(item)));
         if (std::get<2>(item))
             obj.push_back(Pair("Restricted", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
         else
-            obj.push_back(Pair("Restriction Removed", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
+            obj.push_back(Pair("Derestricted", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", std::get<3>(item))));
 
         myRestricted.push_back(obj);
     }

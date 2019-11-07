@@ -380,7 +380,6 @@ class RestrictedAssetsTest(RavenTestFramework):
 
         assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
                                 asset_name, 100, address)
-        print(n0.help('viewmytaggedaddresses'))
 
     def freezing(self):
         self.log.info("Testing freezing...")
@@ -410,6 +409,14 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_does_not_contain(asset_name, n0.listaddressrestrictions(address))
         assert not n0.checkaddressrestriction(address, address)
         assert_equal(10000, n0.listassetbalancesbyaddress(address)[asset_name])
+
+        # Isolate this test from other freezing on n0...
+        def viewmyrestrictedaddresses():
+            return list(filter(lambda x: asset_name == x['Asset Name'], n0.viewmyrestrictedaddresses()))
+
+        # viewmyrestrictedaddresses
+        assert_equal(0, len(viewmyrestrictedaddresses()))
+
         change_address = n0.getnewaddress()
         n0.transferfromaddress(asset_name, address, 1000, n1.getnewaddress(), "", "", "", change_address)
         n0.generate(1)
@@ -432,6 +439,15 @@ class RestrictedAssetsTest(RavenTestFramework):
         # post-freezing verification
         assert_contains(asset_name, n0.listaddressrestrictions(address))
         assert n0.checkaddressrestriction(address, asset_name)
+
+        # viewmyrestrictedaddresses
+        restrictions = viewmyrestrictedaddresses()
+        assert_equal(1, len(restrictions))
+        r = restrictions[0]
+        assert_equal(address, r['Address'])
+        assert_equal(asset_name, r['Asset Name'])
+        assert_happening(r['Restricted'])
+
         assert_raises_rpc_error(-8, "No asset outpoints are selected from the given address", n0.transferfromaddress,
                                 asset_name, address, 1000, n1.getnewaddress())
 
@@ -450,6 +466,15 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_does_not_contain(asset_name, n0.listaddressrestrictions(address))
         assert not n0.checkaddressrestriction(address, asset_name)
         assert_equal(9000, n0.listassetbalancesbyaddress(address)[asset_name])
+
+        # viewmyrestrictedaddresses
+        restrictions = viewmyrestrictedaddresses()
+        assert_equal(1, len(restrictions))
+        r = restrictions[0]
+        assert_equal(address, r['Address'])
+        assert_equal(asset_name, r['Asset Name'])
+        assert_happening(r['Derestricted'])
+
         change_address = n0.getnewaddress()
         n0.transferfromaddress(asset_name, address, 1000, n1.getnewaddress(), "", "", "", change_address)
         n0.generate(1)
@@ -457,7 +482,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_equal(8000, n0.listassetbalancesbyaddress(change_address)[asset_name])
         assert_equal(2000, n1.listmyassets()[asset_name])
         address = change_address # assets have moved
-
 
     def global_freezing(self):
         self.log.info("Testing global freezing...")
