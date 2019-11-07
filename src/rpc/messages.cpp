@@ -406,7 +406,8 @@ UniValue viewmytaggedaddresses(const JSONRPCRequest& request) {
                 "{\n"
                 "\"Address:\"                        (string) The address that was tagged\n"
                 "\"Tag Name:\"                       (string) The asset name\n"
-                "\"Assign/Removed:\"                 (Date) The time as a date in the format (YY-mm-dd Hour-minute-second)\n"
+                "\"[Assigned|Removed]:\"             (Date) The UTC datetime of the assignment or removal of the tag in the format (YY-mm-dd HH:MM:SS)\n"
+                "                                         (Only the most recent tagging/untagging event will be returned for each address)\n"
                 "}...\n"
 
                 "\nExamples:\n"
