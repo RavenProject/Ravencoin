@@ -391,24 +391,24 @@ void RavenGUI::createActions()
     tabGroup->addAction(historyAction);
 
     /** RVN START */
-    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
-    transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
+    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff("", ""), tr(""), this);
+    transferAssetAction->setStatusTip(tr(""));
     transferAssetAction->setToolTip(transferAssetAction->statusTip());
     transferAssetAction->setCheckable(true);
     transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     transferAssetAction->setFont(font);
     tabGroup->addAction(transferAssetAction);
 
-    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
-    createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
+    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff("", ""), tr(""), this);
+    createAssetAction->setStatusTip(tr(""));
     createAssetAction->setToolTip(createAssetAction->statusTip());
     createAssetAction->setCheckable(true);
     createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     createAssetAction->setFont(font);
     tabGroup->addAction(createAssetAction);
 
-    manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_manage_selected", ":/icons/asset_manage"), tr("&Manage Assets"), this);
-    manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
+    manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff("", ""), tr(""), this);
+    manageAssetAction->setStatusTip(tr(""));
     manageAssetAction->setToolTip(manageAssetAction->statusTip());
     manageAssetAction->setCheckable(true);
     manageAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
@@ -684,7 +684,7 @@ void RavenGUI::createToolBars()
         labelCurrentMarket->setAlignment(Qt::AlignVCenter);
         labelCurrentMarket->setStyleSheet(STRING_LABEL_COLOR);
         labelCurrentMarket->setFont(currentMarketFont);
-        labelCurrentMarket->setText(tr("Ravencoin Market Price"));
+        labelCurrentMarket->setText(tr("SUCRECOIN CORE 2 WALLET"));
 
         QString currentPriceStyleSheet = ".QLabel{color: %1;}";
         labelCurrentPrice->setContentsMargins(25,0,0,0);
@@ -694,7 +694,7 @@ void RavenGUI::createToolBars()
         labelCurrentPrice->setFont(currentMarketFont);
 
         QLabel* labelBtcRvn = new QLabel();
-        labelBtcRvn->setText("BTC / RVN");
+        labelBtcRvn->setText("");
         labelBtcRvn->setContentsMargins(15,0,0,0);
         labelBtcRvn->setFixedHeight(75);
         labelBtcRvn->setAlignment(Qt::AlignVCenter);
@@ -703,8 +703,8 @@ void RavenGUI::createToolBars()
 
         priceLayout->setGeometry(headerWidget->rect());
         priceLayout->addWidget(labelCurrentMarket, 0, Qt::AlignVCenter | Qt::AlignLeft);
-        priceLayout->addWidget(labelCurrentPrice, 0,  Qt::AlignVCenter | Qt::AlignLeft);
-        priceLayout->addWidget(labelBtcRvn, 0 , Qt::AlignVCenter | Qt::AlignLeft);
+        //priceLayout->addWidget(labelCurrentPrice, 0,  Qt::AlignVCenter | Qt::AlignLeft);
+        //priceLayout->addWidget(labelBtcRvn, 0 , Qt::AlignVCenter | Qt::AlignLeft);
         priceLayout->addStretch();
 
         // Create the layout for widget to the right of the tool bar
@@ -1346,16 +1346,16 @@ void RavenGUI::checkAssets()
     // Check that status of RIP2 and activate the assets icon if it is active
     if(AreAssetsDeployed()) {
         transferAssetAction->setDisabled(false);
-        transferAssetAction->setToolTip(tr("Transfer assets to RVN addresses"));
+        transferAssetAction->setToolTip(tr(""));
         createAssetAction->setDisabled(false);
-        createAssetAction->setToolTip(tr("Create new main/sub/unique assets"));
+        createAssetAction->setToolTip(tr(""));
         manageAssetAction->setDisabled(false);
         }
     else {
         transferAssetAction->setDisabled(true);
-        transferAssetAction->setToolTip(tr("Assets not yet active"));
+        transferAssetAction->setToolTip(tr(""));
         createAssetAction->setDisabled(true);
-        createAssetAction->setToolTip(tr("Assets not yet active"));
+        createAssetAction->setToolTip(tr(""));
         manageAssetAction->setDisabled(true);
         }
 }
