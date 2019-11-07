@@ -292,6 +292,12 @@ class RestrictedAssetsTest(RavenTestFramework):
         n0.issue(base_asset_name)
         assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.issuerestrictedasset,
             asset_name, qty, verifier, issue_address)
+
+        # Isolate this test from other tagging on n0...
+        def viewmytaggedaddresses():
+            return list(filter(lambda x: tag == x['Tag Name'], n0.viewmytaggedaddresses()))
+        assert_equal(0, len(viewmytaggedaddresses()))
+
         n0.addtagtoaddress(tag, issue_address, change_address)
         n0.generate(1)
         n0.issuerestrictedasset(asset_name, qty, verifier, issue_address)
@@ -301,6 +307,16 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_does_not_contain(address, n0.listaddressesfortag(tag))
         assert_does_not_contain(tag, n0.listtagsforaddress(address))
         assert not n0.checkaddresstag(address, tag)
+
+        # viewmytaggedaddresses
+        tagged = viewmytaggedaddresses()
+        assert_equal(1, len(tagged))
+        t1 = tagged[0]
+        assert_equal(issue_address, t1['Address'])
+        assert_equal(tag, t1['Tag Name'])
+        assert_contains_key('Assigned', t1)
+        assert_happening(t1['Assigned'])
+
         assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
                                 asset_name, 100, address)
 
@@ -319,6 +335,16 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_contains(address, n0.listaddressesfortag(tag))
         assert_contains(tag, n0.listtagsforaddress(address))
         assert n0.checkaddresstag(address, tag)
+
+        # viewmytaggedaddresses
+        tagged = viewmytaggedaddresses()
+        assert_equal(2, len(tagged))
+        assert_contains(issue_address, list(map(lambda x: x['Address'], tagged)))
+        assert_contains(address, list(map(lambda x: x['Address'], tagged)))
+        for t in tagged:
+            assert_equal(tag, t['Tag Name'])
+            assert_happening(t['Assigned'])
+
         txid = n0.transfer(asset_name, 100, address)
         n0.generate(1)
         assert_equal(64, len(txid[0]))
@@ -339,9 +365,21 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_does_not_contain(address, n0.listaddressesfortag(tag))
         assert_does_not_contain(tag, n0.listtagsforaddress(address))
         assert not n0.checkaddresstag(address, tag)
+
+        # viewmytaggedaddresses
+        tagged = viewmytaggedaddresses()
+        assert_equal(2, len(tagged))
+        assert_contains(issue_address, list(map(lambda x: x['Address'], tagged)))
+        assert_contains(address, list(map(lambda x: x['Address'], tagged)))
+        for t in tagged:
+            assert_equal(tag, t['Tag Name'])
+            if issue_address == t['Address']:
+                assert_happening(t['Assigned'])
+            if address == t['Address']:
+                assert_happening(t['Removed'])
+
         assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
                                 asset_name, 100, address)
-
 
     def freezing(self):
         self.log.info("Testing freezing...")
@@ -371,6 +409,14 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_does_not_contain(asset_name, n0.listaddressrestrictions(address))
         assert not n0.checkaddressrestriction(address, address)
         assert_equal(10000, n0.listassetbalancesbyaddress(address)[asset_name])
+
+        # Isolate this test from other freezing on n0...
+        def viewmyrestrictedaddresses():
+            return list(filter(lambda x: asset_name == x['Asset Name'], n0.viewmyrestrictedaddresses()))
+
+        # viewmyrestrictedaddresses
+        assert_equal(0, len(viewmyrestrictedaddresses()))
+
         change_address = n0.getnewaddress()
         n0.transferfromaddress(asset_name, address, 1000, n1.getnewaddress(), "", "", "", change_address)
         n0.generate(1)
@@ -393,6 +439,15 @@ class RestrictedAssetsTest(RavenTestFramework):
         # post-freezing verification
         assert_contains(asset_name, n0.listaddressrestrictions(address))
         assert n0.checkaddressrestriction(address, asset_name)
+
+        # viewmyrestrictedaddresses
+        restrictions = viewmyrestrictedaddresses()
+        assert_equal(1, len(restrictions))
+        r = restrictions[0]
+        assert_equal(address, r['Address'])
+        assert_equal(asset_name, r['Asset Name'])
+        assert_happening(r['Restricted'])
+
         assert_raises_rpc_error(-8, "No asset outpoints are selected from the given address", n0.transferfromaddress,
                                 asset_name, address, 1000, n1.getnewaddress())
 
@@ -411,6 +466,15 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_does_not_contain(asset_name, n0.listaddressrestrictions(address))
         assert not n0.checkaddressrestriction(address, asset_name)
         assert_equal(9000, n0.listassetbalancesbyaddress(address)[asset_name])
+
+        # viewmyrestrictedaddresses
+        restrictions = viewmyrestrictedaddresses()
+        assert_equal(1, len(restrictions))
+        r = restrictions[0]
+        assert_equal(address, r['Address'])
+        assert_equal(asset_name, r['Asset Name'])
+        assert_happening(r['Derestricted'])
+
         change_address = n0.getnewaddress()
         n0.transferfromaddress(asset_name, address, 1000, n1.getnewaddress(), "", "", "", change_address)
         n0.generate(1)
@@ -418,7 +482,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_equal(8000, n0.listassetbalancesbyaddress(change_address)[asset_name])
         assert_equal(2000, n1.listmyassets()[asset_name])
         address = change_address # assets have moved
-
 
     def global_freezing(self):
         self.log.info("Testing global freezing...")
