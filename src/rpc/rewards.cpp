@@ -349,6 +349,9 @@ UniValue distributereward(const JSONRPCRequest& request) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid distribution_asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
     }
 
+    if (chainActive.Height() - snapshot_height < gArgs.GetArg("-minrewardheight", MINIMUM_REWARDS_PAYOUT_HEIGHT)) {
+        throw JSONRPCError(RPC_INVALID_REQUEST, std::string("For security of the rewards payout, it is recommended to wait until chain is 60 blocks ahead of the snapshot height. You can modify this by using the -minrewardsheight."));
+    }
 
     if (!passetsdb)
         throw JSONRPCError(RPC_DATABASE_ERROR, std::string("Assets database is not setup. Please restart wallet to try again"));

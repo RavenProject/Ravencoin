@@ -48,6 +48,8 @@
 #define ASSET_NEW_STRING "new_asset"
 #define ASSET_REISSUE_STRING "reissue_asset"
 
+#define MINIMUM_REWARDS_PAYOUT_HEIGHT 60
+
 class CScript;
 class CDataStream;
 class CTransaction;

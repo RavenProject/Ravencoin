@@ -16,7 +16,7 @@ class RewardsTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
-        self.extra_args = [["-assetindex"], ["-assetindex"], ["-assetindex"]]
+        self.extra_args = [["-assetindex"], ["-assetindex", "-minrewardheight=15"], ["-assetindex"]]
 
     def activate_assets(self):
         self.log.info("Generating RVN for node[0] and activating assets...")
@@ -44,11 +44,11 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Creating owner address")
         ownerAddr0 = n0.getnewaddress()
-        self.log.info(f"Owner address: {ownerAddr0}")
+        # self.log.info(f"Owner address: {ownerAddr0}")
 
         self.log.info("Creating distributor address")
         distAddr0 = n0.getnewaddress()
-        self.log.info(f"Distributor address: {distAddr0}")
+        # self.log.info(f"Distributor address: {distAddr0}")
 
         self.log.info("Providing funding")
         self.nodes[0].sendtoaddress(ownerAddr0, 1000)
@@ -112,6 +112,8 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Requesting snapshot of STOCK1 ownership in 100 blocks")
         n0.requestsnapshot(asset_name="STOCK1", block_height=tgtBlockHeight)
+
+        n0.generate(61)
 
         self.log.info("Retrieving snapshot request")
         snapShotReq = n0.getsnapshotrequest(asset_name="STOCK1", block_height=tgtBlockHeight)
@@ -209,11 +211,11 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Creating owner address")
         ownerAddr0 = n0.getnewaddress()
-        self.log.info(f"Owner address: {ownerAddr0}")
+        # self.log.info(f"Owner address: {ownerAddr0}")
 
         self.log.info("Creating distributor address")
         distAddr0 = n0.getnewaddress()
-        self.log.info(f"Distributor address: {distAddr0}")
+        # self.log.info(f"Distributor address: {distAddr0}")
 
         self.log.info("Providing funding")
         self.nodes[0].sendtoaddress(ownerAddr0, 1000)
@@ -264,6 +266,9 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Requesting snapshot of STOCK2 ownership in 100 blocks")
         n0.requestsnapshot(asset_name="STOCK2", block_height=tgtBlockHeight)
+
+        # Mine 60 blocks to make sure the -minrewardsheight is met
+        n0.generate(61)
 
         self.log.info("Retrieving snapshot request")
         snapShotReq = n0.getsnapshotrequest(asset_name="STOCK2", block_height=tgtBlockHeight)
@@ -361,7 +366,7 @@ class RewardsTest(RavenTestFramework):
         tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 100
 
         self.log.info("Skipping forward so that we're beyond the expected snapshot height")
-        n0.generate(100)
+        n0.generate(161)
         self.sync_all()
 
         self.log.info("Initiating failing reward payout")
@@ -385,7 +390,7 @@ class RewardsTest(RavenTestFramework):
         tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 100
 
         self.log.info("Skipping forward so that we're beyond the expected snapshot height")
-        n0.generate(100)
+        n0.generate(161)
         self.sync_all()
 
         self.log.info("Initiating failing reward payout")
@@ -415,12 +420,72 @@ class RewardsTest(RavenTestFramework):
         tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 100
 
         self.log.info("Skipping forward so that we're beyond the expected snapshot height")
-        n0.generate(100)
+        n0.generate(161)
         self.sync_all()
 
         self.log.info("Initiating failing reward payout")
         assert_raises_rpc_error(-1, "Failed to distribute reward",
             n0.distributereward, "STOCK5", tgtBlockHeight, "PAYOUT2", 2000, ownerAddr0)
+
+    ## Attempts a payout for an invalid payout asset
+    def payout_before_minimum_height_is_reached(self):
+        self.log.info("Running payout before minimum rewards height is reached!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n0.getnewaddress()
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK6 asset")
+        n0.issue(asset_name="STOCK6", qty=10000, to_address=ownerAddr0, change_address="", \
+                 units=4, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 100
+
+        self.log.info("Skipping forward so that we're 15 blocks ahead of the snapshot height")
+        n0.generate(115)
+        self.sync_all()
+
+        self.log.info("Initiating failing reward payout because we are only 15 block ahead of the snapshot instead of 60")
+        assert_raises_rpc_error(-32600, "For security of the rewards payout, it is recommended to wait until chain is 60 blocks ahead of the snapshot height. You can modify this by using the -minrewardsheight.",
+                                n0.distributereward, "STOCK6", tgtBlockHeight, "PAYOUT2", 2000, ownerAddr0)
+
+        ## Attempts a payout for an invalid payout asset
+    def payout_before_minimum_height_is_reached_custom_height_set(self):
+        self.log.info("Running payout before minimum rewards height is reached with custom min height value set!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n1.getnewaddress()
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n1.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK7 asset")
+        n1.issue(asset_name="STOCK7", qty=10000, to_address=ownerAddr0, change_address="", \
+                 units=4, reissuable=True, has_ipfs=False)
+        n1.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n1.getblockchaininfo()["blocks"] + 100
+
+        self.log.info("Skipping forward so that we're 30 blocks ahead of the snapshot height")
+        n1.generate(130)
+        self.sync_all()
+
+        self.log.info("Initiating failing reward payout because snapshot isn't valid")
+        assert_raises_rpc_error(-1, "Failed to distribute reward",
+                                n1.distributereward, "STOCK7", tgtBlockHeight, "PAYOUT2", 2000, ownerAddr0)
 
     def run_test(self):
         self.activate_assets()
@@ -429,6 +494,8 @@ class RewardsTest(RavenTestFramework):
         self.payout_without_snapshot()
         self.payout_with_invalid_ownership_asset()
         self.payout_with_invalid_payout_asset()
+        self.payout_before_minimum_height_is_reached()
+        self.payout_before_minimum_height_is_reached_custom_height_set()
 
 
 if __name__ == "__main__":
