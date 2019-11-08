@@ -106,7 +106,8 @@ struct PendingTransaction
 bool GenerateTransaction(
     CWallet * const p_walletPtr, const std::string & p_src,
     std::vector<OwnerAndAmount> & p_payments,
-    std::vector<PendingTransaction> & p_pendingTxns);
+    std::vector<PendingTransaction> & p_pendingTxns,
+    std::string& change_address);
 
 UniValue requestsnapshot(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 2)
@@ -115,8 +116,8 @@ UniValue requestsnapshot(const JSONRPCRequest& request) {
                 "\nSchedules a snapshot of the specified asset at the specified block height.\n"
 
                 "\nArguments:\n"
-                "asset_name: (string, required) The asset name for which the snapshot will be taken\n"
-                "block_height: (number, required) The block height at which the snapshot will be take\n"
+                "1. \"asset_name\"              (string, required) The asset name for which the snapshot will be taken\n"
+                "2. \"block_height\"            (number, required) The block height at which the snapshot will be take\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -177,8 +178,8 @@ UniValue getsnapshotrequest(const JSONRPCRequest& request) {
                 "\nRetrieves the specified snapshot request details.\n"
 
                 "\nArguments:\n"
-                "asset_name: (string, required) The asset name for which the snapshot will be taken\n"
-                "block_height: (number, required) The block height at which the snapshot will be take\n"
+                "1. \"asset_name\"              (string, required) The asset name for which the snapshot will be taken\n"
+                "2. \"block_height\"            (number, required) The block height at which the snapshot will be take\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -282,8 +283,8 @@ UniValue cancelsnapshotrequest(const JSONRPCRequest& request) {
                 "\nCancels the specified snapshot request.\n"
 
                 "\nArguments:\n"
-                "asset_name: (string, required) The asset name for which the snapshot will be taken\n"
-                "block_height: (number, required) The block height at which the snapshot will be take\n"
+                "1. \"asset_name\"              (string, required) The asset name for which the snapshot will be taken\n"
+                "2. \"block_height\"            (number, required) The block height at which the snapshot will be take\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -325,15 +326,16 @@ UniValue cancelsnapshotrequest(const JSONRPCRequest& request) {
 UniValue distributereward(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() < 4)
         throw std::runtime_error(
-                "distributereward \"asset_name\" snapshot_height \"distribution_asset_name\" gross_distribution_amount ( \"exception_addresses\" )\n"
+                "distributereward \"asset_name\" snapshot_height \"distribution_asset_name\" gross_distribution_amount ( \"exception_addresses\" ) (\"change_address\")\n"
                 "\nSplits the specified amount of the distribution asset to all owners of asset_name that are not in the optional exclusion_addresses\n"
 
                 "\nArguments:\n"
-                "asset_name: (string, required) The reward will be distributed all owners of this asset\n"
-                "snapshot_height: (number, required) The block height of the ownership snapshot\n"
-                "distribution_asset_name: (string, required) The name of the asset that will be distributed, or RVN\n"
-                "gross_distribution_amount: (number, required) The amount of the distribution asset that will be split amongst all owners\n"
-                "exception_addresses: (string, optional) Ownership addresses that should be excluded\n"
+                "1. \"asset_name\"                 (string, required) The reward will be distributed all owners of this asset\n"
+                "2. \"snapshot_height\"            (number, required) The block height of the ownership snapshot\n"
+                "3. \"distribution_asset_name\"    (string, required) The name of the asset that will be distributed, or RVN\n"
+                "4. \"gross_distribution_amount\"  (number, required) The amount of the distribution asset that will be split amongst all owners\n"
+                "5. \"exception_addresses\"        (string, optional) Ownership addresses that should be excluded\n"
+                "6. \"change_address\"             (string, optional) If the rewards can't be fully distributed. The change will be sent to this address\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -387,6 +389,13 @@ UniValue distributereward(const JSONRPCRequest& request) {
         exception_addresses = request.params[4].get_str();
 
         //LogPrint(BCLog::REWARDS, "Excluding \"%s\"\n", exception_addresses.c_str());
+    }
+
+    std::string change_address = "";
+    if (request.params.size() > 5) {
+        change_address = request.params[5].get_str();
+        if (!IsValidDestinationString(change_address))
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid change address: Use a valid RVN address"));
     }
 
     AssetType ownershipAssetType;
@@ -452,7 +461,7 @@ UniValue distributereward(const JSONRPCRequest& request) {
                     //  Build a transaction for the current batch
                     //  If this succeeds, the payment vector elements will have been moved into
                     //      a new PendingTransaction element in the pendingTxns vector.
-                    if (!GenerateTransaction(walletPtr, distribution_asset_name, paymentVector, pendingTxns)) {
+                    if (!GenerateTransaction(walletPtr, distribution_asset_name, paymentVector, pendingTxns, change_address)) {
                         //  If anything fails, we abort before committing transactions
                         LogPrint(BCLog::REWARDS, "Transaction generation failed for '%s' using source '%s'!\n",
                             asset_name.c_str(), distribution_asset_name.c_str());
@@ -470,7 +479,7 @@ UniValue distributereward(const JSONRPCRequest& request) {
             //
             if (paymentVector.size() > 0) {
                 //  Build a transaction for the current batch
-                if (!GenerateTransaction(walletPtr, distribution_asset_name, paymentVector, pendingTxns)) {
+                if (!GenerateTransaction(walletPtr, distribution_asset_name, paymentVector, pendingTxns, change_address)) {
                     LogPrint(BCLog::REWARDS, "Transaction generation failed for '%s' using source '%s'!\n",
                         asset_name.c_str(), distribution_asset_name.c_str());
 
@@ -644,8 +653,8 @@ bool GeneratePayments(
             && !GetParams().IsBurnAddress(currPair.first)
         ) {
             //  Address is valid so add it to the payment list
-            nonExceptionOwnerships.insert(OwnerAndAmount(currPair.first, currPair.second / tgtUnitDivisor));
-            totalAmtOwned += currPair.second / tgtUnitDivisor;
+            nonExceptionOwnerships.insert(OwnerAndAmount(currPair.first, currPair.second));
+            totalAmtOwned += currPair.second;
         }
     }
 
@@ -662,46 +671,41 @@ bool GeneratePayments(
     LogPrint(BCLog::REWARDS, "GeneratePayments: Total payout amount %d\n",
         modifiedPaymentInAssetUnits);
 
-    //  If the asset is indivisible, and there are fewer rewards than individual ownerships,
-    //      fail the distribution, since it is not possible to reward all ownerships equally.
-    if (srcIsIndivisible
-        && (
-            modifiedPaymentInAssetUnits < totalAmtOwned   //  Fail, not enough
-            || modifiedPaymentInAssetUnits % totalAmtOwned != 0   //  Fail, can't distribute evenly
-        )
-    ) {
-        LogPrint(BCLog::REWARDS, "GeneratePayments: Distribution asset '%s' is indivisible, and not enough reward value was provided for all ownership of '%s'\n",
-            p_distributionAsset.c_str(), p_ownershipAsset.c_str());
-        return false;
-    }
-
+    CAmount totalSentAsRewards = 0;
     //  Loop through asset owners
     for (auto & ownership : nonExceptionOwnerships) {
-        //  Calculate the reward amount
-        //
-        //  NOTE - This has to assume that the payment amount in asset units is *AT LEAST*
-        //      as large as the total amount of the asset owned, so that the division doesn't
-        //      end up with fractions.
-        //      To this end, the payment is divided by the total amount owned
-        //          *BEFORE* multiplying by the current owner's owned amount.
-        CAmount rewardAmt = (modifiedPaymentInAssetUnits / totalAmtOwned) * ownership.amount;
+        // Get percentage of total ownership
+        long double percent = (long double)ownership.amount / (long double)totalAmtOwned;
+        // Caculate the reward with potentional unit inaccurancies e.g with units 4, 90054100 satoshis = 0.90054100
+        CAmount rewardAmt = percent * modifiedPaymentInAssetUnits * static_cast<CAmount>(pow(10, COIN_DIGITS_PAST_DECIMAL - distributionAsset.units));
+        // Remove all none accurate units e.g with units 4 90054100 => 9005
+        rewardAmt /= static_cast<CAmount>(pow(10, COIN_DIGITS_PAST_DECIMAL - distributionAsset.units));
+        // Replace all none accurate units back with zeros e.g with units 4 9005 => 90050000 satoshis = 0.90050000
+        rewardAmt *= static_cast<CAmount>(pow(10, COIN_DIGITS_PAST_DECIMAL - distributionAsset.units));
+
+        totalSentAsRewards += rewardAmt;
 
         LogPrint(BCLog::REWARDS, "GeneratePayments: Found ownership address for '%s': '%s' owns %d => reward %d\n",
             p_ownershipAsset.c_str(), ownership.address.c_str(),
             ownership.amount, rewardAmt);
 
-        //  And save it into our list
-        p_paymentDetails.insert(OwnerAndAmount(ownership.address, rewardAmt));
+        //  Save it into our list if the reward payment is above zero
+        if (rewardAmt > 0)
+            p_paymentDetails.insert(OwnerAndAmount(ownership.address, rewardAmt));
+    }
+
+    CAmount change = totalAmtOwned - totalSentAsRewards;
+    if (change > 0) {
+        LogPrint(BCLog::REWARDS, "GeneratePayments: Found change amount of %u\n", change);
     }
 
     return true;
 }
 
-
 bool GenerateTransaction(
     CWallet * const p_walletPtr, const std::string & p_src,
     std::vector<OwnerAndAmount> & p_pendingPayments,
-    std::vector<PendingTransaction> & p_pendingTxns)
+    std::vector<PendingTransaction> & p_pendingTxns, std::string& change_address)
 {
     bool fcnRetVal = false;
     int expectedCount = 0;
@@ -713,6 +717,8 @@ bool GenerateTransaction(
     do {
         //  Transfer the specified amount of the asset from the source to the target
         CCoinControl ctrl;
+        ctrl.destChange = DecodeDestination(change_address);
+        ctrl.assetDestChange = DecodeDestination(change_address);
         std::shared_ptr<CWalletTx> txnPtr = std::make_shared<CWalletTx>();
         std::shared_ptr<CReserveKey> reserveKeyPtr = std::make_shared<CReserveKey>(p_walletPtr);
         std::shared_ptr<UniValue> batchResult = std::make_shared<UniValue>(UniValue::VOBJ);

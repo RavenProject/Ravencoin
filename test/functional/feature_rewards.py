@@ -16,7 +16,7 @@ class RewardsTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
-        self.extra_args = [["-assetindex"], ["-assetindex", "-minrewardheight=15"], ["-assetindex"]]
+        self.extra_args = [["-assetindex", "-debug=rewards"], ["-assetindex", "-minrewardheight=15"], ["-assetindex"]]
 
     def activate_assets(self):
         self.log.info("Generating RVN for node[0] and activating assets...")
@@ -528,6 +528,527 @@ class RewardsTest(RavenTestFramework):
         assert_equal(1, len(srl))
         assert_contains({'asset_name': asset_name2, 'block_height': block_height2}, srl)
 
+
+    def basic_test_asset_uneven_distribution(self):
+        self.log.info("Running ASSET reward test (units = 0)!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n0.getnewaddress()
+        # self.log.info(f"Owner address: {ownerAddr0}")
+
+        self.log.info("Creating distributor address")
+        distAddr0 = n0.getnewaddress()
+        # self.log.info(f"Distributor address: {distAddr0}")
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK8 asset")
+        n0.issue(asset_name="STOCK8", qty=10000, to_address=distAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Creating shareholder addresses")
+        shareholderAddr0 = n0.getnewaddress()
+        shareholderAddr1 = n1.getnewaddress()
+        shareholderAddr2 = n2.getnewaddress()
+
+        self.log.info("Distributing shares")
+        n0.transferfromaddress(asset_name="STOCK8", from_address=distAddr0, qty=300, to_address=shareholderAddr0, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK8", from_address=distAddr0, qty=300, to_address=shareholderAddr1, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK8", from_address=distAddr0, qty=300, to_address=shareholderAddr2, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.generate(150)
+        self.sync_all()
+
+        self.log.info("Verifying share distribution")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)['STOCK8'], 300)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["STOCK8"], 300)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["STOCK8"], 300)
+
+        self.log.info("Mining blocks")
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing PAYOUT8 asset")
+        n0.issue(asset_name="PAYOUT8", qty=10, to_address=ownerAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 5
+
+        self.log.info("Requesting snapshot of STOCK8 ownership in 5 blocks")
+        n0.requestsnapshot(asset_name="STOCK8", block_height=tgtBlockHeight)
+
+        # Mine 10 blocks to make sure snapshot is created
+        n0.generate(10)
+
+        self.log.info("Retrieving snapshot request")
+        snapShotReq = n0.getsnapshotrequest(asset_name="STOCK8", block_height=tgtBlockHeight)
+        assert_equal(snapShotReq["asset_name"], "STOCK8")
+        assert_equal(snapShotReq["block_height"], tgtBlockHeight)
+
+        self.log.info("Skipping forward to allow snapshot to process")
+        n0.generate(61)
+        self.sync_all()
+
+        self.log.info("Retrieving snapshot for ownership validation")
+        snapShot = n0.getsnapshot(asset_name="STOCK8", block_height=tgtBlockHeight)
+        assert_equal(snapShot["name"], "STOCK8")
+        assert_equal(snapShot["height"], tgtBlockHeight)
+        owner0 = False
+        owner1 = False
+        owner2 = False
+        for ownerAddr in snapShot["owners"]:
+            if ownerAddr["address"] == shareholderAddr0:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner0 = True
+            elif ownerAddr["address"] == shareholderAddr1:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner1 = True
+            elif ownerAddr["address"] == shareholderAddr2:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner2 = True
+        assert_equal(owner0, True)
+        assert_equal(owner1, True)
+        assert_equal(owner2, True)
+
+        self.log.info("Initiating reward payout")
+        n0.distributereward(asset_name="STOCK8", snapshot_height=tgtBlockHeight, distribution_asset_name="PAYOUT8", gross_distribution_amount=10, exception_addresses=distAddr0)
+        n0.generate(10)
+        self.sync_all()
+
+        ##  Inexplicably, order matters here. We need to verify the amount
+        ##      using the node that created the address (?!)
+        self.log.info("Verifying PAYOUT8 holdings after payout")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)["PAYOUT8"], 3)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["PAYOUT8"], 3)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["PAYOUT8"], 3)
+
+    def basic_test_asset_even_distribution(self):
+        self.log.info("Running ASSET reward test (units = 0)!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n0.getnewaddress()
+        # self.log.info(f"Owner address: {ownerAddr0}")
+
+        self.log.info("Creating distributor address")
+        distAddr0 = n0.getnewaddress()
+        # self.log.info(f"Distributor address: {distAddr0}")
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK9 asset")
+        n0.issue(asset_name="STOCK9", qty=10000, to_address=distAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Creating shareholder addresses")
+        shareholderAddr0 = n0.getnewaddress()
+        shareholderAddr1 = n1.getnewaddress()
+        shareholderAddr2 = n2.getnewaddress()
+
+        self.log.info("Distributing shares")
+        n0.transferfromaddress(asset_name="STOCK9", from_address=distAddr0, qty=300, to_address=shareholderAddr0, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK9", from_address=distAddr0, qty=300, to_address=shareholderAddr1, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK9", from_address=distAddr0, qty=400, to_address=shareholderAddr2, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.generate(150)
+        self.sync_all()
+
+        self.log.info("Verifying share distribution")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)['STOCK9'], 300)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["STOCK9"], 300)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["STOCK9"], 400)
+
+        self.log.info("Mining blocks")
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing PAYOUT9 asset")
+        n0.issue(asset_name="PAYOUT9", qty=10, to_address=ownerAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 5
+
+        self.log.info("Requesting snapshot of STOCK9 ownership in 5 blocks")
+        n0.requestsnapshot(asset_name="STOCK9", block_height=tgtBlockHeight)
+
+        # Mine 10 blocks to make sure snapshot is created
+        n0.generate(10)
+
+        self.log.info("Retrieving snapshot request")
+        snapShotReq = n0.getsnapshotrequest(asset_name="STOCK9", block_height=tgtBlockHeight)
+        assert_equal(snapShotReq["asset_name"], "STOCK9")
+        assert_equal(snapShotReq["block_height"], tgtBlockHeight)
+
+        self.log.info("Skipping forward to allow snapshot to process")
+        n0.generate(61)
+        self.sync_all()
+
+        self.log.info("Retrieving snapshot for ownership validation")
+        snapShot = n0.getsnapshot(asset_name="STOCK9", block_height=tgtBlockHeight)
+        assert_equal(snapShot["name"], "STOCK9")
+        assert_equal(snapShot["height"], tgtBlockHeight)
+        owner0 = False
+        owner1 = False
+        owner2 = False
+        for ownerAddr in snapShot["owners"]:
+            if ownerAddr["address"] == shareholderAddr0:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner0 = True
+            elif ownerAddr["address"] == shareholderAddr1:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner1 = True
+            elif ownerAddr["address"] == shareholderAddr2:
+                assert_equal(ownerAddr["amount_owned"], 400)
+                owner2 = True
+        assert_equal(owner0, True)
+        assert_equal(owner1, True)
+        assert_equal(owner2, True)
+
+        self.log.info("Initiating reward payout")
+        n0.distributereward(asset_name="STOCK9", snapshot_height=tgtBlockHeight, distribution_asset_name="PAYOUT9", gross_distribution_amount=10, exception_addresses=distAddr0)
+        n0.generate(10)
+        self.sync_all()
+
+        ##  Inexplicably, order matters here. We need to verify the amount
+        ##      using the node that created the address (?!)
+        self.log.info("Verifying PAYOUT9 holdings after payout")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)["PAYOUT9"], 3)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["PAYOUT9"], 3)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["PAYOUT9"], 4)
+
+    def basic_test_asset_round_down_uneven_distribution(self):
+        self.log.info("Running ASSET reward test with uneven distribution (units = 0)!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n0.getnewaddress()
+        # self.log.info(f"Owner address: {ownerAddr0}")
+
+        self.log.info("Creating distributor address")
+        distAddr0 = n0.getnewaddress()
+        # self.log.info(f"Distributor address: {distAddr0}")
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK10 asset")
+        n0.issue(asset_name="STOCK10", qty=10000, to_address=distAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Creating shareholder addresses")
+        shareholderAddr0 = n0.getnewaddress()
+        shareholderAddr1 = n1.getnewaddress()
+        shareholderAddr2 = n2.getnewaddress()
+
+        self.log.info("Distributing shares")
+        n0.transferfromaddress(asset_name="STOCK10", from_address=distAddr0, qty=300, to_address=shareholderAddr0, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK10", from_address=distAddr0, qty=300, to_address=shareholderAddr1, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK10", from_address=distAddr0, qty=500, to_address=shareholderAddr2, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.generate(150)
+        self.sync_all()
+
+        self.log.info("Verifying share distribution")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)['STOCK10'], 300)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["STOCK10"], 300)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["STOCK10"], 500)
+
+        self.log.info("Mining blocks")
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing PAYOUT10 asset")
+        n0.issue(asset_name="PAYOUT10", qty=10, to_address=ownerAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 5
+
+        self.log.info("Requesting snapshot of STOCK10 ownership in 5 blocks")
+        n0.requestsnapshot(asset_name="STOCK10", block_height=tgtBlockHeight)
+
+        # Mine 10 blocks to make sure snapshot is created
+        n0.generate(10)
+
+        self.log.info("Retrieving snapshot request")
+        snapShotReq = n0.getsnapshotrequest(asset_name="STOCK10", block_height=tgtBlockHeight)
+        assert_equal(snapShotReq["asset_name"], "STOCK10")
+        assert_equal(snapShotReq["block_height"], tgtBlockHeight)
+
+        self.log.info("Skipping forward to allow snapshot to process")
+        n0.generate(61)
+        self.sync_all()
+
+        self.log.info("Retrieving snapshot for ownership validation")
+        snapShot = n0.getsnapshot(asset_name="STOCK10", block_height=tgtBlockHeight)
+        assert_equal(snapShot["name"], "STOCK10")
+        assert_equal(snapShot["height"], tgtBlockHeight)
+        owner0 = False
+        owner1 = False
+        owner2 = False
+        for ownerAddr in snapShot["owners"]:
+            if ownerAddr["address"] == shareholderAddr0:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner0 = True
+            elif ownerAddr["address"] == shareholderAddr1:
+                assert_equal(ownerAddr["amount_owned"], 300)
+                owner1 = True
+            elif ownerAddr["address"] == shareholderAddr2:
+                assert_equal(ownerAddr["amount_owned"], 500)
+                owner2 = True
+        assert_equal(owner0, True)
+        assert_equal(owner1, True)
+        assert_equal(owner2, True)
+
+        self.log.info("Initiating reward payout")
+        n0.distributereward(asset_name="STOCK10", snapshot_height=tgtBlockHeight, distribution_asset_name="PAYOUT10", gross_distribution_amount=10, exception_addresses=distAddr0)
+        n0.generate(10)
+        self.sync_all()
+
+        ##  Inexplicably, order matters here. We need to verify the amount
+        ##      using the node that created the address (?!)
+        self.log.info("Verifying PAYOUT10 holdings after payout")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)["PAYOUT10"], 2)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["PAYOUT10"], 2)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["PAYOUT10"], 4)
+
+    def basic_test_asset_round_down_uneven_distribution_2(self):
+        self.log.info("Running ASSET reward test with uneven distribution (units = 0)!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n0.getnewaddress()
+        # self.log.info(f"Owner address: {ownerAddr0}")
+
+        self.log.info("Creating distributor address")
+        distAddr0 = n0.getnewaddress()
+        # self.log.info(f"Distributor address: {distAddr0}")
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK11 asset")
+        n0.issue(asset_name="STOCK11", qty=10000, to_address=distAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Creating shareholder addresses")
+        shareholderAddr0 = n0.getnewaddress()
+        shareholderAddr1 = n1.getnewaddress()
+        shareholderAddr2 = n2.getnewaddress()
+        shareholderAddr3 = n2.getnewaddress()
+
+        self.log.info("Distributing shares")
+        n0.transferfromaddress(asset_name="STOCK11", from_address=distAddr0, qty=9, to_address=shareholderAddr0, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK11", from_address=distAddr0, qty=3, to_address=shareholderAddr1, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK11", from_address=distAddr0, qty=2, to_address=shareholderAddr2, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK11", from_address=distAddr0, qty=1, to_address=shareholderAddr3, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+
+        n0.generate(150)
+        self.sync_all()
+
+        self.log.info("Verifying share distribution")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)['STOCK11'], 9)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["STOCK11"], 3)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["STOCK11"], 2)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr3)["STOCK11"], 1)
+
+        self.log.info("Mining blocks")
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing PAYOUT11 asset")
+        n0.issue(asset_name="PAYOUT11", qty=10, to_address=ownerAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 5
+
+        self.log.info("Requesting snapshot of STOCK11 ownership in 5 blocks")
+        n0.requestsnapshot(asset_name="STOCK11", block_height=tgtBlockHeight)
+
+        # Mine 10 blocks to make sure snapshot is created
+        n0.generate(10)
+
+        self.log.info("Retrieving snapshot request")
+        snapShotReq = n0.getsnapshotrequest(asset_name="STOCK11", block_height=tgtBlockHeight)
+        assert_equal(snapShotReq["asset_name"], "STOCK11")
+        assert_equal(snapShotReq["block_height"], tgtBlockHeight)
+
+        self.log.info("Skipping forward to allow snapshot to process")
+        n0.generate(61)
+        self.sync_all()
+
+        self.log.info("Retrieving snapshot for ownership validation")
+        snapShot = n0.getsnapshot(asset_name="STOCK11", block_height=tgtBlockHeight)
+        assert_equal(snapShot["name"], "STOCK11")
+        assert_equal(snapShot["height"], tgtBlockHeight)
+        owner0 = False
+        owner1 = False
+        owner2 = False
+        for ownerAddr in snapShot["owners"]:
+            if ownerAddr["address"] == shareholderAddr0:
+                assert_equal(ownerAddr["amount_owned"], 9)
+                owner0 = True
+            elif ownerAddr["address"] == shareholderAddr1:
+                assert_equal(ownerAddr["amount_owned"], 3)
+                owner1 = True
+            elif ownerAddr["address"] == shareholderAddr2:
+                assert_equal(ownerAddr["amount_owned"], 2)
+                owner2 = True
+            elif ownerAddr["address"] == shareholderAddr3:
+                assert_equal(ownerAddr["amount_owned"], 1)
+                owner2 = True
+        assert_equal(owner0, True)
+        assert_equal(owner1, True)
+        assert_equal(owner2, True)
+
+        self.log.info("Initiating reward payout")
+        n0.distributereward(asset_name="STOCK11", snapshot_height=tgtBlockHeight, distribution_asset_name="PAYOUT11", gross_distribution_amount=10, exception_addresses=distAddr0)
+        n0.generate(10)
+        self.sync_all()
+
+        ##  Inexplicably, order matters here. We need to verify the amount
+        ##      using the node that created the address (?!)
+        self.log.info("Verifying PAYOUT11 holdings after payout")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)["PAYOUT11"], 6)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["PAYOUT11"], 2)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["PAYOUT11"], 1)
+
+    def basic_test_asset_round_down_uneven_distribution_3(self):
+        self.log.info("Running ASSET reward test with uneven distribution (units = 1)!")
+        n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
+
+        self.log.info("Creating owner address")
+        ownerAddr0 = n0.getnewaddress()
+        # self.log.info(f"Owner address: {ownerAddr0}")
+
+        self.log.info("Creating distributor address")
+        distAddr0 = n0.getnewaddress()
+        # self.log.info(f"Distributor address: {distAddr0}")
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(ownerAddr0, 1000)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing STOCK12 asset")
+        n0.issue(asset_name="STOCK12", qty=10000, to_address=distAddr0, change_address="", \
+                 units=0, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Creating shareholder addresses")
+        shareholderAddr0 = n0.getnewaddress()
+        shareholderAddr1 = n1.getnewaddress()
+        shareholderAddr2 = n2.getnewaddress()
+        shareholderAddr3 = n2.getnewaddress()
+
+        self.log.info("Distributing shares")
+        n0.transferfromaddress(asset_name="STOCK12", from_address=distAddr0, qty=9, to_address=shareholderAddr0, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=distAddr0, qty=3, to_address=shareholderAddr1, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=distAddr0, qty=2, to_address=shareholderAddr2, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=distAddr0, qty=1, to_address=shareholderAddr3, message="", expire_time=0, rvn_change_address="", asset_change_address=distAddr0)
+
+        n0.generate(150)
+        self.sync_all()
+
+        self.log.info("Verifying share distribution")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)['STOCK12'], 9)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["STOCK12"], 3)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["STOCK12"], 2)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr3)["STOCK12"], 1)
+
+        self.log.info("Mining blocks")
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Issuing PAYOUT12 asset")
+        n0.issue(asset_name="PAYOUT12", qty=10, to_address=ownerAddr0, change_address="", \
+                 units=1, reissuable=True, has_ipfs=False)
+        n0.generate(10)
+        self.sync_all()
+
+        self.log.info("Retrieving chain height")
+        tgtBlockHeight = n0.getblockchaininfo()["blocks"] + 5
+
+        self.log.info("Requesting snapshot of STOCK12 ownership in 5 blocks")
+        n0.requestsnapshot(asset_name="STOCK12", block_height=tgtBlockHeight)
+
+        # Mine 10 blocks to make sure snapshot is created
+        n0.generate(10)
+
+        self.log.info("Retrieving snapshot request")
+        snapShotReq = n0.getsnapshotrequest(asset_name="STOCK12", block_height=tgtBlockHeight)
+        assert_equal(snapShotReq["asset_name"], "STOCK12")
+        assert_equal(snapShotReq["block_height"], tgtBlockHeight)
+
+        self.log.info("Skipping forward to allow snapshot to process")
+        n0.generate(61)
+        self.sync_all()
+
+        self.log.info("Retrieving snapshot for ownership validation")
+        snapShot = n0.getsnapshot(asset_name="STOCK12", block_height=tgtBlockHeight)
+        assert_equal(snapShot["name"], "STOCK12")
+        assert_equal(snapShot["height"], tgtBlockHeight)
+        owner0 = False
+        owner1 = False
+        owner2 = False
+        for ownerAddr in snapShot["owners"]:
+            if ownerAddr["address"] == shareholderAddr0:
+                assert_equal(ownerAddr["amount_owned"], 9)
+                owner0 = True
+            elif ownerAddr["address"] == shareholderAddr1:
+                assert_equal(ownerAddr["amount_owned"], 3)
+                owner1 = True
+            elif ownerAddr["address"] == shareholderAddr2:
+                assert_equal(ownerAddr["amount_owned"], 2)
+                owner2 = True
+            elif ownerAddr["address"] == shareholderAddr3:
+                assert_equal(ownerAddr["amount_owned"], 1)
+                owner2 = True
+        assert_equal(owner0, True)
+        assert_equal(owner1, True)
+        assert_equal(owner2, True)
+
+        self.log.info("Initiating reward payout")
+        n0.distributereward(asset_name="STOCK12", snapshot_height=tgtBlockHeight, distribution_asset_name="PAYOUT12", gross_distribution_amount=10, exception_addresses=distAddr0)
+        n0.generate(10)
+        self.sync_all()
+
+        ##  Inexplicably, order matters here. We need to verify the amount
+        ##      using the node that created the address (?!)
+        self.log.info("Verifying PAYOUT12 holdings after payout")
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr0)["PAYOUT12"], 6)
+        assert_equal(n1.listassetbalancesbyaddress(shareholderAddr1)["PAYOUT12"], 2)
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr2)["PAYOUT12"], Decimal(str(1.3)))
+        assert_equal(n0.listassetbalancesbyaddress(shareholderAddr3)["PAYOUT12"], Decimal(str(0.6)))
+
     def run_test(self):
         self.activate_assets()
         self.basic_test_rvn()
@@ -537,6 +1058,11 @@ class RewardsTest(RavenTestFramework):
         self.payout_with_invalid_payout_asset()
         self.payout_before_minimum_height_is_reached()
         self.payout_before_minimum_height_is_reached_custom_height_set()
+        self.basic_test_asset_uneven_distribution()
+        self.basic_test_asset_even_distribution()
+        self.basic_test_asset_round_down_uneven_distribution()
+        self.basic_test_asset_round_down_uneven_distribution_2()
+        self.basic_test_asset_round_down_uneven_distribution_3()
         self.listsnapshotrequests()
 
 
