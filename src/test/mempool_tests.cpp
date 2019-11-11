@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         poolSize = testPool.size();
         testPool.removeRecursive(txParent);
         BOOST_CHECK_EQUAL(testPool.size(), poolSize - 5);
-        BOOST_CHECK_EQUAL(testPool.size(), 0);
+        BOOST_CHECK_EQUAL(testPool.size(), (uint64_t)0);
 
         // Add children and grandchildren, but NOT the parent (simulate the parent being in a block)
         for (int i = 0; i < 3; i++)
@@ -105,7 +105,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         poolSize = testPool.size();
         testPool.removeRecursive(txParent);
         BOOST_CHECK_EQUAL(testPool.size(), poolSize - 6);
-        BOOST_CHECK_EQUAL(testPool.size(), 0);
+        BOOST_CHECK_EQUAL(testPool.size(), (uint64_t)0);
     }
 
     template<typename name>
@@ -162,7 +162,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         tx5.vout[0].nValue = 11 * COIN;
         entry.nTime = 1;
         pool.addUnchecked(tx5.GetHash(), entry.Fee(10000LL).FromTx(tx5));
-        BOOST_CHECK_EQUAL(pool.size(), 5);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)5);
 
         std::vector<std::string> sortedOrder;
         sortedOrder.resize(5);
@@ -180,7 +180,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         tx6.vout[0].scriptPubKey = CScript() << OP_11 << OP_EQUAL;
         tx6.vout[0].nValue = 20 * COIN;
         pool.addUnchecked(tx6.GetHash(), entry.Fee(0LL).FromTx(tx6));
-        BOOST_CHECK_EQUAL(pool.size(), 6);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)6);
         // Check that at this point, tx6 is sorted low
         sortedOrder.insert(sortedOrder.begin(), tx6.GetHash().ToString());
         CheckSort<descendant_score>(pool, sortedOrder);
@@ -203,7 +203,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         BOOST_CHECK(setAncestorsCalculated == setAncestors);
 
         pool.addUnchecked(tx7.GetHash(), entry.FromTx(tx7), setAncestors);
-        BOOST_CHECK_EQUAL(pool.size(), 7);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)7);
 
         // Now tx6 should be sorted higher (high fee child): tx7, tx6, tx2, ...
         sortedOrder.erase(sortedOrder.begin());
@@ -237,7 +237,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         pool.addUnchecked(tx9.GetHash(), entry.Fee(0LL).Time(3).FromTx(tx9), setAncestors);
 
         // tx9 should be sorted low
-        BOOST_CHECK_EQUAL(pool.size(), 9);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)9);
         sortedOrder.insert(sortedOrder.begin(), tx9.GetHash().ToString());
         CheckSort<descendant_score>(pool, sortedOrder);
 
@@ -284,7 +284,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         CheckSort<descendant_score>(pool, sortedOrder);
 
         // there should be 10 transactions in the mempool
-        BOOST_CHECK_EQUAL(pool.size(), 10);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)10);
 
         // Now try removing tx10 and verify the sort order returns to normal
         pool.removeRecursive(pool.mapTx.find(tx10.GetHash())->GetTx());
@@ -369,7 +369,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         tx5.vout[0].scriptPubKey = CScript() << OP_11 << OP_EQUAL;
         tx5.vout[0].nValue = 11 * COIN;
         pool.addUnchecked(tx5.GetHash(), entry.Fee(10000LL).FromTx(tx5));
-        BOOST_CHECK_EQUAL(pool.size(), 5);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)5);
 
         std::vector<std::string> sortedOrder;
         sortedOrder.resize(5);
@@ -400,7 +400,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         uint64_t tx6Size = GetVirtualTransactionSize(tx6);
 
         pool.addUnchecked(tx6.GetHash(), entry.Fee(0LL).FromTx(tx6));
-        BOOST_CHECK_EQUAL(pool.size(), 6);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)6);
         // Ties are broken by hash
         if (tx3.GetHash() < tx6.GetHash())
             sortedOrder.push_back(tx6.GetHash().ToString());
@@ -422,7 +422,7 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         CAmount fee = (20000 / tx2Size) * (tx7Size + tx6Size) - 1;
 
         pool.addUnchecked(tx7.GetHash(), entry.Fee(fee).FromTx(tx7));
-        BOOST_CHECK_EQUAL(pool.size(), 7);
+        BOOST_CHECK_EQUAL(pool.size(), (uint64_t)7);
         sortedOrder.insert(sortedOrder.begin() + 1, tx7.GetHash().ToString());
         CheckSort<ancestor_score>(pool, sortedOrder);
 

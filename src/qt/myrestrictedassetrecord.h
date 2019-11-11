@@ -3,9 +3,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_MYRESTRICTEDASSETRECORD_H
-#define RAVEN_QT_MYRESTRICTEDASSETRECORD
-
 #include "amount.h"
 #include "uint256.h"
 
@@ -79,4 +76,3 @@ public:
 
 };
 
-#endif // RAVEN_QT_TRANSACTIONRECORD_H

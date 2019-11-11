@@ -12,7 +12,7 @@
 #include <map>
 #include <dbwrapper.h>
 
-const int8_t ASSET_UNDO_INCLUDES_VERIFIER_STRING = 255;
+const int8_t ASSET_UNDO_INCLUDES_VERIFIER_STRING = -1;
 
 class CNewAsset;
 class uint256;

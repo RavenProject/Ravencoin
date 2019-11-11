@@ -575,13 +575,13 @@ BOOST_FIXTURE_TEST_SUITE(crypto_tests, BasicTestingSetup)
             if (i == 0)
             {
                 // Check handling of zero.
-                BOOST_CHECK_EQUAL(CountBits(0), 0);
+                BOOST_CHECK_EQUAL(CountBits(0), (uint64_t)0);
             } else if (i < 10)
             {
                 for (uint64_t j = 1 << (i - 1); (j >> i) == 0; ++j)
                 {
                     // Exhaustively test up to 10 bits
-                    BOOST_CHECK_EQUAL(CountBits(j), i);
+                    BOOST_CHECK_EQUAL(CountBits(j), (uint64_t)i);
                 }
             } else
             {
@@ -589,7 +589,7 @@ BOOST_FIXTURE_TEST_SUITE(crypto_tests, BasicTestingSetup)
                 {
                     // Randomly test 1000 samples of each length above 10 bits.
                     uint64_t j = ((uint64_t) 1) << (i - 1) | ctx.randbits(i - 1);
-                    BOOST_CHECK_EQUAL(CountBits(j), i);
+                    BOOST_CHECK_EQUAL(CountBits(j), (uint64_t)i);
                 }
             }
         }

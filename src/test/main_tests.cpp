@@ -62,7 +62,7 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
             nSum += nSubsidy * 1000;
             BOOST_CHECK(MoneyRange(nSum));
         }
-        BOOST_CHECK_EQUAL(nSum, 2078125000000000000ULL);
+        BOOST_CHECK_EQUAL(nSum, (int64_t)2078125000000000000ULL);
     }
 
     bool ReturnFalse()

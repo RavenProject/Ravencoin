@@ -32,6 +32,10 @@
 #include <QGraphicsDropShadowEffect>
 #include <QScrollBar>
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
+
 class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
@@ -83,8 +87,11 @@ public:
 
         painter->setFont(GUIUtil::getSubLabelFont());
         // Concatenate the strings if needed before painting
-        GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
-
+        #ifndef QTversionPreFiveEleven
+    		GUIUtil::concatenate(painter, address, painter->fontMetrics().horizontalAdvance(amountText), addressRect.left(), addressRect.right());
+		#else
+    		GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
+		#endif
         painter->setPen(foreground);
         QRect boundingRect;
         painter->drawText(addressRect, Qt::AlignLeft|Qt::AlignVCenter, address, &boundingRect);
@@ -115,9 +122,12 @@ public:
         QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
 
         // Concatenate the strings if needed before painting
-        GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
-
-        painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
+        #ifndef QTversionPreFiveEleven
+    		GUIUtil::concatenate(painter, assetName, painter->fontMetrics().horizontalAdvance(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+    	#else
+    		GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+    	#endif
+    	painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
 
         painter->setPen(platformStyle->TextColor());
         painter->drawText(amountRect, Qt::AlignLeft|Qt::AlignVCenter, GUIUtil::dateTimeStr(date));
@@ -247,8 +257,11 @@ public:
         // Get the width in pixels that the amount takes up (because they are different font,
         // we need to do this before we call the concatenate function
         painter->setFont(amountFont);
-        int amount_width = painter->fontMetrics().width(amountText);
-
+        #ifndef QTversionPreFiveEleven
+        	int amount_width = painter->fontMetrics().horizontalAdvance(amountText);
+		#else
+			int amount_width = painter->fontMetrics().width(amountText);
+		#endif
         // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
         painter->setFont(nameFont);
 
