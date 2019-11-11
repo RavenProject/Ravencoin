@@ -76,10 +76,6 @@
  * @author   Thomas Pornin <thomas.pornin@cryptolog.com>
  */
 
-#ifndef MAC_OSX
-#pragma GCC diagnostic ignored "-fpermissive"
-#endif
- 
 #ifdef _MSC_VER
 #pragma warning (disable: 4146)
 #endif
