@@ -199,7 +199,7 @@ BOOST_FIXTURE_TEST_SUITE(bloom_tests, BasicTestingSetup)
         CMerkleBlock merkleBlock(block, filter);
         BOOST_CHECK_EQUAL(merkleBlock.header.GetHash().GetHex(), block.GetHash().GetHex());
 
-        BOOST_CHECK_EQUAL(merkleBlock.vMatchedTxn.size(), 1);
+        BOOST_CHECK_EQUAL(merkleBlock.vMatchedTxn.size(), (uint64_t)1);
         std::pair<unsigned int, uint256> pair = merkleBlock.vMatchedTxn[0];
 
         BOOST_CHECK(merkleBlock.vMatchedTxn[0].second == uint256S("0x74d681e0e03bafa802c8aa084379aa98d9fcd632ddc2ed9782b586ec87451f20"));

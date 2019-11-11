@@ -3,9 +3,6 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_TRANSACTIONRECORD_H
-#define RAVEN_QT_TRANSACTIONRECORD_H
-
 #include "amount.h"
 #include "uint256.h"
 
@@ -150,4 +147,3 @@ public:
     bool statusUpdateNeeded() const;
 };
 
-#endif // RAVEN_QT_TRANSACTIONRECORD_H

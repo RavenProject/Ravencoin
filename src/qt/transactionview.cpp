@@ -196,6 +196,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     contextMenu->addAction(abandonAction);
     contextMenu->addAction(editLabelAction);
 
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     mapperThirdPartyTxUrls = new QSignalMapper(this);
 
     // Connect actions

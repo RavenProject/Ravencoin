@@ -55,14 +55,18 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-#if QT_VERSION < 0x050000
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QUrl>
 #else
 #include <QUrlQuery>
 #endif
 
-#if QT_VERSION >= 0x50200
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
 #include <QFontDatabase>
+#endif
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
 #endif
 
 static fs::detail::utf8_codecvt_facet utf8;
@@ -1111,16 +1115,24 @@ void concatenate(QPainter* painter, QString& catString, int static_width, int le
     int start_name_length = catString.size();
 
     // Get the length of the dots
-    int dots_width = painter->fontMetrics().width("...");
+    #ifndef QTversionPreFiveEleven
+    	int dots_width = painter->fontMetrics().horizontalAdvance("...");
+    #else
+    	int dots_width = painter->fontMetrics().width("...");
+    #endif
 
     // Add the dots width to the amount width
     static_width += dots_width;
 
     // Start concatenation loop, end loop if name is at three characters
-    while (catString.size() > 3) {
+    while (catString.size() > 3) 
+    {
         // Get the text width of the current name
-        int text_width = painter->fontMetrics().width(catString);
-
+        #ifndef QTversionPreFiveEleven
+        	int text_width = painter->fontMetrics().horizontalAdvance(catString);
+        #else
+        	int text_width = painter->fontMetrics().width(catString);
+        #endif
         // Check to see if the text width is going to overlap the amount width if it doesn't break the loop
         if (left_side + text_width < right_size - static_width)
             break;
