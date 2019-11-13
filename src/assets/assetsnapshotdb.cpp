@@ -11,9 +11,6 @@
 
 static const char SNAPSHOTCHECK_FLAG = 'C'; // Snapshot Check
 
-//  Addresses are delimited by commas
-static const std::string ADDRESS_COMMA_DELIMITER = ",";
-
 CAssetSnapshotDBEntry::CAssetSnapshotDBEntry()
 {
     SetNull();

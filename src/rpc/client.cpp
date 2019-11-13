@@ -208,6 +208,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "cancelsnapshotrequest", 1, "block_height"},
     { "distributereward", 1, "snapshot_height"},
     { "distributereward", 3, "gross_distribution_amount"},
+    { "distributereward", 6, "dry_run"},
+    { "getdistributestatus", 1, "snapshot_height"},
+    { "getdistributestatus", 3, "gross_distribution_amount"},
     { "getsnapshot", 1, "block_height"},
     { "purgesnapshot", 1, "block_height"},
 };

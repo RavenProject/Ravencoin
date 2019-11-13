@@ -12,6 +12,7 @@
 #include <set>
 
 #include "amount.h"
+#include "assets/rewards.h"
 
 class CSnapshotRequestDBEntry
 {
@@ -71,6 +72,8 @@ public:
         CSnapshotRequestDBEntry & p_snapshotRequest
     );
 
+    bool ContainsSnapshotRequest(const std::string & p_assetName, int p_heightForSnapshot);
+
     // Remove a snapshot request
     bool RemoveSnapshotRequest(const std::string & p_assetName, int p_heightForSnapshot);
 
@@ -82,6 +85,33 @@ public:
         std::set<CSnapshotRequestDBEntry> & p_assetsToSnapshot
     );
 };
+
+class CDistributeSnapshotRequestDB  : public CDBWrapper
+{
+public:
+    explicit CDistributeSnapshotRequestDB(size_t nCacheSize, bool fMemory = false, bool fWipe = false);
+
+    CDistributeSnapshotRequestDB(const CDistributeSnapshotRequestDB&) = delete;
+    CDistributeSnapshotRequestDB& operator=(const CDistributeSnapshotRequestDB&) = delete;
+
+    // Schedule a asset snapshot
+    bool AddDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot);
+    bool OverrideDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot);
+
+    //  Find a snapshot request using its ID
+    bool RetrieveDistributeSnapshotRequest(const uint256& hash, CRewardSnapshot& p_rewardSnapshot);
+
+    // Remove a snapshot request
+    bool RemoveDistributeSnapshotRequest(const uint256& hash);
+
+    bool AddDistributeTransaction(const uint256& hash, const int& nBatchNumber, const uint256& txid);
+    bool GetDistributeTransaction(const uint256& hash, const int& nBatchNumber, uint256& txid);
+
+    void LoadAllDistributeSnapshot(std::map<uint256, CRewardSnapshot>& mapRewardSnapshots);
+
+
+};
+
 
 
 #endif //SNAPSHOTREQUESTDB_H

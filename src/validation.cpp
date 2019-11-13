@@ -235,6 +235,7 @@ CMessageChannelDB *pmessagechanneldb = nullptr;
 CMyRestrictedDB *pmyrestricteddb = nullptr;
 CSnapshotRequestDB *pSnapshotRequestDb = nullptr;
 CAssetSnapshotDB *pAssetSnapshotDb = nullptr;
+CDistributeSnapshotRequestDB *pDistributeSnapshotDb = nullptr;
 
 CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
 CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
@@ -718,6 +719,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         size_t nLimitDescendantSize = gArgs.GetArg("-limitdescendantsize", DEFAULT_DESCENDANT_SIZE_LIMIT)*1000;
         std::string errString;
         if (!pool.CalculateMemPoolAncestors(entry, setAncestors, nLimitAncestors, nLimitAncestorSize, nLimitDescendants, nLimitDescendantSize, errString)) {
+            LogPrintf("%s - %s\n", __func__, errString);
             return state.DoS(0, false, REJECT_NONSTANDARD, "too-long-mempool-chain", false, errString);
         }
 
@@ -3312,6 +3314,9 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         }
     }
 
+#ifdef ENABLE_WALLET
+    CheckRewardDistributions(vpwallets[0]);
+#endif
     /** RVN END */
 
     return true;

@@ -137,6 +137,7 @@ RAVEN_CORE_H = \
   assets/restricteddb.h \
   assets/snapshotrequestdb.h \
   assets/assetsnapshotdb.h \
+  assets/rewards.h \
   base58.h \
   bloom.h \
   blockencodings.h \
@@ -269,6 +270,7 @@ libraven_server_a_SOURCES = \
   assets/restricteddb.cpp \
   assets/snapshotrequestdb.cpp \
   assets/assetsnapshotdb.cpp \
+  assets/rewards.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   policy/rbf.cpp \

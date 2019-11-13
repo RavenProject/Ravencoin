@@ -313,6 +313,9 @@ void PrepareShutdown()
         delete pAssetSnapshotDb;
         pAssetSnapshotDb = nullptr;
 
+        delete pDistributeSnapshotDb;
+        pDistributeSnapshotDb = nullptr;
+
         /** RVN END */
     }
 #ifdef ENABLE_WALLET
@@ -1550,6 +1553,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     //  Rewards
                     delete pSnapshotRequestDb;
                     delete pAssetSnapshotDb;
+                    delete pDistributeSnapshotDb;
 
                     // Basic assets
                     passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
@@ -1577,6 +1581,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     // Rewards
                     pSnapshotRequestDb = new CSnapshotRequestDB(nBlockTreeDBCache, false, false);
                     pAssetSnapshotDb = new CAssetSnapshotDB(nBlockTreeDBCache, false, false);
+                    pDistributeSnapshotDb = new CDistributeSnapshotRequestDB(nBlockTreeDBCache, false, false);
 
                     // Read for fAssetIndex to make sure that we only load asset address balances if it if true
                     pblocktree->ReadFlag("assetindex", fAssetIndex);
