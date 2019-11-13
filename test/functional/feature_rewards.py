@@ -577,9 +577,14 @@ class RewardsTest(RavenTestFramework):
 
     def listsnapshotrequests(self):
         self.log.info("Testing listsnapshotrequests()...")
-        n1 = self.nodes[1]
+        n0, n1 = self.nodes[0], self.nodes[1]
 
-        print(n1.listsnapshotrequests())
+
+        self.log.info("Providing funding")
+        self.nodes[0].sendtoaddress(n1.getnewaddress(), 1000)
+        n0.generate(5)
+        self.sync_all()
+
         srl = n1.listsnapshotrequests()
         assert_equal(0, len(srl))
 
@@ -1248,6 +1253,7 @@ class RewardsTest(RavenTestFramework):
         self.payout_with_invalid_ownership_asset()
         self.payout_with_invalid_payout_asset()
         self.payout_before_minimum_height_is_reached()
+        self.listsnapshotrequests()
         self.payout_custom_height_set_with_low_funds()
         self.payout_with_insufficent_asset_amount()
         self.basic_test_asset_uneven_distribution()
@@ -1255,7 +1261,6 @@ class RewardsTest(RavenTestFramework):
         self.basic_test_asset_round_down_uneven_distribution()
         self.basic_test_asset_round_down_uneven_distribution_2()
         self.basic_test_asset_round_down_uneven_distribution_3()
-        self.listsnapshotrequests()
         #self.test_asset_bulk()
 
 
