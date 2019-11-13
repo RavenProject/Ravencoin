@@ -74,11 +74,12 @@ public:
     // Remove a snapshot request
     bool RemoveSnapshotRequest(const std::string & p_assetName, int p_heightForSnapshot);
 
-    //  Retrieve all snapshot requests at the provided block height,
+    //  Retrieve all snapshot requests at the provided block height
+    //      (if the block height is zero, retrieve requests at ALL HEIGHTS),
     //      limited to the specified asset name (if provided)
     bool RetrieveSnapshotRequestsForHeight(
         const std::string & p_assetName, int p_blockHeight,
-        std::set<std::string> & p_assetsToSnapshot
+        std::set<CSnapshotRequestDBEntry> & p_assetsToSnapshot
     );
 };
 

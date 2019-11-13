@@ -97,7 +97,7 @@ bool CSnapshotRequestDB::RemoveSnapshotRequest(
 
 bool CSnapshotRequestDB::RetrieveSnapshotRequestsForHeight(
     const std::string & p_assetName, int p_blockHeight,
-    std::set<std::string> & p_assetsToSnapshot)
+    std::set<CSnapshotRequestDBEntry> & p_assetsToSnapshot)
 {
     bool assetNameProvided = p_assetName.length() > 0;
     if (assetNameProvided) {
@@ -127,11 +127,11 @@ bool CSnapshotRequestDB::RetrieveSnapshotRequestsForHeight(
             CSnapshotRequestDBEntry reqDbEntry;
 
             if (pcursor->GetValue(reqDbEntry)) {
-                if (reqDbEntry.heightForSnapshot == p_blockHeight) {
+                if (p_blockHeight == 0 || reqDbEntry.heightForSnapshot == p_blockHeight) {
                     //  If an asset was specified, only add entries for it.
                     //  Otherwise, retrieve all entries.
                     if (!assetNameProvided || p_assetName == reqDbEntry.assetName) {
-                        p_assetsToSnapshot.insert(reqDbEntry.assetName);
+                        p_assetsToSnapshot.insert(reqDbEntry);
                     }
                 }
             } else {
@@ -140,13 +140,6 @@ bool CSnapshotRequestDB::RetrieveSnapshotRequestsForHeight(
         }
 
         pcursor->Next();
-    }
-
-    for (auto const & assetName : p_assetsToSnapshot) {
-        LogPrint(BCLog::REWARDS, "%s : Found snapshot request at height %d: assetName='%s'\n",
-            __func__,
-            p_blockHeight,
-            assetName.c_str());
     }
 
     return true;

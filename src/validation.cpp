@@ -3296,15 +3296,14 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     //      and if so, capture a snapshot of the relevant target assets.
     if (pSnapshotRequestDb != nullptr) {
         //  Retrieve the scheduled snapshot requests
-        std::set<std::string> assetsToSnapshot;
-
+        std::set<CSnapshotRequestDBEntry> assetsToSnapshot;
         if (pSnapshotRequestDb->RetrieveSnapshotRequestsForHeight("", pindexNew->nHeight, assetsToSnapshot)) {
             //  Loop through them
-            for (auto const & assetName : assetsToSnapshot) {
+            for (auto const & assetEntry : assetsToSnapshot) {
                 //  Add a snapshot entry for the target asset ownership
-                if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(assetName, pindexNew->nHeight)) {
+                if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(assetEntry.assetName, pindexNew->nHeight)) {
                    LogPrint(BCLog::REWARDS, "ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
-                       assetName.c_str(), pindexNew->nHeight);
+                       assetEntry.assetName.c_str(), pindexNew->nHeight);
                 }
             }
         }
