@@ -67,7 +67,6 @@ QT_TS = \
   qt/locale/raven_nb.ts \
   qt/locale/raven_ne.ts \
   qt/locale/raven_nl.ts \
-  qt/locale/raven_pam.ts \
   qt/locale/raven_pl.ts \
   qt/locale/raven_pt_BR.ts \
   qt/locale/raven_pt_PT.ts \
