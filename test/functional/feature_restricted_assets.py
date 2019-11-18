@@ -320,6 +320,19 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
                                 asset_name, 100, address)
 
+        # special case: make sure transfer fails if change address(es) are verified even though to address isn't
+        rvn_change_address = n0.getnewaddress()
+        asset_change_address = n0.getnewaddress()
+        n0.addtagtoaddress(tag, rvn_change_address)
+        n0.addtagtoaddress(tag, asset_change_address)
+        n0.generate(1)
+        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
+                                asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
+        n0.removetagfromaddress(tag, rvn_change_address)
+        n0.removetagfromaddress(tag, asset_change_address)
+        n0.generate(1)
+        ##
+
         assert_raises_rpc_error(None, "Invalid Raven address", n0.addtagtoaddress, tag, "garbageaddress")
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.addtagtoaddress, tag, address,
                                 "garbagechangeaddress")
@@ -338,17 +351,43 @@ class RestrictedAssetsTest(RavenTestFramework):
 
         # viewmytaggedaddresses
         tagged = viewmytaggedaddresses()
-        assert_equal(2, len(tagged))
+        assert_equal(4, len(tagged))  # includes removed...
         assert_contains(issue_address, list(map(lambda x: x['Address'], tagged)))
         assert_contains(address, list(map(lambda x: x['Address'], tagged)))
         for t in tagged:
             assert_equal(tag, t['Tag Name'])
-            assert_happening(t['Assigned'])
+            if ('Assigned' in t):
+                assert_happening(t['Assigned'])
+            else:
+                assert_happening(t['Removed'])
 
+        # special case: make sure transfer fails if the asset change address isn't verified (even if the rvn change address is)
+        rvn_change_address = n0.getnewaddress()
+        asset_change_address = n0.getnewaddress()
+        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
+                                asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
+        n0.addtagtoaddress(tag, rvn_change_address)
+        n0.generate(1)
+        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
+                                asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
+        n0.removetagfromaddress(tag, rvn_change_address)
+        n0.generate(1)
+        ##
+
+        # do the transfer already!
         txid = n0.transfer(asset_name, 100, address)
         n0.generate(1)
         assert_equal(64, len(txid[0]))
         assert_equal(100, n0.listassetbalancesbyaddress(address)[asset_name])
+
+        # do another transfer with specified, tagged asset change address
+        asset_change_address = n0.getnewaddress()
+        n0.addtagtoaddress(tag, asset_change_address)
+        n0.generate(1)
+        txid = n0.transfer(asset_name, 1, issue_address, "", 0, "", asset_change_address)
+        n0.generate(1)
+        assert_equal(64, len(txid[0]))
+        assert(n0.listassetbalancesbyaddress(asset_change_address)[asset_name] > 0)
 
         assert_raises_rpc_error(None, "Invalid Raven address", n0.removetagfromaddress, tag, "garbageaddress")
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.removetagfromaddress, tag, address,
@@ -361,6 +400,8 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(-32600, "removing-qualifier-when-not-assigned", n0.removetagfromaddress,
                                 tag, address, change_address)
 
+        # TODO: test without specifying change address when there are no valid change addresses (all untagged)
+
         # post-untagging verification
         assert_does_not_contain(address, n0.listaddressesfortag(tag))
         assert_does_not_contain(tag, n0.listtagsforaddress(address))
@@ -368,7 +409,7 @@ class RestrictedAssetsTest(RavenTestFramework):
 
         # viewmytaggedaddresses
         tagged = viewmytaggedaddresses()
-        assert_equal(2, len(tagged))
+        assert_equal(6, len(tagged)) # includes removed
         assert_contains(issue_address, list(map(lambda x: x['Address'], tagged)))
         assert_contains(address, list(map(lambda x: x['Address'], tagged)))
         for t in tagged:
