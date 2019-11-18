@@ -373,6 +373,33 @@ class AssetTest(RavenTestFramework):
         assert_equal(Decimal('11.11111111'), n0.listassets("*", True)[asset_name]["amount"])
 
 
+    def issue_transfer_change(self):
+        self.log.info("Testing specified RVN and asset change on issue and transfer...")
+        n0 = self.nodes[0]
+
+        asset_name = "TRC"
+        issue_qty = 50
+        issue_address = n0.getnewaddress()
+        issue_rvn_change = n0.getnewaddress()
+
+        assert_equal(0, n0.getreceivedbyaddress(issue_rvn_change))
+        n0.issue(asset_name, issue_qty, issue_address, issue_rvn_change)
+        n0.generate(1)
+        assert(n0.getreceivedbyaddress(issue_rvn_change) > 0)
+
+        transfer_address = n0.getnewaddress()
+        transfer_asset_change = n0.getnewaddress()
+        transfer_rvn_change = n0.getnewaddress()
+        transfer_qty = 5
+        change_qty = issue_qty - transfer_qty
+
+        assert_equal(0, n0.getreceivedbyaddress(transfer_rvn_change))
+        n0.transfer(asset_name, 5, transfer_address, "", 0, transfer_rvn_change, transfer_asset_change)
+        n0.generate(1)
+        assert(n0.getreceivedbyaddress(transfer_rvn_change) > 0)
+        assert_equal(transfer_qty, n0.listassetbalancesbyaddress(transfer_address)[asset_name])
+        assert_equal(change_qty, n0.listassetbalancesbyaddress(transfer_asset_change)[asset_name])
+
     def run_test(self):
         self.activate_assets()
         self.big_test()
@@ -381,6 +408,7 @@ class AssetTest(RavenTestFramework):
         self.ipfs_state()
         self.db_corruption_regression()
         self.reissue_prec_change()
+        self.issue_transfer_change()
 
 
 if __name__ == '__main__':

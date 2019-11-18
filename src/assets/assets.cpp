@@ -4250,8 +4250,8 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 return false;
             }
 
-            if (!coinControl.destChange.empty()) {
-                std::string change_address = EncodeDestination(coinControl.destChange);
+            if (!coinControl.assetDestChange.empty()) {
+                std::string change_address = EncodeDestination(coinControl.assetDestChange);
                 // If this is a transfer of a restricted asset, check the destination address against the verifier string
                 CNullAssetTxVerifierString verifier;
                 if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier)) {
@@ -4260,7 +4260,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 }
 
                 if (!ContextualCheckVerifierString(passets, verifier.verifier_string, change_address, strError)) {
-                    error = std::make_pair(RPC_DATABASE_ERROR, std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
+                    error = std::make_pair(RPC_DATABASE_ERROR, std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags ") + strError));
                     return false;
                 }
             }

@@ -1205,13 +1205,13 @@ UniValue transfer(const JSONRPCRequest& request)
         CheckIPFSTxidMessage(message, expireTime);
 
     std::string rvn_change_address = "";
-    if (request.params.size() > 6) {
-        rvn_change_address = request.params[6].get_str();
+    if (request.params.size() > 5) {
+        rvn_change_address = request.params[5].get_str();
     }
 
     std::string asset_change_address = "";
-    if (request.params.size() > 7) {
-        asset_change_address = request.params[7].get_str();
+    if (request.params.size() > 6) {
+        asset_change_address = request.params[6].get_str();
     }
 
     CTxDestination rvn_change_dest = DecodeDestination(rvn_change_address);
