@@ -64,10 +64,9 @@ static const std::regex QUALIFIER_LEADING_PUNCTUATION("^[#\\$][._].*$"); // Used
 static const std::string SUB_NAME_DELIMITER = "/";
 static const std::string UNIQUE_TAG_DELIMITER = "#";
 static const std::string MSGCHANNEL_TAG_DELIMITER = "~";
+// static const char RESTRICTED_TAG_CHAR = '$'; //<- Commented out - fixes "not used" warning
 static const std::string VOTE_TAG_DELIMITER = "^";
 static const std::string RESTRICTED_TAG_DELIMITER = "$";
-
-static const char RESTRICTED_TAG_CHAR = '$';
 
 static const std::regex UNIQUE_INDICATOR(R"(^[^^~#!]+#[^~#!\/]+$)");
 static const std::regex MSGCHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");

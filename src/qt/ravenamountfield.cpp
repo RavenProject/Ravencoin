@@ -17,6 +17,10 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
+
 /** QSpinBox that uses fixed-point numbers internally and uses our own
  * formatting/parsing functions.
  */
@@ -119,7 +123,11 @@ public:
 
             const QFontMetrics fm(fontMetrics());
             int h = lineEdit()->minimumSizeHint().height();
-            int w = fm.width(RavenUnits::format(RavenUnits::RVN, RavenUnits::maxMoney(), false, RavenUnits::separatorAlways, assetUnit));
+			#ifndef QTversionPreFiveEleven
+            	int w = fm.horizontalAdvance(RavenUnits::format(RavenUnits::RVN, RavenUnits::maxMoney(), false, RavenUnits::separatorAlways, assetUnit));
+			#else
+				int w = fm.width(RavenUnits::format(RavenUnits::RVN, RavenUnits::maxMoney(), false, RavenUnits::separatorAlways, assetUnit));
+			#endif
             w += 2; // cursor blinking space
 
             QStyleOptionSpinBox opt;

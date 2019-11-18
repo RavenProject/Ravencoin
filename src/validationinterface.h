@@ -34,6 +34,12 @@ void UnregisterAllValidationInterfaces();
 
 class CValidationInterface {
 protected:
+    /**
+    * Protected destructor so that instances can only be deleted by derived
+    * classes. If that restriction is no longer desired, this should be made
+    * public and virtual.
+    */
+    ~CValidationInterface() = default;
     /** Notifies listeners of updated block chain tip */
     virtual void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {}
     /** Notifies listeners of a transaction having been added to mempool. */

@@ -39,6 +39,10 @@
 #include <QSortFilterProxyModel>
 #include <QCompleter>
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
+
 CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
         QDialog(parent, Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
         ui(new Ui::CreateAssetDialog),
@@ -1088,7 +1092,11 @@ void CreateAssetDialog::updateSmartFeeLabel()
         int lightness = ui->fallbackFeeWarningLabel->palette().color(QPalette::WindowText).lightness();
         QColor warning_colour(255 - (lightness / 5), 176 - (lightness / 3), 48 - (lightness / 14));
         ui->fallbackFeeWarningLabel->setStyleSheet("QLabel { color: " + warning_colour.name() + "; }");
-        ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
+        #ifndef QTversionPreFiveEleven
+    		ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).horizontalAdvance("x"));
+    	#else
+    		ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
+    	#endif
     }
     else
     {

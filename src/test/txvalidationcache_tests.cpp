@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_SUITE(tx_validationcache_tests)
         BOOST_CHECK(chainActive.Tip()->GetBlockHash() == block.GetHash());
         // spends[1] should have been removed from the mempool when the
         // block with spends[0] is accepted:
-        BOOST_CHECK_EQUAL(mempool.size(), 0);
+        BOOST_CHECK_EQUAL(mempool.size(), (uint64_t)0);
     }
 
     // Run CheckInputs (using pcoinsTip) on the given transaction, for all script
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_SUITE(tx_validationcache_tests)
             // not caching invalidity (if that changes, delete this test case).
             std::vector<CScriptCheck> scriptchecks;
             BOOST_CHECK(CheckInputs(spend_tx, state, pcoinsTip, true, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_DERSIG, true, true, ptd_spend_tx, &scriptchecks));
-            BOOST_CHECK_EQUAL(scriptchecks.size(), 1);
+            BOOST_CHECK_EQUAL(scriptchecks.size(), (uint64_t)1);
 
             // Test that CheckInputs returns true iff DERSIG-enforcing flags are
             // not present.  Don't add these checks to the cache, so that we can
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_SUITE(tx_validationcache_tests)
             // input was valid)
             BOOST_CHECK(CheckInputs(tx, state, pcoinsTip, true, SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS, true, true, txdata, &scriptchecks));
             // Should get 2 script checks back -- caching is on a whole-transaction basis.
-            BOOST_CHECK_EQUAL(scriptchecks.size(), 2);
+            BOOST_CHECK_EQUAL(scriptchecks.size(), (uint64_t)2);
         }
     }
 

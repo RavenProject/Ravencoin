@@ -7,6 +7,7 @@
 
 from base64 import b64encode
 from binascii import hexlify, unhexlify
+from datetime import datetime, timezone
 from decimal import Decimal, ROUND_DOWN
 import hashlib
 import json
@@ -207,6 +208,17 @@ def assert_array_result(object_array, to_match, expected, should_not_find=False)
     if num_matched > 0 and should_not_find:
         raise AssertionError("Objects were found %s" % (str(to_match)))
 
+def assert_happening(date_str, within_secs=120):
+    """ Make sure date_str happened withing within_secs seconds of now.
+        Assumes date_str is in rpc results format e.g. '2019-11-07 17:50:06' and assumed to represent UTC.
+        Using a big default to eliminate inaccurate wall clocks...
+    """
+    format = '%Y-%m-%d %H:%M:%S'
+    then = datetime.strptime(date_str, format).replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    diff_secs = (now - then).total_seconds()
+    if abs(diff_secs) > within_secs:
+        raise AssertionError("More than expected %s second difference between %s and now(%s) (%ss)" % (within_secs, date_str, now, diff_secs))
 
 # Utility functions
 ###################

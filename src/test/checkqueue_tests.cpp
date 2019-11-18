@@ -420,7 +420,7 @@ BOOST_FIXTURE_TEST_SUITE(checkqueue_tests, TestingSetup)
                     control.Add(vChecks);
                 }
             }
-            BOOST_REQUIRE_EQUAL(MemoryCheck::fake_allocated_memory, 0);
+            BOOST_REQUIRE_EQUAL(MemoryCheck::fake_allocated_memory, (uint64_t)0);
         }
         tg.interrupt_all();
         tg.join_all();

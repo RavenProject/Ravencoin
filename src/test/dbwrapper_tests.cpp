@@ -253,7 +253,7 @@ BOOST_FIXTURE_TEST_SUITE(dbwrapper_tests, BasicTestingSetup)
                 }
                 BOOST_CHECK(it->GetValue(value));
                 BOOST_CHECK_EQUAL(key, x);
-                BOOST_CHECK_EQUAL(value, x * x);
+                BOOST_CHECK_EQUAL(value, (uint64_t)(x * x));
                 it->Next();
             }
             BOOST_CHECK(!it->Valid());
@@ -352,7 +352,7 @@ BOOST_FIXTURE_TEST_SUITE(dbwrapper_tests, BasicTestingSetup)
                     BOOST_CHECK(it->GetKey(key));
                     BOOST_CHECK(it->GetValue(value));
                     BOOST_CHECK_EQUAL(key.str, exp_key);
-                    BOOST_CHECK_EQUAL(value, x * x);
+                    BOOST_CHECK_EQUAL(value, (uint64_t)(x * x));
                     it->Next();
                 }
             }
