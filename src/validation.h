@@ -38,6 +38,8 @@
 #include <assets/messages.h>
 #include <assets/myassetsdb.h>
 #include <assets/restricteddb.h>
+#include <assets/assetsnapshotdb.h>
+#include <assets/snapshotrequestdb.h>
 
 class CBlockIndex;
 class CBlockTreeDB;
@@ -54,6 +56,7 @@ struct ChainTxData;
 
 class CAssetsDB;
 class CAssets;
+class CSnapshotRequestDB;
 
 struct PrecomputedTransactionData;
 struct LockPoints;
@@ -73,11 +76,11 @@ static const CAmount HIGH_MAX_TX_FEE = 100 * HIGH_TX_FEE_PER_KB;
 /** Default for -limitancestorcount, max number of in-mempool ancestors */
 static const unsigned int DEFAULT_ANCESTOR_LIMIT = 200;
 /** Default for -limitancestorsize, maximum kilobytes of tx + all in-mempool ancestors */
-static const unsigned int DEFAULT_ANCESTOR_SIZE_LIMIT = 202;
+static const unsigned int DEFAULT_ANCESTOR_SIZE_LIMIT = 250;
 /** Default for -limitdescendantcount, max number of in-mempool descendants */
 static const unsigned int DEFAULT_DESCENDANT_LIMIT = 200;
 /** Default for -limitdescendantsize, maximum kilobytes of in-mempool descendants */
-static const unsigned int DEFAULT_DESCENDANT_SIZE_LIMIT = 202;
+static const unsigned int DEFAULT_DESCENDANT_SIZE_LIMIT = 250;
 /** Default for -mempoolexpiry, expiration time for mempool transactions in hours */
 static const unsigned int DEFAULT_MEMPOOL_EXPIRY = 336;
 /** Maximum kilobytes for transactions to store for processing during reorg */
@@ -149,6 +152,7 @@ static const bool DEFAULT_ASSETINDEX = false;
 static const bool DEFAULT_ADDRESSINDEX = false;
 static const bool DEFAULT_TIMESTAMPINDEX = false;
 static const bool DEFAULT_SPENTINDEX = false;
+static const bool DEFAULT_REWARDS_ENABLED = false;
 /** Default for -dbmaxfilesize , in MB */
 static const int64_t DEFAULT_DB_MAX_FILE_SIZE = 2;
 
@@ -542,6 +546,14 @@ extern CLRUCache<std::string, int8_t> *passetsRestrictionCache; // hash(address,
 
 /** Global variable that points to the global asset restriction LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache;
+
+/** Global variable that point to the active Snapshot Request database (protected by cs_main) */
+extern CSnapshotRequestDB *pSnapshotRequestDb;
+
+/** Global variable that point to the active asset snapshot database (protected by cs_main) */
+extern CAssetSnapshotDB *pAssetSnapshotDb;
+
+extern CDistributeSnapshotRequestDB *pDistributeSnapshotDb;
 
 /** RVN END */
 

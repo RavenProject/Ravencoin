@@ -249,6 +249,7 @@ const CLogCategoryDesc LogCategories[] =
                 {BCLog::COINDB,      "coindb"},
                 {BCLog::QT,          "qt"},
                 {BCLog::LEVELDB,     "leveldb"},
+                {BCLog::REWARDS,     "rewards"},
                 {BCLog::ALL,         "1"},
                 {BCLog::ALL,         "all"},
         };
@@ -496,6 +497,13 @@ void ArgsManager::ForceSetArg(const std::string &strArg, const std::string &strV
     LOCK(cs_args);
     mapArgs[strArg] = strValue;
     mapMultiArgs[strArg] = {strValue};
+}
+
+void ArgsManager::ForceSetArg(const std::string &strArg, const int64_t &nValue)
+{
+    LOCK(cs_args);
+    mapArgs[strArg] = std::to_string(nValue);
+    mapMultiArgs[strArg] = {std::to_string(nValue)};
 }
 
 

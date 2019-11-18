@@ -96,6 +96,7 @@ BASE_SCRIPTS= [
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 45s vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     'rpc_fundrawtransaction.py',
     # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv Tests less than 30s vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    'feature_rewards.py',
     'wallet_basic.py',
     'mempool_limit.py',
     'feature_assets.py',
