@@ -41,71 +41,6 @@ bool AddDistributeRewardSnapshot(CRewardSnapshot& p_rewardSnapshot)
     return true;
 }
 
-void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewardSnapshot)
-{
-    if (p_wallet->IsLocked()) {
-        LogPrint(BCLog::REWARDS, "Skipping distribution: Wallet is locked!\n");
-        return;
-    }
-
-    if (IsInitialBlockDownload()) {
-        LogPrint(BCLog::REWARDS, "Skipping distribution: Syncing Chain!\n");
-        return;
-    }
-
-    //  Retrieve the asset snapshot entry for the target asset at the specified height
-    CAssetSnapshotDBEntry snapshotEntry;
-
-    if (!pAssetSnapshotDb->RetrieveOwnershipSnapshot(p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.nHeight, snapshotEntry)) {
-        LogPrint(BCLog::REWARDS, "Failed to retrieve ownership snapshot!\n");
-        return;
-    }
-
-    //  Generate payment transactions and store in the payments DB
-    std::vector<OwnerAndAmount> paymentDetails;
-    if (!GenerateDistributionList(p_rewardSnapshot, paymentDetails)) {
-        LogPrint(BCLog::REWARDS, "Failed to generate payment details!\n");
-        return;
-    }
-
-    int nNumberOfTransactions = ((int)paymentDetails.size() / MAX_PAYMENTS_PER_TRANSACTION) + 1;
-    CRewardSnapshot copyRewardSnapshot = p_rewardSnapshot;
-    for (int i = 0; i < nNumberOfTransactions; i++) {
-        uint256 txid;
-        if (pDistributeSnapshotDb->GetDistributeTransaction(p_rewardSnapshot.GetHash(), i, txid)) {
-            CTransactionRef txRef;
-            uint256 hashBlock;
-            auto walletTx = p_wallet->GetWalletTx(txid);
-            if (walletTx) {
-                int depth = walletTx->GetDepthInMainChain();
-                if (depth < 0) {
-                    LogPrint(BCLog::REWARDS, "Failed distribution: Tx conflict with another tx: %s: number of block back %d!\n", txid.GetHex(), depth);
-                    return;
-                } else if (depth == 0) {
-                    LogPrint(BCLog::REWARDS, "Tx is in the mempool! %s\n", txid.GetHex());
-                    return;
-                } else if (depth > 0) {
-                    LogPrint(BCLog::REWARDS, "Tx is in a block %s!\n", txid.GetHex());
-                    continue;
-                }
-            } else {
-                LogPrint(BCLog::REWARDS, "Failed to get wallet Tx: %s\n", txid.GetHex());
-            }
-        } else {
-            LogPrint(BCLog::REWARDS, "Didn't find transaction in database creating new transaction: %s %s %d %d\n", p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount, i);
-            // Create a new transaction and database it
-            int start = i * MAX_PAYMENTS_PER_TRANSACTION;
-            uint256 retTxid;
-            std::string change = "";
-            if (!BuildTransaction(p_wallet, p_rewardSnapshot, paymentDetails, start, change, retTxid)) {
-                LogPrint(BCLog::REWARDS, "Failed to build Tx: distribute: %s, amount: %d\n", p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount);
-                return;
-            }
-            pDistributeSnapshotDb->AddDistributeTransaction(p_rewardSnapshot.GetHash(), i, retTxid);
-        }
-    }
-}
-
 bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vector<OwnerAndAmount>& vecDistributionList)
 {
     vecDistributionList.clear();
@@ -239,6 +174,73 @@ bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vect
     }
 
     return true;
+}
+
+#ifdef ENABLE_WALLET
+
+void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewardSnapshot)
+{
+    if (p_wallet->IsLocked()) {
+        LogPrint(BCLog::REWARDS, "Skipping distribution: Wallet is locked!\n");
+        return;
+    }
+
+    if (IsInitialBlockDownload()) {
+        LogPrint(BCLog::REWARDS, "Skipping distribution: Syncing Chain!\n");
+        return;
+    }
+
+    //  Retrieve the asset snapshot entry for the target asset at the specified height
+    CAssetSnapshotDBEntry snapshotEntry;
+
+    if (!pAssetSnapshotDb->RetrieveOwnershipSnapshot(p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.nHeight, snapshotEntry)) {
+        LogPrint(BCLog::REWARDS, "Failed to retrieve ownership snapshot!\n");
+        return;
+    }
+
+    //  Generate payment transactions and store in the payments DB
+    std::vector<OwnerAndAmount> paymentDetails;
+    if (!GenerateDistributionList(p_rewardSnapshot, paymentDetails)) {
+        LogPrint(BCLog::REWARDS, "Failed to generate payment details!\n");
+        return;
+    }
+
+    int nNumberOfTransactions = ((int)paymentDetails.size() / MAX_PAYMENTS_PER_TRANSACTION) + 1;
+    CRewardSnapshot copyRewardSnapshot = p_rewardSnapshot;
+    for (int i = 0; i < nNumberOfTransactions; i++) {
+        uint256 txid;
+        if (pDistributeSnapshotDb->GetDistributeTransaction(p_rewardSnapshot.GetHash(), i, txid)) {
+            CTransactionRef txRef;
+            uint256 hashBlock;
+            auto walletTx = p_wallet->GetWalletTx(txid);
+            if (walletTx) {
+                int depth = walletTx->GetDepthInMainChain();
+                if (depth < 0) {
+                    LogPrint(BCLog::REWARDS, "Failed distribution: Tx conflict with another tx: %s: number of block back %d!\n", txid.GetHex(), depth);
+                    return;
+                } else if (depth == 0) {
+                    LogPrint(BCLog::REWARDS, "Tx is in the mempool! %s\n", txid.GetHex());
+                    return;
+                } else if (depth > 0) {
+                    LogPrint(BCLog::REWARDS, "Tx is in a block %s!\n", txid.GetHex());
+                    continue;
+                }
+            } else {
+                LogPrint(BCLog::REWARDS, "Failed to get wallet Tx: %s\n", txid.GetHex());
+            }
+        } else {
+            LogPrint(BCLog::REWARDS, "Didn't find transaction in database creating new transaction: %s %s %d %d\n", p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount, i);
+            // Create a new transaction and database it
+            int start = i * MAX_PAYMENTS_PER_TRANSACTION;
+            uint256 retTxid;
+            std::string change = "";
+            if (!BuildTransaction(p_wallet, p_rewardSnapshot, paymentDetails, start, change, retTxid)) {
+                LogPrint(BCLog::REWARDS, "Failed to build Tx: distribute: %s, amount: %d\n", p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount);
+                return;
+            }
+            pDistributeSnapshotDb->AddDistributeTransaction(p_rewardSnapshot.GetHash(), i, retTxid);
+        }
+    }
 }
 
 bool BuildTransaction(
@@ -387,3 +389,8 @@ void CheckRewardDistributions(CWallet * p_wallet)
         DistributeRewardSnapshot(p_wallet, item.second);
     }
 }
+
+#endif //ENABLE_WALLET
+
+
+
