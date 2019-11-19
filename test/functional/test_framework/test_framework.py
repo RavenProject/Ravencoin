@@ -112,18 +112,18 @@ class RavenTestFramework:
             self.run_test()
             success = TestStatus.PASSED
         except JSONRPCException as e:
-            self.log.exception("JSONRPC error: %s", e.message)
+            self.log.exception("JSONRPC error: %s", e)
         except SkipTest as e:
             self.log.warning("Test Skipped: %s" % e.message)
             success = TestStatus.SKIPPED
         except AssertionError as e:
-            self.log.exception("Assertion failed: %s", e.message)
+            self.log.exception("Assertion failed: %s", e)
         except KeyError as e:
-            self.log.exception("Key error: %s", e.message)
+            self.log.exception("Key error: %s", e)
         except Exception as e:
-            self.log.exception("Unexpected exception caught during testing: %s", e.message)
+            self.log.exception("Unexpected exception caught during testing: %s", e)
         except KeyboardInterrupt as e:
-            self.log.warning("Exiting after keyboard interrupt: %s", e.message)
+            self.log.warning("Exiting after keyboard interrupt: %s", e)
 
         if success == TestStatus.FAILED and self.options.pdbonfailure:
             self.log.info("Testcase failed. Attaching python debugger. Enter ? for help")

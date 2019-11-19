@@ -3752,6 +3752,30 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
 
     return true;
 }
+
+bool GetMyAssetBalance(const std::string& name, CAmount& balance, const int& confirmations) {
+
+    // Return false if no wallet was found to compute asset balances
+    if (!vpwallets.size())
+        return false;
+
+    // Get the map of assetnames to outputs
+    std::map<std::string, std::vector<COutput> > outputs;
+    vpwallets[0]->AvailableAssets(outputs, true, nullptr, 1, MAX_MONEY, MAX_MONEY, 0, confirmations);
+
+    // Loop through all pairs of Asset Name -> vector<COutput>
+    if (outputs.count(name)) {
+        auto& ref = outputs.at(name);
+        for (const auto& txout : ref) {
+            CAssetOutputEntry data;
+            if (GetAssetData(txout.tx->tx->vout[txout.i].scriptPubKey, data)) {
+                balance += data.nAmount;
+            }
+        }
+    }
+
+    return true;
+}
 #endif
 
 // 46 char base58 --> 34 char KAW compatible
@@ -4226,8 +4250,8 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 return false;
             }
 
-            if (!coinControl.destChange.empty()) {
-                std::string change_address = EncodeDestination(coinControl.destChange);
+            if (!coinControl.assetDestChange.empty()) {
+                std::string change_address = EncodeDestination(coinControl.assetDestChange);
                 // If this is a transfer of a restricted asset, check the destination address against the verifier string
                 CNullAssetTxVerifierString verifier;
                 if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier)) {
@@ -4236,7 +4260,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 }
 
                 if (!ContextualCheckVerifierString(passets, verifier.verifier_string, change_address, strError)) {
-                    error = std::make_pair(RPC_DATABASE_ERROR, std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
+                    error = std::make_pair(RPC_DATABASE_ERROR, std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags ") + strError));
                     return false;
                 }
             }

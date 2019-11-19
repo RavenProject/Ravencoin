@@ -57,6 +57,9 @@
 #include "assets/assetdb.h"
 #include "base58.h"
 
+#include "assets/snapshotrequestdb.h"
+#include "assets/assetsnapshotdb.h"
+
 #if defined(NDEBUG)
 # error "Raven cannot be compiled without assertions."
 #endif
@@ -230,6 +233,9 @@ CLRUCache<std::string, int> *pMessagesSeenAddressCache = nullptr;
 CMessageDB *pmessagedb = nullptr;
 CMessageChannelDB *pmessagechanneldb = nullptr;
 CMyRestrictedDB *pmyrestricteddb = nullptr;
+CSnapshotRequestDB *pSnapshotRequestDb = nullptr;
+CAssetSnapshotDB *pAssetSnapshotDb = nullptr;
+CDistributeSnapshotRequestDB *pDistributeSnapshotDb = nullptr;
 
 CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache = nullptr;
 CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
@@ -713,6 +719,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         size_t nLimitDescendantSize = gArgs.GetArg("-limitdescendantsize", DEFAULT_DESCENDANT_SIZE_LIMIT)*1000;
         std::string errString;
         if (!pool.CalculateMemPoolAncestors(entry, setAncestors, nLimitAncestors, nLimitAncestorSize, nLimitDescendants, nLimitDescendantSize, errString)) {
+            LogPrintf("%s - %s\n", __func__, errString);
             return state.DoS(0, false, REJECT_NONSTANDARD, "too-long-mempool-chain", false, errString);
         }
 
@@ -3284,6 +3291,36 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     LogPrint(BCLog::BENCH, "- Connect block: %.2fms [%.2fs (%.2fms/blk)]\n", (nTime6 - nTime1) * MILLI, nTimeTotal * MICRO, nTimeTotal * MILLI / nBlocksTotal);
 
     connectTrace.BlockConnected(pindexNew, std::move(pthisBlock));
+
+    /** RVN START */
+
+    //  Determine if the new block height has any pending snapshot requests,
+    //      and if so, capture a snapshot of the relevant target assets.
+    if (pSnapshotRequestDb != nullptr) {
+        //  Retrieve the scheduled snapshot requests
+        std::set<CSnapshotRequestDBEntry> assetsToSnapshot;
+        if (pSnapshotRequestDb->RetrieveSnapshotRequestsForHeight("", pindexNew->nHeight, assetsToSnapshot)) {
+            //  Loop through them
+            for (auto const & assetEntry : assetsToSnapshot) {
+                //  Add a snapshot entry for the target asset ownership
+                if (!pAssetSnapshotDb->AddAssetOwnershipSnapshot(assetEntry.assetName, pindexNew->nHeight)) {
+                   LogPrint(BCLog::REWARDS, "ConnectTip: Failed to snapshot owners for '%s' at height %d!\n",
+                       assetEntry.assetName.c_str(), pindexNew->nHeight);
+                }
+            }
+        }
+        else {
+            LogPrint(BCLog::REWARDS, "ConnectTip: Failed to load payable Snapshot Requests at height %d!\n", pindexNew->nHeight);
+        }
+    }
+
+#ifdef ENABLE_WALLET
+    if (vpwallets.size()) {
+        CheckRewardDistributions(vpwallets[0]);
+    }
+#endif
+    /** RVN END */
+
     return true;
 }
 
