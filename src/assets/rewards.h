@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <list>
 
+
 class CRewardSnapshot;
 class CWallet;
 class CRewardSnapshot;
@@ -145,9 +146,11 @@ enum {
     FAILED_
 };
 
-void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewardSnapshot);
 bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vector<OwnerAndAmount>& vecDistributionList);
 bool AddDistributeRewardSnapshot(CRewardSnapshot& p_rewardSnapshot);
+
+#ifdef ENABLE_WALLET
+void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewardSnapshot);
 
 bool BuildTransaction(
         CWallet * const p_walletPtr, const CRewardSnapshot& p_rewardSnapshot,
@@ -155,6 +158,12 @@ bool BuildTransaction(
         std::string& change_address, uint256& retTxid);
 
 void CheckRewardDistributions(CWallet * p_wallet);
+#endif //ENABLE_WALLET
+
+
+
+
+
 
 
 
