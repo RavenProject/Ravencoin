@@ -14,7 +14,7 @@
 
 BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
 
-    static void TestBlockSubsidyHalvings(const Consensus::ConsensusParams &consensusParams)
+    static void TestBlockSubsidyHalvings(const Consensus::Params &consensusParams)
     {
         int maxHalvings = 64;
         CAmount nInitialSubsidy = 5000 * COIN;
@@ -34,7 +34,7 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
 
     static void TestBlockSubsidyHalvings(int nSubsidyHalvingInterval)
     {
-        Consensus::ConsensusParams consensusParams;
+        Consensus::Params consensusParams;
         consensusParams.nSubsidyHalvingInterval = nSubsidyHalvingInterval;
         TestBlockSubsidyHalvings(consensusParams);
     }

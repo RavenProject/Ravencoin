@@ -241,7 +241,6 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 338778;
-        nX16RV2ActivationTime = 1569945600; //Tue Oct 01 2019 16:00:00 UTC
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
@@ -438,7 +437,6 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 1;
-        nX16RV2ActivationTime = 1569931200;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;
@@ -620,7 +618,6 @@ public:
 
         // DGW Activation
         nDGWActivationBlock = 200;
-        nX16RV2ActivationTime = 1566571889;
 
         nMaxReorganizationDepth = 60; // 60 at 1 minute block timespan is +/- 60 minutes.
         nMinReorganizationPeers = 4;

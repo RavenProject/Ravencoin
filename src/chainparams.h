@@ -136,8 +136,6 @@ public:
     unsigned int MessagingActivationBlock() const { return nMessagingActivationBlock; }
     unsigned int RestrictedActivationBlock() const { return nRestrictedActivationBlock; }
 
-    uint32_t X16RV2ActivationTime() const { return nX16RV2ActivationTime; }
-
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
     int MinReorganizationAge() const { return nMinReorganizationAge; }
@@ -191,7 +189,6 @@ protected:
     std::string strGlobalBurnAddress;
 
     unsigned int nDGWActivationBlock;
-    uint32_t nX16RV2ActivationTime;
     unsigned int nMessagingActivationBlock;
     unsigned int nRestrictedActivationBlock;
 

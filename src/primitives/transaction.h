@@ -15,11 +15,6 @@
 
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
-struct NewAssetInfo {
-    bool fFromMempool;
-    uint32_t nTimeAdded;
-};
-
 class CCoinsViewCache;
 class CNullAssetTxVerifierString;
 
@@ -336,7 +331,7 @@ public:
 
     /** RVN START */
     bool IsNewAsset() const;
-    bool VerifyNewAsset(std::string& strError, NewAssetInfo* newAssetInfo = nullptr) const;
+    bool VerifyNewAsset(std::string& strError) const;
     bool IsNewUniqueAsset() const;
     bool VerifyNewUniqueAsset(std::string& strError) const;
     bool IsReissueAsset() const;
