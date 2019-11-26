@@ -29,10 +29,6 @@
  *
  * @author   Thomas Pornin <thomas.pornin@cryptolog.com>
  */
- 
-#ifndef MAC_OSX
-#pragma GCC diagnostic ignored "-fpermissive"
-#endif
 
 #include <stddef.h>
 #include <string.h>

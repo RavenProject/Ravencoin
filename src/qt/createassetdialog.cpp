@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -39,6 +39,10 @@
 #include <QSortFilterProxyModel>
 #include <QCompleter>
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
+
 CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
         QDialog(parent, Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
         ui(new Ui::CreateAssetDialog),
@@ -56,6 +60,7 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     connect(ui->assetType, SIGNAL(activated(int)), this, SLOT(onAssetTypeActivated(int)));
     connect(ui->assetList, SIGNAL(activated(int)), this, SLOT(onAssetListActivated(int)));
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(onClearButtonClicked()));
+    connect(ui->lineEditVerifierString, SIGNAL(textChanged(QString)), this, SLOT(onVerifierStringChanged(QString)));
 
     GUIUtil::setupAddressWidget(ui->lineEditCoinControlChange, this);
 
@@ -132,6 +137,7 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
 
     ui->nameText->installEventFilter(this);
     ui->assetList->installEventFilter(this);
+    ui->lineEditVerifierString->installEventFilter(this);
 }
 
 void CreateAssetDialog::setClientModel(ClientModel *_clientModel)
@@ -170,7 +176,7 @@ void CreateAssetDialog::setModel(WalletModel *_model)
 
         // fee section
         for (const int &n : confTargets) {
-            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n*Params().GetConsensus().nPowTargetSpacing)).arg(n));
+            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * GetParams().GetConsensus().nPowTargetSpacing)).arg(n));
         }
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(updateSmartFeeLabel()));
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(coinControlUpdateLabels()));
@@ -209,6 +215,8 @@ void CreateAssetDialog::setModel(WalletModel *_model)
         // Setup the default values
         setUpValues();
 
+        restrictedAssetNotSelected();
+
         adjustSize();
     }
 }
@@ -234,6 +242,12 @@ bool CreateAssetDialog::eventFilter(QObject *sender, QEvent *event)
         {
             ui->assetList->lineEdit()->setStyleSheet("");
         }
+    } else if (sender == ui->lineEditVerifierString)
+    {
+        if(event->type()== QEvent::FocusIn)
+        {
+            hideInvalidVerifierStringMessage();
+        }
     }
     return QWidget::eventFilter(sender,event);
 }
@@ -255,6 +269,11 @@ void CreateAssetDialog::setUpValues()
     list.append(tr("Main Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::ROOT)) + ")");
     list.append(tr("Sub Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::SUB)) + ")");
     list.append(tr("Unique Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::UNIQUE)) + ")");
+    list.append(tr("Messaging Channel Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::MSGCHANNEL)) + ")");
+    list.append(tr("Qualifier Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::QUALIFIER)) + ")");
+    list.append(tr("Sub Qualifier Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::SUB_QUALIFIER)) + ")");
+    list.append(tr("Restricted Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::RESTRICTED)) + ")");
+
     ui->assetType->addItems(list);
     type = IntFromAssetType(AssetType::ROOT);
     ui->assetTypeLabel->setText(tr("Asset Type") + ":");
@@ -334,6 +353,9 @@ void CreateAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
 
     ui->reissuableBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
     ui->ipfsBox->setStyleSheet(QString(".QCheckBox{ %1; }").arg(STRING_LABEL_COLOR));
+
+    ui->labelVerifierString->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelVerifierString->setFont(GUIUtil::getSubLabelFont());
 
 }
 
@@ -436,6 +458,21 @@ void CreateAssetDialog::hideMessage()
     ui->messageLabel->hide();
 }
 
+void CreateAssetDialog::showInvalidVerifierStringMessage(QString string)
+{
+    ui->lineEditVerifierString->setStyleSheet(STYLE_INVALID);
+    ui->labelVerifierStringErrorMessage->setStyleSheet("color: red; font-size: 15pt;font-weight: bold;");
+    ui->labelVerifierStringErrorMessage->setText(string);
+    ui->labelVerifierStringErrorMessage->show();
+}
+
+void CreateAssetDialog::hideInvalidVerifierStringMessage()
+{
+    ui->lineEditVerifierString->setStyleSheet(STYLE_VALID);
+    ui->labelVerifierStringErrorMessage->clear();
+    ui->labelVerifierStringErrorMessage->hide();
+}
+
 void CreateAssetDialog::disableCreateButton()
 {
     ui->createAssetButton->setDisabled(true);
@@ -451,19 +488,19 @@ bool CreateAssetDialog::checkIPFSHash(QString hash)
 {
     if (!hash.isEmpty()) {
         std::string error;
-        if (!CheckEncodedIPFS(hash.toStdString(), error)) {
+        if (!CheckEncoded(DecodeAssetData(hash.toStdString()), error)) {
             ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must start with 'Qm'");
+            showMessage(tr("IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters"));
             disableCreateButton();
             return false;
         }
-        else if (hash.size() != 46) {
+        else if (hash.size() != 46 && hash.size() != 64) {
             ui->ipfsText->setStyleSheet("border: 2px solid red");
-            showMessage("IPFS Hash must have size of 46 characters");
+            showMessage(tr("IPFS/Txid Hash must have size of 46 characters, or 64 hex characters"));
             disableCreateButton();
             return false;
-        } else if (DecodeIPFS(hash.toStdString()).empty()) {
-            showMessage("IPFS hash is not valid. Please use a valid IPFS hash");
+        } else if (DecodeAssetData(hash.toStdString()).empty()) {
+            showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash"));
             disableCreateButton();
             return false;
         }
@@ -488,7 +525,7 @@ void CreateAssetDialog::CheckFormState()
     std::string error;
     bool assetNameValid = IsTypeCheckNameValid(AssetTypeFromInt(type), name.toStdString(), error);
 
-    if (type != IntFromAssetType(AssetType::ROOT)) {
+    if (type != IntFromAssetType(AssetType::ROOT) && type != IntFromAssetType(AssetType::QUALIFIER) && type != IntFromAssetType(AssetType::RESTRICTED)) {
         if (ui->assetList->currentText() == "")
         {
             ui->assetList->lineEdit()->setStyleSheet(STYLE_INVALID);
@@ -508,6 +545,42 @@ void CreateAssetDialog::CheckFormState()
         ui->addressText->setStyleSheet(STYLE_INVALID);
         showMessage(tr("Warning: Invalid Raven address"));
         return;
+    }
+
+    if (type == IntFromAssetType(AssetType::RESTRICTED)) {
+
+        QString qVerifier = ui->lineEditVerifierString->text();
+        std::string strVerifier = qVerifier.toStdString();
+
+        std::string strippedVerifier = GetStrippedVerifierString(strVerifier);
+
+        if (!strVerifier.empty()) {
+            // A valid address must be given
+            QString qAddress = ui->addressText->text();
+            std::string strAddress = qAddress.toStdString();
+
+            if (strAddress.empty()) {
+                ui->addressText->setStyleSheet(STYLE_INVALID);
+                showMessage(tr("Warning: Restricted Assets Reissuance requires an address"));
+                return;
+            } else if (!IsValidDestination(dest)) {
+                ui->addressText->setStyleSheet(STYLE_INVALID);
+                showMessage(tr("Warning: Invalid Raven address"));
+                return;
+            }
+
+            // Check the verifier string
+            std::string strError;
+            ErrorReport errorReport;
+            errorReport.type = ErrorReport::ErrorType::NotSetError;
+            if (!ContextualCheckVerifierString(passets, strippedVerifier, strAddress, strError, &errorReport)) {
+                ui->lineEditVerifierString->setStyleSheet(STYLE_INVALID);
+                showInvalidVerifierStringMessage(QString::fromStdString(GetUserErrorString(errorReport)));
+                return;
+            } else {
+                hideInvalidVerifierStringMessage();
+            }
+        }
     }
 
     if (ui->ipfsBox->isChecked())
@@ -545,6 +618,7 @@ void CreateAssetDialog::checkAvailabilityClicked()
             checkedAvailablity = false;
             return;
         } else {
+            qDebug() << "set to true";
             checkedAvailablity = true;
             ui->nameText->setStyleSheet(STYLE_VALID);
         }
@@ -587,7 +661,7 @@ void CreateAssetDialog::onNameChanged(QString name)
             showMessage(tr(error.c_str()));
             ui->availabilityButton->setDisabled(true);
         }
-    } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE)) {
+    } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::MSGCHANNEL)) {
         if (name.size() == 0) {
             hideMessage();
             ui->availabilityButton->setDisabled(true);
@@ -612,6 +686,32 @@ void CreateAssetDialog::onNameChanged(QString name)
             showMessage(tr(error.c_str()));
             ui->availabilityButton->setDisabled(true);
         }
+    } else if (type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER)) {
+        if (name.size() == 0) {
+            hideMessage();
+            ui->availabilityButton->setDisabled(true);
+        }
+
+        if (type == IntFromAssetType(AssetType::SUB_QUALIFIER)) { // If an asset isn't selected. Mark the lineedit with invalid style sheet
+            if (ui->assetList->currentText() == "") {
+                ui->assetList->lineEdit()->setStyleSheet(STYLE_INVALID);
+                ui->availabilityButton->setDisabled(true);
+                return;
+            }
+        }
+
+        std::string error;
+        auto assetType = AssetTypeFromInt(type);
+        auto strName = GetAssetName();
+        if (IsTypeCheckNameValid(assetType, strName.toStdString(), error)) {
+            hideMessage();
+            ui->availabilityButton->setDisabled(false);
+        } else {
+            ui->nameText->setStyleSheet(STYLE_INVALID);
+            showMessage(tr(error.c_str()));
+            ui->availabilityButton->setDisabled(true);
+        }
+
     }
 
     // Set the assetName
@@ -622,6 +722,11 @@ void CreateAssetDialog::onNameChanged(QString name)
 }
 
 void CreateAssetDialog::onAddressNameChanged(QString address)
+{
+    CheckFormState();
+}
+
+void CreateAssetDialog::onVerifierStringChanged(QString verifier)
 {
     CheckFormState();
 }
@@ -649,9 +754,17 @@ void CreateAssetDialog::onCreateAssetClicked()
 
     std::string ipfsDecoded = "";
     if (hasIPFS)
-        ipfsDecoded = DecodeIPFS(ui->ipfsText->text().toStdString());
+        ipfsDecoded = DecodeAssetData(ui->ipfsText->text().toStdString());
 
     CNewAsset asset(name.toStdString(), quantity, units, reissuable ? 1 : 0, hasIPFS ? 1 : 0, ipfsDecoded);
+
+    std::string verifierStripped = GetStrippedVerifierString(ui->lineEditVerifierString->text().toStdString());
+    bool fRestrictedAssetCreation = false;
+    if (type == IntFromAssetType(AssetType::RESTRICTED)) {
+        fRestrictedAssetCreation = true;
+        if (verifierStripped.empty())
+            verifierStripped = "true";
+    }
 
     CWalletTx tx;
     CReserveKey reservekey(model->getWallet());
@@ -672,8 +785,15 @@ void CreateAssetDialog::onCreateAssetClicked()
         address = ui->addressText->text();
     }
 
+    if (IsInitialBlockDownload()) {
+        GUIUtil::SyncWarningMessage syncWarning(this);
+        bool sendTransaction = syncWarning.showTransactionSyncWarningMessage();
+        if (!sendTransaction)
+            return;
+    }
+
     // Create the transaction
-    if (!CreateAssetTransaction(model->getWallet(), ctrl, asset, address.toStdString(), error, tx, reservekey, nFeeRequired)) {
+    if (!CreateAssetTransaction(model->getWallet(), ctrl, asset, address.toStdString(), error, tx, reservekey, nFeeRequired, fRestrictedAssetCreation ? &verifierStripped : nullptr)) {
         showMessage("Invalid: " + QString::fromStdString(error.second));
         return;
     }
@@ -800,23 +920,44 @@ void CreateAssetDialog::onAssetTypeActivated(int index)
     disableCreateButton();
     checkedAvailablity = false;
 
+    int nCurrentType = type;
     // Update the selected type
     type = index;
 
+    bool fOrginalTypeAsset = type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::MSGCHANNEL);
+    bool fRestrictedTypeAsset = type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::RESTRICTED);
+
+    bool fShowList = type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::RESTRICTED) || type == IntFromAssetType(AssetType::MSGCHANNEL);
+
     // Make sure the type is only the the supported issue types
-    if(!(type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE)))
+    if(!(fOrginalTypeAsset || fRestrictedTypeAsset)) {
         type = IntFromAssetType(AssetType::ROOT);
+    }
 
     // If the type is UNIQUE, set the units and amount to the correct value, and disable them.
-    if (type == IntFromAssetType(AssetType::UNIQUE))
+    if (type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::MSGCHANNEL)) {
         setUniqueSelected();
-    else
+    } else if (type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER)) {
+        setQualifierSelected();
+    } else {
         clearSelected();
+    }
 
     // Get the identifier for the asset type
     QString identifier = GetSpecialCharacter();
 
-    if (index != 0) {
+    // Add functionality when switching between restricted and none restricted asset types
+    if (nCurrentType != IntFromAssetType(AssetType::RESTRICTED) && type == IntFromAssetType(AssetType::RESTRICTED)) {
+        restrictedAssetSelected();
+    } else if (nCurrentType == IntFromAssetType(AssetType::RESTRICTED) && type != IntFromAssetType(AssetType::RESTRICTED)) {
+        restrictedAssetNotSelected();
+    }
+
+    if (type == IntFromAssetType(AssetType::SUB_QUALIFIER)) {
+        updateAssetListForSubQualifierIssuance();
+    }
+
+    if (fShowList) {
         ui->assetList->show();
     } else {
         ui->assetList->hide();
@@ -824,13 +965,21 @@ void CreateAssetDialog::onAssetTypeActivated(int index)
 
     UpdateAssetNameMaxSize();
 
-    // Set assetName
-    updatePresentedAssetName(format.arg(type == IntFromAssetType(AssetType::ROOT) ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
+    // Set assetName when it is an original asset type
+    if (fOrginalTypeAsset)
+        updatePresentedAssetName(format.arg(type == IntFromAssetType(AssetType::ROOT) ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
 
-    if (ui->nameText->text().size())
+    if (fRestrictedTypeAsset) {
+        bool fSingleName = type != IntFromAssetType(AssetType::SUB_QUALIFIER);
+        updatePresentedAssetName(format.arg(fSingleName ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
+    }
+
+    if (ui->nameText->text().size()) {
         ui->availabilityButton->setDisabled(false);
-    else
+    } else {
         ui->availabilityButton->setDisabled(true);
+    }
+
     ui->createAssetButton->setDisabled(true);
 
     // Update coinControl so it can change the amount that is being spent
@@ -845,7 +994,12 @@ void CreateAssetDialog::onAssetListActivated(int index)
     UpdateAssetNameMaxSize();
 
     // Set assetName
-    updatePresentedAssetName(format.arg(type == IntFromAssetType(AssetType::ROOT) ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
+    updatePresentedAssetName(format.arg(type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::RESTRICTED) || type == IntFromAssetType(AssetType::QUALIFIER) ? "" : ui->assetList->currentText(), identifier, ui->nameText->text()));
+
+    if (type == IntFromAssetType(AssetType::RESTRICTED)) {
+        ui->nameText->setText("$" + ui->assetList->currentText());
+        ui->assetFullName->hide();
+    }
 
     if (ui->nameText->text().size())
         ui->availabilityButton->setDisabled(false);
@@ -861,10 +1015,12 @@ void CreateAssetDialog::updatePresentedAssetName(QString name)
 
 QString CreateAssetDialog::GetSpecialCharacter()
 {
-    if (type == IntFromAssetType(AssetType::SUB))
+    if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::SUB_QUALIFIER))
         return "/";
     else if (type == IntFromAssetType(AssetType::UNIQUE))
         return "#";
+    else if (type == IntFromAssetType(AssetType::MSGCHANNEL))
+        return "~";
 
     return "";
 }
@@ -877,21 +1033,29 @@ QString CreateAssetDialog::GetAssetName()
         return ui->assetList->currentText() + "/" + ui->nameText->text();
     else if (type == IntFromAssetType(AssetType::UNIQUE))
         return ui->assetList->currentText() + "#" + ui->nameText->text();
+    else if (type == IntFromAssetType(AssetType::MSGCHANNEL))
+        return ui->assetList->currentText() + "~" + ui->nameText->text();
+    else if (type == IntFromAssetType(AssetType::RESTRICTED))
+        return ui->nameText->text();
+    else if (type == IntFromAssetType(AssetType::QUALIFIER))
+        return ui->nameText->text();
+    else if (type == IntFromAssetType(AssetType::SUB_QUALIFIER))
+        return ui->assetList->currentText() + "/" + ui->nameText->text();
     return "";
 }
 
 void CreateAssetDialog::UpdateAssetNameMaxSize()
 {
-    if (type == IntFromAssetType(AssetType::ROOT)) {
+    if (type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::RESTRICTED)) {
         ui->nameText->setMaxLength(30);
-    } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE)) {
+    } else if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::UNIQUE) || type == IntFromAssetType(AssetType::SUB_QUALIFIER)) {
         ui->nameText->setMaxLength(30 - (ui->assetList->currentText().size() + 1));
     }
 }
 
 void CreateAssetDialog::UpdateAssetNameToUpper()
 {
-    if (type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB)) {
+    if (type == IntFromAssetType(AssetType::ROOT) || type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::RESTRICTED) || type == IntFromAssetType(AssetType::QUALIFIER) || type == IntFromAssetType(AssetType::SUB_QUALIFIER) || type == IntFromAssetType(AssetType::MSGCHANNEL)) {
         ui->nameText->setText(ui->nameText->text().toUpper());
     }
 }
@@ -928,7 +1092,11 @@ void CreateAssetDialog::updateSmartFeeLabel()
         int lightness = ui->fallbackFeeWarningLabel->palette().color(QPalette::WindowText).lightness();
         QColor warning_colour(255 - (lightness / 5), 176 - (lightness / 3), 48 - (lightness / 14));
         ui->fallbackFeeWarningLabel->setStyleSheet("QLabel { color: " + warning_colour.name() + "; }");
-        ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
+        #ifndef QTversionPreFiveEleven
+    		ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).horizontalAdvance("x"));
+    	#else
+    		ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
+    	#endif
     }
     else
     {
@@ -1180,6 +1348,16 @@ void CreateAssetDialog::setUniqueSelected()
     ui->quantitySpinBox->setDisabled(true);
 }
 
+void CreateAssetDialog::setQualifierSelected()
+{
+    ui->reissuableBox->setChecked(false);
+    ui->quantitySpinBox->setValue(1);
+    ui->quantitySpinBox->setMaximum(10);
+    ui->unitBox->setValue(0);
+    ui->reissuableBox->setDisabled(true);
+    ui->unitBox->setDisabled(true);
+}
+
 void CreateAssetDialog::clearSelected()
 {
     ui->reissuableBox->setDisabled(false);
@@ -1205,6 +1383,39 @@ void CreateAssetDialog::updateAssetList()
     stringModel->setStringList(list);
 }
 
+void CreateAssetDialog::updateAssetListForRestrictedIssuance()
+{
+    QStringList list;
+    list << "";
+
+    std::vector<std::string> names;
+    GetAllAdministrativeAssets(model->getWallet(), names, 0);
+    for (auto item : names) {
+        std::string name = QString::fromStdString(item).split("!").first().toStdString();
+        if (IsAssetNameARoot(name))
+            if (name.size() != 30)
+                list << QString::fromStdString(name);
+    }
+
+    stringModel->setStringList(list);
+}
+
+void CreateAssetDialog::updateAssetListForSubQualifierIssuance()
+{
+    QStringList list;
+    list << "";
+
+    std::vector<std::string> names;
+    GetAllMyAssets(model->getWallet(), names, 0, false, false);
+    for (auto item : names) {
+        if (IsAssetNameAQualifier(item, true))
+            if (item.size() != 30)
+                list << QString::fromStdString(item);
+    }
+
+    stringModel->setStringList(list);
+}
+
 void CreateAssetDialog::clear()
 {
     ui->assetType->setCurrentIndex(0);
@@ -1221,6 +1432,9 @@ void CreateAssetDialog::clear()
     ui->assetFullName->clear();
     ui->unitBox->setDisabled(false);
     ui->quantitySpinBox->setDisabled(false);
+    ui->nameText->setEnabled(true);
+
+    ui->reissuableBox->setDisabled(false);
     hideMessage();
     disableCreateButton();
 }
@@ -1254,4 +1468,35 @@ void CreateAssetDialog::selectTypeName(int type, QString name)
     onAssetListActivated(ui->assetList->currentIndex());
 
     ui->nameText->setFocus();
+}
+
+void CreateAssetDialog::restrictedAssetSelected()
+{
+    updateAssetListForRestrictedIssuance();
+
+    ui->nameText->clear();
+    ui->nameText->setEnabled(false);
+
+    ui->labelVerifierString->show();
+    ui->lineEditVerifierString->show();
+
+    ui->addressText->show();
+    ui->addressLabel->show();
+}
+
+void CreateAssetDialog::restrictedAssetNotSelected()
+{
+    updateAssetList();
+
+    ui->nameText->clear();
+    ui->nameText->setEnabled(true);
+    ui->assetFullName->show();
+
+    ui->labelVerifierString->hide();
+    ui->lineEditVerifierString->hide();
+    ui->labelVerifierStringErrorMessage->hide();
+
+    bool fCoinControlEnabled = this->model->getOptionsModel()->getCoinControlFeatures();
+    ui->addressText->setVisible(fCoinControlEnabled);
+    ui->addressLabel->setVisible(fCoinControlEnabled);
 }

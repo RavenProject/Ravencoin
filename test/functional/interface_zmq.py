@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the ZMQ notification interface."""
@@ -8,12 +8,11 @@ import configparser
 import os
 import struct
 
-from test_framework.test_framework import RavenTestFramework, SkipTest
+from test_framework.test_framework import (RavenTestFramework, SkipTest)
 from test_framework.util import (assert_equal,
                                  bytes_to_hex_str,
                                  hash256,
-                                 hash_block,
-                                )
+                                 x16_hash_block)
 
 class ZMQSubscriber:
     def __init__(self, socket, topic):
@@ -106,7 +105,7 @@ class ZMQTest (RavenTestFramework):
 
             # Should receive the generated raw block.
             block = self.rawblock.receive()
-            assert_equal(genhashes[x], hash_block(bytes_to_hex_str(block[:80])))
+            assert_equal(genhashes[x], x16_hash_block(bytes_to_hex_str(block[:80]), "2"))
 
         self.log.info("Wait for tx from second node")
         payment_txid = self.nodes[1].sendtoaddress(self.nodes[0].getnewaddress(), 1.0)

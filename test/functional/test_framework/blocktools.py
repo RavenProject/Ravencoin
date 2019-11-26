@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Utilities for manipulating blocks and transactions."""
 
-from .mininode import *
-from .script import CScript, OP_TRUE, OP_CHECKSIG, OP_RETURN
+from .mininode import (CBlock, 
+                        uint256_from_str, 
+                        ser_uint256, 
+                        hash256, 
+                        CTxInWitness, 
+                        CTxOut, 
+                        CTxIn, 
+                        CTransaction, 
+                        COutPoint, 
+                        ser_string, 
+                        COIN)
+from .script import (CScript, OP_TRUE, OP_CHECKSIG, OP_RETURN)
 
 # Create a block (with regtest difficulty)
 def create_block(hashprev, coinbase, nTime=None):

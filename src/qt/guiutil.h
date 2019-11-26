@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -135,6 +135,18 @@ namespace GUIUtil
     // Concatenate a string given the painter, static text width, left side of rect, and right side of rect
     // and which side the concatenated string is on (default left)
     void concatenate(QPainter* painter, QString& strToCon, int static_width, int left_side, int right_size);
+
+
+    class SyncWarningMessage : public QDialog
+    {
+        Q_OBJECT
+
+    public:
+        explicit SyncWarningMessage(QWidget *parent = 0);
+
+        bool showTransactionSyncWarningMessage();
+    };
+
 
     /** Qt event filter that intercepts ToolTipChange events, and replaces the tooltip with a rich text
       representation if needed. This assures that Qt can word-wrap long tooltip messages.

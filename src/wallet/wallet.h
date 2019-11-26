@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -47,11 +47,11 @@ static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
 //! -fallbackfee default
-static const CAmount DEFAULT_FALLBACK_FEE = 75000;
+static const CAmount DEFAULT_FALLBACK_FEE = 1025000;
 //! -m_discard_rate default
 static const CAmount DEFAULT_DISCARD_FEE = 25000;
 //! -mintxfee default
-static const CAmount DEFAULT_TRANSACTION_MINFEE = 50000;
+static const CAmount DEFAULT_TRANSACTION_MINFEE = 1000000;
 //! minimum recommended increment for BIP 125 replacement txs
 static const CAmount WALLET_INCREMENTAL_RELAY_FEE = 5000;
 //! target minimum change amount
@@ -194,6 +194,8 @@ struct CAssetOutputEntry
     std::string assetName;
     CTxDestination destination;
     CAmount nAmount;
+    std::string message;
+    int64_t expireTime;
     int vout;
 };
 /** RVN END */
@@ -996,7 +998,7 @@ public:
 
     /** RVN START */
     bool CreateTransactionWithAssets(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
-                                   std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination dest, const AssetType& assetType, bool sign = true);
+                                   std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination destination, const AssetType& assetType, bool sign = true);
 
     bool CreateTransactionWithTransferAsset(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
                                                      std::string& strFailReason, const CCoinControl& coin_control, bool sign = true);
@@ -1120,6 +1122,9 @@ public:
     //! Flush wallet (bitdb flush)
     void Flush(bool shutdown=false);
 
+    void UpdateMyRestrictedAssets(std::string& address, std::string& asset_name,
+                                  int type, uint32_t date);
+
     /** 
      * Address book entry changed.
      * @note called with lock cs_wallet held.
@@ -1135,6 +1140,13 @@ public:
      */
     boost::signals2::signal<void (CWallet *wallet, const uint256 &hashTx,
             ChangeType status)> NotifyTransactionChanged;
+
+    /**
+     * Wallets Restricted Asset Address data added or updated.
+     * @note called with lock cs_wallet held.
+     */
+    boost::signals2::signal<void (CWallet *wallet, std::string& address, std::string& asset_name,
+                                  int type, uint32_t date)> NotifyMyRestrictedAssetsChanged;
 
     /** Show progress e.g. for rescan */
     boost::signals2::signal<void (const std::string &title, int nProgress)> ShowProgress;
@@ -1252,9 +1264,16 @@ public:
 // Helper for producing a bunch of max-sized low-S signatures (eg 72 bytes)
 // ContainerType is meant to hold pair<CWalletTx *, int>, and be iterable
 // so that each entry corresponds to each vIn, in order.
+// Returns true if all inputs could be signed normally, false if any were padded out for sizing purposes.
 template <typename ContainerType>
 bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins) const
 {
+    bool allSigned = true;
+
+    // pad past max expected sig length (256)
+    const std::string zeros = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    const unsigned char* cstrZeros = (unsigned char*)zeros.c_str();
+
     // Fill in dummy signatures for fee calculation.
     int nIn = 0;
     for (const auto& coin : coins)
@@ -1264,14 +1283,18 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins
 
         if (!ProduceSignature(DummySignatureCreator(this), scriptPubKey, sigdata))
         {
-            return false;
+            // just add dummy 256 bytes as sigdata if this fails (can't necessarily sign for all inputs)
+            CScript dummyScript = CScript(cstrZeros, cstrZeros + 256);
+            SignatureData dummyData = SignatureData(dummyScript);
+            UpdateTransaction(txNew, nIn, dummyData);
+            allSigned = false;
         } else {
             UpdateTransaction(txNew, nIn, sigdata);
         }
 
         nIn++;
     }
-    return true;
+    return allSigned;
 }
 
 #endif // RAVEN_WALLET_WALLET_H

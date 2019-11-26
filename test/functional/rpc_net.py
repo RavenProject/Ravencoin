@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test RPC calls related to net.
@@ -11,12 +11,7 @@ Tests correspond to code in rpc/net.cpp.
 import time
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_raises_rpc_error,
-    connect_nodes_bi,
-    p2p_port,
-)
+from test_framework.util import (assert_equal, assert_raises_rpc_error, connect_nodes_bi, p2p_port)
 
 class NetTest(RavenTestFramework):
     def set_test_params(self):
@@ -48,7 +43,7 @@ class NetTest(RavenTestFramework):
         # the bytes sent/received should change
         # note ping and pong are 32 bytes each
         self.nodes[0].ping()
-        time.sleep(0.1)
+        time.sleep(1)
         peer_info_after_ping = self.nodes[0].getpeerinfo()
         net_totals_after_ping = self.nodes[0].getnettotals()
         for before, after in zip(peer_info, peer_info_after_ping):

@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -39,12 +39,14 @@ private:
     unsigned int chRejectCode;
     bool corruptionPossible;
     std::string strDebugMessage;
+    uint256 failedTransaction;
+
 public:
     CValidationState() : mode(MODE_VALID), nDoS(0), chRejectCode(0), corruptionPossible(false) {}
     bool DoS(int level, bool ret = false,
              unsigned int chRejectCodeIn=0, const std::string &strRejectReasonIn="",
              bool corruptionIn=false,
-             const std::string &strDebugMessageIn="") {
+             const std::string &strDebugMessageIn="", uint256 tx=uint256()) {
         chRejectCode = chRejectCodeIn;
         strRejectReason = strRejectReasonIn;
         corruptionPossible = corruptionIn;
@@ -87,6 +89,15 @@ public:
     }
     void SetCorruptionPossible() {
         corruptionPossible = true;
+    }
+    void SetFailedTransaction(const uint256& txhash) {
+        failedTransaction = txhash;
+    }
+    uint256 GetFailedTransaction() {
+        return failedTransaction;
+    }
+    bool IsTransactionError() const  {
+        return failedTransaction != uint256();
     }
     unsigned int GetRejectCode() const { return chRejectCode; }
     std::string GetRejectReason() const { return strRejectReason; }

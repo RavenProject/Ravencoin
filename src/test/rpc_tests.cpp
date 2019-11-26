@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,6 +16,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <univalue.h>
+#include <validation.h>
+#include <consensus/consensus.h>
 
 UniValue CallRPC(std::string args)
 {
@@ -155,9 +157,10 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
     {
         BOOST_TEST_MESSAGE("Running RPC CreateRaw Assets Test");
 
+        fUnitTest = true;
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000}"));
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"issue\":{\"name_length\":1,\"asset_name\":\"RAVEN_ASSET\",\"asset_quantity\":20000,\"units\":0,\"reissuable\":1,\"has_ipfs\":0}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"issue\":{\"asset_name\":\"RAVEN_ASSET\",\"asset_quantity\":20000,\"units\":0,\"reissuable\":1,\"has_ipfs\":0}}}"));
 
         // one address multiple asset outs
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000,\"RAVEN_ASSET_2\":20000}}}"));
@@ -167,6 +170,9 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
 
         // coin and asset out
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
+
+        // coin and asset out with message
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transferwithmessage\":{\"RAVEN_ASSET\":20000,\"message\":\"QmTqu3Lk3gmTsQVZZZZZZEAW4xZZZZNmbuEAp2Mjr4AV7E\",\"expire_time\":0}}}"));
 
         // bad command
         BOOST_CHECK_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"badcommand\":{\"RAVEN_ASSET\":20000}}}"), std::runtime_error);
@@ -291,7 +297,7 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
         BOOST_CHECK_NO_THROW(CallRPC(std::string("setban 127.0.0.0 remove")));
         BOOST_CHECK_NO_THROW(r = CallRPC(std::string("listbanned")));
         ar = r.get_array();
-        BOOST_CHECK_EQUAL(ar.size(), 0L);
+        BOOST_CHECK_EQUAL(ar.size(), (uint64_t)0L);
 
         BOOST_CHECK_NO_THROW(r = CallRPC(std::string("setban 127.0.0.0/24 add 1607731200 true")));
         BOOST_CHECK_NO_THROW(r = CallRPC(std::string("listbanned")));
@@ -321,7 +327,7 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
         BOOST_CHECK_NO_THROW(CallRPC(std::string("setban 127.0.0.0/24 remove")));
         BOOST_CHECK_NO_THROW(r = CallRPC(std::string("listbanned")));
         ar = r.get_array();
-        BOOST_CHECK_EQUAL(ar.size(), 0);
+        BOOST_CHECK_EQUAL(ar.size(), (uint64_t)0);
 
         BOOST_CHECK_NO_THROW(r = CallRPC(std::string("setban 127.0.0.0/255.255.0.0 add")));
         BOOST_CHECK_THROW(r = CallRPC(std::string("setban 127.0.1.1 add")), std::runtime_error);
@@ -329,7 +335,7 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
         BOOST_CHECK_NO_THROW(CallRPC(std::string("clearbanned")));
         BOOST_CHECK_NO_THROW(r = CallRPC(std::string("listbanned")));
         ar = r.get_array();
-        BOOST_CHECK_EQUAL(ar.size(), 0);
+        BOOST_CHECK_EQUAL(ar.size(), (uint64_t)0);
 
 
         BOOST_CHECK_THROW(r = CallRPC(std::string("setban test add")), std::runtime_error); //invalid IP

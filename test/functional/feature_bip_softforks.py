@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test BIP 9 soft forks.
@@ -22,7 +22,7 @@ import time
 import itertools
 
 from test_framework.test_framework import ComparisonTestFramework
-from test_framework.util import *
+from test_framework.util import hex_str_to_bytes, bytes_to_hex_str, assert_equal
 from test_framework.mininode import CTransaction, NetworkThread
 from test_framework.blocktools import create_coinbase, create_block
 from test_framework.comptool import TestInstance, TestManager
@@ -59,7 +59,7 @@ class BIP9SoftForksTest(ComparisonTestFramework):
         return tx
 
     def generate_blocks(self, number, version, test_blocks = []):
-        for i in range(number):
+        for _ in range(number):
             block = create_block(self.tip, create_coinbase(self.height), self.last_block_time + 1)
             block.nVersion = version
             block.rehash()

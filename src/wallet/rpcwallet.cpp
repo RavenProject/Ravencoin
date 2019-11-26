@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -22,6 +22,7 @@
 #include "script/sign.h"
 #include "timedata.h"
 #include "util.h"
+#include "utiltime.h"
 #include "utilmoneystr.h"
 #include "wallet/coincontrol.h"
 #include "wallet/feebumper.h"
@@ -503,6 +504,123 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
 
     return wtx.GetHash().GetHex();
 }
+
+UniValue sendfromaddress(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 8)
+        throw std::runtime_error(
+            "sendfromaddress \"from_address\" \"to_address\" amount ( \"comment\" \"comment_to\" subtractfeefromamount replaceable conf_target \"estimate_mode\")\n"
+            "\nSend an amount from a specific address to a given address. All rvn change will get sent back to the from_address\n"
+            + HelpRequiringPassphrase(pwallet) +
+            "\nArguments:\n"
+            "1. \"from_address\"       (string, required) The raven address to send from.\n"
+            "2. \"to_address\"            (string, required) The raven address to send to.\n"
+            "3. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to send. eg 0.1\n"
+            "4. \"comment\"            (string, optional) A comment used to store what the transaction is for. \n"
+            "                             This is not part of the transaction, just kept in your wallet.\n"
+            "5. \"comment_to\"         (string, optional) A comment to store the name of the person or organization \n"
+            "                             to which you're sending the transaction. This is not part of the \n"
+            "                             transaction, just kept in your wallet.\n"
+            "6. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
+            "                             The recipient will receive less ravens than you enter in the amount field.\n"
+            "7. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
+            "8. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
+            "       \"UNSET\"\n"
+            "       \"ECONOMICAL\"\n"
+            "       \"CONSERVATIVE\"\n"
+            "\nResult:\n"
+            "\"txid\"                  (string) The transaction id.\n"
+            "\nExamples:\n"
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1")
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"donation\" \"seans outpost\"")
+            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"\" \"\" true")
+            + HelpExampleRpc("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\", 0.1, \"donation\", \"seans outpost\"")
+        );
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    CCoinControl coin_control;
+
+    std::string from_address = request.params[0].get_str();
+    CTxDestination from_dest = DecodeDestination(from_address);
+    if (!IsValidDestination(from_dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid from address");
+    }
+    coin_control.destChange = from_dest;
+
+    CTxDestination dest = DecodeDestination(request.params[1].get_str());
+    if (!IsValidDestination(dest)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+    }
+
+    // Amount
+    CAmount nAmount = AmountFromValue(request.params[2]);
+    if (nAmount <= 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount for send");
+
+    // Get the coins that belong to the from address
+    std::vector<COutput> coins;
+    pwallet->AvailableCoins(coins);
+
+    CAmount nAmountFromCoins = 0;
+    for (auto out : coins) {
+        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
+        CTxDestination coin_dest;
+        CAmount nCoinAmount = out.tx->tx->vout[out.i].nValue;
+        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, coin_dest);
+
+        if (nCoinAmount <= 0)
+            continue;
+
+        if (from_address != EncodeDestination(coin_dest))
+            continue;
+
+        coin_control.Select(COutPoint(out.tx->GetHash(), out.i));
+        nAmountFromCoins += out.tx->tx->vout[out.i].nValue;
+
+        if (nAmountFromCoins >= nAmount)
+            break;
+    }
+
+    if (nAmountFromCoins < nAmount)
+        throw JSONRPCError(RPC_TYPE_ERROR, "From Address doesn't contain enough funds");
+
+    // Wallet comments
+    CWalletTx wtx;
+    if (!request.params[3].isNull() && !request.params[2].get_str().empty())
+        wtx.mapValue["comment"] = request.params[2].get_str();
+    if (!request.params[4].isNull() && !request.params[3].get_str().empty())
+        wtx.mapValue["to"]      = request.params[3].get_str();
+
+    bool fSubtractFeeFromAmount = false;
+    if (!request.params[5].isNull()) {
+        fSubtractFeeFromAmount = request.params[4].get_bool();
+    }
+
+    if (!request.params[6].isNull()) {
+        coin_control.m_confirm_target = ParseConfirmTarget(request.params[6]);
+    }
+
+    if (!request.params[7].isNull()) {
+        if (!FeeModeFromString(request.params[8].get_str(), coin_control.m_fee_mode)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid estimate_mode parameter");
+        }
+    }
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    SendMoney(pwallet, dest, nAmount, fSubtractFeeFromAmount, wtx, coin_control);
+
+    return wtx.GetHash().GetHex();
+}
+
+
 
 UniValue listaddressgroupings(const JSONRPCRequest& request)
 {
@@ -1232,7 +1350,7 @@ UniValue addwitnessaddress(const JSONRPCRequest& request)
 
     {
         LOCK(cs_main);
-        if (!IsWitnessEnabled(chainActive.Tip(), Params().GetConsensus()) && !gArgs.GetBoolArg("-walletprematurewitness", false)) {
+        if (!IsWitnessEnabled(chainActive.Tip(), GetParams().GetConsensus()) && !gArgs.GetBoolArg("-walletprematurewitness", false)) {
             throw JSONRPCError(RPC_WALLET_ERROR, "Segregated witness not enabled on network");
         }
     }
@@ -1579,6 +1697,9 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
                 entry.push_back(Pair("asset_name", data.assetName));
                 entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
+                entry.push_back(Pair("message", EncodeAssetData(data.message)));
+                if (!data.message.empty() && data.expireTime > 0)
+                    entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
                 entry.push_back(Pair("category", "receive"));
@@ -1593,13 +1714,15 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
                 entry.push_back(Pair("asset_name", data.assetName));
                 entry.push_back(Pair("amount", ValueFromAmount(data.nAmount)));
+                entry.push_back(Pair("message", EncodeAssetData(data.message)));
+                if (!data.message.empty() && data.expireTime > 0)
+                    entry.push_back(Pair("message_expires", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", data.expireTime)));
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
                 entry.push_back(Pair("category", "send"));
                 retAssets.push_back(entry);
             }
         }
-
     }
     /** RVN END */
 }
@@ -1953,7 +2076,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
     UniValue removed(UniValue::VARR);
     while (include_removed && paltindex && paltindex != pindex) {
         CBlock block;
-        if (!ReadBlockFromDisk(block, paltindex, Params().GetConsensus())) {
+        if (!ReadBlockFromDisk(block, paltindex, GetParams().GetConsensus())) {
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
         }
         for (const CTransactionRef& tx : block.vtx) {
@@ -2641,9 +2764,10 @@ UniValue getwalletinfo(const JSONRPCRequest& request)
         obj.push_back(Pair("unlocked_until", pwallet->nRelockTime));
     }
     obj.push_back(Pair("paytxfee",      ValueFromAmount(payTxFee.GetFeePerK())));
-    if (!seed_id.IsNull())
-         obj.push_back(Pair("hdseedid", seed_id.GetHex()));
-         obj.push_back(Pair("hdmasterkeyid", seed_id.GetHex()));
+    if (!seed_id.IsNull()) {
+        obj.push_back(Pair("hdseedid", seed_id.GetHex()));
+        obj.push_back(Pair("hdmasterkeyid", seed_id.GetHex()));
+    }
     return obj;
 }
 
@@ -3376,6 +3500,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "sendfrom",                 &sendfrom,                 {"fromaccount","toaddress","amount","minconf","comment","comment_to"} },
     { "wallet",             "sendmany",                 &sendmany,                 {"fromaccount","amounts","minconf","comment","subtractfeefrom", "conf_target","estimate_mode"} },
     { "wallet",             "sendtoaddress",            &sendtoaddress,            {"address","amount","comment","comment_to","subtractfeefromamount", "conf_target","estimate_mode"} },
+    { "wallet",             "sendfromaddress",          &sendfromaddress,          {"from_address","address","amount","comment","comment_to","subtractfeefromamount", "conf_target","estimate_mode"} },
     { "wallet",             "setaccount",               &setaccount,               {"address","account"} },
     { "wallet",             "settxfee",                 &settxfee,                 {"amount"} },
     { "wallet",             "signmessage",              &signmessage,              {"address","message"} },

@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -733,7 +733,7 @@ UniValue getblockdeltas(const JSONRPCRequest& request)
     if (fHavePruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Block not available (pruned data)");
 
-    if(!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
+    if(!ReadBlockFromDisk(block, pblockindex, GetParams().GetConsensus()))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
 
     return blockToDeltasJSON(block, pblockindex);
@@ -968,7 +968,7 @@ UniValue getblock(const JSONRPCRequest& request)
     if (fHavePruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
         throw JSONRPCError(RPC_MISC_ERROR, "Block not available (pruned data)");
 
-    if (!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
+    if (!ReadBlockFromDisk(block, pblockindex, GetParams().GetConsensus()))
         // Block not found on disk. This could be because we have the block
         // header in our index but don't have the block (for example if a
         // non-whitelisted node sends us an unrequested long chain of valid
@@ -1094,7 +1094,7 @@ UniValue pruneblockchain(const JSONRPCRequest& request)
 
     unsigned int height = (unsigned int) heightParam;
     unsigned int chainHeight = (unsigned int) chainActive.Height();
-    if (chainHeight < Params().PruneAfterHeight())
+    if (chainHeight < GetParams().PruneAfterHeight())
         throw JSONRPCError(RPC_MISC_ERROR, "Blockchain is too short for pruning.");
     else if (height > chainHeight)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Blockchain is shorter than the attempted prune height.");
@@ -1254,11 +1254,11 @@ UniValue verifychain(const JSONRPCRequest& request)
     if (!request.params[1].isNull())
         nCheckDepth = request.params[1].get_int();
 
-    return CVerifyDB().VerifyDB(Params(), pcoinsTip, nCheckLevel, nCheckDepth);
+    return CVerifyDB().VerifyDB(GetParams(), pcoinsTip, nCheckLevel, nCheckDepth);
 }
 
 /** Implementation of IsSuperMajority with better feedback */
-// static UniValue SoftForkMajorityDesc(int version, CBlockIndex* pindex, const Consensus::ConsensusParams& consensusParams)
+// static UniValue SoftForkMajorityDesc(int version, CBlockIndex* pindex, const Consensus::GetParams& consensusParams)
 // {
 //     UniValue rv(UniValue::VOBJ);
 //     bool activated = false;
@@ -1278,7 +1278,7 @@ UniValue verifychain(const JSONRPCRequest& request)
 //     return rv;
 // }
 
-// static UniValue SoftForkDesc(const std::string &name, int version, CBlockIndex* pindex, const Consensus::ConsensusParams& consensusParams)
+// static UniValue SoftForkDesc(const std::string &name, int version, CBlockIndex* pindex, const Consensus::GetParams& consensusParams)
 // {
 //     UniValue rv(UniValue::VOBJ);
 //     rv.push_back(Pair("id", name));
@@ -1287,7 +1287,7 @@ UniValue verifychain(const JSONRPCRequest& request)
 //     return rv;
 // }
 
-static UniValue BIP9SoftForkDesc(const Consensus::ConsensusParams& consensusParams, Consensus::DeploymentPos id)
+static UniValue BIP9SoftForkDesc(const Consensus::Params& consensusParams, Consensus::DeploymentPos id)
 {
     UniValue rv(UniValue::VOBJ);
     const ThresholdState thresholdState = VersionBitsTipState(consensusParams, id);
@@ -1319,7 +1319,7 @@ static UniValue BIP9SoftForkDesc(const Consensus::ConsensusParams& consensusPara
     return rv;
 }
 
-void BIP9SoftForkDescPushBack(UniValue& bip9_softforks, const std::string &name, const Consensus::ConsensusParams& consensusParams, Consensus::DeploymentPos id)
+void BIP9SoftForkDescPushBack(UniValue& bip9_softforks, const std::string &name, const Consensus::Params& consensusParams, Consensus::DeploymentPos id)
 {
     // Deployments with timeout value of 0 are hidden.
     // A timeout value of 0 guarantees a softfork will never be activated.
@@ -1384,7 +1384,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     LOCK(cs_main);
 
     UniValue obj(UniValue::VOBJ);
-    obj.push_back(Pair("chain",                 Params().NetworkIDString()));
+    obj.push_back(Pair("chain", GetParams().NetworkIDString()));
     obj.push_back(Pair("blocks",                (int)chainActive.Height()));
     obj.push_back(Pair("headers",               pindexBestHeader ? pindexBestHeader->nHeight : -1));
     obj.push_back(Pair("bestblockhash",         chainActive.Tip()->GetBlockHash().GetHex()));
@@ -1393,10 +1393,10 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
         obj.push_back(Pair("difficulty_algorithm", "DGW-180"));
     } else {
         obj.push_back(Pair("difficulty_algorithm", "BTC"));
-        obj.push_back(Pair("DGW_activation_height",    (int)Params().DGWActivationBlock()));
+        obj.push_back(Pair("DGW_activation_height",    (int) GetParams().DGWActivationBlock()));
     }
     obj.push_back(Pair("mediantime",            (int64_t)chainActive.Tip()->GetMedianTimePast()));
-    obj.push_back(Pair("verificationprogress",  GuessVerificationProgress(Params().TxData(), chainActive.Tip())));
+    obj.push_back(Pair("verificationprogress",  GuessVerificationProgress(GetParams().TxData(), chainActive.Tip())));
     obj.push_back(Pair("chainwork",             chainActive.Tip()->nChainWork.GetHex()));
     obj.push_back(Pair("size_on_disk",          CalculateCurrentUsage()));
     obj.push_back(Pair("pruned",                fPruneMode));
@@ -1417,9 +1417,8 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
         }
     }
 
-    const Consensus::ConsensusParams& consensusParams = Params().GetConsensus();
+    const Consensus::Params& consensusParams = GetParams().GetConsensus();
     //CBlockIndex* tip = chainActive.Tip();
-
 
     UniValue softforks(UniValue::VARR);
     UniValue bip9_softforks(UniValue::VOBJ);
@@ -1429,6 +1428,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     // BIP9SoftForkDescPushBack(bip9_softforks, "csv", consensusParams, Consensus::DEPLOYMENT_CSV);
     //BIP9SoftForkDescPushBack(bip9_softforks, "segwit", consensusParams, Consensus::DEPLOYMENT_SEGWIT);
     BIP9SoftForkDescPushBack(bip9_softforks, "assets", consensusParams, Consensus::DEPLOYMENT_ASSETS);
+    BIP9SoftForkDescPushBack(bip9_softforks, "messaging_restricted", consensusParams, Consensus::DEPLOYMENT_MSG_REST_ASSETS);
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
 
@@ -1618,7 +1618,7 @@ UniValue preciousblock(const JSONRPCRequest& request)
     }
 
     CValidationState state;
-    PreciousBlock(state, Params(), pblockindex);
+    PreciousBlock(state, GetParams(), pblockindex);
 
     if (!state.IsValid()) {
         throw JSONRPCError(RPC_DATABASE_ERROR, state.GetRejectReason());
@@ -1651,11 +1651,11 @@ UniValue invalidateblock(const JSONRPCRequest& request)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
 
         CBlockIndex* pblockindex = mapBlockIndex[hash];
-        InvalidateBlock(state, Params(), pblockindex);
+        InvalidateBlock(state, GetParams(), pblockindex);
     }
 
     if (state.IsValid()) {
-        ActivateBestChain(state, Params());
+        ActivateBestChain(state, GetParams());
     }
 
     if (!state.IsValid()) {
@@ -1693,7 +1693,7 @@ UniValue reconsiderblock(const JSONRPCRequest& request)
     }
 
     CValidationState state;
-    ActivateBestChain(state, Params());
+    ActivateBestChain(state, GetParams());
 
     if (!state.IsValid()) {
         throw JSONRPCError(RPC_DATABASE_ERROR, state.GetRejectReason());
@@ -1726,7 +1726,7 @@ UniValue getchaintxstats(const JSONRPCRequest& request)
         );
 
     const CBlockIndex* pindex;
-    int blockcount = 30 * 24 * 60 * 60 / Params().GetConsensus().nPowTargetSpacing; // By default: 1 month
+    int blockcount = 30 * 24 * 60 * 60 / GetParams().GetConsensus().nPowTargetSpacing; // By default: 1 month
 
     bool havehash = !request.params[1].isNull();
     uint256 hash;
@@ -1800,9 +1800,29 @@ UniValue savemempool(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+UniValue clearmempool(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 0) {
+        throw std::runtime_error(
+                "clearmempool\n"
+                "\nRemoves all transaction from the mempool\n"
+                "\nExamples:\n"
+                + HelpExampleCli("clearmempool", "")
+                + HelpExampleRpc("clearmempool", "")
+        );
+    }
+
+    LOCK(mempool.cs);
+    mempool.clear();
+
+    return _("Mempool cleared");
+}
+
+
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
+    { "blockchain",         "clearmempool",           &clearmempool,           {} },
     { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      {} },
     { "blockchain",         "getchaintxstats",        &getchaintxstats,        {"nblocks", "blockhash"} },
     { "blockchain",         "getbestblockhash",       &getbestblockhash,       {} },

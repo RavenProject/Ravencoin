@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -663,6 +663,10 @@ public:
     bool IsReissueAsset() const;
     bool IsTransferAsset() const;
     bool IsAsset() const;
+    bool IsNullAsset() const; // Checks all three of the NULL Asset Tx types
+    bool IsNullAssetTxDataScript() const;
+    bool IsNullAssetVerifierTxDataScript() const;
+    bool IsNullGlobalRestrictionAssetTxDataScript() const;
     /** RVN END */
 
     /** Used for obsolete pay-to-pubkey addresses indexing. */

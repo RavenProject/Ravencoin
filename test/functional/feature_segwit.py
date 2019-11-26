@@ -1,15 +1,39 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the SegWit changeover logic."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import sha256, CTransaction, CTxIn, COutPoint, CTxOut, COIN, ToHex, FromHex
-from test_framework.address import script_to_p2sh, key_to_p2pkh
-from test_framework.script import CScript, OP_HASH160, OP_CHECKSIG, OP_0, hash160, OP_EQUAL, OP_DUP, OP_EQUALVERIFY, OP_1, OP_2, OP_CHECKMULTISIG, OP_TRUE
+from test_framework.util import (hex_str_to_bytes, 
+                                bytes_to_hex_str, 
+                                connect_nodes, 
+                                Decimal, 
+                                assert_equal, 
+                                sync_blocks, 
+                                assert_raises_rpc_error, 
+                                try_rpc)
+from test_framework.mininode import (sha256, 
+                                    CTransaction, 
+                                    CTxIn, 
+                                    COutPoint, 
+                                    CTxOut, 
+                                    COIN, 
+                                    ToHex, 
+                                    from_hex)
+from test_framework.address import (script_to_p2sh, key_to_p2pkh)
+from test_framework.script import ( CScript, 
+                                    OP_HASH160, 
+                                    OP_CHECKSIG, 
+                                    hash160, 
+                                    OP_EQUAL, OP_DUP, 
+                                    OP_EQUALVERIFY,
+                                    OP_0, 
+                                    OP_1, 
+                                    OP_2, 
+                                    OP_CHECKMULTISIG, 
+                                    OP_TRUE)
 from io import BytesIO
 
 NODE_0 = 0
@@ -45,7 +69,7 @@ def create_witnessprogram(use_p2wsh, utxo, pubkey, encode_p2sh, amount):
     return ToHex(tx)
 
 # Create a transaction spending a given utxo to a segwit output corresponding
-# to the given pubkey: use_p2wsh determines whether to use P2WPKH or P2WSH;
+# to the given pubkey: use_p2wsh determines whether to use P2WPKH or P2WSH
 # encode_p2sh determines whether to wrap in P2SH.
 # sign=True will have the given node sign the transaction.
 # insert_redeem_script will be added to the scriptSig, if given.
@@ -57,7 +81,7 @@ def send_to_witness(use_p2wsh, node, utxo, pubkey, encode_p2sh, amount, sign=Tru
         return node.sendrawtransaction(signed["hex"])
     else:
         if (insert_redeem_script):
-            tx = FromHex(CTransaction(), tx_to_witness)
+            tx = from_hex(CTransaction(), tx_to_witness)
             tx.vin[0].scriptSig += CScript([hex_str_to_bytes(insert_redeem_script)])
             tx_to_witness = ToHex(tx)
 
@@ -88,22 +112,22 @@ class SegWitTest(RavenTestFramework):
         self.sync_all()
 
     def success_mine(self, node, txid, sign, redeem_script=""):
-        send_to_witness(1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.998"), sign, redeem_script)
+        send_to_witness(1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.8"), sign, redeem_script)
         block = node.generate(1)
         assert_equal(len(node.getblock(block[0])["tx"]), 2)
         sync_blocks(self.nodes)
 
     def skip_mine(self, node, txid, sign, redeem_script=""):
-        send_to_witness(1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.998"), sign, redeem_script)
+        send_to_witness(1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.8"), sign, redeem_script)
         block = node.generate(1)
         assert_equal(len(node.getblock(block[0])["tx"]), 1)
         sync_blocks(self.nodes)
 
     def fail_accept(self, node, error_msg, txid, sign, redeem_script=""):
-        assert_raises_rpc_error(-26, error_msg, send_to_witness, 1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.998"), sign, redeem_script)
+        assert_raises_rpc_error(-26, error_msg, send_to_witness, 1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.8"), sign, redeem_script)
 
     def fail_mine(self, node, txid, sign, redeem_script=""):
-        send_to_witness(1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.998"), sign, redeem_script)
+        send_to_witness(1, node, getutxo(txid), self.pubkey[0], False, Decimal("4999.8"), sign, redeem_script)
         assert_raises_rpc_error(-1, "CreateNewBlock: TestBlockValidity failed", node.generate, 1)
         sync_blocks(self.nodes)
 
@@ -145,16 +169,16 @@ class SegWitTest(RavenTestFramework):
         for i in range(5):
             for n in range(3):
                 for v in range(2):
-                    wit_ids[n][v].append(send_to_witness(v, self.nodes[0], find_unspent(self.nodes[0], 5000), self.pubkey[n], False, Decimal("4999.999")))
-                    p2sh_ids[n][v].append(send_to_witness(v, self.nodes[0], find_unspent(self.nodes[0], 5000), self.pubkey[n], True, Decimal("4999.999")))
+                    wit_ids[n][v].append(send_to_witness(v, self.nodes[0], find_unspent(self.nodes[0], 5000), self.pubkey[n], False, Decimal("4999.9")))
+                    p2sh_ids[n][v].append(send_to_witness(v, self.nodes[0], find_unspent(self.nodes[0], 5000), self.pubkey[n], True, Decimal("4999.9")))
 
         self.nodes[0].generate(1) #block 163
         sync_blocks(self.nodes)
 
         # Make sure all nodes recognize the transactions as theirs
-        assert_equal(self.nodes[0].getbalance(), balance_presetup - 60*5000 + 20*Decimal("4999.999") + 5000)
-        assert_equal(self.nodes[1].getbalance(), 20*Decimal("4999.999"))
-        assert_equal(self.nodes[2].getbalance(), 20*Decimal("4999.999"))
+        assert_equal(self.nodes[0].getbalance(), balance_presetup - 60*5000 + 20*Decimal("4999.9") + 5000)
+        assert_equal(self.nodes[1].getbalance(), 20*Decimal("4999.9"))
+        assert_equal(self.nodes[2].getbalance(), 20*Decimal("4999.9"))
 
         self.nodes[0].generate(260) #block 423
         sync_blocks(self.nodes)
@@ -195,7 +219,7 @@ class SegWitTest(RavenTestFramework):
 
         self.log.info("Verify previous witness txs skipped for mining can now be mined")
         assert_equal(len(self.nodes[2].getrawmempool()), 4)
-        block = self.nodes[2].generate(1) #block 432 (first block with new rules; 432 = 144 * 3)
+        block = self.nodes[2].generate(1) #block 432 (first block with new rules: 432 = 144 * 3)
         sync_blocks(self.nodes)
         assert_equal(len(self.nodes[2].getrawmempool()), 0)
         segwit_tx_list = self.nodes[2].getblock(block[0])["tx"]
@@ -205,7 +229,7 @@ class SegWitTest(RavenTestFramework):
         assert(self.nodes[2].getblock(block[0], False) !=  self.nodes[0].getblock(block[0], False))
         assert(self.nodes[1].getblock(block[0], False) ==  self.nodes[2].getblock(block[0], False))
         for i in range(len(segwit_tx_list)):
-            tx = FromHex(CTransaction(), self.nodes[2].gettransaction(segwit_tx_list[i])["hex"])
+            tx = from_hex(CTransaction(), self.nodes[2].gettransaction(segwit_tx_list[i])["hex"])
             assert(self.nodes[2].getrawtransaction(segwit_tx_list[i]) != self.nodes[0].getrawtransaction(segwit_tx_list[i]))
             assert(self.nodes[1].getrawtransaction(segwit_tx_list[i], 0) == self.nodes[2].getrawtransaction(segwit_tx_list[i]))
             assert(self.nodes[0].getrawtransaction(segwit_tx_list[i]) != self.nodes[2].gettransaction(segwit_tx_list[i])["hex"])
@@ -242,7 +266,7 @@ class SegWitTest(RavenTestFramework):
         # tx1 is allowed to appear in the block, but no others.
         txid1 = send_to_witness(1, self.nodes[0], find_unspent(self.nodes[0], 50), self.pubkey[0], False, Decimal("49.996"))
         hex_tx = self.nodes[0].gettransaction(txid)['hex']
-        tx = FromHex(CTransaction(), hex_tx)
+        tx = from_hex(CTransaction(), hex_tx)
         assert(tx.wit.is_null()) # This should not be a segwit input
         assert(txid1 in self.nodes[0].getrawmempool())
 
@@ -252,7 +276,7 @@ class SegWitTest(RavenTestFramework):
         tx.vout.append(CTxOut(int(49.99*COIN), CScript([OP_TRUE])))
         tx2_hex = self.nodes[0].signrawtransaction(ToHex(tx))['hex']
         txid2 = self.nodes[0].sendrawtransaction(tx2_hex)
-        tx = FromHex(CTransaction(), tx2_hex)
+        tx = from_hex(CTransaction(), tx2_hex)
         assert(not tx.wit.is_null())
 
         # Now create tx3, which will spend from txid2

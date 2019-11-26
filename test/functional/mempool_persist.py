@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2017 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test mempool persistence.
@@ -40,7 +40,7 @@ import os
 import time
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (assert_equal, Decimal, wait_until, assert_raises_rpc_error)
 
 class MempoolPersistTest(RavenTestFramework):
     def set_test_params(self):
@@ -56,7 +56,7 @@ class MempoolPersistTest(RavenTestFramework):
         self.sync_all()
 
         self.log.debug("Send 5 transactions from node2 (to its own address)")
-        for i in range(5):
+        for _ in range(5):
             self.nodes[2].sendtoaddress(self.nodes[2].getnewaddress(), Decimal("10"))
         self.sync_all()
 
@@ -70,7 +70,7 @@ class MempoolPersistTest(RavenTestFramework):
         self.start_node(1)
         # Give ravend a second to reload the mempool
         time.sleep(1)
-        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5)
+        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5, err_msg="Wait for getRawMempool")
         assert_equal(len(self.nodes[1].getrawmempool()), 0)
 
         self.log.debug("Stop-start node0 with -persistmempool=0. Verify that it doesn't load its mempool.dat file.")
@@ -83,7 +83,7 @@ class MempoolPersistTest(RavenTestFramework):
         self.log.debug("Stop-start node0. Verify that it has the transactions in its mempool.")
         self.stop_nodes()
         self.start_node(0)
-        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5)
+        wait_until(lambda: len(self.nodes[0].getrawmempool()) == 5, err_msg="Wait for getRawMempool")
 
         mempooldat0 = os.path.join(self.options.tmpdir, 'node0', 'regtest', 'mempool.dat')
         mempooldat1 = os.path.join(self.options.tmpdir, 'node1', 'regtest', 'mempool.dat')
@@ -96,7 +96,7 @@ class MempoolPersistTest(RavenTestFramework):
         os.rename(mempooldat0, mempooldat1)
         self.stop_nodes()
         self.start_node(1, extra_args=[])
-        wait_until(lambda: len(self.nodes[1].getrawmempool()) == 5)
+        wait_until(lambda: len(self.nodes[1].getrawmempool()) == 5, err_msg="Wait for getRawMempool")
 
         self.log.debug("Prevent ravend from writing mempool.dat to disk. Verify that `savemempool` fails")
         # to test the exception we are setting bad permissions on a tmp file called mempool.dat.new

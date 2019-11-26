@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,6 +26,7 @@
 
 #include <memory> // for unique_ptr
 #include <unordered_map>
+#include <validation.h>
 
 #include "assets/assets.h"
 
@@ -110,14 +111,14 @@ void RPCTypeCheckObj(const UniValue& o,
     }
 }
 
-CAmount AmountFromValue(const UniValue& value)
+CAmount AmountFromValue(const UniValue& value, bool p_isRVN)
 {
     if (!value.isNum() && !value.isStr())
         throw JSONRPCError(RPC_TYPE_ERROR, "Amount is not a number or string");
     CAmount amount;
     if (!ParseFixedPoint(value.getValStr(), 8, &amount))
         throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Invalid amount (3): %s", value.getValStr()));
-    if (!MoneyRange(amount))
+    if (p_isRVN && !MoneyRange(amount))
         throw JSONRPCError(RPC_TYPE_ERROR, strprintf("Amount out of range: %s", amount));
     return amount;
 }
@@ -385,7 +386,7 @@ void JSONRPCRequest::parse(const UniValue& valRequest)
     else if (valParams.isNull())
         params = UniValue(UniValue::VARR);
     else
-        throw JSONRPCError(RPC_INVALID_REQUEST, "ConsensusParams must be an array or object");
+        throw JSONRPCError(RPC_INVALID_REQUEST, "GetParams must be an array or object");
 }
 
 bool IsDeprecatedRPCEnabled(const std::string& method)
@@ -565,3 +566,29 @@ int RPCSerializationFlags()
 }
 
 CRPCTable tableRPC;
+
+void CheckIPFSTxidMessage(const std::string &message, int64_t expireTime)
+{
+    size_t msglen = message.length();
+    if (msglen == 46 || msglen == 64) {
+        if (msglen == 64 && !AreMessagesDeployed()) {
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid txid hash, only ipfs hashes available until RIP5 is activated"));
+        }
+    } else {
+        if (msglen)
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS hash (must be 46 characters), Txid hashes (must be 64 characters)"));
+    }
+
+    bool fNotIPFS = false;
+    if (message.substr(0, 2) != "Qm") {
+        fNotIPFS = true;
+        if (!AreMessagesDeployed())
+            throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid ipfs hash. Please use a valid ipfs hash. They usually start with Qm"));
+    }
+
+    if (fNotIPFS && !IsHex(message))
+        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Invalid IPFS/Txid hash"));
+
+    if (expireTime < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMS, std::string("Expire time must be a positive number"));
+}

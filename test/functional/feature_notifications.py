@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the -alertnotify, -blocknotify and -walletnotify options."""
 import os
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import assert_equal, wait_until, connect_nodes_bi
+from test_framework.util import (assert_equal, wait_until, connect_nodes_bi)
 
 class NotificationsTest(RavenTestFramework):
     def set_test_params(self):
@@ -20,10 +20,10 @@ class NotificationsTest(RavenTestFramework):
         self.tx_filename = os.path.join(self.options.tmpdir, "transactions.txt")
 
         # -alertnotify and -blocknotify on node0, walletnotify on node1
-        self.extra_args = [["-blockversion=2",
+        self.extra_args = [["-blockversion=536870912",
                             "-alertnotify=echo %%s >> %s" % self.alert_filename,
                             "-blocknotify=echo %%s >> %s" % self.block_filename],
-                           ["-blockversion=211",
+                           ["-blockversion=1610612736",
                             "-rescan",
                             "-walletnotify=echo %%s >> %s" % self.tx_filename]]
         super().setup_network()
@@ -34,7 +34,7 @@ class NotificationsTest(RavenTestFramework):
         blocks = self.nodes[1].generate(block_count)
 
         # wait at most 10 seconds for expected file size before reading the content
-        wait_until(lambda: os.path.isfile(self.block_filename) and os.stat(self.block_filename).st_size >= (block_count * 65), timeout=10)
+        wait_until(lambda: os.path.isfile(self.block_filename) and os.stat(self.block_filename).st_size >= (block_count * 65), err_msg="Wait for FileSize", timeout=10)
 
         # file content should equal the generated blocks hashes
         with open(self.block_filename, 'r') as f:
@@ -42,7 +42,7 @@ class NotificationsTest(RavenTestFramework):
 
         self.log.info("test -walletnotify")
         # wait at most 10 seconds for expected file size before reading the content
-        wait_until(lambda: os.path.isfile(self.tx_filename) and os.stat(self.tx_filename).st_size >= (block_count * 65), timeout=10)
+        wait_until(lambda: os.path.isfile(self.tx_filename) and os.stat(self.tx_filename).st_size >= (block_count * 65), err_msg="Wait for FileSize", timeout=10)
 
         # file content should equal the generated transaction hashes
         txids_rpc = list(map(lambda t: t['txid'], self.nodes[1].listtransactions("*", block_count)))
@@ -55,7 +55,7 @@ class NotificationsTest(RavenTestFramework):
         self.restart_node(1)
         connect_nodes_bi(self.nodes, 0, 1)
 
-        wait_until(lambda: os.path.isfile(self.tx_filename) and os.stat(self.tx_filename).st_size >= (block_count * 65), timeout=10)
+        wait_until(lambda: os.path.isfile(self.tx_filename) and os.stat(self.tx_filename).st_size >= (block_count * 65), err_msg="Wait for FileSize", timeout=10)
 
         # file content should equal the generated transaction hashes
         txids_rpc = list(map(lambda t: t['txid'], self.nodes[1].listtransactions("*", block_count)))
@@ -68,7 +68,7 @@ class NotificationsTest(RavenTestFramework):
         self.sync_all()
 
         # Give ravend 10 seconds to write the alert notification
-        wait_until(lambda: os.path.isfile(self.alert_filename) and os.path.getsize(self.alert_filename), timeout=10)
+        wait_until(lambda: os.path.isfile(self.alert_filename) and os.path.getsize(self.alert_filename), err_msg="Wait for FileSize", timeout=10)
 
         with open(self.alert_filename, 'r', encoding='utf8') as f:
             alert_text = f.read()

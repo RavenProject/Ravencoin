@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Compare two or more ravends to each other.
@@ -18,9 +18,22 @@ TestNode behaves as follows:
     on_getdata: provide blocks via BlockStore
 """
 
-from .mininode import *
-from .blockstore import BlockStore, TxStore
-from .util import p2p_port, wait_until
+from .mininode import (NodeConn, 
+                        CBlock, 
+                        msg_inv, 
+                        CInv, 
+                        msg_headers, 
+                        msg_mempool, 
+                        mininode_lock, 
+                        NodeConnCB, 
+                        msg_getheaders, 
+                        msg_ping, 
+                        msg_block, 
+                        CBlockHeader, 
+                        MAX_INV_SZ, 
+                        CTransaction)
+from .blockstore import (BlockStore, TxStore)
+from .util import (p2p_port, wait_until)
 
 import logging
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test message sending before handshake completion.
@@ -18,9 +18,9 @@ and don't receive a VERACK. Unsupported service bits are currently 1 << 5 and
 UPDATE: Raven RIP-2 uses bit 1 << 5.  Currently there are no unsupported service bits.
 """
 
-from test_framework.mininode import *
+from test_framework.mininode import (NodeConnCB, NodeConn, msg_verack, msg_ping, msg_getaddr, NetworkThread, mininode_lock)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (logger, p2p_port, wait_until, time)
 
 banscore = 10
 
@@ -52,7 +52,7 @@ class CLazyNode(NodeConnCB):
     def on_headers(self, conn, message): self.bad_message(message)
     def on_getheaders(self, conn, message): self.bad_message(message)
     def on_ping(self, conn, message): self.bad_message(message)
-    def on_mempool(self, conn): self.bad_message(message)
+    def on_mempool(self, conn, message): self.bad_message(message)
     def on_pong(self, conn, message): self.bad_message(message)
     def on_feefilter(self, conn, message): self.bad_message(message)
     def on_sendheaders(self, conn, message): self.bad_message(message)
@@ -68,7 +68,7 @@ class CNodeNoVersionBan(CLazyNode):
     # NOTE: implementation-specific check here. Remove if ravend ban behavior changes
     def on_open(self, conn):
         super().on_open(conn)
-        for i in range(banscore):
+        for _ in range(banscore):
             self.send_message(msg_verack())
 
     def on_reject(self, conn, message): pass
@@ -104,8 +104,8 @@ class P2PLeakTest(RavenTestFramework):
         no_version_bannode = CNodeNoVersionBan()
         no_version_idlenode = CNodeNoVersionIdle()
         no_verack_idlenode = CNodeNoVerackIdle()
-        unsupported_service_bit5_node = CLazyNode()
-        unsupported_service_bit7_node = CLazyNode()
+        CLazyNode()
+        CLazyNode()
 
         connections = []
         connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_version_bannode, send_version=False))
@@ -117,9 +117,9 @@ class P2PLeakTest(RavenTestFramework):
 
         NetworkThread().start()  # Start up network handling in another thread
 
-        wait_until(lambda: no_version_bannode.ever_connected, timeout=10, lock=mininode_lock)
-        wait_until(lambda: no_version_idlenode.ever_connected, timeout=10, lock=mininode_lock)
-        wait_until(lambda: no_verack_idlenode.version_received, timeout=10, lock=mininode_lock)
+        wait_until(lambda: no_version_bannode.ever_connected, err_msg="Wait for no Version BanNode", timeout=10, lock=mininode_lock)
+        wait_until(lambda: no_version_idlenode.ever_connected, err_msg="Wait for no Version IdleNode", timeout=10, lock=mininode_lock)
+        wait_until(lambda: no_verack_idlenode.version_received, err_msg="Wait for VerAck IdleNode", timeout=10, lock=mininode_lock)
 
         # Mine a block and make sure that it's not sent to the connected nodes
         self.nodes[0].generate(1)
@@ -133,7 +133,7 @@ class P2PLeakTest(RavenTestFramework):
         [conn.disconnect_node() for conn in connections]
 
         # Wait until all connections are closed
-        wait_until(lambda: len(self.nodes[0].getpeerinfo()) == 0)
+        wait_until(lambda: len(self.nodes[0].getpeerinfo()) == 0, err_msg="Wait for Connection Close")
 
         # Make sure no unexpected messages came in
         assert(no_version_bannode.unexpected_msg == False)

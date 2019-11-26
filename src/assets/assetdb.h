@@ -1,4 +1,4 @@
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,6 +12,8 @@
 #include <map>
 #include <dbwrapper.h>
 
+const int8_t ASSET_UNDO_INCLUDES_VERIFIER_STRING = -1;
+
 class CNewAsset;
 class uint256;
 class COutPoint;
@@ -22,7 +24,10 @@ struct CBlockAssetUndo
     bool fChangedIPFS;
     bool fChangedUnits;
     std::string strIPFS;
-    int nUnits;
+    int32_t nUnits;
+    int8_t version;
+    bool fChangedVerifierString;
+    std::string verifierString;
 
     ADD_SERIALIZE_METHODS;
 
@@ -32,6 +37,22 @@ struct CBlockAssetUndo
         READWRITE(fChangedIPFS);
         READWRITE(strIPFS);
         READWRITE(nUnits);
+        if (ser_action.ForRead()) {
+            if (!s.empty() and s.size() >= 1) {
+                int8_t nVersionCheck;
+                ::Unserialize(s, nVersionCheck);
+
+                if (nVersionCheck == ASSET_UNDO_INCLUDES_VERIFIER_STRING) {
+                    ::Unserialize(s, fChangedVerifierString);
+                    ::Unserialize(s, verifierString);
+                }
+                version = nVersionCheck;
+            }
+        } else {
+            ::Serialize(s, ASSET_UNDO_INCLUDES_VERIFIER_STRING);
+            ::Serialize(s, fChangedVerifierString);
+            ::Serialize(s, verifierString);
+        }
     }
 };
 

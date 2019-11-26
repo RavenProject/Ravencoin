@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the abandontransaction RPC.
@@ -12,7 +12,7 @@
  no effect on transactions which are already conflicted or abandoned.
 """
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (sync_blocks, Decimal, sync_mempools, disconnect_nodes, assert_equal, connect_nodes)
 
 class AbandonConflictTest(RavenTestFramework):
     def set_test_params(self):
@@ -31,7 +31,7 @@ class AbandonConflictTest(RavenTestFramework):
 
         sync_blocks(self.nodes)
         newbalance = self.nodes[0].getbalance()
-        assert(balance - newbalance < Decimal("0.001")) #no more than fees lost
+        assert(balance - newbalance < Decimal("0.01")) #no more than fees lost
         balance = newbalance
 
         # Disconnect nodes so node0's transactions don't get into node1's mempool
@@ -131,7 +131,7 @@ class AbandonConflictTest(RavenTestFramework):
         inputs =[]
         inputs.append({"txid":txA, "vout":nA})
         outputs = {}
-        outputs[self.nodes[1].getnewaddress()] = Decimal("9.9999")
+        outputs[self.nodes[1].getnewaddress()] = Decimal("9.998")
         tx = self.nodes[0].createrawtransaction(inputs, outputs)
         signed = self.nodes[0].signrawtransaction(tx)
         self.nodes[1].sendrawtransaction(signed["hex"])

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test longpolling with getblocktemplate."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (get_rpc_proxy, random_transaction, Decimal)
 
 import threading
 
@@ -18,7 +18,7 @@ class LongpollThread(threading.Thread):
         self.longpollid = templat['longpollid']
         # create a new connection to the node, we can't use the same
         # connection from two threads
-        self.node = get_rpc_proxy(node.url, 1, timeout=600, coveragedir=node.coverage_dir)
+        self.node = get_rpc_proxy(node.url, 1, timeout=600, coverage_dir=node.coverage_dir)
 
     def run(self):
         self.node.getblocktemplate({'longpollid':self.longpollid})
@@ -62,7 +62,7 @@ class GetBlockTemplateLPTest(RavenTestFramework):
         # generate a random transaction and submit it
         min_relay_fee = self.nodes[0].getnetworkinfo()["relayfee"]
         # min_relay_fee is fee per 1000 bytes, which should be more than enough.
-        (txid, txhex, fee) = random_transaction(self.nodes, Decimal("1.1"), min_relay_fee, Decimal("0.001"), 20)
+        random_transaction(self.nodes, Decimal("1.1"), min_relay_fee, Decimal("0.001"), 20)
         # after one minute, every 10 seconds the mempool is probed, so in 80 seconds it should have returned
         thr.join(60 + 20)
         assert(not thr.is_alive())

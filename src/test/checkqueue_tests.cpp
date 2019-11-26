@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2017 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -420,7 +420,7 @@ BOOST_FIXTURE_TEST_SUITE(checkqueue_tests, TestingSetup)
                     control.Add(vChecks);
                 }
             }
-            BOOST_REQUIRE_EQUAL(MemoryCheck::fake_allocated_memory, 0);
+            BOOST_REQUIRE_EQUAL(MemoryCheck::fake_allocated_memory, (uint64_t)0);
         }
         tg.interrupt_all();
         tg.join_all();

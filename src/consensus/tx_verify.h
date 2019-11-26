@@ -1,5 +1,5 @@
 // Copyright (c) 2017-2017 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,8 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-struct NewAssetInfo;
+#include <set>
+
 class CBlockIndex;
 class CCoinsViewCache;
 class CTransaction;
@@ -19,16 +20,13 @@ class CValidationState;
 class CAssetsCache;
 class CTxOut;
 class uint256;
+class CMessage;
+class CNullAssetTxData;
 
 /** Transaction validation functions */
 
 /** Context-independent validity checks */
-bool CheckTransaction(const CTransaction& tx, CValidationState& state, CAssetsCache* assetCache = nullptr, bool fCheckDuplicateInputs=true, bool fMemPoolCheck=false, bool fCheckAssetDuplicate = true, bool fForceDuplicateCheck = true, NewAssetInfo* newAssetInfo = nullptr);
-
-struct AssetInfo {
-    bool fFromMempool;
-    uint32_t nTimeAdded;
-};
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true);
 
 namespace Consensus {
 /**
@@ -40,7 +38,7 @@ namespace Consensus {
 bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight, CAmount& txfee);
 
 /** RVN START */
-bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, CAssetsCache* assetsCache=nullptr, AssetInfo* pAssetInfo = nullptr);
+bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0,  std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData = nullptr);
 /** RVN END */
 } // namespace Consensus
 

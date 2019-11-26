@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test mempool limiting together/eviction with the wallet."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (gen_return_txouts, 
+                                create_confirmed_utxos, 
+                                satoshi_round, 
+                                create_lots_of_big_transactions)
 
 class MempoolLimitTest(RavenTestFramework):
     def set_test_params(self):
@@ -25,14 +28,14 @@ class MempoolLimitTest(RavenTestFramework):
         #create a mempool tx that will be evicted
         us0 = utxos.pop()
         inputs = [{ "txid" : us0["txid"], "vout" : us0["vout"]}]
-        outputs = {self.nodes[0].getnewaddress() : 0.0001}
+        outputs = {self.nodes[0].getnewaddress() : 0.1}
         tx = self.nodes[0].createrawtransaction(inputs, outputs)
 
         # Any fee calc method should work as longs as base_fee is set proportionally...
 
         #1
         txF = self.nodes[0].fundrawtransaction(tx)
-        base_fee = satoshi_round(0.00075*100)  # DEFAULT_FALLBACK_FEE (settxfee(0) is default and falls through to this)
+        base_fee = satoshi_round(0.01025*100)  # DEFAULT_FALLBACK_FEE (settxfee(0) is default and falls through to this)
 
         #2
         # self.nodes[0].settxfee(relayfee)  # specifically fund this tx with low fee (this is too low and will be bumped to MINFEE)

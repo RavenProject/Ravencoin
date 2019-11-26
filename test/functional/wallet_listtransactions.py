@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the listtransactions API."""
 
 from decimal import Decimal
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import CTransaction, COIN
+from test_framework.util import (hex_str_to_bytes, assert_array_result, sync_mempools, assert_equal, bytes_to_hex_str)
+from test_framework.mininode import (CTransaction, COIN)
 from io import BytesIO
 
 
 
-def txFromHex(hexstring):
+def from_hex(hexstring):
     tx = CTransaction()
     f = BytesIO(hex_str_to_bytes(hexstring))
     tx.deserialize(f)

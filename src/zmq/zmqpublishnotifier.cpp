@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,10 +13,11 @@
 
 static std::multimap<std::string, CZMQAbstractPublishNotifier*> mapPublishNotifiers;
 
-static const char *MSG_HASHBLOCK = "hashblock";
-static const char *MSG_HASHTX    = "hashtx";
-static const char *MSG_RAWBLOCK  = "rawblock";
-static const char *MSG_RAWTX     = "rawtx";
+static const char *MSG_HASHBLOCK   = "hashblock";
+static const char *MSG_HASHTX      = "hashtx";
+static const char *MSG_RAWBLOCK    = "rawblock";
+static const char *MSG_RAWTX       = "rawtx";
+static const char *MSG_RAWASSETMSG = "rawmessage";
 
 // Internal function to send multipart message
 static int zmq_send_multipart(void *sock, const void* data, size_t size, ...)
@@ -171,7 +172,7 @@ bool CZMQPublishRawBlockNotifier::NotifyBlock(const CBlockIndex *pindex)
 {
     LogPrint(BCLog::ZMQ, "zmq: Publish rawblock %s\n", pindex->GetBlockHash().GetHex());
 
-    const Consensus::ConsensusParams& consensusParams = Params().GetConsensus();
+    const Consensus::Params& consensusParams = GetParams().GetConsensus();
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
     {
         LOCK(cs_main);
@@ -195,4 +196,13 @@ bool CZMQPublishRawTransactionNotifier::NotifyTransaction(const CTransaction &tr
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
     ss << transaction;
     return SendMessage(MSG_RAWTX, &(*ss.begin()), ss.size());
+}
+
+bool CZMQPublishNewAssetMessageNotifier::NotifyMessage(const CMessage &message)
+{
+    LogPrint(BCLog::ZMQ, "zmq: Publish message %s\n", message.ToString());
+
+    CZMQMessage zmqmessage(message);
+    std::string str = zmqmessage.createJsonString();
+    return SendMessage(MSG_RAWASSETMSG, &(*str.begin()), str.size());
 }

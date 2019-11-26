@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -62,7 +62,7 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
             nSum += nSubsidy * 1000;
             BOOST_CHECK(MoneyRange(nSum));
         }
-        BOOST_CHECK_EQUAL(nSum, 2078125000000000000ULL);
+        BOOST_CHECK_EQUAL(nSum, (int64_t)2078125000000000000ULL);
     }
 
     bool ReturnFalse()

@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -45,11 +45,11 @@ public:
     void showAssets();
 
 public Q_SLOTS:
-    void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
-                    const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
+            void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
+                            const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
 
-Q_SIGNALS:
-    void transactionClicked(const QModelIndex &index);
+    Q_SIGNALS:
+            void transactionClicked(const QModelIndex &index);
     void assetSendClicked(const QModelIndex &index);
     void assetIssueSubClicked(const QModelIndex &index);
     void assetIssueUniqueClicked(const QModelIndex &index);
@@ -80,7 +80,7 @@ private:
 
 
 private Q_SLOTS:
-    void updateDisplayUnit();
+            void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
     void handleAssetClicked(const QModelIndex &index);
     void updateAlerts(const QString &warnings);

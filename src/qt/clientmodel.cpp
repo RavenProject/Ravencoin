@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -123,7 +123,7 @@ QDateTime ClientModel::getLastBlockDate() const
     if (chainActive.Tip())
         return QDateTime::fromTime_t(chainActive.Tip()->GetBlockTime());
 
-    return QDateTime::fromTime_t(Params().GenesisBlock().GetBlockTime()); // Genesis block's time of current network
+    return QDateTime::fromTime_t(GetParams().GenesisBlock().GetBlockTime()); // Genesis block's time of current network
 }
 
 long ClientModel::getMempoolSize() const
@@ -144,7 +144,7 @@ double ClientModel::getVerificationProgress(const CBlockIndex *tipIn) const
         LOCK(cs_main);
         tip = chainActive.Tip();
     }
-    return GuessVerificationProgress(Params().TxData(), tip);
+    return GuessVerificationProgress(GetParams().TxData(), tip);
 }
 
 void ClientModel::updateTimer()
