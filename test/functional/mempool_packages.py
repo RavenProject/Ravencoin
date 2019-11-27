@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test descendant package tracking code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (satoshi_round, 
+                                Decimal, 
+                                assert_equal, 
+                                assert_raises_rpc_error, 
+                                sync_blocks, 
+                                sync_mempools)
 from test_framework.mininode import COIN
 
 MAX_ANCESTORS = 25
@@ -23,7 +28,7 @@ class MempoolPackagesTest(RavenTestFramework):
         send_value = satoshi_round((value - fee)/num_outputs)
         inputs = [ {'txid' : parent_txid, 'vout' : vout} ]
         outputs = {}
-        for i in range(num_outputs):
+        for _ in range(num_outputs):
             outputs[node.getnewaddress()] = send_value
         rawtx = node.createrawtransaction(inputs, outputs)
         signedtx = node.signrawtransaction(rawtx)

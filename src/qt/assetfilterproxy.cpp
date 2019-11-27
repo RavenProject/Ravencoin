@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "assetfilterproxy.h"
@@ -17,7 +17,7 @@ bool AssetFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &source
 
     QString assetName = index.data(AssetTableModel::AssetNameRole).toString();
 
-    if(!assetName.contains(assetNamePrefix, Qt::CaseInsensitive))
+    if(!assetName.startsWith(assetNamePrefix, Qt::CaseInsensitive))
         return false;
 
     return true;

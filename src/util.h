@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -105,6 +105,7 @@ namespace BCLog
         COINDB = (1 << 18),
         QT = (1 << 19),
         LEVELDB = (1 << 20),
+        REWARDS = (1 << 21),
         ALL = ~(uint32_t) 0,
     };
 }
@@ -294,6 +295,8 @@ public:
     // Forces an arg setting. Called by SoftSetArg() if the arg hasn't already
     // been set. Also called directly in testing.
     void ForceSetArg(const std::string &strArg, const std::string &strValue);
+
+    void ForceSetArg(const std::string &strArg, const int64_t &nValue);
 };
 
 extern ArgsManager gArgs;

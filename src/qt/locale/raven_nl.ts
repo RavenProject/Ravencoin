@@ -1,4 +1,6 @@
-<TS language="nl" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="nl">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -435,7 +437,7 @@
     </message>
     <message numerus="yes">
         <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>%n actieve verbinding met Ravennetwerk</numerusform><numerusform>%n actieve verbindingen met Ravennetwerk</numerusform></translation>
+        <translation><numerusform>%n actieve verbinding met Ravennetwerk</numerusform></translation>
     </message>
     <message>
         <source>Indexing blocks on disk...</source>
@@ -447,7 +449,7 @@
     </message>
     <message numerus="yes">
         <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>%n blok aan transactiegeschiedenis verwerkt.</numerusform><numerusform>%n blokken aan transactiegeschiedenis verwerkt.</numerusform></translation>
+        <translation><numerusform>%n blok aan transactiegeschiedenis verwerkt.</numerusform></translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -872,11 +874,11 @@
     </message>
     <message numerus="yes">
         <source>%n GB of free space available</source>
-        <translation><numerusform>%n GB aan vrije opslagruimte beschikbaar</numerusform><numerusform>%n GB aan vrije opslagruimte beschikbaar</numerusform></translation>
+        <translation><numerusform>%n GB aan vrije opslagruimte beschikbaar</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>(of %n GB needed)</source>
-        <translation><numerusform>(van %n GB nodig)</numerusform><numerusform>(van %n GB nodig)</numerusform></translation>
+        <translation><numerusform>(van %n GB nodig)</numerusform></translation>
     </message>
 </context>
 <context>
@@ -1413,23 +1415,23 @@
     </message>
     <message numerus="yes">
         <source>%n second(s)</source>
-        <translation><numerusform>%n seconde</numerusform><numerusform>%n seconden</numerusform></translation>
+        <translation><numerusform>%n seconde</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n minute(s)</source>
-        <translation><numerusform>%n minuut</numerusform><numerusform>%n minuten</numerusform></translation>
+        <translation><numerusform>%n minuut</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
-        <translation><numerusform>%n uur</numerusform><numerusform>%n uren</numerusform></translation>
+        <translation><numerusform>%n uur</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
-        <translation><numerusform>%n dag</numerusform><numerusform>%n dagen</numerusform></translation>
+        <translation><numerusform>%n dag</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
-        <translation><numerusform>%n week</numerusform><numerusform>%n weken</numerusform></translation>
+        <translation><numerusform>%n week</numerusform></translation>
     </message>
     <message>
         <source>%1 and %2</source>
@@ -1437,7 +1439,7 @@
     </message>
     <message numerus="yes">
         <source>%n year(s)</source>
-        <translation><numerusform>%n jaar</numerusform><numerusform>%n jaren</numerusform></translation>
+        <translation><numerusform>%n jaar</numerusform></translation>
     </message>
     <message>
         <source>%1 didn't yet exit safely...</source>
@@ -2190,7 +2192,7 @@
     </message>
     <message numerus="yes">
         <source>%n block(s)</source>
-        <translation><numerusform>%n blok</numerusform><numerusform>%n blokken</numerusform></translation>
+        <translation><numerusform>%n blok</numerusform></translation>
     </message>
     <message>
         <source>Pay only the required fee of %1</source>
@@ -2198,7 +2200,7 @@
     </message>
     <message numerus="yes">
         <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>Schatting is dat bevestiging begint over %n blok.</numerusform><numerusform>Schatting is dat bevestiging begint over %n blokken.</numerusform></translation>
+        <translation><numerusform>Schatting is dat bevestiging begint over %n blok.</numerusform></translation>
     </message>
     <message>
         <source>Warning: Invalid Raven address</source>
@@ -2479,7 +2481,7 @@
     <name>TransactionDesc</name>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>Open voor nog %n blok</numerusform><numerusform>Open voor nog %n blokken</numerusform></translation>
+        <translation><numerusform>Open voor nog %n blok</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -2567,7 +2569,7 @@
     </message>
     <message numerus="yes">
         <source>matures in %n more block(s)</source>
-        <translation><numerusform>komt beschikbaar na %n nieuwe blok</numerusform><numerusform>komt beschikbaar na %n nieuwe blokken</numerusform></translation>
+        <translation><numerusform>komt beschikbaar na %n nieuwe blok</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -2673,7 +2675,7 @@
     </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>Open voor nog %n blok</numerusform><numerusform>Open voor nog %n blokken</numerusform></translation>
+        <translation><numerusform>Open voor nog %n blok</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>

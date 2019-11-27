@@ -1416,6 +1416,166 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_repair">
+      <attribute name="title">
+       <string>&amp;Wallet Repair</string>
+      </attribute>
+      <widget class="QLabel" name="label_repair_header">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>15</y>
+         <width>711</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Wallet Repair Options</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_repair_helptext">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>35</y>
+         <width>950</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>The buttons below will restart the wallet with command-line options to recover missing transactions or rebuild corrupt blockchain files.</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="wallet_path">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>75</y>
+         <width>750</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Wallet Path</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btn_rescan">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>121</y>
+         <width>240</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rescan blockchain files</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btn_zapwallettxes1">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>181</y>
+         <width>240</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Recover transactions</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="btn_reindex">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>246</y>
+         <width>240</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rebuild index</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_repair_rescan">
+       <property name="geometry">
+        <rect>
+         <x>265</x>
+         <y>120</y>
+         <width>700</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>-rescan: Rescan the blockchain files on disk for missing wallet transactions. (Short process)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_repair_zap1">
+       <property name="geometry">
+        <rect>
+         <x>265</x>
+         <y>170</y>
+         <width>700</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>-zapwallettxes=1: Delete all wallet transactions and recover them with a rescan. (Keeps metadata)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label2_repair_zap1">
+       <property name="geometry">
+        <rect>
+         <x>265</x>
+         <y>190</y>
+         <width>700</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Use to recover balance when transactions fail to broadcast to the network.</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_repair_reindex">
+       <property name="geometry">
+        <rect>
+         <x>265</x>
+         <y>235</y>
+         <width>700</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>-reindex: Rebuild chain state and block index from the blk00*.dat files on disk. (Long process)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label2_repair_reindex">
+       <property name="geometry">
+        <rect>
+         <x>265</x>
+         <y>255</y>
+         <width>700</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Use after importing private keys or restoring a wallet.dat backup.</string>
+       </property>
+      </widget>
+     </widget>
     </widget>
    </item>
   </layout>

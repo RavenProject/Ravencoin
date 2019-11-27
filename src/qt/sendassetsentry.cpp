@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "sendassetsentry.h"
@@ -17,6 +17,7 @@
 #include "guiconstants.h"
 
 #include "wallet/coincontrol.h"
+#include "assets/assets.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QApplication>
@@ -127,6 +128,11 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     ui->messageTextLabel->setFont(GUIUtil::getSubLabelFont());
     ui->assetAmountLabel->setFont(GUIUtil::getSubLabelFont());
     ui->ownershipWarningMessage->setFont(GUIUtil::getSubLabelFont());
+
+    ui->memoBox->installEventFilter(this);
+    ui->memoLabel->setFont(GUIUtil::getSubLabelFont());
+    ui->memoLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->memoBox->setFont(GUIUtil::getSubLabelFont());
 }
 
 SendAssetsEntry::~SendAssetsEntry()
@@ -227,6 +233,60 @@ bool SendAssetsEntry::validate()
         retval = false;
     }
 
+    if (!ui->memoBox->text().isEmpty()) {
+        if (!AreMessagesDeployed()) {
+            ui->messageTextLabel->show();
+            ui->messageTextLabel->setText(tr("Memos can only be added once RIP5 is voted in"));
+            ui->memoBox->setStyleSheet(STYLE_INVALID);
+            retval = false;
+        }
+
+        size_t size = ui->memoBox->text().size();
+
+        if (size != 46) {
+            if (!AreMessagesDeployed()) {
+
+                ui->memoBox->setStyleSheet(STYLE_INVALID);
+                retval = false;
+            } else {
+                if (size != 64) {
+                    ui->memoBox->setStyleSheet(STYLE_INVALID);
+                    retval = false;
+                }
+            }
+        }
+
+        std::string error = "";
+        if(!CheckEncoded(DecodeAssetData(ui->memoBox->text().toStdString()), error)) {
+            ui->memoBox->setStyleSheet(STYLE_INVALID);
+            retval = false;
+        }
+
+    }
+    std::string assetName = ui->assetSelectionBox->currentText().toStdString();
+    if (IsAssetNameAnRestricted(assetName)) {
+        if (passets) {
+            if (passets->CheckForGlobalRestriction(assetName)) {
+                ui->assetSelectionBox->lineEdit()->setStyleSheet(STYLE_INVALID);
+                ui->messageTextLabel->show();
+                ui->messageTextLabel->setText(tr("This restricted asset have been frozen globally. No transfers can't we sent on the network."));
+                retval = false;
+            }
+
+            CNullAssetTxVerifierString verifier;
+            if (passets->GetAssetVerifierStringIfExists(assetName, verifier)) {
+                std::string strError = "";
+                ErrorReport report;
+                if (!ContextualCheckVerifierString(passets, verifier.verifier_string,ui->payTo->text().toStdString(), strError, &report)) {
+                    ui->payTo->setValid(false);
+                    ui->messageTextLabel->show();
+                    ui->messageTextLabel->setText(QString::fromStdString(GetUserErrorString(report)));
+                    retval = false;
+                }
+            }
+        }
+    }
+
     // TODO check to make sure the payAmount value is within the constraints of how much you own
 
     return retval;
@@ -254,7 +314,9 @@ QWidget *SendAssetsEntry::setupTabChain(QWidget *prev)
     QWidget::setTabOrder(ui->payTo, ui->addAsLabel);
     QWidget::setTabOrder(ui->addressBookButton, ui->pasteButton);
     QWidget::setTabOrder(ui->pasteButton, ui->deleteButton);
-    return ui->deleteButton;
+    QWidget::setTabOrder(ui->deleteButton, ui->payAssetAmount);
+    QWidget::setTabOrder(ui->payAssetAmount, ui->memoBox);
+    return ui->memoBox;
 }
 
 void SendAssetsEntry::setValue(const SendAssetsRecipient &value)
@@ -481,4 +543,14 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
         }
         ui->ownershipWarningMessage->hide();
     }
+}
+
+bool SendAssetsEntry::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == ui->memoBox && event->type() == QEvent::FocusIn)
+    {
+    // Clear invalid flag on focus
+        ui->memoBox->setStyleSheet("");
+    }
+    return QWidget::eventFilter(object, event);
 }

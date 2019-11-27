@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -52,7 +52,7 @@ BOOST_FIXTURE_TEST_SUITE(blockencodings_tests, RegtestingSetup)
         bool mutated;
         block.hashMerkleRoot = BlockMerkleRoot(block, &mutated);
         assert(!mutated);
-        while (!CheckProofOfWork(block.GetHash(), block.nBits, Params().GetConsensus())) ++block.nNonce;
+        while (!CheckProofOfWork(block.GetHash(), block.nBits, GetParams().GetConsensus())) ++block.nNonce;
         return block;
     }
 
@@ -305,7 +305,7 @@ BOOST_FIXTURE_TEST_SUITE(blockencodings_tests, RegtestingSetup)
         bool mutated;
         block.hashMerkleRoot = BlockMerkleRoot(block, &mutated);
         assert(!mutated);
-        while (!CheckProofOfWork(block.GetHash(), block.nBits, Params().GetConsensus())) ++block.nNonce;
+        while (!CheckProofOfWork(block.GetHash(), block.nBits, GetParams().GetConsensus())) ++block.nNonce;
 
         // Test simple header round-trip with only coinbase
         {

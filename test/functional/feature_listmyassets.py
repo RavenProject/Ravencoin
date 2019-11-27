@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test listmyassets RPC command."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
+from test_framework.util import (assert_equal, assert_contains_pair)
+from test_framework.mininode import CInv
 from io import BytesIO
 
 class ListMyAssetsTest(RavenTestFramework):

@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -31,6 +31,10 @@
 #include <QTimer>
 #include <QGraphicsDropShadowEffect>
 #include <QScrollBar>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
 
 class TxViewDelegate : public QAbstractItemDelegate
 {
@@ -83,8 +87,11 @@ public:
 
         painter->setFont(GUIUtil::getSubLabelFont());
         // Concatenate the strings if needed before painting
-        GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
-
+        #ifndef QTversionPreFiveEleven
+    		GUIUtil::concatenate(painter, address, painter->fontMetrics().horizontalAdvance(amountText), addressRect.left(), addressRect.right());
+		#else
+    		GUIUtil::concatenate(painter, address, painter->fontMetrics().width(amountText), addressRect.left(), addressRect.right());
+		#endif
         painter->setPen(foreground);
         QRect boundingRect;
         painter->drawText(addressRect, Qt::AlignLeft|Qt::AlignVCenter, address, &boundingRect);
@@ -115,9 +122,12 @@ public:
         QString assetName = index.data(TransactionTableModel::AssetNameRole).toString();
 
         // Concatenate the strings if needed before painting
-        GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
-
-        painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
+        #ifndef QTversionPreFiveEleven
+    		GUIUtil::concatenate(painter, assetName, painter->fontMetrics().horizontalAdvance(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+    	#else
+    		GUIUtil::concatenate(painter, assetName, painter->fontMetrics().width(GUIUtil::dateTimeStr(date)), amountRect.left(), amountRect.right());
+    	#endif
+    	painter->drawText(amountRect, Qt::AlignRight|Qt::AlignVCenter, assetName);
 
         painter->setPen(platformStyle->TextColor());
         painter->drawText(amountRect, Qt::AlignLeft|Qt::AlignVCenter, GUIUtil::dateTimeStr(date));
@@ -247,8 +257,11 @@ public:
         // Get the width in pixels that the amount takes up (because they are different font,
         // we need to do this before we call the concatenate function
         painter->setFont(amountFont);
-        int amount_width = painter->fontMetrics().width(amountText);
-
+        #ifndef QTversionPreFiveEleven
+        	int amount_width = painter->fontMetrics().horizontalAdvance(amountText);
+		#else
+			int amount_width = painter->fontMetrics().width(amountText);
+		#endif
         // Set the painter for the font used for the asset name, so that the concatenate function estimated width correctly
         painter->setFont(nameFont);
 
@@ -389,7 +402,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     // Trigger the call to show the assets table if assets are active
     showAssets();
 
-
     // context menu actions
     sendAction = new QAction(tr("Send Asset"), this);
     QAction *copyAmountAction = new QAction(tr("Copy Amount"), this);
@@ -397,7 +409,6 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     issueSub = new QAction(tr("Issue Sub Asset"), this);
     issueUnique = new QAction(tr("Issue Unique Asset"), this);
     reissue = new QAction(tr("Reissue Asset"), this);
-
 
     sendAction->setObjectName("Send");
     issueSub->setObjectName("Sub");
@@ -427,8 +438,6 @@ void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 void OverviewPage::handleAssetClicked(const QModelIndex &index)
 {
     if(assetFilter) {
-
-
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
         bool fOwner = false;
         if (IsAssetNameAnOwner(name.toStdString())) {

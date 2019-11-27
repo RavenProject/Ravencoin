@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -217,7 +217,7 @@ static bool rest_block(HTTPRequest* req,
         if (fHavePruned && !(pblockindex->nStatus & BLOCK_HAVE_DATA) && pblockindex->nTx > 0)
             return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not available (pruned data)");
 
-        if (!ReadBlockFromDisk(block, pblockindex, Params().GetConsensus()))
+        if (!ReadBlockFromDisk(block, pblockindex, GetParams().GetConsensus()))
             return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
     }
 
@@ -346,7 +346,7 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
 
     CTransactionRef tx;
     uint256 hashBlock = uint256();
-    if (!GetTransaction(hash, tx, Params().GetConsensus(), hashBlock, true))
+    if (!GetTransaction(hash, tx, GetParams().GetConsensus(), hashBlock, true))
         return RESTERR(req, HTTP_NOT_FOUND, hashStr + " not found");
 
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());

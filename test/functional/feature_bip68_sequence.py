@@ -1,13 +1,26 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test BIP68 implementation."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.blocktools import *
+from test_framework.util import (   satoshi_round, 
+                                    assert_raises_rpc_error, 
+                                    get_bip9_status, 
+                                    assert_equal, 
+                                    assert_greater_than, 
+                                    sync_blocks)
+from test_framework.blocktools import ( CTransaction,
+                                        COIN,
+                                        CTxIn,
+                                        COutPoint,
+                                        CTxOut,
+                                        CScript,
+                                        create_block,
+                                        create_coinbase)
+from test_framework.mininode import (ToHex, from_hex)
 
 SEQUENCE_LOCKTIME_DISABLE_FLAG = (1<<31)
 SEQUENCE_LOCKTIME_TYPE_FLAG = (1<<22) # this means use time (0 means height)
@@ -32,7 +45,7 @@ class BIP68Test(RavenTestFramework):
         self.log.info("Note that nVersion=2 transactions are always standard (independent of BIP68 activation status).")
         self.test_version2_relay()
 
-        self.log.info("Passed")
+        self.log.info("All Tests Passed")
 
     # Test that BIP68 is not in effect if tx version is 1, or if
     # the first sequence bit is set.
@@ -182,7 +195,7 @@ class BIP68Test(RavenTestFramework):
 
         # Create a mempool tx.
         txid = self.nodes[0].sendtoaddress(self.nodes[0].getnewaddress(), 2)
-        tx1 = FromHex(CTransaction(), self.nodes[0].getrawtransaction(txid))
+        tx1 = from_hex(CTransaction(), self.nodes[0].getrawtransaction(txid))
         tx1.rehash()
 
         # Anyone-can-spend mempool tx.
@@ -192,7 +205,7 @@ class BIP68Test(RavenTestFramework):
         tx2.vin = [CTxIn(COutPoint(tx1.sha256, 0), nSequence=0)]
         tx2.vout = [CTxOut(int(tx1.vout[0].nValue - self.relayfee*COIN), CScript([b'a']))]
         tx2_raw = self.nodes[0].signrawtransaction(ToHex(tx2))["hex"]
-        tx2 = FromHex(tx2, tx2_raw)
+        tx2 = from_hex(tx2, tx2_raw)
         tx2.rehash()
 
         self.nodes[0].sendrawtransaction(tx2_raw)
@@ -227,7 +240,7 @@ class BIP68Test(RavenTestFramework):
         # Use prioritisetransaction to lower the effective feerate to 0
         self.nodes[0].prioritisetransaction(txid=tx2.hash, fee_delta=int(-self.relayfee*COIN))
         cur_time = int(time.time())
-        for i in range(10):
+        for _ in range(10):
             self.nodes[0].setmocktime(cur_time + 600)
             self.nodes[0].generate(1)
             cur_time += 600
@@ -287,7 +300,7 @@ class BIP68Test(RavenTestFramework):
         # tx3 to be removed.
         tip = int(self.nodes[0].getblockhash(self.nodes[0].getblockcount()-1), 16)
         height = self.nodes[0].getblockcount()
-        for i in range(2):
+        for _ in range(2):
             block = create_block(tip, create_coinbase(height), cur_time)
             block.nVersion = 3
             block.rehash()
@@ -314,7 +327,7 @@ class BIP68Test(RavenTestFramework):
         assert(get_bip9_status(self.nodes[0], 'csv')['status'] != 'active')
         txid = self.nodes[0].sendtoaddress(self.nodes[0].getnewaddress(), 2)
 
-        tx1 = FromHex(CTransaction(), self.nodes[0].getrawtransaction(txid))
+        tx1 = from_hex(CTransaction(), self.nodes[0].getrawtransaction(txid))
         tx1.rehash()
 
         # Make an anyone-can-spend transaction
@@ -325,7 +338,7 @@ class BIP68Test(RavenTestFramework):
 
         # sign tx2
         tx2_raw = self.nodes[0].signrawtransaction(ToHex(tx2))["hex"]
-        tx2 = FromHex(tx2, tx2_raw)
+        tx2 = from_hex(tx2, tx2_raw)
         tx2.rehash()
 
         self.nodes[0].sendrawtransaction(ToHex(tx2))
@@ -371,7 +384,7 @@ class BIP68Test(RavenTestFramework):
         outputs = { self.nodes[1].getnewaddress() : 1.0 }
         rawtx = self.nodes[1].createrawtransaction(inputs, outputs)
         rawtxfund = self.nodes[1].fundrawtransaction(rawtx)['hex']
-        tx = FromHex(CTransaction(), rawtxfund)
+        tx = from_hex(CTransaction(), rawtxfund)
         tx.nVersion = 2
         tx_signed = self.nodes[1].signrawtransaction(ToHex(tx))["hex"]
         self.nodes[1].sendrawtransaction(tx_signed)

@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -209,7 +209,7 @@ void RecentRequestsTableModel::addNewRequest(RecentRequestEntry &recipient)
 
 void RecentRequestsTableModel::sort(int column, Qt::SortOrder order)
 {
-    qSort(list.begin(), list.end(), RecentRequestEntryLessThan(column, order));
+    std::sort(list.begin(), list.end(), RecentRequestEntryLessThan(column, order));
     Q_EMIT dataChanged(index(0, 0, QModelIndex()), index(list.size() - 1, NUMBER_OF_COLUMNS - 1, QModelIndex()));
 }
 

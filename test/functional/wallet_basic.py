@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the wallet."""
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import (connect_nodes_bi, 
+                                assert_fee_amount, 
+                                assert_equal, 
+                                assert_raises_rpc_error, 
+                                Decimal, 
+                                count_bytes, 
+                                sync_mempools, 
+                                sync_blocks, 
+                                time, 
+                                assert_array_result)
 
 class WalletTest(RavenTestFramework):
     def set_test_params(self):
@@ -17,15 +26,16 @@ class WalletTest(RavenTestFramework):
         self.start_node(0)
         self.start_node(1)
         self.start_node(2)
-        connect_nodes_bi(self.nodes,0,1)
-        connect_nodes_bi(self.nodes,1,2)
-        connect_nodes_bi(self.nodes,0,2)
+        connect_nodes_bi(self.nodes,0,1, True)
+        connect_nodes_bi(self.nodes,1,2, True)
+        connect_nodes_bi(self.nodes,0,2, True)
         self.sync_all([self.nodes[0:3]])
 
-    def check_fee_amount(self, curr_balance, balance_with_fee, fee_per_byte, tx_size):
+    @staticmethod
+    def check_fee_amount(curr_balance, balance_with_fee, fee_per_byte, tx_size):
         """Return curr_balance after asserting the fee was in range"""
         fee = balance_with_fee - curr_balance
-        assert_fee_amount(fee, tx_size, fee_per_byte * 1000)
+        assert_fee_amount(fee, tx_size, fee_per_byte * 10000)
         return curr_balance
 
     def run_test(self):
@@ -90,7 +100,7 @@ class WalletTest(RavenTestFramework):
         # note the mempool tx will have randomly assigned indices
         # but 10 will go to node2 and the rest will go to node0
         balance = self.nodes[0].getbalance()
-        assert_equal(set([txout1['value'], txout2['value']]), set([10, balance]))
+        assert_equal({txout1['value'], txout2['value']}, {10, balance})
         walletinfo = self.nodes[0].getwalletinfo()
         assert_equal(walletinfo['immature_balance'], 0)
 
@@ -176,7 +186,7 @@ class WalletTest(RavenTestFramework):
         self.sync_all([self.nodes[0:3]])
         node_2_bal -= Decimal('10')
         assert_equal(self.nodes[2].getbalance(), node_2_bal)
-        node_0_bal = self.check_fee_amount(self.nodes[0].getbalance(), node_0_bal + Decimal('10'), fee_per_byte, count_bytes(self.nodes[2].getrawtransaction(txid)))
+        self.check_fee_amount(self.nodes[0].getbalance(), node_0_bal + Decimal('10'), fee_per_byte, count_bytes(self.nodes[2].getrawtransaction(txid)))
 
         # Test ResendWalletTransactions:
         # Create a couple of transactions, then start up a fourth
@@ -209,25 +219,25 @@ class WalletTest(RavenTestFramework):
         inputs = [{"txid":usp[0]['txid'], "vout":usp[0]['vout']}]
         outputs = {self.nodes[1].getnewaddress(): 4999.998, self.nodes[0].getnewaddress(): 1111.11}
 
-        rawTx = self.nodes[1].createrawtransaction(inputs, outputs)
-        rawTx = rawTx.replace("c04fbbde19", "0000000000") #replace 1111.11 with 0.0 (int32)
-        decRawTx = self.nodes[1].decoderawtransaction(rawTx)
-        signedRawTx = self.nodes[1].signrawtransaction(rawTx)
-        decRawTx = self.nodes[1].decoderawtransaction(signedRawTx['hex'])
-        zeroValueTxid= decRawTx['txid']
-        self.nodes[1].sendrawtransaction(signedRawTx['hex'])
+        raw_tx = self.nodes[1].createrawtransaction(inputs, outputs)
+        raw_tx = raw_tx.replace("c04fbbde19", "0000000000") #replace 1111.11 with 0.0 (int32)
+        dec_raw_tx = self.nodes[1].decoderawtransaction(raw_tx)
+        signed_raw_tx = self.nodes[1].signrawtransaction(raw_tx)
+        dec_raw_tx = self.nodes[1].decoderawtransaction(signed_raw_tx['hex'])
+        zero_value_txid = dec_raw_tx['txid']
+        self.nodes[1].sendrawtransaction(signed_raw_tx['hex'])
 
         self.sync_all()
         self.nodes[1].generate(1) #mine a block
         self.sync_all()
 
-        unspentTxs = self.nodes[0].listunspent() #zero value tx must be in listunspents output
+        unspent_txs = self.nodes[0].listunspent() #zero value tx must be in listunspents output
         found = False
-        for uTx in unspentTxs:
-            if uTx['txid'] == zeroValueTxid:
+        for uTx in unspent_txs:
+            if uTx['txid'] == zero_value_txid:
                 found = True
                 assert_equal(uTx['amount'], Decimal('0'))
-        assert(found)
+        assert found
 
         #do some -walletbroadcast tests
         self.stop_nodes()
@@ -239,22 +249,22 @@ class WalletTest(RavenTestFramework):
         connect_nodes_bi(self.nodes,0,2)
         self.sync_all([self.nodes[0:3]])
 
-        txIdNotBroadcasted  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 2)
-        txObjNotBroadcasted = self.nodes[0].gettransaction(txIdNotBroadcasted)
+        tx_id_not_broadcasted  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 2)
+        tx_obj_not_broadcasted = self.nodes[0].gettransaction(tx_id_not_broadcasted)
         self.nodes[1].generate(1) #mine a block, tx should not be in there
         self.sync_all([self.nodes[0:3]])
         assert_equal(self.nodes[2].getbalance(), node_2_bal) #should not be changed because tx was not broadcasted
 
         #now broadcast from another node, mine a block, sync, and check the balance
-        self.nodes[1].sendrawtransaction(txObjNotBroadcasted['hex'])
+        self.nodes[1].sendrawtransaction(tx_obj_not_broadcasted['hex'])
         self.nodes[1].generate(1)
         self.sync_all([self.nodes[0:3]])
         node_2_bal += 2
-        txObjNotBroadcasted = self.nodes[0].gettransaction(txIdNotBroadcasted)
+        self.nodes[0].gettransaction(tx_id_not_broadcasted)
         assert_equal(self.nodes[2].getbalance(), node_2_bal)
 
         #create another tx
-        txIdNotBroadcasted  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 2)
+        self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 2)
 
         #restart the nodes with -walletbroadcast=1
         self.stop_nodes()
@@ -274,18 +284,18 @@ class WalletTest(RavenTestFramework):
         assert_equal(self.nodes[2].getbalance(), node_2_bal)
 
         #send a tx with value in a string (PR#6380 +)
-        txId  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), "2")
-        txObj = self.nodes[0].gettransaction(txId)
-        assert_equal(txObj['amount'], Decimal('-2'))
+        tx_id  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), "2")
+        tx_obj = self.nodes[0].gettransaction(tx_id)
+        assert_equal(tx_obj['amount'], Decimal('-2'))
 
-        txId  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), "0.0001")
-        txObj = self.nodes[0].gettransaction(txId)
-        assert_equal(txObj['amount'], Decimal('-0.0001'))
+        tx_id  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), "0.0001")
+        tx_obj = self.nodes[0].gettransaction(tx_id)
+        assert_equal(tx_obj['amount'], Decimal('-0.0001'))
 
         #check if JSON parser can handle scientific notation in strings
-        txId  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), "1e-4")
-        txObj = self.nodes[0].gettransaction(txId)
-        assert_equal(txObj['amount'], Decimal('-0.0001'))
+        tx_id  = self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), "1e-4")
+        tx_obj = self.nodes[0].gettransaction(tx_id)
+        assert_equal(tx_obj['amount'], Decimal('-0.0001'))
 
         # This will raise an exception because the amount type is wrong
         assert_raises_rpc_error(-3, "Invalid amount", self.nodes[0].sendtoaddress, self.nodes[2].getnewaddress(), "1f-4")
@@ -296,7 +306,7 @@ class WalletTest(RavenTestFramework):
         # Import address and private key to check correct behavior of spendable unspents
         # 1. Send some coins to generate new UTXO
         address_to_import = self.nodes[2].getnewaddress()
-        txid = self.nodes[0].sendtoaddress(address_to_import, 1)
+        self.nodes[0].sendtoaddress(address_to_import, 1)
         self.nodes[0].generate(1)
         self.sync_all([self.nodes[0:3]])
 
@@ -321,13 +331,13 @@ class WalletTest(RavenTestFramework):
                            {"spendable": True})
 
         # Mine a block from node0 to an address from node1
-        cbAddr = self.nodes[1].getnewaddress()
-        blkHash = self.nodes[0].generatetoaddress(1, cbAddr)[0]
-        cbTxId = self.nodes[0].getblock(blkHash)['tx'][0]
+        cb_address = self.nodes[1].getnewaddress()
+        block_hash = self.nodes[0].generatetoaddress(1, cb_address)[0]
+        cb_tx_id = self.nodes[0].getblock(block_hash)['tx'][0]
         self.sync_all([self.nodes[0:3]])
 
         # Check that the txid and balance is found by node1
-        self.nodes[1].gettransaction(cbTxId)
+        self.nodes[1].gettransaction(cb_tx_id)
 
         # check if wallet or blockchain maintenance changes the balance
         self.sync_all([self.nodes[0:3]])
@@ -350,26 +360,15 @@ class WalletTest(RavenTestFramework):
         self.nodes[0].ensure_ascii = True # restore to default
 
         # maintenance tests
-        maintenance = [
-            '-rescan',
-            '-reindex',
-            '-zapwallettxes=1',
-            '-zapwallettxes=2',
-            # disabled until issue is fixed: https://github.com/RavenProject/Ravencoin/issues/7463
-            # '-salvagewallet',
-        ]
-        chainlimit = 6
-        for m in maintenance:
-            self.log.info("check " + m)
-            self.stop_nodes()
-            # set lower ancestor limit for later
-            self.start_node(0, [m, "-limitancestorcount="+str(chainlimit)])
-            self.start_node(1, [m, "-limitancestorcount="+str(chainlimit)])
-            self.start_node(2, [m, "-limitancestorcount="+str(chainlimit)])
-            while m == '-reindex' and [block_count] * 3 != [self.nodes[i].getblockcount() for i in range(3)]:
-                # reindex will leave rpc warm up "early"; Wait for it to finish
-                time.sleep(0.1)
-            assert_equal(balance_nodes, [self.nodes[i].getbalance() for i in range(3)])
+        maintenance = "-rescan -reindex -zapwallettxes=1 -zapwallettxes=2"
+        chain_limit = 6
+        self.log.info("check " + maintenance)
+        self.stop_nodes()
+        # set lower ancestor limit for later
+        self.start_node(0, [maintenance, "-limitancestorcount="+str(chain_limit)])
+        self.start_node(1, [maintenance, "-limitancestorcount="+str(chain_limit)])
+        self.start_node(2, [maintenance, "-limitancestorcount="+str(chain_limit)])
+        assert_equal(balance_nodes, [self.nodes[i].getbalance() for i in range(3)])
 
         # Exercise listsinceblock with the last two blocks
         coinbase_tx_1 = self.nodes[0].listsinceblock(blocks[0])
@@ -378,7 +377,7 @@ class WalletTest(RavenTestFramework):
         assert_equal(coinbase_tx_1["transactions"][0]["blockhash"], blocks[1])
         assert_equal(len(self.nodes[0].listsinceblock(blocks[1])["transactions"]), 0)
 
-        # ==Check that wallet prefers to use coins that don't exceed mempool limits =====
+        # Check that wallet prefers to use coins that don't exceed mempool limits =====
 
         # Get all non-zero utxos together
         chain_addrs = [self.nodes[0].getnewaddress(), self.nodes[0].getnewaddress()]
@@ -388,7 +387,7 @@ class WalletTest(RavenTestFramework):
         # Split into two chains
         rawtx = self.nodes[0].createrawtransaction([{"txid":singletxid, "vout":0}], {chain_addrs[0]:node0_balance/2-Decimal('0.01'), chain_addrs[1]:node0_balance/2-Decimal('0.01')})
         signedtx = self.nodes[0].signrawtransaction(rawtx)
-        singletxid = self.nodes[0].sendrawtransaction(signedtx["hex"])
+        self.nodes[0].sendrawtransaction(signedtx["hex"])
         self.nodes[0].generate(1)
 
         # Make a long chain of unconfirmed payments without hitting mempool limit
@@ -397,30 +396,31 @@ class WalletTest(RavenTestFramework):
         # So we should be able to generate exactly chainlimit txs for each original output
         sending_addr = self.nodes[1].getnewaddress()
         txid_list = []
-        for i in range(chainlimit*2):
+        for _ in range(chain_limit*2):
             txid_list.append(self.nodes[0].sendtoaddress(sending_addr, Decimal('0.0001')))
-        assert_equal(self.nodes[0].getmempoolinfo()['size'], chainlimit*2)
-        assert_equal(len(txid_list), chainlimit*2)
+        assert_equal(self.nodes[0].getmempoolinfo()['size'], chain_limit*2)
+        assert_equal(len(txid_list), chain_limit*2)
 
         # Without walletrejectlongchains, we will still generate a txid
         # The tx will be stored in the wallet but not accepted to the mempool
-        extra_txid = self.nodes[0].sendtoaddress(sending_addr, Decimal('0.0001'))
+        assert_raises_rpc_error(-4, "Error: The transaction was rejected! Reason given: too-long-mempool-chain", self.nodes[0].sendtoaddress, sending_addr, Decimal('0.0001'))
+        # Get the last transaction and verify it is not in the mempool
+        trans_count = len(self.nodes[0].listtransactions("*",99999))
+        extra_txid = (self.nodes[0].listtransactions("*",1, trans_count-1))[0]['txid']
         assert(extra_txid not in self.nodes[0].getrawmempool())
-        assert(extra_txid in [tx["txid"] for tx in self.nodes[0].listtransactions()])
-        self.nodes[0].abandontransaction(extra_txid)
         total_txs = len(self.nodes[0].listtransactions("*",99999))
 
         # Try with walletrejectlongchains
         # Double chain limit but require combining inputs, so we pass SelectCoinsMinConf
         self.stop_node(0)
-        self.start_node(0, extra_args=["-walletrejectlongchains", "-limitancestorcount="+str(2*chainlimit)])
+        self.start_node(0, extra_args=["-walletrejectlongchains", "-limitancestorcount="+str(2*chain_limit)])
 
         # wait for loadmempool
         timeout = 10
-        while (timeout > 0 and len(self.nodes[0].getrawmempool()) < chainlimit*2):
+        while timeout > 0 and len(self.nodes[0].getrawmempool()) < chain_limit*2:
             time.sleep(0.5)
             timeout -= 0.5
-        assert_equal(len(self.nodes[0].getrawmempool()), chainlimit*2)
+        assert_equal(len(self.nodes[0].getrawmempool()), chain_limit*2)
 
         node0_balance = self.nodes[0].getbalance()
         # With walletrejectlongchains we will not create the tx and store it in our wallet.

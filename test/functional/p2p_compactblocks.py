@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test compact blocks (BIP 152).
@@ -9,11 +9,55 @@ Version 1 compact blocks are pre-segwit (txids)
 Version 2 compact blocks are post-segwit (wtxids)
 """
 
-from test_framework.mininode import *
+from test_framework.mininode import (NodeConnCB, 
+                                    mininode_lock, 
+                                    msg_getheaders, 
+                                    msg_headers, 
+                                    CBlockHeader, 
+                                    msg_block, 
+                                    CTransaction,
+                                    CTxIn,
+                                    CTxOut,
+                                    COutPoint,
+                                    msg_cmpctblock,
+                                    msg_sendcmpct,
+                                    msg_sendheaders,
+                                    P2PHeaderAndShortIDs,
+                                    PrefilledTransaction,
+                                    from_hex,
+                                    CBlock,
+                                    HeaderAndShortIDs,
+                                    CInv,
+                                    msg_getdata,
+                                    calculate_shortid,
+                                    msg_inv,
+                                    calculate_shortid,
+                                    msg_witness_blocktxn,
+                                    msg_blocktxn,
+                                    BlockTransactions,
+                                    msg_tx,
+                                    MSG_WITNESS_FLAG,
+                                    msg_witness_block,
+                                    msg_getblocktxn,
+                                    BlockTransactionsRequest,
+                                    ToHex,
+                                    CTxInWitness,
+                                    ser_uint256,
+                                    NodeConn,
+                                    NODE_NETWORK,
+                                    NetworkThread,
+                                    NODE_WITNESS)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.blocktools import create_block, create_coinbase, add_witness_commitment
-from test_framework.script import CScript, OP_TRUE
+from test_framework.util import (wait_until, 
+                                assert_equal, 
+                                satoshi_round, 
+                                Decimal, 
+                                random, 
+                                get_bip9_status, 
+                                p2p_port, 
+                                sync_blocks)
+from test_framework.blocktools import (create_block, create_coinbase, add_witness_commitment)
+from test_framework.script import (CScript, OP_TRUE)
 
 # TestNode: A peer we use to send messages to ravend, and store responses.
 class TestNode(NodeConnCB):
@@ -120,7 +164,7 @@ class CompactBlocksTest(RavenTestFramework):
         out_value = total_value // 10
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(block.vtx[0].sha256, 0), b''))
-        for i in range(10):
+        for _ in range(10):
             tx.vout.append(CTxOut(out_value, CScript([OP_TRUE])))
         tx.rehash()
 
@@ -263,10 +307,10 @@ class CompactBlocksTest(RavenTestFramework):
             node.generate(1)
 
         segwit_tx_generated = False
-        for i in range(num_transactions):
+        for _ in range(num_transactions):
             txid = node.sendtoaddress(address, 0.1)
             hex_tx = node.gettransaction(txid)["hex"]
-            tx = FromHex(CTransaction(), hex_tx)
+            tx = from_hex(CTransaction(), hex_tx)
             if not tx.wit.is_null():
                 segwit_tx_generated = True
 
@@ -285,7 +329,7 @@ class CompactBlocksTest(RavenTestFramework):
         block_hash = int(node.generate(1)[0], 16)
 
         # Store the raw block in our internal format.
-        block = FromHex(CBlock(), node.getblock("%02x" % block_hash, False))
+        block = from_hex(CBlock(), node.getblock("%02x" % block_hash, False))
         for tx in block.vtx:
             tx.calc_sha256()
         block.rehash()
@@ -419,7 +463,7 @@ class CompactBlocksTest(RavenTestFramework):
     def build_block_with_transactions(self, node, utxo, num_transactions):
         block = self.build_block_on_tip(node)
 
-        for i in range(num_transactions):
+        for _ in range(num_transactions):
             tx = CTransaction()
             tx.vin.append(CTxIn(COutPoint(utxo[0], utxo[1]), b''))
             tx.vout.append(CTxOut(utxo[2] - 1000, CScript([OP_TRUE])))
@@ -581,7 +625,7 @@ class CompactBlocksTest(RavenTestFramework):
         current_height = chain_height
         while (current_height >= chain_height - MAX_GETBLOCKTXN_DEPTH):
             block_hash = node.getblockhash(current_height)
-            block = FromHex(CBlock(), node.getblock(block_hash, False))
+            block = from_hex(CBlock(), node.getblock(block_hash, False))
 
             msg = msg_getblocktxn()
             msg.block_txn_request = BlockTransactionsRequest(int(block_hash, 16), [])
@@ -624,7 +668,7 @@ class CompactBlocksTest(RavenTestFramework):
         # Test that requesting old compactblocks doesn't work.
         MAX_CMPCTBLOCK_DEPTH = 5
         new_blocks = []
-        for i in range(MAX_CMPCTBLOCK_DEPTH + 1):
+        for _ in range(MAX_CMPCTBLOCK_DEPTH + 1):
             test_node.clear_block_announcement()
             new_blocks.append(node.generate(1)[0])
             wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock)

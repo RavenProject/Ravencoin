@@ -695,6 +695,31 @@
            </layout>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="labelVerifierString">
+              <property name="text">
+               <string>Verifier String:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditVerifierString">
+              <property name="placeholderText">
+               <string>Create a verifier string built from Qualifier names e.g (#KYC &amp; #VALID). Leave blank to default to true</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelVerifierStringErrorMessage">
+            <property name="text">
+             <string>Warning:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="quantityLabel">
@@ -787,20 +812,20 @@
                <string>Does this asset have an ipfs hash to go with it</string>
               </property>
               <property name="text">
-               <string>Add JSON Meta Data Hash</string>
+               <string>Add IPFS/Txid Hash</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QLineEdit" name="ipfsText">
               <property name="toolTip">
-               <string>The ipfs hash that contains information about the asset</string>
+               <string>The ipfs/txid hash that contains information about the asset</string>
               </property>
               <property name="maxLength">
-               <number>46</number>
+               <number>64</number>
               </property>
               <property name="placeholderText">
-               <string>The IPFS Hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</string>
+               <string>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</string>
               </property>
              </widget>
             </item>
@@ -1153,7 +1178,7 @@
                  <item>
                   <widget class="QRadioButton" name="radioCustomFee">
                    <property name="text">
-                    <string>Custom:</string>
+                    <string>C&amp;ustom:</string>
                    </property>
                    <attribute name="buttonGroup">
                     <string notr="true">groupFee</string>

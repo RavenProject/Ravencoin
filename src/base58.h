@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -139,7 +139,7 @@ public:
     void SetKey(const K &key) {
         unsigned char vch[Size];
         key.Encode(vch);
-        SetData(Params().Base58Prefix(Type), vch, vch+Size);
+        SetData(GetParams().Base58Prefix(Type), vch, vch + Size);
     }
 
     K GetKey() {
@@ -156,7 +156,7 @@ public:
     }
 
     CRavenExtKeyBase(const std::string& strBase58c) {
-        SetString(strBase58c.c_str(), Params().Base58Prefix(Type).size());
+        SetString(strBase58c.c_str(), GetParams().Base58Prefix(Type).size());
     }
 
     CRavenExtKeyBase() {}

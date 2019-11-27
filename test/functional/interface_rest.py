@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the REST API."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from struct import *
+from test_framework.util import (connect_nodes_bi, 
+                                assert_equal, 
+                                Decimal, 
+                                json, 
+                                hex_str_to_bytes, 
+                                assert_greater_than)
+from struct import (unpack, pack)
 from io import BytesIO
 from codecs import encode
 
@@ -182,14 +187,14 @@ class RESTTest (RavenTestFramework):
 
         #test limits
         json_request = '/checkmempool/'
-        for x in range(0, 20):
+        for _ in range(0, 20):
             json_request += txid+'-'+str(n)+'/'
         json_request = json_request.rstrip("/")
         response = http_post_call(url.hostname, url.port, '/rest/getutxos'+json_request+self.FORMAT_SEPARATOR+'json', '', True)
         assert_equal(response.status, 400) #must be a 400 because we exceeding the limits
 
         json_request = '/checkmempool/'
-        for x in range(0, 15):
+        for _ in range(0, 15):
             json_request += txid+'-'+str(n)+'/'
         json_request = json_request.rstrip("/")
         response = http_post_call(url.hostname, url.port, '/rest/getutxos'+json_request+self.FORMAT_SEPARATOR+'json', '', True)

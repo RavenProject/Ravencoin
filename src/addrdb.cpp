@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -24,8 +24,8 @@ bool SerializeDB(Stream& stream, const Data& data)
     // Write and commit header, data
     try {
         CHashWriter hasher(SER_DISK, CLIENT_VERSION);
-        stream << FLATDATA(Params().MessageStart()) << data;
-        hasher << FLATDATA(Params().MessageStart()) << data;
+        stream << FLATDATA(GetParams().MessageStart()) << data;
+        hasher << FLATDATA(GetParams().MessageStart()) << data;
         stream << hasher.GetHash();
     } catch (const std::exception& e) {
         return error("%s: Serialize or I/O error - %s", __func__, e.what());
@@ -70,7 +70,7 @@ bool DeserializeDB(Stream& stream, Data& data, bool fCheckSum = true)
         unsigned char pchMsgTmp[4];
         verifier >> FLATDATA(pchMsgTmp);
         // ... verify the network matches ours
-        if (memcmp(pchMsgTmp, Params().MessageStart(), sizeof(pchMsgTmp)))
+        if (memcmp(pchMsgTmp, GetParams().MessageStart(), sizeof(pchMsgTmp)))
             return error("%s: Invalid network magic number", __func__);
 
         // de-serialize data

@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -40,6 +40,10 @@
 #include <policy/policy.h>
 #include <core_io.h>
 #include <rpc/mining.h>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
+#define QTversionPreFiveEleven
+#endif
 
 AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
         QDialog(parent),
@@ -170,7 +174,7 @@ void AssetsDialog::setModel(WalletModel *_model)
 
         // fee section
         for (const int &n : confTargets) {
-            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n*Params().GetConsensus().nPowTargetSpacing)).arg(n));
+            ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n * GetParams().GetConsensus().nPowTargetSpacing)).arg(n));
         }
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(updateSmartFeeLabel()));
         connect(ui->confTargetSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(assetControlUpdateLabels()));
@@ -376,6 +380,13 @@ void AssetsDialog::on_sendButton_clicked()
     CReserveKey reservekey(model->getWallet());
     std::pair<int, std::string> error;
     CAmount nFeeRequired;
+
+    if (IsInitialBlockDownload()) {
+        GUIUtil::SyncWarningMessage syncWarning(this);
+        bool sendTransaction = syncWarning.showTransactionSyncWarningMessage();
+        if (!sendTransaction)
+            return;
+    }
 
     if (!CreateTransferAssetTransaction(model->getWallet(), ctrl, vTransfers, "", error, tx, reservekey, nFeeRequired)) {
         QMessageBox msgBox;
@@ -791,7 +802,11 @@ void AssetsDialog::updateSmartFeeLabel()
         int lightness = ui->fallbackFeeWarningLabel->palette().color(QPalette::WindowText).lightness();
         QColor warning_colour(255 - (lightness / 5), 176 - (lightness / 3), 48 - (lightness / 14));
         ui->fallbackFeeWarningLabel->setStyleSheet("QLabel { color: " + warning_colour.name() + "; }");
-        ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
+        #ifndef QTversionPreFiveEleven
+			ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).horizontalAdvance("x"));
+		#else
+			ui->fallbackFeeWarningLabel->setIndent(QFontMetrics(ui->fallbackFeeWarningLabel->font()).width("x"));
+		#endif
     }
     else
     {

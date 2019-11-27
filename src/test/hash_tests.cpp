@@ -1,5 +1,5 @@
 // Copyright (c) 2013-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,7 +19,7 @@ BOOST_FIXTURE_TEST_SUITE(hash_tests, BasicTestingSetup)
     BOOST_AUTO_TEST_CASE(murmurhash3)
     {
 
-#define T(expected, seed, data) BOOST_CHECK_EQUAL(MurmurHash3(seed, ParseHex(data)), expected)
+#define T(expected, seed, data) BOOST_CHECK_EQUAL(MurmurHash3(seed, ParseHex(data)), (uint64_t)expected)
 
         // Test MurmurHash3 with various inputs. Of course this is retested in the
         // bloom filter tests - they would fail if MurmurHash3() had any problems -

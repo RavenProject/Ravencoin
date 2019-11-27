@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,6 +17,7 @@ enum DeploymentPos
 {
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_ASSETS, // Deployment of RIP2
+    DEPLOYMENT_MSG_REST_ASSETS, // Delpoyment of RIP5 and Restricted assets
     // DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
 //    DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
@@ -33,12 +34,16 @@ struct BIP9Deployment {
     int64_t nStartTime;
     /** Timeout/expiry MedianTime for the deployment attempt. */
     int64_t nTimeout;
+    /** Use to override the confirmation window on a specific BIP */
+    uint32_t nOverrideMinerConfirmationWindow;
+    /** Use to override the the activation threshold on a specific BIP */
+    uint32_t nOverrideRuleChangeActivationThreshold;
 };
 
 /**
  * Parameters that influence chain consensus.
  */
-struct ConsensusParams {
+struct Params {
     uint256 hashGenesisBlock;
     int nSubsidyHalvingInterval;
     /** Block height and hash at which BIP34 becomes active */

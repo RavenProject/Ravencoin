@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -270,7 +270,7 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             CValidationState state;
             if (!(CheckTransaction(wtx, state) && (wtx.GetHash() == hash) && state.IsValid())) {
                 // If a client has a wallet.dat that contains asset transactions, but we are syncing the chain.
-                // we want to make sure that we don't fail to load this wallet transction just because it is an asset transaction
+                // we want to make sure that we don't fail to load this wallet transaction just because it is an asset transaction
                 // before asset are active
                 if (state.GetRejectReason() != "bad-txns-is-asset-and-asset-not-active") {
                     strErr = state.GetRejectReason();

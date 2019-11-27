@@ -172,10 +172,10 @@ BOOST_FIXTURE_TEST_SUITE(torcontrol_tests, BasicTestingSetup)
         // (needed because string comparison reads the null as end-of-string)
         BOOST_TEST_MESSAGE(std::string("CheckParseTorReplyMapping(Null=\"\\0\")"));
         auto ret = ParseTorReplyMapping("Null=\"\\0\"");
-        BOOST_CHECK_EQUAL(ret.size(), 1);
+        BOOST_CHECK_EQUAL(ret.size(), (uint64_t)1);
         auto r_it = ret.begin();
         BOOST_CHECK_EQUAL(r_it->first, "Null");
-        BOOST_CHECK_EQUAL(r_it->second.size(), 1);
+        BOOST_CHECK_EQUAL(r_it->second.size(), (uint64_t)1);
         BOOST_CHECK_EQUAL(r_it->second[0], '\0');
 
         // A more complex valid grammar. PROTOCOLINFO accepts a VersionLine that

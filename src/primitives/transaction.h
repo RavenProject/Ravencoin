@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,12 +15,8 @@
 
 static const int SERIALIZE_TRANSACTION_NO_WITNESS = 0x40000000;
 
-struct NewAssetInfo {
-    bool fFromMempool;
-    uint32_t nTimeAdded;
-};
-
 class CCoinsViewCache;
+class CNullAssetTxVerifierString;
 
 /** An outpoint - a combination of a transaction hash and an index n into its vout */
 class COutPoint
@@ -60,6 +56,8 @@ public:
     }
 
     std::string ToString() const;
+
+    std::string ToSerializedString() const;
 };
 
 /** An input of a transaction.  It contains the location of the previous
@@ -333,11 +331,23 @@ public:
 
     /** RVN START */
     bool IsNewAsset() const;
-    bool VerifyNewAsset(std::string& strError, NewAssetInfo* newAssetInfo = nullptr) const;
+    bool VerifyNewAsset(std::string& strError) const;
     bool IsNewUniqueAsset() const;
     bool VerifyNewUniqueAsset(std::string& strError) const;
     bool IsReissueAsset() const;
     bool VerifyReissueAsset(std::string& strError) const;
+    bool IsNewMsgChannelAsset() const;
+    bool VerifyNewMsgChannelAsset(std::string& strError) const;
+    bool IsNewQualifierAsset() const;
+    bool VerifyNewQualfierAsset(std::string &strError) const;
+    bool IsNewRestrictedAsset() const;
+    bool VerifyNewRestrictedAsset(std::string& strError) const;
+
+    bool CheckAddingTagBurnFee(const int& count) const;
+
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError) const;
+    bool GetVerifierStringFromTx(CNullAssetTxVerifierString& verifier, std::string& strError, bool& fNotFound) const;
+
     /** RVN END */
 
     /**

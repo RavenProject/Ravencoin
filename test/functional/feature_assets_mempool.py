@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Testing asset mempool use cases
 
 """
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import assert_equal, disconnect_all_nodes, connect_all_nodes_bi
 
 
 import string
@@ -46,7 +46,7 @@ class AssetMempoolTest(RavenTestFramework):
         # Issue asset on chain 2 but keep it in the mempool. No mining
         n1.issue(asset_name)
 
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         # Assert that the reorg was successful
         assert_equal(n0.getblockcount(), n1.getblockcount())
@@ -61,7 +61,6 @@ class AssetMempoolTest(RavenTestFramework):
         n0, n1 = self.nodes[0], self.nodes[1]
 
         disconnect_all_nodes(self.nodes)
-
         # Create new asset for testing
         asset_name = "MEMPOOL_2"
         n0.issue(asset_name)
@@ -90,7 +89,7 @@ class AssetMempoolTest(RavenTestFramework):
         n1.generate(55)
 
         # Connect the nodes, a reorg should occur
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         # Asset the reorg occured
         assert_equal(n0.getblockcount(), n1.getblockcount())
@@ -138,7 +137,7 @@ class AssetMempoolTest(RavenTestFramework):
         n1.issue(asset_name + '/SUB/SUB/SUB/SUB')
         assert_equal(17, n1.getmempoolinfo()['size'])
 
-        connect_all_nodes_bi(self.nodes)
+        connect_all_nodes_bi(self.nodes, True)
 
         # Assert that the reorg was successful
         assert_equal(n0.getblockcount(), n1.getblockcount())

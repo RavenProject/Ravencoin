@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -42,7 +42,7 @@ static int AppInitRawTx(int argc, char* argv[])
     //
     gArgs.ParseParameters(argc, argv);
 
-    // Check for -testnet or -regtest parameter (ConsensusParams() calls are only valid after this clause)
+    // Check for -testnet or -regtest parameter (GetParams() calls are only valid after this clause)
     try {
         SelectParams(ChainNameFromCommandLine());
     } catch (const std::exception& e) {

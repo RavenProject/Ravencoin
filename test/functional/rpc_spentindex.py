@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2015 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,9 +10,9 @@
 
 import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
+from test_framework.util import (connect_nodes_bi, assert_equal)
+from test_framework.script import (CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG)
+from test_framework.mininode import (CTransaction, CTxIn, COutPoint, CTxOut)
 import binascii
 
 class SpentIndexTest(RavenTestFramework):
@@ -24,11 +24,11 @@ class SpentIndexTest(RavenTestFramework):
     def setup_network(self):
         self.add_nodes(4, [
             # Nodes 0/1 are "wallet" nodes
-            ["-debug"],
-            ["-debug", "-spentindex"],
+            [],
+            ["-spentindex"],
             # Nodes 2/3 are used for testing
-            ["-debug", "-spentindex"],
-            ["-debug", "-spentindex", "-txindex"]])
+            ["-spentindex"],
+            ["-spentindex", "-txindex"]])
 
         self.start_nodes()
 
@@ -39,7 +39,7 @@ class SpentIndexTest(RavenTestFramework):
         self.sync_all()
 
     def run_test(self):
-        print("Mining blocks...")
+        self.log.info("Mining blocks...")
         self.nodes[0].generate(105)
         self.sync_all()
 
@@ -47,11 +47,11 @@ class SpentIndexTest(RavenTestFramework):
         assert_equal(chain_height, 105)
 
         # Check that
-        print("Testing spent index...")
+        self.log.info("Testing spent index...")
 
-        feeSatoshis = 10000
+        feeSatoshis = 192000
         privkey = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
-        address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
+        #address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
         addressHash = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
         scriptPubKey = CScript([OP_DUP, OP_HASH160, addressHash, OP_EQUALVERIFY, OP_CHECKSIG])
         unspent = self.nodes[0].listunspent()
@@ -66,7 +66,7 @@ class SpentIndexTest(RavenTestFramework):
         self.nodes[0].generate(1)
         self.sync_all()
 
-        print("Testing getspentinfo method...")
+        self.log.info("Testing getspentinfo method...")
 
         # Check that the spentinfo works standalone
         info = self.nodes[1].getspentinfo({"txid": unspent[0]["txid"], "index": unspent[0]["vout"]})
@@ -74,7 +74,7 @@ class SpentIndexTest(RavenTestFramework):
         assert_equal(info["index"], 0)
         assert_equal(info["height"], 106)
 
-        print("Testing getrawtransaction method...")
+        self.log.info("Testing getrawtransaction method...")
 
         # Check that verbose raw transaction includes spent info
         txVerbose = self.nodes[3].getrawtransaction(unspent[0]["txid"], 1)
@@ -88,13 +88,13 @@ class SpentIndexTest(RavenTestFramework):
         assert_equal(txVerbose2["vin"][0]["valueSat"], amount + feeSatoshis)
 
         # Check that verbose raw transaction includes address values and input values
-        privkey2 = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
+        #privkey2 = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
         address2 = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
         addressHash2 = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
         scriptPubKey2 = CScript([OP_DUP, OP_HASH160, addressHash2, OP_EQUALVERIFY, OP_CHECKSIG])
         tx2 = CTransaction()
         tx2.vin = [CTxIn(COutPoint(int(txid, 16), 0))]
-        amount = int(amount - feeSatoshis);
+        amount = int(amount - feeSatoshis)
         tx2.vout = [CTxOut(amount, scriptPubKey2)]
         tx.rehash()
         self.nodes[0].importprivkey(privkey)
@@ -119,7 +119,7 @@ class SpentIndexTest(RavenTestFramework):
         assert_equal(float(txVerbose4["vin"][0]["value"]), (amount + feeSatoshis) / 100000000)
 
         # Check block deltas
-        print("Testing getblockdeltas...")
+        self.log.info("Testing getblockdeltas...")
 
         block = self.nodes[3].getblockdeltas(block_hash[0])
         assert_equal(len(block["deltas"]), 2)
@@ -137,7 +137,7 @@ class SpentIndexTest(RavenTestFramework):
         assert_equal(block["deltas"][1]["outputs"][0]["address"], "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW")
         assert_equal(block["deltas"][1]["outputs"][0]["satoshis"], amount)
 
-        print("Passed\n")
+        self.log.info("All Tests Passed")
 
 
 if __name__ == '__main__':

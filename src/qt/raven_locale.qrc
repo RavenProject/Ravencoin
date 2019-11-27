@@ -59,7 +59,6 @@
         <file alias="nb">locale/raven_nb.qm</file>
         <file alias="ne">locale/raven_ne.qm</file>
         <file alias="nl">locale/raven_nl.qm</file>
-        <file alias="pam">locale/raven_pam.qm</file>
         <file alias="pl">locale/raven_pl.qm</file>
         <file alias="pt_BR">locale/raven_pt_BR.qm</file>
         <file alias="pt_PT">locale/raven_pt_PT.qm</file>

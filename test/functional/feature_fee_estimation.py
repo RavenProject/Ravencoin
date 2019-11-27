@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test fee estimation code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE
-from test_framework.mininode import CTransaction, CTxIn, CTxOut, COutPoint, ToHex, COIN
+from test_framework.util import (satoshi_round, Decimal, connect_nodes, random, sync_mempools, sync_blocks)
+from test_framework.script import (CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE)
+from test_framework.mininode import (CTransaction, CTxIn, CTxOut, COutPoint, ToHex, COIN)
 
 # Construct 2 trivial P2SH's and the ScriptSigs that spend them
 # So we can create many transactions without needing to spend
@@ -77,7 +77,7 @@ def split_inputs(from_node, txins, txouts, initial_split = False):
     tx.vin.append(CTxIn(COutPoint(int(prevtxout["txid"], 16), prevtxout["vout"]), b""))
 
     half_change = satoshi_round(prevtxout["amount"]/2)
-    rem_change = prevtxout["amount"] - half_change  - Decimal("0.00001000")
+    rem_change = prevtxout["amount"] - half_change  - Decimal("0.01000000")
     tx.vout.append(CTxOut(int(half_change*COIN), P2SH_1))
     tx.vout.append(CTxOut(int(rem_change*COIN), P2SH_2))
 
@@ -99,7 +99,7 @@ def check_estimates(node, fees_seen, max_invalid, print_estimates = True):
     """
     all_estimates = [ node.estimatefee(i) for i in range(1,26) ]
     if print_estimates:
-        log.info([str(all_estimates[e-1]) for e in [1,2,3,6,15,25]])
+        log.info("Fee Estimates: " + str([str(all_estimates[e-1]) for e in [1,2,3,6,15,25]]))
     delta = 1.0e-6 # account for rounding error
     last_e = max(fees_seen)
     for e in [x for x in all_estimates if x >= 0]:
@@ -163,14 +163,14 @@ class EstimateFeeTest(RavenTestFramework):
 
 
     def transact_and_mine(self, numblocks, mining_node):
-        min_fee = Decimal("0.00001")
+        min_fee = Decimal("0.0100000")
         # We will now mine numblocks blocks generating on average 100 transactions between each block
         # We shuffle our confirmed txout set before each set of transactions
         # small_txpuzzle_randfee will use the transactions that have inputs already in the chain when possible
         # resorting to tx's that depend on the mempool when those run out
-        for i in range(numblocks):
+        for _ in range(numblocks):
             random.shuffle(self.confutxo)
-            for j in range(random.randrange(100-50,100+50)):
+            for _ in range(random.randrange(100-50,100+50)):
                 from_index = random.randint(1,2)
                 (txhex, fee) = small_txpuzzle_randfee(self.nodes[from_index], self.confutxo,
                                                       self.memutxo, Decimal("0.005"), min_fee, min_fee)
@@ -239,7 +239,7 @@ class EstimateFeeTest(RavenTestFramework):
         self.confutxo = self.txouts # Start with the set of confirmed txouts after splitting
         self.log.info("Will output estimates for 1/2/3/6/15/25 blocks")
 
-        for i in range(2):
+        for _ in range(2):
             self.log.info("Creating transactions and mining them with a block size that can't keep up")
             # Create transactions and mine 10 small blocks with node 2, but create txs faster than we can mine
             self.transact_and_mine(10, self.nodes[2])

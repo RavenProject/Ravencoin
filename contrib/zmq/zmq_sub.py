@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -47,6 +47,7 @@ class ZMQHandler():
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "hashtx")
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawblock")
         self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawtx")
+        self.zmqSubSocket.setsockopt_string(zmq.SUBSCRIBE, "rawmessage")
         self.zmqSubSocket.connect("tcp://127.0.0.1:%i" % port)
 
     async def handle(self) :
@@ -64,11 +65,14 @@ class ZMQHandler():
             print('- HASH TX  ('+sequence+') -')
             print(binascii.hexlify(body))
         elif topic == b"rawblock":
-            print('- RAW BLOCK HEADER ('+sequence+') -')
+             print('- RAW BLOCK HEADER ('+sequence+') -')
             print(binascii.hexlify(body[:80]))
         elif topic == b"rawtx":
             print('- RAW TX ('+sequence+') -')
             print(binascii.hexlify(body))
+        elif topic == b"rawmessage":
+            print('- RAW ASSET MSG ('+sequence+') -')
+            print(body)
         # schedule ourselves to receive the next message
         asyncio.ensure_future(self.handle())
 
@@ -80,6 +84,7 @@ class ZMQHandler():
     def stop(self):
         self.loop.stop()
         self.zmqContext.destroy()
+
 
 daemon = ZMQHandler()
 daemon.start()

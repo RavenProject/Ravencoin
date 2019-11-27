@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,7 +19,7 @@ class CBlockIndex;
 class CChainParams;
 class CScript;
 
-namespace Consensus { struct ConsensusParams; };
+namespace Consensus { struct Params; };
 
 static const bool DEFAULT_PRINTPRIORITY = false;
 
@@ -204,7 +204,7 @@ private:
 
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
-int64_t UpdateTime(CBlockHeader* pblock, const Consensus::ConsensusParams& consensusParams, const CBlockIndex* pindexPrev);
+int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
 
 int GenerateRavens(bool fGenerate, int nThreads, const CChainParams& chainparams);
 #endif // RAVEN_MINER_H

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the zapwallettxes functionality.
@@ -16,11 +16,7 @@
   been zapped.
 """
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    assert_raises_rpc_error,
-    wait_until,
-)
+from test_framework.util import (assert_equal, assert_raises_rpc_error, wait_until)
 
 class ZapWalletTXesTest (RavenTestFramework):
     def set_test_params(self):
@@ -59,7 +55,7 @@ class ZapWalletTXesTest (RavenTestFramework):
         self.stop_node(0)
         self.start_node(0, ["-persistmempool=1", "-zapwallettxes=2"])
 
-        wait_until(lambda: self.nodes[0].getmempoolinfo()['size'] == 1, timeout=3)
+        wait_until(lambda: self.nodes[0].getmempoolinfo()['size'] == 1, err_msg="Wait for getMempoolInfo", timeout=3)
 
         assert_equal(self.nodes[0].gettransaction(txid1)['txid'], txid1)
         assert_equal(self.nodes[0].gettransaction(txid2)['txid'], txid2)

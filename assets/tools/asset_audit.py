@@ -2,21 +2,28 @@
 # Script to audit the assets
 # Reads the asset (amount has all issuances)
 # Reads the balances in every address for the asset.
-# Compares the two numbers to checks that qty of all assets are accounted for
+# Compares the two numbers to checks that qty of all assets are accounted for#
+#
+# -- NOTE: 	This script requires Python, PIP, and bitcoin-rpc to be installed.
+# 		To install bitcoin-rpc run the following command from the terminal:
+#				pip install python-bitcoinrpc
+
 
 import subprocess
 import json
 
 
 #Set this to your raven-cli program
-cli = "raven-cli"
+cli = "./src/raven-cli"
 
-mode = "-testnet"
-rpc_port = 18766
+mode = "-main"
+rpc_port = 8767
+#mode = "-testnet"
+#rpc_port = 18770
 #mode =  "-regtest"
-#rpc_port = 18443
+#rpc_port = 18444
 
-#Set this information in your raven.conf file (in datadir, not testnet3)
+#Set this information in your raven.conf file (in datadir, not testnet6)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
 

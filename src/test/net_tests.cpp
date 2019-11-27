@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "addrman.h"
@@ -65,7 +65,7 @@ public:
 CDataStream AddrmanToStream(CAddrManSerializationMock &_addrman)
 {
     CDataStream ssPeersIn(SER_DISK, CLIENT_VERSION);
-    ssPeersIn << FLATDATA(Params().MessageStart());
+    ssPeersIn << FLATDATA(GetParams().MessageStart());
     ssPeersIn << _addrman;
     std::string str = ssPeersIn.str();
     std::vector<unsigned char> vchData(str.begin(), str.end());
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_SUITE(net_tests, BasicTestingSetup)
 
         // test default
         unsigned short port = GetListenPort();
-        BOOST_CHECK(port == Params().GetDefaultPort());
+        BOOST_CHECK(port == GetParams().GetDefaultPort());
         // test set port
         unsigned short altPort = 12345;
         gArgs.SoftSetArg("-port", std::to_string(altPort));

@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -57,7 +57,7 @@ uint64_t nHashesPerSec = 0;
 uint64_t nHashesDone = 0;
 
 
-int64_t UpdateTime(CBlockHeader* pblock, const Consensus::ConsensusParams& consensusParams, const CBlockIndex* pindexPrev)
+int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
 {
     int64_t nOldTime = pblock->nTime;
     int64_t nNewTime = std::max(pindexPrev->GetMedianTimePast()+1, GetAdjustedTime());
@@ -193,6 +193,18 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     CValidationState state;
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
+        if (state.IsTransactionError()) {
+            if (gArgs.GetBoolArg("-autofixmempool", false)) {
+                {
+                    TRY_LOCK(mempool.cs, fLockMempool);
+                    if (fLockMempool) {
+                        LogPrintf("%s failed because of a transaction %s. Clearing the mempool.", __func__,
+                                  state.GetFailedTransaction().GetHex());
+                        mempool.clear();
+                    }
+                }
+            }
+        }
         throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
     }
     int64_t nTime2 = GetTimeMicros();
@@ -498,6 +510,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 }
 
 CWallet *GetFirstWallet() {
+#ifdef ENABLE_WALLET
     while(vpwallets.size() == 0){
         MilliSleep(100);
 
@@ -505,6 +518,8 @@ CWallet *GetFirstWallet() {
     if (vpwallets.size() == 0)
         return(NULL);
     return(vpwallets[0]);
+#endif
+    return(NULL);
 }
 
 void static RavenMiner(const CChainParams& chainparams)
@@ -518,13 +533,14 @@ void static RavenMiner(const CChainParams& chainparams)
 
     CWallet * pWallet = NULL;
 
-    #ifdef ENABLE_WALLET
-        pWallet = GetFirstWallet();
-    #endif
+#ifdef ENABLE_WALLET
+    pWallet = GetFirstWallet();
+
 
     if (!EnsureWalletIsAvailable(pWallet, false)) {
         LogPrintf("RavenMiner -- Wallet not available\n");
     }
+#endif
 
     if (pWallet == NULL)
     {
@@ -561,6 +577,7 @@ void static RavenMiner(const CChainParams& chainparams)
                 // Busy-wait for the network to come online so we don't waste time mining
                 // on an obsolete chain. In regtest mode we expect to fly solo.
                 do {
+                    break;
                     if ((g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) > 0) && !IsInitialBlockDownload()) {
                         break;
                     }
@@ -579,7 +596,7 @@ void static RavenMiner(const CChainParams& chainparams)
 
 
 
-            std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(Params()).CreateNewBlock(coinbaseScript->reserveScript));
+            std::unique_ptr<CBlockTemplate> pblocktemplate(BlockAssembler(GetParams()).CreateNewBlock(coinbaseScript->reserveScript));
 
             if (!pblocktemplate.get())
             {

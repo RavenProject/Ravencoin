@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,7 +14,7 @@
 
 
 static const uint32_t MAINNET_X16RV2ACTIVATIONTIME = 1569945600;
-static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1569931200;
+static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1567533600;
 static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
 
 
@@ -93,7 +93,7 @@ std::string CBlock::ToString() const
 //    return HashTestGost512(BEGIN(nVersion), END(nNonce), hashPrevBlock);
 //}
 
-//CBlock block = ConsensusParams().GenesisBlock();
+//CBlock block = GetParams().GenesisBlock();
 //int64_t nStart = GetTimeMillis();
 //LogPrintf("Starting Tiger %dms\n", nStart);
 //block.TestTiger();

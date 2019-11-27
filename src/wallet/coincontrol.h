@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -18,6 +18,10 @@ class CCoinControl
 {
 public:
     CTxDestination destChange;
+
+    //! If set, all asset change will be sent to this address, if not destChange will be used
+    CTxDestination assetDestChange;
+
     //! If false, allows unselected inputs, but requires all selected inputs be used
     bool fAllowOtherInputs;
     //! Includes watch only addresses which match the ISMINE_WATCH_SOLVABLE criteria
@@ -46,6 +50,7 @@ public:
     void SetNull()
     {
         destChange = CNoDestination();
+        assetDestChange = CNoDestination();
         fAllowOtherInputs = false;
         fAllowWatchOnly = false;
         setSelected.clear();

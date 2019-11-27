@@ -132,7 +132,12 @@ RAVEN_CORE_H = \
   assets/assets.h \
   assets/assetdb.h \
   assets/assettypes.h \
+  assets/messages.h \
+  assets/myassetsdb.h \
   assets/restricteddb.h \
+  assets/snapshotrequestdb.h \
+  assets/assetsnapshotdb.h \
+  assets/rewards.h \
   base58.h \
   bloom.h \
   blockencodings.h \
@@ -260,6 +265,12 @@ libraven_server_a_SOURCES = \
   assets/assets.cpp \
   assets/assetdb.cpp \
   assets/assettypes.cpp \
+  assets/messages.cpp \
+  assets/myassetsdb.cpp \
+  assets/restricteddb.cpp \
+  assets/snapshotrequestdb.cpp \
+  assets/assetsnapshotdb.cpp \
+  assets/rewards.cpp \
   policy/fees.cpp \
   policy/policy.cpp \
   policy/rbf.cpp \
@@ -267,10 +278,12 @@ libraven_server_a_SOURCES = \
   rest.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
+  rpc/messages.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
   rpc/net.cpp \
   rpc/rawtransaction.cpp \
+  rpc/rewards.cpp \
   rpc/safemode.cpp \
   rpc/server.cpp \
   script/sigcache.cpp \
@@ -325,7 +338,6 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/hmac_sha512.cpp \
   crypto/hmac_sha512.h \
   crypto/ripemd160.cpp \
-  crypto/aes_helper.c \
   crypto/sha1.cpp \
   crypto/sha1.h \
   crypto/sha256.cpp \
@@ -373,6 +385,8 @@ libraven_consensus_a_SOURCES = \
   utilstrencodings.cpp \
   utilstrencodings.h \
   version.h \
+  LibBoolEE.cpp \
+  LibBoolEE.h \
   $(RAVEN_CORE_H)
 
 # common: shared between ravend, and raven-qt and non-server tools
@@ -408,7 +422,6 @@ libraven_util_a_SOURCES = \
   clientversion.cpp \
   compat/glibc_sanity.cpp \
   compat/glibcxx_sanity.cpp \
-  compat/strnlen.cpp \
   fs.cpp \
   random.cpp \
   rpc/protocol.cpp \

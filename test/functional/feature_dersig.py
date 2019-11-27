@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test BIP66 (DER SIG).
@@ -9,9 +9,17 @@ Test that the DERSIG soft-fork activates at (regtest) height 1251.
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.mininode import *
-from test_framework.blocktools import create_coinbase, create_block
+from test_framework.util import (p2p_port, assert_equal)
+from test_framework.mininode import (CTransaction, 
+                                    hex_str_to_bytes, 
+                                    NodeConnCB, 
+                                    NodeConn, 
+                                    NetworkThread, 
+                                    msg_block, 
+                                    wait_until, 
+                                    mininode_lock, 
+                                    msg_tx)
+from test_framework.blocktools import (create_coinbase, create_block)
 from test_framework.script import CScript
 from io import BytesIO
 

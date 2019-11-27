@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the RBF code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
+from test_framework.util import (satoshi_round, assert_raises_rpc_error, assert_equal, Decimal)
+from test_framework.script import CScript
+from test_framework.mininode import (bytes_to_hex_str, COIN, CTransaction, CTxIn, COutPoint, CTxOut)
 
 MAX_REPLACEMENT_LIMIT = 100
 
@@ -111,7 +111,7 @@ class ReplaceByFeeTest(RavenTestFramework):
         self.log.info("Running test prioritised transactions...")
         self.test_prioritised_transactions()
 
-        self.log.info("Passed")
+        self.log.info("All Tests Passed")
 
     def test_simple_doublespend(self):
         """Simple doublespend"""
@@ -233,7 +233,7 @@ class ReplaceByFeeTest(RavenTestFramework):
 
             txid = int(txid, 16)
 
-            for i, txout in enumerate(tx.vout):
+            for i, _ in enumerate(tx.vout):
                 for x in branch(COutPoint(txid, i), txout_value,
                                   max_txs,
                                   tree_width=tree_width, fee=fee,

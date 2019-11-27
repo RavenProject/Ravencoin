@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -36,7 +36,7 @@ static constexpr int64_t EXTRA_PEER_CHECK_INTERVAL = 45;
 /** Minimum time an outbound-peer-eviction candidate must be connected for, in order to evict, in seconds */
 static constexpr int64_t MINIMUM_CONNECT_TIME = 30;
 
-class PeerLogicValidation : public CValidationInterface, public NetEventsInterface {
+class PeerLogicValidation final: public CValidationInterface, public NetEventsInterface {
 private:
     CConnman* const connman;
 
@@ -63,7 +63,7 @@ public:
     bool SendMessages(CNode* pto, std::atomic<bool>& interrupt) override;
 
     void ConsiderEviction(CNode *pto, int64_t time_in_seconds);
-    void CheckForStaleTipAndEvictPeers(const Consensus::ConsensusParams &consensusParams);
+    void CheckForStaleTipAndEvictPeers(const Consensus::Params &consensusParams);
     void EvictExtraOutboundPeers(int64_t time_in_seconds);
 
 private:

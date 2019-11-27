@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -33,15 +33,34 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "issue", 4, "units" },
     { "issue", 5, "reissuable" },
     { "issue", 6, "has_ipfs" },
+    { "issuerestrictedasset", 1, "qty" },
+    { "issuerestrictedasset", 5, "units" },
+    { "issuerestrictedasset", 6, "reissuable" },
+    { "issuerestrictedasset", 7, "has_ipfs" },
+    { "issuequalifierasset", 1,  "qty"},
+    { "issuequalifierasset", 4, "has_ipfs" },
+    { "reissuerestrictedasset", 1, "qty" },
+    { "reissuerestrictedasset", 3, "change_verifier" },
+    { "reissuerestrictedasset", 6, "new_unit" },
+    { "reissuerestrictedasset", 7, "reissuable" },
     { "issueunique", 1, "asset_tags"},
     { "issueunique", 2, "ipfs_hashes"},
     { "transfer", 1, "qty"},
+    { "transfer", 4, "expire_time"},
+    { "transferfromaddress", 2, "qty"},
+    { "transferfromaddress", 5, "expire_time"},
+    { "transferfromaddresses", 1, "from_addresses"},
+    { "transferfromaddresses", 2, "qty"},
+    { "transferfromaddresses", 5, "expire_time"},
+    { "transferqualifier", 2, "qty"},
+    { "transferqualifier", 5, "expire_time"},
     { "reissue", 1, "qty"},
     { "reissue", 4, "reissuable"},
     { "reissue", 5, "new_unit"},
     { "listmyassets", 1, "verbose" },
     { "listmyassets", 2, "count" },
     { "listmyassets", 3, "start"},
+    { "listmyassets", 4, "confs"},
     { "listassets", 1, "verbose" },
     { "listassets", 2, "count" },
     { "listassets", 3, "start" },
@@ -58,6 +77,9 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "sendtoaddress", 4, "subtractfeefromamount" },
 //    { "sendtoaddress", 5 , "replaceable" },
     { "sendtoaddress", 5 , "conf_target" },
+    { "sendfromaddress", 2, "amount" },
+    { "sendfromaddress", 5, "subtractfeefromamount" },
+    { "sendfromaddress", 6 , "conf_target" },
     { "settxfee", 0, "amount" },
     { "getreceivedbyaddress", 1, "minconf" },
     { "getreceivedbyaccount", 1, "minconf" },
@@ -179,6 +201,18 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listassetbalancesbyaddress", 1, "totalonly"},
     { "listassetbalancesbyaddress", 2, "count"},
     { "listassetbalancesbyaddress", 3, "start"},
+    { "sendmessage", 2, "expire_time"},
+    { "requestsnapshot", 1, "block_height"},
+    { "getsnapshotrequest", 1, "block_height"},
+    { "listsnapshotrequests", 1, "block_height"},
+    { "cancelsnapshotrequest", 1, "block_height"},
+    { "distributereward", 1, "snapshot_height"},
+    { "distributereward", 3, "gross_distribution_amount"},
+    { "distributereward", 6, "dry_run"},
+    { "getdistributestatus", 1, "snapshot_height"},
+    { "getdistributestatus", 3, "gross_distribution_amount"},
+    { "getsnapshot", 1, "block_height"},
+    { "purgesnapshot", 1, "block_height"},
 };
 
 class CRPCConvertTable
