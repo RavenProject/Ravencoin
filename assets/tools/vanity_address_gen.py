@@ -9,6 +9,15 @@ def valid_base58(s):
             print(f'Cannot use charachter "{c}" in prefix!!')
             exit()
 
+def success_odds(prefix, ignore_case):
+    odds = 1
+    for letter in prefix[1:]:
+        if letter in ('o', 'l') or not ignore_case:
+            odds *= 58
+        else:
+            odds *= 29
+    return odds
+
 def create_rvn_inst():
     try:
         rvn = Ravencoin(sys.argv[1], sys.argv[2])
@@ -36,16 +45,17 @@ def validate_rvn(rvn):
         print('Run ravend')
         exit()
 
-def display_stats(count, start, addr, prefix):
-    if not count % 30 == 1:
-        return
+def display_stats(count, start, addr, prefix, odds):
+    addr_sec = count/(time.time() - start)
     os.system('cls' if os.name == 'nt' else 'clear')
-    print(f'\u001b[33;1mTried {count} addresses\n\u001b[0m'
-          f'\u001b[32;1mSeconds Spent: {time.time() - start}\n\u001b[0m'
-          f'\u001b[36;1mAve. Addresses/sec: {count/(time.time() - start)}\n'
+    print(f'Tried {count} addresses\n'
+          f'Seconds Spent: {time.time() - start}\n'
+          f'Ave. Addresses/sec: {addr_sec}\n'
           f'Lastest Address: {addr}\n'
           f'Prefix: {prefix}\n'
-          'To stop, press Ctrl-C\u001b[0m', flush=True, end='')
+          f'You have a 1 in {odds} chance per address!\n'
+          f'At this rate, you will find your address in ~{odds/addr_sec/60} minutes!\n'
+          'To stop, press Ctrl-C', flush=True, end='')
     
 
 def main():
@@ -53,22 +63,18 @@ def main():
     validate_rvn(rvn)
     valid_base58(prefix)
     start = time.time()
+    odds = success_odds(prefix, ignore_case)
     count = 0
     address = rvn.getnewaddress()['result']
     try:
-        if ignore_case:
-            while not address.lower().startswith(prefix.lower()):
-                address = rvn.getnewaddress()['result']
-                count += 1
-                display_stats(count, start, address, prefix)
-        else:
-            while not address.startswith(prefix):
-                address = rvn.getnewaddress()['result']
-                count += 1
-                display_stats(count, start, address, prefix)
+        while not address.lower().startswith(prefix.lower()) if ignore_case else address.startswith(prefix):
+            address = rvn.getnewaddress()['result']
+            count += 1
+            if count % 100 == 1:
+                display_stats(count, start, address, prefix, odds)
     except KeyboardInterrupt:
         exit()
-    print(f'Found an address that starts with {prefix}! It is saved to your wallet. Use it freely!\n{address}')
+    print(f'\nFound an address that starts with {prefix}!\n It is saved to your wallet. Use it freely!\n{address}')
 
 if __name__ == '__main__':
     main()
