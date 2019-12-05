@@ -2485,18 +2485,18 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
                 "\nIssue a restricted asset.\n"
                 "Restricted asset names must not conflict with any existing restricted asset.\n"
                 "Restricted assets have units set to 0.\n"
-                "Reissuable is true/false for whether additional assets can be created and if the verifier string can be changed\n"
+                "Reissuable is true/false for whether additional asset quantity can be created and if the verifier string can be changed\n"
 
                 "\nArguments:\n"
-                "1. \"asset_name\"            (string, required) a unique name, starts with '$' if '$' is not there it will be added automatically\n"
-                "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
-                "3. \"verifier\"              (string, required) the KYC string that is evaluated when restricted asset transfers are made\n"
-                "4. \"to_address\"            (string, required), address asset will be sent to, this address must obey the verifier rules\n"
-                "5. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
-                "6. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
-                "7. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
-                "8. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
-                "9. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
+                "1. \"asset_name\"            (string, required) a unique name, starts with '$', if '$' is not there it will be added automatically\n"
+                "2. \"qty\"                   (numeric, required) the quantity of the asset to be issued\n"
+                "3. \"verifier\"              (string, required) the verifier string that will be evaluated when restricted asset transfers are made\n"
+                "4. \"to_address\"            (string, required) address asset will be sent to, this address must meet the verifier string requirements\n"
+                "5. \"change_address\"        (string, optional, default=\"\") address that the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+                "6. \"units\"                 (integer, optional, default=0, min=0, max=8) the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
+                "7. \"reissuable\"            (boolean, optional, default=true (false for unique assets)) whether future reissuance is allowed\n"
+                "8. \"has_ipfs\"              (boolean, optional, default=false) whether an ifps hash or txid hash is going to be added to the asset\n"
+                "9. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1) an ipfs hash or a txid hash once RIP5 is activated\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -2629,31 +2629,31 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 3 || request.params.size() > 9)
         throw std::runtime_error(
-                "reissuerestrictedasset \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( to_address )\" \"( change_address )\" ( new_unit ) ( reissuable ) \"( ipfs_hash )\"\n"
+                "reissuerestrictedasset \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( change_address )\" ( new_units ) ( reissuable ) \"( new_ifps )\"\n"
                 + RestrictedActivationWarning() +
-                "\nReissue a already created restricted\n"
-                "Reissuable is true/false for whether additional asset quantity can be created, an changing the verifier string\n"
+                "\nReissue an already created restricted asset\n"
+                "Reissuable is true/false for whether additional asset quantity can be created and if the verifier string can be changed\n"
 
                 "\nArguments:\n"
                 "1. \"asset_name\"            (string, required) a unique name, starts with '$'\n"
-                "2. \"qty\"                   (numeric, required) the number of assets to be issued\n"
-                "3. \"to_address\"            (string, required) address asset will be sent to, this address must have the verifier string requirements\n"
-                "4. \"change_verifier\"       (boolean, optional, default=false) If the verifier string will get changed\n"
-                "5. \"verifier\"              (string, optional, default=\"\") the KYC string that is evaluated when restricted asset transfers are made\n"
-                "6. \"change_address\"        (string, optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
-                "7. \"new_unit\"              (numeric, optional, default=-1), the new units that will be associated with the asset\n"
-                "8. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
-                "9. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
+                "2. \"qty\"                   (numeric, required) the additional quantity of the asset to be issued\n"
+                "3. \"to_address\"            (string, required) address asset will be sent to, this address must meet the verifier string requirements\n"
+                "4. \"change_verifier\"       (boolean, optional, default=false) if the verifier string will get changed\n"
+                "5. \"new_verifier\"          (string, optional, default=\"\") the new verifier string that will be evaluated when restricted asset transfers are made\n"
+                "6. \"change_address\"        (string, optional, default=\"\") address that the rvn change will be sent to, if it is empty, change address will be generated for you\n"
+                "7. \"new_units\"             (numeric, optional, default=-1) the new units that will be associated with the asset\n"
+                "8. \"reissuable\"            (boolean, optional, default=true (false for unique assets)) whether future reissuance is allowed\n"
+                "9. \"new_ifps\"              (string, optional, default=\"\") whether to update the current ipfs hash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\"")
-                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" ")
-                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\"")
-                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC && !AML\" \"changeaddress\" true")
-                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" false \"\" \"changeaddress\" -1 false true QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC & !AML\"")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC & !AML\" ")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC & !AML\" \"changeaddress\"")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" true \"KYC & !AML\" \"changeaddress\" -1 true")
+                + HelpExampleCli("reissuerestrictedasset", "\"$ASSET_NAME\" 1000  \"myaddress\" false \"\" \"changeaddress\" -1 false QmTqu3Lk3gmTsQVtjU7rYYM37EAW4xNmbuEAp2Mjr4AV7E")
         );
 
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
