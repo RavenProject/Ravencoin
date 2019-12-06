@@ -3,10 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the wallet keypool and interaction with wallet encryption/locking."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, assert_raises_rpc_error, time)
+from test_framework.util import assert_equal, assert_raises_rpc_error, time
 
 class KeyPoolTest(RavenTestFramework):
     def set_test_params(self):

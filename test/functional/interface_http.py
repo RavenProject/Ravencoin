@@ -3,14 +3,15 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test the RPC HTTP basics."""
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (str_to_b64str, assert_equal)
+"""Test the RPC HTTP basics."""
 
 import http.client
 import urllib.parse
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import str_to_b64str, assert_equal
 
+# noinspection PyUnresolvedReferences
 class HTTPBasicsTest (RavenTestFramework):
     def set_test_params(self):
         self.num_nodes = 3
@@ -32,13 +33,13 @@ class HTTPBasicsTest (RavenTestFramework):
         conn.request('POST', '/', '{"method": "getbestblockhash"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1)
-        assert(conn.sock!=None) #according to http/1.1 connection must still be open!
+        assert(conn.sock is not None) #according to http/1.1 connection must still be open!
 
         #send 2nd request without closing connection
         conn.request('POST', '/', '{"method": "getchaintips"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1) #must also response with a correct json-rpc message
-        assert(conn.sock!=None) #according to http/1.1 connection must still be open!
+        assert(conn.sock is not None) #according to http/1.1 connection must still be open!
         conn.close()
 
         #same should be if we add keep-alive because this should be the std. behaviour
@@ -49,13 +50,13 @@ class HTTPBasicsTest (RavenTestFramework):
         conn.request('POST', '/', '{"method": "getbestblockhash"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1)
-        assert(conn.sock!=None) #according to http/1.1 connection must still be open!
+        assert(conn.sock is not None) #according to http/1.1 connection must still be open!
 
         #send 2nd request without closing connection
         conn.request('POST', '/', '{"method": "getchaintips"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1) #must also response with a correct json-rpc message
-        assert(conn.sock!=None) #according to http/1.1 connection must still be open!
+        assert(conn.sock is not None) #according to http/1.1 connection must still be open!
         conn.close()
 
         #now do the same with "Connection: close"
@@ -66,7 +67,7 @@ class HTTPBasicsTest (RavenTestFramework):
         conn.request('POST', '/', '{"method": "getbestblockhash"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1)
-        assert(conn.sock==None) #now the connection must be closed after the response
+        assert(conn.sock is None) #now the connection must be closed after the response
 
         #node1 (2nd node) is running with disabled keep-alive option
         urlNode1 = urllib.parse.urlparse(self.nodes[1].url)
@@ -89,7 +90,7 @@ class HTTPBasicsTest (RavenTestFramework):
         conn.request('POST', '/', '{"method": "getbestblockhash"}', headers)
         out1 = conn.getresponse().read()
         assert(b'"error":null' in out1)
-        assert(conn.sock!=None) #connection must be closed because ravend should use keep-alive by default
+        assert(conn.sock is not None) #connection must be closed because ravend should use keep-alive by default
 
         # Check excessive request size
         conn = http.client.HTTPConnection(urlNode2.hostname, urlNode2.port)

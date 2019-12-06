@@ -3,33 +3,24 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test the rawtransaction RPCs for asset transactions.
+
 """
+Test the rawtransaction RPCs for asset transactions.
+"""
+
+import math
 from io import BytesIO
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal,
-                                 assert_raises_rpc_error,
-                                 assert_is_hash_string,
-                                 assert_does_not_contain_key,
-                                 assert_contains_key,
-                                 assert_contains_pair)
-from test_framework.mininode import (CTransaction,
-                                     hex_str_to_bytes,
-                                     bytes_to_hex_str,
-                                     CScriptReissue,
-                                     CScriptOwner,
-                                     CScriptTransfer,
-                                     CTxOut,
-                                     CScriptIssue)
-import math
-
+from test_framework.util import assert_equal, assert_raises_rpc_error, assert_is_hash_string, assert_does_not_contain_key, assert_contains_key, assert_contains_pair
+from test_framework.mininode import CTransaction, hex_str_to_bytes, bytes_to_hex_str, CScriptReissue, CScriptOwner, CScriptTransfer, CTxOut, CScriptIssue
 
 def truncate(number, digits=8):
     stepper = pow(10.0, digits)
     return math.trunc(stepper * number) / stepper
 
 
-def get_first_unspent(self: object, node: object, needed: object = 500.1) -> object:
+# noinspection PyTypeChecker,PyUnboundLocalVariable,PyUnresolvedReferences
+def get_first_unspent(self: object, node: object, needed: float = 500.1) -> object:
     # Find the first unspent with enough required for transaction
     for n in range(0, len(node.listunspent())):
         unspent = node.listunspent()[n]
@@ -64,6 +55,7 @@ def get_tx_issue_hex(self, node, asset_name, asset_quantity, asset_units=0):
     return tx_issue_hex
 
 
+# noinspection PyTypeChecker
 class RawAssetTransactionsTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
@@ -1332,7 +1324,7 @@ class RawAssetTransactionsTest(RavenTestFramework):
         assert_equal(1, n0.listmyassets()[owner])
 
     def transfer_asset_tampering_test(self):
-        self.log.info("Testing trasnfer of asset transaction tampering...")
+        self.log.info("Testing transfer of asset transaction tampering...")
         n0, n1 = self.nodes[0], self.nodes[1]
 
         ########################################

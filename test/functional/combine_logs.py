@@ -3,13 +3,16 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Combine logs from multiple raven nodes as well as the test_framework log.
+
+"""
+Combine logs from multiple raven nodes as well as the test_framework log.
 
 This streams the combined log output to stdout. Use combine_logs.py > outputfile
-to write to an outputfile."""
+to write to an outputfile.
+"""
 
 import argparse
-from collections import (defaultdict, namedtuple)
+from collections import defaultdict, namedtuple
 import heapq
 import itertools
 import os
@@ -89,6 +92,8 @@ def get_log_events(source, logfile):
     except FileNotFoundError:
         print("File %s could not be opened. Continuing without it." % logfile, file=sys.stderr)
 
+
+# noinspection PyProtectedMember
 def print_logs(log_events, color=False, html=False):
     """Renders the iterator of log events into text or html."""
     if not html:

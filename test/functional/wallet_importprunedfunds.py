@@ -3,9 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the importprunedfunds and removeprunedfunds RPCs."""
+
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, assert_raises_rpc_error, Decimal)
+from test_framework.util import assert_equal, assert_raises_rpc_error, Decimal
 
 class ImportPrunedFundsTest(RavenTestFramework):
     def set_test_params(self):
@@ -24,7 +26,8 @@ class ImportPrunedFundsTest(RavenTestFramework):
         address2 = self.nodes[0].getnewaddress()
         # privkey
         address3 = self.nodes[0].getnewaddress()
-        address3_privkey = self.nodes[0].dumpprivkey(address3)                              # Using privkey
+        # Using privkey
+        address3_privkey = self.nodes[0].dumpprivkey(address3)
 
         #Check only one address
         address_info = self.nodes[0].validateaddress(address1)
@@ -49,38 +52,38 @@ class ImportPrunedFundsTest(RavenTestFramework):
         assert_equal(address_info['ismine'], False)
 
         #Send funds to self
-        txnid1 = self.nodes[0].sendtoaddress(address1, 0.1)
+        txn_id1 = self.nodes[0].sendtoaddress(address1, 0.1)
         self.nodes[0].generate(1)
-        rawtxn1 = self.nodes[0].gettransaction(txnid1)['hex']
-        proof1 = self.nodes[0].gettxoutproof([txnid1])
+        raw_txn1 = self.nodes[0].gettransaction(txn_id1)['hex']
+        proof1 = self.nodes[0].gettxoutproof([txn_id1])
 
-        txnid2 = self.nodes[0].sendtoaddress(address2, 0.05)
+        txn_id2 = self.nodes[0].sendtoaddress(address2, 0.05)
         self.nodes[0].generate(1)
-        rawtxn2 = self.nodes[0].gettransaction(txnid2)['hex']
-        proof2 = self.nodes[0].gettxoutproof([txnid2])
+        raw_txn2 = self.nodes[0].gettransaction(txn_id2)['hex']
+        proof2 = self.nodes[0].gettxoutproof([txn_id2])
 
-        txnid3 = self.nodes[0].sendtoaddress(address3, 0.025)
+        txn_id3 = self.nodes[0].sendtoaddress(address3, 0.025)
         self.nodes[0].generate(1)
-        rawtxn3 = self.nodes[0].gettransaction(txnid3)['hex']
-        proof3 = self.nodes[0].gettxoutproof([txnid3])
+        raw_txn3 = self.nodes[0].gettransaction(txn_id3)['hex']
+        proof3 = self.nodes[0].gettxoutproof([txn_id3])
 
         self.sync_all()
 
         #Import with no affiliated address
-        assert_raises_rpc_error(-5, "No addresses", self.nodes[1].importprunedfunds, rawtxn1, proof1)
+        assert_raises_rpc_error(-5, "No addresses", self.nodes[1].importprunedfunds, raw_txn1, proof1)
 
         balance1 = self.nodes[1].getbalance("", 0, True)
         assert_equal(balance1, Decimal(0))
 
         #Import with affiliated address with no rescan
         self.nodes[1].importaddress(address2, "add2", False)
-        self.nodes[1].importprunedfunds(rawtxn2, proof2)
+        self.nodes[1].importprunedfunds(raw_txn2, proof2)
         balance2 = self.nodes[1].getbalance("add2", 0, True)
         assert_equal(balance2, Decimal('0.05'))
 
         #Import with private key with no rescan
         self.nodes[1].importprivkey(privkey=address3_privkey, label="add3", rescan=False)
-        self.nodes[1].importprunedfunds(rawtxn3, proof3)
+        self.nodes[1].importprunedfunds(raw_txn3, proof3)
         balance3 = self.nodes[1].getbalance("add3", 0, False)
         assert_equal(balance3, Decimal('0.025'))
         balance3 = self.nodes[1].getbalance("*", 0, True)
@@ -98,16 +101,16 @@ class ImportPrunedFundsTest(RavenTestFramework):
         assert_equal(address_info['ismine'], True)
 
         #Remove transactions
-        assert_raises_rpc_error(-8, "Transaction does not exist in wallet.", self.nodes[1].removeprunedfunds, txnid1)
+        assert_raises_rpc_error(-8, "Transaction does not exist in wallet.", self.nodes[1].removeprunedfunds, txn_id1)
 
         balance1 = self.nodes[1].getbalance("*", 0, True)
         assert_equal(balance1, Decimal('0.075'))
 
-        self.nodes[1].removeprunedfunds(txnid2)
+        self.nodes[1].removeprunedfunds(txn_id2)
         balance2 = self.nodes[1].getbalance("*", 0, True)
         assert_equal(balance2, Decimal('0.025'))
 
-        self.nodes[1].removeprunedfunds(txnid3)
+        self.nodes[1].removeprunedfunds(txn_id3)
         balance3 = self.nodes[1].getbalance("*", 0, True)
         assert_equal(balance3, Decimal('0.0'))
 

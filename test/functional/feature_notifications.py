@@ -3,11 +3,14 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test the -alertnotify, -blocknotify and -walletnotify options."""
-import os
 
+"""
+Test the -alertnotify, -blocknotify and -walletnotify options.
+"""
+
+import os
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, wait_until, connect_nodes_bi)
+from test_framework.util import assert_equal, wait_until, connect_nodes_bi
 
 class NotificationsTest(RavenTestFramework):
     def set_test_params(self):

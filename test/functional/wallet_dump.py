@@ -3,13 +3,12 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the dumpwallet RPC."""
 
 import os
-
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, assert_raises_rpc_error)
-
+from test_framework.util import assert_equal, assert_raises_rpc_error
 
 def read_dump(file_name, addrs, hd_master_addr_old):
     """
@@ -86,8 +85,7 @@ class WalletDumpTest(RavenTestFramework):
         result = self.nodes[0].dumpwallet(tmpdir + "/node0/wallet.unencrypted.dump")
         assert_equal(result['filename'], os.path.abspath(tmpdir + "/node0/wallet.unencrypted.dump"))
 
-        found_addr, found_addr_chg, found_addr_rsv, hd_master_addr_unenc = \
-            read_dump(tmpdir + "/node0/wallet.unencrypted.dump", addrs, None)
+        found_addr, found_addr_chg, found_addr_rsv, hd_master_addr_unenc = read_dump(tmpdir + "/node0/wallet.unencrypted.dump", addrs, None)
         assert_equal(found_addr, test_addr_count)  # all keys must be in the dump
         assert_equal(found_addr_chg, 50)  # 50 blocks where mined
         assert_equal(found_addr_rsv, 90*2) # 90 keys plus 100% internal keys
@@ -100,8 +98,7 @@ class WalletDumpTest(RavenTestFramework):
         self.nodes[0].keypoolrefill()
         self.nodes[0].dumpwallet(tmpdir + "/node0/wallet.encrypted.dump")
 
-        found_addr, found_addr_chg, found_addr_rsv, _ = \
-            read_dump(tmpdir + "/node0/wallet.encrypted.dump", addrs, hd_master_addr_unenc)
+        found_addr, found_addr_chg, found_addr_rsv, _ = read_dump(tmpdir + "/node0/wallet.encrypted.dump", addrs, hd_master_addr_unenc)
         assert_equal(found_addr, test_addr_count)
         assert_equal(found_addr_chg, 90*2 + 50)  # old reserve keys are marked as change now
         assert_equal(found_addr_rsv, 90*2) 

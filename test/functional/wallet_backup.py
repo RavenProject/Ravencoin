@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test the wallet backup features.
+
+"""
+Test the wallet backup features.
 
 Test case is:
 4 nodes. 1 2 and 3 send transactions between each other,
@@ -31,11 +33,11 @@ confirm 1/2/3/4 balances are same as before.
 Shutdown again, restore using importwallet,
 and confirm again balances are correct.
 """
+
 from random import randint
 import shutil
-
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (connect_nodes, Decimal, sync_mempools, sync_blocks, os, assert_equal)
+from test_framework.util import connect_nodes, Decimal, sync_mempools, sync_blocks, os, assert_equal
 
 class WalletBackupTest(RavenTestFramework):
     def set_test_params(self):
@@ -53,7 +55,7 @@ class WalletBackupTest(RavenTestFramework):
         self.sync_all()
 
     def one_send(self, from_node, to_address):
-        if (randint(1,2) == 1):
+        if randint(1, 2) == 1:
             amount = Decimal(randint(1,10)) / Decimal(10)
             self.nodes[from_node].sendtoaddress(to_address, amount)
 

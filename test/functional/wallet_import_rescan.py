@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test wallet import RPCs.
+
+"""
+Test wallet import RPCs.
 
 Test rescan behavior of importaddress, importpubkey, importprivkey, and
 importmulti RPCs with different types of keys and rescan options.
@@ -20,18 +22,21 @@ importing nodes pick up the new transactions regardless of whether rescans
 happened previously.
 """
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_raises_rpc_error, connect_nodes, sync_blocks, assert_equal, set_node_times)
-
 import collections
 import enum
 import itertools
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import assert_raises_rpc_error, connect_nodes, sync_blocks, assert_equal, set_node_times
 
+# noinspection PyArgumentList
 Call = enum.Enum("Call", "single multi")
+# noinspection PyArgumentList
 Data = enum.Enum("Data", "address pub priv")
+# noinspection PyArgumentList
 Rescan = enum.Enum("Rescan", "no yes late_timestamp")
 
 
+# noinspection PyUnboundLocalVariable,PyUnresolvedReferences
 class Variant(collections.namedtuple("Variant", "call data rescan prune")):
     """Helper for importing one key and verifying scanned transactions."""
 

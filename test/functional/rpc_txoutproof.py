@@ -3,10 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test gettxoutproof and verifytxoutproof RPCs."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (connect_nodes, assert_equal, assert_raises_rpc_error)
+from test_framework.util import connect_nodes, assert_equal, assert_raises_rpc_error
 
 class MerkleBlockTest(RavenTestFramework):
     def set_test_params(self):

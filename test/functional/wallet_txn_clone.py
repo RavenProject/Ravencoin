@@ -3,10 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the wallet accounts properly when there are cloned transactions with malleated scriptsigs."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (disconnect_nodes, assert_equal, sync_blocks, connect_nodes)
+from test_framework.util import disconnect_nodes, assert_equal, sync_blocks, connect_nodes
 
 class TxnMallTest(RavenTestFramework):
     def set_test_params(self):
@@ -78,7 +79,7 @@ class TxnMallTest(RavenTestFramework):
         assert_equal(tx1_clone["complete"], True)
 
         # Have node0 mine a block, if requested:
-        if (self.options.mine_block):
+        if self.options.mine_block:
             self.nodes[0].generate(1)
             sync_blocks(self.nodes[0:2])
 
@@ -132,7 +133,7 @@ class TxnMallTest(RavenTestFramework):
         # Check node0's total balance; should be same as before the clone, + 100 RVN for 2 matured,
         # less possible orphaned matured subsidy
         expected += 10000
-        if (self.options.mine_block): 
+        if self.options.mine_block:
             expected -= 5000
         assert_equal(self.nodes[0].getbalance(), expected)
         assert_equal(self.nodes[0].getbalance("*", 0), expected)
