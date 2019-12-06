@@ -248,7 +248,6 @@ bool BuildTransaction(
         const std::vector<OwnerAndAmount> & p_pendingPayments,const int& start,
         std::string& change_address, uint256& retTxid)
 {
-    bool fcnRetVal = false;
     int expectedCount = 0;
     int actualCount = 0;
     CValidationState state;
@@ -285,7 +284,7 @@ bool BuildTransaction(
         std::vector<CRecipient> vDestinations;
 
         //  This should (due to external logic) only include pending payments
-        for (int i = start; i < p_pendingPayments.size() && i < stop; i++) {
+        for (int i = start; i < (int)p_pendingPayments.size() && i < stop; i++) {
             expectedCount++;
 
             // Parse Raven address (already validated during ownership snapshot creation)
@@ -343,7 +342,7 @@ bool BuildTransaction(
         GetMyAssetBalance(p_rewardSnapshot.strDistributionAsset, totalAssetBalance, 0);
 
         //  This should (due to external logic) only include pending payments
-        for (int i = start; i < p_pendingPayments.size() && i < stop; i++) {
+        for (int i = start; i < (int)p_pendingPayments.size() && i < stop; i++) {
             expectedCount++;
 
             vDestinations.emplace_back(std::make_pair(
