@@ -3,10 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the wallet accounts properly when there is a double-spend conflict."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (disconnect_nodes, assert_equal, Decimal, sync_blocks, find_output, connect_nodes)
+from test_framework.util import disconnect_nodes, assert_equal, Decimal, sync_blocks, find_output, connect_nodes
 
 class TxnMallTest(RavenTestFramework):
     def set_test_params(self):
@@ -48,17 +49,11 @@ class TxnMallTest(RavenTestFramework):
         # First: use raw transaction API to send 1240 RVN to node1_address,
         # but don't broadcast:
         doublespend_fee = Decimal('-.02')
-        rawtx_input_0 = {}
-        rawtx_input_0["txid"] = fund_foo_txid
-        rawtx_input_0["vout"] = find_output(self.nodes[0], fund_foo_txid, 121900)
-        rawtx_input_1 = {}
-        rawtx_input_1["txid"] = fund_bar_txid
-        rawtx_input_1["vout"] = find_output(self.nodes[0], fund_bar_txid, 2900)
+        rawtx_input_0 = {"txid": fund_foo_txid, "vout": find_output(self.nodes[0], fund_foo_txid, 121900)}
+        rawtx_input_1 = {"txid": fund_bar_txid, "vout": find_output(self.nodes[0], fund_bar_txid, 2900)}
         inputs = [rawtx_input_0, rawtx_input_1]
         change_address = self.nodes[0].getnewaddress()
-        outputs = {}
-        outputs[node1_address] = 124000
-        outputs[change_address] = 124800 - 124000 + doublespend_fee
+        outputs = {node1_address: 124000, change_address: 124800 - 124000 + doublespend_fee}
         rawtx = self.nodes[0].createrawtransaction(inputs, outputs)
         doublespend = self.nodes[0].signrawtransaction(rawtx)
         assert_equal(doublespend["complete"], True)
@@ -68,7 +63,7 @@ class TxnMallTest(RavenTestFramework):
         txid2 = self.nodes[0].sendfrom("bar", node1_address, 2000, 0)
         
         # Have node0 mine a block:
-        if (self.options.mine_block):
+        if self.options.mine_block:
             self.nodes[0].generate(1)
             sync_blocks(self.nodes[0:2])
 

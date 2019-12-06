@@ -3,35 +3,25 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""An example functional test
+
+"""
+An example functional test
 
 The module-level docstring should include a high-level description of
 what the test is doing. It's the first thing people see when they open
 the file and should give the reader information about *what* the test
 is testing and *how* it's being tested
 """
+
 # Imports should be in PEP8 ordering (std library first, then third party
 # libraries then local imports).
+
 from collections import defaultdict
 
 # Avoid wildcard * imports if possible
-from test_framework.blocktools import (create_block, create_coinbase)
-from test_framework.mininode import (
-    CInv,
-    NetworkThread,
-    NodeConn,
-    NodeConnCB,
-    mininode_lock,
-    msg_block,
-    msg_getdata,
-)
+from test_framework.mininode import CInv, NetworkThread, NodeConn, NodeConnCB, mininode_lock, MsgGetdata
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (
-    assert_equal,
-    connect_nodes,
-    p2p_port,
-    wait_until,
-)
+from test_framework.util import assert_equal, connect_nodes, p2p_port
 
 # NodeConnCB is a class containing callbacks to be executed when a P2P
 # message is received from the node-under-test. Subclass NodeConnCB and
@@ -40,7 +30,7 @@ class BaseNode(NodeConnCB):
     def __init__(self):
         """Initialize the NodeConnCB
 
-        Used to inialize custom properties for the Node that aren't
+        Used to initialize custom properties for the Node that aren't
         included by default in the base class. Be aware that the NodeConnCB
         base class already stores a counter for each P2P message type and the
         last received message of each type, which should be sufficient for the
@@ -56,8 +46,8 @@ class BaseNode(NodeConnCB):
         """Override the standard on_block callback
 
         Store the hash of a received block in the dictionary."""
-        message.block.calc_sha256()
-        self.block_receive_map[message.block.sha256] += 1
+        message.block.calc_x16r()
+        self.block_receive_map[message.block.calc_x16r] += 1
 
     def on_inv(self, conn, message):
         """Override the standard on_inv callback"""
@@ -80,7 +70,7 @@ class ExampleTest(RavenTestFramework):
     def set_test_params(self):
         """Override test parameters for your individual test.
 
-        This method must be overridden and num_nodes must be exlicitly set."""
+        This method must be overridden and num_nodes must be explicitly set."""
         self.setup_clean_chain = True
         self.num_nodes = 3
         # Use self.extra_args to change command-line arguments for the nodes
@@ -136,8 +126,7 @@ class ExampleTest(RavenTestFramework):
 
         # Create a P2P connection to one of the nodes
         node0 = BaseNode()
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], node0))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], node0)]
         node0.add_connection(connections[0])
 
         # Start up network handling in another thread. This needs to be called
@@ -171,21 +160,7 @@ class ExampleTest(RavenTestFramework):
         self.tip = int(self.nodes[0].getbestblockhash(), 16)
         self.block_time = self.nodes[0].getblock(self.nodes[0].getbestblockhash())['time'] + 1
 
-        height = 1
-
-        for i in range(10):
-            # Use the mininode and blocktools functionality to manually build a block
-            # Calling the generate() rpc is easier, but this allows us to exactly
-            # control the blocks and transactions.
-            block = create_block(self.tip, create_coinbase(height), self.block_time)
-            block.solve()
-            block_message = msg_block(block)
-            # Send message is used to send a P2P message to the node over our NodeConn connection
-            node0.send_message(block_message)
-            self.tip = block.sha256
-            blocks.append(self.tip)
-            self.block_time += 1
-            height += 1
+        self.nodes[0].generate(10)
 
         self.log.info("Wait for node1 to reach current tip (height 11) using RPC")
         self.nodes[1].waitforblockheight(11)
@@ -201,14 +176,11 @@ class ExampleTest(RavenTestFramework):
 
         self.log.info("Wait for node2 reach current tip. Test that it has propagated all the blocks to us")
 
-        getdata_request = msg_getdata()
+        getdata_request = MsgGetdata()
         for block in blocks:
             getdata_request.inv.append(CInv(2, block))
         node2.send_message(getdata_request)
-
-        # wait_until() will loop until a predicate condition is met. Use it to test properties of the
-        # NodeConnCB objects.
-        wait_until(lambda: sorted(blocks) == sorted(list(node2.block_receive_map.keys())), timeout=5, lock=mininode_lock)
+        self.sync_all([self.nodes[1:2]])
 
         self.log.info("Check that each block was received only once")
         # The network thread uses a global lock on data access to the NodeConn objects when sending and receiving

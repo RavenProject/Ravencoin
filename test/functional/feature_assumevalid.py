@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test logic for skipping signature validation on old blocks.
+
+"""
+Test logic for skipping signature validation on old blocks.
 
 Test logic for skipping signature validation on blocks which we've assumed
 valid (https://github.com/RavenProject/Ravencoin/pull/9484)
@@ -30,27 +32,18 @@ Start three nodes:
       block 200. node2 will reject block 102 since it's assumed valid, but it
       isn't buried by at least two weeks' work.
 """
-import time
 
-from test_framework.blocktools import (create_block, create_coinbase)
+import time
+from test_framework.blocktools import create_block, create_coinbase
 from test_framework.key import CECKey
-from test_framework.mininode import (CBlockHeader,
-                                     COutPoint,
-                                     CTransaction,
-                                     CTxIn,
-                                     CTxOut,
-                                     NetworkThread,
-                                     NodeConn,
-                                     NodeConnCB,
-                                     msg_block,
-                                     msg_headers)
-from test_framework.script import (CScript, OP_TRUE)
+from test_framework.mininode import CBlockHeader, COutPoint, CTransaction, CTxIn, CTxOut, NetworkThread, NodeConn, NodeConnCB, MsgBlock, MsgHeaders
+from test_framework.script import CScript, OP_TRUE
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (p2p_port, assert_equal)
+from test_framework.util import p2p_port, assert_equal
 
 class BaseNode(NodeConnCB):
     def send_header_for_blocks(self, new_blocks):
-        headers_message = msg_headers()
+        headers_message = MsgHeaders()
         headers_message.headers = [CBlockHeader(b) for b in new_blocks]
         self.send_message(headers_message)
 
@@ -72,12 +65,13 @@ class AssumeValidTest(RavenTestFramework):
             if not node.connection:
                 break
             try:
-                node.send_message(msg_block(self.blocks[i]))
+                node.send_message(MsgBlock(self.blocks[i]))
             except IOError as e:
                 assert str(e) == 'Not connected, no pushbuf'
                 break
 
-    def assert_blockchain_height(self, node, height):
+    @staticmethod
+    def assert_blockchain_height(node, height):
         """Wait until the blockchain is no longer advancing and verify it's reached the expected height."""
         last_height = node.getblock(node.getbestblockhash())['height']
         timeout = 10
@@ -88,7 +82,7 @@ class AssumeValidTest(RavenTestFramework):
                 last_height = current_height
                 if timeout < 0:
                     assert False, "blockchain too short after timeout: %d" % current_height
-                timeout - 0.25
+                timeout = timeout - 0.25
                 continue
             elif current_height > height:
                 assert False, "blockchain too long: %d" % current_height
@@ -99,8 +93,7 @@ class AssumeValidTest(RavenTestFramework):
 
         # Connect to node0
         node0 = BaseNode()
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], node0))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], node0)]
         node0.add_connection(connections[0])
 
         NetworkThread().start()  # Start up network handling in another thread
@@ -139,9 +132,9 @@ class AssumeValidTest(RavenTestFramework):
 
         # Create a transaction spending the coinbase output with an invalid (null) signature
         tx = CTransaction()
-        tx.vin.append(CTxIn(COutPoint(self.block1.vtx[0].sha256, 0), scriptSig=b""))
+        tx.vin.append(CTxIn(COutPoint(self.block1.vtx[0].sha256, 0), script_sig=b""))
         tx.vout.append(CTxOut(49 * 100000000, CScript([OP_TRUE])))
-        tx.calc_sha256()
+        tx.calc_x16r()
 
         block102 = create_block(self.tip, create_coinbase(height), self.block_time)
         self.block_time += 1
@@ -190,7 +183,7 @@ class AssumeValidTest(RavenTestFramework):
 
         # Send all blocks to node1. All blocks will be accepted.
         for i in range(2202):
-            node1.send_message(msg_block(self.blocks[i]))
+            node1.send_message(MsgBlock(self.blocks[i]))
         # Syncing 2200 blocks can take a while on slow systems. Give it plenty of time to sync.
         node1.sync_with_ping(120)
         assert_equal(self.nodes[1].getblock(self.nodes[1].getbestblockhash())['height'], 2202)

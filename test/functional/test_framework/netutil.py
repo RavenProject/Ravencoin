@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Linux network utilities.
+
+"""
+Linux network utilities.
 
 Roughly based on http://voorloopnul.com/blog/a-python-netstat-in-less-than-100-lines-of-code/ by Ricardo Pascal
 """
@@ -14,7 +16,7 @@ import fcntl
 import struct
 import array
 import os
-from binascii import (unhexlify, hexlify)
+from binascii import unhexlify, hexlify
 
 # STATE_ESTABLISHED = '01'
 # STATE_SYN_SENT  = '02'
@@ -29,9 +31,9 @@ STATE_LISTEN = '0A'
 # STATE_CLOSING = '0B'
 
 def get_socket_inodes(pid):
-    '''
+    """
     Get list of socket inodes for process pid.
-    '''
+    """
     base = '/proc/%i/fd' % pid
     inodes = []
     for item in os.listdir(base):
@@ -40,11 +42,11 @@ def get_socket_inodes(pid):
             inodes.append(int(target[8:-1]))
     return inodes
 
-def _remove_empty(array):
-    return [x for x in array if x !='']
+def _remove_empty(array_in):
+    return [x for x in array_in if x != '']
 
-def _convert_ip_port(array):
-    host,port = array.split(':')
+def _convert_ip_port(array_in):
+    host,port = array_in.split(':')
     # convert host from mangled-per-four-bytes form as used by kernel
     host = unhexlify(host)
     host_out = ''
@@ -55,11 +57,11 @@ def _convert_ip_port(array):
     return host_out,int(port,16)
 
 def netstat(typ='tcp'):
-    '''
+    """
     Function to return a list with status of tcp connections at linux systems
     To get pid of all network process running on system, you must run this script
     as superuser
-    '''
+    """
     with open('/proc/net/'+typ,'r',encoding='utf8') as f:
         content = f.readlines()
         content.pop(0)
@@ -76,9 +78,9 @@ def netstat(typ='tcp'):
     return result
 
 def get_bind_addrs(pid):
-    '''
+    """
     Get bind addresses as (host,port) tuples for process pid.
-    '''
+    """
     inodes = get_socket_inodes(pid)
     bind_addrs = []
     for conn in netstat('tcp') + netstat('tcp6'):
@@ -88,22 +90,22 @@ def get_bind_addrs(pid):
 
 # from: http://code.activestate.com/recipes/439093/
 def all_interfaces():
-    '''
+    """
     Return all interfaces that are up
-    '''
+    """
     is_64bits = sys.maxsize > 2**32
     struct_size = 40 if is_64bits else 32
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     max_possible = 8 # initial value
     while True:
-        bytes = max_possible * struct_size
-        names = array.array('B', b'\0' * bytes)
+        byte_data = max_possible * struct_size
+        names = array.array('B', b'\0' * byte_data)
         outbytes = struct.unpack('iL', fcntl.ioctl(
             s.fileno(),
             0x8912,  # SIOCGIFCONF
-            struct.pack('iL', bytes, names.buffer_info()[0])
+            struct.pack('iL', byte_data, names.buffer_info()[0])
         ))[0]
-        if outbytes == bytes:
+        if outbytes == byte_data:
             max_possible *= 2
         else:
             break
@@ -113,11 +115,11 @@ def all_interfaces():
             for i in range(0, outbytes, struct_size)]
 
 def addr_to_hex(addr):
-    '''
+    """
     Convert string IPv4 or IPv6 address to binary address as returned by
     get_bind_addrs.
     Very naive implementation that certainly doesn't work for all IPv6 variants.
-    '''
+    """
     if '.' in addr: # IPv4
         addr = [int(x) for x in addr.split('.')]
     elif ':' in addr: # IPv6
@@ -142,9 +144,9 @@ def addr_to_hex(addr):
     return hexlify(bytearray(addr)).decode('ascii')
 
 def test_ipv6_local():
-    '''
+    """
     Check for (local) IPv6 support.
-    '''
+    """
     import socket
     # By using SOCK_DGRAM this will not actually make a connection, but it will
     # fail if there is no route to IPv6 localhost.

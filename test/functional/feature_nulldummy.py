@@ -2,8 +2,10 @@
 # Copyright (c) 2016 The Bitcoin Core developers
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
-# file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test NULLDUMMY softfork.
+# file COPYING or http://www.opensource.org/licenses/mit-mit-license.php.
+
+"""
+Test NULLDUMMY softfork.
 
 Connect to a single node.
 Generate 2 blocks (save the coinbases for later).
@@ -14,25 +16,26 @@ Generate 427 more blocks.
 [Policy/Consensus] Check that the new NULLDUMMY rules are enforced on the 432nd block.
 """
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (bytes_to_hex_str, assert_raises_rpc_error, hex_str_to_bytes, assert_equal)
-from test_framework.mininode import (CTransaction, NetworkThread)
-from test_framework.blocktools import (create_coinbase, create_block, add_witness_commitment)
-from test_framework.script import CScript
 from io import BytesIO
 import time
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import bytes_to_hex_str, assert_raises_rpc_error, hex_str_to_bytes, assert_equal
+from test_framework.mininode import CTransaction, NetworkThread
+from test_framework.blocktools import create_coinbase, create_block, add_witness_commitment
+from test_framework.script import CScript
 
 NULLDUMMY_ERROR = "64: non-mandatory-script-verify-flag (Dummy CHECKMULTISIG argument must be zero)"
 
-def trueDummy(tx):
-    scriptSig = CScript(tx.vin[0].scriptSig)
+def true_dummy(tx):
+    script_sig = CScript(tx.vin[0].scriptSig)
     newscript = []
-    for i in scriptSig:
-        if (len(newscript) == 0):
+    for i in script_sig:
+        if len(newscript) == 0:
             assert(len(i) == 0)
             newscript.append(b'\x51')
         else:
             newscript.append(i)
+    # noinspection PyPep8Naming
     tx.vin[0].scriptSig = CScript(newscript)
     tx.rehash()
 
@@ -71,7 +74,7 @@ class NULLDUMMYTest(RavenTestFramework):
 
         self.log.info("Test 2: Non-NULLDUMMY base multisig transaction should not be accepted to mempool before activation")
         test2tx = self.create_transaction(self.nodes[0], txid2, self.ms_address, 47)
-        trueDummy(test2tx)
+        true_dummy(test2tx)
         assert_raises_rpc_error(-26, NULLDUMMY_ERROR, self.nodes[0].sendrawtransaction, bytes_to_hex_str(test2tx.serialize_with_witness()), True)
 
         self.log.info("Test 3: Non-NULLDUMMY base transactions should be accepted in a block before activation [431]")
@@ -80,7 +83,7 @@ class NULLDUMMYTest(RavenTestFramework):
         self.log.info("Test 4: Non-NULLDUMMY base multisig transaction is invalid after activation")
         test4tx = self.create_transaction(self.nodes[0], test2tx.hash, self.address, 46)
         test6txs=[CTransaction(test4tx)]
-        trueDummy(test4tx)
+        true_dummy(test4tx)
         assert_raises_rpc_error(-26, NULLDUMMY_ERROR, self.nodes[0].sendrawtransaction, bytes_to_hex_str(test4tx.serialize_with_witness()), True)
         self.block_submit(self.nodes[0], [test4tx])
 
@@ -97,7 +100,8 @@ class NULLDUMMYTest(RavenTestFramework):
         self.block_submit(self.nodes[0], test6txs, True, True)
 
 
-    def create_transaction(self, node, txid, to_address, amount):
+    @staticmethod
+    def create_transaction(node, txid, to_address, amount):
         inputs = [{ "txid" : txid, "vout" : 0}]
         outputs = { to_address : amount }
         rawtx = node.createrawtransaction(inputs, outputs)
@@ -119,7 +123,7 @@ class NULLDUMMYTest(RavenTestFramework):
         block.rehash()
         block.solve()
         node.submitblock(bytes_to_hex_str(block.serialize(True)))
-        if (accept):
+        if accept:
             assert_equal(node.getbestblockhash(), block.hash)
             self.tip = block.sha256
             self.lastblockhash = block.hash

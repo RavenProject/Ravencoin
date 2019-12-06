@@ -2,13 +2,14 @@
 #
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Big number routines.
+
+"""
+Big number routines.
 
 This file is copied from python-ravenlib.
 """
 
 import struct
-
 
 # generic big endian MPI format
 

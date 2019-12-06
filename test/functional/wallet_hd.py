@@ -3,12 +3,13 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test Hierarchical Deterministic wallet function."""
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, connect_nodes_bi)
 import shutil
 import os
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import assert_equal, connect_nodes_bi
 
 class WalletHDTest(RavenTestFramework):
     def set_test_params(self):

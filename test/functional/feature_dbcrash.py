@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test recovery from a crash during chainstate writing.
+
+"""
+Test recovery from a crash during chainstate writing.
 
 - 4 nodes
   * node0, node1, and node2 will have different dbcrash ratios, and different
@@ -24,17 +26,17 @@
        * submit block to node
        * if node crashed on/after submitting:
          - restart until recovery succeeds
-         - check that utxo matches node3 using gettxoutsetinfo"""
+         - check that utxo matches node3 using gettxoutsetinfo
+"""
 
 import errno
 import http.client
 import random
 import time
-
-from test_framework.mininode import (CTxIn, COutPoint, COIN, ToHex)
-from test_framework.script import (CTransaction, CTxOut)
+from test_framework.mininode import CTxIn, COutPoint, COIN, to_hex
+from test_framework.script import CTransaction, CTxOut
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (create_confirmed_utxos, hex_str_to_bytes, assert_equal)
+from test_framework.util import create_confirmed_utxos, hex_str_to_bytes, assert_equal
 
 
 class ChainstateWriteCrashTest(RavenTestFramework):
@@ -64,6 +66,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         self.start_nodes()
         # Leave them unconnected, we'll use submitblock directly in this test
 
+    # noinspection PyMethodOverriding
     def restart_node(self, node_index, expected_tip):
         """Start up a given node id, wait for the tip to reach the given block hash, and calculate the utxo hash.
 
@@ -71,6 +74,7 @@ class ChainstateWriteCrashTest(RavenTestFramework):
         after 60 seconds. Returns the utxo hash of the given node."""
         time_start = time.time()
         while time.time() - time_start < 120:
+            # noinspection PyBroadException
             try:
                 # Any of these RPC calls could throw due to node crash
                 self.start_node(node_index)
@@ -175,10 +179,12 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 nodei_utxo_hash = self.restart_node(i, self.nodes[3].getbestblockhash())
             assert_equal(nodei_utxo_hash, node3_utxo_hash)
 
-    def generate_small_transactions(self, node, count, utxo_list):
+    @staticmethod
+    def generate_small_transactions(node, count, utxo_list):
         fee = 100000000  # TODO: replace this with node relay fee based calculation
         num_transactions = 0
         random.shuffle(utxo_list)
+        utxo = None
         while len(utxo_list) >= 2 and num_transactions < count:
             tx = CTransaction()
             input_amount = 0
@@ -193,10 +199,11 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 continue
 
             for _ in range(3):
-                tx.vout.append(CTxOut(output_amount, hex_str_to_bytes(utxo['scriptPubKey'])))
+                if utxo is not None:
+                    tx.vout.append(CTxOut(output_amount, hex_str_to_bytes(utxo['scriptPubKey'])))
 
             # Sign and send the transaction to get into the mempool
-            tx_signed_hex = node.signrawtransaction(ToHex(tx))['hex']
+            tx_signed_hex = node.signrawtransaction(to_hex(tx))['hex']
             node.sendrawtransaction(tx_signed_hex)
             num_transactions += 1
 
