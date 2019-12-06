@@ -16,6 +16,7 @@
 #include "utilstrencodings.h"
 #include "mining.h"
 
+#include <mutex>
 #include <univalue.h>
 
 #include <boost/bind.hpp>
@@ -38,6 +39,37 @@ static CCriticalSection cs_rpcWarmup;
 static RPCTimerInterface* timerInterface = nullptr;
 /* Map of name to timer. */
 static std::map<std::string, std::unique_ptr<RPCTimerBase> > deadlineTimers;
+
+struct RPCCommandExecutionInfo
+{
+    std::string method;
+    int64_t start;
+};
+
+struct RPCServerInfo
+{
+    std::mutex mtx;
+    std::list<RPCCommandExecutionInfo> active_commands GUARDED_BY(mtx);
+};
+
+static RPCServerInfo g_rpc_server_info;
+
+struct RPCCommandExecution
+{
+    std::list<RPCCommandExecutionInfo>::iterator it;
+    explicit RPCCommandExecution(const std::string& method)
+    {
+        g_rpc_server_info.mtx.lock();
+        it = g_rpc_server_info.active_commands.insert(g_rpc_server_info.active_commands.end(), {method, GetTimeMicros()});
+        g_rpc_server_info.mtx.unlock();
+    }
+    ~RPCCommandExecution()
+    {
+        g_rpc_server_info.mtx.lock();
+        g_rpc_server_info.active_commands.erase(it);
+        g_rpc_server_info.mtx.unlock();
+    }
+};
 
 static struct CRPCSignals
 {
@@ -263,6 +295,44 @@ UniValue uptime(const JSONRPCRequest& jsonRequest)
     return GetTime() - GetStartupTime();
 }
 
+UniValue getrpcinfo(const JSONRPCRequest& jsonRequest)
+{
+
+    if (jsonRequest.fHelp || jsonRequest.params.size() > 0)
+        throw std::runtime_error(
+                "getrpcinfo\n"
+                "Returns details of the RPC server.\n"
+                "\nResult:\n"
+                "{\n"
+                " \"active_commands\" (array) All active commands\n"
+                "  [\n"
+                "   {               (object) Information about an active command\n"
+                "    \"method\"       (string)  The name of the RPC command \n"
+                "    \"duration\"     (numeric)  The running time in microseconds\n"
+                "   },...\n"
+                "  ],\n"
+                "}\n"
+                + HelpExampleCli("getrpcinfo", "")
+                + HelpExampleRpc("getrpcinfo", "")
+        );
+
+    g_rpc_server_info.mtx.lock();
+    UniValue active_commands(UniValue::VARR);
+    for (const RPCCommandExecutionInfo& info : g_rpc_server_info.active_commands) {
+        UniValue entry(UniValue::VOBJ);
+        entry.pushKV("method", info.method);
+        entry.pushKV("duration", GetTimeMicros() - info.start);
+        active_commands.push_back(entry);
+    }
+
+    UniValue result(UniValue::VOBJ);
+    result.pushKV("active_commands", active_commands);
+    g_rpc_server_info.mtx.unlock();
+
+    return result;
+}
+
+
 /**
  * Call Table
  */
@@ -270,6 +340,7 @@ static const CRPCCommand vRPCCommands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
     /* Overall control/query calls */
+    { "control",            "getrpcinfo",             &getrpcinfo,             {}  },
     { "control",            "help",                   &help,                   {"command"}  },
     { "control",            "stop",                   &stop,                   {}  },
     { "control",            "uptime",                 &uptime,                 {}  },
@@ -496,6 +567,7 @@ UniValue CRPCTable::execute(const JSONRPCRequest &request) const
 
     try
     {
+        RPCCommandExecution execution(request.strMethod);
         // Execute, convert arguments to array if necessary
         if (request.params.isObject()) {
             return pcmd->actor(transformNamedArguments(request, pcmd->argNames));

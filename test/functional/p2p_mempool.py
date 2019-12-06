@@ -3,15 +3,17 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test p2p mempool message.
+
+"""
+Test p2p mempool message.
 
 Test that nodes are disconnected if they send mempool messages when bloom
 filters are not enabled.
 """
 
-from test_framework.mininode import (NodeConn, NodeConnCB, NetworkThread, msg_mempool)
+from test_framework.mininode import NodeConn, NodeConnCB, NetworkThread, MsgMempool
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (p2p_port, assert_equal)
+from test_framework.util import p2p_port, assert_equal
 
 class P2PMempoolTests(RavenTestFramework):
     def set_test_params(self):
@@ -28,7 +30,7 @@ class P2PMempoolTests(RavenTestFramework):
         aTestNode.wait_for_verack()
 
         #request mempool
-        aTestNode.send_message(msg_mempool())
+        aTestNode.send_message(MsgMempool())
         aTestNode.wait_for_disconnect()
 
         #mininode must be disconnected at this point

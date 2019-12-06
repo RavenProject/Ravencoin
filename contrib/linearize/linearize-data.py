@@ -13,8 +13,8 @@ import struct
 import re
 import os
 import os.path
+import subprocess
 import sys
-import hashlib
 import datetime
 import time
 from collections import namedtuple
@@ -49,23 +49,11 @@ def wordreverse(in_buf):
 	out_words.reverse()
 	return b''.join(out_words)
 
-def calc_hdr_hash(blk_hdr):
-	hash1 = hashlib.sha256()
-	hash1.update(blk_hdr)
-	hash1_o = hash1.digest()
-
-	hash2 = hashlib.sha256()
-	hash2.update(hash1_o)
-	hash2_o = hash2.digest()
-
-	return hash2_o
-
 def calc_hash_str(blk_hdr):
-	hash = calc_hdr_hash(blk_hdr)
-	hash = bufreverse(hash)
-	hash = wordreverse(hash)
-	hash_str = hexlify(hash).decode('utf-8')
-	return hash_str
+	x16r_hash_cmd = os.path.dirname(os.path.realpath(__file__)) + "/../../src/test/test_raven_hash"
+	cmd = [x16r_hash_cmd, hexlify(blk_hdr).decode('utf-8'), "2"]
+	blk_hash = subprocess.run(cmd, stdout=subprocess.PIPE, check=True).stdout.decode('ascii')
+	return blk_hash
 
 def get_blk_dt(blk_hdr):
 	members = struct.unpack("<I", blk_hdr[68:68+4])
@@ -216,7 +204,7 @@ class BlockDataCopier:
 
 			inMagic = inhdr[:4]
 			if (inMagic != self.settings['netmagic']):
-				print("Invalid magic: " + hexlify(inMagic).decode('utf-8'))
+				print("Invalid magic: " + hexlify(inMagic).decode('utf-8') + " (" + str(inMagic) + ")")
 				return
 			inLenLE = inhdr[4:]
 			su = struct.unpack("<I", inLenLE)
@@ -228,8 +216,7 @@ class BlockDataCopier:
 			if not self.hash_str in blkmap:
 				# Because blocks can be written to files out-of-order as of 0.10, the script
 				# may encounter blocks it doesn't know about. Treat as debug output.
-				if settings['debug_output'] == 'true':
-					print("Skipping unknown block " + self.hash_str)
+				print("Skipping unknown block " + self.hash_str)
 				self.inF.seek(inLen, os.SEEK_CUR)
 				continue
 
@@ -284,9 +271,9 @@ if __name__ == '__main__':
 	settings['rev_hash_bytes'] = settings['rev_hash_bytes'].lower()
 
 	if 'netmagic' not in settings:
-		settings['netmagic'] = 'f9beb4d9'
+		settings['netmagic'] = '43524f57'
 	if 'genesis' not in settings:
-		settings['genesis'] = '000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f'
+		settings['genesis'] = '0b2c703dc93bb63a36c4e33b85be4855ddbca2ac951a7a0a29b8de0408200a3c'
 	if 'input' not in settings:
 		settings['input'] = 'input'
 	if 'hashlist' not in settings:

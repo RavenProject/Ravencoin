@@ -4,16 +4,10 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#
-# Test transferring assets rpc calls
-#
+"""Test transferring assets rpc calls"""
 
-import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
-from test_framework.script import *
-from test_framework.mininode import *
-import binascii
+from test_framework.util import connect_all_nodes_bi, assert_equal, assert_raises_rpc_error
 
 class AssetTransferTest(RavenTestFramework):
 
@@ -50,8 +44,7 @@ class AssetTransferTest(RavenTestFramework):
         self.log.info("Calling issue()...")
         address0 = n0.getnewaddress()
         ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
-        n0.issue(asset_name="TRANSFER_TEST", qty=1000, to_address=address0, change_address="", \
-                 units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+        n0.issue(asset_name="TRANSFER_TEST", qty=1000, to_address=address0, change_address="", units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         n0.generate(1)
 
@@ -101,7 +94,6 @@ class AssetTransferTest(RavenTestFramework):
 
         n0_from_addresses = [n0_asset_change, n0_new_address]
 
-        n0_from_address = n0_asset_change
         n1_already_received_address_2 = n1_address
 
         n1_address = n1.getnewaddress()
@@ -123,8 +115,7 @@ class AssetTransferTest(RavenTestFramework):
         # Add the address the only contain 150 TRANSFER_TEST assets
         n0_from_addresses = [n0_asset_change]
 
-        assert_raises_rpc_error(-25, "Insufficient asset funds", \
-                                n0.transferfromaddresses, "TRANSFER_TEST", n0_from_addresses, 450, n1_address, '', 0, n0_rvn_change, n0_asset_change)
+        assert_raises_rpc_error(-25, "Insufficient asset funds", n0.transferfromaddresses, "TRANSFER_TEST", n0_from_addresses, 450, n1_address, '', 0, n0_rvn_change, n0_asset_change)
 
         # Verify that the failed transaction doesn't change the already mined address values on the wallet
         assert_equal(n0.listassetbalancesbyaddress(n1_already_received_address)["TRANSFER_TEST"], 200)

@@ -3,16 +3,19 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Functionality to build scripts, as well as SignatureHash().
+
+"""
+Functionality to build scripts, as well as signature_hash().
 
 This file is modified from python-ravenlib.
 """
 
-from .mininode import (CTransaction, CTxOut, sha256, hash256, uint256_from_str, ser_uint256, ser_string)
+from .mininode import CTransaction, CTxOut, sha256, hash256, uint256_from_str, ser_uint256, ser_string
 from binascii import hexlify
 import hashlib
 
 import sys
+
 bchr = chr
 bord = ord
 if sys.version > '3':
@@ -52,15 +55,15 @@ class CScriptOp(int):
             raise ValueError("Data too long to encode in a PUSHDATA op")
 
     @staticmethod
-    def encode_op_n(n):
+    def encode_op_n(number):
         """Encode a small integer op, returning an opcode"""
-        if not (0 <= n <= 16):
-            raise ValueError('Integer must be in range 0 <= n <= 16, got %d' % n)
+        if not (0 <= number <= 16):
+            raise ValueError('Integer must be in range 0 <= n <= 16, got %d' % number)
 
-        if n == 0:
+        if number == 0:
             return OP_0
         else:
-            return CScriptOp(OP_1 + n-1)
+            return CScriptOp(OP_1 + number - 1)
 
     def decode_op_n(self):
         """Decode a small integer opcode, returning an integer"""
@@ -88,13 +91,13 @@ class CScriptOp(int):
         else:
             return 'CScriptOp(0x%x)' % self
 
-    def __new__(cls, n):
+    def __new__(cls, number):
         try:
-            return _opcode_instances[n]
+            return _opcode_instances[number]
         except IndexError:
-            assert len(_opcode_instances) == n
-            _opcode_instances.append(super(CScriptOp, cls).__new__(cls, n))
-            return _opcode_instances[n]
+            assert len(_opcode_instances) == number
+            _opcode_instances.append(super(CScriptOp, cls).__new__(cls, number))
+            return _opcode_instances[number]
 
 # Populate opcode instance table
 for n in range(0xff+1):
@@ -374,7 +377,7 @@ class CScriptTruncatedPushDataError(CScriptInvalidError):
         super(CScriptTruncatedPushDataError, self).__init__(msg)
 
 # This is used, eg, for blockchain heights in coinbase scripts (bip34)
-class CScriptNum():
+class CScriptNum:
     def __init__(self, d=0):
         self.value = d
 
@@ -385,7 +388,7 @@ class CScriptNum():
             return bytes(r)
         neg = obj.value < 0
         absvalue = -obj.value if neg else obj.value
-        while (absvalue):
+        while absvalue:
             r.append(absvalue & 0xff)
             absvalue >>= 8
         if r[-1] & 0x80:
@@ -411,7 +414,7 @@ class CScript(bytes):
         if isinstance(other, CScriptOp):
             other = bchr(other)
         elif isinstance(other, CScriptNum):
-            if (other.value == 0):
+            if other.value == 0:
                 other = bchr(CScriptOp(OP_0))
             else:
                 other = CScriptNum.encode(other)
@@ -468,44 +471,42 @@ class CScript(bytes):
             if opcode > OP_PUSHDATA4:
                 yield (opcode, None, sop_idx)
             else:
-                datasize = None
-                pushdata_type = None
                 if opcode < OP_PUSHDATA1:
                     pushdata_type = 'PUSHDATA(%d)' % opcode
-                    datasize = opcode
+                    data_size = opcode
 
                 elif opcode == OP_PUSHDATA1:
                     pushdata_type = 'PUSHDATA1'
                     if i >= len(self):
                         raise CScriptInvalidError('PUSHDATA1: missing data length')
-                    datasize = bord(self[i])
+                    data_size = bord(self[i])
                     i += 1
 
                 elif opcode == OP_PUSHDATA2:
                     pushdata_type = 'PUSHDATA2'
                     if i + 1 >= len(self):
                         raise CScriptInvalidError('PUSHDATA2: missing data length')
-                    datasize = bord(self[i]) + (bord(self[i+1]) << 8)
+                    data_size = bord(self[i]) + (bord(self[i+1]) << 8)
                     i += 2
 
                 elif opcode == OP_PUSHDATA4:
                     pushdata_type = 'PUSHDATA4'
                     if i + 3 >= len(self):
                         raise CScriptInvalidError('PUSHDATA4: missing data length')
-                    datasize = bord(self[i]) + (bord(self[i+1]) << 8) + (bord(self[i+2]) << 16) + (bord(self[i+3]) << 24)
+                    data_size = bord(self[i]) + (bord(self[i+1]) << 8) + (bord(self[i+2]) << 16) + (bord(self[i+3]) << 24)
                     i += 4
 
                 else:
                     assert False # shouldn't happen
 
 
-                data = bytes(self[i:i+datasize])
+                data = bytes(self[i:i+data_size])
 
                 # Check for truncation
-                if len(data) < datasize:
+                if len(data) < data_size:
                     raise CScriptTruncatedPushDataError('%s: truncated data' % pushdata_type, data)
 
-                i += datasize
+                i += data_size
 
                 yield (opcode, data, sop_idx)
 
@@ -558,25 +559,25 @@ class CScript(bytes):
 
         return "CScript([%s])" % ', '.join(ops)
 
-    def GetSigOpCount(self, fAccurate):
+    def get_sig_op_count(self, f_accurate):
         """Get the SigOp count.
 
         fAccurate - Accurately count CHECKMULTISIG, see BIP16 for details.
 
         Note that this is consensus-critical.
         """
-        n = 0
-        lastOpcode = OP_INVALIDOPCODE
+        number = 0
+        last_opcode = OP_INVALIDOPCODE
         for (opcode, data, sop_idx) in self.raw_iter():
             if opcode in (OP_CHECKSIG, OP_CHECKSIGVERIFY):
-                n += 1
+                number += 1
             elif opcode in (OP_CHECKMULTISIG, OP_CHECKMULTISIGVERIFY):
-                if fAccurate and (OP_1 <= lastOpcode <= OP_16):
-                    n += opcode.decode_op_n()
+                if f_accurate and (OP_1 <= last_opcode <= OP_16):
+                    number += opcode.decode_op_n()
                 else:
-                    n += 20
-            lastOpcode = opcode
-        return n
+                    number += 20
+            last_opcode = opcode
+        return number
 
 
 SIGHASH_ALL = 1
@@ -584,8 +585,10 @@ SIGHASH_NONE = 2
 SIGHASH_SINGLE = 3
 SIGHASH_ANYONECANPAY = 0x80
 
-def FindAndDelete(script, sig):
-    """Consensus critical, see FindAndDelete() in Satoshi codebase"""
+
+# noinspection PyUnusedLocal
+def find_and_delete(script, sig):
+    """Consensus critical, see find_and_delete() in Satoshi codebase"""
     r = b''
     last_sop_idx = sop_idx = 0
     skip = True
@@ -602,97 +605,97 @@ def FindAndDelete(script, sig):
     return CScript(r)
 
 
-def SignatureHash(script, txTo, inIdx, hashtype):
-    """Consensus-correct SignatureHash
+def signature_hash(script, tx_to, in_idx, hash_type):
+    """Consensus-correct signature_hash
 
     Returns (hash, err) to precisely match the consensus-critical behavior of
     the SIGHASH_SINGLE bug. (inIdx is *not* checked for validity)
     """
-    HASH_ONE = b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    hash_one = b'\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
 
-    if inIdx >= len(txTo.vin):
-        return (HASH_ONE, "inIdx %d out of range (%d)" % (inIdx, len(txTo.vin)))
-    txtmp = CTransaction(txTo)
+    if in_idx >= len(tx_to.vin):
+        return hash_one, "inIdx %d out of range (%d)" % (in_idx, len(tx_to.vin))
+    tx_tmp = CTransaction(tx_to)
 
-    for txin in txtmp.vin:
+    for txin in tx_tmp.vin:
         txin.scriptSig = b''
-    txtmp.vin[inIdx].scriptSig = FindAndDelete(script, CScript([OP_CODESEPARATOR]))
+    tx_tmp.vin[in_idx].scriptSig = find_and_delete(script, CScript(OP_CODESEPARATOR))
 
-    if (hashtype & 0x1f) == SIGHASH_NONE:
-        txtmp.vout = []
+    if (hash_type & 0x1f) == SIGHASH_NONE:
+        tx_tmp.vout = []
 
-        for i in range(len(txtmp.vin)):
-            if i != inIdx:
-                txtmp.vin[i].nSequence = 0
+        for i in range(len(tx_tmp.vin)):
+            if i != in_idx:
+                tx_tmp.vin[i].nSequence = 0
 
-    elif (hashtype & 0x1f) == SIGHASH_SINGLE:
-        outIdx = inIdx
-        if outIdx >= len(txtmp.vout):
-            return (HASH_ONE, "outIdx %d out of range (%d)" % (outIdx, len(txtmp.vout)))
+    elif (hash_type & 0x1f) == SIGHASH_SINGLE:
+        out_idx = in_idx
+        if out_idx >= len(tx_tmp.vout):
+            return hash_one, "outIdx %d out of range (%d)" % (out_idx, len(tx_tmp.vout))
 
-        tmp = txtmp.vout[outIdx]
-        txtmp.vout = []
-        for i in range(outIdx):
-            txtmp.vout.append(CTxOut(-1))
-        txtmp.vout.append(tmp)
+        tmp = tx_tmp.vout[out_idx]
+        tx_tmp.vout = []
+        for i in range(out_idx):
+            tx_tmp.vout.append(CTxOut(-1))
+        tx_tmp.vout.append(tmp)
 
-        for i in range(len(txtmp.vin)):
-            if i != inIdx:
-                txtmp.vin[i].nSequence = 0
+        for i in range(len(tx_tmp.vin)):
+            if i != in_idx:
+                tx_tmp.vin[i].nSequence = 0
 
-    if hashtype & SIGHASH_ANYONECANPAY:
-        tmp = txtmp.vin[inIdx]
-        txtmp.vin = []
-        txtmp.vin.append(tmp)
+    if hash_type & SIGHASH_ANYONECANPAY:
+        tmp = tx_tmp.vin[in_idx]
+        tx_tmp.vin = []
+        tx_tmp.vin.append(tmp)
 
-    s = txtmp.serialize()
-    s += struct.pack(b"<I", hashtype)
+    s = tx_tmp.serialize()
+    s += struct.pack(b"<I", hash_type)
 
-    hash = hash256(s)
+    hash_data = hash256(s)
 
-    return (hash, None)
+    return hash_data, None
 
 # TODO: Allow cached hashPrevouts/hashSequence/hashOutputs to be provided.
 # Performance optimization probably not necessary for python tests, however.
 # Note that this corresponds to sigversion == 1 in EvalScript, which is used
 # for version 0 witnesses.
-def SegwitVersion1SignatureHash(script, txTo, inIdx, hashtype, amount):
+def segwit_version1_signature_hash(script, tx_to, in_idx, hash_type, amount):
 
-    hashPrevouts = 0
-    hashSequence = 0
-    hashOutputs = 0
+    hash_prevouts = 0
+    hash_sequence = 0
+    hash_outputs = 0
 
-    if not (hashtype & SIGHASH_ANYONECANPAY):
+    if not (hash_type & SIGHASH_ANYONECANPAY):
         serialize_prevouts = bytes()
-        for i in txTo.vin:
+        for i in tx_to.vin:
             serialize_prevouts += i.prevout.serialize()
-        hashPrevouts = uint256_from_str(hash256(serialize_prevouts))
+        hash_prevouts = uint256_from_str(hash256(serialize_prevouts))
 
-    if (not (hashtype & SIGHASH_ANYONECANPAY) and (hashtype & 0x1f) != SIGHASH_SINGLE and (hashtype & 0x1f) != SIGHASH_NONE):
+    if not (hash_type & SIGHASH_ANYONECANPAY) and (hash_type & 0x1f) != SIGHASH_SINGLE and (hash_type & 0x1f) != SIGHASH_NONE:
         serialize_sequence = bytes()
-        for i in txTo.vin:
+        for i in tx_to.vin:
             serialize_sequence += struct.pack("<I", i.nSequence)
-        hashSequence = uint256_from_str(hash256(serialize_sequence))
+        hash_sequence = uint256_from_str(hash256(serialize_sequence))
 
-    if ((hashtype & 0x1f) != SIGHASH_SINGLE and (hashtype & 0x1f) != SIGHASH_NONE):
+    if (hash_type & 0x1f) != SIGHASH_SINGLE and (hash_type & 0x1f) != SIGHASH_NONE:
         serialize_outputs = bytes()
-        for o in txTo.vout:
+        for o in tx_to.vout:
             serialize_outputs += o.serialize()
-        hashOutputs = uint256_from_str(hash256(serialize_outputs))
-    elif ((hashtype & 0x1f) == SIGHASH_SINGLE and inIdx < len(txTo.vout)):
-        serialize_outputs = txTo.vout[inIdx].serialize()
-        hashOutputs = uint256_from_str(hash256(serialize_outputs))
+        hash_outputs = uint256_from_str(hash256(serialize_outputs))
+    elif (hash_type & 0x1f) == SIGHASH_SINGLE and in_idx < len(tx_to.vout):
+        serialize_outputs = tx_to.vout[in_idx].serialize()
+        hash_outputs = uint256_from_str(hash256(serialize_outputs))
 
     ss = bytes()
-    ss += struct.pack("<i", txTo.nVersion)
-    ss += ser_uint256(hashPrevouts)
-    ss += ser_uint256(hashSequence)
-    ss += txTo.vin[inIdx].prevout.serialize()
+    ss += struct.pack("<i", tx_to.nVersion)
+    ss += ser_uint256(hash_prevouts)
+    ss += ser_uint256(hash_sequence)
+    ss += tx_to.vin[in_idx].prevout.serialize()
     ss += ser_string(script)
     ss += struct.pack("<q", amount)
-    ss += struct.pack("<I", txTo.vin[inIdx].nSequence)
-    ss += ser_uint256(hashOutputs)
-    ss += struct.pack("<i", txTo.nLockTime)
-    ss += struct.pack("<I", hashtype)
+    ss += struct.pack("<I", tx_to.vin[in_idx].nSequence)
+    ss += ser_uint256(hash_outputs)
+    ss += struct.pack("<i", tx_to.nLockTime)
+    ss += struct.pack("<I", hash_type)
 
     return hash256(ss)

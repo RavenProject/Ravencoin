@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test behavior of -maxuploadtarget.
+
+"""
+Test behavior of -maxuploadtarget.
 
 * Verify that getdata requests for old blocks (>1week) are dropped
 if uploadtarget has been reached.
@@ -11,13 +13,12 @@ if uploadtarget has been reached.
 if uploadtarget has been reached.
 * Verify that the upload counters are reset after 24 hours.
 """
+
 from collections import defaultdict
 import time
-
-from pprint import re
-from test_framework.mininode import (NodeConn, NodeConnCB, NetworkThread, msg_getdata, CInv)
+from test_framework.mininode import NodeConn, NodeConnCB, NetworkThread, MsgGetdata, CInv
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (p2p_port, mine_large_block, assert_equal)
+from test_framework.util import p2p_port, mine_large_block, assert_equal
 
 
 class TestNode(NodeConnCB):
@@ -29,8 +30,8 @@ class TestNode(NodeConnCB):
         pass
 
     def on_block(self, conn, message):
-        message.block.calc_sha256()
-        self.block_receive_map[message.block.sha256] += 1
+        message.block.calc_x16r()
+        self.block_receive_map[message.block.x16r] += 1
 
 
 class MaxUploadTest(RavenTestFramework):
@@ -91,7 +92,7 @@ class MaxUploadTest(RavenTestFramework):
         # test_nodes[0] will test what happens if we just keep requesting the
         # the same big old block too many times (expect: disconnect)
 
-        getdata_request = msg_getdata()
+        getdata_request = MsgGetdata()
         getdata_request.inv.append(CInv(2, big_old_block))
 
         block_rate_minutes = 1

@@ -3,15 +3,13 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Testing messaging
+
+"""
+Testing messaging
 """
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, 
-                                assert_raises_rpc_error, 
-                                assert_contains, 
-                                assert_does_not_contain, 
-                                assert_contains_pair)
+from test_framework.util import assert_equal, assert_raises_rpc_error, assert_contains, assert_does_not_contain, assert_contains_pair
 
 class MessagingTest(RavenTestFramework):
     def set_test_params(self):

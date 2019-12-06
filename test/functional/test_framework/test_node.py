@@ -3,6 +3,7 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Class for ravend node under test"""
 
 import decimal
@@ -11,15 +12,11 @@ import http.client
 import json
 import logging
 import os
+import re
 import subprocess
 import time
 
-from .util import (
-    assert_equal,
-    get_rpc_proxy,
-    rpc_url,
-    wait_until,
-)
+from .util import assert_equal, get_rpc_proxy, rpc_url, wait_until
 from .authproxy import JSONRPCException
 
 RAVEND_PROC_WAIT_TIMEOUT = 60
@@ -51,7 +48,7 @@ class TestNode:
             self.binary = binary
         self.stderr = stderr
         self.coverage_dir = coverage_dir
-        # Most callers will just need to add extra args to the standard list below. For those callers that need more flexibity, they can just set the args property directly.
+        # Most callers will just need to add extra args to the standard list below. For those callers that need more flexibility, they can just set the args property directly.
         self.extra_args = extra_args
         self.args = [self.binary, "-datadir=" + self.datadir, "-server", "-keypool=1", "-discover=0", "-rest", "-logtimemicros", "-debug", "-debugexclude=libevent", "-debugexclude=leveldb", "-mocktime=" + str(mocktime), "-uacomment=testnode%d" % i]
 
@@ -64,6 +61,7 @@ class TestNode:
         self.url = None
         self.log = logging.getLogger('TestFramework.node%d' % i)
         self.cleanup_on_exit = True # Whether to kill the node when this object goes away
+        self.p2ps = []
 
     def __del__(self):
         # Ensure that we don't leave any ravend processes lying around after
@@ -154,6 +152,31 @@ class TestNode:
 
     def wait_until_stopped(self, timeout=RAVEND_PROC_WAIT_TIMEOUT):
         wait_until(self.is_node_stopped, err_msg="Wait until Stopped", timeout=timeout)
+
+    def assert_debug_log(self, expected_msgs, timeout=2):
+        time_end = time.time() + timeout
+        debug_log = os.path.join(self.datadir, self.chain, 'debug.log')
+        with open(debug_log, encoding='utf-8') as dl:
+            dl.seek(0, 2)
+            prev_size = dl.tell()
+
+        yield
+
+        while True:
+            found = True
+            with open(debug_log, encoding='utf-8') as dl:
+                dl.seek(prev_size)
+                log = dl.read()
+            print_log = " - " + "\n - ".join(log.splitlines())
+            for expected_msg in expected_msgs:
+                if re.search(re.escape(expected_msg), log, flags=re.MULTILINE) is None:
+                    found = False
+            if found:
+                return
+            if time.time() >= time_end:
+                break
+            time.sleep(0.05)
+        self._raise_assertion_error('Expected messages "{}" does not partially match log:\n\n{}\n\n'.format(str(expected_msgs), print_log))
 
     def node_encrypt_wallet(self, passphrase):
         """"Encrypts the wallet.

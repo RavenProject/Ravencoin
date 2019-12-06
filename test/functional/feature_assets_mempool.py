@@ -3,14 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Testing asset mempool use cases
 
-"""
+"""Testing asset mempool use cases"""
+
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import assert_equal, disconnect_all_nodes, connect_all_nodes_bi
-
-
-import string
 
 class AssetMempoolTest(RavenTestFramework):
     def set_test_params(self):
@@ -68,8 +65,7 @@ class AssetMempoolTest(RavenTestFramework):
 
         # Reissue that asset
         address1 = n0.getnewaddress()
-        n0.reissue(asset_name=asset_name, qty=2000, to_address=address1, change_address='', \
-                   reissuable=True, new_unit=-1)
+        n0.reissue(asset_name=asset_name, qty=2000, to_address=address1, change_address='', reissuable=True, new_unit=-1)
         n0.generate(15)
 
         # Get a transfer address
@@ -91,7 +87,7 @@ class AssetMempoolTest(RavenTestFramework):
         # Connect the nodes, a reorg should occur
         connect_all_nodes_bi(self.nodes, True)
 
-        # Asset the reorg occured
+        # Asset the reorg occurred
         assert_equal(n0.getblockcount(), n1.getblockcount())
         assert_equal(n0.getbestblockhash(), n1.getbestblockhash())
 
