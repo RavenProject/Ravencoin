@@ -3,18 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the wallet."""
+
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (connect_nodes_bi, 
-                                assert_fee_amount, 
-                                assert_equal, 
-                                assert_raises_rpc_error, 
-                                Decimal, 
-                                count_bytes, 
-                                sync_mempools, 
-                                sync_blocks, 
-                                time, 
-                                assert_array_result)
+from test_framework.util import connect_nodes_bi, assert_fee_amount, assert_equal, assert_raises_rpc_error, Decimal, count_bytes, sync_mempools, sync_blocks, time, assert_array_result
 
 class WalletTest(RavenTestFramework):
     def set_test_params(self):
@@ -48,9 +41,9 @@ class WalletTest(RavenTestFramework):
 
         self.nodes[0].generate(1)
 
-        walletinfo = self.nodes[0].getwalletinfo()
-        assert_equal(walletinfo['immature_balance'], 5000)
-        assert_equal(walletinfo['balance'], 0)
+        wallet_info = self.nodes[0].getwalletinfo()
+        assert_equal(wallet_info['immature_balance'], 5000)
+        assert_equal(wallet_info['balance'], 0)
 
         self.sync_all([self.nodes[0:3]])
         self.nodes[1].generate(101)
@@ -101,8 +94,8 @@ class WalletTest(RavenTestFramework):
         # but 10 will go to node2 and the rest will go to node0
         balance = self.nodes[0].getbalance()
         assert_equal({txout1['value'], txout2['value']}, {10, balance})
-        walletinfo = self.nodes[0].getwalletinfo()
-        assert_equal(walletinfo['immature_balance'], 0)
+        wallet_info = self.nodes[0].getwalletinfo()
+        assert_equal(wallet_info['immature_balance'], 0)
 
         # Have node0 mine a block, thus it will collect its own fee.
         self.nodes[0].generate(1)
@@ -221,7 +214,7 @@ class WalletTest(RavenTestFramework):
 
         raw_tx = self.nodes[1].createrawtransaction(inputs, outputs)
         raw_tx = raw_tx.replace("c04fbbde19", "0000000000") #replace 1111.11 with 0.0 (int32)
-        dec_raw_tx = self.nodes[1].decoderawtransaction(raw_tx)
+        self.nodes[1].decoderawtransaction(raw_tx)
         signed_raw_tx = self.nodes[1].signrawtransaction(raw_tx)
         dec_raw_tx = self.nodes[1].decoderawtransaction(signed_raw_tx['hex'])
         zero_value_txid = dec_raw_tx['txid']
@@ -280,7 +273,7 @@ class WalletTest(RavenTestFramework):
         sync_blocks(self.nodes[0:3])
         node_2_bal += 2
 
-        #tx should be added to balance because after restarting the nodes tx should be broadcastet
+        #tx should be added to balance because after restarting the nodes tx should be broadcasted
         assert_equal(self.nodes[2].getbalance(), node_2_bal)
 
         #send a tx with value in a string (PR#6380 +)
@@ -344,7 +337,7 @@ class WalletTest(RavenTestFramework):
         blocks = self.nodes[0].generate(2)
         self.sync_all([self.nodes[0:3]])
         balance_nodes = [self.nodes[i].getbalance() for i in range(3)]
-        block_count = self.nodes[0].getblockcount()
+        self.nodes[0].getblockcount()
 
         # Check modes:
         #   - True: unicode escaped as \u....
@@ -381,11 +374,11 @@ class WalletTest(RavenTestFramework):
 
         # Get all non-zero utxos together
         chain_addrs = [self.nodes[0].getnewaddress(), self.nodes[0].getnewaddress()]
-        singletxid = self.nodes[0].sendtoaddress(chain_addrs[0], self.nodes[0].getbalance(), "", "", True)
+        single_tx_id = self.nodes[0].sendtoaddress(chain_addrs[0], self.nodes[0].getbalance(), "", "", True)
         self.nodes[0].generate(1)
         node0_balance = self.nodes[0].getbalance()
         # Split into two chains
-        rawtx = self.nodes[0].createrawtransaction([{"txid":singletxid, "vout":0}], {chain_addrs[0]:node0_balance/2-Decimal('0.01'), chain_addrs[1]:node0_balance/2-Decimal('0.01')})
+        rawtx = self.nodes[0].createrawtransaction([{"txid":single_tx_id, "vout":0}], {chain_addrs[0]:node0_balance/2-Decimal('0.01'), chain_addrs[1]:node0_balance/2-Decimal('0.01')})
         signedtx = self.nodes[0].signrawtransaction(rawtx)
         self.nodes[0].sendrawtransaction(signedtx["hex"])
         self.nodes[0].generate(1)

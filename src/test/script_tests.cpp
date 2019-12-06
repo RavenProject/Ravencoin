@@ -1502,9 +1502,9 @@ BOOST_FIXTURE_TEST_SUITE(script_tests, BasicTestingSetup)
 
     BOOST_AUTO_TEST_CASE(script_FindAndDelete_test)
     {
-        BOOST_TEST_MESSAGE("Running script FindAndDelete Test");
+        BOOST_TEST_MESSAGE("Running script find_and_delete Test");
 
-        // Exercise the FindAndDelete functionality
+        // Exercise the find_and_delete functionality
         CScript s;
         CScript d;
         CScript expect;
@@ -1541,7 +1541,7 @@ BOOST_FIXTURE_TEST_SUITE(script_tests, BasicTestingSetup)
 
         s = ScriptFromHex("0302ff030302ff03");
         d = ScriptFromHex("02");
-        expect = s; // FindAndDelete matches entire opcodes
+        expect = s; // find_and_delete matches entire opcodes
         BOOST_CHECK_EQUAL(s.FindAndDelete(d), 0);
         BOOST_CHECK(s == expect);
 
@@ -1586,13 +1586,13 @@ BOOST_FIXTURE_TEST_SUITE(script_tests, BasicTestingSetup)
 
         s = CScript() << OP_0 << OP_0 << OP_1 << OP_1;
         d = CScript() << OP_0 << OP_1;
-        expect = CScript() << OP_0 << OP_1; // FindAndDelete is single-pass
+        expect = CScript() << OP_0 << OP_1; // find_and_delete is single-pass
         BOOST_CHECK_EQUAL(s.FindAndDelete(d), 1);
         BOOST_CHECK(s == expect);
 
         s = CScript() << OP_0 << OP_0 << OP_1 << OP_0 << OP_1 << OP_1;
         d = CScript() << OP_0 << OP_1;
-        expect = CScript() << OP_0 << OP_1; // FindAndDelete is single-pass
+        expect = CScript() << OP_0 << OP_1; // find_and_delete is single-pass
         BOOST_CHECK_EQUAL(s.FindAndDelete(d), 2);
         BOOST_CHECK(s == expect);
 

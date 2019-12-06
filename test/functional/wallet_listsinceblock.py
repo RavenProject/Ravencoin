@@ -3,6 +3,7 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the listsincelast RPC."""
 
 from test_framework.test_framework import RavenTestFramework
@@ -23,7 +24,7 @@ class ListSinceBlockTest (RavenTestFramework):
         self.test_double_send()
 
     def test_reorg(self):
-        '''
+        """
         `listsinceblock` did not behave correctly when handed a block that was
         no longer in the main chain:
 
@@ -49,7 +50,7 @@ class ListSinceBlockTest (RavenTestFramework):
         range bb1-bb4.
 
         This test only checks that [tx0] is present.
-        '''
+        """
 
         # Split network into two
         self.split_network()
@@ -60,7 +61,7 @@ class ListSinceBlockTest (RavenTestFramework):
         # generate on both sides
         lastblockhash = self.nodes[1].generate(6)[5]
         self.nodes[2].generate(7)
-        self.log.debug('lastblockhash=%s' % (lastblockhash))
+        self.log.debug('lastblockhash=%s' % lastblockhash)
 
         self.sync_all([self.nodes[:2], self.nodes[2:]])
 
@@ -76,7 +77,7 @@ class ListSinceBlockTest (RavenTestFramework):
         assert found
 
     def test_double_spend(self):
-        '''
+        """
         This tests the case where the same UTXO is spent twice on two separate
         blocks as part of a reorg.
 
@@ -103,7 +104,7 @@ class ListSinceBlockTest (RavenTestFramework):
         asked for in listsinceblock, and to iterate back over existing blocks up
         until the fork point, and to include all transactions that relate to the
         node wallet.
-        '''
+        """
 
         self.sync_all()
 
@@ -159,7 +160,7 @@ class ListSinceBlockTest (RavenTestFramework):
         assert 'removed' not in lsbres2
 
     def test_double_send(self):
-        '''
+        """
         This tests the case where the same transaction is submitted twice on two
         separate blocks as part of a reorg. The former will vanish and the
         latter will appear as the true transaction (with confirmations dropping
@@ -182,7 +183,7 @@ class ListSinceBlockTest (RavenTestFramework):
            present in a different block.
         3. It is listed with a confirmations count of 2 (bb3, bb4), not
            3 (aa1, aa2, aa3).
-        '''
+        """
 
         self.sync_all()
 

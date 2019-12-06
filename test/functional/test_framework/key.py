@@ -1,5 +1,7 @@
 # Copyright (c) 2011 Sam Rushing
-"""ECC secp256k1 OpenSSL wrapper.
+
+"""
+ECC secp256k1 OpenSSL wrapper.
 
 WARNING: This module does not mlock() secrets; your private keys may end up on
 disk in swap! Use with caution!
@@ -12,7 +14,7 @@ import ctypes.util
 import hashlib
 import sys
 
-ssl = ctypes.cdll.LoadLibrary(ctypes.util.find_library ('ssl') or 'libeay32')
+ssl = ctypes.cdll.LoadLibrary(ctypes.util.find_library ('libeay32'))
 
 ssl.BN_new.restype = ctypes.c_void_p
 ssl.BN_new.argtypes = []
@@ -75,7 +77,7 @@ SECP256K1_ORDER = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD036
 SECP256K1_ORDER_HALF = SECP256K1_ORDER // 2
 
 # Thx to Sam Devlin for the ctypes magic 64-bit fix.
-def _check_result(val, func, args):
+def _check_result(val):
     if val == 0:
         raise ValueError
     else:
@@ -84,7 +86,7 @@ def _check_result(val, func, args):
 ssl.EC_KEY_new_by_curve_name.restype = ctypes.c_void_p
 ssl.EC_KEY_new_by_curve_name.errcheck = _check_result
 
-class CECKey():
+class CECKey:
     """Wrapper around OpenSSL's EC_KEY"""
 
     POINT_CONVERSION_COMPRESSED = 2
@@ -146,17 +148,17 @@ class CECKey():
         r = self.get_raw_ecdh_key(other_pubkey)
         return kdf(r)
 
-    def sign(self, hash, low_s = True):
+    def sign(self, hash_in, low_s = True):
         # FIXME: need unit tests for below cases
-        if not isinstance(hash, bytes):
-            raise TypeError('Hash must be bytes instance; got %r' % hash.__class__)
-        if len(hash) != 32:
+        if not isinstance(hash_in, bytes):
+            raise TypeError('Hash must be bytes instance; got %r' % hash_in.__class__)
+        if len(hash_in) != 32:
             raise ValueError('Hash must be exactly 32 bytes long')
 
         sig_size0 = ctypes.c_uint32()
         sig_size0.value = ssl.ECDSA_size(self.k)
         mb_sig = ctypes.create_string_buffer(sig_size0.value)
-        result = ssl.ECDSA_sign(0, hash, len(hash), mb_sig, ctypes.byref(sig_size0), self.k)
+        result = ssl.ECDSA_sign(0, hash_in, len(hash_in), mb_sig, ctypes.byref(sig_size0), self.k)
         assert 1 == result
         assert mb_sig.raw[0] == 0x30
         assert mb_sig.raw[1] == sig_size0.value - 2
@@ -170,17 +172,17 @@ class CECKey():
             return mb_sig.raw[:sig_size0.value]
         else:
             low_s_value = SECP256K1_ORDER - s_value
-            low_s_bytes = (low_s_value).to_bytes(33, byteorder='big')
+            low_s_bytes = low_s_value.to_bytes(33, byteorder='big')
             while len(low_s_bytes) > 1 and low_s_bytes[0] == 0 and low_s_bytes[1] < 0x80:
                 low_s_bytes = low_s_bytes[1:]
             new_s_size = len(low_s_bytes)
             new_total_size_byte = (total_size + new_s_size - s_size).to_bytes(1,byteorder='big')
-            new_s_size_byte = (new_s_size).to_bytes(1,byteorder='big')
+            new_s_size_byte = new_s_size.to_bytes(1, byteorder='big')
             return b'\x30' + new_total_size_byte + mb_sig.raw[2:5+r_size] + new_s_size_byte + low_s_bytes
 
-    def verify(self, hash, sig):
+    def verify(self, hash_in, sig):
         """Verify a DER signature"""
-        return ssl.ECDSA_verify(0, hash, len(hash), sig, len(sig), self.k) == 1
+        return ssl.ECDSA_verify(0, hash_in, len(hash_in), sig, len(sig), self.k) == 1
 
     def set_compressed(self, compressed):
         if compressed:
@@ -216,8 +218,8 @@ class CPubKey(bytes):
     def is_compressed(self):
         return len(self) == 33
 
-    def verify(self, hash, sig):
-        return self._cec_key.verify(hash, sig)
+    def verify(self, hash_in, sig):
+        return self._cec_key.verify(hash_in, sig)
 
     def __str__(self):
         return repr(self)

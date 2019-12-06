@@ -3,6 +3,7 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Helpful routines for regression testing."""
 
 from base64 import b64encode
@@ -18,48 +19,56 @@ import re
 import subprocess
 from subprocess import CalledProcessError
 import time
-
+import socket
+from contextlib import closing
 from . import coverage
 from .authproxy import AuthServiceProxy, JSONRPCException
 
 logger = logging.getLogger("TestFramework.utils")
 
+##########################################################################################
+#                                   Assert functions
+##########################################################################################
+def assert_approx(v, vexp, vspan=0.00001):
+    """Assert that `v` is within `vspan` of `vexp`"""
+    if v < vexp - vspan:
+        raise AssertionError("%s < [%s..%s]" % (str(v), str(vexp - vspan), str(vexp + vspan)))
+    if v > vexp + vspan:
+        raise AssertionError("%s > [%s..%s]" % (str(v), str(vexp - vspan), str(vexp + vspan)))
 
-# Assert functions
-##################
 
 def assert_contains(val, arr):
     if not (val in arr):
-        raise AssertionError("val %s not in arr" % (val))
+        raise AssertionError("val %s not in arr" % val)
 
 
 def assert_does_not_contain(val, arr):
-    if (val in arr):
-        raise AssertionError("val %s is in arr" % (val))
+    if val in arr:
+        raise AssertionError("val %s is in arr" % val)
 
 
-def assert_contains_pair(key, val, dict):
-    if not (key in dict and val == dict[key]):
+def assert_contains_pair(key, val, dict_data):
+    if not (key in dict_data and val == dict_data[key]):
         raise AssertionError("k/v pair (%s,%s) not in dict" % (key, val))
 
 
-def assert_contains_key(key, dict):
-    if not (key in dict):
-        raise AssertionError("key %s is not in dict" % (key))
+def assert_contains_key(key, dict_data):
+    if not key in dict_data:
+        raise AssertionError("key %s is not in dict" % key)
 
 
-def assert_does_not_contain_key(key, dict):
-    if (key in dict):
-        raise AssertionError("key %s is in dict" % (key))
+def assert_does_not_contain_key(key, dict_data):
+    if key in dict_data:
+        raise AssertionError("key %s is in dict" % key)
 
 
-def assert_fee_amount(fee, tx_size, fee_per_kB):
+def assert_fee_amount(fee, tx_size, fee_per_kb):
     """Assert the fee was in range"""
-    target_fee = tx_size * fee_per_kB / 1000
+    target_fee = tx_size * fee_per_kb / 1000
     if fee < target_fee:
         raise AssertionError("Fee of %s RVN too low! (Should be %s RVN)" % (str(fee), str(target_fee)))
     # allow the wallet's estimation to be at most 2 bytes off
-    if fee > (tx_size + 2) * fee_per_kB / 1000:
+    if fee > (tx_size + 2) * fee_per_kb / 1000:
         raise AssertionError("Fee of %s RVN too high! (Should be %s RVN)" % (str(fee), str(target_fee)))
 
 
@@ -98,7 +107,6 @@ def assert_raises_message(exc, message, fun, *args, **kwds):
 
 def assert_raises_process_error(returncode, output, fun, *args, **kwds):
     """Execute a process and asserts the process return code and output.
-
     Calls function `fun` with arguments `args` and `kwds`. Catches a CalledProcessError
     and verifies that the return code and output are as expected. Throws AssertionError if
     no CalledProcessError was raised or if the return code and output are not as expected.
@@ -210,18 +218,19 @@ def assert_array_result(object_array, to_match, expected, should_not_find=False)
 
 def assert_happening(date_str, within_secs=120):
     """ Make sure date_str happened withing within_secs seconds of now.
-        Assumes date_str is in rpc results format e.g. '2019-11-07 17:50:06' and assumed to represent UTC.
+        Assumes date_str is in rpc results cust_format e.g. '2019-11-07 17:50:06' and assumed to represent UTC.
         Using a big default to eliminate inaccurate wall clocks...
     """
-    format = '%Y-%m-%d %H:%M:%S'
-    then = datetime.strptime(date_str, format).replace(tzinfo=timezone.utc)
+    cust_format = '%Y-%m-%d %H:%M:%S'
+    then = datetime.strptime(date_str, cust_format).replace(tzinfo=timezone.utc)
     now = datetime.now(timezone.utc)
     diff_secs = (now - then).total_seconds()
     if abs(diff_secs) > within_secs:
         raise AssertionError("More than expected %s second difference between %s and now(%s) (%ss)" % (within_secs, date_str, now, diff_secs))
 
-# Utility functions
-###################
+##########################################################################################
+#                                   Utility functions
+##########################################################################################
 
 def check_json_precision():
     """Make sure json library being used does not lose precision converting RVN values"""
@@ -295,9 +304,9 @@ def wait_until(predicate, *, err_msg, attempts=float('inf'), timeout=float('inf'
     assert_greater_than(time.ctime(timeout), time.ctime(), err_msg + " ~~ Exceeded Timeout")
     raise RuntimeError('Unreachable')
 
-
-# RPC/P2P connection constants and functions
-############################################
+##########################################################################################
+#                       RPC/P2P connection constants and functions
+##########################################################################################
 
 # The maximum number of nodes a single test can spawn
 MAX_NODES = 8
@@ -305,11 +314,34 @@ MAX_NODES = 8
 PORT_MIN = 11000
 # The number of ports to "reserve" for p2p and rpc, each
 PORT_RANGE = 5000
-
+# List to store P2P ports
+p2p_ports = [-1, -1, -1, -1, -1, -1, -1, -1]
+# List to store RPC ports
+rpc_ports = [-1, -1, -1, -1, -1, -1, -1, -1]
 
 class PortSeed:
     # Must be initialized with a unique integer for each process
     n = None
+
+
+def find_free_port():
+    """
+    Ask the system for a free port.
+    In case of error return error message.
+    :return: {Tuple}
+    """
+    port = None
+    error = {}
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        try:
+            s.bind(('', 0))
+            sock_name = s.getsockname()
+            if type(sock_name) is tuple and len(sock_name) == 2:
+                port = sock_name[1]
+        except socket.error as e:
+            error = {'errno': e.errno, 'msg': str(e)}
+
+        return port, error
 
 
 def get_rpc_proxy(url, node_number, timeout=None, coverage_dir=None):
@@ -337,16 +369,25 @@ def get_rpc_proxy(url, node_number, timeout=None, coverage_dir=None):
 
 
 def p2p_port(n):
-    assert (n <= MAX_NODES)
-    return PORT_MIN + n + (MAX_NODES * PortSeed.n) % (PORT_RANGE - 1 - MAX_NODES)
+    if p2p_ports[n] is -1:
+        # Port isn't in the list, find one that is available
+        p2p_ports[n] = find_free_port()[0]
+        return p2p_ports[n]
+    else:
+        return p2p_ports[n]
 
 
 def rpc_port(n):
-    return PORT_MIN + PORT_RANGE + n + (MAX_NODES * PortSeed.n) % (PORT_RANGE - 1 - MAX_NODES)
+    if rpc_ports[n] is -1:
+        # Port isn't in the list, find one that is available
+        rpc_ports[n] = find_free_port()[0]
+        return rpc_ports[n]
+    else:
+        return rpc_ports[n]
 
 
-def rpc_url(datadir, i, rpchost=None):
-    rpc_u, rpc_p = get_auth_cookie(datadir)
+def rpc_url(data_dir, i, rpchost=None):
+    rpc_u, rpc_p = get_auth_cookie(data_dir)
     host = '127.0.0.1'
     port = rpc_port(i)
     if rpchost:
@@ -357,11 +398,11 @@ def rpc_url(datadir, i, rpchost=None):
             host = rpchost
     return "http://%s:%s@%s:%d" % (rpc_u, rpc_p, host, int(port))
 
+##########################################################################################
+#                                   Node functions
+##########################################################################################
 
-# Node functions
-################
-
-def initialize_datadir(dirname, n):
+def initialize_data_dir(dirname, n):
     datadir = os.path.join(dirname, "node" + str(n))
     if not os.path.isdir(datadir):
         os.makedirs(datadir)
@@ -391,17 +432,17 @@ def get_auth_cookie(datadir):
                     password = line.split("=")[1].strip("\n")
     if os.path.isfile(os.path.join(datadir, "regtest", ".cookie")):
         with open(os.path.join(datadir, "regtest", ".cookie"), 'r', encoding="ascii") as f:
-            userpass = f.read()
-            split_userpass = userpass.split(':')
-            user = split_userpass[0]
-            password = split_userpass[1]
+            user_pass = f.read()
+            split_user_pass = user_pass.split(':')
+            user = split_user_pass[0]
+            password = split_user_pass[1]
     if user is None or password is None:
         raise ValueError("No RPC credentials")
     return user, password
 
 
-def log_filename(dirname, n_node, logname):
-    return os.path.join(dirname, "node" + str(n_node), "regtest", logname)
+def log_filename(dirname, n_node, log_name):
+    return os.path.join(dirname, "node" + str(n_node), "regtest", log_name)
 
 
 def get_bip9_status(node, key):
@@ -479,16 +520,15 @@ def sync_blocks(rpc_connections, *, wait=1, timeout=60):
     # earlier.
     max_height = max(x.getblockcount() for x in rpc_connections)
     start_time = cur_time = time.time()
+    tips = None
     while cur_time <= start_time + timeout:
         tips = [r.waitforblockheight(max_height, int(wait * 1000)) for r in rpc_connections]
         if all(t["height"] == max_height for t in tips):
             if all(t["hash"] == tips[0]["hash"] for t in tips):
                 return
-            raise AssertionError("Block sync failed, mismatched block hashes:{}".format(
-                "".join("\n  {!r}".format(tip) for tip in tips)))
+            raise AssertionError("Block sync failed, mismatched block hashes:{}".format("".join("\n  {!r}".format(tip) for tip in tips)))
         cur_time = time.time()
-    raise AssertionError("Block sync to height {} timed out:{}".format(
-        max_height, "".join("\n  {!r}".format(tip) for tip in tips)))
+    raise AssertionError("Block sync to height {} timed out:{}".format(max_height, "".join("\n  {!r}".format(tip) for tip in tips)))
 
 
 def sync_chain(rpc_connections, *, wait=1, timeout=60):
@@ -521,9 +561,9 @@ def sync_mempools(rpc_connections, *, wait=1, timeout=60):
         timeout -= wait
     raise AssertionError("Mempool sync failed")
 
-
-# Transaction/Block functions
-#############################
+##########################################################################################
+#                           Transaction/Block functions
+##########################################################################################
 
 def find_output(node, txid, amount):
     """

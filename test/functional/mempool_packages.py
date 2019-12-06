@@ -3,15 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test descendant package tracking code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (satoshi_round, 
-                                Decimal, 
-                                assert_equal, 
-                                assert_raises_rpc_error, 
-                                sync_blocks, 
-                                sync_mempools)
+from test_framework.util import satoshi_round, Decimal, assert_equal, assert_raises_rpc_error, sync_blocks, sync_mempools
 from test_framework.mininode import COIN
 
 MAX_ANCESTORS = 25
@@ -24,7 +20,8 @@ class MempoolPackagesTest(RavenTestFramework):
 
     # Build a transaction that spends parent_txid:vout
     # Return amount sent
-    def chain_transaction(self, node, parent_txid, vout, value, fee, num_outputs):
+    @staticmethod
+    def chain_transaction(node, parent_txid, vout, value, fee, num_outputs):
         send_value = satoshi_round((value - fee)/num_outputs)
         inputs = [ {'txid' : parent_txid, 'vout' : vout} ]
         outputs = {}
@@ -35,10 +32,10 @@ class MempoolPackagesTest(RavenTestFramework):
         txid = node.sendrawtransaction(signedtx['hex'])
         fulltx = node.getrawtransaction(txid, 1)
         assert(len(fulltx['vout']) == num_outputs) # make sure we didn't generate a change output
-        return (txid, send_value)
+        return txid, send_value
 
     def run_test(self):
-        ''' Mine some blocks and have them mature. '''
+        """ Mine some blocks and have them mature. """
         self.nodes[0].generate(101)
         utxo = self.nodes[0].listunspent(10)
         txid = utxo[0]['txid']
@@ -141,7 +138,7 @@ class MempoolPackagesTest(RavenTestFramework):
         descendant_fees = 0
         for x in reversed(chain):
             descendant_fees += mempool[x]['fee']
-            if (x == chain[-1]):
+            if x == chain[-1]:
                 assert_equal(mempool[x]['modifiedfee'], mempool[x]['fee']+satoshi_round(0.00002))
             assert_equal(mempool[x]['descendantfees'], descendant_fees * COIN + 2000)
 
@@ -236,7 +233,7 @@ class MempoolPackagesTest(RavenTestFramework):
         outputs = { self.nodes[0].getnewaddress() : send_value + value - 4*fee }
         rawtx = self.nodes[0].createrawtransaction(inputs, outputs)
         signedtx = self.nodes[0].signrawtransaction(rawtx)
-        txid = self.nodes[0].sendrawtransaction(signedtx['hex'])
+        self.nodes[0].sendrawtransaction(signedtx['hex'])
         sync_mempools(self.nodes)
         
         # Now try to disconnect the tip on each node...

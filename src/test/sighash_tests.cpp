@@ -24,7 +24,7 @@
 
 extern UniValue read_json(const std::string &jsondata);
 
-// Old script.cpp SignatureHash function
+// Old script.cpp signature_hash function
 uint256 static SignatureHashOld(CScript scriptCode, const CTransaction &txTo, unsigned int nIn, int nHashType)
 {
     static const uint256 one(uint256S("0000000000000000000000000000000000000000000000000000000000000001"));
@@ -168,7 +168,7 @@ BOOST_FIXTURE_TEST_SUITE(sighash_tests, BasicTestingSetup)
     #endif
     }
 
-    // Goal: check that SignatureHash generates correct hash
+    // Goal: check that signature_hash generates correct hash
     BOOST_AUTO_TEST_CASE(sighash_from_data_test)
     {
         BOOST_TEST_MESSAGE("Running SigHas From Data Test");

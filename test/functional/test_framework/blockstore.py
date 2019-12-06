@@ -3,15 +3,16 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """BlockStore and TxStore helper classes."""
 
-from .mininode import (logging, CBlock, msg_headers, CBlockHeader, msg_generic, CBlockLocator)
+from .mininode import logging, CBlock, MsgHeaders, CBlockHeader, MsgGeneric, CBlockLocator
 from io import BytesIO
 import dbm.dumb as dbmd
 
 logger = logging.getLogger("TestFramework.blockstore")
 
-class BlockStore():
+class BlockStore:
     """BlockStore helper class.
 
     BlockStore keeps a map of blocks and implements helper functions for
@@ -32,7 +33,6 @@ class BlockStore():
 
     # lookup an entry and return the item as raw bytes
     def get(self, blockhash):
-        value = None
         try:
             value = self.blockDB[repr(blockhash)]
         except KeyError:
@@ -47,7 +47,7 @@ class BlockStore():
             f = BytesIO(serialized_block)
             ret = CBlock()
             ret.deserialize(f)
-            ret.calc_sha256()
+            ret.calc_x16r()
         return ret
 
     def get_header(self, blockhash):
@@ -66,26 +66,26 @@ class BlockStore():
         if current_block_header is None:
             return None
 
-        response = msg_headers()
-        headersList = [ current_block_header ]
-        maxheaders = 2000
-        while (headersList[0].sha256 not in locator.vHave):
-            prevBlockHash = headersList[0].hashPrevBlock
-            prevBlockHeader = self.get_header(prevBlockHash)
-            if prevBlockHeader is not None:
-                headersList.insert(0, prevBlockHeader)
+        response = MsgHeaders()
+        headers_list = [ current_block_header ]
+        max_headers = 2000
+        while headers_list[0].sha256 not in locator.vHave:
+            prev_block_hash = headers_list[0].hashPrevBlock
+            prev_block_header = self.get_header(prev_block_hash)
+            if prev_block_header is not None:
+                headers_list.insert(0, prev_block_header)
             else:
                 break
-        headersList = headersList[:maxheaders] # truncate if we have too many
-        hashList = [x.sha256 for x in headersList]
-        index = len(headersList)
-        if (hash_stop in hashList):
-            index = hashList.index(hash_stop)+1
-        response.headers = headersList[:index]
+        headers_list = headers_list[:max_headers] # truncate if we have too many
+        hash_list = [x.sha256 for x in headers_list]
+        index = len(headers_list)
+        if hash_stop in hash_list:
+            index = hash_list.index(hash_stop)+1
+        response.headers = headers_list[:index]
         return response
 
     def add_block(self, block):
-        block.calc_sha256()
+        block.calc_x16r()
         try:
             self.blockDB[repr(block.sha256)] = bytes(block.serialize())
         except TypeError:
@@ -101,11 +101,11 @@ class BlockStore():
     def get_blocks(self, inv):
         responses = []
         for i in inv:
-            if (i.type == 2): # MSG_BLOCK
+            if i.type == 2: # MSG_BLOCK
                 data = self.get(i.hash)
                 if data is not None:
                     # Use msg_generic to avoid re-serialization
-                    responses.append(msg_generic(b"block", data))
+                    responses.append(MsgGeneric(b"block", data))
         return responses
 
     def get_locator(self, current_tip=None):
@@ -114,12 +114,12 @@ class BlockStore():
         r = []
         counter = 0
         step = 1
-        lastBlock = self.get_block(current_tip)
-        while lastBlock is not None:
-            r.append(lastBlock.hashPrevBlock)
+        last_block = self.get_block(current_tip)
+        while last_block is not None:
+            r.append(last_block.hashPrevBlock)
             for _ in range(step):
-                lastBlock = self.get_block(lastBlock.hashPrevBlock)
-                if lastBlock is None:
+                last_block = self.get_block(last_block.hashPrevBlock)
+                if last_block is None:
                     break
             counter += 1
             if counter > 10:
@@ -128,7 +128,7 @@ class BlockStore():
         locator.vHave = r
         return locator
 
-class TxStore():
+class TxStore:
     def __init__(self, datadir):
         self.txDB = dbmd.open(datadir + "/transactions", 'c')
 
@@ -137,7 +137,6 @@ class TxStore():
 
     # lookup an entry and return the item as raw bytes
     def get(self, txhash):
-        value = None
         try:
             value = self.txDB[repr(txhash)]
         except KeyError:
@@ -145,7 +144,7 @@ class TxStore():
         return value
 
     def add_transaction(self, tx):
-        tx.calc_sha256()
+        tx.calc_x16r()
         try:
             self.txDB[repr(tx.sha256)] = bytes(tx.serialize())
         except TypeError:
@@ -154,8 +153,8 @@ class TxStore():
     def get_transactions(self, inv):
         responses = []
         for i in inv:
-            if (i.type == 1): # MSG_TX
+            if i.type == 1: # MSG_TX
                 tx = self.get(i.hash)
                 if tx is not None:
-                    responses.append(msg_generic(b"tx", tx))
+                    responses.append(MsgGeneric(b"tx", tx))
         return responses
