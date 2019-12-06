@@ -129,7 +129,7 @@ public:
         ppmutexOpenSSL.reset(new CCriticalSection[CRYPTO_num_locks()]);
         CRYPTO_set_locking_callback(locking_callback);
 
-        // OpenSSL can optionally load a config file which lists omake ptional loadable modules and engines.
+        // OpenSSL can optionally load a config file which lists optional loadable modules and engines.
         // We don't use them so we don't require the config. However some of our libs may call functions
         // which attempt to load the config file, possibly resulting in an exit() or crash if it is missing
         // or corrupt. Explicitly tell OpenSSL not to try to load the file. The result for our libs will be
