@@ -488,6 +488,13 @@ public:
     std::map<std::string, std::set<uint256>> mapAssetVerifierChanged;
     std::map<uint256, std::set<std::string>> mapHashVerifierChanged;
 
+    // Helper map for when an asset already in mempool that is globally freezing
+    std::map<std::string, std::set<uint256>> mapGlobalFreezingAssetTransactions;
+    std::map<uint256, std::set<std::string>> mapHashGlobalFreezingAssetTransactions;
+
+    std::map<std::string, std::set<uint256>> mapGlobalUnFreezingAssetTransactions;
+    std::map<uint256, std::set<std::string>> mapHashGlobalUnFreezingAssetTransactions;
+
     typedef indexed_transaction_set::nth_index<0>::type::iterator txiter;
     std::vector<std::pair<uint256, txiter> > vTxHashes; //!< All tx witness hashes/entries in mapTx, in random order
 
