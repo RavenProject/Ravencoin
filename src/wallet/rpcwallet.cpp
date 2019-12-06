@@ -1691,8 +1691,12 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
     /** RVN START */
     if (AreAssetsDeployed()) {
         if (listAssetsReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth) {
-            for (const CAssetOutputEntry &data : listAssetsReceived) {
+            for (const CAssetOutputEntry &data : listAssetsReceived){
                 UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwallet, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
 
                 entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
                 entry.push_back(Pair("asset_name", data.assetName));
@@ -1703,6 +1707,9 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
                 entry.push_back(Pair("category", "receive"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
                 retAssets.push_back(entry);
             }
         }
@@ -1710,6 +1717,10 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
         if ((!listAssetsSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount)) {
             for (const CAssetOutputEntry &data : listAssetsSent) {
                 UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwallet, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
 
                 entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
                 entry.push_back(Pair("asset_name", data.assetName));
@@ -1720,6 +1731,9 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
                 entry.push_back(Pair("category", "send"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
                 retAssets.push_back(entry);
             }
         }
