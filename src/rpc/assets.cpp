@@ -420,7 +420,7 @@ UniValue issue(const JSONRPCRequest& request)
             "4. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
             "5. \"units\"                 (integer, optional, default=0, min=0, max=8), the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
             "6. \"reissuable\"            (boolean, optional, default=true (false for unique assets)), whether future reissuance is allowed\n"
-            "7. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
+            "7. \"has_ipfs\"              (boolean, optional, default=false), whether ipfs hash is going to be added to the asset\n"
             "8. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
 
             "\nResult:\n"
@@ -1557,7 +1557,7 @@ UniValue reissue(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 7 || request.params.size() < 3)
         throw std::runtime_error(
-                "reissue \"asset_name\" qty \"to_address\" \"change_address\" ( reissuable ) ( new_unit) \"( new_ipfs )\" \n"
+                "reissue \"asset_name\" qty \"to_address\" \"change_address\" ( reissuable ) ( new_units) \"( new_ipfs )\" \n"
                 + AssetActivationWarning() +
                 "\nReissues a quantity of an asset to an owned address if you own the Owner Token"
                 "\nCan change the reissuable flag during reissuance"
@@ -1569,8 +1569,8 @@ UniValue reissue(const JSONRPCRequest& request)
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
                 "4. \"change_address\"           (string, optional) address that the change of the transaction will be sent to\n"
                 "5. \"reissuable\"               (boolean, optional, default=true), whether future reissuance is allowed\n"
-                "6. \"new_unit\"                 (numeric, optional, default=-1), the new units that will be associated with the asset\n"
-                "7. \"new_ifps\"                 (string, optional, default=\"\"), whether to update the current ipfshash or txid once RIP5 is active\n"
+                "6. \"new_units\"                (numeric, optional, default=-1), the new units that will be associated with the asset\n"
+                "7. \"new_ipfs\"                 (string, optional, default=\"\"), whether to update the current ipfs hash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -2329,7 +2329,7 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
                 "2. \"qty\"                   (numeric, optional, default=1) the number of units to be issued\n"
                 "3. \"to_address\"            (string), optional, default=\"\"), address asset will be sent to, if it is empty, address will be generated for you\n"
                 "4. \"change_address\"        (string), optional, default=\"\"), address the the rvn change will be sent to, if it is empty, change address will be generated for you\n"
-                "5. \"has_ipfs\"              (boolean, optional, default=false), whether ifps hash is going to be added to the asset\n"
+                "5. \"has_ipfs\"              (boolean, optional, default=false), whether ipfs hash is going to be added to the asset\n"
                 "6. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1), an ipfs hash or a txid hash once RIP5 is activated\n"
 
                 "\nResult:\n"
@@ -2487,7 +2487,7 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
                 "5. \"change_address\"        (string, optional, default=\"\") address that the rvn change will be sent to, if it is empty, change address will be generated for you\n"
                 "6. \"units\"                 (integer, optional, default=0, min=0, max=8) the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
                 "7. \"reissuable\"            (boolean, optional, default=true (false for unique assets)) whether future reissuance is allowed\n"
-                "8. \"has_ipfs\"              (boolean, optional, default=false) whether an ifps hash or txid hash is going to be added to the asset\n"
+                "8. \"has_ipfs\"              (boolean, optional, default=false) whether an ipfs hash or txid hash is going to be added to the asset\n"
                 "9. \"ipfs_hash\"             (string, optional but required if has_ipfs = 1) an ipfs hash or a txid hash once RIP5 is activated\n"
 
                 "\nResult:\n"
@@ -2621,7 +2621,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
 {
     if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() < 3 || request.params.size() > 9)
         throw std::runtime_error(
-                "reissuerestrictedasset \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( change_address )\" ( new_units ) ( reissuable ) \"( new_ifps )\"\n"
+                "reissuerestrictedasset \"asset_name\" qty to_address ( change_verifier ) ( \"new_verifier\" ) \"( change_address )\" ( new_units ) ( reissuable ) \"( new_ipfs )\"\n"
                 + RestrictedActivationWarning() +
                 "\nReissue an already created restricted asset\n"
                 "Reissuable is true/false for whether additional asset quantity can be created and if the verifier string can be changed\n"
@@ -2635,7 +2635,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
                 "6. \"change_address\"        (string, optional, default=\"\") address that the rvn change will be sent to, if it is empty, change address will be generated for you\n"
                 "7. \"new_units\"             (numeric, optional, default=-1) the new units that will be associated with the asset\n"
                 "8. \"reissuable\"            (boolean, optional, default=true (false for unique assets)) whether future reissuance is allowed\n"
-                "9. \"new_ifps\"              (string, optional, default=\"\") whether to update the current ipfs hash or txid once RIP5 is active\n"
+                "9. \"new_ipfs\"              (string, optional, default=\"\") whether to update the current ipfs hash or txid once RIP5 is active\n"
 
                 "\nResult:\n"
                 "\"txid\"                     (string) The transaction id\n"
@@ -3033,7 +3033,7 @@ static const CRPCCommand commands[] =
     { "assets",   "transferfromaddress",        &transferfromaddress,        {"asset_name", "from_address", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time", "change_address", "asset_change_address"}},
-    { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_unit", "new_ipfs"}},
+    { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_units", "new_ipfs"}},
 #endif
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
@@ -3042,7 +3042,7 @@ static const CRPCCommand commands[] =
     { "restricted assets",   "transferqualifier",          &transferqualifier,          {"qualifier_name", "qty", "to_address", "change_address", "message", "expire_time"}},
     { "restricted assets",   "issuerestrictedasset",       &issuerestrictedasset,       {"asset_name","qty","verifier","to_address","change_address","units","reissuable","has_ipfs","ipfs_hash"} },
     { "restricted assets",   "issuequalifierasset",        &issuequalifierasset,        {"asset_name","qty","to_address","change_address","has_ipfs","ipfs_hash"} },
-    { "restricted assets",   "reissuerestrictedasset",     &reissuerestrictedasset,     {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_unit", "reissuable", "ipfs_hash"}},
+    { "restricted assets",   "reissuerestrictedasset",     &reissuerestrictedasset,     {"asset_name", "qty", "change_verifier", "new_verifier", "to_address", "change_address", "new_units", "reissuable", "new_ipfs"}},
     { "restricted assets",   "addtagtoaddress",            &addtagtoaddress,            {"tag_name", "to_address", "change_address", "asset_data"}},
     { "restricted assets",   "removetagfromaddress",       &removetagfromaddress,       {"tag_name", "to_address", "change_address", "asset_data"}},
     { "restricted assets",   "freezeaddress",              &freezeaddress,              {"asset_name", "address", "change_address", "asset_data"}},
