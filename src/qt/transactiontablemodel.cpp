@@ -263,11 +263,11 @@ TransactionTableModel::~TransactionTableModel()
 }
 
 /** Updates the column title to "Amount (DisplayUnit)" and emits headerDataChanged() signal for table headers to react. */
-void TransactionTableModel::updateAmountColumnTitle()
-{
-    columns[Amount] = RavenUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
-    Q_EMIT headerDataChanged(Qt::Horizontal,Amount,Amount);
-}
+//void TransactionTableModel::updateAmountColumnTitle()
+//{
+//    columns[Amount] = RavenUnits::getAmountColumnTitle(walletModel->getOptionsModel()->getDisplayUnit());
+//    Q_EMIT headerDataChanged(Qt::Horizontal,Amount,Amount);
+//}
 
 void TransactionTableModel::updateTransaction(const QString &hash, int status, bool showTransaction)
 {
@@ -592,7 +592,10 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         case Amount:
             return formatTxAmount(rec, true, RavenUnits::separatorAlways);
         case AssetName:
-            return QString::fromStdString(rec->assetName);
+            if (rec->assetName != "RVN")
+               return QString::fromStdString(rec->assetName);
+            else
+               return QString(RavenUnits::name(walletModel->getOptionsModel()->getDisplayUnit()));
         }
         break;
     case Qt::EditRole:
@@ -637,6 +640,11 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         if(index.column() == ToAddress)
         {
             return addressColor(rec);
+        }
+        if(index.column() == AssetName)
+        {
+            if (rec->assetName != "RVN")
+               return platformStyle->AssetTxColor();
         }
         break;
     case TypeRole:
@@ -697,7 +705,10 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
     case AssetNameRole:
         {
             QString assetName;
-            assetName.append(QString::fromStdString(rec->assetName));
+            if (rec->assetName != "RVN")
+               assetName.append(QString::fromStdString(rec->assetName));
+            else
+               assetName.append(QString(RavenUnits::name(walletModel->getOptionsModel()->getDisplayUnit())));
             return assetName;
         }
     case StatusRole:
@@ -755,7 +766,7 @@ QModelIndex TransactionTableModel::index(int row, int column, const QModelIndex 
 void TransactionTableModel::updateDisplayUnit()
 {
     // emit dataChanged to update Amount column with the current unit
-    updateAmountColumnTitle();
+    //updateAmountColumnTitle();
     Q_EMIT dataChanged(index(0, Amount), index(priv->size()-1, Amount));
 }
 
