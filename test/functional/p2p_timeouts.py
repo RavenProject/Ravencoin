@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test various net timeouts.
+
+"""
+Test various net timeouts.
 
 - Create three ravend nodes:
 
@@ -23,8 +25,7 @@
 """
 
 from time import sleep
-
-from test_framework.mininode import (NodeConn, NodeConnCB, NetworkThread, msg_ping)
+from test_framework.mininode import NodeConn, NodeConnCB, NetworkThread, MsgPing
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import p2p_port
 
@@ -44,10 +45,9 @@ class TimeoutsTest(RavenTestFramework):
         self.no_version_node = TestNode() # never send version (just ping)
         self.no_send_node = TestNode() # never send anything
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.no_verack_node))
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.no_version_node, send_version=False))
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.no_send_node, send_version=False))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.no_verack_node),
+                       NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.no_version_node, send_version=False),
+                       NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.no_send_node, send_version=False)]
         self.no_verack_node.add_connection(connections[0])
         self.no_version_node.add_connection(connections[1])
         self.no_send_node.add_connection(connections[2])
@@ -56,11 +56,11 @@ class TimeoutsTest(RavenTestFramework):
 
         sleep(1)
 
-        assert(self.no_verack_node.connected)
-        assert(self.no_version_node.connected)
-        assert(self.no_send_node.connected)
+        assert self.no_verack_node.connected
+        assert self.no_version_node.connected
+        assert self.no_send_node.connected
 
-        ping_msg = msg_ping()
+        ping_msg = MsgPing()
         connections[0].send_message(ping_msg)
         connections[1].send_message(ping_msg)
 
@@ -68,9 +68,9 @@ class TimeoutsTest(RavenTestFramework):
 
         assert "version" in self.no_verack_node.last_message
 
-        assert(self.no_verack_node.connected)
-        assert(self.no_version_node.connected)
-        assert(self.no_send_node.connected)
+        assert self.no_verack_node.connected
+        assert self.no_version_node.connected
+        assert self.no_send_node.connected
 
         connections[0].send_message(ping_msg)
         connections[1].send_message(ping_msg)

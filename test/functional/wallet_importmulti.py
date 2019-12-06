@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the importmulti RPC."""
+
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import assert_equal, assert_greater_than, assert_raises_rpc_error
 
@@ -246,9 +248,9 @@ class ImportMultiTest (RavenTestFramework):
         assert_equal(address_assert['isscript'], True)
         assert_equal(address_assert['iswatchonly'], True)
         assert_equal(address_assert['timestamp'], timestamp)
-        p2shunspent = self.nodes[1].listunspent(0,999999, [multi_sig_script['address']])[0]
-        assert_equal(p2shunspent['spendable'], False)
-        assert_equal(p2shunspent['solvable'], False)
+        p2sh_unspent = self.nodes[1].listunspent(0,999999, [multi_sig_script['address']])[0]
+        assert_equal(p2sh_unspent['spendable'], False)
+        assert_equal(p2sh_unspent['solvable'], False)
 
 
         # P2SH + Redeem script
@@ -257,7 +259,7 @@ class ImportMultiTest (RavenTestFramework):
         sig_address_3 = self.nodes[0].validateaddress(self.nodes[0].getnewaddress())
         multi_sig_script = self.nodes[0].createmultisig(2, [sig_address_1['address'], sig_address_2['address'], sig_address_3['pubkey']])
         self.nodes[1].generate(100)
-        transactionid = self.nodes[1].sendtoaddress(multi_sig_script['address'], 10.00)
+        self.nodes[1].sendtoaddress(multi_sig_script['address'], 10.00)
         self.nodes[1].generate(1)
         timestamp = self.nodes[1].getblock(self.nodes[1].getbestblockhash())['mediantime']
 
@@ -273,9 +275,9 @@ class ImportMultiTest (RavenTestFramework):
         address_assert = self.nodes[1].validateaddress(multi_sig_script['address'])
         assert_equal(address_assert['timestamp'], timestamp)
 
-        p2shunspent = self.nodes[1].listunspent(0,999999, [multi_sig_script['address']])[0]
-        assert_equal(p2shunspent['spendable'], False)
-        assert_equal(p2shunspent['solvable'], True)
+        p2sh_unspent = self.nodes[1].listunspent(0,999999, [multi_sig_script['address']])[0]
+        assert_equal(p2sh_unspent['spendable'], False)
+        assert_equal(p2sh_unspent['solvable'], True)
 
 
         # P2SH + Redeem script + Private Keys + !Watchonly
@@ -284,7 +286,7 @@ class ImportMultiTest (RavenTestFramework):
         sig_address_3 = self.nodes[0].validateaddress(self.nodes[0].getnewaddress())
         multi_sig_script = self.nodes[0].createmultisig(2, [sig_address_1['address'], sig_address_2['address'], sig_address_3['pubkey']])
         self.nodes[1].generate(100)
-        transactionid = self.nodes[1].sendtoaddress(multi_sig_script['address'], 10.00)
+        self.nodes[1].sendtoaddress(multi_sig_script['address'], 10.00)
         self.nodes[1].generate(1)
         timestamp = self.nodes[1].getblock(self.nodes[1].getbestblockhash())['mediantime']
 
@@ -301,9 +303,9 @@ class ImportMultiTest (RavenTestFramework):
         address_assert = self.nodes[1].validateaddress(multi_sig_script['address'])
         assert_equal(address_assert['timestamp'], timestamp)
 
-        p2shunspent = self.nodes[1].listunspent(0,999999, [multi_sig_script['address']])[0]
-        assert_equal(p2shunspent['spendable'], False)
-        assert_equal(p2shunspent['solvable'], True)
+        p2sh_unspent = self.nodes[1].listunspent(0,999999, [multi_sig_script['address']])[0]
+        assert_equal(p2sh_unspent['spendable'], False)
+        assert_equal(p2sh_unspent['solvable'], True)
 
         # P2SH + Redeem script + Private Keys + Watchonly
         sig_address_1 = self.nodes[0].validateaddress(self.nodes[0].getnewaddress())
@@ -311,7 +313,7 @@ class ImportMultiTest (RavenTestFramework):
         sig_address_3 = self.nodes[0].validateaddress(self.nodes[0].getnewaddress())
         multi_sig_script = self.nodes[0].createmultisig(2, [sig_address_1['address'], sig_address_2['address'], sig_address_3['pubkey']])
         self.nodes[1].generate(100)
-        transactionid = self.nodes[1].sendtoaddress(multi_sig_script['address'], 10.00)
+        self.nodes[1].sendtoaddress(multi_sig_script['address'], 10.00)
         self.nodes[1].generate(1)
         timestamp = self.nodes[1].getblock(self.nodes[1].getbestblockhash())['mediantime']
 

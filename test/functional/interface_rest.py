@@ -3,18 +3,14 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the REST API."""
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (connect_nodes_bi, 
-                                assert_equal, 
-                                Decimal, 
-                                json, 
-                                hex_str_to_bytes, 
-                                assert_greater_than)
-from struct import (unpack, pack)
+from struct import unpack, pack
 from io import BytesIO
 from codecs import encode
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import connect_nodes_bi, assert_equal, Decimal, json, hex_str_to_bytes, assert_greater_than
 
 import http.client
 import urllib.parse
@@ -46,6 +42,8 @@ def http_post_call(host, port, path, requestdata = '', response_object = 0):
 
     return conn.getresponse().read()
 
+
+# noinspection PyTypeChecker
 class RESTTest (RavenTestFramework):
     FORMAT_SEPARATOR = "."
 
@@ -112,7 +110,7 @@ class RESTTest (RavenTestFramework):
         #check chainTip response
         assert_equal(json_obj['chaintipHash'], bb_hash)
 
-        #make sure there is no utox in the response because this oupoint has been spent
+        # make sure there is no utxo in the response because this oupoint has been spent
         assert_equal(len(json_obj['utxos']), 0)
 
         #check bitmap
@@ -156,7 +154,7 @@ class RESTTest (RavenTestFramework):
         txid = self.nodes[0].sendtoaddress(self.nodes[1].getnewaddress(), 0.1)
         json_string = http_get_call(url.hostname, url.port, '/rest/tx/'+txid+self.FORMAT_SEPARATOR+"json")
         json_obj = json.loads(json_string)
-        vintx = json_obj['vin'][0]['txid'] # get the vin to later check for utxo (should be spent by then)
+        #vintx = json_obj['vin'][0]['txid'] # get the vin to later check for utxo (should be spent by then)
         # get n of 0.1 outpoint
         n = 0
         for vout in json_obj['vout']:
@@ -285,10 +283,9 @@ class RESTTest (RavenTestFramework):
 
         # check block tx details
         # let's make 3 tx and mine them on node 1
-        txs = []
-        txs.append(self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11))
-        txs.append(self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11))
-        txs.append(self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11))
+        txs = [self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11),
+               self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11),
+               self.nodes[0].sendtoaddress(self.nodes[2].getnewaddress(), 11)]
         self.sync_all()
 
         # check that there are exactly 3 transactions in the TX memory pool before generating the block

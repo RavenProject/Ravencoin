@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test RPCs related to blockchainstate.
+
+"""
+Test RPCs related to blockchainstate.
 
 Test the following RPCs:
     - gettxoutsetinfo
@@ -21,15 +23,8 @@ Tests correspond to code in rpc/blockchain.cpp.
 from decimal import Decimal
 import http.client
 import subprocess
-
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, 
-                                assert_greater_than, 
-                                assert_greater_than_or_equal,
-                                assert_raises,
-                                assert_raises_rpc_error,
-                                assert_is_hex_string,
-                                assert_is_hash_string,)
+from test_framework.util import assert_equal, assert_greater_than, assert_greater_than_or_equal, assert_raises, assert_raises_rpc_error, assert_is_hex_string, assert_is_hash_string
 
 class BlockchainTest(RavenTestFramework):
     def set_test_params(self):
@@ -98,32 +93,32 @@ class BlockchainTest(RavenTestFramework):
         assert_greater_than(res['size_on_disk'], 0)
 
     def _test_getchaintxstats(self):
-        chaintxstats = self.nodes[0].getchaintxstats(1)
+        chain_tx_stats = self.nodes[0].getchaintxstats(1)
         # 200 txs plus genesis tx
-        assert_equal(chaintxstats['txcount'], 201)
+        assert_equal(chain_tx_stats['txcount'], 201)
         # tx rate should be 1 per 1 minutes, or 1/60
         # we have to round because of binary math
-        assert_equal(round(chaintxstats['txrate'] * 60, 1), Decimal(1))
+        assert_equal(round(chain_tx_stats['txrate'] * 60, 1), Decimal(1))
 
         b1 = self.nodes[0].getblock(self.nodes[0].getblockhash(1))
         b200 = self.nodes[0].getblock(self.nodes[0].getblockhash(200))
         time_diff = b200['mediantime'] - b1['mediantime']
 
-        chaintxstats = self.nodes[0].getchaintxstats()
-        assert_equal(chaintxstats['time'], b200['time'])
-        assert_equal(chaintxstats['txcount'], 201)
-        assert_equal(chaintxstats['window_block_count'], 199)
-        assert_equal(chaintxstats['window_tx_count'], 199)
-        assert_equal(chaintxstats['window_interval'], time_diff)
-        assert_equal(round(chaintxstats['txrate'] * time_diff, 10), Decimal(199))
+        chain_tx_stats = self.nodes[0].getchaintxstats()
+        assert_equal(chain_tx_stats['time'], b200['time'])
+        assert_equal(chain_tx_stats['txcount'], 201)
+        assert_equal(chain_tx_stats['window_block_count'], 199)
+        assert_equal(chain_tx_stats['window_tx_count'], 199)
+        assert_equal(chain_tx_stats['window_interval'], time_diff)
+        assert_equal(round(chain_tx_stats['txrate'] * time_diff, 10), Decimal(199))
 
-        chaintxstats = self.nodes[0].getchaintxstats(blockhash=b1['hash'])
-        assert_equal(chaintxstats['time'], b1['time'])
-        assert_equal(chaintxstats['txcount'], 2)
-        assert_equal(chaintxstats['window_block_count'], 0)
-        assert('window_tx_count' not in chaintxstats)
-        assert('window_interval' not in chaintxstats)
-        assert('txrate' not in chaintxstats)
+        chain_tx_stats = self.nodes[0].getchaintxstats(blockhash=b1['hash'])
+        assert_equal(chain_tx_stats['time'], b1['time'])
+        assert_equal(chain_tx_stats['txcount'], 2)
+        assert_equal(chain_tx_stats['window_block_count'], 0)
+        assert('window_tx_count' not in chain_tx_stats)
+        assert('window_interval' not in chain_tx_stats)
+        assert('txrate' not in chain_tx_stats)
 
         assert_raises_rpc_error(-8, "Invalid block count: should be between 0 and the block's height - 1", self.nodes[0].getchaintxstats, 201)
 
@@ -174,14 +169,14 @@ class BlockchainTest(RavenTestFramework):
         assert_raises_rpc_error(-5, "Block not found",
                               node.getblockheader, "nonsense")
 
-        besthash = node.getbestblockhash()
-        secondbesthash = node.getblockhash(199)
-        header = node.getblockheader(besthash)
+        best_hash = node.getbestblockhash()
+        second_best_hash = node.getblockhash(199)
+        header = node.getblockheader(best_hash)
 
-        assert_equal(header['hash'], besthash)
+        assert_equal(header['hash'], best_hash)
         assert_equal(header['height'], 200)
         assert_equal(header['confirmations'], 1)
-        assert_equal(header['previousblockhash'], secondbesthash)
+        assert_equal(header['previousblockhash'], second_best_hash)
         assert_is_hex_string(header['chainwork'])
         assert_is_hash_string(header['hash'])
         assert_is_hash_string(header['previousblockhash'])

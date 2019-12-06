@@ -3,12 +3,14 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test message sending before handshake completion.
+
+"""
+Test message sending before handshake completion.
 
 A node should never send anything other than VERSION/VERACK/REJECT until it's
 received a VERACK.
 
-This test connects to a node and sends it a few messages, trying to intice it
+This test connects to a node and sends it a few messages, trying to entice it
 into sending us something it shouldn't.
 
 Also test that nodes that send unsupported service bits to ravend are disconnected
@@ -18,12 +20,14 @@ and don't receive a VERACK. Unsupported service bits are currently 1 << 5 and
 UPDATE: Raven RIP-2 uses bit 1 << 5.  Currently there are no unsupported service bits.
 """
 
-from test_framework.mininode import (NodeConnCB, NodeConn, msg_verack, msg_ping, msg_getaddr, NetworkThread, mininode_lock)
+from test_framework.mininode import NodeConnCB, NodeConn, MsgVerack, MsgPing, MsgGetAddr, NetworkThread, mininode_lock
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (logger, p2p_port, wait_until, time)
+from test_framework.util import logger, p2p_port, wait_until, time
 
 banscore = 10
 
+
+# noinspection PyMethodOverriding
 class CLazyNode(NodeConnCB):
     def __init__(self):
         super().__init__()
@@ -69,7 +73,7 @@ class CNodeNoVersionBan(CLazyNode):
     def on_open(self, conn):
         super().on_open(conn)
         for _ in range(banscore):
-            self.send_message(msg_verack())
+            self.send_message(MsgVerack())
 
     def on_reject(self, conn, message): pass
 
@@ -92,8 +96,8 @@ class CNodeNoVerackIdle(CLazyNode):
     # list!
     def on_version(self, conn, message):
         self.version_received = True
-        conn.send_message(msg_ping())
-        conn.send_message(msg_getaddr())
+        conn.send_message(MsgPing())
+        conn.send_message(MsgGetAddr())
 
 class P2PLeakTest(RavenTestFramework):
     def set_test_params(self):
@@ -107,10 +111,9 @@ class P2PLeakTest(RavenTestFramework):
         CLazyNode()
         CLazyNode()
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_version_bannode, send_version=False))
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_version_idlenode, send_version=False))
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_verack_idlenode))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_version_bannode, send_version=False),
+                       NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_version_idlenode, send_version=False),
+                       NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], no_verack_idlenode)]
         no_version_bannode.add_connection(connections[0])
         no_version_idlenode.add_connection(connections[1])
         no_verack_idlenode.add_connection(connections[2])

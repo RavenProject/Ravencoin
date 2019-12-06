@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test a node with the -disablewallet option.
+
+"""
+Test a node with the -disablewallet option.
 
 - Test that validateaddress RPC works when running with -disablewallet
 - Test that it is not possible to mine to an invalid address.

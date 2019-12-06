@@ -3,14 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Testing asset reorg use cases
 
-"""
+"""Testing asset reorg use cases"""
+
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, disconnect_all_nodes, connect_all_nodes_bi)
-
-
-import string
+from test_framework.util import assert_equal, disconnect_all_nodes, connect_all_nodes_bi
 
 class AssetReorgTest(RavenTestFramework):
     def set_test_params(self):
@@ -115,7 +112,6 @@ class AssetReorgTest(RavenTestFramework):
         # Mine 44 blocks on chain 2
         n1.generate(20)
         node_1_hash_20 = n1.getbestblockhash()
-        node_1_height_20 = n1.getblockcount()
 
         n1.generate(24)
         node_1_hash_44 = n1.getbestblockhash()

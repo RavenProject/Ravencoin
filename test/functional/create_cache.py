@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Create a blockchain cache.
+
+"""
+Create a blockchain cache.
 
 Creating a cache of the blockchain speeds up test execution when running
 multiple functional tests. This helper script is executed by test_runner when multiple
