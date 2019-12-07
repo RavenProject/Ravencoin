@@ -199,8 +199,8 @@ UniValue validateaddress(const JSONRPCRequest& request)
             "  \"hdmasterkeyid\" : \"<hash160>\" (string, optional) The Hash160 of the HD master pubkey\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("validateaddress", "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\"")
-            + HelpExampleRpc("validateaddress", "\"1PSSGeFHDnKNxiEyFrD1wcEaHr9hrQDDWc\"")
+            + HelpExampleCli("validateaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"")
+            + HelpExampleRpc("validateaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"")
         );
 
 #ifdef ENABLE_WALLET
