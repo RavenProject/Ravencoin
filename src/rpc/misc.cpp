@@ -738,10 +738,10 @@ UniValue getaddressmempool(const JSONRPCRequest& request)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
-            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}', true")
-            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}, true")
+            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}'")
+            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}")
+            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}', true")
+            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}, true")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -829,10 +829,10 @@ UniValue getaddressutxos(const JSONRPCRequest& request)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
-            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"],\"assetName\":\"MY_ASSET\"}'")
-            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"],\"assetName\":\"MY_ASSET\"}")
+            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}'")
+            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}")
+            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"],\"assetName\":\"MY_ASSET\"}'")
+            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"],\"assetName\":\"MY_ASSET\"}")
             );
 
     bool includeChainInfo = false;
@@ -942,10 +942,10 @@ UniValue getaddressdeltas(const JSONRPCRequest& request)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
-            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"],\"assetName\":\"MY_ASSET\"}'")
-            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"],\"assetName\":\"MY_ASSET\"}")
+            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}'")
+            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}")
+            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"],\"assetName\":\"MY_ASSET\"}'")
+            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"],\"assetName\":\"MY_ASSET\"}")
         );
 
 
@@ -1080,10 +1080,10 @@ UniValue getaddressbalance(const JSONRPCRequest& request)
             "  },...\n"
             "\n]"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}', true")
-            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
-            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}, true")
+            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}'")
+            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}', true")
+            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}")
+            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}, true")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -1189,10 +1189,10 @@ UniValue getaddresstxids(const JSONRPCRequest& request)
             "  ,...\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}'")
-            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}")
-            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}', true")
-            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX\"]}, true")
+            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}'")
+            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}")
+            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}', true")
+            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\"]}, true")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
