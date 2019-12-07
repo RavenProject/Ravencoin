@@ -451,10 +451,10 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
             "\nResult:\n"
             "\"txid\"                  (string) The transaction id.\n"
             "\nExamples:\n"
-            + HelpExampleCli("sendtoaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1")
-            + HelpExampleCli("sendtoaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"donation\" \"seans outpost\"")
-            + HelpExampleCli("sendtoaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"\" \"\" true")
-            + HelpExampleRpc("sendtoaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\", 0.1, \"donation\", \"seans outpost\"")
+            + HelpExampleCli("sendtoaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.1")
+            + HelpExampleCli("sendtoaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.1 \"donation\" \"seans outpost\"")
+            + HelpExampleCli("sendtoaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.1 \"\" \"\" true")
+            + HelpExampleRpc("sendtoaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\", 0.1, \"donation\", \"seans outpost\"")
         );
 
     ObserveSafeMode();
@@ -536,10 +536,10 @@ UniValue sendfromaddress(const JSONRPCRequest& request)
             "\nResult:\n"
             "\"txid\"                  (string) The transaction id.\n"
             "\nExamples:\n"
-            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1")
-            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"donation\" \"seans outpost\"")
-            + HelpExampleCli("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.1 \"\" \"\" true")
-            + HelpExampleRpc("sendfromaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\", 0.1, \"donation\", \"seans outpost\"")
+            + HelpExampleCli("sendfromaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.1")
+            + HelpExampleCli("sendfromaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.1 \"donation\" \"seans outpost\"")
+            + HelpExampleCli("sendfromaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.1 \"\" \"\" true")
+            + HelpExampleRpc("sendfromaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\", 0.1, \"donation\", \"seans outpost\"")
         );
 
     ObserveSafeMode();
@@ -1031,11 +1031,11 @@ UniValue sendfrom(const JSONRPCRequest& request)
             "\"txid\"                 (string) The transaction id.\n"
             "\nExamples:\n"
             "\nSend 0.01 " + CURRENCY_UNIT + " from the default account to the address, must have at least 1 confirmation\n"
-            + HelpExampleCli("sendfrom", "\"\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.01") +
+            + HelpExampleCli("sendfrom", "\"\" \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.01") +
             "\nSend 0.01 from the tabby account to the given address, funds must have at least 6 confirmations\n"
-            + HelpExampleCli("sendfrom", "\"tabby\" \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 0.01 6 \"donation\" \"seans outpost\"") +
+            + HelpExampleCli("sendfrom", "\"tabby\" \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 0.01 6 \"donation\" \"seans outpost\"") +
             "\nAs a json rpc call\n"
-            + HelpExampleRpc("sendfrom", "\"tabby\", \"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\", 0.01, 6, \"donation\", \"seans outpost\"")
+            + HelpExampleRpc("sendfrom", "\"tabby\", \"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\", 0.01, 6, \"donation\", \"seans outpost\"")
         );
 
     ObserveSafeMode();
@@ -2454,7 +2454,7 @@ UniValue walletlock(const JSONRPCRequest& request)
             "\nSet the passphrase for 2 minutes to perform a transaction\n"
             + HelpExampleCli("walletpassphrase", "\"my pass phrase\" 120") +
             "\nPerform a send (requires passphrase set)\n"
-            + HelpExampleCli("sendtoaddress", "\"1M72Sfpbz1BPpXFHz9m3CdqATR44Jvaydd\" 1.0") +
+            + HelpExampleCli("sendtoaddress", "\"RKAWWWw3nCXLugJfb58JPkf1iBgkbsF2dx\" 1.0") +
             "\nClear the passphrase since we are done before 2 minutes is up\n"
             + HelpExampleCli("walletlock", "") +
             "\nAs json rpc call\n"
