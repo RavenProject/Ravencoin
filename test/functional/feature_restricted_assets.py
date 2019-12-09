@@ -515,19 +515,20 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezerestrictedasset, asset_name, "garbagechangeaddress")
 
         n0.freezerestrictedasset(asset_name, rvn_change_address)  # Can only freeze once!
-        assert_raises_rpc_error(-26, "Freezing transaction already in mempool", n0.freezerestrictedasset, asset_name, rvn_change_address)
         n0.generate(1)
+
         assert_raises_rpc_error(None, "global-freeze-when-already-frozen", n0.freezerestrictedasset, asset_name, rvn_change_address)
 
         # post-freeze validation
         assert_contains(asset_name, n0.listglobalrestrictions())
         assert n0.checkglobalrestriction(asset_name)
         assert_raises_rpc_error(-8, "restricted asset has been globally frozen", n0.transferfromaddress, asset_name, address, 1000, n1.getnewaddress())
+
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezerestrictedasset, asset_name, "garbagechangeaddress")
 
         n0.unfreezerestrictedasset(asset_name, rvn_change_address)  # Can only un-freeze once!
-        assert_raises_rpc_error(-26, "Unfreezing transaction already in mempool", n0.unfreezerestrictedasset, asset_name, rvn_change_address)
         n0.generate(1)
+
         assert_raises_rpc_error(None, "global-unfreeze-when-not-frozen", n0.unfreezerestrictedasset, asset_name, rvn_change_address)
 
         # post-unfreeze validation
