@@ -662,7 +662,11 @@ void PaymentServer::fetchPaymentACK(CWallet* wallet, const SendCoinsRecipient& r
         }
     }
 
+#if GOOGLE_PROTOBUF_VERSION < 3011001
     int length = payment.ByteSize();
+#else
+    int length = payment.ByteSizeLong();
+#endif
     netRequest.setHeader(QNetworkRequest::ContentLengthHeader, length);
     QByteArray serData(length, '\0');
     if (payment.SerializeToArray(serData.data(), length)) {
