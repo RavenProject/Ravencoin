@@ -1691,8 +1691,12 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
     /** RVN START */
     if (AreAssetsDeployed()) {
         if (listAssetsReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth) {
-            for (const CAssetOutputEntry &data : listAssetsReceived) {
+            for (const CAssetOutputEntry &data : listAssetsReceived){
                 UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwallet, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
 
                 entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
                 entry.push_back(Pair("asset_name", data.assetName));
@@ -1703,6 +1707,9 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
                 entry.push_back(Pair("category", "receive"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
                 retAssets.push_back(entry);
             }
         }
@@ -1710,6 +1717,10 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
         if ((!listAssetsSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount)) {
             for (const CAssetOutputEntry &data : listAssetsSent) {
                 UniValue entry(UniValue::VOBJ);
+
+                if (involvesWatchonly || (::IsMine(*pwallet, data.destination) & ISMINE_WATCH_ONLY)) {
+                    entry.push_back(Pair("involvesWatchonly", true));
+                }
 
                 entry.push_back(Pair("asset_type", GetTxnOutputType(data.type)));
                 entry.push_back(Pair("asset_name", data.assetName));
@@ -1720,6 +1731,9 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
                 entry.push_back(Pair("destination", EncodeDestination(data.destination)));
                 entry.push_back(Pair("vout", data.vout));
                 entry.push_back(Pair("category", "send"));
+                if (fLong)
+                    WalletTxToJSON(wtx, entry);
+                entry.push_back(Pair("abandoned", wtx.isAbandoned()));
                 retAssets.push_back(entry);
             }
         }
@@ -2062,18 +2076,20 @@ UniValue listsinceblock(const JSONRPCRequest& request)
     int depth = pindex ? (1 + chainActive.Height() - pindex->nHeight) : -1;
 
     UniValue transactions(UniValue::VARR);
+    UniValue assetTransactions(UniValue::VARR);
 
     for (const std::pair<uint256, CWalletTx>& pairWtx : pwallet->mapWallet) {
         CWalletTx tx = pairWtx.second;
 
         if (depth == -1 || tx.GetDepthInMainChain() < depth) {
-            ListTransactions(pwallet, tx, "*", 0, true, transactions, filter);
+            ListTransactions(pwallet, tx, "*", 0, true, transactions, assetTransactions, filter);
         }
     }
 
     // when a reorg'd block is requested, we also list any relevant transactions
     // in the blocks of the chain that was detached
     UniValue removed(UniValue::VARR);
+    UniValue assetRemoved(UniValue::VARR);
     while (include_removed && paltindex && paltindex != pindex) {
         CBlock block;
         if (!ReadBlockFromDisk(block, paltindex, GetParams().GetConsensus())) {
@@ -2084,7 +2100,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
             if (it != pwallet->mapWallet.end()) {
                 // We want all transactions regardless of confirmation count to appear here,
                 // even negative confirmation ones, hence the big negative.
-                ListTransactions(pwallet, it->second, "*", -100000000, true, removed, filter);
+                ListTransactions(pwallet, it->second, "*", -100000000, true, removed, assetRemoved, filter);
             }
         }
         paltindex = paltindex->pprev;
@@ -2095,7 +2111,11 @@ UniValue listsinceblock(const JSONRPCRequest& request)
 
     UniValue ret(UniValue::VOBJ);
     ret.push_back(Pair("transactions", transactions));
-    if (include_removed) ret.push_back(Pair("removed", removed));
+    ret.push_back(Pair("asset_transactions", assetTransactions));
+    if (include_removed) {
+        ret.push_back(Pair("removed", removed));
+        ret.push_back(Pair("assets_removed", assetRemoved));
+    }
     ret.push_back(Pair("lastblock", lastblock.GetHex()));
 
     return ret;

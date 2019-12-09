@@ -681,6 +681,28 @@ void CTxMemPool::removeUnchecked(txiter it, MemPoolRemovalReason reason)
             mapAssetVerifierChanged.at(item).erase(hash);
         mapHashVerifierChanged.erase(hash);
     }
+
+    if (mapHashGlobalFreezingAssetTransactions.count(hash)) {
+        for (auto item : mapHashGlobalFreezingAssetTransactions.at(hash)) {
+            if (mapGlobalFreezingAssetTransactions.count(item)) {
+                mapGlobalFreezingAssetTransactions.at(item).erase(hash);
+                if (mapGlobalFreezingAssetTransactions.at(item).size() == 0)
+                    mapGlobalFreezingAssetTransactions.erase(item);
+            }
+        }
+        mapHashGlobalFreezingAssetTransactions.erase(hash);
+    }
+
+    if (mapHashGlobalUnFreezingAssetTransactions.count(hash)) {
+        for (auto item : mapHashGlobalUnFreezingAssetTransactions.at(hash)) {
+            if (mapGlobalUnFreezingAssetTransactions.count(item)) {
+                mapGlobalUnFreezingAssetTransactions.at(item).erase(hash);
+                if (mapGlobalUnFreezingAssetTransactions.at(item).size() == 0)
+                    mapGlobalUnFreezingAssetTransactions.erase(item);
+            }
+        }
+        mapHashGlobalUnFreezingAssetTransactions.erase(hash);
+    }
     /** RVN END */
 }
 
@@ -888,6 +910,34 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                     }
                 }
             }
+
+            if (mapGlobalFreezingAssetTransactions.count(it.assetName)) {
+                for (auto hash : mapGlobalFreezingAssetTransactions.at(it.assetName)) {
+                    indexed_transaction_set::iterator i = mapTx.find(hash);
+                    if (i != mapTx.end()) {
+                        CValidationState state;
+                        if (!setAlreadyRemoving.count(hash)) {
+                            entries.push_back(&*i);
+                            trans.emplace_back(i->GetTx());
+                            setAlreadyRemoving.insert(hash);
+                        }
+                    }
+                }
+            }
+        } else if (it.type == RestrictedType::GLOBAL_UNFREEZE) {
+            if (mapGlobalUnFreezingAssetTransactions.count(it.assetName)) {
+                for (auto hash : mapGlobalUnFreezingAssetTransactions.at(it.assetName)) {
+                    indexed_transaction_set::iterator i = mapTx.find(hash);
+                    if (i != mapTx.end()) {
+                        CValidationState state;
+                        if (!setAlreadyRemoving.count(hash)) {
+                            entries.push_back(&*i);
+                            trans.emplace_back(i->GetTx());
+                            setAlreadyRemoving.insert(hash);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -967,6 +1017,12 @@ void CTxMemPool::_clear()
     mapHashQualifiersChanged.clear();
     mapAssetVerifierChanged.clear();
     mapHashVerifierChanged.clear();
+
+    mapGlobalFreezingAssetTransactions.clear();
+    mapHashGlobalFreezingAssetTransactions.clear();
+
+    mapGlobalUnFreezingAssetTransactions.clear();
+    mapHashGlobalUnFreezingAssetTransactions.clear();
 }
 
 void CTxMemPool::clear()

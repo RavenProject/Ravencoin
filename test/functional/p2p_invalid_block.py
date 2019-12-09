@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test node responses to invalid blocks.
+
+"""
+Test node responses to invalid blocks.
 
 In this test we connect to one node over p2p, and test block requests:
 1) Valid blocks should be requested and become chain tip.
@@ -12,18 +14,19 @@ In this test we connect to one node over p2p, and test block requests:
 re-requested.
 """
 
-from test_framework.test_framework import ComparisonTestFramework
-from test_framework.util import assert_equal
-from test_framework.comptool import (TestManager, TestInstance, RejectResult)
-from test_framework.blocktools import (NetworkThread, create_block, create_coinbase, create_transaction, COIN)
 import copy
 import time
+from test_framework.test_framework import ComparisonTestFramework
+from test_framework.util import assert_equal
+from test_framework.comptool import TestManager, TestInstance, RejectResult
+from test_framework.blocktools import create_block, create_coinbase, create_transaction, COIN
+from test_framework.mininode import NetworkThread
 
 # Use the ComparisonTestFramework with 1 node: only use --testbinary.
 class InvalidBlockRequestTest(ComparisonTestFramework):
 
-    ''' Can either run this test as 1 node with expected answers, or two and compare them. 
-        Change the "outcome" variable from each TestInstance object to only do the comparison. '''
+    """ Can either run this test as 1 node with expected answers, or two and compare them.
+        Change the "outcome" variable from each TestInstance object to only do the comparison. """
     def set_test_params(self):
         self.num_nodes = 1
         self.setup_clean_chain = True
@@ -105,7 +108,7 @@ class InvalidBlockRequestTest(ComparisonTestFramework):
         self.block_time += 1
         block3.vtx[0].vout[0].nValue = 100 * COIN # Too high!
         block3.vtx[0].sha256=None
-        block3.vtx[0].calc_sha256()
+        block3.vtx[0].calc_x16r()
         block3.hashMerkleRoot = block3.calc_merkle_root()
         block3.rehash()
         block3.solve()

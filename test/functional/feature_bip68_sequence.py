@@ -3,24 +3,15 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test BIP68 implementation."""
 
+import time
+import random
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (   satoshi_round, 
-                                    assert_raises_rpc_error, 
-                                    get_bip9_status, 
-                                    assert_equal, 
-                                    assert_greater_than, 
-                                    sync_blocks)
-from test_framework.blocktools import ( CTransaction,
-                                        COIN,
-                                        CTxIn,
-                                        COutPoint,
-                                        CTxOut,
-                                        CScript,
-                                        create_block,
-                                        create_coinbase)
-from test_framework.mininode import (ToHex, from_hex)
+from test_framework.util import satoshi_round, assert_raises_rpc_error, get_bip9_status, assert_equal,assert_greater_than, sync_blocks
+from test_framework.blocktools import CTransaction, COIN, CTxIn, COutPoint, CTxOut, CScript, create_block, create_coinbase
+from test_framework.mininode import to_hex, from_hex
 
 SEQUENCE_LOCKTIME_DISABLE_FLAG = (1<<31)
 SEQUENCE_LOCKTIME_TYPE_FLAG = (1<<22) # this means use time (0 means height)
@@ -66,10 +57,10 @@ class BIP68Test(RavenTestFramework):
         # If sequence locks were used, this would require 1 block for the
         # input to mature.
         sequence_value = SEQUENCE_LOCKTIME_DISABLE_FLAG | 1
-        tx1.vin = [CTxIn(COutPoint(int(utxo["txid"], 16), utxo["vout"]), nSequence=sequence_value)] 
+        tx1.vin = [CTxIn(COutPoint(int(utxo["txid"], 16), utxo["vout"]), n_sequence=sequence_value)]
         tx1.vout = [CTxOut(value, CScript([b'a']))]
 
-        tx1_signed = self.nodes[0].signrawtransaction(ToHex(tx1))["hex"]
+        tx1_signed = self.nodes[0].signrawtransaction(to_hex(tx1))["hex"]
         tx1_id = self.nodes[0].sendrawtransaction(tx1_signed)
         tx1_id = int(tx1_id, 16)
 
@@ -78,17 +69,17 @@ class BIP68Test(RavenTestFramework):
         tx2 = CTransaction()
         tx2.nVersion = 2
         sequence_value = sequence_value & 0x7fffffff
-        tx2.vin = [CTxIn(COutPoint(tx1_id, 0), nSequence=sequence_value)]
+        tx2.vin = [CTxIn(COutPoint(tx1_id, 0), n_sequence=sequence_value)]
         tx2.vout = [CTxOut(int(value-self.relayfee*COIN), CScript([b'a']))]
         tx2.rehash()
 
-        assert_raises_rpc_error(-26, NOT_FINAL_ERROR, self.nodes[0].sendrawtransaction, ToHex(tx2))
+        assert_raises_rpc_error(-26, NOT_FINAL_ERROR, self.nodes[0].sendrawtransaction, to_hex(tx2))
 
         # Setting the version back down to 1 should disable the sequence lock,
         # so this should be accepted.
         tx2.nVersion = 1
 
-        self.nodes[0].sendrawtransaction(ToHex(tx2))
+        self.nodes[0].sendrawtransaction(to_hex(tx2))
 
     # Calculate the median time past of a prior block ("confirmations" before
     # the current tip).
@@ -105,7 +96,6 @@ class BIP68Test(RavenTestFramework):
         while len(addresses) < max_outputs:
             addresses.append(self.nodes[0].getnewaddress())
         while len(self.nodes[0].listunspent()) < 200:
-            import random
             random.shuffle(addresses)
             num_outputs = random.randint(1, max_outputs)
             outputs = {}
@@ -167,17 +157,17 @@ class BIP68Test(RavenTestFramework):
                         time_delta = sequence_value << SEQUENCE_LOCKTIME_GRANULARITY
                         if input_will_pass and time_delta > cur_time - orig_time:
                             sequence_value = ((cur_time - orig_time) >> SEQUENCE_LOCKTIME_GRANULARITY)
-                        elif (not input_will_pass and time_delta <= cur_time - orig_time):
+                        elif not input_will_pass and time_delta <= cur_time - orig_time:
                             sequence_value = ((cur_time - orig_time) >> SEQUENCE_LOCKTIME_GRANULARITY)+1
                         sequence_value |= SEQUENCE_LOCKTIME_TYPE_FLAG
-                tx.vin.append(CTxIn(COutPoint(int(utxos[j]["txid"], 16), utxos[j]["vout"]), nSequence=sequence_value))
+                tx.vin.append(CTxIn(COutPoint(int(utxos[j]["txid"], 16), utxos[j]["vout"]), n_sequence=sequence_value))
                 value += utxos[j]["amount"]*COIN
             # Overestimate the size of the tx - signatures should be less than 120 bytes, and leave 50 for the output
-            tx_size = len(ToHex(tx))//2 + 120*num_inputs + 50
+            tx_size = len(to_hex(tx)) // 2 + 120 * num_inputs + 50
             tx.vout.append(CTxOut(int(value-self.relayfee*tx_size*COIN/1000), CScript([b'a'])))
-            rawtx = self.nodes[0].signrawtransaction(ToHex(tx))["hex"]
+            rawtx = self.nodes[0].signrawtransaction(to_hex(tx))["hex"]
 
-            if (using_sequence_locks and not should_pass):
+            if using_sequence_locks and not should_pass:
                 # This transaction should be rejected
                 assert_raises_rpc_error(-26, NOT_FINAL_ERROR, self.nodes[0].sendrawtransaction, rawtx)
             else:
@@ -202,9 +192,9 @@ class BIP68Test(RavenTestFramework):
         # Sequence lock of 0 should pass.
         tx2 = CTransaction()
         tx2.nVersion = 2
-        tx2.vin = [CTxIn(COutPoint(tx1.sha256, 0), nSequence=0)]
+        tx2.vin = [CTxIn(COutPoint(tx1.sha256, 0), n_sequence=0)]
         tx2.vout = [CTxOut(int(tx1.vout[0].nValue - self.relayfee*COIN), CScript([b'a']))]
-        tx2_raw = self.nodes[0].signrawtransaction(ToHex(tx2))["hex"]
+        tx2_raw = self.nodes[0].signrawtransaction(to_hex(tx2))["hex"]
         tx2 = from_hex(tx2, tx2_raw)
         tx2.rehash()
 
@@ -220,16 +210,16 @@ class BIP68Test(RavenTestFramework):
 
             tx = CTransaction()
             tx.nVersion = 2
-            tx.vin = [CTxIn(COutPoint(orig_tx.sha256, 0), nSequence=sequence_value)]
+            tx.vin = [CTxIn(COutPoint(orig_tx.x16r, 0), n_sequence=sequence_value)]
             tx.vout = [CTxOut(int(orig_tx.vout[0].nValue - relayfee*COIN), CScript([b'a']))]
             tx.rehash()
 
-            if (orig_tx.hash in node.getrawmempool()):
+            if orig_tx.hash in node.getrawmempool():
                 # sendrawtransaction should fail if the tx is in the mempool
-                assert_raises_rpc_error(-26, NOT_FINAL_ERROR, node.sendrawtransaction, ToHex(tx))
+                assert_raises_rpc_error(-26, NOT_FINAL_ERROR, node.sendrawtransaction, to_hex(tx))
             else:
                 # sendrawtransaction should succeed if the tx is not in the mempool
-                node.sendrawtransaction(ToHex(tx))
+                node.sendrawtransaction(to_hex(tx))
 
             return tx
 
@@ -275,9 +265,9 @@ class BIP68Test(RavenTestFramework):
         assert(tx5.hash not in self.nodes[0].getrawmempool())
 
         utxos = self.nodes[0].listunspent()
-        tx5.vin.append(CTxIn(COutPoint(int(utxos[0]["txid"], 16), utxos[0]["vout"]), nSequence=1))
+        tx5.vin.append(CTxIn(COutPoint(int(utxos[0]["txid"], 16), utxos[0]["vout"]), n_sequence=1))
         tx5.vout[0].nValue += int(utxos[0]["amount"]*COIN)
-        raw_tx5 = self.nodes[0].signrawtransaction(ToHex(tx5))["hex"]
+        raw_tx5 = self.nodes[0].signrawtransaction(to_hex(tx5))["hex"]
 
         assert_raises_rpc_error(-26, NOT_FINAL_ERROR, self.nodes[0].sendrawtransaction, raw_tx5)
 
@@ -307,7 +297,7 @@ class BIP68Test(RavenTestFramework):
             block.solve()
             tip = block.sha256
             height += 1
-            self.nodes[0].submitblock(ToHex(block))
+            self.nodes[0].submitblock(to_hex(block))
             cur_time += 1
 
         mempool = self.nodes[0].getrawmempool()
@@ -333,26 +323,26 @@ class BIP68Test(RavenTestFramework):
         # Make an anyone-can-spend transaction
         tx2 = CTransaction()
         tx2.nVersion = 1
-        tx2.vin = [CTxIn(COutPoint(tx1.sha256, 0), nSequence=0)]
+        tx2.vin = [CTxIn(COutPoint(tx1.sha256, 0), n_sequence=0)]
         tx2.vout = [CTxOut(int(tx1.vout[0].nValue - self.relayfee*COIN), CScript([b'a']))]
 
         # sign tx2
-        tx2_raw = self.nodes[0].signrawtransaction(ToHex(tx2))["hex"]
+        tx2_raw = self.nodes[0].signrawtransaction(to_hex(tx2))["hex"]
         tx2 = from_hex(tx2, tx2_raw)
         tx2.rehash()
 
-        self.nodes[0].sendrawtransaction(ToHex(tx2))
+        self.nodes[0].sendrawtransaction(to_hex(tx2))
         
         # Now make an invalid spend of tx2 according to BIP68
         sequence_value = 100 # 100 block relative locktime
 
         tx3 = CTransaction()
         tx3.nVersion = 2
-        tx3.vin = [CTxIn(COutPoint(tx2.sha256, 0), nSequence=sequence_value)]
+        tx3.vin = [CTxIn(COutPoint(tx2.sha256, 0), n_sequence=sequence_value)]
         tx3.vout = [CTxOut(int(tx2.vout[0].nValue - self.relayfee*COIN), CScript([b'a']))]
         tx3.rehash()
 
-        assert_raises_rpc_error(-26, NOT_FINAL_ERROR, self.nodes[0].sendrawtransaction, ToHex(tx3))
+        assert_raises_rpc_error(-26, NOT_FINAL_ERROR, self.nodes[0].sendrawtransaction, to_hex(tx3))
 
         # make a block that violates bip68; ensure that the tip updates
         tip = int(self.nodes[0].getbestblockhash(), 16)
@@ -363,10 +353,10 @@ class BIP68Test(RavenTestFramework):
         block.rehash()
         block.solve()
 
-        self.nodes[0].submitblock(ToHex(block))
+        self.nodes[0].submitblock(to_hex(block))
         assert_equal(self.nodes[0].getbestblockhash(), block.hash)
 
-    def activateCSV(self):
+    def activate_csv(self):
         # activation should happen at block height 432 (3 periods)
         # getblockchaininfo will show CSV as active at block 431 (144 * 3 -1) since it's returning whether CSV is active for the next block.
         min_activation_height = 432
@@ -386,7 +376,7 @@ class BIP68Test(RavenTestFramework):
         rawtxfund = self.nodes[1].fundrawtransaction(rawtx)['hex']
         tx = from_hex(CTransaction(), rawtxfund)
         tx.nVersion = 2
-        tx_signed = self.nodes[1].signrawtransaction(ToHex(tx))["hex"]
+        tx_signed = self.nodes[1].signrawtransaction(to_hex(tx))["hex"]
         self.nodes[1].sendrawtransaction(tx_signed)
 
 if __name__ == '__main__':

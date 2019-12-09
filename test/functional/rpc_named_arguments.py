@@ -3,11 +3,14 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test using named arguments for RPCs."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, assert_raises_rpc_error)
+from test_framework.util import assert_equal, assert_raises_rpc_error
 
+
+# noinspection PyTypeChecker
 class NamedArgumentTest(RavenTestFramework):
     def set_test_params(self):
         self.num_nodes = 1

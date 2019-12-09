@@ -3,11 +3,13 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the preciousblock RPC."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, connect_nodes_bi, sync_chain, sync_blocks)
+from test_framework.util import assert_equal, connect_nodes_bi, sync_chain, sync_blocks
 
+# noinspection PyBroadException
 def unidirectional_node_sync_via_rpc(node_src, node_dest):
     blocks_to_copy = []
     blockhash = node_src.getbestblockhash()
@@ -20,8 +22,8 @@ def unidirectional_node_sync_via_rpc(node_src, node_dest):
             blockhash = node_src.getblockheader(blockhash, True)['previousblockhash']
     blocks_to_copy.reverse()
     for blockhash in blocks_to_copy:
-        blockdata = node_src.getblock(blockhash, False)
-        assert(node_dest.submitblock(blockdata) in (None, 'inconclusive'))
+        block_data = node_src.getblock(blockhash, False)
+        assert(node_dest.submitblock(block_data) in (None, 'inconclusive'))
 
 def node_sync_via_rpc(nodes):
     for node_src in nodes:

@@ -3,14 +3,14 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test running ravend with the -rpcbind and -rpcallowip options."""
 
 import socket
 import sys
-
-from test_framework.test_framework import (RavenTestFramework, SkipTest)
-from test_framework.util import (assert_equal, get_rpc_proxy, rpc_url, get_datadir_path, rpc_port, assert_raises_rpc_error)
-from test_framework.netutil import (addr_to_hex, get_bind_addrs, all_interfaces)
+from test_framework.test_framework import RavenTestFramework, SkipTest
+from test_framework.util import assert_equal, get_rpc_proxy, rpc_url, get_datadir_path, rpc_port, assert_raises_rpc_error
+from test_framework.netutil import addr_to_hex, get_bind_addrs, all_interfaces
 
 class RPCBindTest(RavenTestFramework):
     def set_test_params(self):
@@ -21,11 +21,11 @@ class RPCBindTest(RavenTestFramework):
         self.add_nodes(self.num_nodes, None)
 
     def run_bind_test(self, allow_ips, connect_to, addresses, expected):
-        '''
+        """
         Start a node with requested rpcallowip and rpcbind parameters,
         then try to connect, and check if the set of bound addresses
         matches the expected set.
-        '''
+        """
         self.log.info("Bind test for %s" % str(addresses))
         expected = [(addr_to_hex(addr), port) for (addr, port) in expected]
         base_args = ['-disablewallet', '-nolisten']
@@ -39,10 +39,10 @@ class RPCBindTest(RavenTestFramework):
         self.stop_nodes()
 
     def run_allowip_test(self, allow_ips, rpchost, rpcport):
-        '''
+        """
         Start a node with rpcallow IP, and request getnetworkinfo
         at a non-localhost IP.
-        '''
+        """
         self.log.info("Allow IP test for %s:%d" % (rpchost, rpcport))
         base_args = ['-disablewallet', '-nolisten'] + ['-rpcallowip='+x for x in allow_ips]
         self.nodes[0].rpchost = None
@@ -67,23 +67,23 @@ class RPCBindTest(RavenTestFramework):
         try:
             s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
             s.connect(("::1",1))
-            s.close
+            s.close()
         except OSError:
             raise SkipTest("This test requires IPv6 support.")
 
         self.log.info("Using interface %s for testing" % non_loopback_ip)
 
-        defaultport = rpc_port(0)
+        default_port = rpc_port(0)
 
         # check default without rpcallowip (IPv4 and IPv6 localhost)
         self.run_bind_test(None, '127.0.0.1', [],
-            [('127.0.0.1', defaultport), ('::1', defaultport)])
+            [('127.0.0.1', default_port), ('::1', default_port)])
         # check default with rpcallowip (IPv6 any)
         self.run_bind_test(['127.0.0.1'], '127.0.0.1', [],
-            [('::0', defaultport)])
+            [('::0', default_port)])
         # check only IPv4 localhost (explicit)
         self.run_bind_test(['127.0.0.1'], '127.0.0.1', ['127.0.0.1'],
-            [('127.0.0.1', defaultport)])
+            [('127.0.0.1', default_port)])
         # check only IPv4 localhost (explicit) with alternative port
         self.run_bind_test(['127.0.0.1'], '127.0.0.1:32171', ['127.0.0.1:32171'],
             [('127.0.0.1', 32171)])
@@ -92,17 +92,17 @@ class RPCBindTest(RavenTestFramework):
             [('127.0.0.1', 32171), ('127.0.0.1', 32172)])
         # check only IPv6 localhost (explicit)
         self.run_bind_test(['[::1]'], '[::1]', ['[::1]'],
-            [('::1', defaultport)])
+            [('::1', default_port)])
         # check both IPv4 and IPv6 localhost (explicit)
         self.run_bind_test(['127.0.0.1'], '127.0.0.1', ['127.0.0.1', '[::1]'],
-            [('127.0.0.1', defaultport), ('::1', defaultport)])
+            [('127.0.0.1', default_port), ('::1', default_port)])
         # check only non-loopback interface
         self.run_bind_test([non_loopback_ip], non_loopback_ip, [non_loopback_ip],
-            [(non_loopback_ip, defaultport)])
+            [(non_loopback_ip, default_port)])
 
         # Check that with invalid rpcallowip, we are denied
-        self.run_allowip_test([non_loopback_ip], non_loopback_ip, defaultport)
-        assert_raises_rpc_error(-342, "non-JSON HTTP response with '403 Forbidden' from server", self.run_allowip_test, ['1.1.1.1'], non_loopback_ip, defaultport)
+        self.run_allowip_test([non_loopback_ip], non_loopback_ip, default_port)
+        assert_raises_rpc_error(-342, "non-JSON HTTP response with '403 Forbidden' from server", self.run_allowip_test, ['1.1.1.1'], non_loopback_ip, default_port)
 
 if __name__ == '__main__':
     RPCBindTest().main()

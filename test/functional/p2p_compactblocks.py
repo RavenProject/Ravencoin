@@ -3,61 +3,22 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test compact blocks (BIP 152).
+
+"""
+Test compact blocks (BIP 152).
 
 Version 1 compact blocks are pre-segwit (txids)
 Version 2 compact blocks are post-segwit (wtxids)
 """
 
-from test_framework.mininode import (NodeConnCB, 
-                                    mininode_lock, 
-                                    msg_getheaders, 
-                                    msg_headers, 
-                                    CBlockHeader, 
-                                    msg_block, 
-                                    CTransaction,
-                                    CTxIn,
-                                    CTxOut,
-                                    COutPoint,
-                                    msg_cmpctblock,
-                                    msg_sendcmpct,
-                                    msg_sendheaders,
-                                    P2PHeaderAndShortIDs,
-                                    PrefilledTransaction,
-                                    from_hex,
-                                    CBlock,
-                                    HeaderAndShortIDs,
-                                    CInv,
-                                    msg_getdata,
-                                    calculate_shortid,
-                                    msg_inv,
-                                    calculate_shortid,
-                                    msg_witness_blocktxn,
-                                    msg_blocktxn,
-                                    BlockTransactions,
-                                    msg_tx,
-                                    MSG_WITNESS_FLAG,
-                                    msg_witness_block,
-                                    msg_getblocktxn,
-                                    BlockTransactionsRequest,
-                                    ToHex,
-                                    CTxInWitness,
-                                    ser_uint256,
-                                    NodeConn,
-                                    NODE_NETWORK,
-                                    NetworkThread,
-                                    NODE_WITNESS)
+from test_framework.mininode import (NodeConnCB, mininode_lock, MsgGetHeaders, MsgHeaders, CBlockHeader, MsgBlock, CTransaction, CTxIn, CTxOut, COutPoint, MsgCmpctBlock, MsgSendCmpct, MsgSendHeaders,
+                                     P2PHeaderAndShortIDs, PrefilledTransaction, from_hex, CBlock, HeaderAndShortIDs, CInv, MsgGetdata, MsgInv, calculate_shortid, MsgWitnessBlocktxn, MsgBlockTxn,
+                                     BlockTransactions, MsgTx, MSG_WITNESS_FLAG, MsgWitnessBlock, MsgGetBlockTxn, BlockTransactionsRequest, to_hex, CTxInWitness, ser_uint256, NodeConn, NODE_NETWORK,
+                                     NetworkThread, NODE_WITNESS)
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (wait_until, 
-                                assert_equal, 
-                                satoshi_round, 
-                                Decimal, 
-                                random, 
-                                get_bip9_status, 
-                                p2p_port, 
-                                sync_blocks)
-from test_framework.blocktools import (create_block, create_coinbase, add_witness_commitment)
-from test_framework.script import (CScript, OP_TRUE)
+from test_framework.util import wait_until, assert_equal, satoshi_round, Decimal, random, get_bip9_status, p2p_port, sync_blocks
+from test_framework.blocktools import create_block, create_coinbase, add_witness_commitment
+from test_framework.script import CScript, OP_TRUE
 
 # TestNode: A peer we use to send messages to ravend, and store responses.
 class TestNode(NodeConnCB):
@@ -75,13 +36,13 @@ class TestNode(NodeConnCB):
 
     def on_cmpctblock(self, conn, message):
         self.block_announced = True
-        self.last_message["cmpctblock"].header_and_shortids.header.calc_sha256()
+        self.last_message["cmpctblock"].header_and_shortids.header.calc_x16r()
         self.announced_blockhashes.add(self.last_message["cmpctblock"].header_and_shortids.header.sha256)
 
     def on_headers(self, conn, message):
         self.block_announced = True
         for x in self.last_message["headers"].headers:
-            x.calc_sha256()
+            x.calc_x16r()
             self.announced_blockhashes.add(x.sha256)
 
     def on_inv(self, conn, message):
@@ -102,28 +63,28 @@ class TestNode(NodeConnCB):
             self.last_message.pop("cmpctblock", None)
 
     def get_headers(self, locator, hashstop):
-        msg = msg_getheaders()
+        msg = MsgGetHeaders()
         msg.locator.vHave = locator
         msg.hashstop = hashstop
         self.connection.send_message(msg)
 
     def send_header_for_blocks(self, new_blocks):
-        headers_message = msg_headers()
+        headers_message = MsgHeaders()
         headers_message.headers = [CBlockHeader(b) for b in new_blocks]
         self.send_message(headers_message)
 
     def request_headers_and_sync(self, locator, hashstop=0):
         self.clear_block_announcement()
         self.get_headers(locator, hashstop)
-        wait_until(self.received_block_announcement, timeout=30, lock=mininode_lock)
+        wait_until(self.received_block_announcement, timeout=30, lock=mininode_lock, err_msg="request_headers_and_sync")
         self.clear_block_announcement()
 
     # Block until a block announcement for a particular block hash is
     # received.
     def wait_for_block_announcement(self, block_hash, timeout=30):
         def received_hash():
-            return (block_hash in self.announced_blockhashes)
-        wait_until(received_hash, timeout=timeout, lock=mininode_lock)
+            return block_hash in self.announced_blockhashes
+        wait_until(received_hash, timeout=timeout, lock=mininode_lock, err_msg="wait_for_block_disconnect")
 
     def send_await_disconnect(self, message, timeout=30):
         """Sends a message to the node and wait for disconnect.
@@ -131,7 +92,7 @@ class TestNode(NodeConnCB):
         This is used when we want to send a message into the node that we expect
         will get us disconnected, eg an invalid block."""
         self.send_message(message)
-        wait_until(lambda: not self.connected, timeout=timeout, lock=mininode_lock)
+        wait_until(lambda: not self.connected, timeout=timeout, lock=mininode_lock, err_msg="send_wait_disconnect")
 
 class CompactBlocksTest(RavenTestFramework):
     def set_test_params(self):
@@ -141,7 +102,8 @@ class CompactBlocksTest(RavenTestFramework):
         self.extra_args = [["-vbparams=segwit:0:0"], ["-txindex"]]
         self.utxos = []
 
-    def build_block_on_tip(self, node, segwit=False):
+    @staticmethod
+    def build_block_on_tip(node, segwit=False):
         height = node.getblockcount()
         tip = node.getbestblockhash()
         mtp = node.getblockheader(tip)['mediantime']
@@ -156,7 +118,7 @@ class CompactBlocksTest(RavenTestFramework):
     def make_utxos(self):
         # Doesn't matter which node we use, just use node0.
         block = self.build_block_on_tip(self.nodes[0])
-        self.test_node.send_and_ping(msg_block(block))
+        self.test_node.send_and_ping(MsgBlock(block))
         assert(int(self.nodes[0].getbestblockhash(), 16) == block.sha256)
         self.nodes[0].generate(100)
 
@@ -172,9 +134,9 @@ class CompactBlocksTest(RavenTestFramework):
         block2.vtx.append(tx)
         block2.hashMerkleRoot = block2.calc_merkle_root()
         block2.solve()
-        self.test_node.send_and_ping(msg_block(block2))
+        self.test_node.send_and_ping(MsgBlock(block2))
         assert_equal(int(self.nodes[0].getbestblockhash(), 16), block2.sha256)
-        self.utxos.extend([[tx.sha256, i, out_value] for i in range(10)])
+        self.utxos.extend([[tx.x16r, i, out_value] for i in range(10)])
         return
 
     # Test "sendcmpct" (between peers preferring the same version):
@@ -186,11 +148,12 @@ class CompactBlocksTest(RavenTestFramework):
     #   are made with compact blocks.
     # If old_node is passed in, request compact blocks with version=preferred-1
     # and verify that it receives block announcements via compact block.
-    def test_sendcmpct(self, node, test_node, preferred_version, old_node=None):
+    @staticmethod
+    def test_sendcmpct(node, test_node, preferred_version, old_node=None):
         # Make sure we get a SENDCMPCT message from our peer
         def received_sendcmpct():
-            return (len(test_node.last_sendcmpct) > 0)
-        wait_until(received_sendcmpct, timeout=30, lock=mininode_lock)
+            return len(test_node.last_sendcmpct) > 0
+        wait_until(received_sendcmpct, timeout=30, lock=mininode_lock, err_msg="test_sendcmpct")
         with mininode_lock:
             # Check that the first version received is the preferred one
             assert_equal(test_node.last_sendcmpct[0].version, preferred_version)
@@ -200,11 +163,11 @@ class CompactBlocksTest(RavenTestFramework):
 
         tip = int(node.getbestblockhash(), 16)
 
-        def check_announcement_of_new_block(node, peer, predicate):
+        def check_announcement_of_new_block(node_data, peer, predicate):
             peer.clear_block_announcement()
-            block_hash = int(node.generate(1)[0], 16)
+            block_hash = int(node_data.generate(1)[0], 16)
             peer.wait_for_block_announcement(block_hash, timeout=30)
-            assert(peer.block_announced)
+            assert peer.block_announced
 
             with mininode_lock:
                 assert predicate(peer), (
@@ -224,7 +187,7 @@ class CompactBlocksTest(RavenTestFramework):
         test_node.request_headers_and_sync(locator=[tip])
 
         # Now try a SENDCMPCT message with too-high version
-        sendcmpct = msg_sendcmpct()
+        sendcmpct = MsgSendCmpct()
         sendcmpct.version = preferred_version+1
         sendcmpct.announce = True
         test_node.send_and_ping(sendcmpct)
@@ -252,7 +215,7 @@ class CompactBlocksTest(RavenTestFramework):
         check_announcement_of_new_block(node, test_node, lambda p: "cmpctblock" in p.last_message)
 
         # Try one more time, after turning on sendheaders
-        test_node.send_and_ping(msg_sendheaders())
+        test_node.send_and_ping(MsgSendHeaders())
         check_announcement_of_new_block(node, test_node, lambda p: "cmpctblock" in p.last_message)
 
         # Try one more time, after sending a version-1, announce=false message.
@@ -288,7 +251,7 @@ class CompactBlocksTest(RavenTestFramework):
         # This index will be too high
         prefilled_txn = PrefilledTransaction(1, block.vtx[0])
         cmpct_block.prefilled_txn = [prefilled_txn]
-        self.test_node.send_await_disconnect(msg_cmpctblock(cmpct_block))
+        self.test_node.send_await_disconnect(MsgCmpctBlock(cmpct_block))
         assert_equal(int(self.nodes[0].getbestblockhash(), 16), block.hashPrevBlock)
 
     # Compare the generated shortids to what we expect based on BIP 152, given
@@ -315,7 +278,7 @@ class CompactBlocksTest(RavenTestFramework):
                 segwit_tx_generated = True
 
         if use_witness_address:
-            assert(segwit_tx_generated) # check that our test is not broken
+            assert segwit_tx_generated  # check that our test is not broken
 
         # Wait until we've seen the block announcement for the resulting tip
         tip = int(node.getbestblockhash(), 16)
@@ -331,14 +294,13 @@ class CompactBlocksTest(RavenTestFramework):
         # Store the raw block in our internal format.
         block = from_hex(CBlock(), node.getblock("%02x" % block_hash, False))
         for tx in block.vtx:
-            tx.calc_sha256()
+            tx.calc_x16r()
         block.rehash()
 
         # Wait until the block was announced (via compact blocks)
-        wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock)
+        wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock, err_msg="test_node.received_block_announcement")
 
         # Now fetch and check the compact block
-        header_and_shortids = None
         with mininode_lock:
             assert("cmpctblock" in test_node.last_message)
             # Convert the on-the-wire representation to absolute indexes
@@ -349,21 +311,21 @@ class CompactBlocksTest(RavenTestFramework):
         with mininode_lock:
             test_node.clear_block_announcement()
             inv = CInv(4, block_hash)  # 4 == "CompactBlock"
-            test_node.send_message(msg_getdata([inv]))
+            test_node.send_message(MsgGetdata([inv]))
 
-        wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock)
+        wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock, err_msg="test_node.received_block_announcement")
 
         # Now fetch and check the compact block
-        header_and_shortids = None
         with mininode_lock:
             assert("cmpctblock" in test_node.last_message)
             # Convert the on-the-wire representation to absolute indexes
             header_and_shortids = HeaderAndShortIDs(test_node.last_message["cmpctblock"].header_and_shortids)
         self.check_compactblock_construction_from_block(version, header_and_shortids, block_hash, block)
 
-    def check_compactblock_construction_from_block(self, version, header_and_shortids, block_hash, block):
+    @staticmethod
+    def check_compactblock_construction_from_block(version, header_and_shortids, block_hash, block):
         # Check that we got the right block!
-        header_and_shortids.header.calc_sha256()
+        header_and_shortids.header.calc_x16r()
         assert_equal(header_and_shortids.header.sha256, block_hash)
 
         # Make sure the prefilled_txn appears to have included the coinbase
@@ -372,14 +334,14 @@ class CompactBlocksTest(RavenTestFramework):
 
         # Check that all prefilled_txn entries match what's in the block.
         for entry in header_and_shortids.prefilled_txn:
-            entry.tx.calc_sha256()
+            entry.tx.calc_x16r()
             # This checks the non-witness parts of the tx agree
             assert_equal(entry.tx.sha256, block.vtx[entry.index].sha256)
 
             # And this checks the witness
-            wtxid = entry.tx.calc_sha256(True)
+            wtxid = entry.tx.calc_x16r(True)
             if version == 2:
-                assert_equal(wtxid, block.vtx[entry.index].calc_sha256(True))
+                assert_equal(wtxid, block.vtx[entry.index].calc_x16r(True))
             else:
                 # Shouldn't have received a witness
                 assert(entry.tx.wit.is_null())
@@ -400,7 +362,7 @@ class CompactBlocksTest(RavenTestFramework):
             else:
                 tx_hash = block.vtx[index].sha256
                 if version == 2:
-                    tx_hash = block.vtx[index].calc_sha256(True)
+                    tx_hash = block.vtx[index].calc_x16r(True)
                 shortid = calculate_shortid(k0, k1, tx_hash)
                 assert_equal(shortid, header_and_shortids.shortids[0])
                 header_and_shortids.shortids.pop(0)
@@ -421,12 +383,12 @@ class CompactBlocksTest(RavenTestFramework):
                 test_node.last_message.pop("getdata", None)
 
             if announce == "inv":
-                test_node.send_message(msg_inv([CInv(2, block.sha256)]))
-                wait_until(lambda: "getheaders" in test_node.last_message, timeout=30, lock=mininode_lock)
+                test_node.send_message(MsgInv([CInv(2, block.sha256)]))
+                wait_until(lambda: "getheaders" in test_node.last_message, timeout=30, lock=mininode_lock, err_msg="test_compactblock_requests")
                 test_node.send_header_for_blocks([block])
             else:
                 test_node.send_header_for_blocks([block])
-            wait_until(lambda: "getdata" in test_node.last_message, timeout=30, lock=mininode_lock)
+            wait_until(lambda: "getdata" in test_node.last_message, timeout=30, lock=mininode_lock, err_msg="test_nod.last_message getdata")
             assert_equal(len(test_node.last_message["getdata"].inv), 1)
             assert_equal(test_node.last_message["getdata"].inv[0].type, 4)
             assert_equal(test_node.last_message["getdata"].inv[0].hash, block.sha256)
@@ -438,10 +400,10 @@ class CompactBlocksTest(RavenTestFramework):
             [k0, k1] = comp_block.get_siphash_keys()
             coinbase_hash = block.vtx[0].sha256
             if version == 2:
-                coinbase_hash = block.vtx[0].calc_sha256(True)
+                coinbase_hash = block.vtx[0].calc_x16r(True)
             comp_block.shortids = [
                     calculate_shortid(k0, k1, coinbase_hash) ]
-            test_node.send_and_ping(msg_cmpctblock(comp_block.to_p2p()))
+            test_node.send_and_ping(MsgCmpctBlock(comp_block.to_p2p()))
             assert_equal(int(node.getbestblockhash(), 16), block.hashPrevBlock)
             # Expect a getblocktxn message.
             with mininode_lock:
@@ -451,9 +413,9 @@ class CompactBlocksTest(RavenTestFramework):
 
             # Send the coinbase, and verify that the tip advances.
             if version == 2:
-                msg = msg_witness_blocktxn()
+                msg = MsgWitnessBlocktxn()
             else:
-                msg = msg_blocktxn()
+                msg = MsgBlockTxn()
             msg.block_transactions.blockhash = block.sha256
             msg.block_transactions.transactions = [block.vtx[0]]
             test_node.send_and_ping(msg)
@@ -468,7 +430,7 @@ class CompactBlocksTest(RavenTestFramework):
             tx.vin.append(CTxIn(COutPoint(utxo[0], utxo[1]), b''))
             tx.vout.append(CTxOut(utxo[2] - 1000, CScript([OP_TRUE])))
             tx.rehash()
-            utxo = [tx.sha256, 0, tx.vout[0].nValue]
+            utxo = [tx.x16r, 0, tx.vout[0].nValue]
             block.vtx.append(tx)
 
         block.hashMerkleRoot = block.calc_merkle_root()
@@ -482,16 +444,16 @@ class CompactBlocksTest(RavenTestFramework):
         with_witness = (version==2)
 
         def test_getblocktxn_response(compact_block, peer, expected_result):
-            msg = msg_cmpctblock(compact_block.to_p2p())
+            msg = MsgCmpctBlock(compact_block.to_p2p())
             peer.send_and_ping(msg)
             with mininode_lock:
                 assert("getblocktxn" in peer.last_message)
                 absolute_indexes = peer.last_message["getblocktxn"].block_txn_request.to_absolute()
             assert_equal(absolute_indexes, expected_result)
 
-        def test_tip_after_message(node, peer, msg, tip):
+        def test_tip_after_message(node_data, peer, msg, tip):
             peer.send_and_ping(msg)
-            assert_equal(int(node.getbestblockhash(), 16), tip)
+            assert_equal(int(node_data.getbestblockhash(), 16), tip)
 
         # First try announcing compactblocks that won't reconstruct, and verify
         # that we receive getblocktxn messages back.
@@ -504,9 +466,9 @@ class CompactBlocksTest(RavenTestFramework):
 
         test_getblocktxn_response(comp_block, test_node, [1, 2, 3, 4, 5])
 
-        msg_bt = msg_blocktxn()
+        msg_bt = MsgBlockTxn()
         if with_witness:
-            msg_bt = msg_witness_blocktxn() # serialize with witnesses
+            msg_bt = MsgWitnessBlocktxn() # serialize with witnesses
         msg_bt.block_transactions = BlockTransactions(block.sha256, block.vtx[1:])
         test_tip_after_message(node, test_node, msg_bt, block.sha256)
 
@@ -524,7 +486,7 @@ class CompactBlocksTest(RavenTestFramework):
         utxo = self.utxos.pop(0)
         block = self.build_block_with_transactions(node, utxo, 5)
         self.utxos.append([block.vtx[-1].sha256, 0, block.vtx[-1].vout[0].nValue])
-        test_node.send_and_ping(msg_tx(block.vtx[1]))
+        test_node.send_and_ping(MsgTx(block.vtx[1]))
         assert(block.vtx[1].hash in node.getrawmempool())
 
         # Prefill 4 out of the 6 transactions, and verify that only the one
@@ -541,7 +503,7 @@ class CompactBlocksTest(RavenTestFramework):
         block = self.build_block_with_transactions(node, utxo, 10)
         self.utxos.append([block.vtx[-1].sha256, 0, block.vtx[-1].vout[0].nValue])
         for tx in block.vtx[1:]:
-            test_node.send_message(msg_tx(tx))
+            test_node.send_message(MsgTx(tx))
         test_node.sync_with_ping()
         # Make sure all transactions were accepted.
         mempool = node.getrawmempool()
@@ -554,7 +516,7 @@ class CompactBlocksTest(RavenTestFramework):
 
         # Send compact block
         comp_block.initialize_from_block(block, prefill_list=[0], use_witness=with_witness)
-        test_tip_after_message(node, test_node, msg_cmpctblock(comp_block.to_p2p()), block.sha256)
+        test_tip_after_message(node, test_node, MsgCmpctBlock(comp_block.to_p2p()), block.sha256)
         with mininode_lock:
             # Shouldn't have gotten a request for any transaction
             assert("getblocktxn" not in test_node.last_message)
@@ -562,7 +524,7 @@ class CompactBlocksTest(RavenTestFramework):
     # Incorrectly responding to a getblocktxn shouldn't cause the block to be
     # permanently failed.
     def test_incorrect_blocktxn_response(self, node, test_node, version):
-        if (len(self.utxos) == 0):
+        if len(self.utxos) == 0:
             self.make_utxos()
         utxo = self.utxos.pop(0)
 
@@ -570,7 +532,7 @@ class CompactBlocksTest(RavenTestFramework):
         self.utxos.append([block.vtx[-1].sha256, 0, block.vtx[-1].vout[0].nValue])
         # Relay the first 5 transactions from the block in advance
         for tx in block.vtx[1:6]:
-            test_node.send_message(msg_tx(tx))
+            test_node.send_message(MsgTx(tx))
         test_node.sync_with_ping()
         # Make sure all transactions were accepted.
         mempool = node.getrawmempool()
@@ -580,8 +542,7 @@ class CompactBlocksTest(RavenTestFramework):
         # Send compact block
         comp_block = HeaderAndShortIDs()
         comp_block.initialize_from_block(block, prefill_list=[0], use_witness=(version == 2))
-        test_node.send_and_ping(msg_cmpctblock(comp_block.to_p2p()))
-        absolute_indexes = []
+        test_node.send_and_ping(MsgCmpctBlock(comp_block.to_p2p()))
         with mininode_lock:
             assert("getblocktxn" in test_node.last_message)
             absolute_indexes = test_node.last_message["getblocktxn"].block_txn_request.to_absolute()
@@ -595,9 +556,9 @@ class CompactBlocksTest(RavenTestFramework):
         # different peer provide the block further down, so that we're still
         # verifying that the block isn't marked bad permanently. This is good
         # enough for now.
-        msg = msg_blocktxn()
+        msg = MsgBlockTxn()
         if version==2:
-            msg = msg_witness_blocktxn()
+            msg = MsgWitnessBlocktxn()
         msg.block_transactions = BlockTransactions(block.sha256, [block.vtx[5]] + block.vtx[7:])
         test_node.send_and_ping(msg)
 
@@ -605,62 +566,64 @@ class CompactBlocksTest(RavenTestFramework):
         assert_equal(int(node.getbestblockhash(), 16), block.hashPrevBlock)
 
         # We should receive a getdata request
-        wait_until(lambda: "getdata" in test_node.last_message, timeout=10, lock=mininode_lock)
+        wait_until(lambda: "getdata" in test_node.last_message, timeout=10, lock=mininode_lock, err_msg="test_node.last_message getdata")
         assert_equal(len(test_node.last_message["getdata"].inv), 1)
         assert(test_node.last_message["getdata"].inv[0].type == 2 or test_node.last_message["getdata"].inv[0].type == 2|MSG_WITNESS_FLAG)
         assert_equal(test_node.last_message["getdata"].inv[0].hash, block.sha256)
 
         # Deliver the block
         if version==2:
-            test_node.send_and_ping(msg_witness_block(block))
+            test_node.send_and_ping(MsgWitnessBlock(block))
         else:
-            test_node.send_and_ping(msg_block(block))
+            test_node.send_and_ping(MsgBlock(block))
         assert_equal(int(node.getbestblockhash(), 16), block.sha256)
 
-    def test_getblocktxn_handler(self, node, test_node, version):
+    @staticmethod
+    def test_getblocktxn_handler(node, test_node, version):
         # ravend will not send blocktxn responses for blocks whose height is
         # more than 10 blocks deep.
         MAX_GETBLOCKTXN_DEPTH = 10
         chain_height = node.getblockcount()
         current_height = chain_height
-        while (current_height >= chain_height - MAX_GETBLOCKTXN_DEPTH):
+        while current_height >= chain_height - MAX_GETBLOCKTXN_DEPTH:
             block_hash = node.getblockhash(current_height)
             block = from_hex(CBlock(), node.getblock(block_hash, False))
 
-            msg = msg_getblocktxn()
+            msg = MsgGetBlockTxn()
             msg.block_txn_request = BlockTransactionsRequest(int(block_hash, 16), [])
             num_to_request = random.randint(1, len(block.vtx))
             msg.block_txn_request.from_absolute(sorted(random.sample(range(len(block.vtx)), num_to_request)))
             test_node.send_message(msg)
-            wait_until(lambda: "blocktxn" in test_node.last_message, timeout=10, lock=mininode_lock)
+            wait_until(lambda: "blocktxn" in test_node.last_message, timeout=10, lock=mininode_lock, err_msg="test_getblocktxn_handler")
 
-            [tx.calc_sha256() for tx in block.vtx]
+            [tx.calc_x16r() for tx in block.vtx]
             with mininode_lock:
                 assert_equal(test_node.last_message["blocktxn"].block_transactions.blockhash, int(block_hash, 16))
                 all_indices = msg.block_txn_request.to_absolute()
                 for index in all_indices:
                     tx = test_node.last_message["blocktxn"].block_transactions.transactions.pop(0)
-                    tx.calc_sha256()
+                    tx.calc_x16r()
                     assert_equal(tx.sha256, block.vtx[index].sha256)
                     if version == 1:
                         # Witnesses should have been stripped
                         assert(tx.wit.is_null())
                     else:
                         # Check that the witness matches
-                        assert_equal(tx.calc_sha256(True), block.vtx[index].calc_sha256(True))
+                        assert_equal(tx.calc_x16r(True), block.vtx[index].calc_x16r(True))
                 test_node.last_message.pop("blocktxn", None)
             current_height -= 1
 
         # Next request should send a full block response, as we're past the
         # allowed depth for a blocktxn response.
         block_hash = node.getblockhash(current_height)
+        # noinspection PyUnboundLocalVariable
         msg.block_txn_request = BlockTransactionsRequest(int(block_hash, 16), [0])
         with mininode_lock:
             test_node.last_message.pop("block", None)
             test_node.last_message.pop("blocktxn", None)
         test_node.send_and_ping(msg)
         with mininode_lock:
-            test_node.last_message["block"].block.calc_sha256()
+            test_node.last_message["block"].block.calc_x16r()
             assert_equal(test_node.last_message["block"].block.sha256, int(block_hash, 16))
             assert "blocktxn" not in test_node.last_message
 
@@ -671,22 +634,22 @@ class CompactBlocksTest(RavenTestFramework):
         for _ in range(MAX_CMPCTBLOCK_DEPTH + 1):
             test_node.clear_block_announcement()
             new_blocks.append(node.generate(1)[0])
-            wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock)
+            wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock, err_msg="test_compactblocks_not_at_tip test_node.received_block_announcement")
 
         test_node.clear_block_announcement()
-        test_node.send_message(msg_getdata([CInv(4, int(new_blocks[0], 16))]))
-        wait_until(lambda: "cmpctblock" in test_node.last_message, timeout=30, lock=mininode_lock)
+        test_node.send_message(MsgGetdata([CInv(4, int(new_blocks[0], 16))]))
+        wait_until(lambda: "cmpctblock" in test_node.last_message, timeout=30, lock=mininode_lock, err_msg="test_compactblocks_not_at_tip testnode.last_message")
 
         test_node.clear_block_announcement()
         node.generate(1)
-        wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock)
+        wait_until(test_node.received_block_announcement, timeout=30, lock=mininode_lock, err_msg="test_compactblocks_not_at_tip test_node.received_block_announcement")
         test_node.clear_block_announcement()
         with mininode_lock:
             test_node.last_message.pop("block", None)
-        test_node.send_message(msg_getdata([CInv(4, int(new_blocks[0], 16))]))
-        wait_until(lambda: "block" in test_node.last_message, timeout=30, lock=mininode_lock)
+        test_node.send_message(MsgGetdata([CInv(4, int(new_blocks[0], 16))]))
+        wait_until(lambda: "block" in test_node.last_message, timeout=30, lock=mininode_lock, err_msg="test_node.received_block_announcement test_node.last_message")
         with mininode_lock:
-            test_node.last_message["block"].block.calc_sha256()
+            test_node.last_message["block"].block.calc_x16r()
             assert_equal(test_node.last_message["block"].block.sha256, int(new_blocks[0], 16))
 
         # Generate an old compactblock, and verify that it's not accepted.
@@ -698,7 +661,7 @@ class CompactBlocksTest(RavenTestFramework):
 
         comp_block = HeaderAndShortIDs()
         comp_block.initialize_from_block(block)
-        test_node.send_and_ping(msg_cmpctblock(comp_block.to_p2p()))
+        test_node.send_and_ping(MsgCmpctBlock(comp_block.to_p2p()))
 
         tips = node.getchaintips()
         found = False
@@ -707,11 +670,11 @@ class CompactBlocksTest(RavenTestFramework):
                 assert_equal(x["status"], "headers-only")
                 found = True
                 break
-        assert(found)
+        assert found
 
         # Requesting this block via getblocktxn should silently fail
         # (to avoid fingerprinting attacks).
-        msg = msg_getblocktxn()
+        msg = MsgGetBlockTxn()
         msg.block_txn_request = BlockTransactionsRequest(block.sha256, [0])
         with mininode_lock:
             test_node.last_message.pop("blocktxn", None)
@@ -719,7 +682,8 @@ class CompactBlocksTest(RavenTestFramework):
         with mininode_lock:
             assert "blocktxn" not in test_node.last_message
 
-    def activate_segwit(self, node):
+    @staticmethod
+    def activate_segwit(node):
         node.generate(144*3)
         assert_equal(get_bip9_status(node, "segwit")["status"], 'active')
 
@@ -730,16 +694,16 @@ class CompactBlocksTest(RavenTestFramework):
 
         [l.clear_block_announcement() for l in listeners]
 
-        # ToHex() won't serialize with witness, but this block has no witnesses
+        # to_hex() won't serialize with witness, but this block has no witnesses
         # anyway. TODO: repeat this test with witness tx's to a segwit node.
-        node.submitblock(ToHex(block))
+        node.submitblock(to_hex(block))
 
         for l in listeners:
-            wait_until(lambda: l.received_block_announcement(), timeout=30, lock=mininode_lock)
+            wait_until(lambda: l.received_block_announcement(), timeout=30, lock=mininode_lock, err_msg="test_end_to_end_block_relay received_block_announcement")
         with mininode_lock:
             for l in listeners:
                 assert "cmpctblock" in l.last_message
-                l.last_message["cmpctblock"].header_and_shortids.header.calc_sha256()
+                l.last_message["cmpctblock"].header_and_shortids.header.calc_x16r()
                 assert_equal(l.last_message["cmpctblock"].header_and_shortids.header.sha256, block.sha256)
 
     # Test that we don't get disconnected if we relay a compact block with valid header,
@@ -762,7 +726,7 @@ class CompactBlocksTest(RavenTestFramework):
         # verify that we don't get disconnected.
         comp_block = HeaderAndShortIDs()
         comp_block.initialize_from_block(block, prefill_list=[0, 1, 2, 3, 4], use_witness=use_segwit)
-        msg = msg_cmpctblock(comp_block.to_p2p())
+        msg = MsgCmpctBlock(comp_block.to_p2p())
         test_node.send_and_ping(msg)
 
         # Check that the tip didn't advance
@@ -771,11 +735,12 @@ class CompactBlocksTest(RavenTestFramework):
 
     # Helper for enabling cb announcements
     # Send the sendcmpct request and sync headers
-    def request_cb_announcements(self, peer, node, version):
+    @staticmethod
+    def request_cb_announcements(peer, node, version):
         tip = node.getbestblockhash()
         peer.get_headers(locator=[int(tip, 16)], hashstop=0)
 
-        msg = msg_sendcmpct()
+        msg = MsgSendCmpct()
         msg.version = version
         msg.announce = True
         peer.send_and_ping(msg)
@@ -783,28 +748,28 @@ class CompactBlocksTest(RavenTestFramework):
     def test_compactblock_reconstruction_multiple_peers(self, node, stalling_peer, delivery_peer):
         assert(len(self.utxos))
 
-        def announce_cmpct_block(node, peer):
+        def announce_cmpct_block(node_data, peer):
             utxo = self.utxos.pop(0)
-            block = self.build_block_with_transactions(node, utxo, 5)
+            block_data = self.build_block_with_transactions(node_data, utxo, 5)
 
-            cmpct_block = HeaderAndShortIDs()
-            cmpct_block.initialize_from_block(block)
-            msg = msg_cmpctblock(cmpct_block.to_p2p())
-            peer.send_and_ping(msg)
+            cmpct_block_data = HeaderAndShortIDs()
+            cmpct_block_data.initialize_from_block(block_data)
+            msg_data = MsgCmpctBlock(cmpct_block_data.to_p2p())
+            peer.send_and_ping(msg_data)
             with mininode_lock:
                 assert "getblocktxn" in peer.last_message
-            return block, cmpct_block
+            return block_data, cmpct_block_data
 
         block, cmpct_block = announce_cmpct_block(node, stalling_peer)
 
         for tx in block.vtx[1:]:
-            delivery_peer.send_message(msg_tx(tx))
+            delivery_peer.send_message(MsgTx(tx))
         delivery_peer.sync_with_ping()
         mempool = node.getrawmempool()
         for tx in block.vtx[1:]:
             assert(tx.hash in mempool)
 
-        delivery_peer.send_and_ping(msg_cmpctblock(cmpct_block.to_p2p()))
+        delivery_peer.send_and_ping(MsgCmpctBlock(cmpct_block.to_p2p()))
         assert_equal(int(node.getbestblockhash(), 16), block.sha256)
 
         self.utxos.append([block.vtx[-1].sha256, 0, block.vtx[-1].vout[0].nValue])
@@ -813,17 +778,17 @@ class CompactBlocksTest(RavenTestFramework):
 
         block, cmpct_block = announce_cmpct_block(node, stalling_peer)
         for tx in block.vtx[1:]:
-            delivery_peer.send_message(msg_tx(tx))
+            delivery_peer.send_message(MsgTx(tx))
         delivery_peer.sync_with_ping()
 
         cmpct_block.prefilled_txn[0].tx.wit.vtxinwit = [ CTxInWitness() ]
         cmpct_block.prefilled_txn[0].tx.wit.vtxinwit[0].scriptWitness.stack = [ser_uint256(0)]
 
         cmpct_block.use_witness = True
-        delivery_peer.send_and_ping(msg_cmpctblock(cmpct_block.to_p2p()))
+        delivery_peer.send_and_ping(MsgCmpctBlock(cmpct_block.to_p2p()))
         assert(int(node.getbestblockhash(), 16) != block.sha256)
 
-        msg = msg_blocktxn()
+        msg = MsgBlockTxn()
         msg.block_transactions.blockhash = block.sha256
         msg.block_transactions.transactions = block.vtx[1:]
         stalling_peer.send_and_ping(msg)
@@ -835,12 +800,11 @@ class CompactBlocksTest(RavenTestFramework):
         self.segwit_node = TestNode()
         self.old_node = TestNode()  # version 1 peer <--> segwit node
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.test_node))
-        connections.append(NodeConn('127.0.0.1', p2p_port(1), self.nodes[1],
-                    self.segwit_node, services=NODE_NETWORK|NODE_WITNESS))
-        connections.append(NodeConn('127.0.0.1', p2p_port(1), self.nodes[1],
-                    self.old_node, services=NODE_NETWORK))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], self.test_node),
+                       NodeConn('127.0.0.1', p2p_port(1), self.nodes[1],
+                                self.segwit_node, services=NODE_NETWORK | NODE_WITNESS),
+                       NodeConn('127.0.0.1', p2p_port(1), self.nodes[1],
+                                self.old_node, services=NODE_NETWORK)]
         self.test_node.add_connection(connections[0])
         self.segwit_node.add_connection(connections[1])
         self.old_node.add_connection(connections[2])
@@ -936,7 +900,7 @@ class CompactBlocksTest(RavenTestFramework):
         # node1 will not download blocks from node0.
         self.log.info("Syncing nodes...")
         assert(self.nodes[0].getbestblockhash() != self.nodes[1].getbestblockhash())
-        while (self.nodes[0].getblockcount() > self.nodes[1].getblockcount()):
+        while self.nodes[0].getblockcount() > self.nodes[1].getblockcount():
             block_hash = self.nodes[0].getblockhash(self.nodes[1].getblockcount()+1)
             self.nodes[1].submitblock(self.nodes[0].getblock(block_hash, False))
         assert_equal(self.nodes[0].getbestblockhash(), self.nodes[1].getbestblockhash())

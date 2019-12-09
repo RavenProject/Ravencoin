@@ -3,12 +3,12 @@
 # Copyright (c) 2017-2018 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test restricted asset related RPC commands."""
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
 import math
-from pprint import pprint
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import assert_equal
 
 BURN_ADDRESSES = {
     'issue_restricted':   'n1issueRestrictedXXXXXXXXXXXXZVT9V',
@@ -32,9 +32,7 @@ def truncate(number, digits = 8):
     stepper = pow(10.0, digits)
     return math.trunc(stepper * number) / stepper
 
-def get_tx_issue_hex(node, to_address, asset_name, \
-                     asset_quantity=1000, verifier_string="true", units=0, reissuable=1, has_ipfs=0, \
-                     ipfs_hash="", owner_change_address=""):
+def get_tx_issue_hex(node, to_address, asset_name, asset_quantity=1000, verifier_string="true", units=0, reissuable=1, has_ipfs=0, ipfs_hash="", owner_change_address=""):
     change_address = node.getnewaddress()
 
     rvn_unspent = next(u for u in node.listunspent() if u['amount'] > BURN_AMOUNTS['issue_restricted'])
@@ -68,8 +66,7 @@ def get_tx_issue_hex(node, to_address, asset_name, \
     tx_issue_hex = tx_issue_signed['hex']
     return tx_issue_hex
 
-def get_tx_reissue_hex(node, to_address, asset_name, asset_quantity, \
-                     reissuable=1, verifier_string="", ipfs_hash="", owner_change_address=""):
+def get_tx_reissue_hex(node, to_address, asset_name, asset_quantity, reissuable=1, verifier_string="", ipfs_hash="", owner_change_address=""):
     change_address = node.getnewaddress()
 
     rvn_unspent = next(u for u in node.listunspent() if u['amount'] > BURN_AMOUNTS['reissue_restricted'])
@@ -102,8 +99,7 @@ def get_tx_reissue_hex(node, to_address, asset_name, asset_quantity, \
     tx_issue_hex = tx_issue_signed['hex']
     return tx_issue_hex
 
-def get_tx_issue_qualifier_hex(node, to_address, asset_name, \
-                               asset_quantity=1, has_ipfs=0, ipfs_hash="", root_change_address="", change_qty=1):
+def get_tx_issue_qualifier_hex(node, to_address, asset_name, asset_quantity=1, has_ipfs=0, ipfs_hash="", root_change_address="", change_qty=1):
     change_address = node.getnewaddress()
 
     is_sub_qualifier = len(asset_name.split('/')) > 1
@@ -174,8 +170,7 @@ def get_tx_transfer_hex(node, to_address, asset_name, asset_quantity):
     tx_transfer_hex = tx_transfer_signed['hex']
     return tx_transfer_hex
 
-def get_tx_tag_address_hex(node, op, qualifier_name, tag_addresses, qualifier_change_address, \
-                           change_qty=1):
+def get_tx_tag_address_hex(node, op, qualifier_name, tag_addresses, qualifier_change_address, change_qty=1):
     change_address = node.getnewaddress()
 
     burn_amount = truncate(float(BURN_AMOUNTS['tag_address'] * len(tag_addresses)))
@@ -289,9 +284,8 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         n0.issue(base_asset_name)
         n0.generate(1)
 
-        hex = get_tx_issue_hex(n0, to_address, asset_name, qty, verifier, \
-                               units, reissuable, has_ipfs, ipfs_hash, owner_change_address)
-        txid = n0.sendrawtransaction(hex)
+        hex_data = get_tx_issue_hex(n0, to_address, asset_name, qty, verifier, units, reissuable, has_ipfs, ipfs_hash, owner_change_address)
+        txid = n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
         #verify
@@ -335,9 +329,8 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         n0.addtagtoaddress(qualifier, to_address)
         n0.generate(1)
 
-        hex = get_tx_reissue_hex(n0, to_address, asset_name, reissue_qty, reissuable, reissue_verifier, ipfs_hash, \
-                                 owner_change_address)
-        txid = n0.sendrawtransaction(hex)
+        hex_data = get_tx_reissue_hex(n0, to_address, asset_name, reissue_qty, reissuable, reissue_verifier, ipfs_hash, owner_change_address)
+        txid = n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
         #verify
@@ -362,8 +355,8 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
 
         #### ROOT QUALIFIER
-        hex = get_tx_issue_qualifier_hex(n0, to_address, asset_name, qty, has_ipfs, ipfs_hash)
-        txid = n0.sendrawtransaction(hex)
+        hex_data = get_tx_issue_qualifier_hex(n0, to_address, asset_name, qty, has_ipfs, ipfs_hash)
+        txid = n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
         #verify
@@ -384,8 +377,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         root_change_address = n0.getnewaddress()
 
         #### SUB-QUALIFIER
-        sub_hex = get_tx_issue_qualifier_hex(n0, sub_to_address, sub_asset_name, sub_qty, sub_has_ipfs, sub_ipfs_hash, \
-                                             root_change_address, qty)
+        sub_hex = get_tx_issue_qualifier_hex(n0, sub_to_address, sub_asset_name, sub_qty, sub_has_ipfs, sub_ipfs_hash, root_change_address, qty)
         sub_txid = n0.sendrawtransaction(sub_hex)
         n0.generate(1)
 
@@ -408,14 +400,14 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         qty = 5
         n0_address = n0.getnewaddress()
 
-        hex = get_tx_issue_qualifier_hex(n0, n0_address, asset_name, qty)
-        txid = n0.sendrawtransaction(hex)
+        hex_data = get_tx_issue_qualifier_hex(n0, n0_address, asset_name, qty)
+        n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
         n1_address = n1.getnewaddress()
         xfer_qty = 2
-        hex = get_tx_transfer_hex(n0, n1_address, asset_name, xfer_qty)
-        txid = n0.sendrawtransaction(hex)
+        hex_data = get_tx_transfer_hex(n0, n1_address, asset_name, xfer_qty)
+        n0.sendrawtransaction(hex_data)
         n0.generate(1)
         self.sync_all()
 

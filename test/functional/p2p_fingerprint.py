@@ -3,26 +3,19 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test various fingerprinting protections.
+
+"""
+Test various fingerprinting protections.
 
 If an stale block more than a month old or its header are requested by a peer,
 the node should pretend that it does not have it to avoid fingerprinting.
 """
 
 import time
-
-from test_framework.blocktools import (create_block, create_coinbase)
-from test_framework.mininode import (CInv,
-                                     NetworkThread,
-                                     NodeConn,
-                                     NodeConnCB,
-                                     msg_headers,
-                                     msg_block,
-                                     msg_getdata,
-                                     msg_getheaders,
-                                     wait_until)
+from test_framework.blocktools import create_block, create_coinbase
+from test_framework.mininode import CInv, NetworkThread, NodeConn, NodeConnCB, MsgHeaders, MsgBlock, MsgGetdata, MsgGetHeaders, wait_until
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, p2p_port,)
+from test_framework.util import assert_equal, p2p_port
 
 class P2PFingerprintTest(RavenTestFramework):
     def set_test_params(self):
@@ -30,7 +23,8 @@ class P2PFingerprintTest(RavenTestFramework):
         self.num_nodes = 1
 
     # Build a chain of blocks on top of given one
-    def build_chain(self, nblocks, prev_hash, prev_height, prev_median_time):
+    @staticmethod
+    def build_chain(nblocks, prev_hash, prev_height, prev_median_time):
         blocks = []
         for _ in range(nblocks):
             coinbase = create_coinbase(prev_height + 1)
@@ -45,24 +39,28 @@ class P2PFingerprintTest(RavenTestFramework):
         return blocks
 
     # Send a getdata request for a given block hash
-    def send_block_request(self, block_hash, node):
-        msg = msg_getdata()
+    @staticmethod
+    def send_block_request(block_hash, node):
+        msg = MsgGetdata()
         msg.inv.append(CInv(2, block_hash))  # 2 == "Block"
         node.send_message(msg)
 
     # Send a getheaders request for a given single block hash
-    def send_header_request(self, block_hash, node):
-        msg = msg_getheaders()
+    @staticmethod
+    def send_header_request(block_hash, node):
+        msg = MsgGetHeaders()
         msg.hashstop = block_hash
         node.send_message(msg)
 
     # Check whether last block received from node has a given hash
-    def last_block_equals(self, expected_hash, node):
+    @staticmethod
+    def last_block_equals(expected_hash, node):
         block_msg = node.last_message.get("block")
         return block_msg and block_msg.block.rehash() == expected_hash
 
     # Check whether last block header received from node has a given hash
-    def last_header_equals(self, expected_hash, node):
+    @staticmethod
+    def last_header_equals(expected_hash, node):
         headers_msg = node.last_message.get("headers")
         return (headers_msg and
                 headers_msg.headers and
@@ -75,8 +73,7 @@ class P2PFingerprintTest(RavenTestFramework):
     def run_test(self):
         node0 = NodeConnCB()
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], node0))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], node0)]
         node0.add_connection(connections[0])
 
         NetworkThread().start()
@@ -95,10 +92,10 @@ class P2PFingerprintTest(RavenTestFramework):
         new_blocks = self.build_chain(5, block_hash, height, block_time)
 
         # Force reorg to a longer chain
-        node0.send_message(msg_headers(new_blocks))
+        node0.send_message(MsgHeaders(new_blocks))
         node0.wait_for_getdata()
         for block in new_blocks:
-            node0.send_and_ping(msg_block(block))
+            node0.send_and_ping(MsgBlock(block))
 
         # Check that reorg succeeded
         assert_equal(self.nodes[0].getblockcount(), 13)
@@ -108,12 +105,12 @@ class P2PFingerprintTest(RavenTestFramework):
         # Check that getdata request for stale block succeeds
         self.send_block_request(stale_hash, node0)
         test_function = lambda: self.last_block_equals(stale_hash, node0)
-        wait_until(test_function, timeout=3)
+        wait_until(test_function, timeout=3, err_msg="test_function 1")
 
         # Check that getheader request for stale block header succeeds
         self.send_header_request(stale_hash, node0)
         test_function = lambda: self.last_header_equals(stale_hash, node0)
-        wait_until(test_function, timeout=3)
+        wait_until(test_function, timeout=3, err_msg="test_function 2")
 
         # Longest chain is extended so stale is much older than chain tip
         self.nodes[0].setmocktime(0)
@@ -144,11 +141,11 @@ class P2PFingerprintTest(RavenTestFramework):
 
         self.send_block_request(block_hash, node0)
         test_function = lambda: self.last_block_equals(block_hash, node0)
-        wait_until(test_function, timeout=3)
+        wait_until(test_function, timeout=3, err_msg="test_function 3")
 
         self.send_header_request(block_hash, node0)
         test_function = lambda: self.last_header_equals(block_hash, node0)
-        wait_until(test_function, timeout=3)
+        wait_until(test_function, timeout=3, err_msg="test_function 4")
 
 if __name__ == '__main__':
     P2PFingerprintTest().main()

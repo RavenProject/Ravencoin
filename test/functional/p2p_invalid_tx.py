@@ -3,23 +3,24 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test node responses to invalid transactions.
+
+"""
+Test node responses to invalid transactions.
 
 In this test we connect to one node over p2p, and test tx requests.
 """
 
-from test_framework.test_framework import ComparisonTestFramework
-from test_framework.comptool import (TestManager, TestInstance, RejectResult)
-from test_framework.blocktools import (NetworkThread, create_block, create_coinbase, create_transaction, COIN)
 import time
-
-
+from test_framework.test_framework import ComparisonTestFramework
+from test_framework.comptool import TestManager, TestInstance, RejectResult
+from test_framework.blocktools import create_block, create_coinbase, create_transaction, COIN
+from test_framework.mininode import NetworkThread
 
 # Use the ComparisonTestFramework with 1 node: only use --testbinary.
 class InvalidTxRequestTest(ComparisonTestFramework):
 
-    ''' Can either run this test as 1 node with expected answers, or two and compare them. 
-        Change the "outcome" variable from each TestInstance object to only do the comparison. '''
+    """ Can either run this test as 1 node with expected answers, or two and compare them.
+        Change the "outcome" variable from each TestInstance object to only do the comparison. """
     def set_test_params(self):
         self.num_nodes = 1
         self.setup_clean_chain = True

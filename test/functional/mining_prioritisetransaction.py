@@ -3,11 +3,12 @@
 # Copyright (c) 2017-2018 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the prioritisetransaction mining RPC."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (gen_return_txouts, create_confirmed_utxos, create_lots_of_big_transactions, assert_raises_rpc_error, assert_equal, time)
-from test_framework.mininode import (COIN, MAX_BLOCK_BASE_SIZE)
+from test_framework.util import gen_return_txouts, create_confirmed_utxos, create_lots_of_big_transactions, assert_raises_rpc_error, assert_equal, time
+from test_framework.mininode import COIN, MAX_BLOCK_BASE_SIZE
 
 class PrioritiseTransactionTest(RavenTestFramework):
     def set_test_params(self):
@@ -60,7 +61,7 @@ class PrioritiseTransactionTest(RavenTestFramework):
                 high_fee_tx = x
 
         # Something high-fee should have been mined!
-        assert(high_fee_tx != None)
+        assert(high_fee_tx is not None)
 
         # Add a prioritisation before a tx is in the mempool (de-prioritising a
         # high-fee transaction so that it's now low fee).
@@ -76,7 +77,7 @@ class PrioritiseTransactionTest(RavenTestFramework):
         # Now verify the modified-high feerate transaction isn't mined before
         # the other high fee transactions. Keep mining until our mempool has
         # decreased by all the high fee size that we calculated above.
-        while (self.nodes[0].getmempoolinfo()['bytes'] > sizes[0] + sizes[1]):
+        while self.nodes[0].getmempoolinfo()['bytes'] > sizes[0] + sizes[1]:
             self.nodes[0].generate(1)
 
         # High fee transaction should not have been mined, but other high fee rate
@@ -85,7 +86,7 @@ class PrioritiseTransactionTest(RavenTestFramework):
         self.log.info("Assert that de-prioritised transaction is still in mempool")
         assert(high_fee_tx in mempool)
         for x in txids[2]:
-            if (x != high_fee_tx):
+            if x != high_fee_tx:
                 assert(x not in mempool)
 
         # Create a free transaction.  Should be rejected.
