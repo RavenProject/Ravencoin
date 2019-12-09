@@ -7,6 +7,7 @@
 """Base class for RPC testing."""
 
 from enum import Enum
+from random import randint
 import logging
 import optparse
 import os
@@ -86,9 +87,17 @@ class RavenTestFramework:
         self.options.cachedir = os.path.abspath(self.options.cachedir)
 
         # Set up temp directory and start logging
+        # When looping tests using the --loop=n argument, when a test fails the tmpdir will not be deleted.
+        # This will cause that specific test to fail on every loop after since this directory will exist.
+        # Now when it fails to create the tmpdir it will try to create a new directory with a random int
+        # appended to the path. This will allow looped tests to pass and keep the log and state data from the previous failure.
         if self.options.tmpdir:
             self.options.tmpdir = os.path.abspath(self.options.tmpdir)
-            os.makedirs(self.options.tmpdir, exist_ok=False)
+            try:
+                os.makedirs(self.options.tmpdir, exist_ok=False)
+            except OSError as e:
+                self.options.tmpdir = os.path.abspath(self.options.tmpdir + str(randint(0,48)))
+                os.makedirs(self.options.tmpdir, exist_ok=False)
         else:
             self.options.tmpdir = tempfile.mkdtemp(prefix="test")
         self._start_logging()
