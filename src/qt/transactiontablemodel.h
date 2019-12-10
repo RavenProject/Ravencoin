@@ -114,7 +114,7 @@ public Q_SLOTS:
     void updateConfirmations();
     void updateDisplayUnit();
     /** Updates the column title to "Amount (DisplayUnit)" and emits headerDataChanged() signal for table headers to react. */
-    void updateAmountColumnTitle();
+    //void updateAmountColumnTitle();
     /* Needed to update fProcessingQueuedTransactions through a QueuedConnection */
     void setProcessingQueuedTransactions(bool value) { fProcessingQueuedTransactions = value; }
 
