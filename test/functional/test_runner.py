@@ -154,6 +154,7 @@ BASE_SCRIPTS= [
     'rpc_signrawtransaction.py',
     'wallet_resendtransactions.py',
     'wallet_txn_clone.py --mineblock',
+    'interface_rpc.py',
     'rpc_signmessage.py',
     'rpc_deprecated.py',
     'wallet_coinbase_category.py',
