@@ -340,6 +340,14 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Unsupported asset type: ") + AssetTypeToString(assetType));
     }
 
+    if (flag == 1 && mempool.mapGlobalFreezingAssetTransactions.count(restricted_name)){
+        throw JSONRPCError(RPC_TRANSACTION_REJECTED, std::string("Freezing transaction already in mempool"));
+    }
+
+    if (flag == 0 && mempool.mapGlobalUnFreezingAssetTransactions.count(restricted_name)){
+        throw JSONRPCError(RPC_TRANSACTION_REJECTED, std::string("Unfreezing transaction already in mempool"));
+    }
+
     // Get the optional change address
     std::string change_address = "";
     if (request.params.size() > 1) {

@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test activation of the first version bits soft fork.
+
+"""
+Test activation of the first version bits soft fork.
 
 This soft fork will activate the following BIPS:
 BIP 68  - nSequence relative lock times
@@ -44,14 +46,15 @@ bip112txs_vary_OP_CSV_9 - 16 txs with nSequence = 9 evaluated against varying {r
 bip112tx_special - test negative argument to OP_CSV
 """
 
-from test_framework.test_framework import ComparisonTestFramework
-from test_framework.util import (Decimal, hex_str_to_bytes, assert_equal, get_bip9_status)
-from test_framework.mininode import (ToHex, CTransaction, NetworkThread)
-from test_framework.blocktools import (create_coinbase, create_block)
-from test_framework.comptool import (TestInstance, TestManager)
-from test_framework.script import (OP_DROP, CScript, OP_CHECKSEQUENCEVERIFY)
 from io import BytesIO
 import time
+from test_framework.test_framework import ComparisonTestFramework
+from test_framework.util import Decimal, hex_str_to_bytes, assert_equal, get_bip9_status
+from test_framework.mininode import to_hex, CTransaction, NetworkThread
+from test_framework.blocktools import create_coinbase, create_block
+from test_framework.comptool import TestInstance, TestManager
+from test_framework.script import OP_DROP, CScript, OP_CHECKSEQUENCEVERIFY
+
 
 base_relative_locktime = 10
 seq_disable_flag = 1<<31
@@ -70,19 +73,21 @@ for b31 in range(2):
             b18times = []
             for b18 in range(2):
                 rlt = base_relative_locktime
-                if (b31):
+                if b31:
                     rlt = rlt | seq_disable_flag
-                if (b25):
+                if b25:
                     rlt = rlt | seq_random_high_bit
-                if (b22):
+                if b22:
                     rlt = rlt | seq_type_flag
-                if (b18):
+                if b18:
                     rlt = rlt | seq_random_low_bit
                 b18times.append(rlt)
             b22times.append(b18times)
         b25times.append(b22times)
     relative_locktimes.append(b25times)
 
+
+# noinspection PyShadowingNames
 def all_rlt_txs(txarray):
     txs = []
     for b31 in range(2):
@@ -92,6 +97,8 @@ def all_rlt_txs(txarray):
                     txs.append(txarray[b31][b25][b22][b18])
     return txs
 
+
+# noinspection PyPep8Naming
 class BIP68_112_113Test(ComparisonTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
@@ -106,9 +113,10 @@ class BIP68_112_113Test(ComparisonTestFramework):
 
     def send_generic_input_tx(self, node, coinbases):
         amount = Decimal("49.99")
-        return node.sendrawtransaction(ToHex(self.sign_transaction(node, self.create_transaction(node, node.getblock(coinbases.pop())['tx'][0], self.nodeaddress, amount))))
+        return node.sendrawtransaction(to_hex(self.sign_transaction(node, self.create_transaction(node, node.getblock(coinbases.pop())['tx'][0], self.nodeaddress, amount))))
 
-    def create_transaction(self, node, txid, to_address, amount):
+    @staticmethod
+    def create_transaction(node, txid, to_address, amount):
         inputs = [{ "txid" : txid, "vout" : 0}]
         outputs = { to_address : amount }
         rawtx = node.createrawtransaction(inputs, outputs)
@@ -117,15 +125,18 @@ class BIP68_112_113Test(ComparisonTestFramework):
         tx.deserialize(f)
         return tx
 
-    def sign_transaction(self, node, unsignedtx):
-        rawtx = ToHex(unsignedtx)
+    @staticmethod
+    def sign_transaction(node, unsignedtx):
+        rawtx = to_hex(unsignedtx)
         signresult = node.signrawtransaction(rawtx)
         tx = CTransaction()
         f = BytesIO(hex_str_to_bytes(signresult['hex']))
         tx.deserialize(f)
         return tx
 
-    def generate_blocks(self, number, version, test_blocks = []):
+    def generate_blocks(self, number, version, test_blocks=None):
+        if test_blocks is None:
+            test_blocks = []
         for _ in range(number):
             block = self.create_test_block([], version)
             test_blocks.append([block, True])
@@ -143,6 +154,7 @@ class BIP68_112_113Test(ComparisonTestFramework):
         block.solve()
         return block
 
+    # noinspection PyShadowingNames
     def create_bip68txs(self, bip68inputs, txversion, locktime_delta = 0):
         txs = []
         assert(len(bip68inputs) >= 16)
@@ -164,14 +176,15 @@ class BIP68_112_113Test(ComparisonTestFramework):
             txs.append(b25txs)
         return txs
 
-    def create_bip112special(self, input, txversion):
-        tx = self.create_transaction(self.nodes[0], input, self.nodeaddress, Decimal("49.98"))
+    def create_bip112special(self, input_data, txversion):
+        tx = self.create_transaction(self.nodes[0], input_data, self.nodeaddress, Decimal("49.98"))
         tx.nVersion = txversion
         signtx = self.sign_transaction(self.nodes[0], tx)
         signtx.vin[0].scriptSig = CScript([-1, OP_CHECKSEQUENCEVERIFY, OP_DROP] + list(CScript(signtx.vin[0].scriptSig)))
         return signtx
 
-    def create_bip112txs(self, bip112inputs, varyOP_CSV, txversion, locktime_delta = 0):
+    # noinspection PyShadowingNames
+    def create_bip112txs(self, bip112inputs, vary_op_csv, txversion, locktime_delta = 0):
         txs = []
         assert(len(bip112inputs) >= 16)
         i = 0
@@ -184,13 +197,13 @@ class BIP68_112_113Test(ComparisonTestFramework):
                     for b18 in range(2):
                         tx =  self.create_transaction(self.nodes[0], bip112inputs[i], self.nodeaddress, Decimal("49.98"))
                         i += 1
-                        if (varyOP_CSV): # if varying OP_CSV, nSequence is fixed
+                        if vary_op_csv: # if varying OP_CSV, nSequence is fixed
                             tx.vin[0].nSequence = base_relative_locktime + locktime_delta
                         else: # vary nSequence instead, OP_CSV is fixed
                             tx.vin[0].nSequence = relative_locktimes[b31][b25][b22][b18] + locktime_delta
                         tx.nVersion = txversion
                         signtx = self.sign_transaction(self.nodes[0], tx)
-                        if (varyOP_CSV):
+                        if vary_op_csv:
                             signtx.vin[0].scriptSig = CScript([relative_locktimes[b31][b25][b22][b18], OP_CHECKSEQUENCEVERIFY, OP_DROP] + list(CScript(signtx.vin[0].scriptSig)))
                         else:
                             signtx.vin[0].scriptSig = CScript([base_relative_locktime, OP_CHECKSEQUENCEVERIFY, OP_DROP] + list(CScript(signtx.vin[0].scriptSig)))
@@ -200,6 +213,7 @@ class BIP68_112_113Test(ComparisonTestFramework):
             txs.append(b25txs)
         return txs
 
+    # noinspection PyShadowingNames
     def get_tests(self):
         long_past_time = int(time.time()) - 600 * 1000 # enough to build up to 1000 blocks 10 minutes apart without worrying about getting into the future
         self.nodes[0].setmocktime(long_past_time - 100) # enough so that the generated blocks will still all be before long_past_time

@@ -3,38 +3,15 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the SegWit changeover logic."""
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (hex_str_to_bytes, 
-                                bytes_to_hex_str, 
-                                connect_nodes, 
-                                Decimal, 
-                                assert_equal, 
-                                sync_blocks, 
-                                assert_raises_rpc_error, 
-                                try_rpc)
-from test_framework.mininode import (sha256, 
-                                    CTransaction, 
-                                    CTxIn, 
-                                    COutPoint, 
-                                    CTxOut, 
-                                    COIN, 
-                                    ToHex, 
-                                    from_hex)
-from test_framework.address import (script_to_p2sh, key_to_p2pkh)
-from test_framework.script import ( CScript, 
-                                    OP_HASH160, 
-                                    OP_CHECKSIG, 
-                                    hash160, 
-                                    OP_EQUAL, OP_DUP, 
-                                    OP_EQUALVERIFY,
-                                    OP_0, 
-                                    OP_1, 
-                                    OP_2, 
-                                    OP_CHECKMULTISIG, 
-                                    OP_TRUE)
 from io import BytesIO
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import hex_str_to_bytes, bytes_to_hex_str, connect_nodes, Decimal, assert_equal,  sync_blocks, assert_raises_rpc_error, try_rpc
+from test_framework.mininode import sha256, CTransaction, CTxIn, COutPoint, CTxOut, COIN, to_hex, from_hex
+from test_framework.address import script_to_p2sh, key_to_p2pkh
+from test_framework.script import CScript, OP_HASH160, OP_CHECKSIG, hash160, OP_EQUAL, OP_DUP, OP_EQUALVERIFY, OP_0, OP_1, OP_2, OP_CHECKMULTISIG, OP_TRUE
 
 NODE_0 = 0
 NODE_2 = 2
@@ -45,7 +22,7 @@ WIT_V1 = 1
 # given pubkey, or a P2WSH output of a 1-of-1 multisig for the given
 # pubkey. Returns the hex encoding of the scriptPubKey.
 def witness_script(use_p2wsh, pubkey):
-    if (use_p2wsh == False):
+    if not use_p2wsh:
         # P2WPKH instead
         pubkeyhash = hash160(hex_str_to_bytes(pubkey))
         pkscript = CScript([OP_0, pubkeyhash])
@@ -60,13 +37,13 @@ def witness_script(use_p2wsh, pubkey):
 # optionally wrapping the segwit output using P2SH.
 def create_witnessprogram(use_p2wsh, utxo, pubkey, encode_p2sh, amount):
     pkscript = hex_str_to_bytes(witness_script(use_p2wsh, pubkey))
-    if (encode_p2sh):
+    if encode_p2sh:
         p2sh_hash = hash160(pkscript)
         pkscript = CScript([OP_HASH160, p2sh_hash, OP_EQUAL])
     tx = CTransaction()
     tx.vin.append(CTxIn(COutPoint(int(utxo["txid"], 16), utxo["vout"]), b""))
     tx.vout.append(CTxOut(int(amount*COIN), pkscript))
-    return ToHex(tx)
+    return to_hex(tx)
 
 # Create a transaction spending a given utxo to a segwit output corresponding
 # to the given pubkey: use_p2wsh determines whether to use P2WPKH or P2WSH
@@ -75,22 +52,20 @@ def create_witnessprogram(use_p2wsh, utxo, pubkey, encode_p2sh, amount):
 # insert_redeem_script will be added to the scriptSig, if given.
 def send_to_witness(use_p2wsh, node, utxo, pubkey, encode_p2sh, amount, sign=True, insert_redeem_script=""):
     tx_to_witness = create_witnessprogram(use_p2wsh, utxo, pubkey, encode_p2sh, amount)
-    if (sign):
+    if sign:
         signed = node.signrawtransaction(tx_to_witness)
         assert("errors" not in signed or len(["errors"]) == 0)
         return node.sendrawtransaction(signed["hex"])
     else:
-        if (insert_redeem_script):
+        if insert_redeem_script:
             tx = from_hex(CTransaction(), tx_to_witness)
             tx.vin[0].scriptSig += CScript([hex_str_to_bytes(insert_redeem_script)])
-            tx_to_witness = ToHex(tx)
+            tx_to_witness = to_hex(tx)
 
     return node.sendrawtransaction(tx_to_witness)
 
 def getutxo(txid):
-    utxo = {}
-    utxo["vout"] = 0
-    utxo["txid"] = txid
+    utxo = {"vout": 0, "txid": txid}
     return utxo
 
 def find_unspent(node, min_value):
@@ -274,7 +249,7 @@ class SegWitTest(RavenTestFramework):
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(int(txid1, 16), 0), b''))
         tx.vout.append(CTxOut(int(49.99*COIN), CScript([OP_TRUE])))
-        tx2_hex = self.nodes[0].signrawtransaction(ToHex(tx))['hex']
+        tx2_hex = self.nodes[0].signrawtransaction(to_hex(tx))['hex']
         txid2 = self.nodes[0].sendrawtransaction(tx2_hex)
         tx = from_hex(CTransaction(), tx2_hex)
         assert(not tx.wit.is_null())
@@ -283,8 +258,8 @@ class SegWitTest(RavenTestFramework):
         tx = CTransaction()
         tx.vin.append(CTxIn(COutPoint(int(txid2, 16), 0), b""))
         tx.vout.append(CTxOut(int(49.95*COIN), CScript([OP_TRUE]))) # Huge fee
-        tx.calc_sha256()
-        txid3 = self.nodes[0].sendrawtransaction(ToHex(tx))
+        tx.calc_x16r()
+        txid3 = self.nodes[0].sendrawtransaction(to_hex(tx))
         assert(tx.wit.is_null())
         assert(txid3 in self.nodes[0].getrawmempool())
 
@@ -304,7 +279,7 @@ class SegWitTest(RavenTestFramework):
         assert(txid3 in template_txids)
 
         # Check that wtxid is properly reported in mempool entry
-        assert_equal(int(self.nodes[0].getmempoolentry(txid3)["wtxid"], 16), tx.calc_sha256(True))
+        assert_equal(int(self.nodes[0].getmempoolentry(txid3)["wtxid"], 16), tx.calc_x16r(True))
 
         # Mine a block to clear the gbt cache again.
         self.nodes[0].generate(1)
@@ -327,8 +302,8 @@ class SegWitTest(RavenTestFramework):
         uncompressed_spendable_address = ["mvozP4UwyGD2mGZU4D2eMvMLPB9WkMmMQu"]
         self.nodes[0].importprivkey("cNC8eQ5dg3mFAVePDX4ddmPYpPbw41r9bm2jd1nLJT77e6RrzTRR")
         compressed_spendable_address = ["mmWQubrDomqpgSYekvsU7HWEVjLFHAakLe"]
-        assert ((self.nodes[0].validateaddress(uncompressed_spendable_address[0])['iscompressed'] == False))
-        assert ((self.nodes[0].validateaddress(compressed_spendable_address[0])['iscompressed'] == True))
+        assert (self.nodes[0].validateaddress(uncompressed_spendable_address[0])['iscompressed'] == False)
+        assert (self.nodes[0].validateaddress(compressed_spendable_address[0])['iscompressed'] == True)
 
         self.nodes[0].importpubkey(pubkeys[0])
         compressed_solvable_address = [key_to_p2pkh(pubkeys[0])]
@@ -362,7 +337,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in compressed_spendable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 # bare and p2sh multisig with compressed keys should always be spendable
                 spendable_anytime.extend([bare, p2sh])
@@ -377,7 +352,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in uncompressed_spendable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 # bare and p2sh multisig with uncompressed keys should always be spendable
                 spendable_anytime.extend([bare, p2sh])
@@ -394,7 +369,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in compressed_solvable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 # Multisig without private is not seen after addmultisigaddress, but seen after importaddress
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 solvable_after_importaddress.extend([bare, p2sh, p2wsh, p2sh_p2wsh])
@@ -407,7 +382,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in uncompressed_solvable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 # Base uncompressed multisig without private is not seen after addmultisigaddress, but seen after importaddress
                 solvable_after_importaddress.extend([bare, p2sh])
@@ -447,7 +422,7 @@ class SegWitTest(RavenTestFramework):
         importlist = []
         for i in compressed_spendable_address + uncompressed_spendable_address + compressed_solvable_address + uncompressed_solvable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 bare = hex_str_to_bytes(v['hex'])
                 importlist.append(bytes_to_hex_str(bare))
                 importlist.append(bytes_to_hex_str(CScript([OP_0, sha256(bare)])))
@@ -523,7 +498,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in compressed_spendable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 # P2WSH and P2SH(P2WSH) multisig with compressed keys are spendable after addwitnessaddress
                 spendable_after_addwitnessaddress.extend([p2wsh, p2sh_p2wsh])
@@ -536,7 +511,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in uncompressed_spendable_address + uncompressed_solvable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 # P2WSH and P2SH(P2WSH) multisig with uncompressed keys are never seen
                 unseen_anytime.extend([p2wsh, p2sh_p2wsh])
@@ -547,7 +522,7 @@ class SegWitTest(RavenTestFramework):
 
         for i in compressed_solvable_address:
             v = self.nodes[0].validateaddress(i)
-            if (v['isscript']):
+            if v['isscript']:
                 # P2WSH multisig without private key are seen after addwitnessaddress
                 [bare, p2sh, p2wsh, p2sh_p2wsh] = self.p2sh_address_to_script(v)
                 solvable_after_addwitnessaddress.extend([p2wsh, p2sh_p2wsh])
@@ -604,27 +579,29 @@ class SegWitTest(RavenTestFramework):
         watchcount = 0
         spendcount = 0
         for i in self.nodes[0].listunspent():
-            if (i['txid'] == txid):
+            if i['txid'] == txid:
                 watchcount += 1
-                if (i['spendable'] == True):
+                if i['spendable']:
                     spendcount += 1
-        if (ismine == 2):
+        if ismine == 2:
             assert_equal(spendcount, len(script_list))
-        elif (ismine == 1):
+        elif ismine == 1:
             assert_equal(watchcount, len(script_list))
             assert_equal(spendcount, 0)
         else:
             assert_equal(watchcount, 0)
         return txid
 
-    def p2sh_address_to_script(self,v):
+    @staticmethod
+    def p2sh_address_to_script(v):
         bare = CScript(hex_str_to_bytes(v['hex']))
         p2sh = CScript(hex_str_to_bytes(v['scriptPubKey']))
         p2wsh = CScript([OP_0, sha256(bare)])
         p2sh_p2wsh = CScript([OP_HASH160, hash160(p2wsh), OP_EQUAL])
-        return([bare, p2sh, p2wsh, p2sh_p2wsh])
+        return [bare, p2sh, p2wsh, p2sh_p2wsh]
 
-    def p2pkh_address_to_script(self,v):
+    @staticmethod
+    def p2pkh_address_to_script(v):
         pubkey = hex_str_to_bytes(v['pubkey'])
         p2wpkh = CScript([OP_0, hash160(pubkey)])
         p2sh_p2wpkh = CScript([OP_HASH160, hash160(p2wpkh), OP_EQUAL])
@@ -638,7 +615,7 @@ class SegWitTest(RavenTestFramework):
         p2sh_p2wsh_p2pkh = CScript([OP_HASH160, hash160(p2wsh_p2pkh), OP_EQUAL])
         return [p2wpkh, p2sh_p2wpkh, p2pk, p2pkh, p2sh_p2pk, p2sh_p2pkh, p2wsh_p2pk, p2wsh_p2pkh, p2sh_p2wsh_p2pk, p2sh_p2wsh_p2pkh]
 
-    def create_and_mine_tx_from_txids(self, txids, success = True):
+    def create_and_mine_tx_from_txids(self, txids):
         tx = CTransaction()
         for i in txids:
             txtmp = CTransaction()

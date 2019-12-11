@@ -259,6 +259,14 @@ QColor PlatformStyle::SingleColor() const
     return singleColor;
 }
 
+QColor PlatformStyle::AssetTxColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_LIGHT_BLUE;
+
+    return COLOR_DARK_BLUE;
+}
+
 
 const PlatformStyle *PlatformStyle::instantiate(const QString &platformId)
 {

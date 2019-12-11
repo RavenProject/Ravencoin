@@ -3,14 +3,14 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test the listtransactions API."""
 
+from io import BytesIO
 from decimal import Decimal
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (hex_str_to_bytes, assert_array_result, sync_mempools, assert_equal, bytes_to_hex_str)
-from test_framework.mininode import (CTransaction, COIN)
-from io import BytesIO
-
+from test_framework.util import hex_str_to_bytes, assert_array_result, sync_mempools, assert_equal, bytes_to_hex_str
+from test_framework.mininode import CTransaction, COIN
 
 
 def from_hex(hexstring):
@@ -151,7 +151,7 @@ class ListTransactionsTest(RavenTestFramework):
         inputs = [{"txid": txid_2, "vout": utxo_to_use["vout"]}]
         outputs = {self.nodes[1].getnewaddress(): 0.998}
         tx3 = self.nodes[0].createrawtransaction(inputs, outputs)
-        tx3_modified = txFromHex(tx3)
+        tx3_modified = from_hex(tx3)
         tx3_modified.vin[0].nSequence = 0
         tx3 = bytes_to_hex_str(tx3_modified.serialize())
         tx3_signed = self.nodes[0].signrawtransaction(tx3)['hex']

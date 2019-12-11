@@ -3,24 +3,26 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test processing of feefilter messages.
 
-  (Wallet now has DEFAULT_TRANSACTION_MINFEE = 0.00050000"""
+"""
+Test processing of feefilter messages.
 
-from test_framework.mininode import (mininode_lock, NodeConnCB, NodeConn, NetworkThread, msg_feefilter)
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (sync_blocks, p2p_port, Decimal, sync_mempools)
+(Wallet now has DEFAULT_TRANSACTION_MINFEE = 0.01000000
+"""
+
 import time
+from test_framework.mininode import mininode_lock, NodeConnCB, NodeConn, NetworkThread, MsgFeeFilter
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import sync_blocks, p2p_port, Decimal, sync_mempools
 
-
-def hashToHex(hash):
-    return format(hash, '064x')
+def hash_to_hex(hash_data):
+    return format(hash_data, '064x')
 
 # Wait up to 60 secs to see if the testnode has received all the expected invs
-def allInvsMatch(invsExpected, testnode):
+def all_invs_match(invs_expected, testnode):
     for _ in range(60):
         with mininode_lock:
-            if (sorted(invsExpected) == sorted(testnode.txinvs)):
+            if sorted(invs_expected) == sorted(testnode.txinvs):
                 return True
         time.sleep(1)
     return False
@@ -32,8 +34,8 @@ class TestNode(NodeConnCB):
 
     def on_inv(self, conn, message):
         for i in message.inv:
-            if (i.type == 1):
-                self.txinvs.append(hashToHex(i.hash))
+            if i.type == 1:
+                self.txinvs.append(hash_to_hex(i.hash))
 
     def clear_invs(self):
         with mininode_lock:
@@ -57,23 +59,23 @@ class FeeFilterTest(RavenTestFramework):
         NetworkThread().start()
         test_node.wait_for_verack()
 
-        # Test that invs are received for all txs at feerate of 2,000,000 sats
+        # Test that invs are received for all txs at feerate of 2,000,000 corbies
         node1.settxfee(Decimal("0.02000000"))
-        txids = [node1.sendtoaddress(node1.getnewaddress(), 1) for x in range(3)]
-        assert(allInvsMatch(txids, test_node))
+        txids = [node1.sendtoaddress(node1.getnewaddress(), 1) for _ in range(3)]
+        assert(all_invs_match(txids, test_node))
         test_node.clear_invs()
 
-        # Set a filter of 1,500,000 sats (must be above 1,000,000 sats (min fee is enforced)
-        test_node.send_and_ping(msg_feefilter(1500000))
+        # Set a filter of 1,500,000 corbies (must be above 1,000,000 corbies (min fee is enforced)
+        test_node.send_and_ping(MsgFeeFilter(1500000))
 
         # Test that txs are still being received (paying 70 sat/byte)
-        txids = [node1.sendtoaddress(node1.getnewaddress(), 1) for x in range(3)]
-        assert(allInvsMatch(txids, test_node))
+        txids = [node1.sendtoaddress(node1.getnewaddress(), 1) for _ in range(3)]
+        assert(all_invs_match(txids, test_node))
         test_node.clear_invs()
 
-        # Change tx fee rate to 1,350,000 sats and test they are no longer received
+        # Change tx fee rate to 1,350,000 corbies and test they are no longer received
         node1.settxfee(Decimal("0.013500000"))
-        [node1.sendtoaddress(node1.getnewaddress(), 1) for x in range(3)]
+        [node1.sendtoaddress(node1.getnewaddress(), 1) for _ in range(3)]
         sync_mempools(self.nodes) # must be sure node 0 has received all txs 
 
         # Raise the tx fee back up above the mintxfee, submit 1 tx on node 0,
@@ -88,13 +90,13 @@ class FeeFilterTest(RavenTestFramework):
         # as well.
         node0.settxfee(Decimal("0.01600000"))
         txids = [node0.sendtoaddress(node0.getnewaddress(), 1)] #
-        assert(allInvsMatch(txids, test_node))
+        assert(all_invs_match(txids, test_node))
         test_node.clear_invs()
 
         # Remove fee filter and check that txs are received again
-        test_node.send_and_ping(msg_feefilter(0))
-        txids = [node1.sendtoaddress(node1.getnewaddress(), 1) for x in range(3)]
-        assert(allInvsMatch(txids, test_node))
+        test_node.send_and_ping(MsgFeeFilter(0))
+        txids = [node1.sendtoaddress(node1.getnewaddress(), 1) for _ in range(3)]
+        assert(all_invs_match(txids, test_node))
         test_node.clear_invs()
 
 if __name__ == '__main__':

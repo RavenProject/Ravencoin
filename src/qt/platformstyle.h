@@ -37,6 +37,7 @@ public:
     QColor DarkBlueColor() const;
     QColor LightOrangeColor() const;
     QColor DarkOrangeColor() const;
+    QColor AssetTxColor() const;
 
 
     /** Colorize an image (given filename) with the icon color */

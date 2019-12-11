@@ -4,16 +4,13 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#
-# Test txindex generation and fetching
-#
+"""Test txindex generation and fetching"""
 
-import time
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (connect_nodes_bi, assert_equal)
-from test_framework.script import (CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG)
-from test_framework.mininode import (CTransaction, CTxIn, CTxOut, COutPoint)
 import binascii
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import connect_nodes_bi, assert_equal
+from test_framework.script import CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG
+from test_framework.mininode import CTransaction, CTxIn, CTxOut, COutPoint
 
 class TxIndexTest(RavenTestFramework):
 
@@ -50,13 +47,13 @@ class TxIndexTest(RavenTestFramework):
 
         #privkey = "cSdkPxkAjA4HDr5VHgsebAPDEh9Gyub4HK8UJr2DFGGqKKy4K5sG"
         #address = "mgY65WSfEmsyYaYPQaXhmXMeBhwp4EcsQW"
-        addressHash = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
-        scriptPubKey = CScript([OP_DUP, OP_HASH160, addressHash, OP_EQUALVERIFY, OP_CHECKSIG])
+        address_hash = bytes([11,47,10,12,49,191,224,64,107,12,204,19,129,253,190,49,25,70,218,220])
+        script_pub_key = CScript([OP_DUP, OP_HASH160, address_hash, OP_EQUALVERIFY, OP_CHECKSIG])
         unspent = self.nodes[0].listunspent()
         tx = CTransaction()
         amount = int(unspent[0]["amount"] * 10000000)
         tx.vin = [CTxIn(COutPoint(int(unspent[0]["txid"], 16), unspent[0]["vout"]))]
-        tx.vout = [CTxOut(amount, scriptPubKey)]
+        tx.vout = [CTxOut(amount, script_pub_key)]
         tx.rehash()
 
         signed_tx = self.nodes[0].signrawtransaction(binascii.hexlify(tx.serialize()).decode("utf-8"))

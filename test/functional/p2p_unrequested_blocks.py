@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test processing of unrequested blocks.
+
+"""
+Test processing of unrequested blocks.
 
 Since behavior differs when receiving unrequested blocks from whitelisted peers
 versus non-whitelisted peers, this tests the behavior of both (effectively two
@@ -58,24 +60,11 @@ work on its chain).
 
 """
 
-from test_framework.mininode import (NodeConn, 
-                                    NodeConnCB, 
-                                    NetworkThread, 
-                                    msg_block, 
-                                    msg_headers, 
-                                    CBlockHeader, 
-                                    mininode_lock, 
-                                    msg_inv, 
-                                    CInv)
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (os, 
-                                p2p_port, 
-                                assert_equal, 
-                                assert_raises_rpc_error, 
-                                connect_nodes, 
-                                sync_blocks)
 import time
-from test_framework.blocktools import (create_block, create_coinbase)
+from test_framework.mininode import NodeConn, NodeConnCB, NetworkThread, MsgBlock, MsgHeaders, CBlockHeader, mininode_lock, MsgInv, CInv
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import os, p2p_port, assert_equal, assert_raises_rpc_error, connect_nodes, sync_blocks
+from test_framework.blocktools import create_block, create_coinbase
 
 class AcceptBlockTest(RavenTestFramework):
     def add_options(self, parser):
@@ -102,10 +91,9 @@ class AcceptBlockTest(RavenTestFramework):
         white_node = NodeConnCB()  # connects to node1 (whitelisted)
         min_work_node = NodeConnCB()  # connects to node2 (not whitelisted)
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node))
-        connections.append(NodeConn('127.0.0.1', p2p_port(1), self.nodes[1], white_node))
-        connections.append(NodeConn('127.0.0.1', p2p_port(2), self.nodes[2], min_work_node))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node),
+                       NodeConn('127.0.0.1', p2p_port(1), self.nodes[1], white_node),
+                       NodeConn('127.0.0.1', p2p_port(2), self.nodes[2], min_work_node)]
         test_node.add_connection(connections[0])
         white_node.add_connection(connections[1])
         min_work_node.add_connection(connections[2])
@@ -129,9 +117,9 @@ class AcceptBlockTest(RavenTestFramework):
             blocks_h2.append(create_block(tips[i], create_coinbase(2), block_time))
             blocks_h2[i].solve()
             block_time += 1
-        test_node.send_message(msg_block(blocks_h2[0]))
-        white_node.send_message(msg_block(blocks_h2[1]))
-        min_work_node.send_message(msg_block(blocks_h2[2]))
+        test_node.send_message(MsgBlock(blocks_h2[0]))
+        white_node.send_message(MsgBlock(blocks_h2[1]))
+        min_work_node.send_message(MsgBlock(blocks_h2[2]))
 
         for x in [test_node, white_node, min_work_node]:
             x.sync_with_ping()
@@ -145,8 +133,8 @@ class AcceptBlockTest(RavenTestFramework):
         for i in range(2):
             blocks_h2f.append(create_block(tips[i], create_coinbase(2), blocks_h2[i].nTime+1))
             blocks_h2f[i].solve()
-        test_node.send_message(msg_block(blocks_h2f[0]))
-        white_node.send_message(msg_block(blocks_h2f[1]))
+        test_node.send_message(MsgBlock(blocks_h2f[0]))
+        white_node.send_message(MsgBlock(blocks_h2f[1]))
 
         for x in [test_node, white_node]:
             x.sync_with_ping()
@@ -165,8 +153,8 @@ class AcceptBlockTest(RavenTestFramework):
         for i in range(2):
             blocks_h3.append(create_block(blocks_h2f[i].sha256, create_coinbase(3), blocks_h2f[i].nTime+1))
             blocks_h3[i].solve()
-        test_node.send_message(msg_block(blocks_h3[0]))
-        white_node.send_message(msg_block(blocks_h3[1]))
+        test_node.send_message(MsgBlock(blocks_h3[0]))
+        white_node.send_message(MsgBlock(blocks_h3[1]))
 
         for x in [test_node, white_node]:
             x.sync_with_ping()
@@ -188,14 +176,14 @@ class AcceptBlockTest(RavenTestFramework):
         # the last (height-too-high) on node0.  Node1 should process the tip if
         # we give it the headers chain leading to the tip.
         tips = blocks_h3
-        headers_message = msg_headers()
+        headers_message = MsgHeaders()
         all_blocks = []   # node0's blocks
         for j in range(2):
             for i in range(288):
                 next_block = create_block(tips[j].sha256, create_coinbase(i + 4), tips[j].nTime+1)
                 next_block.solve()
                 if j==0:
-                    test_node.send_message(msg_block(next_block))
+                    test_node.send_message(MsgBlock(next_block))
                     all_blocks.append(next_block)
                 else:
                     headers_message.headers.append(CBlockHeader(next_block))
@@ -209,7 +197,7 @@ class AcceptBlockTest(RavenTestFramework):
 
         headers_message.headers.pop() # Ensure the last block is unrequested
         white_node.send_message(headers_message) # Send headers leading to tip
-        white_node.send_message(msg_block(tips[1]))  # Now deliver the tip
+        white_node.send_message(MsgBlock(tips[1]))  # Now deliver the tip
         white_node.sync_with_ping()
         self.nodes[1].getblock(tips[1].hash)
         self.log.info("Unrequested block far ahead of tip accepted from whitelisted peer")
@@ -217,7 +205,7 @@ class AcceptBlockTest(RavenTestFramework):
         # 5. Test handling of unrequested block on the node that didn't process
         # Should still not be processed (even though it has a child that has more
         # work).
-        test_node.send_message(msg_block(blocks_h2f[0]))
+        test_node.send_message(MsgBlock(blocks_h2f[0]))
 
         # Here, if the sleep is too short, the test could falsely succeed (if the
         # node hasn't processed the block by the time the sleep returns, and then
@@ -234,7 +222,7 @@ class AcceptBlockTest(RavenTestFramework):
         with mininode_lock:
             # Clear state so we can check the getdata request
             test_node.last_message.pop("getdata", None)
-            test_node.send_message(msg_inv([CInv(2, blocks_h3[0].sha256)]))
+            test_node.send_message(MsgInv([CInv(2, blocks_h3[0].sha256)]))
 
         test_node.sync_with_ping()
         with mininode_lock:
@@ -245,7 +233,7 @@ class AcceptBlockTest(RavenTestFramework):
         self.log.info("Inv at tip triggered getdata for unprocessed block")
 
         # 7. Send the missing block for the third time (now it is requested)
-        test_node.send_message(msg_block(blocks_h2f[0]))
+        test_node.send_message(MsgBlock(blocks_h2f[0]))
 
         test_node.sync_with_ping()
         assert_equal(self.nodes[0].getblockcount(), 290)

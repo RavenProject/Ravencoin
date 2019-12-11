@@ -3,19 +3,19 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test longpolling with getblocktemplate."""
 
-from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (get_rpc_proxy, random_transaction, Decimal)
-
 import threading
+from test_framework.test_framework import RavenTestFramework
+from test_framework.util import get_rpc_proxy, random_transaction, Decimal
 
 class LongpollThread(threading.Thread):
     def __init__(self, node):
         threading.Thread.__init__(self)
         # query current longpollid
-        templat = node.getblocktemplate()
-        self.longpollid = templat['longpollid']
+        template = node.getblocktemplate()
+        self.longpollid = template['longpollid']
         # create a new connection to the node, we can't use the same
         # connection from two threads
         self.node = get_rpc_proxy(node.url, 1, timeout=600, coverage_dir=node.coverage_dir)
@@ -30,11 +30,11 @@ class GetBlockTemplateLPTest(RavenTestFramework):
     def run_test(self):
         self.log.info("Warning: this test will take about 70 seconds in the best case. Be patient.")
         self.nodes[0].generate(10)
-        templat = self.nodes[0].getblocktemplate()
-        longpollid = templat['longpollid']
+        template = self.nodes[0].getblocktemplate()
+        longpollid = template['longpollid']
         # longpollid should not change between successive invocations if nothing else happens
-        templat2 = self.nodes[0].getblocktemplate()
-        assert(templat2['longpollid'] == longpollid)
+        template_2 = self.nodes[0].getblocktemplate()
+        assert(template_2['longpollid'] == longpollid)
 
         # Test 1: test that the longpolling wait if we do nothing
         thr = LongpollThread(self.nodes[0])

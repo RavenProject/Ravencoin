@@ -3,11 +3,13 @@
 # Copyright (c) 2017-2018 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test restricted asset related RPC commands."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import *
+from test_framework.util import assert_equal, assert_raises_rpc_error, assert_does_not_contain_key, assert_does_not_contain, assert_contains_key, assert_happening, assert_contains
 
+# noinspection PyAttributeOutsideInit
 class RestrictedAssetsTest(RavenTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
@@ -42,26 +44,20 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Arguments:", n0.issuerestrictedasset, asset_name, qty, verifier)
 
         # valid params
-        assert_raises_rpc_error(None, "Invalid asset name",
-                                n0.issuerestrictedasset, "$!N\/AL!D", qty, verifier, to_address)
-        assert_raises_rpc_error(None, "Verifier string can not be empty",
-                                n0.issuerestrictedasset, asset_name, qty, "", to_address)
-        assert_raises_rpc_error(None, "bad-txns-null-verifier-failed-syntax-check",
-                                n0.issuerestrictedasset, asset_name, qty, "false && true", to_address)
-        assert_raises_rpc_error(None, "bad-txns-null-verifier-contains-non-issued-qualifier",
-                                n0.issuerestrictedasset, asset_name, qty, "#NONEXIZTENT", to_address)
-        assert_raises_rpc_error(None, "Invalid Raven address",
-                                n0.issuerestrictedasset, asset_name, qty, verifier, "garbageaddress")
+        assert_raises_rpc_error(None, "Invalid asset name", n0.issuerestrictedasset, "$!N\/AL!D", qty, verifier, to_address)
+        assert_raises_rpc_error(None, "Verifier string can not be empty", n0.issuerestrictedasset, asset_name, qty, "", to_address)
+        assert_raises_rpc_error(None, "bad-txns-null-verifier-failed-syntax-check", n0.issuerestrictedasset, asset_name, qty, "false && true", to_address)
+        assert_raises_rpc_error(None, "bad-txns-null-verifier-contains-non-issued-qualifier", n0.issuerestrictedasset, asset_name, qty, "#NONEXIZTENT", to_address)
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.issuerestrictedasset, asset_name, qty, verifier, "garbageaddress")
 
         # base asset required
-        assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {base_asset_name}!",
-                                n0.issuerestrictedasset, asset_name, qty, verifier, to_address)
+        assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {base_asset_name}!", n0.issuerestrictedasset, asset_name, qty, verifier, to_address)
         n0.issue(base_asset_name)
 
         # issue
         txid = n0.issuerestrictedasset(asset_name, qty, verifier, to_address)
 
-        #verify
+        # verify
         assert_equal(64, len(txid[0]))
         assert_equal(qty, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         n0.generate(1)
@@ -89,18 +85,14 @@ class RestrictedAssetsTest(RavenTestFramework):
         n0.issue(base_asset_name)
 
         # valid params
-        assert_raises_rpc_error(None, "Invalid Raven address",
-                                n0.issuerestrictedasset, asset_name, qty, verifier, to_address, "garbagechangeaddress")
-        assert_raises_rpc_error(None, "Units must be between 0 and 8",
-                                n0.issuerestrictedasset, asset_name, qty, verifier, to_address, change_address, 9)
-        assert_raises_rpc_error(None, "Units must be between 0 and 8",
-                                n0.issuerestrictedasset, asset_name, qty, verifier, to_address, change_address, -1)
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.issuerestrictedasset, asset_name, qty, verifier, to_address, "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Units must be between 0 and 8", n0.issuerestrictedasset, asset_name, qty, verifier, to_address, change_address, 9)
+        assert_raises_rpc_error(None, "Units must be between 0 and 8", n0.issuerestrictedasset, asset_name, qty, verifier, to_address, change_address, -1)
 
-        #issue
-        txid = n0.issuerestrictedasset(asset_name, qty, verifier, to_address, change_address, units, reissuable,
-                                       has_ipfs, ipfs_hash)
+        # issue
+        txid = n0.issuerestrictedasset(asset_name, qty, verifier, to_address, change_address, units, reissuable, has_ipfs, ipfs_hash)
 
-        #verify
+        # verify
         assert_equal(64, len(txid[0]))
         assert_equal(qty, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         n0.generate(1)
@@ -150,25 +142,15 @@ class RestrictedAssetsTest(RavenTestFramework):
         n0.generate(1)
 
         # valid params
-        assert_raises_rpc_error(None, "Invalid asset name",
-                                n0.reissuerestrictedasset, "$!N\/AL!D", qty, to_address)
-        assert_raises_rpc_error(None, "Wallet doesn't have asset",
-                                n0.reissuerestrictedasset, foreign_asset_name, qty, to_address)
-        assert_raises_rpc_error(None, "Invalid Raven address",
-                                n0.reissuerestrictedasset, asset_name, qty, "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven address",
-                                n0.reissuerestrictedasset, asset_name, qty, to_address,
-                                change_verifier, verifier, "garbagechangeaddress")
-        assert_raises_rpc_error(None, "Units must be between -1 and 8",
-                                n0.reissuerestrictedasset, asset_name, qty, to_address,
-                                change_verifier, verifier, change_address, 9)
-        assert_raises_rpc_error(None, "Units must be between -1 and 8",
-                                n0.reissuerestrictedasset, asset_name, qty, to_address,
-                                change_verifier, verifier, change_address, -2)
+        assert_raises_rpc_error(None, "Invalid asset name", n0.reissuerestrictedasset, "$!N\/AL!D", qty, to_address)
+        assert_raises_rpc_error(None, "Wallet doesn't have asset", n0.reissuerestrictedasset, foreign_asset_name, qty, to_address)
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.reissuerestrictedasset, asset_name, qty, "garbageaddress")
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.reissuerestrictedasset, asset_name, qty, to_address, change_verifier, verifier, "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Units must be between -1 and 8", n0.reissuerestrictedasset, asset_name, qty, to_address, change_verifier, verifier, change_address, 9)
+        assert_raises_rpc_error(None, "Units must be between -1 and 8", n0.reissuerestrictedasset, asset_name, qty, to_address, change_verifier, verifier, change_address, -2)
 
         # reissue
-        txid = n0.reissuerestrictedasset(asset_name, qty, to_address,
-                                         change_verifier, verifier, change_address, units, reissuable, ipfs_hash)
+        txid = n0.reissuerestrictedasset(asset_name, qty, to_address, change_verifier, verifier, change_address, units, reissuable, ipfs_hash)
 
         # verify
         assert_equal(64, len(txid[0]))
@@ -204,7 +186,7 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_equal(False, asset_data['reissuable'])
         assert_equal(False, asset_data['has_ipfs'])
 
-    def issuequalifierasset_full(self):
+    def issue_qualifier_asset_full(self):
         self.log.info("Testing issuequalifierasset() with all params...")
         n0 = self.nodes[0]
 
@@ -216,13 +198,9 @@ class RestrictedAssetsTest(RavenTestFramework):
         ipfs_hash = "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"
 
         assert_raises_rpc_error(None, "Amount must be between 1 and 10", n0.issuequalifierasset, asset_name, 0)
-        assert_raises_rpc_error(None, "Invalid Raven address", n0.issuequalifierasset, asset_name, qty,
-                                "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven address", n0.issuequalifierasset, asset_name, qty, to_address,
-                                "gargabechangeaddress")
-        assert_raises_rpc_error(None, "ipfs_hash must be 46 characters", n0.issuequalifierasset, asset_name, qty,
-                                to_address, change_address, True)
-
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.issuequalifierasset, asset_name, qty, "garbageaddress")
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.issuequalifierasset, asset_name, qty, to_address, "gargabechangeaddress")
+        assert_raises_rpc_error(None, "ipfs_hash must be 46 characters", n0.issuequalifierasset, asset_name, qty, to_address, change_address, True)
 
         # issue
         txid = n0.issuequalifierasset(asset_name, qty, to_address, change_address, has_ipfs, ipfs_hash)
@@ -252,16 +230,13 @@ class RestrictedAssetsTest(RavenTestFramework):
         n0.generate(1)
         self.sync_all()
 
-        assert_equal(1, n0.listmyassets(asset_name,  True)[asset_name]['balance'])
+        assert_equal(1, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         assert_does_not_contain_key(asset_name, n1.listmyassets())
 
-        assert_raises_rpc_error(None, "Only use this rpc call to send Qualifier assets", n0.transferqualifier,
-                                nonqualifier_asset_name, 1, n1_address)
+        assert_raises_rpc_error(None, "Only use this rpc call to send Qualifier assets", n0.transferqualifier, nonqualifier_asset_name, 1, n1_address)
         assert_raises_rpc_error(None, "Invalid Raven address", n0.transferqualifier, asset_name, 1, "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven address", n0.transferqualifier, asset_name, 1, n1_address,
-                                "garbagechangeaddress")
-        assert_raises_rpc_error(None, "Invalid IPFS hash", n0.transferqualifier, asset_name, 1, n1_address,
-                                n0_change_address, "garbagemessage")
+        assert_raises_rpc_error(None, "Invalid Raven address", n0.transferqualifier, asset_name, 1, n1_address, "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Invalid IPFS hash", n0.transferqualifier, asset_name, 1, n1_address, n0_change_address, "garbagemessage")
 
         # transfer
         txid = n0.transferqualifier(asset_name, 1, n1_address, n0_change_address, message)
@@ -290,12 +265,12 @@ class RestrictedAssetsTest(RavenTestFramework):
         verifier = tag
         issue_address = n0.getnewaddress()
         n0.issue(base_asset_name)
-        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.issuerestrictedasset,
-            asset_name, qty, verifier, issue_address)
+        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.issuerestrictedasset, asset_name, qty, verifier, issue_address)
 
         # Isolate this test from other tagging on n0...
         def viewmytaggedaddresses():
             return list(filter(lambda x: tag == x['Tag Name'], n0.viewmytaggedaddresses()))
+
         assert_equal(0, len(viewmytaggedaddresses()))
 
         n0.addtagtoaddress(tag, issue_address, change_address)
@@ -317,8 +292,7 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_contains_key('Assigned', t1)
         assert_happening(t1['Assigned'])
 
-        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
-                                asset_name, 100, address)
+        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address)
 
         # special case: make sure transfer fails if change address(es) are verified even though to address isn't
         rvn_change_address = n0.getnewaddress()
@@ -326,23 +300,20 @@ class RestrictedAssetsTest(RavenTestFramework):
         n0.addtagtoaddress(tag, rvn_change_address)
         n0.addtagtoaddress(tag, asset_change_address)
         n0.generate(1)
-        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
-                                asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
+        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
         n0.removetagfromaddress(tag, rvn_change_address)
         n0.removetagfromaddress(tag, asset_change_address)
         n0.generate(1)
         ##
 
         assert_raises_rpc_error(None, "Invalid Raven address", n0.addtagtoaddress, tag, "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven change address", n0.addtagtoaddress, tag, address,
-                                "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Invalid Raven change address", n0.addtagtoaddress, tag, address, "garbagechangeaddress")
 
         n0.addtagtoaddress(tag, address, change_address)
         n0.addtagtoaddress(tag, address, change_address)  # redundant tagging ok if consistent
         n0.generate(1)
 
-        assert_raises_rpc_error(-32600, "add-qualifier-when-already-assigned", n0.addtagtoaddress,
-                                tag, address, change_address)
+        assert_raises_rpc_error(-32600, "add-qualifier-when-already-assigned", n0.addtagtoaddress, tag, address, change_address)
 
         # post-tagging verification
         assert_contains(address, n0.listaddressesfortag(tag))
@@ -351,12 +322,12 @@ class RestrictedAssetsTest(RavenTestFramework):
 
         # viewmytaggedaddresses
         tagged = viewmytaggedaddresses()
-        assert_equal(4, len(tagged))  # includes removed...
+        assert_equal(4, len(tagged))
         assert_contains(issue_address, list(map(lambda x: x['Address'], tagged)))
         assert_contains(address, list(map(lambda x: x['Address'], tagged)))
         for t in tagged:
             assert_equal(tag, t['Tag Name'])
-            if ('Assigned' in t):
+            if 'Assigned' in t:
                 assert_happening(t['Assigned'])
             else:
                 assert_happening(t['Removed'])
@@ -364,15 +335,12 @@ class RestrictedAssetsTest(RavenTestFramework):
         # special case: make sure transfer fails if the asset change address isn't verified (even if the rvn change address is)
         rvn_change_address = n0.getnewaddress()
         asset_change_address = n0.getnewaddress()
-        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
-                                asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
+        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
         n0.addtagtoaddress(tag, rvn_change_address)
         n0.generate(1)
-        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
-                                asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
+        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
         n0.removetagfromaddress(tag, rvn_change_address)
         n0.generate(1)
-        ##
 
         # do the transfer already!
         txid = n0.transfer(asset_name, 100, address)
@@ -387,18 +355,16 @@ class RestrictedAssetsTest(RavenTestFramework):
         txid = n0.transfer(asset_name, 1, issue_address, "", 0, "", asset_change_address)
         n0.generate(1)
         assert_equal(64, len(txid[0]))
-        assert(n0.listassetbalancesbyaddress(asset_change_address)[asset_name] > 0)
+        assert (n0.listassetbalancesbyaddress(asset_change_address)[asset_name] > 0)
 
         assert_raises_rpc_error(None, "Invalid Raven address", n0.removetagfromaddress, tag, "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven change address", n0.removetagfromaddress, tag, address,
-                                "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Invalid Raven change address", n0.removetagfromaddress, tag, address, "garbagechangeaddress")
 
         n0.removetagfromaddress(tag, address, change_address)
-        n0.removetagfromaddress(tag, address, change_address) # redundant untagging ok if consistent
+        n0.removetagfromaddress(tag, address, change_address)  # redundant untagging ok if consistent
         n0.generate(1)
 
-        assert_raises_rpc_error(-32600, "removing-qualifier-when-not-assigned", n0.removetagfromaddress,
-                                tag, address, change_address)
+        assert_raises_rpc_error(-32600, "removing-qualifier-when-not-assigned", n0.removetagfromaddress, tag, address, change_address)
 
         # TODO: test without specifying change address when there are no valid change addresses (all untagged)
 
@@ -409,7 +375,7 @@ class RestrictedAssetsTest(RavenTestFramework):
 
         # viewmytaggedaddresses
         tagged = viewmytaggedaddresses()
-        assert_equal(6, len(tagged)) # includes removed
+        assert_equal(6, len(tagged))  # includes removed
         assert_contains(issue_address, list(map(lambda x: x['Address'], tagged)))
         assert_contains(address, list(map(lambda x: x['Address'], tagged)))
         for t in tagged:
@@ -419,8 +385,7 @@ class RestrictedAssetsTest(RavenTestFramework):
             if address == t['Address']:
                 assert_happening(t['Removed'])
 
-        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer,
-                                asset_name, 100, address)
+        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address)
 
     def freezing(self):
         self.log.info("Testing freezing...")
@@ -464,18 +429,16 @@ class RestrictedAssetsTest(RavenTestFramework):
         self.sync_all()
         assert_equal(9000, n0.listassetbalancesbyaddress(change_address)[asset_name])
         assert_equal(1000, n1.listmyassets()[asset_name])
-        address = change_address # assets have moved
+        address = change_address  # assets have moved
 
         assert_raises_rpc_error(None, "Invalid Raven address", n0.freezeaddress, asset_name, "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezeaddress, asset_name, address,
-                                "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezeaddress, asset_name, address, "garbagechangeaddress")
 
         n0.freezeaddress(asset_name, address, rvn_change_address)
-        n0.freezeaddress(asset_name, address, rvn_change_address) # redundant freezing ok if consistent
+        n0.freezeaddress(asset_name, address, rvn_change_address)  # redundant freezing ok if consistent
         n0.generate(1)
 
-        assert_raises_rpc_error(-32600, "freeze-address-when-already-frozen", n0.freezeaddress,
-                                asset_name, address, rvn_change_address)
+        assert_raises_rpc_error(-32600, "freeze-address-when-already-frozen", n0.freezeaddress, asset_name, address, rvn_change_address)
 
         # post-freezing verification
         assert_contains(asset_name, n0.listaddressrestrictions(address))
@@ -489,19 +452,16 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_equal(asset_name, r['Asset Name'])
         assert_happening(r['Restricted'])
 
-        assert_raises_rpc_error(-8, "No asset outpoints are selected from the given address", n0.transferfromaddress,
-                                asset_name, address, 1000, n1.getnewaddress())
+        assert_raises_rpc_error(-8, "No asset outpoints are selected from the given address", n0.transferfromaddress, asset_name, address, 1000, n1.getnewaddress())
 
         assert_raises_rpc_error(None, "Invalid Raven address", n0.unfreezeaddress, asset_name, "garbageaddress")
-        assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezeaddress, asset_name, address,
-                                "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezeaddress, asset_name, address, "garbagechangeaddress")
 
         n0.unfreezeaddress(asset_name, address, rvn_change_address)
-        n0.unfreezeaddress(asset_name, address, rvn_change_address) # redundant unfreezing ok if consistent
+        n0.unfreezeaddress(asset_name, address, rvn_change_address)  # redundant unfreezing ok if consistent
         n0.generate(1)
 
-        assert_raises_rpc_error(-32600, "unfreeze-address-when-not-frozen", n0.unfreezeaddress,
-                                asset_name, address, rvn_change_address)
+        assert_raises_rpc_error(-32600, "unfreeze-address-when-not-frozen", n0.unfreezeaddress, asset_name, address, rvn_change_address)
 
         # post-unfreezing verification
         assert_does_not_contain(asset_name, n0.listaddressrestrictions(address))
@@ -522,7 +482,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         self.sync_all()
         assert_equal(8000, n0.listassetbalancesbyaddress(change_address)[asset_name])
         assert_equal(2000, n1.listmyassets()[asset_name])
-        address = change_address # assets have moved
 
     def global_freezing(self):
         self.log.info("Testing global freezing...")
@@ -551,33 +510,25 @@ class RestrictedAssetsTest(RavenTestFramework):
         self.sync_all()
         assert_equal(9000, n0.listassetbalancesbyaddress(change_address)[asset_name])
         assert_equal(1000, n1.listmyassets()[asset_name])
-        address = change_address # assets have moved
+        address = change_address  # assets have moved
 
-        assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezerestrictedasset, asset_name,
-                                "garbagechangeaddress")
+        assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezerestrictedasset, asset_name, "garbagechangeaddress")
 
-        n0.freezerestrictedasset(asset_name, rvn_change_address)
-        n0.freezerestrictedasset(asset_name, rvn_change_address) # redundant freezing ok if consistent
+        n0.freezerestrictedasset(asset_name, rvn_change_address)  # Can only freeze once!
+        assert_raises_rpc_error(-26, "Freezing transaction already in mempool", n0.freezerestrictedasset, asset_name, rvn_change_address)
         n0.generate(1)
-
-        assert_raises_rpc_error(None, "global-freeze-when-already-frozen", n0.freezerestrictedasset,
-                                asset_name, rvn_change_address)
+        assert_raises_rpc_error(None, "global-freeze-when-already-frozen", n0.freezerestrictedasset, asset_name, rvn_change_address)
 
         # post-freeze validation
         assert_contains(asset_name, n0.listglobalrestrictions())
         assert n0.checkglobalrestriction(asset_name)
-        assert_raises_rpc_error(-8, "restricted asset has been globally frozen", n0.transferfromaddress,
-                                asset_name, address, 1000, n1.getnewaddress())
+        assert_raises_rpc_error(-8, "restricted asset has been globally frozen", n0.transferfromaddress, asset_name, address, 1000, n1.getnewaddress())
+        assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezerestrictedasset, asset_name, "garbagechangeaddress")
 
-        assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezerestrictedasset, asset_name,
-                                "garbagechangeaddress")
-
-        n0.unfreezerestrictedasset(asset_name, rvn_change_address)
-        n0.unfreezerestrictedasset(asset_name, rvn_change_address) # redundant unfreezing ok if consistent
+        n0.unfreezerestrictedasset(asset_name, rvn_change_address)  # Can only un-freeze once!
+        assert_raises_rpc_error(-26, "Unfreezing transaction already in mempool", n0.unfreezerestrictedasset, asset_name, rvn_change_address)
         n0.generate(1)
-
-        assert_raises_rpc_error(None, "global-unfreeze-when-not-frozen", n0.unfreezerestrictedasset,
-                                asset_name, rvn_change_address)
+        assert_raises_rpc_error(None, "global-unfreeze-when-not-frozen", n0.unfreezerestrictedasset, asset_name, rvn_change_address)
 
         # post-unfreeze validation
         assert_does_not_contain(asset_name, n0.listglobalrestrictions())
@@ -589,8 +540,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         self.sync_all()
         assert_equal(8000, n0.listassetbalancesbyaddress(change_address)[asset_name])
         assert_equal(2000, n1.listmyassets()[asset_name])
-        address = change_address # assets have moved
-
 
     def isvalidverifierstring(self):
         self.log.info("Testing isvalidverifierstring()...")
@@ -614,8 +563,7 @@ class RestrictedAssetsTest(RavenTestFramework):
             "    "
         ]
         for s in invalid_empty:
-            assert_raises_rpc_error(-8, "Verifier string can not be empty",
-                                    n0.isvalidverifierstring, s)
+            assert_raises_rpc_error(-8, "Verifier string can not be empty", n0.isvalidverifierstring, s)
 
         invalid_syntax = [
             "asdf",
@@ -624,12 +572,9 @@ class RestrictedAssetsTest(RavenTestFramework):
         for s in invalid_syntax:
             assert_raises_rpc_error(-8, "failed-syntax", n0.isvalidverifierstring, s)
 
-        invalid_non_issued = [
-            "#NOPE"
-        ]
+        invalid_non_issued = ["#NOPE"]
         for s in invalid_non_issued:
-            assert_raises_rpc_error(-8, "contains-non-issued-qualifier",
-                                    n0.isvalidverifierstring, s)
+            assert_raises_rpc_error(-8, "contains-non-issued-qualifier", n0.isvalidverifierstring, s)
 
     def run_test(self):
         self.activate_restricted_assets()
@@ -638,12 +583,13 @@ class RestrictedAssetsTest(RavenTestFramework):
         self.issuerestrictedasset_full()
         self.reissuerestrictedasset_full()
         self.issuequalifierasset()
-        self.issuequalifierasset_full()
+        self.issue_qualifier_asset_full()
         self.transferqualifier()
         self.tagging()
         self.freezing()
         self.global_freezing()
         self.isvalidverifierstring()
+
 
 if __name__ == '__main__':
     RestrictedAssetsTest().main()
