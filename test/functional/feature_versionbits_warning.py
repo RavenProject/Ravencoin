@@ -3,16 +3,18 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test version bits warning system.
+
+"""
+Test version bits warning system.
 
 Generate chains with block versions that appear to be signalling unknown
 soft-forks, and test that warning alerts are generated.
 """
 
-from test_framework.mininode import (NodeConn, NodeConnCB, msg_block, NetworkThread)
+from re import compile
+from test_framework.mininode import NodeConn, NodeConnCB, MsgBlock, NetworkThread
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (os, p2p_port)
-import re
+from test_framework.util import os, p2p_port
 from test_framework.blocktools import create_block, create_coinbase
 
 VB_PERIOD = 144 # versionbits period length for regtest
@@ -22,7 +24,7 @@ VB_UNKNOWN_BIT = 27 # Choose a bit unassigned to any deployment
 
 WARN_UNKNOWN_RULES_MINED = "Unknown block versions being mined! It's possible unknown rules are in effect"
 WARN_UNKNOWN_RULES_ACTIVE = "unknown new rules activated (versionbit {})".format(VB_UNKNOWN_BIT)
-VB_PATTERN = re.compile("^Warning.*versionbit")
+VB_PATTERN = compile("^Warning.*versionbit")
 
 class TestNode(NodeConnCB):
     def on_inv(self, conn, message):
@@ -42,7 +44,7 @@ class VersionBitsWarningTest(RavenTestFramework):
         self.setup_nodes()
 
     # Send numblocks blocks via peer with nVersionToUse set.
-    def send_blocks_with_version(self, peer, numblocks, nVersionToUse):
+    def send_blocks_with_version(self, peer, numblocks, n_version_to_use):
         tip = self.nodes[0].getbestblockhash()
         height = self.nodes[0].getblockcount()
         block_time = self.nodes[0].getblockheader(tip)["time"]+1
@@ -50,12 +52,12 @@ class VersionBitsWarningTest(RavenTestFramework):
 
         for _ in range(numblocks):
             block = create_block(tip, create_coinbase(height+1), block_time)
-            block.nVersion = nVersionToUse
+            block.nVersion = n_version_to_use
             block.solve()
-            peer.send_message(msg_block(block))
+            peer.send_message(MsgBlock(block))
             block_time += 1
             height += 1
-            tip = block.sha256
+            tip = block.x16r
         peer.sync_with_ping()
 
     def test_versionbits_in_alert_file(self):
@@ -67,8 +69,7 @@ class VersionBitsWarningTest(RavenTestFramework):
         # Setup the p2p connection and start up the network thread.
         test_node = TestNode()
 
-        connections = []
-        connections.append(NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node))
+        connections = [NodeConn('127.0.0.1', p2p_port(0), self.nodes[0], test_node)]
         test_node.add_connection(connections[0])
 
         NetworkThread().start() # Start up network handling in another thread
@@ -81,8 +82,8 @@ class VersionBitsWarningTest(RavenTestFramework):
 
         # 2. Now build one period of blocks on the tip, with < VB_THRESHOLD
         # blocks signaling some unknown bit.
-        nVersion = VB_TOP_BITS | (1<<VB_UNKNOWN_BIT)
-        self.send_blocks_with_version(test_node, VB_THRESHOLD-1, nVersion)
+        n_version = VB_TOP_BITS | (1<<VB_UNKNOWN_BIT)
+        self.send_blocks_with_version(test_node, VB_THRESHOLD-1, n_version)
 
         # Fill rest of period with regular version blocks
         self.nodes[0].generate(VB_PERIOD - VB_THRESHOLD + 1)
@@ -94,7 +95,7 @@ class VersionBitsWarningTest(RavenTestFramework):
 
         # 3. Now build one period of blocks with >= VB_THRESHOLD blocks signaling
         # some unknown bit
-        self.send_blocks_with_version(test_node, VB_THRESHOLD, nVersion)
+        self.send_blocks_with_version(test_node, VB_THRESHOLD, n_version)
         self.nodes[0].generate(VB_PERIOD - VB_THRESHOLD)
         # Might not get a versionbits-related alert yet, as we should
         # have gotten a different alert due to more than 51/100 blocks

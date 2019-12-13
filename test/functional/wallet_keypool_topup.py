@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test HD Wallet keypool restore function.
+
+"""
+Test HD Wallet keypool restore function.
 
 Two nodes. Node1 is under test. Node0 is providing transactions and generating blocks.
 
@@ -11,10 +13,10 @@ Two nodes. Node1 is under test. Node0 is providing transactions and generating b
 - Generate 110 keys (enough to drain the keypool). Store key 90 (in the initial keypool) and key 110 (beyond the initial keypool). Send funds to key 90 and key 110.
 - Stop node1, clear the datadir, move wallet file back into the datadir and restart node1.
 - connect node1 to node0. Verify that they sync and node1 receives its funds."""
-import shutil
 
+import shutil
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, connect_nodes_bi, sync_blocks)
+from test_framework.util import assert_equal, connect_nodes_bi, sync_blocks
 
 class KeypoolRestoreTest(RavenTestFramework):
     def set_test_params(self):
@@ -36,6 +38,8 @@ class KeypoolRestoreTest(RavenTestFramework):
 
         self.log.info("Generate keys for wallet")
 
+        addr_oldpool = []
+        addr_extpool = []
         for _ in range(90):
             addr_oldpool = self.nodes[1].getnewaddress()
         for _ in range(20):

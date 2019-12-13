@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test mempool persistence.
+
+"""
+Test mempool persistence.
 
 By default, ravend will dump mempool on shutdown and
 then reload it on startup. This can be overridden with
@@ -34,13 +36,12 @@ Test is as follows:
     mempool.
   - Verify that savemempool throws when the RPC is called if
     node1 can't write to disk.
-
 """
+
 import os
 import time
-
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, Decimal, wait_until, assert_raises_rpc_error)
+from test_framework.util import assert_equal, Decimal, wait_until, assert_raises_rpc_error
 
 class MempoolPersistTest(RavenTestFramework):
     def set_test_params(self):

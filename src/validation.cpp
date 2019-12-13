@@ -989,6 +989,25 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
                             pool.mapHashVerifierChanged[hash].insert(data.assetName);
                         }
                     }
+                } else if (out.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript()) {
+                    CNullAssetTxData globalNullData;
+                    if (GlobalAssetNullDataFromScript(out.scriptPubKey, globalNullData)) {
+                        if (globalNullData.flag == 1) {
+                            if (pool.mapGlobalFreezingAssetTransactions.count(globalNullData.asset_name)) {
+                                return state.DoS(0, false, REJECT_INVALID, "bad-txns-global-freeze-already-in-mempool");
+                            } else {
+                                pool.mapGlobalFreezingAssetTransactions[globalNullData.asset_name].insert(tx.GetHash());
+                                pool.mapHashGlobalFreezingAssetTransactions[tx.GetHash()].insert(globalNullData.asset_name);
+                            }
+                        } else if (globalNullData.flag == 0) {
+                            if (pool.mapGlobalUnFreezingAssetTransactions.count(globalNullData.asset_name)) {
+                                return state.DoS(0, false, REJECT_INVALID, "bad-txns-global-unfreeze-already-in-mempool");
+                            } else {
+                                pool.mapGlobalUnFreezingAssetTransactions[globalNullData.asset_name].insert(tx.GetHash());
+                                pool.mapHashGlobalUnFreezingAssetTransactions[tx.GetHash()].insert(globalNullData.asset_name);
+                            }
+                        }
+                    }
                 }
             }
         }

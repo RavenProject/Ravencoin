@@ -3,6 +3,7 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Dummy Socks5 server for testing."""
 
 import socket, threading, queue
@@ -32,7 +33,7 @@ def recvall(s, n):
     return rv
 
 ### Implementation classes
-class Socks5Configuration():
+class Socks5Configuration:
     """Proxy configuration."""
     def __init__(self):
         self.addr = None # Bind address (must be set)
@@ -40,7 +41,7 @@ class Socks5Configuration():
         self.unauth = False  # Support unauthenticated
         self.auth = False  # Support authentication
 
-class Socks5Command():
+class Socks5Command:
     """Information about an incoming socks5 command."""
     def __init__(self, cmd, atyp, addr, port, username, password):
         self.cmd = cmd # Command (one of Command.*)
@@ -52,7 +53,7 @@ class Socks5Command():
     def __repr__(self):
         return 'Socks5Command(%s,%s,%s,%s,%s,%s)' % (self.cmd, self.atyp, self.addr, self.port, self.username, self.password)
 
-class Socks5Connection():
+class Socks5Connection:
     def __init__(self, serv, conn, peer):
         self.serv = serv
         self.conn = conn
@@ -123,7 +124,7 @@ class Socks5Connection():
         finally:
             self.conn.close()
 
-class Socks5Server():
+class Socks5Server:
     def __init__(self, conf):
         self.conf = conf
         self.s = socket.socket(conf.af)

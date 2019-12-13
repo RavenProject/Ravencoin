@@ -3,12 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Testing asset use cases
 
-"""
+"""Testing asset use cases"""
+
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (assert_equal, assert_is_hash_string, assert_does_not_contain_key, assert_raises_rpc_error, JSONRPCException, Decimal)
-
+from test_framework.util import assert_equal, assert_is_hash_string, assert_does_not_contain_key, assert_raises_rpc_error, JSONRPCException, Decimal
 
 import string
 
@@ -35,7 +34,7 @@ class AssetTest(RavenTestFramework):
         self.log.info("Calling issue()...")
         address0 = n0.getnewaddress()
         ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
-        n0.issue(asset_name="MY_ASSET", qty=1000, to_address=address0, change_address="", \
+        n0.issue(asset_name="MY_ASSET", qty=1000, to_address=address0, change_address="",
                  units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         self.log.info("Waiting for ten confirmations after issue...")
@@ -62,8 +61,7 @@ class AssetTest(RavenTestFramework):
         assert_equal(len(myassets["MY_ASSET"]["outpoints"]), 1)
         assert_equal(len(myassets["MY_ASSET!"]["outpoints"]), 1)
         assert_is_hash_string(myassets["MY_ASSET"]["outpoints"][0]["txid"])
-        assert_equal(myassets["MY_ASSET"]["outpoints"][0]["txid"], \
-                     myassets["MY_ASSET!"]["outpoints"][0]["txid"])
+        assert_equal(myassets["MY_ASSET"]["outpoints"][0]["txid"], myassets["MY_ASSET!"]["outpoints"][0]["txid"])
         assert(int(myassets["MY_ASSET"]["outpoints"][0]["vout"]) >= 0)
         assert(int(myassets["MY_ASSET!"]["outpoints"][0]["vout"]) >= 0)
         assert_equal(myassets["MY_ASSET"]["outpoints"][0]["amount"], 1000)
@@ -103,10 +101,10 @@ class AssetTest(RavenTestFramework):
         assert_equal(sum(n0.listaddressesbyasset("MY_ASSET").values()), 1000)
         assert_equal(sum(n1.listaddressesbyasset("MY_ASSET").values()), 1000)
         for assaddr in n0.listaddressesbyasset("MY_ASSET").keys():
-            if n0.validateaddress(assaddr)["ismine"] == True:
+            if n0.validateaddress(assaddr)["ismine"]:
                 changeaddress = assaddr
                 assert_equal(n0.listassetbalancesbyaddress(changeaddress)["MY_ASSET"], 800)
-        assert(changeaddress != None)
+        assert(changeaddress is not None)
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET!"], 1)
 
         self.log.info("Burning all units to test reissue on zero units...")
@@ -117,8 +115,7 @@ class AssetTest(RavenTestFramework):
         self.log.info("Calling reissue()...")
         address1 = n0.getnewaddress()
         ipfs_hash2 = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
-        n0.reissue(asset_name="MY_ASSET", qty=2000, to_address=address0, change_address=address1, \
-                   reissuable=False, new_unit=-1, new_ipfs=ipfs_hash2)
+        n0.reissue(asset_name="MY_ASSET", qty=2000, to_address=address0, change_address=address1, reissuable=False, new_unit=-1, new_ipfs=ipfs_hash2)
 
         self.log.info("Waiting for ten confirmations after reissue...")
         self.sync_all()
@@ -147,8 +144,7 @@ class AssetTest(RavenTestFramework):
         n0.listassets(asset="RAVEN*", verbose=False, count=2, start=-2)
 
         self.log.info("Creating some sub-assets...")
-        n0.issue(asset_name="MY_ASSET/SUB1", qty=1000, to_address=address0, change_address=address0,\
-                 units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+        n0.issue(asset_name="MY_ASSET/SUB1", qty=1000, to_address=address0, change_address=address0, units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         self.sync_all()
         self.log.info("Waiting for ten confirmations after issuesubasset...")
@@ -175,22 +171,16 @@ class AssetTest(RavenTestFramework):
         n0 = self.nodes[0]
 
         # just plain bad asset name
-        assert_raises_rpc_error(-8, "Invalid asset name: bad-asset-name", \
-            n0.issue, "bad-asset-name")
+        assert_raises_rpc_error(-8, "Invalid asset name: bad-asset-name", n0.issue, "bad-asset-name")
 
         # trying to issue things that can't be issued
-        assert_raises_rpc_error(-8, "Unsupported asset type: OWNER", \
-            n0.issue, "AN_OWNER!")
-        assert_raises_rpc_error(-8, "Unsupported asset type: VOTE", \
-            n0.issue, "A_VOTE^PEDRO")
+        assert_raises_rpc_error(-8, "Unsupported asset type: OWNER", n0.issue, "AN_OWNER!")
+        assert_raises_rpc_error(-8, "Unsupported asset type: VOTE", n0.issue, "A_VOTE^PEDRO")
 
         # check bad unique params
-        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
-            n0.issue, "A_UNIQUE#ASSET", 2)
-        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
-            n0.issue, "A_UNIQUE#ASSET", 1, "", "", 1)
-        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", \
-            n0.issue, "A_UNIQUE#ASSET", 1, "", "", 0, True)
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", n0.issue, "A_UNIQUE#ASSET", 2)
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", n0.issue, "A_UNIQUE#ASSET", 1, "", "", 1)
+        assert_raises_rpc_error(-8, "Invalid parameters for issuing a unique asset.", n0.issue, "A_UNIQUE#ASSET", 1, "", "", 0, True)
 
     def chain_assets(self):
         self.log.info("Issuing chained assets in depth issue()...")
@@ -199,15 +189,13 @@ class AssetTest(RavenTestFramework):
         chain_address = n0.getnewaddress()
         ipfs_hash = "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"
         chain_string = "CHAIN1"
-        n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", \
-                 units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+        n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         for c in string.ascii_uppercase:
             chain_string += '/' + c
             if len(chain_string) > 30:
                 break
-            n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", \
-                     units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+            n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         n0.generate(1)
         self.sync_all()
@@ -218,14 +206,12 @@ class AssetTest(RavenTestFramework):
         self.log.info("Issuing chained assets in width issue()...")
         chain_address = n0.getnewaddress()
         chain_string = "CHAIN2"
-        n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", \
-                 units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+        n0.issue(asset_name=chain_string, qty=1000, to_address=chain_address, change_address="", units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         for c in string.ascii_uppercase:
             asset_name = chain_string + '/' + c
 
-            n0.issue(asset_name=asset_name, qty=1000, to_address=chain_address, change_address="", \
-                     units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+            n0.issue(asset_name=asset_name, qty=1000, to_address=chain_address, change_address="", units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
 
         n0.generate(1)
         self.sync_all()
@@ -235,21 +221,18 @@ class AssetTest(RavenTestFramework):
 
         self.log.info("Chaining reissue transactions...")
         address0 = n0.getnewaddress()
-        n0.issue(asset_name="CHAIN_REISSUE", qty=1000, to_address=address0, change_address="", \
-                 units=4, reissuable=True, has_ipfs=False)
+        n0.issue(asset_name="CHAIN_REISSUE", qty=1000, to_address=address0, change_address="", units=4, reissuable=True, has_ipfs=False)
 
         n0.generate(1)
         self.sync_all()
 
-        n0.reissue(asset_name="CHAIN_REISSUE", qty=1000, to_address=address0, change_address="", \
-                   reissuable=True)
+        n0.reissue(asset_name="CHAIN_REISSUE", qty=1000, to_address=address0, change_address="", reissuable=True)
         assert_raises_rpc_error(-4, "Error: The transaction was rejected! Reason given: bad-tx-reissue-chaining-not-allowed", n0.reissue, "CHAIN_REISSUE", 1000, address0, "", True)
 
         n0.generate(1)
         self.sync_all()
 
-        n0.reissue(asset_name="CHAIN_REISSUE", qty=1000, to_address=address0, change_address="", \
-                   reissuable=True)
+        n0.reissue(asset_name="CHAIN_REISSUE", qty=1000, to_address=address0, change_address="", reissuable=True)
 
         n0.generate(1)
         self.sync_all()
@@ -276,8 +259,7 @@ class AssetTest(RavenTestFramework):
         # bad hash (isn't a valid multihash sha2-256)
         self.log.info("Testing issue asset with invalid IPFS...")
         try:
-            n0.issue(asset_name=asset_name1, qty=1000, to_address=address1, change_address=address2, \
-                     units=0, reissuable=True, has_ipfs=True, ipfs_hash=bad_hash)
+            n0.issue(asset_name=asset_name1, qty=1000, to_address=address1, change_address=address2, units=0, reissuable=True, has_ipfs=True, ipfs_hash=bad_hash)
         except JSONRPCException as e:
             if "Invalid IPFS/Txid hash" not in e.error['message']:
                 raise AssertionError("Expected substring not found:" + e.error['message'])
@@ -289,8 +271,7 @@ class AssetTest(RavenTestFramework):
         ########################################
         # no hash
         self.log.info("Testing issue asset with no IPFS...")
-        n0.issue(asset_name=asset_name2, qty=1000, to_address=address1, change_address=address2, \
-                 units=0, reissuable=True, has_ipfs=False)
+        n0.issue(asset_name=asset_name2, qty=1000, to_address=address1, change_address=address2, units=0, reissuable=True, has_ipfs=False)
         n0.generate(1)
         ad = n0.getassetdata(asset_name2)
         assert_equal(0, ad['has_ipfs'])
@@ -300,8 +281,7 @@ class AssetTest(RavenTestFramework):
         # reissue w/ bad hash
         self.log.info("Testing re-issue asset with invalid IPFS...")
         try:
-            n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, \
-                       reissuable=True, new_unit=-1, new_ipfs=bad_hash)
+            n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, reissuable=True, new_unit=-1, new_ipfs=bad_hash)
         except JSONRPCException as e:
             if "Invalid IPFS/Txid hash" not in e.error['message']:
                 raise AssertionError("Expected substring not found:" + e.error['message'])
@@ -313,8 +293,7 @@ class AssetTest(RavenTestFramework):
         ########################################
         # reissue w/ hash
         self.log.info("Testing re-issue asset with valid IPFS...")
-        n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, \
-                   reissuable=True, new_unit=-1, new_ipfs=ipfs_hash)
+        n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, reissuable=True, new_unit=-1, new_ipfs=ipfs_hash)
         n0.generate(1)
         ad = n0.getassetdata(asset_name2)
         assert_equal(1, ad['has_ipfs'])
@@ -342,6 +321,7 @@ class AssetTest(RavenTestFramework):
         a = n0.generate(1)[0]
 
         n0.reissue(asset_name, 500, n0.getnewaddress())
+        # noinspection PyStatementEffect
         n0.generate(1)[0]
 
         self.log.info(f"Invalidating {a}...")
@@ -365,40 +345,12 @@ class AssetTest(RavenTestFramework):
             n0.reissue(asset_name, 10.0**(-i), address, "", True, i+1)
             n0.generate(1)
             assert_equal(i+1, n0.listassets("*", True)[asset_name]["units"])
-            assert_raises_rpc_error(-25, "Error: Unable to reissue asset: unit must be larger than current unit selection", \
-                                    n0.reissue, asset_name, 10.0**(-i), address, "", True, i)
+            assert_raises_rpc_error(-25, "Error: Unable to reissue asset: unit must be larger than current unit selection", n0.reissue, asset_name, 10.0**(-i), address, "", True, i)
 
         n0.reissue(asset_name, 0.00000001, address)
         n0.generate(1)
         assert_equal(Decimal('11.11111111'), n0.listassets("*", True)[asset_name]["amount"])
 
-
-    def issue_transfer_change(self):
-        self.log.info("Testing specified RVN and asset change on issue and transfer...")
-        n0 = self.nodes[0]
-
-        asset_name = "TRC"
-        issue_qty = 50
-        issue_address = n0.getnewaddress()
-        issue_rvn_change = n0.getnewaddress()
-
-        assert_equal(0, n0.getreceivedbyaddress(issue_rvn_change))
-        n0.issue(asset_name, issue_qty, issue_address, issue_rvn_change)
-        n0.generate(1)
-        assert(n0.getreceivedbyaddress(issue_rvn_change) > 0)
-
-        transfer_address = n0.getnewaddress()
-        transfer_asset_change = n0.getnewaddress()
-        transfer_rvn_change = n0.getnewaddress()
-        transfer_qty = 5
-        change_qty = issue_qty - transfer_qty
-
-        assert_equal(0, n0.getreceivedbyaddress(transfer_rvn_change))
-        n0.transfer(asset_name, 5, transfer_address, "", 0, transfer_rvn_change, transfer_asset_change)
-        n0.generate(1)
-        assert(n0.getreceivedbyaddress(transfer_rvn_change) > 0)
-        assert_equal(transfer_qty, n0.listassetbalancesbyaddress(transfer_address)[asset_name])
-        assert_equal(change_qty, n0.listassetbalancesbyaddress(transfer_asset_change)[asset_name])
 
     def run_test(self):
         self.activate_assets()
@@ -408,7 +360,6 @@ class AssetTest(RavenTestFramework):
         self.ipfs_state()
         self.db_corruption_regression()
         self.reissue_prec_change()
-        self.issue_transfer_change()
 
 
 if __name__ == '__main__':

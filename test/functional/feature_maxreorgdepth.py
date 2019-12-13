@@ -3,17 +3,15 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Max Reorg Test
+
 """
+Max Reorg Test
+"""
+
 import sys
 import time
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (connect_all_nodes_bi, 
-                                set_node_times, 
-                                assert_equal, 
-                                connect_nodes_bi, 
-                                assert_contains_pair, 
-                                assert_does_not_contain_key) 
+from test_framework.util import connect_all_nodes_bi, set_node_times, assert_equal, connect_nodes_bi, assert_contains_pair, assert_does_not_contain_key
 from test_framework.mininode import wait_until
 
 
@@ -30,12 +28,9 @@ class MaxReorgTest(RavenTestFramework):
         # self.extra_args = [[f"-maxreorg={self.max_reorg_depth}", f"-minreorgpeers={self.min_reorg_peers}", f"-minreorgage={self.min_reorg_age}"] for i in range(self.num_nodes)]
 
     def add_options(self, parser):
-        parser.add_option("--height", dest="height", default=65,
-                          help="The height of good branch when adversary surprises.")
-        parser.add_option("--tip_age", dest="tip_age", default=60*5,
-                          help="Age of tip of non-adversaries at time of reorg.")
-        parser.add_option("--should_reorg", dest="should_reorg", default=0,
-                          help="Whether a reorg is expected (0 or 1).")
+        parser.add_option("--height", dest="height", default=65, help="The height of good branch when adversary surprises.")
+        parser.add_option("--tip_age", dest="tip_age", default=60*5, help="Age of tip of non-adversaries at time of reorg.")
+        parser.add_option("--should_reorg", dest="should_reorg", default=0, help="Whether a reorg is expected (0 or 1).")
 
 
     def setup_network(self):
@@ -117,8 +112,9 @@ class MaxReorgTest(RavenTestFramework):
         else:
             self.log.info(f"Didn't expect a reorg -- blockcount should remain {expected_height} and both subject and adversary should own {asset_name} (waiting 5 seconds)...")
 
+        # noinspection PyBroadException
         try:
-            wait_until(lambda: [n.getblockcount() for n in self.nodes] == [expected_height] * peers, timeout=5)
+            wait_until(lambda: [n.getblockcount() for n in self.nodes] == [expected_height] * peers, timeout=5, err_msg="getblockcount")
         except:
             pass
         self.log.info("BlockCount: " +str([n.getblockcount() for n in self.nodes]))

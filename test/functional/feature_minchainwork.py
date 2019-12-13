@@ -3,7 +3,9 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test logic for setting nMinimumChainWork on command line.
+
+"""
+Test logic for setting nMinimumChainWork on command line.
 
 Nodes don't consider themselves out of "initial block download" until
 their active chain has more work than nMinimumChainWork.
@@ -17,9 +19,8 @@ only succeeds past a given node once its nMinimumChainWork has been exceeded.
 """
 
 import time
-
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (sync_blocks, connect_nodes, assert_equal)
+from test_framework.util import connect_nodes, assert_equal
 
 # 2 hashes required per regtest block (with no difficulty adjustment)
 REGTEST_WORK_PER_BLOCK = 2

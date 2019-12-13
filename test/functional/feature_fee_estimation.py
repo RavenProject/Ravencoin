@@ -3,12 +3,13 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Test fee estimation code."""
 
 from test_framework.test_framework import RavenTestFramework
-from test_framework.util import (satoshi_round, Decimal, connect_nodes, random, sync_mempools, sync_blocks)
-from test_framework.script import (CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE)
-from test_framework.mininode import (CTransaction, CTxIn, CTxOut, COutPoint, ToHex, COIN)
+from test_framework.util import satoshi_round, Decimal, connect_nodes, random, sync_mempools, sync_blocks
+from test_framework.script import CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE
+from test_framework.mininode import CTransaction, CTxIn, CTxOut, COutPoint, to_hex, COIN
 
 # Construct 2 trivial P2SH's and the ScriptSigs that spend them
 # So we can create many transactions without needing to spend
@@ -21,9 +22,10 @@ P2SH_2 = CScript([OP_HASH160, hash160(redeem_script_2), OP_EQUAL])
 # Associated ScriptSig's to spend satisfy P2SH_1 and P2SH_2
 SCRIPT_SIG = [CScript([OP_TRUE, redeem_script_1]), CScript([OP_TRUE, redeem_script_2])]
 
+# noinspection PyGlobalUndefined
 global log
 
-def small_txpuzzle_randfee(from_node, conflist, unconflist, amount, min_fee, fee_increment):
+def small_tx_puzzle_rand_fee(from_node, conflist, unconflist, amount, min_fee, fee_increment):
     """
     Create and send a transaction with a random fee.
     The transaction pays to a trivial P2SH script, and assumes that its inputs
@@ -58,11 +60,11 @@ def small_txpuzzle_randfee(from_node, conflist, unconflist, amount, min_fee, fee
     # the ScriptSig that will satisfy the ScriptPubKey.
     for inp in tx.vin:
         inp.scriptSig = SCRIPT_SIG[inp.prevout.n]
-    txid = from_node.sendrawtransaction(ToHex(tx), True)
+    txid = from_node.sendrawtransaction(to_hex(tx), True)
     unconflist.append({ "txid" : txid, "vout" : 0 , "amount" : total_in - amount - fee})
     unconflist.append({ "txid" : txid, "vout" : 1 , "amount" : amount})
 
-    return (ToHex(tx), fee)
+    return to_hex(tx), fee
 
 def split_inputs(from_node, txins, txouts, initial_split = False):
     """
@@ -83,11 +85,11 @@ def split_inputs(from_node, txins, txouts, initial_split = False):
 
     # If this is the initial split we actually need to sign the transaction
     # Otherwise we just need to insert the proper ScriptSig
-    if (initial_split) :
-        completetx = from_node.signrawtransaction(ToHex(tx))["hex"]
+    if initial_split:
+        completetx = from_node.signrawtransaction(to_hex(tx))["hex"]
     else :
         tx.vin[0].scriptSig = SCRIPT_SIG[prevtxout["vout"]]
-        completetx = ToHex(tx)
+        completetx = to_hex(tx)
     txid = from_node.sendrawtransaction(completetx, True)
     txouts.append({ "txid" : txid, "vout" : 0 , "amount" : half_change})
     txouts.append({ "txid" : txid, "vout" : 1 , "amount" : rem_change})
@@ -137,7 +139,7 @@ def check_estimates(node, fees_seen, max_invalid, print_estimates = True):
     # Check on the expected number of different confirmation counts
     # that we might not have valid estimates for
     if invalid_estimates > max_invalid:
-        raise AssertionError("More than (%d) invalid estimates"%(max_invalid))
+        raise AssertionError("More than (%d) invalid estimates" % max_invalid)
     return all_estimates
 
 
@@ -166,14 +168,14 @@ class EstimateFeeTest(RavenTestFramework):
         min_fee = Decimal("0.0100000")
         # We will now mine numblocks blocks generating on average 100 transactions between each block
         # We shuffle our confirmed txout set before each set of transactions
-        # small_txpuzzle_randfee will use the transactions that have inputs already in the chain when possible
+        # small_tx_puzzle_rand_fee will use the transactions that have inputs already in the chain when possible
         # resorting to tx's that depend on the mempool when those run out
         for _ in range(numblocks):
             random.shuffle(self.confutxo)
             for _ in range(random.randrange(100-50,100+50)):
                 from_index = random.randint(1,2)
-                (txhex, fee) = small_txpuzzle_randfee(self.nodes[from_index], self.confutxo,
-                                                      self.memutxo, Decimal("0.005"), min_fee, min_fee)
+                (txhex, fee) = small_tx_puzzle_rand_fee(self.nodes[from_index], self.confutxo,
+                                                        self.memutxo, Decimal("0.005"), min_fee, min_fee)
                 tx_kbytes = (len(txhex) // 2) / 1000.0
                 self.fees_per_kb.append(float(fee)/tx_kbytes)
             sync_mempools(self.nodes[0:3], wait=.1)
@@ -204,22 +206,22 @@ class EstimateFeeTest(RavenTestFramework):
         split_inputs(self.nodes[0], self.nodes[0].listunspent(0), self.txouts, True)
 
         # Mine
-        while (len(self.nodes[0].getrawmempool()) > 0):
+        while len(self.nodes[0].getrawmempool()) > 0:
             self.nodes[0].generate(1)
 
         # Repeatedly split those 2 outputs, doubling twice for each rep
         # Use txouts to monitor the available utxo, since these won't be tracked in wallet
         reps = 0
-        while (reps < 5):
+        while reps < 5:
             #Double txouts to txouts2
-            while (len(self.txouts)>0):
+            while len(self.txouts)>0:
                 split_inputs(self.nodes[0], self.txouts, self.txouts2)
-            while (len(self.nodes[0].getrawmempool()) > 0):
+            while len(self.nodes[0].getrawmempool()) > 0:
                 self.nodes[0].generate(1)
             #Double txouts2 to txouts
-            while (len(self.txouts2)>0):
+            while len(self.txouts2)>0:
                 split_inputs(self.nodes[0], self.txouts2, self.txouts)
-            while (len(self.nodes[0].getrawmempool()) > 0):
+            while len(self.nodes[0].getrawmempool()) > 0:
                 self.nodes[0].generate(1)
             reps += 1
         self.log.info("Finished splitting")

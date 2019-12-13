@@ -3,9 +3,11 @@
 # Copyright (c) 2017-2019 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 """Base class for RPC testing."""
 
 from enum import Enum
+from random import randint
 import logging
 import optparse
 import os
@@ -18,20 +20,8 @@ import time
 from .authproxy import JSONRPCException
 from . import coverage
 from .test_node import TestNode
-from .util import (
-    MAX_NODES,
-    PortSeed,
-    assert_equal,
-    check_json_precision,
-    connect_nodes_bi,
-    disconnect_nodes,
-    initialize_datadir,
-    log_filename,
-    p2p_port,
-    set_node_times,
-    sync_blocks,
-    sync_mempools,
-)
+from .util import (MAX_NODES, PortSeed, assert_equal, check_json_precision, connect_nodes_bi, disconnect_nodes,
+                   initialize_data_dir, log_filename, p2p_port, set_node_times, sync_blocks, sync_mempools)
 
 
 class TestStatus(Enum):
@@ -97,9 +87,17 @@ class RavenTestFramework:
         self.options.cachedir = os.path.abspath(self.options.cachedir)
 
         # Set up temp directory and start logging
+        # When looping tests using the --loop=n argument, when a test fails the tmpdir will not be deleted.
+        # This will cause that specific test to fail on every loop after since this directory will exist.
+        # Now when it fails to create the tmpdir it will try to create a new directory with a random int
+        # appended to the path. This will allow looped tests to pass and keep the log and state data from the previous failure.
         if self.options.tmpdir:
             self.options.tmpdir = os.path.abspath(self.options.tmpdir)
-            os.makedirs(self.options.tmpdir, exist_ok=False)
+            try:
+                os.makedirs(self.options.tmpdir, exist_ok=False)
+            except OSError as e:
+                self.options.tmpdir = os.path.abspath(self.options.tmpdir + str(randint(0,48)))
+                os.makedirs(self.options.tmpdir, exist_ok=False)
         else:
             self.options.tmpdir = tempfile.mkdtemp(prefix="test")
         self._start_logging()
@@ -385,7 +383,7 @@ class RavenTestFramework:
 
             # Create cache directories, run ravends:
             for i in range(MAX_NODES):
-                datadir = initialize_datadir(self.options.cachedir, i)
+                datadir = initialize_data_dir(self.options.cachedir, i)
                 args = [os.getenv("RAVEND", "ravend"), "-server", "-keypool=1", "-datadir=" + datadir, "-discover=0"]
                 if i > 0:
                     args.append("-connect=127.0.0.1:" + str(p2p_port(0)))
@@ -431,7 +429,7 @@ class RavenTestFramework:
             from_dir = os.path.join(self.options.cachedir, "node" + str(i))
             to_dir = os.path.join(self.options.tmpdir, "node" + str(i))
             shutil.copytree(from_dir, to_dir)
-            initialize_datadir(self.options.tmpdir, i)  # Overwrite port/rpcport in raven.conf
+            initialize_data_dir(self.options.tmpdir, i)  # Overwrite port/rpcport in raven.conf
 
     def _initialize_chain_clean(self):
         """Initialize empty blockchain for use by the test.
@@ -439,7 +437,7 @@ class RavenTestFramework:
         Create an empty blockchain and num_nodes wallets.
         Useful if a test case wants complete control over initialization."""
         for i in range(self.num_nodes):
-            initialize_datadir(self.options.tmpdir, i)
+            initialize_data_dir(self.options.tmpdir, i)
 
 
 class ComparisonTestFramework(RavenTestFramework):
@@ -449,6 +447,9 @@ class ComparisonTestFramework(RavenTestFramework):
     - 1 binary: test binary
     - 2 binaries: 1 test binary, 1 ref binary
     - n>2 binaries: 1 test binary, n-1 ref binaries"""
+
+    def run_test(self):
+        pass
 
     def set_test_params(self):
         self.num_nodes = 2
