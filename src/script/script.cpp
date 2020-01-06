@@ -244,7 +244,7 @@ bool CScript::IsAssetScript(int& nType, bool& isOwner) const
 
 bool CScript::IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) const
 {
-    if (this->size() > 30) {
+    if (this->size() > 31) {
         if ((*this)[25] == OP_RVN_ASSET) { // OP_RVN_ASSET is always in the 25 index of the script if it exists
             int index = -1;
             if ((*this)[27] == RVN_R) { // Check to see if RVN starts at 27 ( this->size() < 105)

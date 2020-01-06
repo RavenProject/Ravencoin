@@ -329,6 +329,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
     }
 
     for (auto name: setNullGlobalAssetChanges) {
+        if (name.size() == 0)
+            return state.DoS(100, false, REJECT_INVALID,"bad-txns-tx-contains-global-asset-null-tx-with-null-asset-name");
+
         std::string rootName = name.substr(1,  name.size()); // $TOKEN into TOKEN
         if (!setAssetTransferNames.count(rootName + OWNER_TAG)) {
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-tx-contains-global-asset-null-tx-without-asset-transfer");
