@@ -3,6 +3,8 @@
 OS=${1}
 GITHUB_WORKSPACE=${2}
 
+export BOOST_TEST_LOG_LEVEL=error
+
 if [[ ${OS} == "windows" ]]; then
     echo "----------------------------------------"
     echo "Checking binary security for ${OS}"
