@@ -65,7 +65,7 @@ class AssetMempoolTest(RavenTestFramework):
 
         # Reissue that asset
         address1 = n0.getnewaddress()
-        n0.reissue(asset_name=asset_name, qty=2000, to_address=address1, change_address='', reissuable=True, new_unit=-1)
+        n0.reissue(asset_name=asset_name, qty=2000, to_address=address1, change_address='', reissuable=True, new_units=-1)
         n0.generate(15)
 
         # Get a transfer address
