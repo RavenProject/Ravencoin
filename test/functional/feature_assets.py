@@ -115,7 +115,7 @@ class AssetTest(RavenTestFramework):
         self.log.info("Calling reissue()...")
         address1 = n0.getnewaddress()
         ipfs_hash2 = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
-        n0.reissue(asset_name="MY_ASSET", qty=2000, to_address=address0, change_address=address1, reissuable=False, new_unit=-1, new_ipfs=ipfs_hash2)
+        n0.reissue(asset_name="MY_ASSET", qty=2000, to_address=address0, change_address=address1, reissuable=False, new_units=-1, new_ipfs=ipfs_hash2)
 
         self.log.info("Waiting for ten confirmations after reissue...")
         self.sync_all()
@@ -281,7 +281,7 @@ class AssetTest(RavenTestFramework):
         # reissue w/ bad hash
         self.log.info("Testing re-issue asset with invalid IPFS...")
         try:
-            n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, reissuable=True, new_unit=-1, new_ipfs=bad_hash)
+            n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, reissuable=True, new_units=-1, new_ipfs=bad_hash)
         except JSONRPCException as e:
             if "Invalid IPFS/Txid hash" not in e.error['message']:
                 raise AssertionError("Expected substring not found:" + e.error['message'])
@@ -293,7 +293,7 @@ class AssetTest(RavenTestFramework):
         ########################################
         # reissue w/ hash
         self.log.info("Testing re-issue asset with valid IPFS...")
-        n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, reissuable=True, new_unit=-1, new_ipfs=ipfs_hash)
+        n0.reissue(asset_name=asset_name2, qty=2000, to_address=address1, change_address=address2, reissuable=True, new_units=-1, new_ipfs=ipfs_hash)
         n0.generate(1)
         ad = n0.getassetdata(asset_name2)
         assert_equal(1, ad['has_ipfs'])
