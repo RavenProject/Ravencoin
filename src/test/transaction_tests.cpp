@@ -841,9 +841,9 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET;
         BOOST_CHECK(IsStandardTx(t, reason));
 
-        // Only ten TX_RESTRICTED_ASSET_DATA permitted in all cases
-        t.vout.resize(11);
-        for (int i = 0; i < 11; i++) {
+        // Only one hundred TX_RESTRICTED_ASSET_DATA permitted in all cases
+        t.vout.resize(101);
+        for (int i = 0; i < 101; i++) {
             t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET
                                                << ParseHex(
                                                        "04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
@@ -852,18 +852,14 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
 
         t.vout[0].scriptPubKey = CScript() << OP_RVN_ASSET
                                            << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38");
-        for (int i = 1; i < 11; i++) {
+        for (int i = 1; i < 101; i++) {
             t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
         }
         BOOST_CHECK(!IsStandardTx(t, reason));
 
-        for (int i = 0; i < 11; i++)
-            t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
-        BOOST_CHECK(!IsStandardTx(t, reason));
-
         t.vout.clear();
-        t.vout.resize(10);
-        for (int i = 0; i < 10; i++)
+        t.vout.resize(99);
+        for (int i = 0; i < 99; i++)
             t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
         BOOST_CHECK(IsStandardTx(t, reason));
     }
