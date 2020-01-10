@@ -2,8 +2,8 @@ name: Build Raven
 
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - release*
   pull_request:
     branches:
       - develop
@@ -15,8 +15,7 @@ on:
       - 'whitepaper/**'
       - 'binaries/**'
       - 'contrib/**'
-    tags:
-      - v*
+
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
   AWS_S3_ENABLE: ${{ secrets.AWS_S3_ENABLE }}
