@@ -2,8 +2,8 @@ name: Build Raven
 
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - release*
   pull_request:
     branches:
       - develop
@@ -15,8 +15,7 @@ on:
       - 'whitepaper/**'
       - 'binaries/**'
       - 'contrib/**'
-    tags:
-      - v*
+
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
   AWS_S3_ENABLE: ${{ secrets.AWS_S3_ENABLE }}
@@ -55,7 +54,7 @@ jobs:
       run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
 
     - name: Package Up the Build
-      run: ${SCRIPTS}/06-package.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }}
+      run: ${SCRIPTS}/06-package.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
     
     - name: Upload Build to the Nightly Site
       if: env.AWS_S3_ENABLE == 'true'
