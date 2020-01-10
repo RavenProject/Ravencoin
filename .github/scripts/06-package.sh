@@ -4,6 +4,10 @@ OS=${1}
 GITHUB_WORKSPACE=${2}
 GITHUB_BASE_REF=${3}
 
+echo "----------------------------------------"
+env
+echo "----------------------------------------"
+
 if [[ ! ${OS} || ! ${GITHUB_WORKSPACE} || ! ${GITHUB_BASE_REF} ]]; then
     echo "Error: Invalid options"
     echo "Usage: ${0} <operating system> <github workspace path> <github base ref>"
@@ -27,10 +31,6 @@ echo "----------------------------------------"
 if [[ ! -e ${RELEASE_LOCATION} ]]; then
     mkdir -p ${RELEASE_LOCATION}
 fi
-
-echo "----------------------------------------"
-env
-echo "----------------------------------------"
 
 echo "----------------------------------------"
 echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
