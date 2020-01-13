@@ -1937,9 +1937,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         if (!pmessagechanneldb->ReadFlag("init", found)) {
             uiInterface.InitMessage(_("Init Message Channels - Scanning Asset Transactions"));
             std::string strLoadError;
-            if (!ScanForMessageChannels(strLoadError))
-                return InitError(strLoadError);
-            pmessagechanneldb->WriteFlag("init", true);
+            if (!ScanForMessageChannels(strLoadError)) {
+                LogPrintf("%s : Failed to scan for message channels, %s\n", __func__, strLoadError);
+            } else {
+                pmessagechanneldb->WriteFlag("init", true);
+            }
         }
     }
 #endif
