@@ -3,6 +3,15 @@ import sys
 import os
 import time
 
+# Requires ravenrpc==0.2.4
+#
+# usage:
+# ```
+# python vanity_address_gen.py ( rpcuser ) ( rpcpass ) ( prefix ) ( ignore_case=True )
+# ```
+
+
+
 def valid_base58(s):
     for c in ('0', 'O', 'l', '1'):
         if c in s:
