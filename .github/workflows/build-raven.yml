@@ -36,7 +36,7 @@ jobs:
       run: sudo ${SCRIPTS}/00-install-deps.sh ${{ MATRIX.OS }}
 
     - name: Copy Build Dependencies
-      run: ${SCRIPTS}/02-copy-build-dependencies.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+      run: ${SCRIPTS}/02-copy-build-dependencies.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
 
     - name: Add Dependencies to the System PATH
       run: ${SCRIPTS}/03-export-path.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
