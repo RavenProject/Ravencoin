@@ -259,11 +259,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
         bool fIsOwner;
         if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
             isAsset = true;
-
-        // Make sure that all asset tx have a nValue of zero RVN
-        if (isAsset && txout.nValue != 0)
-            return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-tx-amount-isn't-zero");
-
+        
         // Check for transfers that don't meet the assets units only if the assetCache is not null
         if (isAsset) {
             // Get the transfer transaction data from the scriptPubKey
@@ -304,6 +300,14 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                     if (transfer.nAmount < QUALIFIER_ASSET_MIN_AMOUNT || transfer.nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-qualifier-amount-must be between 1 - 100");
                 }
+                
+                // Specific check and error message to go with to make sure the amount is 0
+                if (txout.nValue != 0)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-transfer-amount-isn't-zero");
+            } else if (nType == TX_NEW_ASSET) {
+                // Specific check and error message to go with to make sure the amount is 0
+                if (txout.nValue != 0)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-issued-amount-isn't-zero");
             }
         }
     }
