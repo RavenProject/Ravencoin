@@ -453,6 +453,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-par=<n>", strprintf(_("Set the number of script verification threads (%u to %d, 0 = auto, <0 = leave that many cores free, default: %d)"),
         -GetNumCores(), MAX_SCRIPTCHECK_THREADS, DEFAULT_SCRIPTCHECK_THREADS));
     strUsage += HelpMessageOpt("-autofixmempool", strprintf(_("When set, if the CreateNewBlock fails because of a transaction. The mempool will be cleared. (default: %d)"), false));
+    strUsage += HelpMessageOpt("-bypassdownload", strprintf(_("When set, if the chain is in initialblockdownload the getblocktemplate rpc call will still return block data (default: %d)"), false));
 #ifndef WIN32
     strUsage += HelpMessageOpt("-pid=<file>", strprintf(_("Specify pid file (default: %s)"), RAVEN_PID_FILENAME));
 #endif
