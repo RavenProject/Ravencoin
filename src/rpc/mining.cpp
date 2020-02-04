@@ -451,7 +451,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Raven is not connected!");
 
-    if (IsInitialBlockDownload())
+    if (IsInitialBlockDownload() && !gArgs.GetBoolArg("-bypassdownload", false))
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Raven is downloading blocks...");
 
     static unsigned int nTransactionsUpdatedLast;
