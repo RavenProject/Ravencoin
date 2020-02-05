@@ -159,9 +159,11 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     std::string change_address = "";
     if (request.params.size() > 2) {
         change_address = request.params[2].get_str();
-        CTxDestination change_dest = DecodeDestination(change_address);
-        if (!IsValidDestination(change_dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+        if (!change_address.empty()) {
+           CTxDestination change_dest = DecodeDestination(change_address);
+           if (!IsValidDestination(change_dest)) {
+               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+           }
         }
     }
 
@@ -257,9 +259,11 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     std::string change_address = "";
     if (request.params.size() > 2) {
         change_address = request.params[2].get_str();
-        CTxDestination change_dest = DecodeDestination(change_address);
-        if (!IsValidDestination(change_dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+        if (!change_address.empty()) {
+           CTxDestination change_dest = DecodeDestination(change_address);
+           if (!IsValidDestination(change_dest)) {
+               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+           }
         }
     }
 
@@ -352,9 +356,11 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     std::string change_address = "";
     if (request.params.size() > 1) {
         change_address = request.params[1].get_str();
-        CTxDestination change_dest = DecodeDestination(change_address);
-        if (!IsValidDestination(change_dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+        if (!change_address.empty()) {
+           CTxDestination change_dest = DecodeDestination(change_address);
+           if (!IsValidDestination(change_dest)) {
+               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+           }
         }
     }
 
