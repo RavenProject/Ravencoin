@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,26 +11,28 @@ from test_framework.test_framework import RavenTestFramework
 from test_framework.util import assert_equal
 
 BURN_ADDRESSES = {
-    'issue_restricted':   'n1issueRestrictedXXXXXXXXXXXXZVT9V',
+    'issue_restricted': 'n1issueRestrictedXXXXXXXXXXXXZVT9V',
     'reissue_restricted': 'n1ReissueAssetXXXXXXXXXXXXXXWG9NLd',
-    'issue_qualifier':    'n1issueQuaLifierXXXXXXXXXXXXUysLTj',
+    'issue_qualifier': 'n1issueQuaLifierXXXXXXXXXXXXUysLTj',
     'issue_subqualifier': 'n1issueSubQuaLifierXXXXXXXXXYffPLh',
-    'tag_address':        'n1addTagBurnXXXXXXXXXXXXXXXXX5oLMH',
+    'tag_address': 'n1addTagBurnXXXXXXXXXXXXXXXXX5oLMH',
 }
 
 BURN_AMOUNTS = {
-    'issue_restricted':   1500,
-    'reissue_restricted':  100,
-    'issue_qualifier':    1000,
-    'issue_subqualifier':  100,
-    'tag_address':           0.1,
+    'issue_restricted': 1500,
+    'reissue_restricted': 100,
+    'issue_qualifier': 1000,
+    'issue_subqualifier': 100,
+    'tag_address': 0.1,
 }
 
 FEE_AMOUNT = 0.01
 
-def truncate(number, digits = 8):
+
+def truncate(number, digits=8):
     stepper = pow(10.0, digits)
     return math.trunc(stepper * number) / stepper
+
 
 def get_tx_issue_hex(node, to_address, asset_name, asset_quantity=1000, verifier_string="true", units=0, reissuable=1, has_ipfs=0, ipfs_hash="", owner_change_address=""):
     change_address = node.getnewaddress()
@@ -47,12 +49,12 @@ def get_tx_issue_hex(node, to_address, asset_name, asset_quantity=1000, verifier
         change_address: truncate(float(rvn_unspent['amount']) - BURN_AMOUNTS['issue_restricted'] - FEE_AMOUNT),
         to_address: {
             'issue_restricted': {
-                'asset_name':       asset_name,
-                'asset_quantity':   asset_quantity,
-                'verifier_string':  verifier_string,
-                'units':            units,
-                'reissuable':       reissuable,
-                'has_ipfs':         has_ipfs,
+                'asset_name': asset_name,
+                'asset_quantity': asset_quantity,
+                'verifier_string': verifier_string,
+                'units': units,
+                'reissuable': reissuable,
+                'has_ipfs': has_ipfs,
             }
         }
     }
@@ -65,6 +67,7 @@ def get_tx_issue_hex(node, to_address, asset_name, asset_quantity=1000, verifier
     tx_issue_signed = node.signrawtransaction(tx_issue)
     tx_issue_hex = tx_issue_signed['hex']
     return tx_issue_hex
+
 
 def get_tx_reissue_hex(node, to_address, asset_name, asset_quantity, reissuable=1, verifier_string="", ipfs_hash="", owner_change_address=""):
     change_address = node.getnewaddress()
@@ -81,9 +84,9 @@ def get_tx_reissue_hex(node, to_address, asset_name, asset_quantity, reissuable=
         change_address: truncate(float(rvn_unspent['amount']) - BURN_AMOUNTS['reissue_restricted'] - FEE_AMOUNT),
         to_address: {
             'reissue_restricted': {
-                'asset_name':       asset_name,
-                'asset_quantity':   asset_quantity,
-                'reissuable':       reissuable,
+                'asset_name': asset_name,
+                'asset_quantity': asset_quantity,
+                'reissuable': reissuable,
             }
         }
     }
@@ -98,6 +101,7 @@ def get_tx_reissue_hex(node, to_address, asset_name, asset_quantity, reissuable=
     tx_issue_signed = node.signrawtransaction(tx_issue)
     tx_issue_hex = tx_issue_signed['hex']
     return tx_issue_hex
+
 
 def get_tx_issue_qualifier_hex(node, to_address, asset_name, asset_quantity=1, has_ipfs=0, ipfs_hash="", root_change_address="", change_qty=1):
     change_address = node.getnewaddress()
@@ -120,9 +124,9 @@ def get_tx_issue_qualifier_hex(node, to_address, asset_name, asset_quantity=1, h
         change_address: truncate(float(rvn_unspent['amount']) - burn_amount - FEE_AMOUNT),
         to_address: {
             'issue_qualifier': {
-                'asset_name':      asset_name,
-                'asset_quantity':  asset_quantity,
-                'has_ipfs':        has_ipfs,
+                'asset_name': asset_name,
+                'asset_quantity': asset_quantity,
+                'has_ipfs': has_ipfs,
             }
         }
     }
@@ -138,6 +142,7 @@ def get_tx_issue_qualifier_hex(node, to_address, asset_name, asset_quantity=1, h
     tx_issue_hex = tx_issue_signed['hex']
     return tx_issue_hex
 
+
 def get_tx_transfer_hex(node, to_address, asset_name, asset_quantity):
     change_address = node.getnewaddress()
     asset_change_address = node.getnewaddress()
@@ -148,7 +153,6 @@ def get_tx_transfer_hex(node, to_address, asset_name, asset_quantity):
     asset_unspent = node.listmyassets(asset_name, True)[asset_name]['outpoints'][0]
     asset_unspent_qty = asset_unspent['amount']
     asset_inputs = [{k: asset_unspent[k] for k in ['txid', 'vout']}]
-
 
     outputs = {
         change_address: truncate(float(rvn_unspent['amount']) - FEE_AMOUNT),
@@ -169,6 +173,7 @@ def get_tx_transfer_hex(node, to_address, asset_name, asset_quantity):
     tx_transfer_signed = node.signrawtransaction(tx_transfer)
     tx_transfer_hex = tx_transfer_signed['hex']
     return tx_transfer_hex
+
 
 def get_tx_tag_address_hex(node, op, qualifier_name, tag_addresses, qualifier_change_address, change_qty=1):
     change_address = node.getnewaddress()
@@ -199,6 +204,7 @@ def get_tx_tag_address_hex(node, op, qualifier_name, tag_addresses, qualifier_ch
     tx_tag_hex = tx_tag_signed['hex']
     return tx_tag_hex
 
+
 def get_tx_freeze_address_hex(node, op, asset_name, freeze_addresses, owner_change_address):
     change_address = node.getnewaddress()
 
@@ -224,6 +230,7 @@ def get_tx_freeze_address_hex(node, op, asset_name, freeze_addresses, owner_chan
     tx_freeze_hex = tx_freeze_signed['hex']
     return tx_freeze_hex
 
+
 # get_tx_freeze_asset_hex(n0, "freeze", asset_name, owner_change_address)
 def get_tx_freeze_asset_hex(node, op, asset_name, owner_change_address):
     change_address = node.getnewaddress()
@@ -248,6 +255,7 @@ def get_tx_freeze_asset_hex(node, op, asset_name, owner_change_address):
     tx_freeze_signed = node.signrawtransaction(tx_freeze)
     tx_freeze_hex = tx_freeze_signed['hex']
     return tx_freeze_hex
+
 
 class RawRestrictedAssetsTest(RavenTestFramework):
     def set_test_params(self):
@@ -288,7 +296,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         txid = n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(txid))
         assert_equal(qty, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         asset_data = n0.getassetdata(asset_name)
@@ -333,7 +341,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         txid = n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(txid))
         assert_equal(qty + reissue_qty, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         asset_data = n0.getassetdata(asset_name)
@@ -354,12 +362,12 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         has_ipfs = 1
         ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
 
-        #### ROOT QUALIFIER
+        # ROOT QUALIFIER
         hex_data = get_tx_issue_qualifier_hex(n0, to_address, asset_name, qty, has_ipfs, ipfs_hash)
         txid = n0.sendrawtransaction(hex_data)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(txid))
         assert_equal(qty, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         asset_data = n0.getassetdata(asset_name)
@@ -376,12 +384,12 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         sub_ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
         root_change_address = n0.getnewaddress()
 
-        #### SUB-QUALIFIER
+        # SUB-QUALIFIER
         sub_hex = get_tx_issue_qualifier_hex(n0, sub_to_address, sub_asset_name, sub_qty, sub_has_ipfs, sub_ipfs_hash, root_change_address, qty)
         sub_txid = n0.sendrawtransaction(sub_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(sub_txid))
         assert_equal(sub_qty, n0.listmyassets(sub_asset_name, True)[sub_asset_name]['balance'])
         asset_data = n0.getassetdata(sub_asset_name)
@@ -411,7 +419,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         n0.generate(1)
         self.sync_all()
 
-        #verify
+        # verify
         assert_equal(qty - xfer_qty, n0.listmyassets(asset_name, True)[asset_name]['balance'])
         assert_equal(xfer_qty, n1.listassetbalancesbyaddress(n1_address)[asset_name])
 
@@ -429,32 +437,32 @@ class RawRestrictedAssetsTest(RavenTestFramework):
 
         tag_addresses = [n0.getnewaddress(), n0.getnewaddress(), n0.getnewaddress()]
 
-        #verify
+        # verify
         for tag_address in tag_addresses:
-            assert(not n0.checkaddresstag(tag_address, qualifier_name))
+            assert (not n0.checkaddresstag(tag_address, qualifier_name))
 
-        #tag
+        # tag
         change_address = n0.getnewaddress()
         tag_hex = get_tx_tag_address_hex(n0, "tag", qualifier_name, tag_addresses, change_address, 2)
         tag_txid = n0.sendrawtransaction(tag_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(tag_txid))
         for tag_address in tag_addresses:
-            assert(n0.checkaddresstag(tag_address, qualifier_name))
+            assert (n0.checkaddresstag(tag_address, qualifier_name))
         assert_equal(qty, n0.listassetbalancesbyaddress(change_address)[qualifier_name])
 
-        #untag
+        # untag
         change_address = n0.getnewaddress()
         tag_hex = get_tx_tag_address_hex(n0, "untag", qualifier_name, tag_addresses, change_address, 2)
         tag_txid = n0.sendrawtransaction(tag_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(tag_txid))
         for tag_address in tag_addresses:
-            assert(not n0.checkaddresstag(tag_address, qualifier_name))
+            assert (not n0.checkaddresstag(tag_address, qualifier_name))
         assert_equal(qty, n0.listassetbalancesbyaddress(change_address)[qualifier_name])
 
     def address_freezing_test(self):
@@ -475,32 +483,32 @@ class RawRestrictedAssetsTest(RavenTestFramework):
 
         freeze_addresses = [n0.getnewaddress(), n0.getnewaddress(), n0.getnewaddress()]
 
-        #verify
+        # verify
         for freeze_address in freeze_addresses:
-            assert(not n0.checkaddressrestriction(freeze_address, asset_name))
+            assert (not n0.checkaddressrestriction(freeze_address, asset_name))
 
-        #freeze
+        # freeze
         owner_change_address = n0.getnewaddress()
         freeze_hex = get_tx_freeze_address_hex(n0, "freeze", asset_name, freeze_addresses, owner_change_address)
         freeze_txid = n0.sendrawtransaction(freeze_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(freeze_txid))
         for freeze_address in freeze_addresses:
-            assert(n0.checkaddressrestriction(freeze_address, asset_name))
+            assert (n0.checkaddressrestriction(freeze_address, asset_name))
         assert_equal(1, n0.listassetbalancesbyaddress(owner_change_address)[f"{base_asset_name}!"])
 
-        #unfreeze
+        # unfreeze
         owner_change_address = n0.getnewaddress()
         freeze_hex = get_tx_freeze_address_hex(n0, "unfreeze", asset_name, freeze_addresses, owner_change_address)
         freeze_txid = n0.sendrawtransaction(freeze_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(freeze_txid))
         for freeze_address in freeze_addresses:
-            assert(not n0.checkaddressrestriction(freeze_address, asset_name))
+            assert (not n0.checkaddressrestriction(freeze_address, asset_name))
         assert_equal(1, n0.listassetbalancesbyaddress(owner_change_address)[f"{base_asset_name}!"])
 
     def asset_freezing_test(self):
@@ -519,29 +527,29 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         n0.issuerestrictedasset(asset_name, qty, verifier, issue_address)
         n0.generate(1)
 
-        #verify
-        assert(not n0.checkglobalrestriction(asset_name))
+        # verify
+        assert (not n0.checkglobalrestriction(asset_name))
 
-        #freeze
+        # freeze
         owner_change_address = n0.getnewaddress()
         freeze_hex = get_tx_freeze_asset_hex(n0, "freeze", asset_name, owner_change_address)
         freeze_txid = n0.sendrawtransaction(freeze_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(freeze_txid))
-        assert(n0.checkglobalrestriction(asset_name))
+        assert (n0.checkglobalrestriction(asset_name))
         assert_equal(1, n0.listassetbalancesbyaddress(owner_change_address)[f"{base_asset_name}!"])
 
-        #unfreeze
+        # unfreeze
         owner_change_address = n0.getnewaddress()
         freeze_hex = get_tx_freeze_asset_hex(n0, "unfreeze", asset_name, owner_change_address)
         freeze_txid = n0.sendrawtransaction(freeze_hex)
         n0.generate(1)
 
-        #verify
+        # verify
         assert_equal(64, len(freeze_txid))
-        assert(not n0.checkglobalrestriction(asset_name))
+        assert (not n0.checkglobalrestriction(asset_name))
         assert_equal(1, n0.listassetbalancesbyaddress(owner_change_address)[f"{base_asset_name}!"])
 
     def run_test(self):
@@ -554,6 +562,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         self.address_tagging_test()
         self.address_freezing_test()
         self.asset_freezing_test()
+
 
 if __name__ == '__main__':
     RawRestrictedAssetsTest().main()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -25,6 +25,7 @@ from . import coverage
 from .authproxy import AuthServiceProxy, JSONRPCException
 
 logger = logging.getLogger("TestFramework.utils")
+
 
 ##########################################################################################
 #                                   Assert functions
@@ -53,7 +54,7 @@ def assert_contains_pair(key, val, dict_data):
 
 
 def assert_contains_key(key, dict_data):
-    if not key in dict_data:
+    if key not in dict_data:
         raise AssertionError("key %s is not in dict" % key)
 
 
@@ -216,6 +217,7 @@ def assert_array_result(object_array, to_match, expected, should_not_find=False)
     if num_matched > 0 and should_not_find:
         raise AssertionError("Objects were found %s" % (str(to_match)))
 
+
 def assert_happening(date_str, within_secs=120):
     """ Make sure date_str happened withing within_secs seconds of now.
         Assumes date_str is in rpc results cust_format e.g. '2019-11-07 17:50:06' and assumed to represent UTC.
@@ -227,6 +229,7 @@ def assert_happening(date_str, within_secs=120):
     diff_secs = (now - then).total_seconds()
     if abs(diff_secs) > within_secs:
         raise AssertionError("More than expected %s second difference between %s and now(%s) (%ss)" % (within_secs, date_str, now, diff_secs))
+
 
 ##########################################################################################
 #                                   Utility functions
@@ -304,6 +307,7 @@ def wait_until(predicate, *, err_msg, attempts=float('inf'), timeout=float('inf'
     assert_greater_than(time.ctime(timeout), time.ctime(), err_msg + " ~~ Exceeded Timeout")
     raise RuntimeError('Unreachable')
 
+
 ##########################################################################################
 #                       RPC/P2P connection constants and functions
 ##########################################################################################
@@ -318,6 +322,7 @@ PORT_RANGE = 5000
 p2p_ports = [-1, -1, -1, -1, -1, -1, -1, -1]
 # List to store RPC ports
 rpc_ports = [-1, -1, -1, -1, -1, -1, -1, -1]
+
 
 class PortSeed:
     # Must be initialized with a unique integer for each process
@@ -358,7 +363,6 @@ def get_rpc_proxy(url, node_number, timeout=None, coverage_dir=None):
     proxy_kwargs = {}
     if timeout is not None:
         proxy_kwargs['timeout'] = timeout
-
     proxy = AuthServiceProxy(url, **proxy_kwargs)
     proxy.url = url  # store URL on proxy for info
 
@@ -397,6 +401,7 @@ def rpc_url(data_dir, i, rpchost=None):
         else:
             host = rpchost
     return "http://%s:%s@%s:%d" % (rpc_u, rpc_p, host, int(port))
+
 
 ##########################################################################################
 #                                   Node functions
@@ -560,6 +565,7 @@ def sync_mempools(rpc_connections, *, wait=1, timeout=60):
         time.sleep(wait)
         timeout -= wait
     raise AssertionError("Mempool sync failed")
+
 
 ##########################################################################################
 #                           Transaction/Block functions
