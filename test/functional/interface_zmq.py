@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,7 @@ import configparser
 import os
 import struct
 from test_framework.test_framework import RavenTestFramework, SkipTest
-from test_framework.util import assert_equal, bytes_to_hex_str, hash256, x16_hash_block
+from test_framework.util import assert_equal, hash256, x16_hash_block
 
 
 # noinspection PyUnresolvedReferences
@@ -35,7 +35,7 @@ class ZMQSubscriber:
 
 
 # noinspection PyUnresolvedReferences
-class ZMQTest (RavenTestFramework):
+class ZMQTest(RavenTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
 
@@ -96,18 +96,17 @@ class ZMQTest (RavenTestFramework):
 
             # Should receive the coinbase raw transaction.
             hex_data = self.rawtx.receive()
-            assert_equal(bytes_to_hex_str(hash256(hex_data)),
-                         self.nodes[1].getrawtransaction(bytes_to_hex_str(txid), True)["hash"])
+            assert_equal(hash256(hex_data).hex(), self.nodes[1].getrawtransaction(txid.hex(), True)["hash"])
 
             # Should receive the generated block hash.
-            hash_data = bytes_to_hex_str(self.hashblock.receive())
+            hash_data = self.hashblock.receive().hex()
             assert_equal(genhashes[x], hash_data)
             # The block should only have the coinbase txid.
-            assert_equal([bytes_to_hex_str(txid)], self.nodes[1].getblock(hash_data)["tx"])
+            assert_equal([txid.hex()], self.nodes[1].getblock(hash_data)["tx"])
 
             # Should receive the generated raw block.
             block = self.rawblock.receive()
-            assert_equal(genhashes[x], x16_hash_block(bytes_to_hex_str(block[:80]), "2"))
+            assert_equal(genhashes[x], x16_hash_block(block[:80].hex(), "2"))
 
         self.log.info("Wait for tx from second node")
         payment_txid = self.nodes[1].sendtoaddress(self.nodes[0].getnewaddress(), 1.0)
@@ -115,11 +114,12 @@ class ZMQTest (RavenTestFramework):
 
         # Should receive the broadcasted txid.
         txid = self.hashtx.receive()
-        assert_equal(payment_txid, bytes_to_hex_str(txid))
+        assert_equal(payment_txid, txid.hex())
 
         # Should receive the broadcasted raw transaction.
         hex_data = self.rawtx.receive()
-        assert_equal(payment_txid, bytes_to_hex_str(hash256(hex_data)))
+        assert_equal(payment_txid, hash256(hex_data).hex())
+
 
 if __name__ == '__main__':
     ZMQTest().main()
