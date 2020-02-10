@@ -93,9 +93,6 @@ public:
 
         if(VERSION_HD_BIP44_BIP39 == nVersion) {
             READWRITE(bUse_bip44);
-            READWRITE(vchMnemonic);
-            READWRITE(vchMnemonicPassphrase);
-            READWRITE(vchSeed);
         }
         else
         {
@@ -126,32 +123,7 @@ public:
     bool IsBip44() const            { return bUse_bip44 == true;}
 
 
-    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, SecureVector& vchSeed)
- 	{
- 		SecureString ssMnemonicTmp = ssMnemonic;
-
-		// can't (re)set mnemonic if seed was already set
-		if (!IsNull())
-			return false;
-
-		// empty mnemonic i.e. "generate a new one"
-		if (ssMnemonic.empty()) {
-			ssMnemonicTmp = CMnemonic::Generate(bUse_bip44 ? 128 : 256);
-		}
-		// NOTE: default mnemonic passphrase is an empty string
-
-		// printf("mnemonic: %s\n", ssMnemonicTmp.c_str());
-		if (!CMnemonic::Check(ssMnemonicTmp)) {
-			throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
-		}
-
-		CMnemonic::ToSeed(ssMnemonicTmp, ssMnemonicPassphrase, vchSeed);
-
- 		vchMnemonic = SecureVector(ssMnemonicTmp.begin(), ssMnemonicTmp.end());
- 		vchMnemonicPassphrase = SecureVector(ssMnemonicPassphrase.begin(), ssMnemonicPassphrase.end());
-
- 		return true;
- 	}
+    bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, SecureVector& vchSeed);
 };
 
 class CKeyMetadata
@@ -307,6 +279,13 @@ public:
     bool ReadVersion(int& nVersion);
     //! Write wallet version
     bool WriteVersion(int nVersion);
+
+    bool WriteBip39Words(const uint256& hash, const std::vector<unsigned char>& vchWords, bool fEncrypted);
+    bool WriteBip39Passphrase(const std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool ReadBip39Words(uint256& hash, std::vector<unsigned char>& vchWords, bool fEncrypted);
+    bool ReadBip39Passphrase(std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool EraseBip39Words(bool fEncrypted);
+    bool EraseBip39Passphrase(bool fEncrypted);
 private:
     CDB batch;
     CWalletDBWrapper& m_dbw;

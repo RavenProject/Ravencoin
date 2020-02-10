@@ -112,3 +112,27 @@ bool CBasicKeyStore::HaveWatchOnly() const
     LOCK(cs_KeyStore);
     return (!setWatchOnly.empty());
 }
+
+
+bool CBasicKeyStore::AddWords(const uint256& p_hash, const std::vector<unsigned char>& p_vchWords)
+{
+    LOCK(cs_KeyStore);
+    nWordHash = p_hash;
+    vchWords = p_vchWords;
+    return true;
+}
+
+bool CBasicKeyStore::AddPassphrase(const std::vector<unsigned char>& p_vchPassphrase)
+{
+    LOCK(cs_KeyStore);
+    vchPassphrase = p_vchPassphrase;
+    return true;
+}
+
+void CBasicKeyStore::GetBip39Data(uint256& p_hash, std::vector<unsigned char>& p_vchWords, std::vector<unsigned char>& p_vchPassphrase)
+{
+    LOCK(cs_KeyStore);
+    p_hash = nWordHash;
+    p_vchWords = vchWords;
+    p_vchPassphrase = vchPassphrase;
+}

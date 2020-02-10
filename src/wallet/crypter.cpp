@@ -104,10 +104,10 @@ bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingM
     nLen = dec.Decrypt(vchCiphertext.data(), vchCiphertext.size(), &vchPlaintext[0]);
     if(nLen == 0)
         return false;
+
     vchPlaintext.resize(nLen);
     return true;
 }
-
 
 static bool EncryptSecret(const CKeyingMaterial& vMasterKey, const CKeyingMaterial &vchPlaintext, const uint256& nIV, std::vector<unsigned char> &vchCiphertext)
 {
@@ -126,6 +126,7 @@ static bool DecryptSecret(const CKeyingMaterial& vMasterKey, const std::vector<u
     memcpy(chIV.data(), &nIV, WALLET_CRYPTO_IV_SIZE);
     if(!cKeyCrypter.SetKey(vMasterKey, chIV))
         return false;
+
     return cKeyCrypter.Decrypt(vchCiphertext, *((CKeyingMaterial*)&vchPlaintext));
 }
 
@@ -163,6 +164,9 @@ bool CCryptoKeyStore::Lock()
         vMasterKey.clear();
     }
 
+    vchWords.clear();
+    vchPassphrase.clear();
+
     NotifyStatusChanged(this);
     return true;
 }
@@ -190,6 +194,12 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
             keyPass = true;
             if (fDecryptionThoroughlyChecked)
                 break;
+        }
+        if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size()) {
+            if (!DecryptBip39(vMasterKeyIn)) {
+                LogPrintf("Failed to decrypt bip 39 data");
+                assert(false);
+            }
         }
         if (keyPass && keyFail)
         {
@@ -296,5 +306,77 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial& vMasterKeyIn)
         }
         mapKeys.clear();
     }
+    return true;
+}
+
+bool CCryptoKeyStore::AddCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!SetCrypted())
+            return false;
+
+        nWordHash = hash;
+        vchCryptedBip39Words = vchCryptedWords;
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::AddCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!SetCrypted())
+            return false;
+
+        vchCryptedBip39Passphrase = vchCryptedPassphrase;
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::EncryptBip39(CKeyingMaterial& vMasterKeyIn)
+{
+    {
+        LOCK(cs_KeyStore);
+
+        CKeyingMaterial vchSecretWords(vchWords.begin(), vchWords.end());
+        if (!EncryptSecret(vMasterKeyIn, vchSecretWords, nWordHash, vchCryptedBip39Words))
+            return false;
+
+        if (!vchPassphrase.empty()) {
+            CKeyingMaterial vchSecretPassphrase(vchPassphrase.begin(), vchPassphrase.end());
+            if (!EncryptSecret(vMasterKeyIn, vchSecretPassphrase, nWordHash, vchCryptedBip39Passphrase))
+                return false;
+
+            CKeyingMaterial vchDecryptedPassphrase;
+            if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39Passphrase, nWordHash, vchDecryptedPassphrase)) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+bool CCryptoKeyStore::DecryptBip39(const CKeyingMaterial& vMasterKeyIn)
+{
+    {
+        LOCK(cs_KeyStore);
+        CKeyingMaterial vchDecryptedWords;
+        if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39Words, nWordHash, vchDecryptedWords)) {
+            return false;
+        }
+
+        vchWords = std::vector<unsigned char>(vchDecryptedWords.begin(), vchDecryptedWords.end());
+
+        if (!vchCryptedBip39Passphrase.empty()) {
+            CKeyingMaterial vchDecryptedPassphrase;
+            if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39Passphrase, nWordHash, vchDecryptedPassphrase)) {
+                return false;
+            }
+            vchPassphrase = std::vector<unsigned char>(vchDecryptedPassphrase.begin(), vchDecryptedPassphrase.end());
+        }
+    }
+
     return true;
 }

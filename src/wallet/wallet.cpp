@@ -52,6 +52,9 @@ bool fWalletRbf = DEFAULT_WALLET_RBF;
 const char * DEFAULT_WALLET_DAT = "wallet.dat";
 const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
 
+std::string my_words;
+std::string my_passphrase;
+
 /**
  * Fees smaller than this (in satoshi) are considered zero fee (for transaction creation)
  * Override with -mintxfee
@@ -200,7 +203,7 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKe
 				// derive m/purpose'
 				masterKey.Derive(purposeKey, 44 | BIP32_HARDENED_KEY_LIMIT);
 				// derive m/purpose'/coin_type'
-				purposeKey.Derive(coinTypeKey, Params().ExtCoinType() | BIP32_HARDENED_KEY_LIMIT);
+				purposeKey.Derive(coinTypeKey, GetParams().ExtCoinType() | BIP32_HARDENED_KEY_LIMIT);
 				// derive m/purpose'/coin_type'/account'
 				coinTypeKey.Derive(accountKey, nAccountIndex | BIP32_HARDENED_KEY_LIMIT);
 				// derive m/purpose'/coin_type'/account'/change
@@ -227,7 +230,7 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKe
     secret = childKey.key;
 
     if(hdChain.IsBip44())
-        metadata.hdKeypath = strprintf("m/44'/%d'/%d'/%d/%d", Params().ExtCoinType(), nAccountIndex, internal, nChildIndex - 1);
+        metadata.hdKeypath = strprintf("m/44'/%d'/%d'/%d/%d", GetParams().ExtCoinType(), nAccountIndex, internal, nChildIndex - 1);
     else
         metadata.hdKeypath = strprintf("m/%d'/%d'/%d'", nAccountIndex, internal, nChildIndex - 1);
 
@@ -310,6 +313,31 @@ bool CWallet::LoadKeyMetadata(const CTxDestination& keyID, const CKeyMetadata &m
 bool CWallet::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
 {
     return CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret);
+}
+
+bool CWallet::LoadCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords)
+{
+    return CCryptoKeyStore::AddCryptedWords(hash, vchCryptedWords);
+}
+
+bool CWallet::LoadCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase)
+{
+    return CCryptoKeyStore::AddCryptedPassphrase(vchCryptedPassphrase);
+}
+
+bool CWallet::LoadWords(const uint256& hash, const std::vector<unsigned char> &vchWords)
+{
+    return CCryptoKeyStore::AddWords(hash, vchWords);
+}
+
+bool CWallet::LoadPassphrase(const std::vector<unsigned char> &vchPassphrase)
+{
+    return CCryptoKeyStore::AddPassphrase(vchPassphrase);
+}
+
+void CWallet::GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase)
+{
+    CCryptoKeyStore::GetBip39Data(hash, vchWords, vchPassphrase );
 }
 
 /**
@@ -668,6 +696,34 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
             assert(false);
         }
 
+        if(hdChain.IsBip44()) {
+            pwalletdbEncryption->EraseBip39Words( false);
+            pwalletdbEncryption->EraseBip39Passphrase(false);
+
+            if (!EncryptBip39(_vMasterKey))
+            {
+                pwalletdbEncryption->TxnAbort();
+                delete pwalletdbEncryption;
+                // We now probably have half of our keys encrypted in memory, and half not...
+                // die and let the user reload the unencrypted wallet.
+                assert(false);
+            }
+
+            if (!pwalletdbEncryption->WriteBip39Words(nWordHash, vchCryptedBip39Words, true)) {
+                pwalletdbEncryption->TxnAbort();
+                delete pwalletdbEncryption;
+                assert(false);
+            }
+
+            if (!vchCryptedBip39Passphrase.empty()) {
+                if (!pwalletdbEncryption->WriteBip39Passphrase(vchCryptedBip39Passphrase, true)) {
+                    pwalletdbEncryption->TxnAbort();
+                    delete pwalletdbEncryption;
+                    assert(false);
+                }
+            }
+        }
+
         // Encryption was introduced in version 0.4.0
         SetMinVersion(FEATURE_WALLETCRYPT, pwalletdbEncryption, true);
 
@@ -685,19 +741,27 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
         Unlock(strWalletPassphrase);
 
         // if we are using HD, replace the HD seed with a new one
-        if (IsHDEnabled()) {
+        if (IsHDEnabled() && !hdChain.IsBip44()) {
             if (!SetHDSeed(GenerateNewSeed())) {
                 return false;
             }
         }
 
-        NewKeyPool();
+        if (!hdChain.IsBip44())
+            NewKeyPool();
+
         Lock();
 
         // Need to completely rewrite the wallet file; if we don't, bdb might keep
         // bits of the unencrypted private key in slack space in the database file.
         dbw->Rewrite();
 
+        if (hdChain.IsBip44()) {
+            CWalletDB walletdb(*dbw);
+            walletdb.WriteBip39Words(nWordHash, vchCryptedBip39Words, true);
+            if (!vchCryptedBip39Passphrase.empty())
+                walletdb.WriteBip39Passphrase(vchCryptedBip39Passphrase, true);
+        }
     }
     NotifyStatusChanged(this);
 
@@ -1416,11 +1480,9 @@ CAmount CWallet::GetChange(const CTransaction& tx) const
 
 CPubKey CWallet::GenerateNewSeed()
 {
-
     CHDChain newHdChain(this);
 	newHdChain.UseBip44(hdChain.IsBip44());
     std::string strSeed = gArgs.GetArg("-hdseed", "not hex");
-
 
     if(IsHex(strSeed)) { // that means gArgs.IsArgSet("-hdseed") == true
 		std::vector<unsigned char> vchSeed = ParseHex(strSeed);
@@ -1445,6 +1507,14 @@ CPubKey CWallet::GenerateNewSeed()
 	// NOTE: default mnemonic passphrase is an empty string
 	std::string strMnemonicPassphrase = gArgs.GetArg("-mnemonicpassphrase", "");
 
+    if (!my_words.empty()) {
+        strMnemonic = my_words;
+    }
+
+    if (!my_passphrase.empty()) {
+        strMnemonicPassphrase = my_passphrase;
+    }
+
 	SecureString vchMnemonic(strMnemonic.begin(), strMnemonic.end());
 	SecureString vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
 
@@ -1452,11 +1522,17 @@ CPubKey CWallet::GenerateNewSeed()
 	if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, vchSeed))
 		throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
 
+    if (my_words.empty())
+        InitWarning(strprintf("These are your words, write them down:\n%s\n", std::string(newHdChain.vchMnemonic.begin(), newHdChain.vchMnemonic.end())));
+
 	CPubKey seed(vchSeed.begin(), vchSeed.end());
 
 	newHdChain.seed_id = seed.GetID();
 
 	SetHDChain(newHdChain, false);
+
+	my_passphrase.clear();
+	my_words.clear();
 
 	return seed;
 
@@ -3818,6 +3894,11 @@ bool CWallet::AddAccountingEntry(const CAccountingEntry& acentry, CWalletDB *pwa
     return true;
 }
 
+bool CWallet::IsFirstRun()
+{
+    return mapKeys.empty() && mapCryptedKeys.empty() && mapWatchKeys.empty() && setWatchOnly.empty() && mapScripts.empty();
+}
+
 DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
 {
     LOCK2(cs_main, cs_wallet);
@@ -4675,9 +4756,15 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
             InitError(strprintf(_("Error creating %s: You can't create non-HD wallets with this version."), walletFile));
             return nullptr;
         }
+
         walletInstance->SetMinVersion(FEATURE_NO_DEFAULT_KEY);
 
         walletInstance->UseBip44(gArgs.GetBoolArg("-bip44", true));
+
+        // If this is the first run, show the bip44 gui to the user
+        if (walletInstance->hdChain.IsBip44()){
+            uiInterface.ShowMnemonic(CClientUIInterface::MODAL);
+        }
 
         // generate a new seed
         walletInstance->GenerateNewSeed();
@@ -4687,6 +4774,10 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
             InitError(_("Unable to generate initial keys") += "\n");
             return nullptr;
         }
+
+
+        std::cout << "The mnemonic words for this wallet are: " << std::endl;
+        std::cout << std::string(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end()) << std::endl;
 
         walletInstance->SetBestChain(chainActive.GetLocator());
     }
@@ -4708,6 +4799,36 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
 
     // Try to top up keypool. No-op if the wallet is locked.
     walletInstance->TopUpKeyPool();
+
+    if (walletInstance->hdChain.IsBip44() && fFirstRun) {
+        CWalletDB walletdb(walletInstance->GetDBHandle());
+
+        std::string strWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
+        std::vector<unsigned char> vchWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
+
+        printf("These are my words: %s\n", strWords.c_str());
+        auto hash = Hash(strWords.begin(), strWords.end());
+        printf("These are my words hash: %s\n", hash.GetHex().c_str());
+        if (!walletdb.WriteBip39Words(hash, vchWords, false)) {
+            InitError(_("Error writing bip 39 words to database"));
+            return nullptr;
+        }
+
+        walletInstance->LoadWords(hash, vchWords);
+
+        if (!walletInstance->hdChain.vchMnemonicPassphrase.empty()) {
+            std::vector<unsigned char> vchPassphrase(walletInstance->hdChain.vchMnemonicPassphrase.begin(), walletInstance->hdChain.vchMnemonicPassphrase.end());
+            printf("This is my passphrase: %s\n", std::string(vchPassphrase.begin(), vchPassphrase.end()).c_str());
+            if (!walletdb.WriteBip39Passphrase(vchPassphrase, false)) {
+                InitError(_("Error writing bip 39 passphrase to database"));
+                return nullptr;
+            }
+
+            walletInstance->LoadPassphrase(vchPassphrase);
+        }
+
+
+    }
 
     CBlockIndex *pindexRescan = chainActive.Genesis();
     if (!gArgs.GetBoolArg("-rescan", false))
