@@ -667,16 +667,21 @@ UniValue dumpwallet(const JSONRPCRequest& request)
 
 		file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
 
-		if(pwallet->GetHDChain().vchMnemonic.size() > 0)
+		if(pwallet->GetHDChain().IsBip44())
 		{
-			SecureString ssMnemonic(pwallet->GetHDChain().vchMnemonic.begin(), pwallet->GetHDChain().vchMnemonic.end());
-			SecureString ssMnemonicPassphrase(pwallet->GetHDChain().vchMnemonicPassphrase.begin(), pwallet->GetHDChain().vchMnemonicPassphrase.end());
+            CWalletDB walletdb(pwallet->GetDBHandle());
 
+            std::vector<unsigned char> vchWords;
+            std::vector<unsigned char> vchPassphrase;
+            uint256 hash;
+
+            pwallet->GetBip39Data(hash, vchWords, vchPassphrase);
 
 			//hdChainCurrent.GetMnemonic(ssMnemonic, ssMnemonicPassphrase);
 			file << "# HD seed: " << HexStr(pwallet->GetHDChain().vchSeed) << "\n";
-			file << "# mnemonic: " << ssMnemonic << "\n";
-			file << "# mnemonic passphrase: " << ssMnemonicPassphrase << "\n\n";
+			file << "# mnemonic: " << std::string(vchWords.begin(), vchWords.end()).c_str() << "\n";
+			file << "# mnemonic passphrase: " << std::string(vchPassphrase.begin(), vchPassphrase.end()).c_str() << "\n";
+			file << "# hash of words: " << hash.GetHex() << "\n\n";
 		}
     }
     for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {

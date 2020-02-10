@@ -222,6 +222,8 @@ public Q_SLOTS:
 
     /** Show the assets button if assets are active */
     void checkAssets();
+
+    void mnemonic();
 #endif // ENABLE_WALLET
 
 private Q_SLOTS:
@@ -234,7 +236,6 @@ private Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
-
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */

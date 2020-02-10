@@ -132,8 +132,15 @@ protected:
     //! will encrypt previously unencrypted keys
     bool EncryptKeys(CKeyingMaterial& vMasterKeyIn);
 
+    //! EncryptBip39 words and passphrase
+    bool EncryptBip39(CKeyingMaterial& vMasterKeyIn);
+    bool DecryptBip39(const CKeyingMaterial& vMasterKeyIn);
+
     bool Unlock(const CKeyingMaterial& vMasterKeyIn);
     CryptedKeyMap mapCryptedKeys;
+
+    std::vector<unsigned char> vchCryptedBip39Words;
+    std::vector<unsigned char> vchCryptedBip39Passphrase;
 
 public:
     CCryptoKeyStore() : fUseCrypto(false), fDecryptionThoroughlyChecked(false)
@@ -160,6 +167,8 @@ public:
     bool Lock();
 
     virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    virtual bool AddCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords);
+    virtual bool AddCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase);
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;
     bool HaveKey(const CKeyID &address) const override
     {

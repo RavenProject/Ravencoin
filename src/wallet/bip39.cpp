@@ -23,8 +23,8 @@
  */
 
 
-#include "bip39.h"
-#include "bip39_english.h"
+#include "wallet/bip39.h"
+#include "wallet/bip39_english.h"
 #include "crypto/sha256.h"
 #include "random.h"
 
