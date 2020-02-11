@@ -198,9 +198,20 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
                 {
                     TRY_LOCK(mempool.cs, fLockMempool);
                     if (fLockMempool) {
-                        LogPrintf("%s failed because of a transaction %s. Clearing the mempool.", __func__,
+                        LogPrintf("%s failed because of a transaction %s. -autofixmempool is set to true. Clearing the mempool\n", __func__,
                                   state.GetFailedTransaction().GetHex());
                         mempool.clear();
+                    }
+                }
+            } else {
+                {
+                    TRY_LOCK(mempool.cs, fLockMempool);
+                    if (fLockMempool) {
+                        auto mempoolTx = mempool.get(state.GetFailedTransaction());
+                        if (mempoolTx) {
+                            LogPrintf("%s : Failed because of a transaction %s. Trying to remove the transaction from the mempool\n", __func__, state.GetFailedTransaction().GetHex());
+                            mempool.removeRecursive(*mempoolTx, MemPoolRemovalReason::CONFLICT);
+                        }
                     }
                 }
             }

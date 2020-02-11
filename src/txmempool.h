@@ -492,6 +492,14 @@ public:
     std::map<std::string, std::set<uint256>> mapGlobalFreezingAssetTransactions;
     std::map<uint256, std::set<std::string>> mapHashGlobalFreezingAssetTransactions;
 
+    // Helper map for when a qualfier is added to an address
+    std::map<std::pair<std::string, std::string>, std::set<uint256> > mapAddressAddedTag;
+    std::map<uint256, std::set<std::pair<std::string, std::string>>> mapHashToAddressAddedTag;
+
+    // Helper map for when a qualfier is added to an address
+    std::map<std::pair<std::string, std::string>, std::set<uint256> > mapAddressRemoveTag;
+    std::map<uint256, std::set<std::pair<std::string, std::string>>> mapHashToAddressRemoveTag;
+
     std::map<std::string, std::set<uint256>> mapGlobalUnFreezingAssetTransactions;
     std::map<uint256, std::set<std::string>> mapHashGlobalUnFreezingAssetTransactions;
 

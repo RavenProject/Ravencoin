@@ -1013,6 +1013,32 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
                             }
                         }
                     }
+                } else if (out.scriptPubKey.IsNullAssetTxDataScript()) {
+                    // We need to track all tags that are being adding to address, that live in the mempool
+                    // This will allow us to keep the mempool clean, and only allow one tag per address at a time into the mempool
+                    CNullAssetTxData addressNullData;
+                    std::string address;
+                    if (AssetNullDataFromScript(out.scriptPubKey, addressNullData, address)) {
+                        if (IsAssetNameAQualifier(addressNullData.asset_name)) {
+                            if (addressNullData.flag == (int) QualifierType::ADD_QUALIFIER) {
+                                if (pool.mapAddressAddedTag.count(std::make_pair(address, addressNullData.asset_name))) {
+                                    return state.DoS(0, false, REJECT_INVALID,
+                                                     "bad-txns-adding-tag-already-in-mempool");
+                                }
+                                // Adding a qualifier to an address
+                                pool.mapAddressAddedTag[std::make_pair(address, addressNullData.asset_name)].insert(tx.GetHash());
+                                pool.mapHashToAddressAddedTag[tx.GetHash()].insert(std::make_pair(address, addressNullData.asset_name));
+                            } else {
+                                    if (pool.mapAddressRemoveTag.count(std::make_pair(address, addressNullData.asset_name))) {
+                                        return state.DoS(0, false, REJECT_INVALID,
+                                                         "bad-txns-remove-tag-already-in-mempool");
+                                    }
+
+                                pool.mapAddressRemoveTag[std::make_pair(address, addressNullData.asset_name)].insert(tx.GetHash());
+                                pool.mapHashToAddressRemoveTag[tx.GetHash()].insert(std::make_pair(address, addressNullData.asset_name));
+                            }
+                        }
+                    }
                 }
             }
         }
