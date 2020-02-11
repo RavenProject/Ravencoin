@@ -269,7 +269,7 @@ bool SendAssetsEntry::validate()
             if (passets->CheckForGlobalRestriction(assetName)) {
                 ui->assetSelectionBox->lineEdit()->setStyleSheet(STYLE_INVALID);
                 ui->messageTextLabel->show();
-                ui->messageTextLabel->setText(tr("This restricted asset have been frozen globally. No transfers can't we sent on the network."));
+                ui->messageTextLabel->setText(tr("This restricted asset has been frozen globally. No transfers can be sent on the network."));
                 retval = false;
             }
 
