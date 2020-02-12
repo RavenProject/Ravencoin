@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,9 +17,10 @@ import subprocess
 import time
 
 from .util import assert_equal, get_rpc_proxy, rpc_url, wait_until
-from .authproxy import JSONRPCException
+from .authproxy import JSONRPCException, AuthServiceProxy
 
 RAVEND_PROC_WAIT_TIMEOUT = 60
+
 
 class TestNode:
     """A class for representing a ravend node under test.
@@ -55,12 +56,13 @@ class TestNode:
         self.cli = TestNodeCLI(os.getenv("RAVENCLI", "raven-cli"), self.datadir)
 
         self.running = False
+        AuthServiceProxy.running = False
         self.process = None
         self.rpc_connected = False
         self.rpc = None
         self.url = None
         self.log = logging.getLogger('TestFramework.node%d' % i)
-        self.cleanup_on_exit = True # Whether to kill the node when this object goes away
+        self.cleanup_on_exit = True  # Whether to kill the node when this object goes away
         self.p2ps = []
 
     def __del__(self):
@@ -86,6 +88,7 @@ class TestNode:
             stderr = self.stderr
         self.process = subprocess.Popen(self.args + extra_args, stderr=stderr)
         self.running = True
+        AuthServiceProxy.running = True
         self.log.debug("ravend started, waiting for RPC to come up")
 
     def wait_for_rpc_connection(self):
@@ -144,6 +147,7 @@ class TestNode:
         # process has stopped. Assert that it didn't return an error code.
         assert_equal(return_code, 0)
         self.running = False
+        AuthServiceProxy.running = False
         self.process = None
         self.rpc_connected = False
         self.rpc = None
@@ -186,6 +190,7 @@ class TestNode:
         self.encryptwallet(passphrase)
         self.wait_until_stopped()
 
+
 class TestNodeCLI:
     """Interface to raven-cli for an individual node"""
 
@@ -204,6 +209,7 @@ class TestNodeCLI:
     def __getattr__(self, command):
         def dispatcher(*args, **kwargs):
             return self.send_cli(command, *args, **kwargs)
+
         return dispatcher
 
     def send_cli(self, command, *args, **kwargs):

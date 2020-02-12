@@ -1,8 +1,7 @@
 # Copyright (c) 2011 Jeff Garzik
-#
 # Previous copyright, from python-jsonrpc/jsonrpc/proxy.py:
-#
 # Copyright (c) 2007 Jan-Klaas Kollhof
+# Copyright (c) 2017-2020 The Raven Core developers
 #
 # This file is part of jsonrpc.
 #
@@ -41,6 +40,7 @@ from http import HTTPStatus
 import http.client
 import json
 import logging
+import os
 import socket
 import time
 import urllib.parse
@@ -77,19 +77,12 @@ class AuthServiceProxy:
         self._service_name = service_name
         self.ensure_ascii = ensure_ascii  # can be toggled on the fly by tests
         self.__url = urllib.parse.urlparse(service_url)
-        port = 80 if self.__url.port is None else self.__url.port
         user = None if self.__url.username is None else self.__url.username.encode('utf8')
         passwd = None if self.__url.password is None else self.__url.password.encode('utf8')
         auth_pair = user + b':' + passwd
         self.__auth_header = b'Basic ' + base64.b64encode(auth_pair)
-
-        if connection:
-            # Callables re-use the connection of the original proxy
-            self.__conn = connection
-        elif self.__url.scheme == 'https':
-            self.__conn = http.client.HTTPSConnection(self.__url.hostname, port, timeout=timeout)
-        else:
-            self.__conn = http.client.HTTPConnection(self.__url.hostname, port, timeout=timeout)
+        self.timeout = timeout
+        self._set_conn(connection)
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
@@ -108,6 +101,10 @@ class AuthServiceProxy:
                    'User-Agent': USER_AGENT,
                    'Authorization': self.__auth_header,
                    'Content-type': 'application/json'}
+        if os.name == 'nt':
+            # Windows somehow does not like to re-use connections
+            # TODO: Find out why the connection would disconnect occasionally and make it reusable on Windows
+            self._set_conn()
         try:
             self.__conn.request(method, path, post_data, headers)
             return self._get_response()
@@ -120,12 +117,6 @@ class AuthServiceProxy:
                 return self._get_response()
             else:
                 raise
-        except http.client.UnknownProtocol as e:
-            self.__conn.close()
-            self.__conn.request(method, path, post_data, headers)
-            print("~~~~~~~~~~~~~~~~~ Protocol Exception ~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print(e)
-            return self._get_response()
         except (BrokenPipeError, ConnectionResetError) as e:
             # Python 3.5+ raises BrokenPipeError instead of BadStatusLine when the connection was reset
             # ConnectionResetError happens on FreeBSD with Python 3.4
@@ -138,8 +129,7 @@ class AuthServiceProxy:
     def get_request(self, *args, **argsn):
         AuthServiceProxy.__id_count += 1
 
-        log.debug("-%s-> %s %s" % (AuthServiceProxy.__id_count, self._service_name,
-                                   json.dumps(args, default=encode_decimal, ensure_ascii=self.ensure_ascii)))
+        log.debug("-{}-> {} {}".format(AuthServiceProxy.__id_count, self._service_name, json.dumps(args or argsn, default=encode_decimal, ensure_ascii=self.ensure_ascii),))
         if args and argsn:
             raise ValueError('Cannot handle both named and positional arguments')
         return {'version': '1.1',
@@ -157,11 +147,9 @@ class AuthServiceProxy:
             log.debug("---------------------------</authproxy>--------------------------")
             raise JSONRPCException(response['error'], status)
         elif 'result' not in response:
-            raise JSONRPCException({
-                'code': -343, 'message': 'missing JSON-RPC result'}, status)
+            raise JSONRPCException({'code': -343, 'message': 'missing JSON-RPC result'}, status)
         elif status != HTTPStatus.OK:
-            raise JSONRPCException({
-                'code': -342, 'message': 'non-200 HTTP status code but no JSON-RPC error'}, status)
+            raise JSONRPCException({'code': -342, 'message': 'non-200 HTTP status code but no JSON-RPC error'}, status)
         else:
             return response['result']
 
@@ -170,8 +158,7 @@ class AuthServiceProxy:
         log.debug("--> " + postdata)
         response, status = self._request('POST', self.__url.path, postdata.encode('utf-8'))
         if status != HTTPStatus.OK:
-            raise JSONRPCException({
-                'code': -342, 'message': 'non-200 HTTP status code but no JSON-RPC error'}, status)
+            raise JSONRPCException({'code': -342, 'message': 'non-200 HTTP status code but no JSON-RPC error'}, status)
         return response
 
     def _get_response(self):
@@ -183,22 +170,13 @@ class AuthServiceProxy:
                 'code': -344,
                 'message': '%r RPC took longer than %f seconds. Consider '
                            'using larger timeout for calls that take '
-                           'longer to return.' % (self._service_name,
-                                                  self.__conn.timeout)})
-        except http.client.RemoteDisconnected as e:
-            log.debug("~~~~~~~ _get_response Remote Disconnected Exception: %s ~~~~~~~~~~~", e)
-            raise
-        except http.client.UnknownProtocol as e:
-            log.debug("~~~~~~~ _get_response Unknown Protocol Exception: %s ~~~~~~~~~~~", e)
-            raise
+                           'longer to return.' % (self._service_name, self.__conn.timeout)})
         if http_response is None:
-            raise JSONRPCException({
-                'code': -342, 'message': 'missing HTTP response from server'})
+            raise JSONRPCException({'code': -342, 'message': 'missing HTTP response from server'})
 
         content_type = http_response.getheader('Content-Type')
         if content_type != 'application/json':
-            raise JSONRPCException({'code': -342, 'message': 'non-JSON HTTP response with \'%i %s\' from server' % (http_response.status, http_response.reason)},
-                                   http_response.status)
+            raise JSONRPCException({'code': -342, 'message': 'non-JSON HTTP response with \'%i %s\' from server' % (http_response.status, http_response.reason)}, http_response.status)
 
         response_data = http_response.read().decode('utf8')
         response = json.loads(response_data, parse_float=decimal.Decimal)
@@ -211,3 +189,13 @@ class AuthServiceProxy:
 
     def __truediv__(self, relative_uri):
         return AuthServiceProxy("{}/{}".format(self.__service_url, relative_uri), self._service_name, connection=self.__conn)
+
+    def _set_conn(self, connection=None):
+        port = 80 if self.__url.port is None else self.__url.port
+        if connection:
+            self.__conn = connection
+            self.timeout = connection.timeout
+        elif self.__url.scheme == 'https':
+            self.__conn = http.client.HTTPSConnection(self.__url.hostname, port, timeout=self.timeout)
+        else:
+            self.__conn = http.client.HTTPConnection(self.__url.hostname, port, timeout=self.timeout)

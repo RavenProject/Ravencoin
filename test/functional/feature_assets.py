@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,6 +10,7 @@ from test_framework.test_framework import RavenTestFramework
 from test_framework.util import assert_equal, assert_is_hash_string, assert_does_not_contain_key, assert_raises_rpc_error, JSONRPCException, Decimal
 
 import string
+
 
 class AssetTest(RavenTestFramework):
     def set_test_params(self):
@@ -62,8 +63,8 @@ class AssetTest(RavenTestFramework):
         assert_equal(len(myassets["MY_ASSET!"]["outpoints"]), 1)
         assert_is_hash_string(myassets["MY_ASSET"]["outpoints"][0]["txid"])
         assert_equal(myassets["MY_ASSET"]["outpoints"][0]["txid"], myassets["MY_ASSET!"]["outpoints"][0]["txid"])
-        assert(int(myassets["MY_ASSET"]["outpoints"][0]["vout"]) >= 0)
-        assert(int(myassets["MY_ASSET!"]["outpoints"][0]["vout"]) >= 0)
+        assert (int(myassets["MY_ASSET"]["outpoints"][0]["vout"]) >= 0)
+        assert (int(myassets["MY_ASSET!"]["outpoints"][0]["vout"]) >= 0)
         assert_equal(myassets["MY_ASSET"]["outpoints"][0]["amount"], 1000)
         assert_equal(myassets["MY_ASSET!"]["outpoints"][0]["amount"], 1)
 
@@ -91,7 +92,7 @@ class AssetTest(RavenTestFramework):
         assert_equal(myassets["MY_ASSET"]["balance"], 200)
         assert_equal(len(myassets["MY_ASSET"]["outpoints"]), 1)
         assert_is_hash_string(myassets["MY_ASSET"]["outpoints"][0]["txid"])
-        assert(int(myassets["MY_ASSET"]["outpoints"][0]["vout"]) >= 0)
+        assert (int(myassets["MY_ASSET"]["outpoints"][0]["vout"]) >= 0)
         assert_equal(n0.listmyassets(asset="MY_ASSET")["MY_ASSET"], 800)
 
         self.log.info("Checking listassetbalancesbyaddress()...")
@@ -104,7 +105,7 @@ class AssetTest(RavenTestFramework):
             if n0.validateaddress(assaddr)["ismine"]:
                 changeaddress = assaddr
                 assert_equal(n0.listassetbalancesbyaddress(changeaddress)["MY_ASSET"], 800)
-        assert(changeaddress is not None)
+        assert (changeaddress is not None)
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET!"], 1)
 
         self.log.info("Burning all units to test reissue on zero units...")
@@ -329,7 +330,6 @@ class AssetTest(RavenTestFramework):
 
         assert_equal(0, len(n0.listassets(asset_name, True)))
 
-
     def reissue_prec_change(self):
         self.log.info("Testing precision change on reissue...")
         n0 = self.nodes[0]
@@ -342,15 +342,14 @@ class AssetTest(RavenTestFramework):
         assert_equal(0, n0.listassets("*", True)[asset_name]["units"])
 
         for i in range(0, 8):
-            n0.reissue(asset_name, 10.0**(-i), address, "", True, i+1)
+            n0.reissue(asset_name, 10.0 ** (-i), address, "", True, i + 1)
             n0.generate(1)
-            assert_equal(i+1, n0.listassets("*", True)[asset_name]["units"])
-            assert_raises_rpc_error(-25, "Error: Unable to reissue asset: unit must be larger than current unit selection", n0.reissue, asset_name, 10.0**(-i), address, "", True, i)
+            assert_equal(i + 1, n0.listassets("*", True)[asset_name]["units"])
+            assert_raises_rpc_error(-25, "Error: Unable to reissue asset: unit must be larger than current unit selection", n0.reissue, asset_name, 10.0 ** (-i), address, "", True, i)
 
         n0.reissue(asset_name, 0.00000001, address)
         n0.generate(1)
         assert_equal(Decimal('11.11111111'), n0.listassets("*", True)[asset_name]["amount"])
-
 
     def run_test(self):
         self.activate_assets()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -53,6 +53,7 @@ class RavenTestFramework:
 
     def __init__(self):
         """Sets test framework defaults. Do not override this method. Instead, override the set_test_params() method"""
+        self.num_nodes = None
         self.setup_clean_chain = False
         self.nodes = []
         self.mocktime = 0
@@ -95,8 +96,8 @@ class RavenTestFramework:
             self.options.tmpdir = os.path.abspath(self.options.tmpdir)
             try:
                 os.makedirs(self.options.tmpdir, exist_ok=False)
-            except OSError as e:
-                self.options.tmpdir = os.path.abspath(self.options.tmpdir + str(randint(0,48)))
+            except OSError:
+                self.options.tmpdir = os.path.abspath(self.options.tmpdir + str(randint(0, 48)))
                 os.makedirs(self.options.tmpdir, exist_ok=False)
         else:
             self.options.tmpdir = tempfile.mkdtemp(prefix="test")
@@ -233,7 +234,7 @@ class RavenTestFramework:
                 node.start(extra_args[i])
             for node in self.nodes:
                 node.wait_for_rpc_connection()
-        except:
+        except Exception:
             # If one node failed to start, stop the others
             self.stop_nodes()
             raise
@@ -438,39 +439,6 @@ class RavenTestFramework:
         Useful if a test case wants complete control over initialization."""
         for i in range(self.num_nodes):
             initialize_data_dir(self.options.tmpdir, i)
-
-
-class ComparisonTestFramework(RavenTestFramework):
-    """Test framework for doing p2p comparison testing
-
-    Sets up some ravend binaries:
-    - 1 binary: test binary
-    - 2 binaries: 1 test binary, 1 ref binary
-    - n>2 binaries: 1 test binary, n-1 ref binaries"""
-
-    def run_test(self):
-        pass
-
-    def set_test_params(self):
-        self.num_nodes = 2
-        self.setup_clean_chain = True
-
-    def add_options(self, parser):
-        parser.add_option("--testbinary", dest="testbinary",
-                          default=os.getenv("RAVEND", "ravend"),
-                          help="ravend binary to test")
-        parser.add_option("--refbinary", dest="refbinary",
-                          default=os.getenv("RAVEND", "ravend"),
-                          help="ravend binary to use for reference nodes (if any)")
-
-    def setup_network(self):
-        extra_args = [['-whitelist=127.0.0.1']] * self.num_nodes
-        if hasattr(self, "extra_args"):
-            extra_args = self.extra_args
-        self.add_nodes(self.num_nodes, extra_args,
-                       binary=[self.options.testbinary] +
-                              [self.options.refbinary] * (self.num_nodes - 1))
-        self.start_nodes()
 
 
 class SkipTest(Exception):
