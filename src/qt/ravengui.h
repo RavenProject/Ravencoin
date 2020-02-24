@@ -129,6 +129,9 @@ private:
     QTimer *pricingTimer;
     QNetworkAccessManager* networkManager;
     QNetworkRequest* request;
+    QLabel *labelVersionUpdate;
+    QNetworkAccessManager* networkVersionManager;
+    QNetworkRequest* versionRequest;
     /** RVN END */
 
     QSystemTrayIcon *trayIcon;
@@ -196,6 +199,8 @@ public Q_SLOTS:
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
 
     void getPriceInfo();
+
+    void getLatestVersion();
 
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.
