@@ -856,8 +856,8 @@ void RavenGUI::createToolBars()
                        if (key == "tag_name") {
                            auto latestVersion = latestRelease["tag_name"].get_str();
 
-                           QRegExp rx("v(\\d).(\\d).(\\d)");
-                           rx.indexIn(answer);
+                           QRegExp rx("v(\\d+).(\\d+).(\\d+)");
+                           rx.indexIn(QString::fromStdString(latestVersion));
 
                            // List the found values
                            QStringList list = rx.capturedTexts();
