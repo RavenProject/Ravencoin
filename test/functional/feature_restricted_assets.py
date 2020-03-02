@@ -310,7 +310,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.addtagtoaddress, tag, address, "garbagechangeaddress")
 
         n0.addtagtoaddress(tag, address, change_address)
-        n0.addtagtoaddress(tag, address, change_address)  # redundant tagging ok if consistent
         n0.generate(1)
 
         assert_raises_rpc_error(-32600, "add-qualifier-when-already-assigned", n0.addtagtoaddress, tag, address, change_address)
@@ -361,7 +360,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.removetagfromaddress, tag, address, "garbagechangeaddress")
 
         n0.removetagfromaddress(tag, address, change_address)
-        n0.removetagfromaddress(tag, address, change_address)  # redundant untagging ok if consistent
         n0.generate(1)
 
         assert_raises_rpc_error(-32600, "removing-qualifier-when-not-assigned", n0.removetagfromaddress, tag, address, change_address)
@@ -435,7 +433,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezeaddress, asset_name, address, "garbagechangeaddress")
 
         n0.freezeaddress(asset_name, address, rvn_change_address)
-        n0.freezeaddress(asset_name, address, rvn_change_address)  # redundant freezing ok if consistent
         n0.generate(1)
 
         assert_raises_rpc_error(-32600, "freeze-address-when-already-frozen", n0.freezeaddress, asset_name, address, rvn_change_address)
@@ -458,7 +455,6 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezeaddress, asset_name, address, "garbagechangeaddress")
 
         n0.unfreezeaddress(asset_name, address, rvn_change_address)
-        n0.unfreezeaddress(asset_name, address, rvn_change_address)  # redundant unfreezing ok if consistent
         n0.generate(1)
 
         assert_raises_rpc_error(-32600, "unfreeze-address-when-not-frozen", n0.unfreezeaddress, asset_name, address, rvn_change_address)
