@@ -29,8 +29,6 @@ class KeyPoolTest(RavenTestFramework):
         addr = nodes[0].getnewaddress()
         addr_data = nodes[0].validateaddress(addr)
         wallet_info = nodes[0].getwalletinfo()
-        assert_equal(wallet_info['hdseedid'], wallet_info['hdmasterkeyid'])
-        assert(addr_before_encrypting_data['hdseedid'] != wallet_info['hdseedid'])
         assert(addr_data['hdseedid'] == wallet_info['hdseedid'])
         assert_raises_rpc_error(-12, "Error: Keypool ran out, please call keypoolrefill first", nodes[0].getnewaddress)
 

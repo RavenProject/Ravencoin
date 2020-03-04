@@ -90,6 +90,7 @@ BASE_SCRIPTS= [
     'feature_assets_mempool.py',
     'feature_restricted_assets.py',
     'feature_raw_restricted_assets.py',
+    'wallet_bip44.py',
     'mining_prioritisetransaction.py',
     'feature_maxreorgdepth.py 4 --height=60 --tip_age=0 --should_reorg=0',      # Don't Reorg
     'feature_maxreorgdepth.py 3 --height=60 --tip_age=0 --should_reorg=1',      # Reorg (low peer count)

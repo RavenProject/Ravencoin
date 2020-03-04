@@ -1522,9 +1522,6 @@ CPubKey CWallet::GenerateNewSeed()
 	if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, vchSeed))
 		throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
 
-    if (my_words.empty())
-        InitWarning(strprintf("These are your words, write them down:\n%s\n", std::string(newHdChain.vchMnemonic.begin(), newHdChain.vchMnemonic.end())));
-
 	CPubKey seed(vchSeed.begin(), vchSeed.end());
 
 	newHdChain.seed_id = seed.GetID();
@@ -4749,6 +4746,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
         walletInstance->SetMaxVersion(nMaxVersion);
     }
 
+
     if (fFirstRun)
     {
         // ensure this wallet.dat can only be opened by clients supporting HD with chain split and expects no default key
@@ -4760,6 +4758,8 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
         walletInstance->SetMinVersion(FEATURE_NO_DEFAULT_KEY);
 
         walletInstance->UseBip44(gArgs.GetBoolArg("-bip44", true));
+        LogPrintf("parameter interaction: -bip44 wallet enabled: %s\n", gArgs.GetBoolArg("-bip44", true));
+
 
         // If this is the first run, show the bip44 gui to the user
         if (walletInstance->hdChain.IsBip44()){
@@ -4774,10 +4774,6 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
             InitError(_("Unable to generate initial keys") += "\n");
             return nullptr;
         }
-
-
-        std::cout << "The mnemonic words for this wallet are: " << std::endl;
-        std::cout << std::string(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end()) << std::endl;
 
         walletInstance->SetBestChain(chainActive.GetLocator());
     }
@@ -4806,9 +4802,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
         std::string strWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
         std::vector<unsigned char> vchWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
 
-        printf("These are my words: %s\n", strWords.c_str());
         auto hash = Hash(strWords.begin(), strWords.end());
-        printf("These are my words hash: %s\n", hash.GetHex().c_str());
         if (!walletdb.WriteBip39Words(hash, vchWords, false)) {
             InitError(_("Error writing bip 39 words to database"));
             return nullptr;
@@ -4818,7 +4812,6 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
 
         if (!walletInstance->hdChain.vchMnemonicPassphrase.empty()) {
             std::vector<unsigned char> vchPassphrase(walletInstance->hdChain.vchMnemonicPassphrase.begin(), walletInstance->hdChain.vchMnemonicPassphrase.end());
-            printf("This is my passphrase: %s\n", std::string(vchPassphrase.begin(), vchPassphrase.end()).c_str());
             if (!walletdb.WriteBip39Passphrase(vchPassphrase, false)) {
                 InitError(_("Error writing bip 39 passphrase to database"));
                 return nullptr;
