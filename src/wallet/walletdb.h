@@ -93,6 +93,7 @@ public:
 
         if(VERSION_HD_BIP44_BIP39 == nVersion) {
             READWRITE(bUse_bip44);
+            READWRITE(vchSeed);
         }
         else
         {
