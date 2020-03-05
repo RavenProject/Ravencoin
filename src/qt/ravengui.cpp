@@ -76,6 +76,9 @@
 #include <validation.h>
 #include <tinyformat.h>
 #include <QFontDatabase>
+#include <univalue/include/univalue.h>
+#include <QDesktopServices>
+
 #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
@@ -144,6 +147,9 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     pricingTimer(0),
     networkManager(0),
     request(0),
+    labelVersionUpdate(0),
+    networkVersionManager(0),
+    versionRequest(0),
     trayIcon(0),
     trayIconMenu(0),
     notificator(0),
@@ -210,6 +216,9 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     pricingTimer = new QTimer();
     networkManager = new QNetworkAccessManager();
     request = new QNetworkRequest();
+    labelVersionUpdate = new QLabel();
+    networkVersionManager = new QNetworkAccessManager();
+    versionRequest = new QNetworkRequest();
     /** RVN END */
 
     // Accept D&D of URIs
@@ -726,11 +735,23 @@ void RavenGUI::createToolBars()
         labelBtcRvn->setStyleSheet(STRING_LABEL_COLOR);
         labelBtcRvn->setFont(currentMarketFont);
 
+        labelVersionUpdate->setText("<a href=\"https://github.com/RavenProject/Ravencoin/releases\">New Wallet Version Available</a>");
+        labelVersionUpdate->setTextFormat(Qt::RichText);
+        labelVersionUpdate->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        labelVersionUpdate->setOpenExternalLinks(true);
+        labelVersionUpdate->setContentsMargins(0,0,15,0);
+        labelVersionUpdate->setFixedHeight(75);
+        labelVersionUpdate->setAlignment(Qt::AlignVCenter);
+        labelVersionUpdate->setStyleSheet(STRING_LABEL_COLOR);
+        labelVersionUpdate->setFont(currentMarketFont);
+        labelVersionUpdate->hide();
+
         priceLayout->setGeometry(headerWidget->rect());
         priceLayout->addWidget(labelCurrentMarket, 0, Qt::AlignVCenter | Qt::AlignLeft);
         priceLayout->addWidget(labelCurrentPrice, 0,  Qt::AlignVCenter | Qt::AlignLeft);
         priceLayout->addWidget(labelBtcRvn, 0 , Qt::AlignVCenter | Qt::AlignLeft);
         priceLayout->addStretch();
+        priceLayout->addWidget(labelVersionUpdate, 0 , Qt::AlignVCenter | Qt::AlignRight);
 
         // Create the layout for widget to the right of the tool bar
         QVBoxLayout* mainFrameLayout = new QVBoxLayout(mainWalletWidget);
@@ -796,11 +817,105 @@ void RavenGUI::createToolBars()
                 }
         );
 
+        connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
         // Create the timer
         connect(pricingTimer, SIGNAL(timeout()), this, SLOT(getPriceInfo()));
         pricingTimer->start(10000);
         getPriceInfo();
         /** RVN END */
+
+        // Get the latest Ravencoin release and let the user know if they are using the latest version
+        // Network request code for the header widget
+        QObject::connect(networkVersionManager, &QNetworkAccessManager::finished,
+                         this, [=](QNetworkReply *reply) {
+                    if (reply->error()) {
+                        qDebug() << reply->errorString();
+                        return;
+                    }
+
+                    // Get the data from the network request
+                    QString answer = reply->readAll();
+
+                    UniValue releases(UniValue::VARR);
+                    releases.read(answer.toStdString());
+
+                    if (!releases.isArray()) {
+                        return;
+                    }
+
+                    if (!releases.size()) {
+                        return;
+                    }
+
+                    // Latest release lives in the first index of the array return from github v3 api
+                    auto latestRelease = releases[0];
+
+                    auto keys = latestRelease.getKeys();
+                    for (auto key : keys) {
+                       if (key == "tag_name") {
+                           auto latestVersion = latestRelease["tag_name"].get_str();
+
+                           QRegExp rx("v(\\d+).(\\d+).(\\d+)");
+                           rx.indexIn(QString::fromStdString(latestVersion));
+
+                           // List the found values
+                           QStringList list = rx.capturedTexts();
+                           bool fNewSoftwareFound = false;
+                           bool fStopSearch = false;
+                           if (list.size() >= 4) {
+                               if (MAIN_SOFTWARE_VERSION < list[1].toInt()) {
+                                   fNewSoftwareFound = true;
+                               } else {
+                                   if (MAIN_SOFTWARE_VERSION > list[1].toInt()) {
+                                       fStopSearch = true;
+                                   }
+                               }
+
+                               if (!fStopSearch) {
+                                   if (SECOND_SOFTWARE_VERSION < list[2].toInt()) {
+                                       fNewSoftwareFound = true;
+                                   } else {
+                                       if (SECOND_SOFTWARE_VERSION > list[2].toInt()) {
+                                           fStopSearch = true;
+                                       }
+                                   }
+                               }
+
+                               if (!fStopSearch) {
+                                   if (THIRD_SOFTWARE_VERSION < list[3].toInt()) {
+                                       fNewSoftwareFound = true;
+                                   }
+                               }
+                           }
+
+                           if (fNewSoftwareFound) {
+                               labelVersionUpdate->setToolTip(QString::fromStdString(strprintf("Currently running: %s\nLatest version: %s", SOFTWARE_VERSION,
+                                                                                               latestVersion)));
+                               labelVersionUpdate->show();
+
+                               // Only display the message on startup to the user around 1/2 of the time
+                               if (GetRandInt(2) == 1) {
+                                   bool fRet = uiInterface.ThreadSafeQuestion(
+                                           strprintf("\nCurrently running: %s\nLatest version: %s", SOFTWARE_VERSION,
+                                                     latestVersion) + "\n\nWould you like to visit the releases page?",
+                                           "",
+                                           "New Wallet Version Found",
+                                           CClientUIInterface::MSG_VERSION | CClientUIInterface::BTN_NO);
+                                   if (fRet) {
+                                       QString link = "https://github.com/RavenProject/Ravencoin/releases";
+                                       QDesktopServices::openUrl(QUrl(link));
+                                   }
+                               }
+                           } else {
+                               labelVersionUpdate->hide();
+                           }
+                       }
+                    }
+                }
+        );
+
+        getLatestVersion();
     }
 }
 
@@ -1698,4 +1813,10 @@ void RavenGUI::getPriceInfo()
 {
     request->setUrl(QUrl("https://api.binance.com/api/v1/ticker/price?symbol=RVNBTC"));
     networkManager->get(*request);
+}
+
+void RavenGUI::getLatestVersion()
+{
+    versionRequest->setUrl(QUrl("https://api.github.com/repos/RavenProject/Ravencoin/releases"));
+    networkVersionManager->get(*versionRequest);
 }
