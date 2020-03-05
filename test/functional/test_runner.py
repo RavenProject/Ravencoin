@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -179,10 +179,7 @@ SKIPPED_TESTS = [
     # List of tests that are not going to be run (usually means test is broken)
     'example_test.py',
     'feature_assumevalid.py',
-    'feature_bip_softforks.py',     # use this for future soft fork testing
-    'feature_block.py',             #TODO - fix comptool.TestInstance timeout
     'feature_cltv.py',              #TODO - fix mininode rehash methods to use X16R
-    'feature_csv_activation.py',    #TODO - currently testing softfork activations, we need to test the features
     'feature_dersig.py',            #TODO - fix mininode rehash methods to use X16R
     'feature_nulldummy.py',         #TODO - fix mininode rehash methods to use X16R
     'feature_pruning.py',
@@ -192,8 +189,6 @@ SKIPPED_TESTS = [
     'mining_basic.py',              #TODO - fix mininode rehash methods to use X16R
     'p2p_compactblocks.py',         #TODO - refactor to assume segwit is always active
     'p2p_fingerprint.py',           #TODO - fix mininode rehash methods to use X16R
-    'p2p_invalid_block.py',         #TODO - fix mininode rehash methods to use X16R
-    'p2p_invalid_tx.py',            #TODO - fix mininode rehash methods to use X16R
     'p2p_segwit.py',                #TODO - refactor to assume segwit is always active
     'p2p_sendheaders.py',           #TODO - fix mininode rehash methods to use X16R
     'p2p_unrequested_blocks.py',
