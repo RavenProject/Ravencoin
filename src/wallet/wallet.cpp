@@ -4769,7 +4769,8 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
 
         // If this is the first run, show the bip44 gui to the user
         if (walletInstance->hdChain.IsBip44()){
-            uiInterface.ShowMnemonic(CClientUIInterface::MODAL);
+            if (gArgs.GetArg("-mnemonic", "").empty() && gArgs.GetArg("-mnemonicpassphrase", "").empty())
+                uiInterface.ShowMnemonic(CClientUIInterface::MODAL);
         }
 
         // generate a new seed
