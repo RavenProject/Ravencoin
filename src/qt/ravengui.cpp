@@ -1831,11 +1831,13 @@ void RavenGUI::getPriceInfo()
     networkManager->get(*request);
 }
 
+#ifdef ENABLE_WALLET
 void RavenGUI::mnemonic()
 {
         MnemonicDialog dlg(this);
         dlg.exec();
 }
+#endif
 
 void RavenGUI::getLatestVersion()
 {
