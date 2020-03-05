@@ -71,6 +71,12 @@ public:
 #endif // ENABLE_WALLET
     bool enableWallet;
 
+    enum {
+        HD_DISABLED = 0,
+        HD_ENABLED = 1,
+        HD44_ENABLED = 2
+    };
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
@@ -222,6 +228,8 @@ public Q_SLOTS:
 
     /** Show the assets button if assets are active */
     void checkAssets();
+
+    void mnemonic();
 #endif // ENABLE_WALLET
 
 private Q_SLOTS:
@@ -234,7 +242,6 @@ private Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage(QString addr = "");
-
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
     /** Show Sign/Verify Message dialog and switch to verify message tab */
