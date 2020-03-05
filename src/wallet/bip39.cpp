@@ -147,7 +147,6 @@ bool CMnemonic::Check(SecureString mnemonic)
     return fResult;
 }
 
-// passphrase must be at most 256 characters or code may crash
 void CMnemonic::ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet)
 {
     SecureString ssSalt = SecureString("mnemonic") + passphrase;
