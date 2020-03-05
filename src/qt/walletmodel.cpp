@@ -858,6 +858,11 @@ bool WalletModel::hdEnabled() const
     return wallet->IsHDEnabled();
 }
 
+bool WalletModel::hd44Enabled() const
+{
+    return wallet->IsBip44Enabled();
+}
+
 int WalletModel::getDefaultConfirmTarget() const
 {
     return nTxConfirmTarget;
