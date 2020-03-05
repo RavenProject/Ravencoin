@@ -192,6 +192,7 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKe
 
     masterKey.SetSeed(hdChain.vchSeed.data(), hdChain.vchSeed.size());
 
+    // Select which chain we are using depending on if this is a change address or not
     uint32_t& nChildIndex = internal ? hdChain.nInternalChainCounter : hdChain.nExternalChainCounter;
 
     do {
@@ -1589,6 +1590,11 @@ bool CWallet::SetHDChain(const CHDChain& chain, bool memonly)
 bool CWallet::IsHDEnabled() const
 {
     return !hdChain.seed_id.IsNull();
+}
+
+bool CWallet::IsBip44Enabled() const
+{
+    return IsHDEnabled() && hdChain.bUse_bip44;
 }
 
 int64_t CWalletTx::GetTxTime() const

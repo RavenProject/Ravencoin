@@ -71,6 +71,12 @@ public:
 #endif // ENABLE_WALLET
     bool enableWallet;
 
+    enum {
+        HD_DISABLED = 0,
+        HD_ENABLED = 1,
+        HD44_ENABLED = 2
+    };
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);

@@ -1572,7 +1572,16 @@ bool RavenGUI::handlePaymentRequest(const SendCoinsRecipient& recipient)
 
 void RavenGUI::setHDStatus(int hdEnabled)
 {
-    labelWalletHDStatusIcon->setPixmap(platformStyle->SingleColorIcon(hdEnabled ? ":/icons/hd_enabled" : ":/icons/hd_disabled").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    QString icon = "";
+    if (hdEnabled == HD_DISABLED) {
+        icon = ":/icons/hd_disabled";
+    } else if (hdEnabled == HD_ENABLED) {
+        icon = ":/icons/hd_enabled";
+    } else if (hdEnabled == HD44_ENABLED) {
+        icon = ":/icons/hd_enabled_44";
+    }
+
+    labelWalletHDStatusIcon->setPixmap(platformStyle->SingleColorIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     labelWalletHDStatusIcon->setToolTip(hdEnabled ? tr("HD key generation is <b>enabled</b>") : tr("HD key generation is <b>disabled</b>"));
 
     // eventually disable the QLabel to set its opacity to 50%

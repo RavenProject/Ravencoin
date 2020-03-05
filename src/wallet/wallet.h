@@ -1198,7 +1198,11 @@ public:
     /* Returns true if HD is enabled */
     bool IsHDEnabled() const;
 
-     /* Generates a new HD seed (will not be activated) */
+    /* Returns true if HD is enabled with Bip44 */
+    bool IsBip44Enabled() const;
+
+
+    /* Generates a new HD seed (will not be activated) */
     CPubKey GenerateNewSeed();
     
     /* Derives a new HD seed (will not be activated) */
