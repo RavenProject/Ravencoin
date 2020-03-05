@@ -228,6 +228,8 @@ RAVEN_CORE_H = \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/walletdb.h \
+  wallet/bip39.h \
+  wallet/bip39_english.h \
   warnings.h \
   zmq/zmqabstractnotifier.h \
   zmq/zmqconfig.h\
@@ -322,6 +324,7 @@ libraven_wallet_a_SOURCES = \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \
   wallet/walletdb.cpp \
+  wallet/bip39.cpp \
   $(RAVEN_CORE_H)
 
 # crypto primitives library
