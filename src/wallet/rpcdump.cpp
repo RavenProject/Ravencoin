@@ -659,13 +659,19 @@ UniValue dumpwallet(const JSONRPCRequest& request)
     CKeyID seed_id = pwallet->GetHDChain().seed_id;
     if (!seed_id.IsNull())
     {
-		CExtKey masterKey;
-		masterKey.SetSeed(&pwallet->GetHDChain().vchSeed[0], pwallet->GetHDChain().vchSeed.size());
 
-		CRavenExtKey b58extkey;
-		b58extkey.SetKey(masterKey);
+        if (!pwallet->GetHDChain().IsBip44()) {
+            CKey seed;
+            if (pwallet->GetKey(seed_id, seed)) {
+                CExtKey masterKey;
+                masterKey.SetSeed(seed.begin(), seed.size());
 
-		file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+                CRavenExtKey b58extkey;
+                b58extkey.SetKey(masterKey);
+
+                file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+            }
+        }
 
 		if(pwallet->GetHDChain().IsBip44())
 		{
@@ -673,12 +679,20 @@ UniValue dumpwallet(const JSONRPCRequest& request)
 
             std::vector<unsigned char> vchWords;
             std::vector<unsigned char> vchPassphrase;
+            std::vector<unsigned char> vchSeed;
             uint256 hash;
 
-            pwallet->GetBip39Data(hash, vchWords, vchPassphrase);
+            pwallet->GetBip39Data(hash, vchWords, vchPassphrase, vchSeed);
 
-			//hdChainCurrent.GetMnemonic(ssMnemonic, ssMnemonicPassphrase);
-			file << "# HD seed: " << HexStr(pwallet->GetHDChain().vchSeed) << "\n";
+            CExtKey masterKey;
+            masterKey.SetSeed(vchSeed.data(), vchSeed.size());
+
+            CRavenExtKey b58extkey;
+            b58extkey.SetKey(masterKey);
+
+            file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+
+			file << "# HD seed: " << HexStr(vchSeed) << "\n";
 			file << "# mnemonic: " << std::string(vchWords.begin(), vchWords.end()).c_str() << "\n";
 			file << "# mnemonic passphrase: " << std::string(vchPassphrase.begin(), vchPassphrase.end()).c_str() << "\n";
 			file << "# hash of words: " << hash.GetHex() << "\n\n";

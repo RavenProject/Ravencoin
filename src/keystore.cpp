@@ -129,10 +129,18 @@ bool CBasicKeyStore::AddPassphrase(const std::vector<unsigned char>& p_vchPassph
     return true;
 }
 
-void CBasicKeyStore::GetBip39Data(uint256& p_hash, std::vector<unsigned char>& p_vchWords, std::vector<unsigned char>& p_vchPassphrase)
+void CBasicKeyStore::GetBip39Data(uint256& p_hash, std::vector<unsigned char>& p_vchWords, std::vector<unsigned char>& p_vchPassphrase, std::vector<unsigned char>& p_vchSeed)
 {
     LOCK(cs_KeyStore);
     p_hash = nWordHash;
     p_vchWords = vchWords;
     p_vchPassphrase = vchPassphrase;
+    p_vchSeed = g_vchSeed;
+}
+
+bool CBasicKeyStore::AddVchSeed(const std::vector<unsigned char>& p_vchSeed)
+{
+    LOCK(cs_KeyStore);
+    g_vchSeed = p_vchSeed;
+    return true;
 }

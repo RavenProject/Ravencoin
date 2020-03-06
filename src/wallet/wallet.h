@@ -933,9 +933,11 @@ public:
     bool LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     bool LoadCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords);
     bool LoadCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase);
+    bool LoadCryptedVchSeed(const std::vector<unsigned char> &vchCryptedVchSeed);
     bool LoadWords(const uint256& hash, const std::vector<unsigned char> &vchWords);
-    void GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase);
+    void GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase, std::vector<unsigned char>& vchSeed);
     bool LoadPassphrase(const std::vector<unsigned char> &vchPassphrase);
+    bool LoadVchSeed(const std::vector<unsigned char> &vchSeed);
     bool AddCScript(const CScript& redeemScript) override;
     bool LoadCScript(const CScript& redeemScript);
 
