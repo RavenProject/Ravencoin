@@ -538,6 +538,17 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
                 return false;
             }
         }
+        else if (strType == "cbip39vchseed")
+        {
+            std::vector<unsigned char> vchSeed;
+            ssValue >> vchSeed;
+
+            if (!pwallet->LoadCryptedVchSeed(vchSeed))
+            {
+                strErr = "Error reading wallet database: LoadCryptedVchSeed failed";
+                return false;
+            }
+        }
         else if (strType == "bip39words")
         {
             std::pair<uint256,std::vector<unsigned char> > valuePair;
@@ -557,6 +568,17 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             if (!pwallet->LoadPassphrase(vchPassphrase))
             {
                 strErr = "Error reading wallet database: LoadPassphrase failed";
+                return false;
+            }
+        }
+        else if (strType == "bip39vchseed")
+        {
+            std::vector<unsigned char> vchSeed;
+            ssValue >> vchSeed;
+
+            if (!pwallet->LoadVchSeed(vchSeed))
+            {
+                strErr = "Error reading wallet database: LoadVchSeed failed";
                 return false;
             }
         }
@@ -621,6 +643,7 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
                     result = DB_CORRUPT;
                 else
                 {
+                    LogPrintf("DB failed to Read Key Value. Type: %s, Error: %s\n", strType, strErr);
                     // Leave other errors alone, if we try to fix them we might make things worse.
                     fNoncriticalErrors = true; // ... but do warn the user there is something wrong.
                     if (strType == "tx") {
@@ -895,6 +918,13 @@ bool CWalletDB::WriteBip39Passphrase(const std::vector<unsigned char>& vchPassph
     return WriteIC(key, vchPassphrase, true);
 }
 
+bool CWalletDB::WriteBip39VchSeed(const std::vector<unsigned char>& vchSeed,  bool fEncrypted)
+{
+    std::string key = fEncrypted ? "c" : "";
+    key.append("bip39vchseed");
+    return WriteIC(key, vchSeed, true);
+}
+
 bool CWalletDB::ReadBip39Words(uint256& hash, std::vector<unsigned char>& vchWords,  bool fEncrypted)
 {
     std::string key = fEncrypted ? "c" : "";
@@ -915,6 +945,13 @@ bool CWalletDB::ReadBip39Passphrase(std::vector<unsigned char>& vchPassphrase,  
     return batch.Read(key, vchPassphrase);
 }
 
+bool CWalletDB::ReadBip39VchSeed(std::vector<unsigned char>& vchSeed,  bool fEncrypted)
+{
+    std::string key = fEncrypted ? "c" : "";
+    key.append("bip39vchseed");
+    return batch.Read(key, vchSeed);
+}
+
 bool CWalletDB::EraseBip39Words(bool fEncrypted)
 {
     std::string key = fEncrypted ? "c" : "";
@@ -926,6 +963,13 @@ bool CWalletDB::EraseBip39Passphrase(bool fEncrypted)
 {
     std::string key = fEncrypted ? "c" : "";
     key.append("bip39passphrase");
+    return EraseIC(key);
+}
+
+bool CWalletDB::EraseBip39VchSeed(bool fEncrypted)
+{
+    std::string key = fEncrypted ? "c" : "";
+    key.append("bip39vchseed");
     return EraseIC(key);
 }
 
@@ -968,10 +1012,15 @@ void CHDChain::SetSeedFromSeedId()
 {
     // try to get the seed
 	CKey seed;
-    if (!pwallet || !pwallet->GetKey(seed_id, seed))
-        throw std::runtime_error(std::string(__func__) + ": seed not found");
+	if (pwallet && !pwallet->IsLocked()) {
+        if (!pwallet->GetKey(seed_id, seed)) {
+            throw std::runtime_error(std::string(__func__) + ": seed not found");
+        }
+        vchSeed = SecureVector(seed.begin(), seed.end());
+	}
 
-    vchSeed = SecureVector(seed.begin(), seed.end());
+	if (!pwallet)
+        throw std::runtime_error(std::string(__func__) + ": wallet not found");
 }
 
 bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, SecureVector& vchSeed)

@@ -88,26 +88,16 @@ public:
         READWRITE(this->nVersion);
         READWRITE(nExternalChainCounter);
         READWRITE(seed_id);
-        if (this->nVersion >= VERSION_HD_CHAIN_SPLIT)
+        if (this->nVersion >= VERSION_HD_CHAIN_SPLIT) {
             READWRITE(nInternalChainCounter);
+        }
 
-        if(VERSION_HD_BIP44_BIP39 == nVersion) {
+        if(VERSION_HD_BIP44_BIP39 == this->nVersion) {
             READWRITE(bUse_bip44);
-            READWRITE(vchSeed);
         }
-        else
-        {
-        	// when loading an old bip32 only wallet, get vchSeed from seed_id
-        	if(ser_action.ForRead())
-        	{
-        		SetSeedFromSeedId();
-        	}
-        }
-
     }
 
     void SetSeedFromSeedId();
-
 
     void SetNull()
     {
@@ -115,6 +105,7 @@ public:
         nExternalChainCounter = 0;
         nInternalChainCounter = 0;
         seed_id.SetNull();
+        bUse_bip44 = false;
     }
 
     bool IsNull() { return seed_id.IsNull();}
@@ -283,10 +274,13 @@ public:
 
     bool WriteBip39Words(const uint256& hash, const std::vector<unsigned char>& vchWords, bool fEncrypted);
     bool WriteBip39Passphrase(const std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool WriteBip39VchSeed(const std::vector<unsigned char>& vchSeed,  bool fEncrypted);
     bool ReadBip39Words(uint256& hash, std::vector<unsigned char>& vchWords, bool fEncrypted);
     bool ReadBip39Passphrase(std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool ReadBip39VchSeed(std::vector<unsigned char>& vchSeed,  bool fEncrypted);
     bool EraseBip39Words(bool fEncrypted);
     bool EraseBip39Passphrase(bool fEncrypted);
+    bool EraseBip39VchSeed(bool fEncrypted);
 private:
     CDB batch;
     CWalletDBWrapper& m_dbw;

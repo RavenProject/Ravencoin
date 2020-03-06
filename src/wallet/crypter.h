@@ -141,6 +141,7 @@ protected:
 
     std::vector<unsigned char> vchCryptedBip39Words;
     std::vector<unsigned char> vchCryptedBip39Passphrase;
+    std::vector<unsigned char> vchCryptedBip39VchSeed;
 
 public:
     CCryptoKeyStore() : fUseCrypto(false), fDecryptionThoroughlyChecked(false)
@@ -169,6 +170,7 @@ public:
     virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     virtual bool AddCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords);
     virtual bool AddCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase);
+    virtual bool AddCryptedVchSeed(const std::vector<unsigned char> &vchCryptedVchSeed);
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;
     bool HaveKey(const CKeyID &address) const override
     {
