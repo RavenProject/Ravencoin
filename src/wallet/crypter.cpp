@@ -195,7 +195,7 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
             if (fDecryptionThoroughlyChecked)
                 break;
         }
-        if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size()) {
+        if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size() || vchCryptedBip39VchSeed.size()) {
             if (!DecryptBip39(vMasterKeyIn)) {
                 LogPrintf("Failed to decrypt bip 39 data");
                 assert(false);
@@ -253,16 +253,19 @@ bool CCryptoKeyStore::GetKey(const CKeyID &address, CKey& keyOut) const
 {
     {
         LOCK(cs_KeyStore);
-        if (!IsCrypted())
+        if (!IsCrypted()) {
             return CBasicKeyStore::GetKey(address, keyOut);
+        }
 
         CryptedKeyMap::const_iterator mi = mapCryptedKeys.find(address);
+
         if (mi != mapCryptedKeys.end())
         {
             const CPubKey &vchPubKey = (*mi).second.first;
             const std::vector<unsigned char> &vchCryptedSecret = (*mi).second.second;
             return DecryptKey(vMasterKey, vchCryptedSecret, vchPubKey, keyOut);
         }
+
     }
     return false;
 }
@@ -334,6 +337,18 @@ bool CCryptoKeyStore::AddCryptedPassphrase(const std::vector<unsigned char> &vch
     return true;
 }
 
+bool CCryptoKeyStore::AddCryptedVchSeed(const std::vector<unsigned char> &vchCryptedVchSeed)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!SetCrypted())
+            return false;
+
+        vchCryptedBip39VchSeed = vchCryptedVchSeed;
+    }
+    return true;
+}
+
 bool CCryptoKeyStore::EncryptBip39(CKeyingMaterial& vMasterKeyIn)
 {
     {
@@ -342,6 +357,15 @@ bool CCryptoKeyStore::EncryptBip39(CKeyingMaterial& vMasterKeyIn)
         CKeyingMaterial vchSecretWords(vchWords.begin(), vchWords.end());
         if (!EncryptSecret(vMasterKeyIn, vchSecretWords, nWordHash, vchCryptedBip39Words))
             return false;
+
+        CKeyingMaterial vchSecretVchSeed(g_vchSeed.begin(), g_vchSeed.end());
+        if (!EncryptSecret(vMasterKeyIn, vchSecretVchSeed, nWordHash, vchCryptedBip39VchSeed))
+            return false;
+
+        CKeyingMaterial vchDecryptedVchSeed;
+        if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39VchSeed, nWordHash, vchDecryptedVchSeed)) {
+            return false;
+        }
 
         if (!vchPassphrase.empty()) {
             CKeyingMaterial vchSecretPassphrase(vchPassphrase.begin(), vchPassphrase.end());
@@ -368,6 +392,13 @@ bool CCryptoKeyStore::DecryptBip39(const CKeyingMaterial& vMasterKeyIn)
         }
 
         vchWords = std::vector<unsigned char>(vchDecryptedWords.begin(), vchDecryptedWords.end());
+
+        CKeyingMaterial vchDecryptedVchSeed;
+        if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39VchSeed, nWordHash, vchDecryptedVchSeed)) {
+            return false;
+        }
+
+        g_vchSeed = std::vector<unsigned char>(vchDecryptedVchSeed.begin(), vchDecryptedVchSeed.end());
 
         if (!vchCryptedBip39Passphrase.empty()) {
             CKeyingMaterial vchDecryptedPassphrase;

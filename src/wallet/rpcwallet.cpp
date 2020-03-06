@@ -162,9 +162,10 @@ UniValue getmywords(const JSONRPCRequest& request)
 
     std::vector<unsigned char> vchWords;
     std::vector<unsigned char> vchPassphrase;
+    std::vector<unsigned char> vchSeed;
     uint256 hash;
 
-    pwallet->GetBip39Data(hash, vchWords, vchPassphrase);
+    pwallet->GetBip39Data(hash, vchWords, vchPassphrase, vchSeed);
 
     UniValue ret(UniValue::VOBJ);
 
