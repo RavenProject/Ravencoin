@@ -381,6 +381,10 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, use_term_control, j
 
     tests_dir = src_dir + '/test/functional/'
 
+    # limit number of jobs to 13
+    if jobs > 13:
+        jobs = 13
+        print("Jobs limited to 13 threads max.")
     print("Using: ", jobs, " threads")
 
     flags = ["--srcdir={}/src".format(build_dir)] + args
