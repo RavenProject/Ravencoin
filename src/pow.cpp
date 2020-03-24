@@ -19,8 +19,8 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     assert(pindexLast != nullptr);
 
-    unsigned int nProofOfWorkLimit = pblock->nTime > nKAWPOWActivationTime ? UintToArith256(params.kawpowLimit).GetCompact() : UintToArith256(params.powLimit).GetCompact();
-    const arith_uint256 bnPowLimit = pblock->nTime > nKAWPOWActivationTime ? UintToArith256(params.kawpowLimit) : UintToArith256(params.powLimit);
+    unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
+    const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     int64_t nPastBlocks = 180; // ~3hr
 
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
@@ -47,6 +47,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     const CBlockIndex *pindex = pindexLast;
     arith_uint256 bnPastTargetAvg;
 
+    int nKAWPOWBlocksFound = 0;
     for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
         arith_uint256 bnTarget = arith_uint256().SetCompact(pindex->nBits);
         if (nCountBlocks == 1) {
@@ -56,9 +57,25 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
             bnPastTargetAvg = (bnPastTargetAvg * nCountBlocks + bnTarget) / (nCountBlocks + 1);
         }
 
+        // Count how blocks are KAWPOW mined in the last 180 blocks
+        if (pindex->nTime >= nKAWPOWActivationTime) {
+            nKAWPOWBlocksFound++;
+        }
+
         if(nCountBlocks != nPastBlocks) {
             assert(pindex->pprev); // should never fail
             pindex = pindex->pprev;
+        }
+    }
+
+    // If we are mining a KAWPOW block. We check to see if we have mined
+    // 180 KAWPOW blocks already. If we haven't we are going to return our
+    // temp limit. This will allow us to change algos to kawpow without having to
+    // change the DGW math.
+    if (pblock->nTime >= nKAWPOWActivationTime) {
+        if (nKAWPOWBlocksFound != nPastBlocks) {
+            const arith_uint256 bnKawPowLimit = UintToArith256(params.kawpowLimit);
+            return bnKawPowLimit.GetCompact();
         }
     }
 
@@ -122,19 +139,17 @@ unsigned int GetNextWorkRequiredBTC(const CBlockIndex* pindexLast, const CBlockH
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
-    int dgw = DarkGravityWave(pindexLast, pblock, params);
-    int btc = GetNextWorkRequiredBTC(pindexLast, pblock, params);
 //    int64_t nPrevBlockTime = (pindexLast->pprev ? pindexLast->pprev->GetBlockTime() : pindexLast->GetBlockTime());  //<- Commented out - fixes "not used" warning
 
     if (IsDGWActive(pindexLast->nHeight + 1)) {
 //        LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using DGW: [%s] (BTC would have been [%s]\t(%+d)\t(%0.3f%%)\t(%s sec))\n",
 //                 pindexLast->nHeight + 1, pblock->nVersion, dgw, btc, btc - dgw, (float)(btc - dgw) * 100.0 / (float)dgw, pindexLast->GetBlockTime() - nPrevBlockTime);
-        return dgw;
+        return DarkGravityWave(pindexLast, pblock, params);
     }
     else {
 //        LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using BTC: [%s] (DGW would have been [%s]\t(%+d)\t(%0.3f%%)\t(%s sec))\n",
 //                  pindexLast->nHeight + 1, pblock->nVersion, btc, dgw, dgw - btc, (float)(dgw - btc) * 100.0 / (float)btc, pindexLast->GetBlockTime() - nPrevBlockTime);
-        return btc;
+        return GetNextWorkRequiredBTC(pindexLast, pblock, params);
     }
 
 }

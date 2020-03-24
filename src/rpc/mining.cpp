@@ -714,7 +714,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         result.push_back(Pair("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end())));
     }
 
-    if (pblock->nTime > nKAWPOWActivationTime) {
+    if (pblock->nTime >= nKAWPOWActivationTime) {
         std::string address = gArgs.GetArg("-miningaddress", "");
         if (IsValidDestinationString(address)) {
             static std::string lastheader = "";
