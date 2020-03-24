@@ -1,0 +1,148 @@
+# Docker
+# Build a Docker image 
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- none
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build Docker Images
+
+  jobs:  
+  - job: Build_amd64_image
+    displayName: Build amd64 image
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DownloadGitHubRelease@0
+      inputs:
+        connection: 'github.com_cfrogjump'
+        userRepository: 'RavenProject/Ravencoin'
+        defaultVersionType: 'latest'
+        itemPattern: 'raven-*-*-linux*'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    - task: Bash@3
+      displayName: Figure out the environment
+      inputs:
+        targetType: 'inline'
+        script: |
+          env | sort
+          
+          echo ""
+          
+          echo "System.ArtifactsDirectory"
+          ls $(System.ArtifactsDirectory)
+          
+          echo ""
+          echo "Where am I?"
+          pwd
+          echo ""
+          
+          echo "Ravencoin"
+          ls Ravencoin
+          echo ""
+    - task: Bash@3
+      displayName: Setup Environment
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd ${RELEASE_PRIMARYARTIFACTSOURCEALIAS}
+          
+          mkdir linux64
+          
+          echo "Installing build dependencies"
+          bash -x .github/scripts/01-update-docker.sh
+          echo ""
+    - task: Bash@3
+      displayName: Setup amd64 Build
+      inputs:
+        targetType: 'inline'
+        script: |
+          release_version=$(curl --silent https://api.github.com/repos/ravenproject/ravencoin/releases/latest | jq .tag_name | sed 's/\"//g' | tr -d "v").0
+          
+          echo "Release Version: ${release_version}"
+          echo ""
+          echo "Checksum release"
+          if [[ -e raven-${release_version}-x86_64-linux-gnu.tar.gz ]]; then
+            sha256sum -c raven-${release_version}-x86_64-linux-gnu.tar.gz.sha256sum
+            echo ""
+            if [[ $? == 0 ]]; then
+              echo "Extracting the release"
+              tar zxvf raven-${release_version}-x86_64-linux-gnu.tar.gz
+              mv raven-${release_version}/bin/* ${RELEASE_PRIMARYARTIFACTSOURCEALIAS}/linux64/
+            fi
+          else
+            echo "Unable to find raven-${release_version}-x86_64-linux-gnu.tar.gz. $?"
+          fi
+          
+          echo ""
+          echo "Hell yeah!"
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'dockerhub_cadecall'
+        repository: 'ravenproject/ravend'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile.amd64'
+        tags: 'amd64-$(Build.BuildNumber)'
+
+  - job: Build_arm32v7_image
+    displayName: Build arm32v7 image
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DownloadGitHubRelease@0
+      inputs:
+        connection: 'github.com_cfrogjump'
+        userRepository: 'RavenProject/Ravencoin'
+        defaultVersionType: 'latest'
+        itemPattern: 'raven-*-*-linux*'
+        downloadPath: '$(System.ArtifactsDirectory)'
+    - task: Bash@3
+      displayName: Setup Environment
+      inputs:
+        targetType: 'inline'
+        script: |
+          cd ${RELEASE_PRIMARYARTIFACTSOURCEALIAS}
+          
+          mkdir linux64
+          
+          echo "Installing build dependencies"
+          bash -x .github/scripts/01-update-docker.sh
+          echo ""
+    - task: Bash@3
+      inputs:
+        targetType: 'inline'
+        script: |
+          release_version=$(curl --silent https://api.github.com/repos/ravenproject/ravencoin/releases/latest | jq .tag_name | sed 's/\"//g' | tr -d "v").0
+          
+          echo "Release Version: ${release_version}"
+          echo ""
+          echo "Checksum release"
+          if [[ -e raven-${release_version}-arm-linux-gnueabihf.tar.gz ]]; then
+            sha256sum -c raven-${release_version}arm-linux-gnueabihf.tar.gz.sha256sum
+            echo ""
+            if [[ $? == 0 ]]; then
+              echo "Extracting the release"
+              tar zxvf raven-${release_version}-arm-linux-gnueabihf.tar.gz
+              mv raven-${release_version}/bin/* ${RELEASE_PRIMARYARTIFACTSOURCEALIAS}/linux64/
+            fi
+          else
+            echo "Unable to find raven-${release_version}-arm-linux-gnueabihf.tar.gz. $?"
+          fi
+          
+          echo ""
+          echo "Hell yeah!"
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'dockerhub_cadecall'
+        repository: 'ravenproject/ravend'
+        command: 'buildAndPush'
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile.arm32v7'
+        tags: 'arm32v7-$(Build.BuildNumber)'
