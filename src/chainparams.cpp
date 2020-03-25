@@ -124,6 +124,7 @@ public:
         consensus.nSegwitEnabled = true;
         consensus.nCSVEnabled = true;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.kawpowLimit = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
         consensus.nPowTargetSpacing = 1 * 60;
 		consensus.fPowAllowMinDifficultyBlocks = false;
@@ -246,6 +247,9 @@ public:
         nAssetActivationHeight = 435456; // Asset activated block height
         nMessagingActivationBlock = 0; // Messaging activated block height // TODO after messaging goes active on mainnet
         nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on mainnet
+
+        nKAAAWWWPOWActivationTime = 4294967295;
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
 };
@@ -265,6 +269,7 @@ public:
         consensus.nCSVEnabled = true;
 
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.kawpowLimit = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
         consensus.nPowTargetSpacing = 1 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -396,7 +401,8 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                { 225, uint256S("0x000003465e3e0167322eb8269ce91246bbc211e293bc5fbf6f0a0d12c1ccb363")},
+                    { 225, uint256S("0x000003465e3e0167322eb8269ce91246bbc211e293bc5fbf6f0a0d12c1ccb363")},
+                    {223408, uint256S("0x000000012a0c09dd6456ab19018cc458648dec762b04f4ddf8ef8108eae69db9")},
             }
         };
 
@@ -445,6 +451,9 @@ public:
         nAssetActivationHeight = 0; // Asset activated block height
         nMessagingActivationBlock = 0; // Messaging activated block height
         nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on testnet
+
+        nKAAAWWWPOWActivationTime = 1585159200; //Wed Mar 25 2020 18:00:00 UTC
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
 };
@@ -463,6 +472,7 @@ public:
         consensus.nCSVEnabled = true;
         consensus.nSubsidyHalvingInterval = 150;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.kawpowLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
         consensus.nPowTargetSpacing = 1 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -628,6 +638,9 @@ public:
         nAssetActivationHeight = 0; // Asset activated block height
         nMessagingActivationBlock = 0; // Messaging activated block height
         nRestrictedActivationBlock = 0; // Restricted activated block height
+
+        nKAAAWWWPOWActivationTime = 1582830167;
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
 };

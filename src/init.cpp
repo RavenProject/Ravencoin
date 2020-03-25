@@ -411,6 +411,16 @@ std::string HelpMessage(HelpMessageMode mode)
     const auto testnetBaseParams = CreateBaseChainParams(CBaseChainParams::TESTNET);
     const auto defaultChainParams = CreateChainParams(CBaseChainParams::MAIN);
     const auto testnetChainParams = CreateChainParams(CBaseChainParams::TESTNET);
+
+    // We want to make sure to set the correct values after we get the help values
+    if (bNetwork.fOnRegtest) {
+        CreateChainParams(CBaseChainParams::REGTEST);
+    } else if (bNetwork.fOnTestnet) {
+        CreateChainParams(CBaseChainParams::TESTNET);
+    } else {
+        CreateChainParams(CBaseChainParams::MAIN);
+    }
+
     const bool showDebug = gArgs.GetBoolArg("-help-debug", false);
 
     // When adding new options to the categories, please keep and ensure alphabetical ordering.
