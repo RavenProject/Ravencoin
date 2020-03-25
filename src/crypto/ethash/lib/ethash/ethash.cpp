@@ -24,7 +24,7 @@ constexpr static int light_cache_growth = 1 << 17;
 constexpr static int light_cache_rounds = 3;
 constexpr static int full_dataset_init_size = 1 << 30;
 constexpr static int full_dataset_growth = 1 << 23;
-constexpr static int full_dataset_item_parents = 256;
+constexpr static int full_dataset_item_parents = 512;
 
 // Verify constants:
 static_assert(sizeof(hash512) == ETHASH_LIGHT_CACHE_ITEM_SIZE, "");
