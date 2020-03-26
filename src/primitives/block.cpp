@@ -50,12 +50,11 @@ uint256 CBlockHeader::GetHash() const
 
         return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
     } else {
-        uint256 mix_hash;
-        return KAWPOWHash(*this, mix_hash);
+        return KAWPOWHash_OnlyMix(*this);
     }
 }
 
-uint256 CBlockHeader::GetHash(uint256& mix_hash) const
+uint256 CBlockHeader::GetHashFull(uint256& mix_hash) const
 {
     if (nTime < nKAWPOWActivationTime) {
         uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;
@@ -73,6 +72,7 @@ uint256 CBlockHeader::GetHash(uint256& mix_hash) const
         return KAWPOWHash(*this, mix_hash);
     }
 }
+
 
 
 

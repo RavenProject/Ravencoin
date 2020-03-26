@@ -35,6 +35,9 @@ result hash(const epoch_context_full& context, int block_number, const hash256& 
 bool verify(const epoch_context& context, int block_number, const hash256& header_hash,
     const hash256& mix_hash, uint64_t nonce, const hash256& boundary) noexcept;
 
+hash256 hash_no_verify(const int& block_number, const hash256& header_hash,
+    const hash256& mix_hash, const uint64_t& nonce) noexcept;
+
 search_result search_light(const epoch_context& context, int block_number,
     const hash256& header_hash, const hash256& boundary, uint64_t start_nonce,
     size_t iterations) noexcept;

@@ -634,7 +634,7 @@ void static RavenMiner(const CChainParams& chainparams)
                 uint256 mix_hash;
                 while (true)
                 {
-                    hash = pblock->GetHash(mix_hash);
+                    hash = pblock->GetHashFull(mix_hash);
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         pblock->mix_hash = mix_hash;

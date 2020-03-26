@@ -606,6 +606,7 @@ inline uint256 HashX16RV2(const T1 pbegin, const T1 pend, const uint256 PrevBloc
 }
 
 uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash);
+uint256 KAWPOWHash_OnlyMix(const CBlockHeader& blockHeader);
 
 
 #endif // RAVEN_HASH_H
