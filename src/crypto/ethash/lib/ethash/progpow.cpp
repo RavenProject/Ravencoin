@@ -494,6 +494,62 @@ bool verify(const epoch_context& context, int block_number, const hash256& heade
     return is_equal(expected_mix_hash, mix_hash);
 }
 
+
+hash256 hash_no_verify(const int& block_number, const hash256& header_hash,
+        const hash256& mix_hash, const uint64_t& nonce) noexcept
+{
+    uint32_t state2[8];
+
+    {
+        // Absorb phase for initial round of keccak
+
+        uint32_t state[25] = {0x0};     // Keccak's state
+
+        // 1st fill with header data (8 words)
+        for (int i = 0; i < 8; i++)
+            state[i] = header_hash.word32s[i];
+
+        // 2nd fill with nonce (2 words)
+        state[8] = nonce;
+        state[9] = nonce >> 32;
+
+        // 3rd apply ravencoin input constraints
+        for (int i = 10; i < 25; i++)
+            state[i] = ravencoin_kawpow[i-10];
+
+        keccak_progpow_64(state);
+
+        for (int i = 0; i < 8; i++)
+            state2[i] = state[i];
+    }
+
+    // Absorb phase for last round of keccak (256 bits)
+
+    uint32_t state[25] = {0x0};     // Keccak's state
+
+    // 1st initial 8 words of state are kept as carry-over from initial keccak
+    for (int i = 0; i < 8; i++)
+        state[i] = state2[i];
+
+    // 2nd subsequent 8 words are carried from digest/mix
+    for (int i = 8; i < 16; i++)
+        state[i] = mix_hash.word32s[i-8];
+
+    // 3rd apply ravencoin input constraints
+    for (int i = 16; i < 25; i++)
+        state[i] = ravencoin_kawpow[i - 16];
+
+    // Run keccak loop
+    keccak_progpow_256(state);
+
+    hash256 output;
+    for (int i = 0; i < 8; ++i)
+        output.word32s[i] = le::uint32(state[i]);
+
+    return output;
+}
+
+
 search_result search_light(const epoch_context& context, int block_number,
     const hash256& header_hash, const hash256& boundary, uint64_t start_nonce,
     size_t iterations) noexcept
