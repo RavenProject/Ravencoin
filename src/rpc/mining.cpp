@@ -137,7 +137,7 @@ UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGen
             IncrementExtraNonce(pblock, chainActive.Tip(), nExtraNonce);
         }
         uint256 mix_hash;
-        while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetHash(mix_hash), pblock->nBits,
+        while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetHashFull(mix_hash), pblock->nBits,
                                                                                       GetParams().GetConsensus())) {
             if (pblock->nTime < nKAWPOWActivationTime) {
                 ++pblock->nNonce;
@@ -877,7 +877,8 @@ static UniValue pprpcsb(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not start with a coinbase");
     }
 
-    if (!CheckProofOfWork(blockptr->GetHash(), blockptr->nBits, GetParams().GetConsensus()))
+    uint256 retMixHash;
+    if (!CheckProofOfWork(blockptr->GetHashFull(retMixHash), blockptr->nBits, GetParams().GetConsensus()))
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not solve the boundary");
 
 

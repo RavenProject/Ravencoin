@@ -277,4 +277,18 @@ uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash)
 }
 
 
+uint256 KAWPOWHash_OnlyMix(const CBlockHeader& blockHeader)
+{
+    // Build the header_hash
+    uint256 nHeaderHash = blockHeader.GetKAWPOWHeaderHash();
+    const auto header_hash = to_hash256(nHeaderHash.GetHex());
+
+    // ProgPow hash
+    const auto result = progpow::hash_no_verify(blockHeader.nHeight, header_hash, to_hash256(blockHeader.mix_hash.GetHex()), blockHeader.nNonce64);
+
+    return uint256S(to_hex(result));
+}
+
+
+
 
