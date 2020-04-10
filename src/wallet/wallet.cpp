@@ -2953,7 +2953,7 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
     CAmount nTotalLower = 0;
 
     random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
-
+    #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     for (const COutput &output : vCoins)
     {
         if (!output.fSpendable)
@@ -2976,8 +2976,6 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
         int nType = -1;
         bool fIsOwner = false;
         if (!coin.txout.scriptPubKey.IsAssetScript(nType, fIsOwner)) {
-            // TODO - Remove std::cout this before mainnet release
-            std::cout << "This shouldn't be occuring: Non Asset Script pub key made it to the SelectAssetsMinConf function call. Look into this!" << std::endl;
             continue;
         }
 
@@ -3043,6 +3041,8 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
         if (!coinLowestLarger || !coinLowestLargerAmount)
             return false;
         setCoinsRet.insert(coinLowestLarger.get());
+
+        #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
         nValueRet += coinLowestLargerAmount.get();
         return true;
     }

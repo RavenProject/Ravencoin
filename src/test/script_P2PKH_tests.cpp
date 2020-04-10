@@ -49,11 +49,15 @@ BOOST_FIXTURE_TEST_SUITE(script_P2PKH_tests, BasicTestingSetup)
         static const unsigned char missing2[] = {
                 OP_DUP, OP_HASH160, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
+
+        #pragma GCC diagnostic ignored "-Warray-bounds"
         BOOST_CHECK(!CScript(missing2, missing2 + sizeof(missing)).IsPayToPublicKeyHash());
 
         static const unsigned char tooshort[] = {
                 OP_DUP, OP_HASH160, 2, 0, 0, OP_EQUALVERIFY, OP_CHECKSIG
         };
+
+        #pragma GCC diagnostic ignored "-Warray-bounds"
         BOOST_CHECK(!CScript(tooshort, tooshort + sizeof(direct)).IsPayToPublicKeyHash());
 
     }

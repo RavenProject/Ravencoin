@@ -439,9 +439,7 @@ void OverviewPage::handleAssetClicked(const QModelIndex &index)
 {
     if(assetFilter) {
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
-        bool fOwner = false;
         if (IsAssetNameAnOwner(name.toStdString())) {
-            fOwner = true;
             name = name.left(name.size() - 1);
             sendAction->setDisabled(true);
         } else {

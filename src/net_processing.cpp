@@ -660,7 +660,6 @@ bool AddOrphanTx(const CTransactionRef& tx, NodeId peer) EXCLUSIVE_LOCKS_REQUIRE
     assert(ret.second);
     for (const CTxIn& txin : tx->vin)
     {
-#pragma GCC diagnostic ignored "-Wuser-defined-warnings"
         mapOrphanTransactionsByPrev[txin.prevout].insert(ret.first);
     }
 
@@ -1239,7 +1238,7 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
                 continue;
             }
 
-            bool push = false;
+            UNUSED_VAR bool push = false;
             auto currentActiveAssetCache = GetCurrentAssetCache();
             if (currentActiveAssetCache) {
                 CNewAsset asset;
