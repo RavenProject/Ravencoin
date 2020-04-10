@@ -779,17 +779,9 @@ static UniValue getkawpowhash(const JSONRPCRequest& request) {
     std::string hex_nonce = request.params[2].get_str();
     uint32_t nHeight = request.params[3].get_uint();
 
-    char *str, *end;
     uint64_t nNonce;
-    errno = 0;
-    nNonce = strtoull(hex_nonce.c_str(), &end, 16);
-    if (nNonce == 0 && end == str) {
-        throw JSONRPCError(RPC_INVALID_PARAMS, "Nonce wasn't a string");
-    } else if (nNonce == ULLONG_MAX && errno) {
-        throw JSONRPCError(RPC_INVALID_PARAMS, "Hex value was out of range");
-    } else if (*end) {
-        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid hex string");
-    }
+    if (!ParseUInt64(hex_nonce, &nNonce, 16))
+        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid nonce hex string");
 
     if (nHeight > (uint32_t)chainActive.Height() + 10)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
@@ -862,7 +854,9 @@ static UniValue pprpcsb(const JSONRPCRequest& request) {
     std::string mix_hash = request.params[1].get_str();
     std::string str_nonce = request.params[2].get_str();
 
-    uint64_t nonce = std::stoul(str_nonce, nullptr, 16);
+    uint64_t nonce;
+    if (!ParseUInt64(str_nonce, &nonce, 16))
+        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid hex nonce");
 
     if (!mapRVNKAWBlockTemplates.count(header_hash))
         throw JSONRPCError(RPC_INVALID_PARAMS, "Block header hash not found in block data");

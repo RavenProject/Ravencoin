@@ -84,13 +84,6 @@ bool ParseUInt32(const std::string& str, uint32_t *out);
 bool ParseInt64(const std::string& str, int64_t *out);
 
 /**
- * Convert string to unsigned 64-bit integer with strict parse error feedback.
- * @returns true if the entire string could be parsed as valid integer,
- *   false if not the entire string could be parsed or when overflow or underflow occurred.
- */
-bool ParseUInt64(const std::string& str, uint64_t *out);
-
-/**
  * Convert decimal string to unsigned 32-bit integer with strict parse error feedback.
  * @returns true if the entire string could be parsed as valid integer,
  *   false if not the entire string could be parsed or when overflow or underflow occurred.
@@ -102,7 +95,7 @@ bool ParseUInt32(const std::string& str, uint32_t *out);
  * @returns true if the entire string could be parsed as valid integer,
  *   false if not the entire string could be parsed or when overflow or underflow occurred.
  */
-bool ParseUInt64(const std::string& str, uint64_t *out);
+bool ParseUInt64(const std::string& str, uint64_t *out, int base = 10);
 
 /**
  * Convert string to double with strict parse error feedback.

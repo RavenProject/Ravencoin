@@ -42,7 +42,6 @@ BOOST_AUTO_TEST_CASE(kawpow_hash_empty)
 {
     auto& context = get_ethash_epoch_context_0();
 
-    printf("Starting block 1000 %u\n", GetTimeMillis());
     int count = 1000;
     ethash_result result;
     while (count > 0) {
@@ -52,7 +51,6 @@ BOOST_AUTO_TEST_CASE(kawpow_hash_empty)
 
     const auto mix_hex = "6e97b47b134fda0c7888802988e1a373affeb28bcd813b6e9a0fc669c935d03a";
     const auto final_hex = "e601a7257a70dc48fccc97a7330d704d776047623b92883d77111fb36870f3d1";
-    printf("Ending block 0 %u\n", GetTimeMillis());
     BOOST_CHECK_EQUAL(to_hex(result.mix_hash), mix_hex);
     BOOST_CHECK_EQUAL(to_hex(result.final_hash), final_hex);
 }
