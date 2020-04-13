@@ -514,6 +514,18 @@ BOOST_FIXTURE_TEST_SUITE(util_tests, BasicTestingSetup)
         BOOST_CHECK(!ParseUInt64("-2147483648", &n));
         BOOST_CHECK(!ParseUInt64("-9223372036854775808", &n));
         BOOST_CHECK(!ParseUInt64("-1234", &n));
+
+
+        // HEX Tests (base 16)
+        BOOST_CHECK(ParseUInt64("0x7FFFFFFFFFFFFFFF", &n, 16) && n == 9223372036854775807ULL);
+        BOOST_CHECK(ParseUInt64("0x8000000000000000", &n, 16) && n == 9223372036854775808ULL);
+        BOOST_CHECK(ParseUInt64("0xFFFFFFFFFFFFFFFF", &n, 16) && n == 18446744073709551615ULL);
+        BOOST_CHECK(ParseUInt64("0x04D2", nullptr, 16));
+        BOOST_CHECK(ParseUInt64("0x0", &n, 16) && n == 0LL);
+        BOOST_CHECK(ParseUInt64("0x04D2", &n, 16) && n == 1234LL);
+        BOOST_CHECK(ParseUInt64("0x7FFFFFFF", &n, 16) && n == 2147483647LL);
+        BOOST_CHECK(!ParseUInt64("9223372036854775807", &n, 16)); //no base 10 when base 16,
+
     }
 
     BOOST_AUTO_TEST_CASE(ParseDouble_test)

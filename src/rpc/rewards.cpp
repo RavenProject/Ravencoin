@@ -298,7 +298,6 @@ UniValue distributereward(const JSONRPCRequest& request) {
                 "4. \"gross_distribution_amount\"  (number, required) The amount of the distribution asset that will be split amongst all owners\n"
                 "5. \"exception_addresses\"        (string, optional) Ownership addresses that should be excluded\n"
                 "6. \"change_address\"             (string, optional) If the rewards can't be fully distributed. The change will be sent to this address\n"
-                "7. \"dry_run\"                    (bool, optional) If you would like to do a dry run of what the distribution would look like\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -359,11 +358,6 @@ UniValue distributereward(const JSONRPCRequest& request) {
         change_address = request.params[5].get_str();
         if (!change_address.empty() && !IsValidDestinationString(change_address))
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid change address: Use a valid RVN address"));
-    }
-
-    bool fDryRun = false;
-    if (request.params.size() > 6) {
-        fDryRun = request.params[6].get_bool();
     }
 
     AssetType ownershipAssetType;
@@ -495,7 +489,7 @@ static const CRPCCommand commands[] =
             {   "rewards",      "getsnapshotrequest",         &getsnapshotrequest,         {"asset_name", "block_height"}},
             {   "rewards",      "listsnapshotrequests",         &listsnapshotrequests,         {"asset_name", "block_height"}},
             {   "rewards",      "cancelsnapshotrequest",      &cancelsnapshotrequest,      {"asset_name", "block_height"}},
-            {   "rewards",      "distributereward",           &distributereward,           {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses", "change_address", "dry_run"}},
+            {   "rewards",      "distributereward",           &distributereward,           {"asset_name", "snapshot_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses", "change_address"}},
             {   "rewards",      "getdistributestatus",        &getdistributestatus,            {"asset_name", "block_height", "distribution_asset_name", "gross_distribution_amount", "exception_addresses"}}
     #endif
     };

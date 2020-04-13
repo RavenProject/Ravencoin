@@ -4,10 +4,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "versionbits.h"
 #include "primitives/block.h"
 
-#include "algo/hash_algos.h"
+#include <hash.h>
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 #include "crypto/common.h"
@@ -17,6 +16,7 @@ static const uint32_t MAINNET_X16RV2ACTIVATIONTIME = 1569945600;
 static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1567533600;
 static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
 
+uint32_t nKAWPOWActivationTime;
 
 BlockNetwork bNetwork = BlockNetwork();
 
@@ -37,18 +37,44 @@ void BlockNetwork::SetNetwork(const std::string& net)
 
 uint256 CBlockHeader::GetHash() const
 {
-    uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;
-    if (bNetwork.fOnTestnet) {
-        nTimeToUse = TESTNET_X16RV2ACTIVATIONTIME;
-    } else if (bNetwork.fOnRegtest) {
-        nTimeToUse = REGTEST_X16RV2ACTIVATIONTIME;
-    }
-    if (nTime >= nTimeToUse) {
-        return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
-    }
+    if (nTime < nKAWPOWActivationTime) {
+        uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;
+        if (bNetwork.fOnTestnet) {
+            nTimeToUse = TESTNET_X16RV2ACTIVATIONTIME;
+        } else if (bNetwork.fOnRegtest) {
+            nTimeToUse = REGTEST_X16RV2ACTIVATIONTIME;
+        }
+        if (nTime >= nTimeToUse) {
+            return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+        }
 
-    return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+        return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+    } else {
+        return KAWPOWHash_OnlyMix(*this);
+    }
 }
+
+uint256 CBlockHeader::GetHashFull(uint256& mix_hash) const
+{
+    if (nTime < nKAWPOWActivationTime) {
+        uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;
+        if (bNetwork.fOnTestnet) {
+            nTimeToUse = TESTNET_X16RV2ACTIVATIONTIME;
+        } else if (bNetwork.fOnRegtest) {
+            nTimeToUse = REGTEST_X16RV2ACTIVATIONTIME;
+        }
+        if (nTime >= nTimeToUse) {
+            return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+        }
+
+        return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
+    } else {
+        return KAWPOWHash(*this, mix_hash);
+    }
+}
+
+
+
 
 uint256 CBlockHeader::GetX16RHash() const
 {
@@ -60,15 +86,40 @@ uint256 CBlockHeader::GetX16RV2Hash() const
     return HashX16RV2(BEGIN(nVersion), END(nNonce), hashPrevBlock);
 }
 
+/**
+ * @brief This takes a block header, removes the nNonce64 and the mixHash. Then performs a serialized hash of it SHA256D.
+ * This will be used as the input to the KAAAWWWPOW hashing function
+ * @note Only to be called and used on KAAAWWWPOW block headers
+ */
+uint256 CBlockHeader::GetKAWPOWHeaderHash() const
+{
+    CKAWPOWInput input{*this};
+
+    return SerializeHash(input);
+}
+
+std::string CBlockHeader::ToString() const
+{
+    std::stringstream s;
+    s << strprintf("CBlock(ver=0x%08x, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, nNonce64=%u, nHeight=%u)\n",
+                   nVersion,
+                   hashPrevBlock.ToString(),
+                   hashMerkleRoot.ToString(),
+                   nTime, nBits, nNonce, nNonce64, nHeight);
+    return s.str();
+}
+
+
+
 std::string CBlock::ToString() const
 {
     std::stringstream s;
-    s << strprintf("CBlock(hash=%s, ver=0x%08x, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%u)\n",
+    s << strprintf("CBlock(hash=%s, ver=0x%08x, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, nNonce64=%u, vtx=%u)\n",
         GetHash().ToString(),
         nVersion,
         hashPrevBlock.ToString(),
         hashMerkleRoot.ToString(),
-        nTime, nBits, nNonce,
+        nTime, nBits, nNonce, nNonce64,
         vtx.size());
     for (const auto& tx : vtx) {
         s << "  " << tx->ToString() << "\n";

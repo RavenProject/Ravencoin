@@ -674,13 +674,23 @@ bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetT
     strAddress = EncodeDestination(destination);
 
     std::vector<unsigned char> vchTransferAsset;
-    vchTransferAsset.insert(vchTransferAsset.end(), scriptPubKey.begin() + 31, scriptPubKey.end());
+
+    if (AreTransferScriptsSizeDeployed()) {
+        // Before kawpow activation we used the hardcoded 31 to find the data
+        // This created a bug where large transfers scripts would fail to serialize.
+        // This fixes that issue (https://github.com/RavenProject/Ravencoin/issues/752)
+        // TODO, after the kawpow fork goes active, we should be able to remove this if/else statement and just use this line.
+        vchTransferAsset.insert(vchTransferAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    } else {
+        vchTransferAsset.insert(vchTransferAsset.end(), scriptPubKey.begin() + 31, scriptPubKey.end());
+    }
+
     CDataStream ssAsset(vchTransferAsset, SER_NETWORK, PROTOCOL_VERSION);
 
     try {
         ssAsset >> assetTransfer;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the transfer asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the transfer asset from the stream: %s", e.what());
         return false;
     }
 
@@ -705,7 +715,7 @@ bool AssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew, std::stri
     try {
         ssAsset >> assetNew;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the asset from the stream: %s", e.what());
         return false;
     }
 
@@ -730,7 +740,7 @@ bool MsgChannelAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew,
     try {
         ssAsset >> assetNew;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the msg channel asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the msg channel asset from the stream: %s", e.what());
         return false;
     }
 
@@ -755,7 +765,7 @@ bool QualifierAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew, 
     try {
         ssAsset >> assetNew;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the qualifier asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the qualifier asset from the stream: %s", e.what());
         return false;
     }
 
@@ -780,7 +790,7 @@ bool RestrictedAssetFromScript(const CScript& scriptPubKey, CNewAsset& assetNew,
     try {
         ssAsset >> assetNew;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the restricted asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the restricted asset from the stream: %s", e.what());
         return false;
     }
 
@@ -805,7 +815,7 @@ bool OwnerAssetFromScript(const CScript& scriptPubKey, std::string& assetName, s
     try {
         ssOwner >> assetName;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the owner asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the owner asset from the stream: %s", e.what());
         return false;
     }
 
@@ -830,7 +840,7 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
     try {
         ssReissue >> reissue;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the reissue asset from the stream: " << e.what() << std::endl;
+        error("Failed to get the reissue asset from the stream: %s", e.what());
         return false;
     }
 
@@ -855,7 +865,7 @@ bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& asse
     try {
         ssData >> assetData;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the asset tx data from the stream: " << e.what() << std::endl;
+        error("Failed to get the null asset tx data from the stream: %s", e.what());
         return false;
     }
 
@@ -875,7 +885,7 @@ bool GlobalAssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData
     try {
         ssData >> assetData;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the global restriction asset tx data from the stream: " << e.what() << std::endl;
+        error("Failed to get the global restriction asset tx data from the stream: %s", e.what());
         return false;
     }
 
@@ -895,7 +905,7 @@ bool AssetNullVerifierDataFromScript(const CScript& scriptPubKey, CNullAssetTxVe
     try {
         ssData >> verifierData;
     } catch(std::exception& e) {
-        std::cout << "Failed to get the verifier string from the stream: " << e.what() << std::endl;
+        error("Failed to get the verifier string from the stream: %s", e.what());
         return false;
     }
 

@@ -660,7 +660,6 @@ bool AddOrphanTx(const CTransactionRef& tx, NodeId peer) EXCLUSIVE_LOCKS_REQUIRE
     assert(ret.second);
     for (const CTxIn& txin : tx->vin)
     {
-#pragma GCC diagnostic ignored "-Wuser-defined-warnings"
         mapOrphanTransactionsByPrev[txin.prevout].insert(ret.first);
     }
 
@@ -1145,7 +1144,8 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         bool fPeerWantsWitness = State(pfrom->GetId())->fWantsCmpctWitness;
                         int nSendFlags = fPeerWantsWitness ? 0 : SERIALIZE_TRANSACTION_NO_WITNESS;
                         if (CanDirectFetch(consensusParams) && mi->second->nHeight >= chainActive.Height() - MAX_CMPCTBLOCK_DEPTH) {
-                            if ((fPeerWantsWitness || !fWitnessesPresentInARecentCompactBlock) && a_recent_compact_block && a_recent_compact_block->header.GetHash() == mi->second->GetBlockHash()) {
+                            if ((fPeerWantsWitness || !fWitnessesPresentInARecentCompactBlock) && a_recent_compact_block &&
+                                    a_recent_compact_block->header.GetHash() == mi->second->GetBlockHash()) {
                                 connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::CMPCTBLOCK, *a_recent_compact_block));
                             } else {
                                 CBlockHeaderAndShortTxIDs cmpctblock(*pblock, fPeerWantsWitness);
@@ -1238,7 +1238,7 @@ void static ProcessAssetGetData(CNode* pfrom, const Consensus::Params& consensus
                 continue;
             }
 
-            bool push = false;
+            UNUSED_VAR bool push = false;
             auto currentActiveAssetCache = GetCurrentAssetCache();
             if (currentActiveAssetCache) {
                 CNewAsset asset;
@@ -1333,7 +1333,7 @@ bool static ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::ve
             nodestate->nUnconnectingHeaders++;
             connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexBestHeader), uint256()));
             LogPrint(BCLog::NET, "received header %s: missing prev block %s, sending getheaders (%d) to end (peer=%d, nUnconnectingHeaders=%d)\n",
-                    headers[0].GetHash().ToString(),
+                     headers[0].GetHash().ToString(),
                     headers[0].hashPrevBlock.ToString(),
                     pindexBestHeader->nHeight,
                     pfrom->GetId(), nodestate->nUnconnectingHeaders);
@@ -1637,6 +1637,14 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             LogPrintf("peer=%d using obsolete version %i; disconnecting because peer isn't signalling protocol version for restricted and messaging assets\n", pfrom->GetId(), nVersion);
             connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                                                               strprintf("Version must be %d or greater", MESSAGING_RESTRICTED_ASSETS_VERSION)));
+            pfrom->fDisconnect = true;
+            return false;
+        }
+
+        if (AreTransferScriptsSizeDeployed() && nVersion < KAWPOW_VERSION) {
+            LogPrintf("peer=%d using obsolete version %i; disconnecting because peer isn't signalling protocol version for kawpow support\n", pfrom->GetId(), nVersion);
+            connman->PushMessage(pfrom, CNetMsgMaker(INIT_PROTO_VERSION).Make(NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                                                                              strprintf("Version must be %d or greater or equal to", KAWPOW_VERSION)));
             pfrom->fDisconnect = true;
             return false;
         }
@@ -2582,7 +2590,12 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 // process from some other peer.  We do this after calling
                 // ProcessNewBlock so that a malleated cmpctblock announcement
                 // can't be used to interfere with block relay.
-                MarkBlockAsReceived(pblock->GetHash());
+                if (pblock->fChecked) {
+                    MarkBlockAsReceived(pblock->GetHash());
+                } else {
+                    uint256 mix_hash;
+                    MarkBlockAsReceived(pblock->GetHashFull(mix_hash));
+                }
             }
         }
 
@@ -2658,7 +2671,12 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 pfrom->nLastBlockTime = GetTime();
             } else {
                 LOCK(cs_main);
-                mapBlockSource.erase(pblock->GetHash());
+                if (pblock->fChecked) {
+                    mapBlockSource.erase(pblock->GetHash());
+                } else {
+                    uint256 mix_hash;
+                    mapBlockSource.erase(pblock->GetHashFull(mix_hash));
+                }
             }
         }
     }
@@ -3446,7 +3464,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
                     // We only send up to 1 block as header-and-ids, as otherwise
                     // probably means we're doing an initial-ish-sync or they're slow
                     LogPrint(BCLog::NET, "%s sending header-and-ids %s to peer=%d\n", __func__,
-                            vHeaders.front().GetHash().ToString(), pto->GetId());
+                             vHeaders.front().GetHash().ToString(), pto->GetId());
 
                     int nSendFlags = state.fWantsCmpctWitness ? 0 : SERIALIZE_TRANSACTION_NO_WITNESS;
 
@@ -3474,12 +3492,12 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
                 } else if (state.fPreferHeaders) {
                     if (vHeaders.size() > 1) {
                         LogPrint(BCLog::NET, "%s: %u headers, range (%s, %s), to peer=%d\n", __func__,
-                                vHeaders.size(),
-                                vHeaders.front().GetHash().ToString(),
-                                vHeaders.back().GetHash().ToString(), pto->GetId());
+                                 vHeaders.size(),
+                                 vHeaders.front().GetHash().ToString(),
+                                 vHeaders.back().GetHash().ToString(), pto->GetId());
                     } else {
                         LogPrint(BCLog::NET, "%s: sending header %s to peer=%d\n", __func__,
-                                vHeaders.front().GetHash().ToString(), pto->GetId());
+                                 vHeaders.front().GetHash().ToString(), pto->GetId());
                     }
                     connman->PushMessage(pto, msgMaker.Make(NetMsgType::HEADERS, vHeaders));
                     state.pindexBestHeaderSent = pBestIndex;

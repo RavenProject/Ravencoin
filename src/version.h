@@ -10,6 +10,14 @@
  * network protocol versioning
  */
 
+// Update these four values on every release cycle
+// These values should match the values in configure.ac
+// Used for checking the Ravencoin releases on github
+static const std::string SOFTWARE_VERSION = "v4.0.0";
+static const int MAIN_SOFTWARE_VERSION = 4;
+static const int SECOND_SOFTWARE_VERSION = 0;
+static const int THIRD_SOFTWARE_VERSION = 0;
+
 static const int PROTOCOL_VERSION = 70026;
 
 //! initial proto version, to be increased after version/verack negotiation
@@ -23,6 +31,9 @@ static const int ASSETDATA_VERSION = 70017;
 
 //! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
 static const int X16RV2_VERSION = 70025;
+
+//! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
+static const int KAWPOW_VERSION = 70027;
 
 //! disconnect from peers older than this proto version
 //!!! Anytime this value is changed please also update the "MY_VERSION" value to match in the
@@ -56,5 +67,6 @@ static const int ASSETDATA_VERSION_UPDATED = 70020;
 
 //! In this version, 'rip5 (messaging and restricted assets)' was introduced
 static const int MESSAGING_RESTRICTED_ASSETS_VERSION = 70026;
+
 
 #endif // RAVEN_VERSION_H

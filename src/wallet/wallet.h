@@ -43,6 +43,9 @@ extern unsigned int nTxConfirmTarget;
 extern bool bSpendZeroConfChange;
 extern bool fWalletRbf;
 
+extern std::string my_words;
+extern std::string my_passphrase;
+
 static const unsigned int DEFAULT_KEYPOOL_SIZE = 1000;
 //! -paytxfee default
 static const CAmount DEFAULT_TRANSACTION_FEE = 0;
@@ -780,13 +783,13 @@ public:
     unsigned int nMasterKeyMaxID;
 
     // Create wallet with dummy database handle
-    CWallet(): dbw(new CWalletDBWrapper())
+    CWallet(): hdChain(this), dbw(new CWalletDBWrapper())
     {
         SetNull();
     }
 
     // Create wallet with passed-in database handle
-    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : dbw(std::move(dbw_in))
+    explicit CWallet(std::unique_ptr<CWalletDBWrapper> dbw_in) : hdChain(this), dbw(std::move(dbw_in))
     {
         SetNull();
     }
@@ -928,6 +931,13 @@ public:
     bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret) override;
     //! Adds an encrypted key to the store, without saving it to disk (used by LoadWallet)
     bool LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    bool LoadCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords);
+    bool LoadCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase);
+    bool LoadCryptedVchSeed(const std::vector<unsigned char> &vchCryptedVchSeed);
+    bool LoadWords(const uint256& hash, const std::vector<unsigned char> &vchWords);
+    void GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase, std::vector<unsigned char>& vchSeed);
+    bool LoadPassphrase(const std::vector<unsigned char> &vchPassphrase);
+    bool LoadVchSeed(const std::vector<unsigned char> &vchSeed);
     bool AddCScript(const CScript& redeemScript) override;
     bool LoadCScript(const CScript& redeemScript);
 
@@ -1076,6 +1086,8 @@ public:
     CAmount GetChange(const CTransaction& tx) const;
     void SetBestChain(const CBlockLocator& loc) override;
 
+    bool IsFirstRun();
+
     DBErrors LoadWallet(bool& fFirstRunRet);
     DBErrors ZapWalletTx(std::vector<CWalletTx>& vWtx);
     DBErrors ZapSelectTx(std::vector<uint256>& vHashIn, std::vector<uint256>& vHashOut);
@@ -1183,10 +1195,16 @@ public:
     bool SetHDChain(const CHDChain& chain, bool memonly);
     const CHDChain& GetHDChain() const { return hdChain; }
 
+    void UseBip44( bool b = true)    { hdChain.UseBip44(b);}
+
     /* Returns true if HD is enabled */
     bool IsHDEnabled() const;
 
-     /* Generates a new HD seed (will not be activated) */
+    /* Returns true if HD is enabled with Bip44 */
+    bool IsBip44Enabled() const;
+
+
+    /* Generates a new HD seed (will not be activated) */
     CPubKey GenerateNewSeed();
     
     /* Derives a new HD seed (will not be activated) */

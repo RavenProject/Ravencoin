@@ -288,6 +288,7 @@ public:
     static bool isWalletEnabled();
 
     bool hdEnabled() const;
+    bool hd44Enabled() const;
 
     int getDefaultConfirmTarget() const;
 

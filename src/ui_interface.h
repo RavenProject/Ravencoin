@@ -69,7 +69,8 @@ public:
         /** Predefined combinations for certain default usage cases */
         MSG_INFORMATION = ICON_INFORMATION,
         MSG_WARNING = (ICON_WARNING | BTN_OK | MODAL),
-        MSG_ERROR = (ICON_ERROR | BTN_OK | MODAL)
+        MSG_ERROR = (ICON_ERROR | BTN_OK | MODAL),
+        MSG_VERSION = (ICON_INFORMATION | BTN_OK | MODAL),
     };
 
     /** Show message box. */
@@ -94,6 +95,9 @@ public:
 
     /** A wallet has been loaded. */
     boost::signals2::signal<void (CWallet* wallet)> LoadWallet;
+
+    /** Show mnemoic. */
+    boost::signals2::signal<void (int style)> ShowMnemonic;
 
     /**
      * Show progress e.g. for verifychain.

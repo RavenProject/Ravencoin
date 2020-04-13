@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2018 The Raven Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,22 +10,25 @@ import random
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import assert_contains, assert_does_not_contain_key, assert_equal, assert_raises_rpc_error
 
+
 def gen_root_asset_name():
     size = random.randint(3, 14)
     name = ""
-    for _ in range(1, size+1):
-        ch = random.randint(65, 65+25)
+    for _ in range(1, size + 1):
+        ch = random.randint(65, 65 + 25)
         name += chr(ch)
     return name
+
 
 def gen_unique_asset_name(root):
     tag_ab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@$%&*()[]{}_.?-:"
     name = root + "#"
     tag_size = random.randint(1, 15)
-    for _ in range(1, tag_size+1):
+    for _ in range(1, tag_size + 1):
         tag_c = tag_ab[random.randint(0, len(tag_ab) - 1)]
         name += tag_c
     return name
+
 
 class UniqueAssetTest(RavenTestFramework):
     def set_test_params(self):
@@ -58,7 +61,6 @@ class UniqueAssetTest(RavenTestFramework):
         self.sync_all()
         root = gen_root_asset_name()
         asset_name = gen_unique_asset_name(root)
-        
 
         # no root
         assert_raises_rpc_error(-32600, f"Wallet doesn't have asset: {root}!", n0.issue, asset_name)
@@ -91,7 +93,6 @@ class UniqueAssetTest(RavenTestFramework):
         self.sync_all()
         assert_raises_rpc_error(-8, f"Invalid parameter: asset_name '{asset_name}' has already been used", n0.issue, asset_name)
 
-
     def issue_unique_test(self):
         self.log.info("Testing issueunique RPC...")
         n0, n1 = self.nodes[0], self.nodes[1]
@@ -113,7 +114,7 @@ class UniqueAssetTest(RavenTestFramework):
 
         # invalidate
         n0.invalidateblock(block_hash)
-        assert(root in n0.listmyassets())
+        assert (root in n0.listmyassets())
         assert_does_not_contain_key(asset_name, n0.listmyassets(asset="*", verbose=False, count=100000, start=0, confs=1))
 
         # reconsider

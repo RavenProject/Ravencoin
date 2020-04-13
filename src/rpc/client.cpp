@@ -137,6 +137,8 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "signrawtransaction", 1, "prevtxs" },
     { "signrawtransaction", 2, "privkeys" },
     { "sendrawtransaction", 1, "allowhighfees" },
+    { "testmempoolaccept", 0, "rawtxs" },
+    { "testmempoolaccept", 1, "allowhighfees" },
     { "combinerawtransaction", 0, "txs" },
     { "fundrawtransaction", 1, "options" },
     { "gettxout", 1, "n" },
@@ -208,11 +210,12 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "cancelsnapshotrequest", 1, "block_height"},
     { "distributereward", 1, "snapshot_height"},
     { "distributereward", 3, "gross_distribution_amount"},
-    { "distributereward", 6, "dry_run"},
     { "getdistributestatus", 1, "snapshot_height"},
     { "getdistributestatus", 3, "gross_distribution_amount"},
     { "getsnapshot", 1, "block_height"},
     { "purgesnapshot", 1, "block_height"},
+    { "stop", 0, "wait"},
+    { "getkawpowhash", 3, "height"},
 };
 
 class CRPCConvertTable

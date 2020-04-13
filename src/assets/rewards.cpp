@@ -60,7 +60,7 @@ bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vect
 
     //  Get details on the specified source asset
     CNewAsset distributionAsset;
-    bool srcIsIndivisible = false;
+    UNUSED_VAR bool srcIsIndivisible = false;
     CAmount srcUnitDivisor = COIN;  //  Default to divisor for RVN
     const int8_t COIN_DIGITS_PAST_DECIMAL = 8;
 
