@@ -13,10 +13,10 @@
 // Update these four values on every release cycle
 // These values should match the values in configure.ac
 // Used for checking the Ravencoin releases on github
-static const std::string SOFTWARE_VERSION = "v3.3.2";
-static const int MAIN_SOFTWARE_VERSION = 3;
-static const int SECOND_SOFTWARE_VERSION = 3;
-static const int THIRD_SOFTWARE_VERSION = 2;
+static const std::string SOFTWARE_VERSION = "v4.0.0";
+static const int MAIN_SOFTWARE_VERSION = 4;
+static const int SECOND_SOFTWARE_VERSION = 0;
+static const int THIRD_SOFTWARE_VERSION = 0;
 
 static const int PROTOCOL_VERSION = 70026;
 
