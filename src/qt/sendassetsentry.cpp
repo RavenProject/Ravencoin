@@ -303,7 +303,7 @@ SendAssetsRecipient SendAssetsEntry::getValue()
     recipient.address = ui->payTo->text();
     recipient.label = ui->addAsLabel->text();
     recipient.amount = ui->payAssetAmount->value();
-    recipient.message = ui->messageTextLabel->text();
+    recipient.message = ui->memoBox->text();
 
     return recipient;
 }

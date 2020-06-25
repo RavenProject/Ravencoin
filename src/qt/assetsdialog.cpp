@@ -366,7 +366,7 @@ void AssetsDialog::on_sendButton_clicked()
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     for (auto recipient : recipients) {
-        vTransfers.emplace_back(std::make_pair(CAssetTransfer(recipient.assetName.toStdString(), recipient.amount), recipient.address.toStdString()));
+        vTransfers.emplace_back(std::make_pair(CAssetTransfer(recipient.assetName.toStdString(), recipient.amount, DecodeAssetData(recipient.message.toStdString()), 0), recipient.address.toStdString()));
     }
 
     // Always use a CCoinControl instance, use the AssetControlDialog instance if CoinControl has been enabled
