@@ -5715,7 +5715,7 @@ bool AreEnforcedValuesDeployed()
         return true;
 
     const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_ENFORCE_VALUE);
-    if (thresholdState == THRESHOLD_ACTIVE)
+    if (thresholdState == THRESHOLD_ACTIVE || thresholdState == THRESHOLD_LOCKED_IN)
         fEnforcedValuesIsActive = true;
 
     return fEnforcedValuesIsActive;
