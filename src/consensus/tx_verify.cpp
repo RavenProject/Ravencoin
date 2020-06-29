@@ -316,7 +316,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                     // when AreEnforcedValuesDeployed return true
                     if (fBlockCheck) {
                         if (txout.nValue != 0) {
-                            return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-reissued-amount-isn't-zero");
+                            return state.DoS(0, false, REJECT_INVALID, "bad-txns-asset-reissued-amount-isn't-zero");
                         }
                     }
                 }
@@ -324,7 +324,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                 if (fMempoolCheck) {
                     // Don't accept to the mempool no matter what on these types of transactions
                     if (txout.nValue != 0) {
-                        return state.DoS(100, false, REJECT_INVALID, "bad-mempool-txns-asset-reissued-amount-isn't-zero");
+                        return state.DoS(0, false, REJECT_INVALID, "bad-mempool-txns-asset-reissued-amount-isn't-zero");
                     }
                 }
             }
