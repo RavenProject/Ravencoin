@@ -515,7 +515,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
-    if (!CheckTransaction(tx, state))
+    if (!CheckTransaction(tx, state, true, true))
         return false; // state filled in by CheckTransaction
 
     // Coinbase is only valid in a block, not as a loose transaction
@@ -3997,7 +3997,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
     // Check transactions
     for (const auto& tx : block.vtx)
-        if (!CheckTransaction(*tx, state))
+        if (!CheckTransaction(*tx, state, true, false, true))
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(), state.GetDebugMessage(), state.GetRejectReason()));
 
@@ -5703,7 +5703,20 @@ double GuessVerificationProgress(const ChainTxData& data, CBlockIndex *pindex) {
 }
 
 /** RVN START */
-bool AreAssetsDeployed() {
+bool AreEnforcedValuesDeployed()
+{
+    if (fEnforcedValuesIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_ENFORCE_VALUE);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        fEnforcedValuesIsActive = true;
+
+    return fEnforcedValuesIsActive;
+}
+
+bool AreAssetsDeployed()
+{
 
     if (fAssetsIsActive)
         return true;

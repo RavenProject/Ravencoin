@@ -595,6 +595,8 @@ bool AreMessagesDeployed();
 
 bool AreRestrictedAssetsDeployed();
 
+bool AreEnforcedValuesDeployed();
+
 bool IsRip5Active();
 
 

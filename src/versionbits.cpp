@@ -26,6 +26,10 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
             /*.name =*/ "transfer_script",
             /*.gbt_force =*/ true,
+    },
+    {
+            /*.name =*/ "enforce_value",
+            /*.gbt_force =*/ true,
     }
 };
 
