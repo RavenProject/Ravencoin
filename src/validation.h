@@ -597,6 +597,9 @@ bool AreRestrictedAssetsDeployed();
 
 bool AreEnforcedValuesDeployed();
 
+// Only used by test framework
+void SetEnforcedValues(bool value);
+
 bool IsRip5Active();
 
 

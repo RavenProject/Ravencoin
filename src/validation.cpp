@@ -5703,6 +5703,12 @@ double GuessVerificationProgress(const ChainTxData& data, CBlockIndex *pindex) {
 }
 
 /** RVN START */
+
+// Only used by test framework
+void SetEnforcedValues(bool value) {
+    fEnforcedValuesIsActive = value;
+}
+
 bool AreEnforcedValuesDeployed()
 {
     if (fEnforcedValuesIsActive)
