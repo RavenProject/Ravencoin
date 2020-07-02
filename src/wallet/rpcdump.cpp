@@ -669,7 +669,14 @@ UniValue dumpwallet(const JSONRPCRequest& request)
                 CRavenExtKey b58extkey;
                 b58extkey.SetKey(masterKey);
 
+                CExtPubKey pubkey;
+                pubkey = masterKey.Neuter();
+
+                CRavenExtPubKey b58extpubkey;
+                b58extpubkey.SetKey(pubkey);
+
                 file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+                file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
             }
         }
 
@@ -690,7 +697,14 @@ UniValue dumpwallet(const JSONRPCRequest& request)
             CRavenExtKey b58extkey;
             b58extkey.SetKey(masterKey);
 
+            CExtPubKey pubkey;
+            pubkey = masterKey.Neuter();
+
+            CRavenExtPubKey b58extpubkey;
+            b58extpubkey.SetKey(pubkey);
+
             file << "# extended private masterkey: " << b58extkey.ToString() << "\n\n";
+            file << "# extended public masterkey: " << b58extpubkey.ToString() << "\n\n";
 
 			file << "# HD seed: " << HexStr(vchSeed) << "\n";
 			file << "# mnemonic: " << std::string(vchWords.begin(), vchWords.end()).c_str() << "\n";
@@ -727,6 +741,154 @@ UniValue dumpwallet(const JSONRPCRequest& request)
     reply.push_back(Pair("filename", filepath.string()));
 
     return reply;
+}
+
+UniValue getmasterkeyinfo(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 0)
+        throw std::runtime_error(
+                "getmasterkeyinfo\n"
+                "\nFetches and displays the master private key and the master public key.\n"
+                "\nResult:\n"
+                "{                           (json object)\n"
+                "  \"bip32_root_private\" : (string) extended master private key,\n"
+                "  \"bip32_root_public\" :  (string) extended master public key,\n"
+                "  \"account_derivation_path\" : (string) The derivation path to the account public/private keys\n"
+                "  \"account_extended_private_key\" : (string) extended account private key,\n"
+                "  \"account_extended_public_key\" :  (string) extended account public key,\n"
+                "}\n"
+                "\nExamples:\n"
+                + HelpExampleCli("getmasterkeyinfo", "")
+                + HelpExampleRpc("getmasterkeyinfo", "")
+        );
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    UniValue ret(UniValue::VOBJ);
+
+    // add the base58check encoded extended master if the wallet uses HD
+    CKeyID seed_id = pwallet->GetHDChain().seed_id;
+    if (!seed_id.IsNull())
+    {
+
+        if (!pwallet->GetHDChain().IsBip44()) {
+            CKey seed;
+            if (pwallet->GetKey(seed_id, seed)) {
+
+                // Create the master key
+                CExtKey masterKey;
+                masterKey.SetSeed(seed.begin(), seed.size());;
+
+                // Get the Raven Ext Key from the master key
+                CRavenExtKey b58extkey;
+                b58extkey.SetKey(masterKey);
+
+                // Get the public key from the master key
+                CExtPubKey pubkey;
+                pubkey = masterKey.Neuter();
+
+                // Get the Raven Ext Key from the public key
+                CRavenExtPubKey b58extpubkey;
+                b58extpubkey.SetKey(pubkey);
+
+                // Add the private and public key to the output
+                ret.push_back(std::make_pair("bip32_root_private",  b58extkey.ToString()));
+                ret.push_back(std::make_pair("bip32_root_public",  b58extpubkey.ToString()));
+                ret.push_back(std::make_pair("account_derivation_path",  "m/0'"));
+
+                CExtKey accountKey;
+                // derive m/account'
+                masterKey.Derive(accountKey, 0 | 0x80000000);
+
+                // Create the account public key from the account private key
+                CExtPubKey account_extended_public_key;
+                account_extended_public_key = accountKey.Neuter();
+
+                // Create the Raven Account Ext Private Key
+                CRavenExtKey b58accountextprivatekey;
+                b58accountextprivatekey.SetKey(accountKey);
+
+                // Create the Raven Account Ext Public Key
+                CRavenExtPubKey b58actextpubkey;
+                b58actextpubkey.SetKey(account_extended_public_key);
+
+                // Add the account extended public and private keys to the return
+                ret.push_back(std::make_pair("account_extended_private_key",  b58accountextprivatekey.ToString()));
+                ret.push_back(std::make_pair("account_extended_public_key",  b58actextpubkey.ToString()));
+
+            }
+        }
+
+        if(pwallet->GetHDChain().IsBip44())
+        {
+            CWalletDB walletdb(pwallet->GetDBHandle());
+
+            std::vector<unsigned char> vchWords;
+            std::vector<unsigned char> vchPassphrase;
+            std::vector<unsigned char> vchSeed;
+            uint256 hash;
+
+            pwallet->GetBip39Data(hash, vchWords, vchPassphrase, vchSeed);
+
+            // Create the master key
+            CExtKey masterKey;
+            masterKey.SetSeed(vchSeed.data(), vchSeed.size());
+
+            // Get the Raven Ext Key from the master key
+            CRavenExtKey b58extkey;
+            b58extkey.SetKey(masterKey);
+
+            // Get the public key from the master key
+            CExtPubKey pubkey;
+            pubkey = masterKey.Neuter();
+
+            // Get the Raven Ext Key from the public key
+            CRavenExtPubKey b58extpubkey;
+            b58extpubkey.SetKey(pubkey);
+
+            // Add the private and public key to the output
+            ret.push_back(std::make_pair("bip32_root_private",  b58extkey.ToString()));
+            ret.push_back(std::make_pair("bip32_root_public",  b58extpubkey.ToString()));
+            std::string path = strprintf("m/44'/%d'/%d'", GetParams().ExtCoinType(), 0);
+            ret.push_back(std::make_pair("account_derivation_path",  path));
+
+            // Lets generate the account private and public keys
+            CExtKey purposeKey;
+            CExtKey coinTypeKey;
+            CExtKey accountKey;
+            // derive m/purpose'
+            masterKey.Derive(purposeKey, 44 | 0x80000000);
+            // derive m/purpose'/coin_type'
+            purposeKey.Derive(coinTypeKey, GetParams().ExtCoinType() | 0x80000000);
+            // derive m/purpose'/coin_type'/account'
+            coinTypeKey.Derive(accountKey, 0 | 0x80000000);
+
+            // Create the account public key from the account private key
+            CExtPubKey account_extended_public_key;
+            account_extended_public_key = accountKey.Neuter();
+
+            // Create the Raven Account Ext Private Key
+            CRavenExtKey b58accountextprivatekey;
+            b58accountextprivatekey.SetKey(accountKey);
+
+            // Create the Raven Account Ext Public Key
+            CRavenExtPubKey b58actextpubkey;
+            b58actextpubkey.SetKey(account_extended_public_key);
+
+            // Add the account extended public and private keys to the return
+            ret.push_back(std::make_pair("account_extended_private_key",  b58accountextprivatekey.ToString()));
+            ret.push_back(std::make_pair("account_extended_public_key",  b58actextpubkey.ToString()));
+        }
+    }
+
+    return ret;
 }
 
 

@@ -1625,7 +1625,7 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("asset_name", transfer.strName));
         r.push_back(Pair("amount", ValueFromAmount(transfer.nAmount)));
         if (!transfer.message.empty())
-            r.push_back(Pair("message", transfer.message));
+            r.push_back(Pair("message", EncodeAssetData(transfer.message)));
         if (transfer.nExpireTime)
             r.push_back(Pair("expire_time", transfer.nExpireTime));
 
