@@ -6,17 +6,18 @@
 #ifndef RAVEN_VERSION_H
 #define RAVEN_VERSION_H
 
+#include <tinyformat.h>
 /**
  * network protocol versioning
  */
 
-// Update these four values on every release cycle
+// Update these three values on every release cycle
 // These values should match the values in configure.ac
 // Used for checking the Ravencoin releases on github
-static const std::string SOFTWARE_VERSION = "v4.2.0";
 static const int MAIN_SOFTWARE_VERSION = 4;
 static const int SECOND_SOFTWARE_VERSION = 2;
 static const int THIRD_SOFTWARE_VERSION = 0;
+static const std::string SOFTWARE_VERSION = strprintf("v%d.%d.%d", MAIN_SOFTWARE_VERSION, SECOND_SOFTWARE_VERSION, THIRD_SOFTWARE_VERSION);
 
 static const int PROTOCOL_VERSION = 70028;
 
