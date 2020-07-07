@@ -862,29 +862,32 @@ void RavenGUI::createToolBars()
 
                            // List the found values
                            QStringList list = rx.capturedTexts();
+                           static const int CLIENT_VERSION_MAJOR_INDEX = 1;
+                           static const int CLIENT_VERSION_MINOR_INDEX = 2;
+                           static const int CLIENT_VERSION_REVISION_INDEX = 3;
                            bool fNewSoftwareFound = false;
                            bool fStopSearch = false;
                            if (list.size() >= 4) {
-                               if (CLIENT_VERSION_MAJOR < list[1].toInt()) {
+                               if (CLIENT_VERSION_MAJOR < list[CLIENT_VERSION_MAJOR_INDEX].toInt()) {
                                    fNewSoftwareFound = true;
                                } else {
-                                   if (CLIENT_VERSION_MAJOR > list[1].toInt()) {
+                                   if (CLIENT_VERSION_MAJOR > list[CLIENT_VERSION_MAJOR_INDEX].toInt()) {
                                        fStopSearch = true;
                                    }
                                }
 
                                if (!fStopSearch) {
-                                   if (CLIENT_VERSION_MINOR < list[2].toInt()) {
+                                   if (CLIENT_VERSION_MINOR < list[CLIENT_VERSION_MINOR_INDEX].toInt()) {
                                        fNewSoftwareFound = true;
                                    } else {
-                                       if (CLIENT_VERSION_MINOR > list[2].toInt()) {
+                                       if (CLIENT_VERSION_MINOR > list[CLIENT_VERSION_MINOR_INDEX].toInt()) {
                                            fStopSearch = true;
                                        }
                                    }
                                }
 
                                if (!fStopSearch) {
-                                   if (CLIENT_VERSION_REVISION < list[3].toInt()) {
+                                   if (CLIENT_VERSION_REVISION < list[CLIENT_VERSION_REVISION_INDEX].toInt()) {
                                        fNewSoftwareFound = true;
                                    }
                                }
