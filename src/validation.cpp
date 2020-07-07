@@ -515,7 +515,10 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
-    if (!CheckTransaction(tx, state, true, true))
+
+    bool fCheckDuplicates = true;
+    bool fCheckMempool = true;
+    if (!CheckTransaction(tx, state, fCheckDuplicates, fCheckMempool))
         return false; // state filled in by CheckTransaction
 
     // Coinbase is only valid in a block, not as a loose transaction
@@ -3996,15 +3999,19 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
 
     // Check transactions
+    bool fCheckBlock = true;
+    bool fCheckDuplicates = true;
+    bool fCheckMempool = false;
     for (const auto& tx : block.vtx) {
         // We only want to check the blocks when they are added to our chain
         // We want to make sure when nodes shutdown and restart that they still
         // verify the blocks in the database correctly even if Enforce Value BIP is active
-        bool fCheckBlock = true;
+        fCheckBlock = true;
         if (fDBCheck){
             fCheckBlock = false;
         }
-        if (!CheckTransaction(*tx, state, true, false, fCheckBlock))
+
+        if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock))
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(),
                                            state.GetDebugMessage(), state.GetRejectReason()));
@@ -4887,7 +4894,10 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
         if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), true, true, true)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
+        bool fCheckPoW = true;
+        bool fCheckMerkleRoot = true;
+        bool fDBCheck = true;
+        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), fCheckPoW, fCheckMerkleRoot, fDBCheck)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
             return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                          pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
