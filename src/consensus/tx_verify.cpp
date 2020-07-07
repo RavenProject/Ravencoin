@@ -308,7 +308,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                 // Specific check and error message to go with to make sure the amount is 0
                 if (txout.nValue != 0)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-issued-amount-isn't-zero");
-            }  else if (nType == TX_REISSUE_ASSET) {
+            } else if (nType == TX_REISSUE_ASSET) {
                 // Specific check and error message to go with to make sure the amount is 0
                 if (AreEnforcedValuesDeployed()) {
                     // We only want to not accept these txes when checking them from CheckBlock.
@@ -327,8 +327,9 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                         return state.DoS(0, false, REJECT_INVALID, "bad-mempool-txns-asset-reissued-amount-isn't-zero");
                     }
                 }
+            } else {
+                return state.DoS(0, false, REJECT_INVALID, "bad-asset-type-not-any-of-the-main-three");
             }
-
         }
     }
 
