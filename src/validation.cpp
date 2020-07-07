@@ -67,6 +67,13 @@
 #define MICRO 0.000001
 #define MILLI 0.001
 
+#define CHECK_DUPLICATE_TRANSACTION_TRUE true
+#define CHECK_DUPLICATE_TRANSACTION_FALSE false
+#define CHECK_MEMPOOL_TRANSACTION_TRUE true
+#define CHECK_MEMPOOL_TRANSACTION_FALSE false
+#define CHECK_BLOCK_TRANSACTION_TRUE true
+#define CHECK_BLOCK_TRANSACTION_FALSE false
+
 /**
  * Global state
  */
@@ -3999,16 +4006,16 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
 
     // Check transactions
-    bool fCheckBlock = true;
-    bool fCheckDuplicates = true;
-    bool fCheckMempool = false;
+    bool fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+    bool fCheckDuplicates = CHECK_DUPLICATE_TRANSACTION_TRUE;
+    bool fCheckMempool = CHECK_MEMPOOL_TRANSACTION_FALSE;
     for (const auto& tx : block.vtx) {
         // We only want to check the blocks when they are added to our chain
         // We want to make sure when nodes shutdown and restart that they still
         // verify the blocks in the database correctly even if Enforce Value BIP is active
-        fCheckBlock = true;
+        fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
         if (fDBCheck){
-            fCheckBlock = false;
+            fCheckBlock = CHECK_BLOCK_TRANSACTION_FALSE;
         }
 
         if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock))
