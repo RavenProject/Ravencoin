@@ -19,6 +19,7 @@ enum DeploymentPos
     DEPLOYMENT_ASSETS, // Deployment of RIP2
     DEPLOYMENT_MSG_REST_ASSETS, // Delpoyment of RIP5 and Restricted assets
     DEPLOYMENT_TRANSFER_SCRIPT_SIZE,
+    DEPLOYMENT_ENFORCE_VALUE,
     // DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
 //    DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp

@@ -166,7 +166,7 @@ int64_t GetTransactionSigOpCost(const CTransaction& tx, const CCoinsViewCache& i
     return nSigOps;
 }
 
-bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fCheckDuplicateInputs)
+bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fCheckDuplicateInputs, bool fMempoolCheck, bool fBlockCheck)
 {
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
@@ -308,6 +308,27 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                 // Specific check and error message to go with to make sure the amount is 0
                 if (txout.nValue != 0)
                     return state.DoS(100, false, REJECT_INVALID, "bad-txns-asset-issued-amount-isn't-zero");
+            } else if (nType == TX_REISSUE_ASSET) {
+                // Specific check and error message to go with to make sure the amount is 0
+                if (AreEnforcedValuesDeployed()) {
+                    // We only want to not accept these txes when checking them from CheckBlock.
+                    // We don't want to change the behavior when reading transactions from the database
+                    // when AreEnforcedValuesDeployed return true
+                    if (fBlockCheck) {
+                        if (txout.nValue != 0) {
+                            return state.DoS(0, false, REJECT_INVALID, "bad-txns-asset-reissued-amount-isn't-zero");
+                        }
+                    }
+                }
+
+                if (fMempoolCheck) {
+                    // Don't accept to the mempool no matter what on these types of transactions
+                    if (txout.nValue != 0) {
+                        return state.DoS(0, false, REJECT_INVALID, "bad-mempool-txns-asset-reissued-amount-isn't-zero");
+                    }
+                }
+            } else {
+                return state.DoS(0, false, REJECT_INVALID, "bad-asset-type-not-any-of-the-main-three");
             }
         }
     }
