@@ -13,6 +13,7 @@
 #include <base58.h>
 #include <consensus/validation.h>
 #include <consensus/tx_verify.h>
+#include <validation.h>
 
 BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
@@ -475,6 +476,68 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         // Amount = 0.00000100
         asset = CNewAsset("ASSET", CAmount(100), 5, false, false, "");
         BOOST_CHECK_MESSAGE(!CheckNewAsset(asset, error), "Test13: " + error);
+    }
+
+    BOOST_AUTO_TEST_CASE(asset_tx_enforce_value_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Enforce Value Test");
+
+        SelectParams(CBaseChainParams::MAIN);
+
+        // Create the reissue asset
+        CReissueAsset reissueAsset("ENFORCE_VALUE", 100, 8, true, "");
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        reissueAsset.ConstructTransaction(scriptPubKey);
+
+        // Create an invalid reissue asset with nValue not equal to zero
+        CTxOut txOut;
+        txOut.nValue = 500;
+        txOut.scriptPubKey = scriptPubKey;
+
+        // Create views
+        CCoinsView view;
+        CCoinsViewCache coins(&view);
+        CAssetsCache assetCache;
+
+        // Create a random hash
+        uint256 hash = uint256S("BF50CB9A63BE0019171456252989A459A7D0A5F494735278290079D22AB704A2");
+
+        // Add the coin to the cache
+        COutPoint outpoint(hash, 1);
+        coins.AddCoin(outpoint, Coin(txOut, 10, 0), true);
+
+        // Create input
+        CTxIn in;
+        in.prevout = outpoint;
+
+        // Create transaction and input for the outpoint of the coin we just created
+        CMutableTransaction mutTx;
+
+        // Add the input, and an output into the transaction
+        mutTx.vin.emplace_back(in);
+        mutTx.vout.emplace_back(txOut);
+
+        CTransaction tx(mutTx);
+        CValidationState state;
+
+        bool fCheckMempool = true;
+        bool fCheckBlock = false;
+
+        // Check that the CheckTransaction will fail when trying to add it to the mempool
+        bool fCheck = !CheckTransaction(tx, state, true, fCheckMempool, fCheckBlock);
+
+        BOOST_CHECK(fCheck);
+        BOOST_CHECK(state.GetRejectReason() == "bad-mempool-txns-asset-reissued-amount-isn't-zero");
+
+        // Check that the CheckTransaction will fail when trying to add it to a block
+        fCheckMempool = false;
+        fCheckBlock = true;
+        // Turn on the BIP that enforces the block check
+        SetEnforcedValues(true);
+
+        fCheck = !CheckTransaction(tx, state, true, fCheckMempool, fCheckBlock);
+        BOOST_CHECK(fCheck);
+        BOOST_CHECK(state.GetRejectReason() == "bad-txns-asset-reissued-amount-isn't-zero");
     }
 
 BOOST_AUTO_TEST_SUITE_END()
