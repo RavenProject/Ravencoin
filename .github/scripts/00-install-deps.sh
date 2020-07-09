@@ -70,16 +70,12 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     autoconf \
     automake \
     autotools-dev \
-    binutils-aarch64-linux-gnu \
     binutils-gold \
     bsdmainutils \
     build-essential \
     ca-certificates \
     curl \
-    g++-aarch64-linux-gnu \
-    g++-7-aarch64-linux-gnu \
     g++-7-multilib \
-    gcc-7-aarch64-linux-gnu \
     gcc-7-multilib \
     git \
     gnupg \
@@ -93,6 +89,10 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     xkb-data \
     zip
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
+
+    apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial main restricted'
+    apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial-updates main restricted'
+    
     apt -y install \
     autoconf \
     automake \
