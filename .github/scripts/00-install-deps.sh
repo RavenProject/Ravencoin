@@ -90,8 +90,10 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     zip
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
 
+    echo "adding apt repository for arm packages"
     apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial main restricted'
     apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial-updates main restricted'
+    apt-get update
     
     apt -y install \
     autoconf \
