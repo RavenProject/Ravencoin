@@ -5,6 +5,7 @@
 
 trigger:
 - master
+
 strategy:
   matrix:
     linux:
@@ -21,13 +22,13 @@ strategy:
 
 variables:
   - group: AWS Variables
-  - name: SCRIPTS
+  - name: scripts
     value: $(Agent.BuildDirectory)/.github/scripts
 #  - name: AWS_S3_ENABLE
 #    value:  $(AWS_S3_ENABLE)
 
 steps:
-- script: sudo ${{ SCRIPTS }}/00-install-deps.sh $(imageName)
+- script: sudo $(variables.scripts)/00-install-deps.sh $(imageName)
   displayName: 'Install Build Tools'
 
 #- script: |
