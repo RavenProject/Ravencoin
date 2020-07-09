@@ -23,14 +23,16 @@ strategy:
 variables:
   - group: AWS Variables
   - name: scripts
-    value: $(BUILD_SOURCESDIRECTORY)/.github/scripts
+    value: $(build.SourcesDirectory)/.github/scripts
 #  - name: AWS_S3_ENABLE
 #    value:  $(AWS_S3_ENABLE)
 
 steps:
 - script: |
           env
-          ls $(Agent.BuildDirectory)
+          echo ""
+          echo "listing of build.SourcesDirectory"
+          ls $(build.SourcesDirectory)
   displayName: 'Dump Environment'
 
 - script: sudo ${{variables.scripts}}/00-install-deps.sh $(imageName)
