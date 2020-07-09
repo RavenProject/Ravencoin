@@ -28,7 +28,7 @@ variables:
 #    value:  $(AWS_S3_ENABLE)
 
 steps:
-- script: sudo $(variables.scripts)/00-install-deps.sh $(imageName)
+- script: sudo ${{variables.scripts}}/00-install-deps.sh $(imageName)
   displayName: 'Install Build Tools'
 
 #- script: |
