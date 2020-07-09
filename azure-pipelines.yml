@@ -1,0 +1,36 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+strategy:
+  matrix:
+    linux:
+      imageName: 'ubuntu-latest'
+    mac:
+      imageName: 'ubuntu-latest'
+    windows:
+      imageName: 'ubuntu-latest'
+    arm32v7:
+      imageName: 'ubuntu-latest'
+
+#pool:
+#  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: AWS Variables
+  - name: SCRIPTS
+    value: $(Agent.BuildDirectory)/.github/scripts
+#  - name: AWS_S3_ENABLE
+#    value:  $(AWS_S3_ENABLE)
+
+steps:
+- script: sudo ${{ SCRIPTS }}/00-install-deps.sh $(imageName)
+  displayName: 'Install Build Tools'
+
+#- script: |
+#    echo Add other tasks to build, test, and deploy your project.
+#    echo See https://aka.ms/yaml
+#  displayName: 'Run a multi-line script'
