@@ -89,8 +89,14 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     xkb-data \
     zip
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
-
+    echo "removing existing azure repositories"
+    apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial InRelease'
+    apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial-updates InRelease'
+    apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial-backports InRelease'
+    
     echo "adding apt repository for arm packages"
+    apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial InRelease'
+    apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial-updates InRelease'
     apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial main restricted'
     apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial-updates main restricted'
     apt-get update
