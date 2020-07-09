@@ -862,43 +862,46 @@ void RavenGUI::createToolBars()
 
                            // List the found values
                            QStringList list = rx.capturedTexts();
+                           static const int CLIENT_VERSION_MAJOR_INDEX = 1;
+                           static const int CLIENT_VERSION_MINOR_INDEX = 2;
+                           static const int CLIENT_VERSION_REVISION_INDEX = 3;
                            bool fNewSoftwareFound = false;
                            bool fStopSearch = false;
                            if (list.size() >= 4) {
-                               if (MAIN_SOFTWARE_VERSION < list[1].toInt()) {
+                               if (CLIENT_VERSION_MAJOR < list[CLIENT_VERSION_MAJOR_INDEX].toInt()) {
                                    fNewSoftwareFound = true;
                                } else {
-                                   if (MAIN_SOFTWARE_VERSION > list[1].toInt()) {
+                                   if (CLIENT_VERSION_MAJOR > list[CLIENT_VERSION_MAJOR_INDEX].toInt()) {
                                        fStopSearch = true;
                                    }
                                }
 
                                if (!fStopSearch) {
-                                   if (SECOND_SOFTWARE_VERSION < list[2].toInt()) {
+                                   if (CLIENT_VERSION_MINOR < list[CLIENT_VERSION_MINOR_INDEX].toInt()) {
                                        fNewSoftwareFound = true;
                                    } else {
-                                       if (SECOND_SOFTWARE_VERSION > list[2].toInt()) {
+                                       if (CLIENT_VERSION_MINOR > list[CLIENT_VERSION_MINOR_INDEX].toInt()) {
                                            fStopSearch = true;
                                        }
                                    }
                                }
 
                                if (!fStopSearch) {
-                                   if (THIRD_SOFTWARE_VERSION < list[3].toInt()) {
+                                   if (CLIENT_VERSION_REVISION < list[CLIENT_VERSION_REVISION_INDEX].toInt()) {
                                        fNewSoftwareFound = true;
                                    }
                                }
                            }
 
                            if (fNewSoftwareFound) {
-                               labelVersionUpdate->setToolTip(QString::fromStdString(strprintf("Currently running: %s\nLatest version: %s", SOFTWARE_VERSION,
+                               labelVersionUpdate->setToolTip(QString::fromStdString(strprintf("Currently running: %s\nLatest version: %s", FormatFullVersion(),
                                                                                                latestVersion)));
                                labelVersionUpdate->show();
 
                                // Only display the message on startup to the user around 1/2 of the time
                                if (GetRandInt(2) == 1) {
                                    bool fRet = uiInterface.ThreadSafeQuestion(
-                                           strprintf("\nCurrently running: %s\nLatest version: %s", SOFTWARE_VERSION,
+                                           strprintf("\nCurrently running: %s\nLatest version: %s", FormatFullVersion(),
                                                      latestVersion) + "\n\nWould you like to visit the releases page?",
                                            "",
                                            "New Wallet Version Found",

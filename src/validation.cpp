@@ -67,6 +67,13 @@
 #define MICRO 0.000001
 #define MILLI 0.001
 
+#define CHECK_DUPLICATE_TRANSACTION_TRUE true
+#define CHECK_DUPLICATE_TRANSACTION_FALSE false
+#define CHECK_MEMPOOL_TRANSACTION_TRUE true
+#define CHECK_MEMPOOL_TRANSACTION_FALSE false
+#define CHECK_BLOCK_TRANSACTION_TRUE true
+#define CHECK_BLOCK_TRANSACTION_FALSE false
+
 /**
  * Global state
  */
@@ -515,7 +522,10 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
     AssertLockHeld(cs_main);
     if (pfMissingInputs)
         *pfMissingInputs = false;
-    if (!CheckTransaction(tx, state))
+
+    bool fCheckDuplicates = true;
+    bool fCheckMempool = true;
+    if (!CheckTransaction(tx, state, fCheckDuplicates, fCheckMempool))
         return false; // state filled in by CheckTransaction
 
     // Coinbase is only valid in a block, not as a loose transaction
@@ -3951,7 +3961,7 @@ static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state,
     return true;
 }
 
-bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot)
+bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW, bool fCheckMerkleRoot, bool fDBCheck)
 {
     // These are checks that are independent of context.
 
@@ -3996,10 +4006,23 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-multiple", false, "more than one coinbase");
 
     // Check transactions
-    for (const auto& tx : block.vtx)
-        if (!CheckTransaction(*tx, state))
+    bool fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+    bool fCheckDuplicates = CHECK_DUPLICATE_TRANSACTION_TRUE;
+    bool fCheckMempool = CHECK_MEMPOOL_TRANSACTION_FALSE;
+    for (const auto& tx : block.vtx) {
+        // We only want to check the blocks when they are added to our chain
+        // We want to make sure when nodes shutdown and restart that they still
+        // verify the blocks in the database correctly even if Enforce Value BIP is active
+        fCheckBlock = CHECK_BLOCK_TRANSACTION_TRUE;
+        if (fDBCheck){
+            fCheckBlock = CHECK_BLOCK_TRANSACTION_FALSE;
+        }
+
+        if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock))
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
-                                 strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(), state.GetDebugMessage(), state.GetRejectReason()));
+                                 strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(),
+                                           state.GetDebugMessage(), state.GetRejectReason()));
+    }
 
     unsigned int nSigOps = 0;
     for (const auto& tx : block.vtx)
@@ -4878,7 +4901,10 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
         if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
-        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), true, true)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
+        bool fCheckPoW = true;
+        bool fCheckMerkleRoot = true;
+        bool fDBCheck = true;
+        if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), fCheckPoW, fCheckMerkleRoot, fDBCheck)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
             return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                          pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
         // check level 2: verify undo validity
@@ -5703,7 +5729,26 @@ double GuessVerificationProgress(const ChainTxData& data, CBlockIndex *pindex) {
 }
 
 /** RVN START */
-bool AreAssetsDeployed() {
+
+// Only used by test framework
+void SetEnforcedValues(bool value) {
+    fEnforcedValuesIsActive = value;
+}
+
+bool AreEnforcedValuesDeployed()
+{
+    if (fEnforcedValuesIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_ENFORCE_VALUE);
+    if (thresholdState == THRESHOLD_ACTIVE || thresholdState == THRESHOLD_LOCKED_IN)
+        fEnforcedValuesIsActive = true;
+
+    return fEnforcedValuesIsActive;
+}
+
+bool AreAssetsDeployed()
+{
 
     if (fAssetsIsActive)
         return true;
