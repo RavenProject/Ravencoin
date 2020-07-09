@@ -23,7 +23,7 @@ strategy:
 variables:
   - group: AWS Variables
   - name: scripts
-    value: $(Agent.BuildDirectory)/.github/scripts
+    value: $(BUILD_SOURCESDIRECTORY)/.github/scripts
 #  - name: AWS_S3_ENABLE
 #    value:  $(AWS_S3_ENABLE)
 
