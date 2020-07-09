@@ -19,10 +19,10 @@ strategy:
       imageName: 'ubuntu-latest'
     arm32v7:
       os: 'arm32v7'
-      imageName: 'ubuntu-latest'
+      imageName: 'arm64'
 
-#pool:
-#  vmImage: 'ubuntu-latest'
+pool:
+  vmImage: $(imageName)
 
 variables:
   - group: AWS Variables
