@@ -17,7 +17,7 @@ if [[ ${OS} == "arm32v7-disable-wallet" || ${OS} == "linux-disable-wallet" ]]; t
     OS=`echo ${OS} | cut -d"-" -f1`
 fi
 
-if [[ ${GITHUB_REF} =~ "release" ]]; then
+#if [[ ${GITHUB_REF} =~ "release" ]]; then
     echo "----------------------------------------"
     echo "Building Dependencies for ${OS}"
     echo "----------------------------------------"
@@ -36,19 +36,19 @@ if [[ ${GITHUB_REF} =~ "release" ]]; then
     elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
         make HOST=arm-linux-gnueabihf -j2
     fi
-else
-    echo "----------------------------------------"
-    echo "Retrieving Dependencies for ${OS}"
-    echo "----------------------------------------"
+#else
+#    echo "----------------------------------------"
+#    echo "Retrieving Dependencies for ${OS}"
+#    echo "----------------------------------------"
 
-    cd /tmp
-    curl -O https://raven-build-resources.s3.amazonaws.com/${OS}/raven-${OS}-dependencies.tar.gz
-    curl -O https://raven-build-resources.s3.amazonaws.com/${OS}/SHASUM
-    if [[ $(sha256sum -c /tmp/SHASUM) ]]; then
-        cd ${GITHUB_WORKSPACE}/depends
-        tar zxvf /tmp/raven-${OS}-dependencies.tar.gz
-    else
-        echo "SHASUM doesn't match"
-        exit 1
-    fi
-fi
+#   cd /tmp
+#    curl -O https://raven-build-resources.s3.amazonaws.com/${OS}/raven-${OS}-dependencies.tar.gz
+#    curl -O https://raven-build-resources.s3.amazonaws.com/${OS}/SHASUM
+#    if [[ $(sha256sum -c /tmp/SHASUM) ]]; then
+#        cd ${GITHUB_WORKSPACE}/depends
+#        tar zxvf /tmp/raven-${OS}-dependencies.tar.gz
+#    else
+#        echo "SHASUM doesn't match"
+#        exit 1
+#    fi
+#fi
