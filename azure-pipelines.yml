@@ -17,9 +17,9 @@ strategy:
     windows:
       os: 'windows'
       imageName: 'ubuntu-latest'
-    arm32v7:
-      os: 'arm32v7'
-      imageName: 'arm64'
+#    arm32v7:
+#      os: 'arm32v7'
+#      imageName: 'arm64'
 
 pool:
   vmImage: $(imageName)
@@ -33,7 +33,7 @@ variables:
 
 steps:
 - script: |
-          env
+          env | sort
           echo ""
           echo "listing of build.SourcesDirectory"
           ls $(build.SourcesDirectory)
@@ -41,6 +41,28 @@ steps:
 
 - script: sudo ${{variables.scripts}}/00-install-deps.sh $(os)
   displayName: 'Install Build Tools'
+
+- script: ${{variables.scripts}/02-copy-build-dependencies.sh $(os) $(build.SourcesDirectory) $(build.SourceBranch)
+  displayName: Copy Build Dependencies
+
+- script: ${{variables.scripts}/03-export-path.sh $(os) $(build.SourcesDirectory)
+  displayName: Add Dependencies to the System PATH
+
+- script: cd $(build.SourcesDirectory) && ./autogen.sh
+  displayName: Build Config
+
+- script: ${{variables.scripts}/04-configure-build.sh $(os) $(build.SourcesDirectory)
+  displayName: Configure Build
+
+- script: make -j2
+  displayName: Build Raven
+
+- script: ${{variables.scripts}/05-binary-checks.sh $(os) $(build.SourcesDirectory)
+  displayName: Check Binary Security
+
+- script: ${{variables.scripts}/06-package.sh  $(os) $(build.SourcesDirectory) $(build.SourceBranch)
+  displayName: Package Up the Build
+
 
 #- script: |
 #    echo Add other tasks to build, test, and deploy your project.
