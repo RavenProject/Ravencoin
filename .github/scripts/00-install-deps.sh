@@ -48,8 +48,8 @@ elif [[ ${OS} == "osx" ]]; then
     cmake \
     curl \
     fonts-tuffy \
-    gcc \
-    gcc-g++ \
+    g++-7-multilib \
+    gcc-7-multilib \
     g++ \
     git \
     imagemagick \
