@@ -21,6 +21,7 @@
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
+#include <QPainterPath>
 #include <validation.h>
 #include <utiltime.h>
 
