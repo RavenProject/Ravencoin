@@ -14,9 +14,7 @@ echo "----------------------------------------"
 
 apt-get update
 apt-get install -y software-properties-common
-if [[ ${AGENT_NAME} == "Hosted Agent" || ${AGENT_MACHINENAME} == "azure-builder" ]]; then
-    add-apt-repository ppa:bitcoin/bitcoin
-fi
+add-apt-repository ppa:bitcoin/bitcoin
 apt-get update
 
 if [[ ${OS} == "windows" ]]; then
@@ -93,41 +91,27 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     xkb-data \
     zip
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
-    if [[ ${AGENT_NAME} == "Hosted Agent" || ${AGENT_MACHINENAME} == "azure-builder" ]]; then
-        echo "removing existing azure repositories"
-        apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial InRelease'
-        apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial-updates InRelease'
-        apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial-backports InRelease'
-    
-        echo "adding apt repository for arm packages"
-        apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial InRelease'
-        apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial-updates InRelease'
-        apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial main restricted'
-        apt-add-repository 'deb http://us-west1.gce.archive.ubuntu.com/ubuntu/ xenial-updates main restricted'
-        apt-get update
-    
-        apt -y install \
-        autoconf \
-        automake \
-        binutils-aarch64-linux-gnu \
-        binutils-arm-linux-gnueabihf \
-        binutils-gold \
-        bsdmainutils \
-        ca-certificates \
-        curl \
-        g++-aarch64-linux-gnu \
-        g++-7-aarch64-linux-gnu \
-        gcc-7-aarch64-linux-gnu \
-        g++-arm-linux-gnueabihf \
-        g++-7-arm-linux-gnueabihf \
-        gcc-7-arm-linux-gnueabihf \
-        g++-7-multilib \
-        gcc-7-multilib \
-        git \
-        libtool \
-        pkg-config \
-        python
-    fi
+    apt -y install \
+    autoconf \
+    automake \
+    binutils-aarch64-linux-gnu \
+    binutils-arm-linux-gnueabihf \
+    binutils-gold \
+    bsdmainutils \
+    ca-certificates \
+    curl \
+    g++-aarch64-linux-gnu \
+    g++-7-aarch64-linux-gnu \
+    gcc-7-aarch64-linux-gnu \
+    g++-arm-linux-gnueabihf \
+    g++-7-arm-linux-gnueabihf \
+    gcc-7-arm-linux-gnueabihf \
+    g++-7-multilib \
+    gcc-7-multilib \
+    git \
+    libtool \
+    pkg-config \
+    python
 else
     echo "you must pass the OS to build for"
     exit 1
