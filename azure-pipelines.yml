@@ -10,18 +10,23 @@ strategy:
   matrix:
     linux:
       os: 'linux'
+      poolName: Azure Pipelines
       imageName: 'ubuntu-latest'
     mac:
       os: 'osx'
+      poolName: Azure Pipelines
       imageName: 'ubuntu-latest'
     windows:
       os: 'windows'
+      poolName: Azure Pipelines
       imageName: 'ubuntu-latest'
     arm32v7:
       os: 'arm32v7'
-      imageName: 'arm'
+      poolName: 'arm'
+      imageName:
 
 pool:
+  name: $(poolName)
   vmImage: $(imageName)
 
 variables:
