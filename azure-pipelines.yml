@@ -5,7 +5,7 @@
 
 trigger:
 - master
-
+- azure-builds
 
 jobs:
 - job:
