@@ -17,9 +17,9 @@ strategy:
     windows:
       os: 'windows'
       imageName: 'ubuntu-latest'
-#    arm32v7:
-#      os: 'arm32v7'
-#      imageName: 'arm64'
+    arm32v7:
+      os: 'arm32v7'
+      imageName: 'arm'
 
 pool:
   vmImage: $(imageName)
