@@ -6,68 +6,71 @@
 trigger:
 - master
 
-strategy:
-  matrix:
-    linux:
-      os: 'linux'
-      poolName: Azure Pipelines
-      imageName: 'ubuntu-latest'
-    mac:
-      os: 'osx'
-      poolName: Azure Pipelines
-      imageName: 'ubuntu-latest'
-    windows:
-      os: 'windows'
-      poolName: Azure Pipelines
-      imageName: 'ubuntu-latest'
-    arm32v7:
-      os: 'arm32v7'
-      poolName: 'arm'
-      imageName:
-
-pool:
-  name: $(poolName)
-  vmImage: $(imageName)
-
-variables:
-  - group: AWS Variables
-  - name: scripts
-    value: $(build.SourcesDirectory)/.github/scripts
-#  - name: AWS_S3_ENABLE
-#    value:  $(AWS_S3_ENABLE)
 
 jobs:
--  job: Build
-   timeoutInMinutes: 180
-   steps:
-   - script: |
-             env | sort
-             echo ""
-             echo "listing of build.SourcesDirectory"
-             ls $(build.SourcesDirectory)
-     displayName: 'Dump Environment'
- 
-   - script: sudo ${{variables.scripts}}/00-install-deps.sh $(os)
-     displayName: 'Install Build Tools'
+- job:
+  displayName: Build
+  timeoutInMinutes: 180
+  strategy:
+    matrix:
+      linux:
+        os: 'linux'
+        poolName: Azure Pipelines
+        imageName: 'ubuntu-latest'
+      mac:
+        os: 'osx'
+        poolName: Azure Pipelines
+        imageName: 'ubuntu-latest'
+      windows:
+        os: 'windows'
+        poolName: Azure Pipelines
+        imageName: 'ubuntu-latest'
+      arm32v7:
+        os: 'arm32v7'
+        poolName: 'arm'
+        imageName:
 
-   - script: ${{variables.scripts}}/02-copy-build-dependencies.sh $(os) $(build.SourcesDirectory) $(build.SourceBranch)
-     displayName: 'Copy Build Dependencies'
+  pool:
+    name: $(poolName)
+    vmImage: $(imageName)
 
-   - script: ${{variables.scripts}}/03-export-path.sh $(os) $(build.SourcesDirectory)
-     displayName: 'Add Dependencies to the System PATH'
+  variables:
+    - group: AWS Variables
+    - name: scripts
+      value: $(build.SourcesDirectory)/.github/scripts
+  #  - name: AWS_S3_ENABLE
+  #    value:  $(AWS_S3_ENABLE)
 
-   - script: cd $(build.SourcesDirectory) && ./autogen.sh
-     displayName: 'Build Config'
 
-   - script: ${{variables.scripts}}/04-configure-build.sh $(os) $(build.SourcesDirectory)
-     displayName: 'Configure Build'
+  steps:
+  - script: |
+              env | sort
+              echo ""
+              echo "listing of build.SourcesDirectory"
+              ls $(build.SourcesDirectory)
+    displayName: 'Dump Environment'
+  
+  - script: sudo ${{variables.scripts}}/00-install-deps.sh $(os)
+    displayName: 'Install Build Tools'
 
-   - script: make -j2
-     displayName: 'Build Raven'
+  - script: ${{variables.scripts}}/02-copy-build-dependencies.sh $(os) $(build.SourcesDirectory) $(build.SourceBranch)
+    displayName: 'Copy Build Dependencies'
 
-   - script: ${{variables.scripts}}/05-binary-checks.sh $(os) $(build.SourcesDirectory)
-     displayName: 'Check Binary Security'
+  - script: ${{variables.scripts}}/03-export-path.sh $(os) $(build.SourcesDirectory)
+    displayName: 'Add Dependencies to the System PATH'
 
-   - script: ${{variables.scripts}}/06-package.sh  $(os) $(build.SourcesDirectory) $(build.SourceBranch)
-     displayName: 'Package Up the Build'
+  - script: cd $(build.SourcesDirectory) && ./autogen.sh
+    displayName: 'Build Config'
+
+  - script: ${{variables.scripts}}/04-configure-build.sh $(os) $(build.SourcesDirectory)
+    displayName: 'Configure Build'
+
+  - script: make -j2
+    displayName: 'Build Raven'
+
+  - script: ${{variables.scripts}}/05-binary-checks.sh $(os) $(build.SourcesDirectory)
+    displayName: 'Check Binary Security'
+
+  - script: ${{variables.scripts}}/06-package.sh  $(os) $(build.SourcesDirectory) $(build.SourceBranch)
+    displayName: 'Package Up the Build'
 
