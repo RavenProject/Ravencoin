@@ -14,7 +14,7 @@ echo "----------------------------------------"
 
 apt-get update
 apt-get install -y software-properties-common
-if [[ ${AGENT_NAME} == "Hosted Agent" ]]; then
+if [[ ${AGENT_NAME} == "Hosted Agent" || ${AGENT_MACHINENAME} == "azure-builder" ]]; then
     add-apt-repository ppa:bitcoin/bitcoin
 fi
 apt-get update
@@ -93,7 +93,7 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     xkb-data \
     zip
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
-    if [[ ${AGENT_NAME} == "Hosted Agent" || ${AGENT_NAME} == "azure-builder" ]]; then
+    if [[ ${AGENT_NAME} == "Hosted Agent" || ${AGENT_MACHINENAME} == "azure-builder" ]]; then
         echo "removing existing azure repositories"
         apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial InRelease'
         apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial-updates InRelease'
