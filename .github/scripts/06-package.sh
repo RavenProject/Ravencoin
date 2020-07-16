@@ -86,7 +86,7 @@ if [[ ${OS} == "windows" ]]; then
     for i in ${DISTNAME}-win64.zip ${DISTNAME}-win64-setup.exe ${DISTNAME}-win64-setup-unsigned.exe; do
         if [[ -e ${i} ]]; then
             md5sum ${i} >> ${i}.md5sum
-            sha256sum ${i} >> ${i}.md5sum
+            sha256sum ${i} >> ${i}.sha256sum
         else
             echo "${i} doesn't exist"
         fi
