@@ -90,7 +90,7 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     ubuntu-dev-tools \
     xkb-data \
     zip
-elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
+elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" && ${AGENT_NAME} != "Hosted Agent" ]]; then
     echo "removing existing azure repositories"
     apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial InRelease'
     apt-add-repository -r 'deb http://azure.archive.ubuntu.com/ubuntu xenial-updates InRelease'
