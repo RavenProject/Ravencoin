@@ -37,7 +37,7 @@ variables:
 #    value:  $(AWS_S3_ENABLE)
 
 jobs:
-  jobs: Build
+  job: Build
   timeoutInMinutes: 180
   steps:
   - script: |
