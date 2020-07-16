@@ -74,3 +74,6 @@ jobs:
   - script: ${{variables.scripts}}/06-package.sh  $(os) $(build.SourcesDirectory) $(build.SourceBranch)
     displayName: 'Package Up the Build'
 
+  - publish: release/*
+    artifact: raven-$(build.BuildNumber)-$(os)
+    displayName: Gather Build Artifacts
