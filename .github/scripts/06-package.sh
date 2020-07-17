@@ -24,12 +24,17 @@ SHORTHASH=`git rev-parse --short HEAD`
 RELEASE_LOCATION="${GITHUB_WORKSPACE}/release"
 STAGE_DIR="${GITHUB_WORKSPACE}/stage"
 
+cd ${GITHUB_WORKSPACE}
+
 echo "----------------------------------------"
 echo "RELEASE_LOCATION: ${RELEASE_LOCATION}"
 echo "----------------------------------------"
 
 if [[ ! -e ${RELEASE_LOCATION} ]]; then
     mkdir -p ${RELEASE_LOCATION}
+    echo "made ${RELEASE_LOCATION}"
+else
+    echo "${RELEASE_LOCATION} does not exist"
 fi
 
 echo "----------------------------------------"
@@ -91,6 +96,7 @@ if [[ ${OS} == "windows" ]]; then
             echo "${i} doesn't exist"
         fi
     done
+    ls -la ${RELEASE_LOCATION}
 
     for rmfile in detach-sig-create.sh win-codesign.cert raven-cli.exe raven-qt.exe ravend.exe; do
         if [[ -e ${rmfile} ]]; then
@@ -143,9 +149,11 @@ elif [[ ${OS} == "osx" ]]; then
             md5sum "${i}" >> ${i}.md5sum
             sha256sum "${i}" >> ${i}.sha256sum
         done
+        ls -la ${RELEASE_LOCATION}
     else
         echo "release directory doesn't exist"
     fi
+    
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
 
     make install DESTDIR=${STAGE_DIR}/${DISTNAME}
@@ -177,6 +185,7 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
             echo "${DISTNAME}-x86_64-linux-gnu.tar.gz doesn't exist. $?"
             exit 1
         fi
+	ls -la ${RELEASE_LOCATION}
     else
         echo "release directory doesn't exist"
     fi
@@ -213,6 +222,7 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
         cd ${STAGE_DIR}
         cp -Rf ${DISTNAME}/bin/ravend .
         cp -Rf ${DISTNAME}/bin/raven-cli .
+	ls -la ${RELEASE_LOCATION}
     else
         echo "release directory doesn't exist"
     fi
