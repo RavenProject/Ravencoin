@@ -96,6 +96,7 @@ if [[ ${OS} == "windows" ]]; then
             echo "${i} doesn't exist"
         fi
     done
+    rm -rf windeploy ${DISTNAME}-win64-unsigned.tar.gz 
     ls -la ${RELEASE_LOCATION}
 
     for rmfile in detach-sig-create.sh win-codesign.cert raven-cli.exe raven-qt.exe ravend.exe; do
@@ -145,7 +146,12 @@ elif [[ ${OS} == "osx" ]]; then
 
     if [[ -e ${RELEASE_LOCATION} ]]; then
         cd ${RELEASE_LOCATION}
-        for i in ${DISTNAME}-osx-unsigned.tar.gz ${DISTNAME}-osx64.tar.gz ${DISTNAME}-osx-unsigned.dmg; do
+        for f in *; do
+            if [[ ${f} != ${DISTNAME}-osx-unsigned.dmg ]]; then
+                rm -f ${f}
+            fi
+        done
+        for i in ${DISTNAME}-osx-unsigned.dmg; do
             md5sum "${i}" >> ${i}.md5sum
             sha256sum "${i}" >> ${i}.sha256sum
         done
