@@ -71,9 +71,9 @@ jobs:
   - script: ${{variables.scripts}}/05-binary-checks.sh $(os) $(build.SourcesDirectory)
     displayName: 'Check Binary Security'
 
-  - script: ${{variables.scripts}}/06-package.sh  $(os) $(build.SourcesDirectory) $(build.SourceBranch)
+  - script: ${{variables.scripts}}/06-package.sh $(os) $(build.SourcesDirectory) $(build.SourceBranch)
     displayName: 'Package Up the Build'
 
-  - publish: release/*
+  - publish: $(build.SourcesDirectory)/release/*
     artifact: raven-$(build.BuildNumber)-$(os)
     displayName: Gather Build Artifacts
