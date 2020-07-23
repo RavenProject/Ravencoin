@@ -264,7 +264,10 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
             if (assetsCache) {
                 CAssetOutputEntry assetData;
                 if (GetAssetData(tx.vout[i].scriptPubKey, assetData)) {
-                    if (assetData.type == TX_TRANSFER_ASSET && !tx.vout[i].scriptPubKey.IsUnspendable()) {
+
+                    // If this is a transfer asset, and the amount is greater than zero
+                    // We want to make sure it is added to the asset addresses database if (fAssetIndex == true)
+                    if (assetData.type == TX_TRANSFER_ASSET && assetData.nAmount > 0) {
                         CAssetTransfer assetTransfer;
                         std::string address;
                         if (!TransferAssetFromScript(tx.vout[i].scriptPubKey, assetTransfer, address))
