@@ -11,6 +11,7 @@
 #include <QSortFilterProxyModel>
 #include <QWidget>
 #include <QMenu>
+#include <QPainterPath>
 #include <memory>
 
 class ClientModel;
