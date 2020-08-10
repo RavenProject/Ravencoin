@@ -2517,6 +2517,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         nInputs += tx.vin.size();
 
+        if (tx.IsCoinBase() && AreCoinbaseCheckAssetsDeployed()) {
+            for (unsigned int i = 0; i < tx.vout.size(); i++) {
+                if (tx.vout[i].scriptPubKey.IsAssetScript()) {
+                    return state.DoS(0, error("%s: coinbase contains asset transaction", __func__),
+                                     REJECT_INVALID, "bad-txns-coinbase-contains-asset-txes");
+                }
+            }
+        }
+
         if (!tx.IsCoinBase())
         {
             CAmount txfee = 0;
@@ -5745,6 +5754,18 @@ bool AreEnforcedValuesDeployed()
         fEnforcedValuesIsActive = true;
 
     return fEnforcedValuesIsActive;
+}
+
+bool AreCoinbaseCheckAssetsDeployed()
+{
+    if (fCheckCoinbaseAssetsIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_COINBASE_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        fCheckCoinbaseAssetsIsActive = true;
+
+    return fCheckCoinbaseAssetsIsActive;
 }
 
 bool AreAssetsDeployed()
