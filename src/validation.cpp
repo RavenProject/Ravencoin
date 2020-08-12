@@ -2518,8 +2518,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         nInputs += tx.vin.size();
 
         if (tx.IsCoinBase() && AreCoinbaseCheckAssetsDeployed()) {
-            for (unsigned int i = 0; i < tx.vout.size(); i++) {
-                if (tx.vout[i].scriptPubKey.IsAssetScript()) {
+            for (auto vout : tx.vout) {
+                if (vout.scriptPubKey.IsAssetScript() || vout.scriptPubKey.IsNullAsset()) {
                     return state.DoS(0, error("%s: coinbase contains asset transaction", __func__),
                                      REJECT_INVALID, "bad-txns-coinbase-contains-asset-txes");
                 }
