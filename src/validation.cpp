@@ -5735,6 +5735,11 @@ void SetEnforcedValues(bool value) {
     fEnforcedValuesIsActive = value;
 }
 
+void SetEnforcedCoinbase(bool value)
+{
+    fCheckCoinbaseAssetsIsActive = value;
+}
+
 bool AreEnforcedValuesDeployed()
 {
     if (fEnforcedValuesIsActive)
