@@ -2517,15 +2517,6 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
         nInputs += tx.vin.size();
 
-        if (tx.IsCoinBase() && AreCoinbaseCheckAssetsDeployed()) {
-            for (auto vout : tx.vout) {
-                if (vout.scriptPubKey.IsAssetScript() || vout.scriptPubKey.IsNullAsset()) {
-                    return state.DoS(0, error("%s: coinbase contains asset transaction", __func__),
-                                     REJECT_INVALID, "bad-txns-coinbase-contains-asset-txes");
-                }
-            }
-        }
-
         if (!tx.IsCoinBase())
         {
             CAmount txfee = 0;
