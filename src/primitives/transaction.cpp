@@ -89,16 +89,19 @@ CTransaction::CTransaction() : vin(), vout(), nVersion(CTransaction::CURRENT_VER
 CTransaction::CTransaction(const CMutableTransaction &tx) : vin(tx.vin), vout(tx.vout), nVersion(tx.nVersion), nLockTime(tx.nLockTime), hash(ComputeHash()) {}
 CTransaction::CTransaction(CMutableTransaction &&tx) : vin(std::move(tx.vin)), vout(std::move(tx.vout)), nVersion(tx.nVersion), nLockTime(tx.nLockTime), hash(ComputeHash()) {}
 
-CAmount CTransaction::GetValueOut() const
+CAmount CTransaction::GetValueOut(const bool fAreEnforcedValues) const
 {
     CAmount nValueOut = 0;
     for (const auto& tx_out : vout) {
-        
-        // Because we don't want to deal with assets messing up this calculation
-        // If this is an asset tx, we should move onto the next output in the transaction
-        // This will also help with processing speed of transaction that contain a large amounts of asset outputs in a transaction
-        if (tx_out.scriptPubKey.IsAssetScript())
-            continue;
+
+        // Stop doing this check after Enforced Values BIP goes active
+        if (!fAreEnforcedValues) {
+            // Because we don't want to deal with assets messing up this calculation
+            // If this is an asset tx, we should move onto the next output in the transaction
+            // This will also help with processing speed of transaction that contain a large amounts of asset outputs in a transaction
+            if (tx_out.scriptPubKey.IsAssetScript())
+                continue;
+        }
         
         nValueOut += tx_out.nValue;
         if (!MoneyRange(tx_out.nValue) || !MoneyRange(nValueOut))

@@ -264,14 +264,15 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
             if (assetsCache) {
                 CAssetOutputEntry assetData;
                 if (GetAssetData(tx.vout[i].scriptPubKey, assetData)) {
-                    if (assetData.type == TX_TRANSFER_ASSET && !tx.vout[i].scriptPubKey.IsUnspendable()) {
-                        CAssetTransfer assetTransfer;
-                        std::string address;
-                        if (!TransferAssetFromScript(tx.vout[i].scriptPubKey, assetTransfer, address))
-                            LogPrintf(
-                                    "%s : ERROR - Received a coin that was a Transfer Asset but failed to get the transfer object from the scriptPubKey. CTxOut: %s\n",
-                                    __func__, tx.vout[i].ToString());
 
+                    // If this is a transfer asset, and the amount is greater than zero
+                    // We want to make sure it is added to the asset addresses database if (fAssetIndex == true)
+                    if (assetData.type == TX_TRANSFER_ASSET && assetData.nAmount > 0) {
+                        // Create the objects needed from the assetData
+                        CAssetTransfer assetTransfer(assetData.assetName, assetData.nAmount, assetData.message, assetData.expireTime);
+                        std::string address = EncodeDestination(assetData.destination);
+
+                        // Add the transfer asset data to the asset cache
                         if (!assetsCache->AddTransferAsset(assetTransfer, address, COutPoint(txid, i), tx.vout[i]))
                             LogPrintf("%s : ERROR - Failed to add transfer asset CTxOut: %s\n", __func__,
                                       tx.vout[i].ToString());
