@@ -29,6 +29,7 @@
 
 #include <QDebug>
 #include <QTimer>
+#include <QPainterPath>
 #include <QGraphicsDropShadowEffect>
 #include <QScrollBar>
 
