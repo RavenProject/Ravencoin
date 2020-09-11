@@ -4,8 +4,14 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
-- azure-builds
+  pr:
+    branches:
+      include:
+      - master
+      - develop
+  branches:
+    include:
+    - release*
 
 jobs:
 - job:
