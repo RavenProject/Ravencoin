@@ -1,4 +1,5 @@
 buildspecs
+linux64
 Jenkinsfile
 *.tar.gz
 
