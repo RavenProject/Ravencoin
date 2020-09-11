@@ -4,14 +4,13 @@
 # https://aka.ms/yaml
 
 trigger:
-  pr:
-    branches:
-      include:
-      - master
-      - develop
-  branches:
-    include:
-    - release*
+- release*
+
+pr:
+ branches:
+  include:
+  - master
+  - develop
 
 jobs:
 - job:
