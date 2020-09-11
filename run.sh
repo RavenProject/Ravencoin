@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 env
 if [[ -e /etc/raven/ravend.conf ]]; then
