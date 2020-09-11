@@ -32,13 +32,8 @@ if [[ -e /etc/raven/ravend.conf ]]; then
       -reindex=$REINDEX \
       -testnet=$TESTNET
 else
-
-  if [[ $SERVER ]]; then
-    $SERVER_ARG = "-server=$SERVER"
-  fi
-
   /home/raven/ravend \
-    $SERVER_ARG \
+    -server=$SERVER \
     -printtoconsole=$PRINTTOCONSOLE \
     -maxconnections=$MAXCONNECTIONS \
     -datadir=$DATADIR \
