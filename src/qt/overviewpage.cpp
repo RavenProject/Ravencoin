@@ -32,6 +32,7 @@
 #include <QTimer>
 #include <QGraphicsDropShadowEffect>
 #include <QScrollBar>
+#include <QUrl>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
 #define QTversionPreFiveEleven
