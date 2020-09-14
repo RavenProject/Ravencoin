@@ -43,7 +43,11 @@ public:
         /** Formatted amount, without brackets when unconfirmed */
             FormattedAmountRole = 102,
         /** AdministratorRole */
-            AdministratorRole = 103
+            AdministratorRole = 103,
+        /** RVN or name of an asset */
+            AssetIPFSHashRole = 104,
+        /** IPFS Decoration Role */
+            AssetIPFSHashDecorationRole = 105
     };
 
     int rowCount(const QModelIndex &parent) const;
@@ -52,6 +56,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
     QString formatTooltip(const AssetRecord *rec) const;
+    QString formatAssetData(const AssetRecord *wtx) const;
     QString formatAssetName(const AssetRecord *wtx) const;
     QString formatAssetQuantity(const AssetRecord *wtx) const;
 

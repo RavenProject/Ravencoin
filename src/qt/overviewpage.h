@@ -77,10 +77,11 @@ private:
     QAction *issueSub;
     QAction *issueUnique;
     QAction *reissue;
+    QAction *openURL;
 
 
 private Q_SLOTS:
-            void updateDisplayUnit();
+    void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
     void handleAssetClicked(const QModelIndex &index);
     void updateAlerts(const QString &warnings);

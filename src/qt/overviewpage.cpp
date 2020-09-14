@@ -21,6 +21,7 @@
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
+#include <QDesktopServices>
 #include <validation.h>
 #include <utiltime.h>
 
@@ -163,11 +164,13 @@ public:
 
         /** Get the icon for the administrator of the asset */
         QPixmap pixmap = qvariant_cast<QPixmap>(index.data(Qt::DecorationRole));
+        QPixmap ipfspixmap = qvariant_cast<QPixmap>(index.data(AssetTableModel::AssetIPFSHashDecorationRole));
 
         bool admin = index.data(AssetTableModel::AdministratorRole).toBool();
 
         /** Need to know the heigh to the pixmap. If it is 0 we don't we dont own this asset so dont have room for the icon */
         int nIconSize = admin ? pixmap.height() : 0;
+        int nIPFSIconSize = ipfspixmap.height();
         int extraNameSpacing = 12;
         if (nIconSize)
             extraNameSpacing = 0;
@@ -188,7 +191,8 @@ public:
         /** Create the three main rectangles  (Icon, Name, Amount) */
         QRect assetAdministratorRect(QPoint(20, gradientRect.top() + halfheight/2 - 3*ypad), QSize(nIconSize, nIconSize));
         QRect assetNameRect(gradientRect.left() + xspace - extraNameSpacing, gradientRect.top()+ypad+(halfheight/2), gradientRect.width() - xspace, halfheight + ypad);
-        QRect amountRect(gradientRect.left() + xspace, gradientRect.top()+ypad+(halfheight/2), gradientRect.width() - xspace - 16, halfheight);
+        QRect amountRect(gradientRect.left() + xspace, gradientRect.top()+ypad+(halfheight/2), gradientRect.width() - xspace - 24, halfheight);
+        QRect ipfsLinkRect(QPoint(gradientRect.right() - nIconSize/2, gradientRect.top() + halfheight/1.5), QSize(nIconSize/2, nIconSize/2));
 
         // Create the gradient for the asset items
         QLinearGradient gradient(mainRect.topLeft(), mainRect.bottomRight());
@@ -223,6 +227,9 @@ public:
         /** Draw asset administrator icon */
         if (nIconSize)
             painter->drawPixmap(assetAdministratorRect, pixmap);
+
+        if (nIPFSIconSize)
+            painter->drawPixmap(ipfsLinkRect, ipfspixmap);
 
         /** Create the font that is used for painting the asset name */
         QFont nameFont;
@@ -270,7 +277,6 @@ public:
         /** Paint the asset name */
         painter->setPen(penName);
         painter->drawText(assetNameRect, Qt::AlignLeft|Qt::AlignVCenter, name);
-
 
         /** Paint the amount */
         painter->setFont(amountFont);
@@ -409,6 +415,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     issueSub = new QAction(tr("Issue Sub Asset"), this);
     issueUnique = new QAction(tr("Issue Unique Asset"), this);
     reissue = new QAction(tr("Reissue Asset"), this);
+    openURL = new QAction(tr("Open IPFS in Browser"), this);
 
     sendAction->setObjectName("Send");
     issueSub->setObjectName("Sub");
@@ -416,6 +423,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     reissue->setObjectName("Reissue");
     copyNameAction->setObjectName("Copy Name");
     copyAmountAction->setObjectName("Copy Amount");
+    openURL->setObjectName("Browse");
 
     // context menu
     contextMenu = new QMenu(this);
@@ -423,6 +431,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     contextMenu->addAction(issueSub);
     contextMenu->addAction(issueUnique);
     contextMenu->addAction(reissue);
+    contextMenu->addAction(openURL);
     contextMenu->addSeparator();
     contextMenu->addAction(copyNameAction);
     contextMenu->addAction(copyAmountAction);
@@ -439,11 +448,19 @@ void OverviewPage::handleAssetClicked(const QModelIndex &index)
 {
     if(assetFilter) {
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
+        QString ipfshash = index.data(AssetTableModel::AssetIPFSHashRole).toString();
         if (IsAssetNameAnOwner(name.toStdString())) {
             name = name.left(name.size() - 1);
             sendAction->setDisabled(true);
         } else {
             sendAction->setDisabled(false);
+        }
+
+        // If the ipfs hash isn't there or doesn't start with Qm, disable the action item
+        if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0) {
+            openURL->setDisabled(false);
+        } else {
+            openURL->setDisabled(true);
         }
 
         if (!index.data(AssetTableModel::AdministratorRole).toBool()) {
@@ -466,20 +483,22 @@ void OverviewPage::handleAssetClicked(const QModelIndex &index)
 
         if (action) {
             if (action->objectName() == "Send")
-                    Q_EMIT assetSendClicked(assetFilter->mapToSource(index));
+                Q_EMIT assetSendClicked(assetFilter->mapToSource(index));
             else if (action->objectName() == "Sub")
-                    Q_EMIT assetIssueSubClicked(assetFilter->mapToSource(index));
+                Q_EMIT assetIssueSubClicked(assetFilter->mapToSource(index));
             else if (action->objectName() == "Unique")
-                    Q_EMIT assetIssueUniqueClicked(assetFilter->mapToSource(index));
+                Q_EMIT assetIssueUniqueClicked(assetFilter->mapToSource(index));
             else if (action->objectName() == "Reissue")
-                    Q_EMIT assetReissueClicked(assetFilter->mapToSource(index));
+                Q_EMIT assetReissueClicked(assetFilter->mapToSource(index));
             else if (action->objectName() == "Copy Name")
                 GUIUtil::setClipboard(index.data(AssetTableModel::AssetNameRole).toString());
             else if (action->objectName() == "Copy Amount")
                 GUIUtil::setClipboard(index.data(AssetTableModel::FormattedAmountRole).toString());
+            else if (action->objectName() == "Browse") {
+                QDesktopServices::openUrl(QUrl::fromUserInput("https://cloudflare-ipfs.com/ipfs/" + ipfshash));
+            }
         }
     }
-
 }
 
 void OverviewPage::handleOutOfSyncWarningClicks()
