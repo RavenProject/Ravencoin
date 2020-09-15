@@ -345,7 +345,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     connect(asset_typing_delay, SIGNAL(timeout()), this, SLOT(assetSearchChanged()));
 
     connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
-    connect(ui->listAssets, SIGNAL(clicked(QModelIndex)), this, SLOT(handleAssetClicked(QModelIndex)));
+    ui->listAssets->viewport()->installEventFilter(this);
 
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
@@ -439,17 +439,41 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     // context menu signals
 }
 
+bool OverviewPage::eventFilter(QObject *object, QEvent *event)
+{
+    // If the asset viewport is being clicked
+    if (object == ui->listAssets->viewport() && event->type() == QEvent::MouseButtonPress) {
+
+        // Grab the mouse event
+        QMouseEvent * mouseEv = static_cast<QMouseEvent*>(event);
+
+        // Select the current index at the mouse location
+        QModelIndex currentIndex = ui->listAssets->indexAt(mouseEv->pos());
+
+        // Open the menu on right click, direct url on left click
+        if (mouseEv->buttons() & Qt::RightButton ) {
+            handleAssetRightClicked(currentIndex);
+        } else if (mouseEv->buttons() & Qt::LeftButton) {
+            openIPFSForAsset(currentIndex);
+        }
+    }
+
+    return QWidget::eventFilter(object, event);
+}
+
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 {
     if(filter)
         Q_EMIT transactionClicked(filter->mapToSource(index));
 }
 
-void OverviewPage::handleAssetClicked(const QModelIndex &index)
+void OverviewPage::handleAssetRightClicked(const QModelIndex &index)
 {
     if(assetFilter) {
+        // Grab the data elements from the index that we need to disable and enable menu items
         QString name = index.data(AssetTableModel::AssetNameRole).toString();
         QString ipfshash = index.data(AssetTableModel::AssetIPFSHashRole).toString();
+
         if (IsAssetNameAnOwner(name.toStdString())) {
             name = name.left(name.size() - 1);
             sendAction->setDisabled(true);
@@ -664,4 +688,15 @@ void OverviewPage::assetSearchChanged()
     if (!assetFilter)
         return;
     assetFilter->setAssetNamePrefix(ui->assetSearch->text());
+}
+
+void OverviewPage::openIPFSForAsset(const QModelIndex &index)
+{
+    // Get the ipfs hash of the asset clicked
+    QString ipfshash = index.data(AssetTableModel::AssetIPFSHashRole).toString();
+
+    // If the ipfs hash isn't there or doesn't start with Qm, disable the action item
+    if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0) {
+        QDesktopServices::openUrl(QUrl::fromUserInput("https://cloudflare-ipfs.com/ipfs/" + ipfshash));
+    }
 }
