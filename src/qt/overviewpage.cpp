@@ -22,6 +22,7 @@
 #include <QAbstractItemDelegate>
 #include <QPainter>
 #include <QDesktopServices>
+#include <QMouseEvent>
 #include <validation.h>
 #include <utiltime.h>
 
