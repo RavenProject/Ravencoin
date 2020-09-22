@@ -1,4 +1,4 @@
-name: Build Raven
+name: Build Raxven
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
       - release*
   pull_request:
     branches:
+      - master
       - develop
       - release*
     paths-ignore:
