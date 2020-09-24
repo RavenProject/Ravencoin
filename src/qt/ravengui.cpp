@@ -69,6 +69,10 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
+// Fixing Boost 1.73 compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include <QTextDocument>
 #include <QUrl>
