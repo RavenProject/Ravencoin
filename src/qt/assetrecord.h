@@ -18,12 +18,12 @@ class AssetRecord
 public:
 
     AssetRecord():
-            name(""), quantity(0), units(0), fIsAdministrator(false)
+            name(""), quantity(0), units(0), fIsAdministrator(false), ipfshash("")
     {
     }
 
-    AssetRecord(const std::string _name, const CAmount& _quantity, const int _units, const bool _fIsAdministrator):
-            name(_name), quantity(_quantity), units(_units), fIsAdministrator(_fIsAdministrator)
+    AssetRecord(const std::string _name, const CAmount& _quantity, const int _units, const bool _fIsAdministrator, const std::string _ipfshash):
+            name(_name), quantity(_quantity), units(_units), fIsAdministrator(_fIsAdministrator), ipfshash(_ipfshash)
     {
     }
 
@@ -48,6 +48,7 @@ public:
     CAmount quantity;
     int units;
     bool fIsAdministrator;
+    std::string ipfshash;
     /**@}*/
 
 };
