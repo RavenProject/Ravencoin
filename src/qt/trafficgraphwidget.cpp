@@ -7,6 +7,7 @@
 #include "clientmodel.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QColor>
 #include <QTimer>
 

@@ -26,6 +26,9 @@
 #include <QDebug>
 #include <QTimer>
 
+// Fixing Boost 1.73 compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 class CBlockIndex;
 
 static int64_t nLastHeaderTipUpdateNotification = 0;

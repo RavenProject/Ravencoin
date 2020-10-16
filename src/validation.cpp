@@ -60,6 +60,10 @@
 #include "assets/snapshotrequestdb.h"
 #include "assets/assetsnapshotdb.h"
 
+// Fixing Boost 1.73 compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
+
 #if defined(NDEBUG)
 # error "Raven cannot be compiled without assertions."
 #endif
