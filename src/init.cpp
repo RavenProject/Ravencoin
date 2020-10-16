@@ -65,7 +65,9 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/bind.hpp>
+// Fixing Boost 1.73 compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/thread.hpp>
 #include <openssl/crypto.h>
