@@ -14,8 +14,10 @@
 #include <consensus/validation.h>
 #include <consensus/tx_verify.h>
 #include <validation.h>
+#ifdef ENABLE_WALLET
 #include <wallet/db.h>
 #include <wallet/wallet.h>
+#endif
 
 BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
@@ -542,6 +544,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK(state.GetRejectReason() == "bad-txns-asset-reissued-amount-isn't-zero");
     }
 
+#ifdef ENABLE_WALLET
     BOOST_AUTO_TEST_CASE(asset_tx_enforce_coinbase_test)
     {
         BOOST_TEST_MESSAGE("Running Asset TX Enforce Coinbase Test");
@@ -602,5 +605,6 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         bitdb.Flush(true);
         bitdb.Reset();
     }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
