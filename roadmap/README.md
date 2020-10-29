@@ -39,11 +39,11 @@ The RVN used to issue assets will be sent to a burn address, which will reduce t
 
 Asset transfers require the standard RVN transaction fees for transfer from one address to another.
 
-#### Metadata
+#### Metadata (Complete)
 
 Metadata about the token can be stored in IPFS.
 
-#### Rewards
+#### Rewards (Complete)
 
 Reward capabilities will be added to allow payment (in RVN) to all holders of an asset. Payments of RVN would be distributed to all asset holders pro rata. This is useful for paying dividends, dividing payments, or rewarding a group of token holders.
 
@@ -53,7 +53,7 @@ Example: A small software company issues an asset GAMECO that represents a share
 
 Raven may increase the blocksize from 2 MB to X MB to allow for more on-chain transactions.
 
-### Phase 3 - Rewards
+### Phase 3 - Rewards (Complete)
 
 Rewards allow payment in RVN to asset holders.
 
