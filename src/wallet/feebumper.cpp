@@ -139,7 +139,7 @@ CFeeBumper::CFeeBumper(const CWallet *pWallet, const uint256 txidIn, const CCoin
     }
 
     // calculate the old fee and fee-rate
-    nOldFee = wtx.GetDebit(ISMINE_SPENDABLE) - wtx.tx->GetValueOut();
+    nOldFee = wtx.GetDebit(ISMINE_SPENDABLE) - wtx.tx->GetValueOut(AreEnforcedValuesDeployed());
     CFeeRate nOldFeeRate(nOldFee, txSize);
     CFeeRate nNewFeeRate;
     // The wallet uses a conservative WALLET_INCREMENTAL_RELAY_FEE value to

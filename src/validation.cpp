@@ -60,6 +60,10 @@
 #include "assets/snapshotrequestdb.h"
 #include "assets/assetsnapshotdb.h"
 
+// Fixing Boost 1.73 compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
+
 #if defined(NDEBUG)
 # error "Raven cannot be compiled without assertions."
 #endif
@@ -2734,10 +2738,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
-    if (block.vtx[0]->GetValueOut() > blockReward)
+    if (block.vtx[0]->GetValueOut(AreEnforcedValuesDeployed()) > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
-                               block.vtx[0]->GetValueOut(), blockReward),
+                               block.vtx[0]->GetValueOut(AreEnforcedValuesDeployed()), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
 
     if (!control.Wait())
@@ -5745,6 +5749,18 @@ bool AreEnforcedValuesDeployed()
         fEnforcedValuesIsActive = true;
 
     return fEnforcedValuesIsActive;
+}
+
+bool AreCoinbaseCheckAssetsDeployed()
+{
+    if (fCheckCoinbaseAssetsIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_COINBASE_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        fCheckCoinbaseAssetsIsActive = true;
+
+    return fCheckCoinbaseAssetsIsActive;
 }
 
 bool AreAssetsDeployed()

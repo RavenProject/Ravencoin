@@ -597,6 +597,8 @@ bool AreRestrictedAssetsDeployed();
 
 bool AreEnforcedValuesDeployed();
 
+bool AreCoinbaseCheckAssetsDeployed();
+
 // Only used by test framework
 void SetEnforcedValues(bool value);
 

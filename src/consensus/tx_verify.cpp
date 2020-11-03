@@ -378,6 +378,15 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
     {
         if (tx.vin[0].scriptSig.size() < 2 || tx.vin[0].scriptSig.size() > 100)
             return state.DoS(100, false, REJECT_INVALID, "bad-cb-length");
+
+        if (AreCoinbaseCheckAssetsDeployed()) {
+            for (auto vout : tx.vout) {
+                if (vout.scriptPubKey.IsAssetScript() || vout.scriptPubKey.IsNullAsset()) {
+                    return state.DoS(0, error("%s: coinbase contains asset transaction", __func__),
+                                     REJECT_INVALID, "bad-txns-coinbase-contains-asset-txes");
+                }
+            }
+        }
     }
     else
     {
@@ -578,7 +587,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
         }
     }
 
-    const CAmount value_out = tx.GetValueOut();
+    const CAmount value_out = tx.GetValueOut(AreEnforcedValuesDeployed());
     if (nValueIn < value_out) {
         return state.DoS(100, false, REJECT_INVALID, "bad-txns-in-belowout", false,
             strprintf("value in (%s) < value out (%s)", FormatMoney(nValueIn), FormatMoney(value_out)), tx.GetHash());

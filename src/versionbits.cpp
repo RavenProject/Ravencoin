@@ -30,6 +30,10 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
             /*.name =*/ "enforce_value",
             /*.gbt_force =*/ true,
+    },
+    {
+            /*.name =*/ "coinbase",
+            /*.gbt_force =*/ true,
     }
 };
 
