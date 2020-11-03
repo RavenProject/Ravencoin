@@ -65,7 +65,23 @@ reasons to make the configuration file and data directory only readable by the
 raven user and group.  Access to raven-cli and other ravend rpc clients
 can then be controlled by group membership.
 
-### Mac OS X
+NOTE: When using the systemd .service file, the creation of the aforementioned
+directories and the setting of their permissions is automatically handled by
+systemd. Directories are given a permission of 710, giving the ravencoin group
+access to files under it _if_ the files themselves give permission to the
+ravencoin group to do so (e.g. when `-sysperms` is specified). This does not allow
+for the listing of files under the directory.
+
+NOTE: It is not currently possible to override `datadir` in
+`/etc/raven/raven.conf` with the current systemd, OpenRC, and Upstart init
+files out-of-the-box. This is because the command line options specified in the
+init files take precedence over the configurations in
+`/etc/raven/raven.conf`. However, some init systems have their own
+configuration mechanisms that would allow for overriding the command line
+options specified in the init files (e.g. setting `RAVEND_DATADIR` for
+OpenRC).
+
+### macOS
 
 Binary:              `/usr/local/bin/ravend`  
 Configuration file:  `~/Library/Application Support/Raven/raven.conf`  
