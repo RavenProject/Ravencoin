@@ -21,6 +21,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
+#include <QDesktopServices>
 
 AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode _mode, Tabs _tab, QWidget *parent) :
     QDialog(parent),
@@ -79,6 +80,7 @@ AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode _mode,
 
     // Context menu actions
     QAction *copyAddressAction = new QAction(tr("&Copy Address"), this);
+    QAction *openAddressExplorerAction = new QAction(tr("&Open address in block explorer"), this);
     QAction *copyLabelAction = new QAction(tr("Copy &Label"), this);
     QAction *editAction = new QAction(tr("&Edit"), this);
     deleteAction = new QAction(ui->deleteAddress->text(), this);
@@ -86,6 +88,7 @@ AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode _mode,
     // Build context menu
     contextMenu = new QMenu(this);
     contextMenu->addAction(copyAddressAction);
+    contextMenu->addAction(openAddressExplorerAction);
     contextMenu->addAction(copyLabelAction);
     contextMenu->addAction(editAction);
     if(tab == SendingTab)
@@ -94,6 +97,7 @@ AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode _mode,
 
     // Connect signals for context menu actions
     connect(copyAddressAction, SIGNAL(triggered()), this, SLOT(on_copyAddress_clicked()));
+    connect(openAddressExplorerAction, SIGNAL(triggered()), this, SLOT(onOpenAddressExplorerAction()));
     connect(copyLabelAction, SIGNAL(triggered()), this, SLOT(onCopyLabelAction()));
     connect(editAction, SIGNAL(triggered()), this, SLOT(onEditAction()));
     connect(deleteAction, SIGNAL(triggered()), this, SLOT(on_deleteAddress_clicked()));
@@ -151,6 +155,13 @@ void AddressBookPage::setModel(AddressTableModel *_model)
     connect(_model, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(selectNewAddress(QModelIndex,int,int)));
 
     selectionChanged();
+}
+
+void AddressBookPage::onOpenAddressExplorerAction()
+{
+    QString explorer = "https://explorer.ravenland.org/address/";
+    QString address = GUIUtil::getEntryData(ui->tableView, 1)[0].data(0).toString();  
+    QDesktopServices::openUrl(QUrl(explorer + address, QUrl::TolerantMode));
 }
 
 void AddressBookPage::on_copyAddress_clicked()

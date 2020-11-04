@@ -174,6 +174,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
 //    bumpFeeAction = new QAction(tr("Increase transaction fee"), this);
 //    bumpFeeAction->setObjectName("bumpFeeAction");
     QAction *copyAddressAction = new QAction(tr("Copy address"), this);
+    QAction *openAddressExplorerAction = new QAction(tr("Open address in block explorer"), this);
     QAction *copyLabelAction = new QAction(tr("Copy label"), this);
     QAction *copyAmountAction = new QAction(tr("Copy amount"), this);
     QAction *copyTxIDAction = new QAction(tr("Copy transaction ID"), this);
@@ -185,6 +186,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
     contextMenu = new QMenu(this);
     contextMenu->setObjectName("contextMenu");
     contextMenu->addAction(copyAddressAction);
+    contextMenu->addAction(openAddressExplorerAction);
     contextMenu->addAction(copyLabelAction);
     contextMenu->addAction(copyAmountAction);
     contextMenu->addAction(copyTxIDAction);
@@ -218,6 +220,7 @@ TransactionView::TransactionView(const PlatformStyle *platformStyle, QWidget *pa
 //    connect(bumpFeeAction, SIGNAL(triggered()), this, SLOT(bumpFee()));
     connect(abandonAction, SIGNAL(triggered()), this, SLOT(abandonTx()));
     connect(copyAddressAction, SIGNAL(triggered()), this, SLOT(copyAddress()));
+    connect(openAddressExplorerAction, SIGNAL(triggered()), this, SLOT(openAddressExplorer()));
     connect(copyLabelAction, SIGNAL(triggered()), this, SLOT(copyLabel()));
     connect(copyAmountAction, SIGNAL(triggered()), this, SLOT(copyAmount()));
     connect(copyTxIDAction, SIGNAL(triggered()), this, SLOT(copyTxID()));
@@ -512,6 +515,13 @@ void TransactionView::bumpFee()
 void TransactionView::copyAddress()
 {
     GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::AddressRole);
+}
+
+void TransactionView::openAddressExplorer()
+{
+    QString explorer = "https://explorer.ravenland.org/address/";
+    QString address = GUIUtil::getEntryData(transactionView, 0)[0].data(TransactionTableModel::AddressRole).toString();
+    QDesktopServices::openUrl(QUrl(explorer + address, QUrl::TolerantMode));
 }
 
 void TransactionView::copyLabel()
