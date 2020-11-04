@@ -5739,6 +5739,14 @@ void SetEnforcedValues(bool value) {
     fEnforcedValuesIsActive = value;
 }
 
+#ifdef ENABLE_WALLET
+void SetEnforcedCoinbase(bool value)
+{
+    fCheckCoinbaseAssetsIsActive = value;
+}
+#endif
+
+
 bool AreEnforcedValuesDeployed()
 {
     if (fEnforcedValuesIsActive)

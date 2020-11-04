@@ -601,6 +601,9 @@ bool AreCoinbaseCheckAssetsDeployed();
 
 // Only used by test framework
 void SetEnforcedValues(bool value);
+#ifdef ENABLE_WALLET
+void SetEnforcedCoinbase(bool value);
+#endif
 
 bool IsRip5Active();
 
