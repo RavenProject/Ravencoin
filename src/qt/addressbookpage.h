@@ -67,6 +67,8 @@ private Q_SLOTS:
     /** Copy address of currently selected address entry to clipboard */
     void on_copyAddress_clicked();
     /** Copy label of currently selected address entry to clipboard (no button) */
+    void onOpenAddressExplorerAction();
+    /** Open the block explorer on the page of the currently selected address entry**/
     void onCopyLabelAction();
     /** Edit currently selected address entry (no button) */
     void onEditAction();

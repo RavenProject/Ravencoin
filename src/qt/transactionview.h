@@ -97,6 +97,7 @@ private Q_SLOTS:
     void dateRangeChanged();
     void showDetails();
     void copyAddress();
+    void openAddressExplorer();
     void editLabel();
     void copyLabel();
     void copyAssetName();
