@@ -22,6 +22,7 @@
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
 #include <QDesktopServices>
+#include <QUrl>
 
 AddressBookPage::AddressBookPage(const PlatformStyle *platformStyle, Mode _mode, Tabs _tab, QWidget *parent) :
     QDialog(parent),
