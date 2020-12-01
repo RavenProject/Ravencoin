@@ -3,7 +3,8 @@
 OS=${1}
 GITHUB_WORKSPACE=${2}
 
-export BOOST_TEST_LOG_LEVEL=error
+# "all" is too much log information. This will increase from verbosity from error"
+#export BOOST_TEST_LOG_LEVEL=all
 
 if [[ ${OS} == "windows" ]]; then
     echo "----------------------------------------"

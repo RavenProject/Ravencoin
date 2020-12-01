@@ -55,6 +55,7 @@ public:
                     // retrieve units for asset
                     uint8_t units = OWNER_UNITS;
                     bool fIsAdministrator = true;
+                    std::string ipfsHash = "";
 
                     if (setAssetsToSkip.count(bal->first))
                         continue;
@@ -67,6 +68,7 @@ public:
                             return;
                         }
                         units = assetData.units;
+                        ipfsHash = assetData.strIPFSHash;
                         // If we have the administrator asset, add it to the skip listå
                         if (balances.count(bal->first + OWNER_TAG)) {
                             setAssetsToSkip.insert(bal->first + OWNER_TAG);
@@ -82,7 +84,7 @@ public:
                             continue;
                         }
                     }
-                    cachedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator));
+                    cachedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator, EncodeAssetData(ipfsHash)));
                 }
             }
         }
@@ -158,8 +160,25 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
         case FormattedAmountRole:
             return QString::fromStdString(rec->formattedQuantity());
         case AdministratorRole:
-        {
             return rec->fIsAdministrator;
+        case AssetIPFSHashRole:
+            return QString::fromStdString(rec->ipfshash);
+        case AssetIPFSHashDecorationRole:
+        {
+            if (index.column() == Quantity)
+                return QVariant();
+
+            if (rec->ipfshash.size() == 0)
+                return QVariant();
+
+            QPixmap pixmap;
+
+            if (darkModeEnabled)
+                pixmap = QPixmap::fromImage(QImage(":/icons/external_link_dark"));
+            else
+                pixmap = QPixmap::fromImage(QImage(":/icons/external_link"));
+
+            return pixmap;
         }
         case Qt::DecorationRole:
         {
@@ -235,7 +254,7 @@ QModelIndex AssetTableModel::index(int row, int column, const QModelIndex &paren
 
 QString AssetTableModel::formatTooltip(const AssetRecord *rec) const
 {
-    QString tooltip = formatAssetName(rec) + QString("\n") + formatAssetQuantity(rec);
+    QString tooltip = formatAssetName(rec) + QString("\n") + formatAssetQuantity(rec) + QString("\n") + formatAssetData(rec);
     return tooltip;
 }
 
@@ -247,4 +266,9 @@ QString AssetTableModel::formatAssetName(const AssetRecord *wtx) const
 QString AssetTableModel::formatAssetQuantity(const AssetRecord *wtx) const
 {
     return QString::fromStdString(wtx->formattedQuantity());
+}
+
+QString AssetTableModel::formatAssetData(const AssetRecord *wtx) const
+{
+    return QString::fromStdString(wtx->ipfshash);
 }
