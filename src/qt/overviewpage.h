@@ -44,6 +44,9 @@ public:
     void showOutOfSyncWarning(bool fShow);
     void showAssets();
 
+    bool eventFilter(QObject *object, QEvent *event);
+    void openIPFSForAsset(const QModelIndex &index);
+
 public Q_SLOTS:
             void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                             const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);
@@ -77,12 +80,13 @@ private:
     QAction *issueSub;
     QAction *issueUnique;
     QAction *reissue;
+    QAction *openURL;
 
 
 private Q_SLOTS:
-            void updateDisplayUnit();
+    void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
-    void handleAssetClicked(const QModelIndex &index);
+    void handleAssetRightClicked(const QModelIndex &index);
     void updateAlerts(const QString &warnings);
     void updateWatchOnlyLabels(bool showWatchOnly);
     void handleOutOfSyncWarningClicks();
