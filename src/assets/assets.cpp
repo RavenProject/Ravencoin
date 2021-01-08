@@ -4517,7 +4517,7 @@ bool CNullAssetTxData::IsValid(std::string &strError, CAssetsCache &assetCache, 
         return false;
     }
 
-    if (flag != 0 || flag != 1) {
+    if (flag != 0 && flag != 1) {
         strError = _("Flag must be 1 or 0");
         return false;
     }
