@@ -97,10 +97,10 @@ the commit it claims to have been updated to.
 
 To use, make sure that you have fetched the upstream repository branch in which the subtree is
 maintained:
-* for `src/secp256k1`: https://github.com/raven-core/secp256k1.git (branch master)
-* for `src/leveldb`: https://github.com/raven-core/leveldb.git (branch raven-fork)
-* for `src/univalue`: https://github.com/raven-core/univalue.git (branch master)
-* for `src/crypto/ctaes`: https://github.com/raven-core/ctaes.git (branch master)
+* for `src/secp256k1`: https://github.com/bitcoin-core/secp256k1.git (branch master)
+* for `src/leveldb`: https://github.com/bitcoin-core/leveldb.git (branch raven-fork)
+* for `src/univalue`: https://github.com/bitcoin-core/univalue.git (branch master)
+* for `src/crypto/ctaes`: https://github.com/bitcoin-core/ctaes.git (branch master)
 
 Usage: `git-subtree-check.sh DIR (COMMIT)`
 
@@ -160,7 +160,7 @@ still compatible with the minimum supported Linux distribution versions.
 
 Example usage after a gitian build:
 
-    find ../gitian-builder/build -type f -executable | xargs python contrib/devtools/symbol-check.py 
+    find ../gitian-builder/build -type f -executable | xargs python contrib/devtools/symbol-check.py
 
 If only supported symbols are used the return value will be 0 and the output will be empty.
 

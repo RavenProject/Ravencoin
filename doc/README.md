@@ -20,11 +20,11 @@ The following are some helpful notes on how to run Ravencoin on your native plat
 3) Run the GUI wallet or only the Ravencoin core deamon
 
    a. GUI wallet:
-   
+
    `./raven-qt`
 
    b. Core deamon:
-   
+
    `./ravend -deamon`
 
 #### Ubuntu 16.04, 17.04/17.10 and 18.04
@@ -36,7 +36,7 @@ sudo apt update
 sudo apt install libevent-dev libboost-all-dev libminiupnpc10 libzmq5 software-properties-common
 ```
 
-The wallet requires version 4.8 of the Berkeley DB. The easiest way to get it is from the bitcoin repository: 
+The wallet requires version 4.8 of the Berkeley DB. The easiest way to get it is from the bitcoin repository:
 
 ```
 sudo add-apt-repository ppa:bitcoin/bitcoin
@@ -75,7 +75,7 @@ The GUI wallet requires the QR Code encoding library and Google's data interchan
 
 1) Download Raven-Qt.dmg.
 
-2) Double click the DMG to mount it. 
+2) Double click the DMG to mount it.
 
 3) Drag Raven Core icon to the Applications Folder
 
@@ -105,7 +105,6 @@ To resolve, you will need to copy libboost_system.dylib to libboost_system-mt.dy
 - See the documentation at the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
 for help and more information.
 - Ask for help on [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
-- Ask for help on the [RavencoinTalk](https://www.ravencointalk.org/) forums, in the [Development and Technical discussion board](https://www.ravencointalk.org/?forum=661517).
 
 Building from source
 ---------------------
@@ -136,7 +135,6 @@ Ravencoin repo's [root README](https://github.com/RavenProject/Ravencoin/blob/ma
 - [Benchmarking](https://github.com/RavenProject/Ravencoin/blob/master/doc/benchmarking.md)
 
 ### Resources
-- Discuss on the [RavencoinTalk](https://www.ravencointalk.org/) forums, in the [Development & Technical Discussion board](https://www.ravencointalk.org/?forum=661517).
 - Discuss on chat [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
 - Find out more on the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
 - Visit the project home [Ravencoin.org](https://ravencoin.org)
