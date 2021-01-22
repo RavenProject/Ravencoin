@@ -59,6 +59,7 @@ void QRImageWidget::mousePressEvent(QMouseEvent *event)
 
         QDrag *drag = new QDrag(this);
         drag->setMimeData(mimeData);
+        drag->setPixmap(QPixmap::fromImage(exportImage().scaled(100, 100, Qt::KeepAspectRatio)));
         drag->exec();
     } else {
         QLabel::mousePressEvent(event);
