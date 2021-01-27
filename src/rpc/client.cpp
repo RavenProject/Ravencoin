@@ -52,7 +52,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "transferfromaddresses", 1, "from_addresses"},
     { "transferfromaddresses", 2, "qty"},
     { "transferfromaddresses", 5, "expire_time"},
-    { "transferqualifier", 2, "qty"},
+    { "transferqualifier", 1, "qty"},
     { "transferqualifier", 5, "expire_time"},
     { "reissue", 1, "qty"},
     { "reissue", 4, "reissuable"},
