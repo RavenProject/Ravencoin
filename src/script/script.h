@@ -664,9 +664,11 @@ public:
 
     /** RVN START */
     enum class txnouttype;
-    bool IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) const;
-    bool IsAssetScript(int& nType, bool& fIsOwner) const;
     bool IsAssetScript() const;
+    bool IsAssetScript(int& nType, bool& fIsOwner) const;
+    bool IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner) const;
+    bool IsAssetScript(int& nTXType, int& nScriptType, bool& fIsOwner, int& nStartingIndex) const;
+    bool IsP2SHAssetScript() const;
     bool IsNewAsset() const;
     bool IsOwnerAsset() const;
     bool IsReissueAsset() const;
@@ -738,5 +740,7 @@ bool AmountFromReissueScript(const CScript& scriptPubKey, CAmount& nAmount);
 bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
+
+int SearchForRVN(const CScript& script, const int startingValue);
 
 #endif // RAVEN_SCRIPT_SCRIPT_H

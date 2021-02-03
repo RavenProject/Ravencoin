@@ -53,7 +53,8 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
 
     std::vector<valtype> vSolutions;
     txnouttype whichType;
-    if (!Solver(scriptPubKey, whichType, vSolutions)) {
+    txnouttype scriptType;
+    if (!Solver(scriptPubKey, whichType, scriptType, vSolutions)) {
         if (keystore.HaveWatchOnly(scriptPubKey))
             return ISMINE_WATCH_UNSOLVABLE;
         return ISMINE_NO;
@@ -145,52 +146,32 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
             break;
         }
             /** RVN START */
-        case TX_NEW_ASSET: {
-            if (!AreAssetsDeployed())
-                return ISMINE_NO;
-            keyID = CKeyID(uint160(vSolutions[0]));
-            if (sigversion != SIGVERSION_BASE) {
-                CPubKey pubkey;
-                if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
-                    isInvalid = true;
-                    return ISMINE_NO;
-                }
-            }
-            if (keystore.HaveKey(keyID))
-                return ISMINE_SPENDABLE;
-            break;
-
-        }
-
-        case TX_TRANSFER_ASSET: {
-            if (!AreAssetsDeployed())
-                return ISMINE_NO;
-            keyID = CKeyID(uint160(vSolutions[0]));
-            if (sigversion != SIGVERSION_BASE) {
-                CPubKey pubkey;
-                if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
-                    isInvalid = true;
-                    return ISMINE_NO;
-                }
-            }
-            if (keystore.HaveKey(keyID))
-                return ISMINE_SPENDABLE;
-            break;
-        }
-
+        case TX_NEW_ASSET:
+        case TX_TRANSFER_ASSET:
         case TX_REISSUE_ASSET: {
             if (!AreAssetsDeployed())
                 return ISMINE_NO;
-            keyID = CKeyID(uint160(vSolutions[0]));
-            if (sigversion != SIGVERSION_BASE) {
-                CPubKey pubkey;
-                if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
-                    isInvalid = true;
-                    return ISMINE_NO;
+
+            if (scriptType == TX_PUBKEYHASH) {
+                keyID = CKeyID(uint160(vSolutions[0]));
+                if (sigversion != SIGVERSION_BASE) {
+                    CPubKey pubkey;
+                    if (keystore.GetPubKey(keyID, pubkey) && !pubkey.IsCompressed()) {
+                        isInvalid = true;
+                        return ISMINE_NO;
+                    }
+                }
+                if (keystore.HaveKey(keyID))
+                    return ISMINE_SPENDABLE;
+            } else if (scriptType == TX_SCRIPTHASH) {
+                CScriptID scriptID = CScriptID(uint160(vSolutions[0]));
+                CScript subscript;
+                if (keystore.GetCScript(scriptID, subscript)) {
+                    isminetype ret = IsMine(keystore, subscript, isInvalid);
+                    if (ret == ISMINE_SPENDABLE || ret == ISMINE_WATCH_SOLVABLE || (ret == ISMINE_NO && isInvalid))
+                        return ret;
                 }
             }
-            if (keystore.HaveKey(keyID))
-                return ISMINE_SPENDABLE;
             break;
         }
             /** RVN END*/
