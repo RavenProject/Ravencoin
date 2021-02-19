@@ -414,6 +414,120 @@ class AssetTest(RavenTestFramework):
         assert_equal(balances_P2SH[asset_name], 50)
         assert_equal(balances_P2SH[asset_name + '!'], 1)
 
+    def p2sh_1of2_single_node_signatue_mutated_attack_test(self):
+        self.log.info("Running p2sh_1of2_single_node_signatue_mutated_attack_test")
+        n0, n1 = self.nodes[0], self.nodes[1]
+
+        asset_name = "P2SH_ASSET_MUTATED"
+
+        # Create new address
+        # Get private key for address
+        # Create multisig address
+        # Gather multisig address and redeem script
+        first_address = n0.getnewaddress()
+        second_address = n0.getnewaddress()
+
+        first_address_pub = n0.validateaddress(first_address)['pubkey']
+        second_address_pub = n0.validateaddress(second_address)['pubkey']
+
+        first_address_priv = n0.dumpprivkey(first_address)
+        second_address_priv = n0.dumpprivkey(second_address)
+
+        multisig_data = n0.createmultisig(1, [first_address_pub, second_address_pub])
+        multisig_address = multisig_data['address']
+        multisig_redeemscript = multisig_data['redeemScript']
+
+        # Issue Asset to multisig address
+        self.log.info("Calling issue() to P2SH address")
+        ipfs_hash = "QmcvyefkqQX3PpjpY5L8B2yMd47XrVwAipr6cxUt2zvYU8"
+        issue_txid = n0.issue(asset_name=asset_name, qty=1000, to_address=multisig_address, change_address="",
+                              units=8, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
+
+        self.log.info("Waiting for one confirmations after P2SH issue...")
+        n0.generate(1)
+        self.sync_all()
+
+        tx_data = n0.decoderawtransaction(n0.gettransaction(issue_txid[0])['hex'])
+        tx_index = 3
+
+        # Get scriptpubkey for issued asset location
+        issued_scriptPubKey = tx_data['vout'][tx_index]['scriptPubKey']['hex']
+
+        # Building createrawtransaction data
+        rvn_destination_address = n0.getnewaddress()
+
+        self.log.info("Get RVN for tx fee()...")
+        unspent_rvn_inputs = n0.listunspent(100)[0]
+
+        self.log.info("Get private key for unspent input")
+        unspent_rvn_private_key = n0.dumpprivkey(unspent_rvn_inputs['address'])
+
+        self.log.info("Building rvn tx input...")
+        rvn_tx_input = {
+            'txid' : unspent_rvn_inputs['txid'],
+            'vout' : unspent_rvn_inputs['vout']
+        }
+
+        self.log.info("Building asset tx input...")
+        asset_tx_input = {
+            'txid' : issue_txid[0],
+            'vout' : tx_index
+        }
+
+        self.log.info("Building destination tx input...")
+        destination_tx_data = {
+            rvn_destination_address : unspent_rvn_inputs['amount'] - 1,
+            first_address : {
+                'transfer' : {
+                    asset_name : 1000
+                }
+            }
+        }
+
+        # Create data for signrawtransaction()
+        self.log.info("Calling createrawtransaction()...")
+        create_raw_hex = n0.createrawtransaction([rvn_tx_input, asset_tx_input], destination_tx_data)
+
+        prev_tx_data = [
+            {
+                'txid' : rvn_tx_input['txid'],
+                'vout' : rvn_tx_input['vout'],
+                'scriptPubKey' : unspent_rvn_inputs['scriptPubKey'],
+                'redeemScript' : '',
+                'amount' : unspent_rvn_inputs['amount']
+            },
+            {
+                'txid' : asset_tx_input['txid'],
+                'vout' : asset_tx_input['vout'],
+                'scriptPubKey' : issued_scriptPubKey,
+                'redeemScript' : multisig_redeemscript,
+                'amount' : 0
+            }
+        ]
+
+        self.log.info("Calling signrawtransaction on first node with one private key...")
+        private_keys = [first_address_priv, unspent_rvn_private_key]
+        signed_data = n0.signrawtransaction(create_raw_hex, prev_tx_data, private_keys)
+        assert_equal(signed_data['complete'], True)
+
+        # Mutate the signature belonging to the P2SH asset transfer
+        signed_transaction_hex = signed_data['hex']
+        asset_signature_hex = n0.decoderawtransaction(signed_transaction_hex)['vin'][1]['scriptSig']['hex']
+        mutate_location = 25
+
+        # Change the signature by changing a single hex character at index 25
+        signature_list = list(asset_signature_hex)
+        if signature_list[mutate_location] is '0':
+            signature_list[mutate_location] = '1'
+        else:
+            signature_list[mutate_location] = '0'
+
+        # Create a string from the list, and replace the signature in the signed transaction with the mutated one
+        mutated_signature_hex = "".join(signature_list)
+        mutated_hex = signed_transaction_hex.replace(asset_signature_hex,mutated_signature_hex)
+
+        assert_raises_rpc_error(-26, "mandatory-script-verify-flag-failed (Signature must be zero for failed CHECK(MULTI)SIG operation)",  n0.sendrawtransaction, mutated_hex)
+
 
     def run_test(self):
         self.activate_p2sh_assets()
@@ -422,6 +536,7 @@ class AssetTest(RavenTestFramework):
         self.p2sh_2of3_multi_nodes_rvn_send_test()
         self.p2sh_2of3_multi_nodes_asset_transfer_test()
         self.p2sh_using_rpc_console_test()
+        self.p2sh_1of2_single_node_signatue_mutated_attack_test()
 
 
 if __name__ == '__main__':
