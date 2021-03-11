@@ -48,6 +48,7 @@ These dependencies are required:
  libssl      | Crypto           | Random Number Generation, Elliptic Curve Cryptography
  libboost    | Utility          | Library for threading, data structures, etc
  libevent    | Networking       | OS independent asynchronous networking
+ libdb++     | Utility          | Contains headers and static libraries for the Berkeley DB library
 
 Optional dependencies:
 
