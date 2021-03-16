@@ -1779,11 +1779,11 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     const QFontMetrics fm(font());
     for (const RavenUnits::Unit unit : units)
     {
-        #ifndef QTversionPreFiveEleven
-            max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
-        #else
-            max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
-        #endif
+    #ifndef QTversionPreFiveEleven
+        max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
+    #else
+        max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
+    #endif
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);

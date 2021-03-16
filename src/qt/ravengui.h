@@ -89,7 +89,7 @@ public:
         {"BTC / RVN", "RVNBTC", 1},
         {"mBTC / RVN", "RVNBTC", 1000},
         {"µBTC / RVN", "RVNBTC", 1000000},
-        {"USDT / RVC", "RVNUSDT", 1}
+        {"USDT / RVN", "RVNUSDT", 1}
     };
 
 protected:
