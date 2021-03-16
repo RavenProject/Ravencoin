@@ -68,6 +68,7 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
+#include <QComboBox>
 
 // Fixing Boost 1.73 compile errors
 #include <boost/bind/bind.hpp>
@@ -149,6 +150,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     headerWidget(0),
     labelCurrentMarket(0),
     labelCurrentPrice(0),
+    comboRvnUnit(0),
     pricingTimer(0),
     networkManager(0),
     request(0),
@@ -702,7 +704,7 @@ void RavenGUI::createToolBars()
         QString widgetBackgroundSytleSheet = QString(".QWidget{background-color: %1}").arg(platformStyle->TopWidgetBackGroundColor().name());
 
         // Set the headers widget options
-        headerWidget->setContentsMargins(0,0,0,50);
+        headerWidget->setContentsMargins(0,25,0,0);
         headerWidget->setStyleSheet(widgetBackgroundSytleSheet);
         headerWidget->setGraphicsEffect(GUIUtil::getShadowEffect());
         headerWidget->setFixedHeight(75);
@@ -715,11 +717,10 @@ void RavenGUI::createToolBars()
 
         // Set the pricing information
         QHBoxLayout* priceLayout = new QHBoxLayout(headerWidget);
-        priceLayout->setContentsMargins(QMargins());
+        priceLayout->setContentsMargins(0,0,0,25);
         priceLayout->setDirection(QBoxLayout::LeftToRight);
         priceLayout->setAlignment(Qt::AlignVCenter);
         labelCurrentMarket->setContentsMargins(50,0,0,0);
-        labelCurrentMarket->setFixedHeight(75);
         labelCurrentMarket->setAlignment(Qt::AlignVCenter);
         labelCurrentMarket->setStyleSheet(STRING_LABEL_COLOR);
         labelCurrentMarket->setFont(currentMarketFont);
@@ -727,25 +728,26 @@ void RavenGUI::createToolBars()
 
         QString currentPriceStyleSheet = ".QLabel{color: %1;}";
         labelCurrentPrice->setContentsMargins(25,0,0,0);
-        labelCurrentPrice->setFixedHeight(75);
         labelCurrentPrice->setAlignment(Qt::AlignVCenter);
         labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
         labelCurrentPrice->setFont(currentMarketFont);
 
-        QLabel* labelBtcRvn = new QLabel();
-        labelBtcRvn->setText("BTC / RVN");
-        labelBtcRvn->setContentsMargins(15,0,0,0);
-        labelBtcRvn->setFixedHeight(75);
-        labelBtcRvn->setAlignment(Qt::AlignVCenter);
-        labelBtcRvn->setStyleSheet(STRING_LABEL_COLOR);
-        labelBtcRvn->setFont(currentMarketFont);
+        comboRvnUnit = new QComboBox(headerWidget);
+        QStringList list;
+        for(int unitNum = 0; unitNum < (int)(sizeof(priceUnits) / sizeof(priceUnits[0])); unitNum++) {
+            list.append(priceUnits[unitNum].Header);
+        }
+        comboRvnUnit->addItems(list);
+        comboRvnUnit->setFixedHeight(26);
+        comboRvnUnit->setContentsMargins(5,0,0,0);
+        comboRvnUnit->setStyleSheet(STRING_LABEL_COLOR);
+        comboRvnUnit->setFont(currentMarketFont);
 
         labelVersionUpdate->setText("<a href=\"https://github.com/RavenProject/Ravencoin/releases\">New Wallet Version Available</a>");
         labelVersionUpdate->setTextFormat(Qt::RichText);
         labelVersionUpdate->setTextInteractionFlags(Qt::TextBrowserInteraction);
         labelVersionUpdate->setOpenExternalLinks(true);
         labelVersionUpdate->setContentsMargins(0,0,15,0);
-        labelVersionUpdate->setFixedHeight(75);
         labelVersionUpdate->setAlignment(Qt::AlignVCenter);
         labelVersionUpdate->setStyleSheet(STRING_LABEL_COLOR);
         labelVersionUpdate->setFont(currentMarketFont);
@@ -754,7 +756,7 @@ void RavenGUI::createToolBars()
         priceLayout->setGeometry(headerWidget->rect());
         priceLayout->addWidget(labelCurrentMarket, 0, Qt::AlignVCenter | Qt::AlignLeft);
         priceLayout->addWidget(labelCurrentPrice, 0,  Qt::AlignVCenter | Qt::AlignLeft);
-        priceLayout->addWidget(labelBtcRvn, 0 , Qt::AlignVCenter | Qt::AlignLeft);
+        priceLayout->addWidget(comboRvnUnit, 0 , Qt::AlignBottom| Qt::AlignLeft);
         priceLayout->addStretch();
         priceLayout->addWidget(labelVersionUpdate, 0 , Qt::AlignVCenter | Qt::AlignRight);
 
@@ -799,7 +801,7 @@ void RavenGUI::createToolBars()
                     // Evaluate the current and next numbers and assign a color (green for positive, red for negative)
                     bool ok;
                     if (!list.isEmpty()) {
-                        double next = list.first().toDouble(&ok);
+                        double next = list.first().toDouble(&ok) * this->currentPriceDisplay.Scalar;
                         if (!ok) {
                             labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             labelCurrentPrice->setText("");
@@ -808,13 +810,14 @@ void RavenGUI::createToolBars()
                             if (!ok) {
                                 current = 0.00000000;
                             } else {
-                                if (next < current)
+                                if (next < current && !this->unitChanged)
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("red"));
-                                else if (next > current)
+                                else if (next > current && !this->unitChanged)
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("green"));
                                 else
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             }
+                            this->unitChanged = false;
                             labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', 8)));
                             labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));
                         }
@@ -824,6 +827,9 @@ void RavenGUI::createToolBars()
 
         connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+
+        // Signal change of displayed price units, must get new conversion ratio
+        connect(comboRvnUnit, SIGNAL(activated(int)), this, SLOT(onPriceUnitChange(int)));
         // Create the timer
         connect(pricingTimer, SIGNAL(timeout()), this, SLOT(getPriceInfo()));
         pricingTimer->start(10000);
@@ -1773,10 +1779,10 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     const QFontMetrics fm(font());
     for (const RavenUnits::Unit unit : units)
     {
-    	#ifndef QTversionPreFiveEleven
-        	max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
+        #ifndef QTversionPreFiveEleven
+            max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
         #else
-        	max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
+            max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
         #endif
     }
     setMinimumSize(max_width, 0);
@@ -1841,9 +1847,22 @@ void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
     }
 }
 
+void RavenGUI::onPriceUnitChange(int unitIndex)
+{
+    qDebug() << "RavenGUI::onPriceUnitChange: " + QString::number(unitIndex);
+
+    if(unitIndex < 0 || unitIndex >= (int)(sizeof(priceUnits) / sizeof(priceUnits[0]))){
+        return;
+    }
+
+    this->unitChanged = true;
+    this->currentPriceDisplay = priceUnits[unitIndex];
+    this->getPriceInfo();
+}
+
 void RavenGUI::getPriceInfo()
 {
-    request->setUrl(QUrl("https://api.binance.com/api/v1/ticker/price?symbol=RVNBTC"));
+    request->setUrl(QUrl(QString("https://api.binance.com/api/v1/ticker/price?symbol=%1").arg(this->currentPriceDisplay.Ticker)));
     networkManager->get(*request);
 }
 

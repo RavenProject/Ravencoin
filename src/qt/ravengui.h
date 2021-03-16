@@ -18,6 +18,7 @@
 #include <QMenu>
 #include <QPoint>
 #include <QSystemTrayIcon>
+#include <QComboBox>
 
 class ClientModel;
 class NetworkStyle;
@@ -39,6 +40,13 @@ class QProgressDialog;
 class QNetworkAccessManager;
 class QNetworkRequest;
 QT_END_NAMESPACE
+
+struct RavencoinPriceDisplay
+{
+    QString Header;
+    QString Ticker;
+    float Scalar;
+};
 
 /**
   Raven GUI main class. This class represents the main window of the Raven UI. It communicates with both the client and
@@ -75,6 +83,13 @@ public:
         HD_DISABLED = 0,
         HD_ENABLED = 1,
         HD44_ENABLED = 2
+    };
+
+    const RavencoinPriceDisplay priceUnits[4] = {
+        {"BTC / RVN", "RVNBTC", 1},
+        {"mBTC / RVN", "RVNBTC", 1000},
+        {"µBTC / RVN", "RVNBTC", 1000000},
+        {"USDT / RVC", "RVNUSDT", 1}
     };
 
 protected:
@@ -132,6 +147,7 @@ private:
     QWidget *headerWidget;
     QLabel *labelCurrentMarket;
     QLabel *labelCurrentPrice;
+    QComboBox *comboRvnUnit;
     QTimer *pricingTimer;
     QNetworkAccessManager* networkManager;
     QNetworkRequest* request;
@@ -152,6 +168,9 @@ private:
     int spinnerFrame;
 
     const PlatformStyle *platformStyle;
+
+    RavencoinPriceDisplay currentPriceDisplay = priceUnits[0];
+    bool unitChanged = true; //Setting this true makes the first price update not appear as an uptick
 
     /** Load the custome open sans fonts into the font database */
     void loadFonts();
@@ -203,6 +222,8 @@ public Q_SLOTS:
        @param[in] ret       pointer to a bool that will be modified to whether Ok was clicked (modal only)
     */
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
+
+    void onPriceUnitChange(int unitIndex);
 
     void getPriceInfo();
 
@@ -324,5 +345,6 @@ private Q_SLOTS:
     /** Tells underlying optionsModel to update its current display unit. */
     void onMenuSelection(QAction* action);
 };
+
 
 #endif // RAVEN_QT_RAVENGUI_H
