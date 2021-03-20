@@ -1365,6 +1365,7 @@ void CreateAssetDialog::clearSelected()
     ui->quantitySpinBox->setDisabled(false);
     ui->reissuableBox->setChecked(true);
     ui->unitBox->setValue(0);
+    ui->quantitySpinBox->setMaximum(1000000000);
 }
 
 void CreateAssetDialog::updateAssetList()
@@ -1491,6 +1492,7 @@ void CreateAssetDialog::restrictedAssetNotSelected()
     ui->nameText->clear();
     ui->nameText->setEnabled(true);
     ui->assetFullName->show();
+    ui->quantitySpinBox->setMaximum(1000000000);
 
     ui->labelVerifierString->hide();
     ui->lineEditVerifierString->hide();
