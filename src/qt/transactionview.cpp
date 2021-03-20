@@ -282,7 +282,7 @@ void TransactionView::setModel(WalletModel *_model)
                 {
                     QAction *thirdPartyTxUrlAction = new QAction(host, this); // use host as menu item label
                     if (i == 0)
-                        contextMenu->addSeparator();
+                        contextMenu->addSeparator()->setText(tr("Browse with:"));
                     contextMenu->addAction(thirdPartyTxUrlAction);
                     connect(thirdPartyTxUrlAction, SIGNAL(triggered()), mapperThirdPartyTxUrls, SLOT(map()));
                     mapperThirdPartyTxUrls->setMapping(thirdPartyTxUrlAction, listUrls[i].trimmed());
