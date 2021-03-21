@@ -109,6 +109,7 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     }
 #if QT_VERSION >= 0x040700
     ui->thirdPartyTxUrls->setPlaceholderText("https://example.com/tx/%s");
+    ui->ipfsUrl->setPlaceholderText("https://ipfs.io/ipfs/%s");
 #endif
 
     ui->unit->setModel(new RavenUnits(this));
@@ -168,6 +169,7 @@ void OptionsDialog::setModel(OptionsModel *_model)
     /* Display */
     connect(ui->lang, SIGNAL(valueChanged()), this, SLOT(showRestartWarning()));
     connect(ui->thirdPartyTxUrls, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
+    connect(ui->ipfsUrl, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
     connect(ui->darkModeCheckBox, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
 }
 
@@ -207,6 +209,7 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
+    mapper->addMapping(ui->ipfsUrl, OptionsModel::IpfsUrl);
 }
 
 void OptionsDialog::setOkButtonState(bool fState)
@@ -230,6 +233,12 @@ void OptionsDialog::on_resetButton_clicked()
         model->Reset();
         QApplication::quit();
     }
+}
+
+void OptionsDialog::on_ipfsUrlReset_clicked()
+{
+    /* reset third-party IPFS viewer URL to default setting. */
+    ui->ipfsUrl->setText("https://ipfs.io/ipfs/%s");
 }
 
 void OptionsDialog::on_openRavenConfButton_clicked()

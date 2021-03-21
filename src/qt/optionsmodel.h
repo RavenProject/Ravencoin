@@ -41,6 +41,7 @@ public:
         ProxyPortTor,           // int
         DisplayUnit,            // RavenUnits::Unit
         ThirdPartyTxUrls,       // QString
+        IpfsUrl,                // QString
         Language,               // QString
         CoinControlFeatures,    // bool
         ThreadsScriptVerif,     // int
@@ -67,6 +68,7 @@ public:
     bool getMinimizeOnClose() const { return fMinimizeOnClose; }
     int getDisplayUnit() const { return nDisplayUnit; }
     QString getThirdPartyTxUrls() const { return strThirdPartyTxUrls; }
+    QString getIpfsUrl() const { return strIpfsUrl; }
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
     bool getCustomFeeFeatures() const { return fCustomFeeFeatures; }
@@ -85,6 +87,7 @@ private:
     QString language;
     int nDisplayUnit;
     QString strThirdPartyTxUrls;
+    QString strIpfsUrl;
     bool fCoinControlFeatures;
     /** RVN START*/
     bool fCustomFeeFeatures;
