@@ -42,6 +42,7 @@ public:
         DisplayUnit,            // RavenUnits::Unit
         DisplayCurrencyIndex,   // int
         ThirdPartyTxUrls,       // QString
+        IpfsUrl,                // QString
         Language,               // QString
         CoinControlFeatures,    // bool
         ThreadsScriptVerif,     // int
@@ -71,6 +72,7 @@ public:
     int getDisplayUnit() const { return nDisplayUnit; }
     int getDisplayCurrencyIndex() const { return nDisplayCurrencyIndex; }
     QString getThirdPartyTxUrls() const { return strThirdPartyTxUrls; }
+    QString getIpfsUrl() const { return strIpfsUrl; }
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
     bool getCustomFeeFeatures() const { return fCustomFeeFeatures; }
@@ -90,6 +92,7 @@ private:
     int nDisplayUnit;
     int nDisplayCurrencyIndex;
     QString strThirdPartyTxUrls;
+    QString strIpfsUrl;
     bool fCoinControlFeatures;
     /** RVN START*/
     bool fCustomFeeFeatures;

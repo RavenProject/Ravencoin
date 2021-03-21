@@ -83,6 +83,10 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("strThirdPartyTxUrls", "");
     strThirdPartyTxUrls = settings.value("strThirdPartyTxUrls", "").toString();
 
+    if (!settings.contains("strIpfsUrl"))
+        settings.setValue("strIpfsUrl", "https://ipfs.io/ipfs/%s");
+    strIpfsUrl = settings.value("strIpfsUrl", "").toString();
+
     if (!settings.contains("fCoinControlFeatures"))
         settings.setValue("fCoinControlFeatures", false);
     fCoinControlFeatures = settings.value("fCoinControlFeatures", false).toBool();
@@ -275,6 +279,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return nDisplayCurrencyIndex;
         case ThirdPartyTxUrls:
             return strThirdPartyTxUrls;
+        case IpfsUrl:
+            return strIpfsUrl;
         case Language:
             return settings.value("language");
         case CoinControlFeatures:
@@ -408,6 +414,13 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             if (strThirdPartyTxUrls != value.toString()) {
                 strThirdPartyTxUrls = value.toString();
                 settings.setValue("strThirdPartyTxUrls", strThirdPartyTxUrls);
+                setRestartRequired(true);
+            }
+            break;
+        case IpfsUrl:
+            if (strIpfsUrl != value.toString()) {
+                strIpfsUrl = value.toString();
+                settings.setValue("strIpfsUrl", strIpfsUrl);
                 setRestartRequired(true);
             }
             break;
