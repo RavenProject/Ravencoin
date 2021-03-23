@@ -3,6 +3,7 @@
 OS=${1}
 GITHUB_WORKSPACE=${2}
 GITHUB_REF=${3}
+FORCEBUIDDEPS="1"
 
 if [[ ! ${OS} || ! ${GITHUB_WORKSPACE} ]]; then
     echo "Error: Invalid options"
@@ -17,7 +18,7 @@ if [[ ${OS} == "arm32v7-disable-wallet" || ${OS} == "linux-disable-wallet" ]]; t
     OS=`echo ${OS} | cut -d"-" -f1`
 fi
 
-if [[ ${GITHUB_REF} =~ "release" ]]; then
+if [[ ${GITHUB_REF} =~ "release" || ${FORCEBUILDDEPS} = "1" ]]; then
     echo "----------------------------------------"
     echo "Building Dependencies for ${OS}"
     echo "----------------------------------------"
