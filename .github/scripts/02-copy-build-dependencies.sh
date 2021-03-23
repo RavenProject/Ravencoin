@@ -28,7 +28,7 @@ if [[ ${GITHUB_REF} =~ "release" || ${FORCEBUILDDEPS} = "1" ]]; then
         make HOST=x86_64-w64-mingw32 -j2
     elif [[ ${OS} == "osx" ]]; then
         cd ${GITHUB_WORKSPACE}
-        curl -O https://raven-build-resources.s3.amazonaws.com/osx/MacOSX10.11.sdk.tar.gz
+        curl -O https://github.com/zsrem/MacOSX10.11.sdk.tar.gz/raw/master/MacOSX10.11.sdk.tar.gz
         mkdir -p ${GITHUB_WORKSPACE}/depends/SDKs
         cd ${GITHUB_WORKSPACE}/depends/SDKs && tar -zxf ${GITHUB_WORKSPACE}/MacOSX10.11.sdk.tar.gz
         cd ${GITHUB_WORKSPACE}/depends && make HOST=x86_64-apple-darwin14 -j2
