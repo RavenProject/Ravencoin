@@ -3,7 +3,7 @@
 OS=${1}
 GITHUB_WORKSPACE=${2}
 GITHUB_REF=${3}
-FORCEBUIDDEPS="1"
+FORCEBUILDDEPS="1"
 
 if [[ ! ${OS} || ! ${GITHUB_WORKSPACE} ]]; then
     echo "Error: Invalid options"
