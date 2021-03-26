@@ -28,7 +28,9 @@ if [[ ${GITHUB_REF} =~ "release" || ${FORCEBUILDDEPS} = "1" ]]; then
         make HOST=x86_64-w64-mingw32 -j2
     elif [[ ${OS} == "osx" ]]; then
         cd ${GITHUB_WORKSPACE}
-        curl -O https://raw.githubusercontent.com/shannon1916/MacOSX10.11.sdk.tar.gz/master/MacOSX10.11.sdk.tar.gz
+        # curl -O <url>
+        echo "LEGAL issues with OSX SDK, can't do it this way"
+        exit 1
         mkdir -p ${GITHUB_WORKSPACE}/depends/SDKs
         cd ${GITHUB_WORKSPACE}/depends/SDKs && tar -zxf ${GITHUB_WORKSPACE}/MacOSX10.11.sdk.tar.gz
         cd ${GITHUB_WORKSPACE}/depends && make HOST=x86_64-apple-darwin14 -j2
