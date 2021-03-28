@@ -62,6 +62,9 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
 /* Toolbar selected text color */
 #define COLOR_TOOLBAR_SELECTED_TEXT COLOR_WHITE
+/* Send entries background color */
+#define COLOR_SENDENTRIES_BACKGROUND QColor("#fbfbfe")
+
 
 /** DARK MODE */
 /* Widget background color, dark mode */
@@ -84,6 +87,8 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE QColor("#6c80c5")
 /* Toolbar selected text color */
 #define COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE QColor("#c5ccdf")
+/* Send entries background color dark mode */
+#define COLOR_SENDENTRIES_BACKGROUND_DARK QColor("#1c2535")
 
 
 /* Ravencoin label color as a string */
