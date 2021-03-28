@@ -374,9 +374,10 @@ void SendAssetsEntry::onAssetSelected(int index)
     // If the name
     if (index == 0) {
         ui->assetAmountLabel->clear();
-        if(!ui->administratorCheckbox->isChecked())
-            ui->payAssetAmount->setDisabled(false);
+//        if(!ui->administratorCheckbox->isChecked())
+//            ui->payAssetAmount->setDisabled(false);
         ui->payAssetAmount->clear();
+        ui->payAssetAmount->setDisabled(true);
         return;
     }
 
@@ -385,6 +386,12 @@ void SendAssetsEntry::onAssetSelected(int index)
     if (IsAssetNameAnOwner(name.toStdString())) {
         fIsOwnerAsset = true;
         name = name.split("!").first();
+    }
+
+    // Check to see if the asset selected is an messenger asset
+    bool fIsMessengerAsset = false;
+    if (IsAssetNameAnMsgChannel(name.toStdString())) {
+        fIsMessengerAsset = true;
     }
 
     LOCK(cs_main);
@@ -442,10 +449,18 @@ void SendAssetsEntry::onAssetSelected(int index)
     ui->messageLabel->hide();
     ui->messageTextLabel->hide();
 
-    // If it is an ownership asset lock the amount
+    // If it is not an ownership asset unlock the amount
     if (!fIsOwnerAsset) {
         ui->payAssetAmount->setUnit(asset.units);
+        ui->payAssetAmount->setSingleStep(1);
         ui->payAssetAmount->setDisabled(false);
+        ui->payAssetAmount->setValue(0);
+    }
+    // If it is messanger channel set amount to 1 and keep locked.
+    if (fIsMessengerAsset) {
+        ui->payAssetAmount->setUnit(asset.units);
+        ui->payAssetAmount->setDisabled(true);
+        ui->payAssetAmount->setValue(1);
     }
 }
 
@@ -534,8 +549,8 @@ void SendAssetsEntry::switchAdministratorList(bool fSwitchStatus)
 
             stringModel->setStringList(list);
             ui->assetSelectionBox->lineEdit()->setPlaceholderText(tr("Select an asset to transfer"));
-            ui->payAssetAmount->clear();
-            ui->payAssetAmount->setUnit(MAX_UNIT);
+//            ui->payAssetAmount->clear();
+//            ui->payAssetAmount->setUnit(MAX_UNIT);
             ui->assetAmountLabel->clear();
             ui->assetSelectionBox->setFocus();
         } else {
