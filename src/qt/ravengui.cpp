@@ -818,7 +818,7 @@ void RavenGUI::createToolBars()
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             }
                             this->unitChanged = false;
-                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', 8)));
+                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', this->currentPriceDisplay.Decimals)));
                             labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));
                         }
                     }

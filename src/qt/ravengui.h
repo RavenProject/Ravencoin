@@ -46,6 +46,7 @@ struct RavencoinPriceDisplay
     QString Header;
     QString Ticker;
     float Scalar;
+    int Decimals;
 };
 
 /**
@@ -85,11 +86,12 @@ public:
         HD44_ENABLED = 2
     };
 
-    const RavencoinPriceDisplay priceUnits[4] = {
-        {"BTC / RVN", "RVNBTC", 1},
-        {"mBTC / RVN", "RVNBTC", 1000},
-        {"µBTC / RVN", "RVNBTC", 1000000},
-        {"USDT / RVN", "RVNUSDT", 1}
+    const RavencoinPriceDisplay priceUnits[5] = {
+        {"BTC",     "RVNBTC",   1,          8},
+        {"mBTC",    "RVNBTC",   1000,       5},
+        {"µBTC",    "RVNBTC",   1000000,    2},
+        {"Satoshi", "RVNBTC",   100000000,  0},
+        {"USDT",    "RVNUSDT",  1,          5}
     };
 
 protected:
