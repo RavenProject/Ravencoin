@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet' ]
+       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet' ]
 #       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'osx', 'arm32v7', 'arm32v7-disable-wallet' ]
 
     steps:

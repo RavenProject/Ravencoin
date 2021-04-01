@@ -13,9 +13,6 @@ echo "Installing Build Packages for ${OS}"
 echo "----------------------------------------"
 
 apt-get update
-apt-get install -y software-properties-common
-add-apt-repository ppa:bitcoin/bitcoin
-apt-get update
 
 if [[ ${OS} == "windows" ]]; then
     apt-get install -y \
@@ -24,7 +21,8 @@ if [[ ${OS} == "windows" ]]; then
     bsdmainutils \
     build-essential \
     curl \
-    g++-mingw-w64-x86-64 \
+    mingw-w64 \
+    mingw-w64-x86-64-dev \
     git \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -34,9 +32,10 @@ if [[ ${OS} == "windows" ]]; then
     pkg-config \
     python \
     rename \
-    zip
+    zip \
+    bison
 
-    update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+    update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix 
 
 elif [[ ${OS} == "osx" ]]; then
     apt -y install \
@@ -63,7 +62,8 @@ elif [[ ${OS} == "osx" ]]; then
     python-dev \
     python-setuptools \
     s3curl \
-    sleuthkit
+    sleuthkit \
+    bison
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     apt -y install \
     apt-file \
@@ -71,7 +71,7 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     automake \
     autotools-dev \
     binutils-aarch64-linux-gnu \
-    binutils-gold \
+    binutils \
     bsdmainutils \
     build-essential \
     ca-certificates \
@@ -91,14 +91,15 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     rename \
     ubuntu-dev-tools \
     xkb-data \
-    zip
+    zip \
+    bison
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     apt -y install \
     autoconf \
     automake \
     binutils-aarch64-linux-gnu \
     binutils-arm-linux-gnueabihf \
-    binutils-gold \
+    binutils \
     bsdmainutils \
     ca-certificates \
     curl \
@@ -113,7 +114,8 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     git \
     libtool \
     pkg-config \
-    python
+    python \
+    bison
 else
     echo "you must pass the OS to build for"
     exit 1
