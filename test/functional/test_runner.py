@@ -115,6 +115,7 @@ BASE_SCRIPTS= [
     'feature_versionbits_warning.py',
     'rpc_spentindex.py',
     'feature_rawassettransactions.py',
+    'feature_sweep.py',
     'wallet_importmulti.py',
     'wallet_labels.py',
     'wallet_import_with_label.py',
