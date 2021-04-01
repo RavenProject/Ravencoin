@@ -13,9 +13,6 @@ echo "Installing Build Packages for ${OS}"
 echo "----------------------------------------"
 
 apt-get update
-apt-get install -y software-properties-common
-add-apt-repository ppa:bitcoin/bitcoin
-apt-get update
 
 if [[ ${OS} == "windows" ]]; then
     apt-get install -y \
@@ -24,7 +21,8 @@ if [[ ${OS} == "windows" ]]; then
     bsdmainutils \
     build-essential \
     curl \
-    g++-mingw-w64-x86-64 \
+    mingw-w64 \
+    mingw-w64-x86-64-dev \
     git \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -32,11 +30,12 @@ if [[ ${OS} == "windows" ]]; then
     osslsigncode \
     nsis \
     pkg-config \
-    python \
+    python3 \
     rename \
-    zip
+    zip \
+    bison
 
-    update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+    update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix 
 
 elif [[ ${OS} == "osx" ]]; then
     apt -y install \
@@ -59,11 +58,15 @@ elif [[ ${OS} == "osx" ]]; then
     libz-dev \
     p7zip-full \
     pkg-config \
-    python \
-    python-dev \
-    python-setuptools \
+    python-is-python3 \
+    python3 \
+    python3-dev \
+    python3-setuptools \
     s3curl \
-    sleuthkit
+    sleuthkit \
+    bison \
+    libtinfo5
+    
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     apt -y install \
     apt-file \
@@ -71,7 +74,7 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     automake \
     autotools-dev \
     binutils-aarch64-linux-gnu \
-    binutils-gold \
+    binutils \
     bsdmainutils \
     build-essential \
     ca-certificates \
@@ -87,18 +90,20 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     nsis \
     pbuilder \
     pkg-config \
-    python \
+    python-is-python3 \
+    python3 \
     rename \
     ubuntu-dev-tools \
     xkb-data \
-    zip
+    zip \
+    bison
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     apt -y install \
     autoconf \
     automake \
     binutils-aarch64-linux-gnu \
     binutils-arm-linux-gnueabihf \
-    binutils-gold \
+    binutils \
     bsdmainutils \
     ca-certificates \
     curl \
@@ -113,7 +118,9 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     git \
     libtool \
     pkg-config \
-    python
+    python-is-python3 \
+    python3 \
+    bison
 else
     echo "you must pass the OS to build for"
     exit 1
