@@ -11,6 +11,7 @@
 #endif
 
 #include "amount.h"
+#include "currencyunits.h"
 
 #include <QLabel>
 #include <QMainWindow>
@@ -40,14 +41,6 @@ class QProgressDialog;
 class QNetworkAccessManager;
 class QNetworkRequest;
 QT_END_NAMESPACE
-
-struct RavencoinPriceDisplay
-{
-    QString Header;
-    QString Ticker;
-    float Scalar;
-    int Decimals;
-};
 
 /**
   Raven GUI main class. This class represents the main window of the Raven UI. It communicates with both the client and
@@ -86,13 +79,6 @@ public:
         HD44_ENABLED = 2
     };
 
-    const RavencoinPriceDisplay priceUnits[5] = {
-        {"BTC",     "RVNBTC",   1,          8},
-        {"mBTC",    "RVNBTC",   1000,       5},
-        {"µBTC",    "RVNBTC",   1000000,    2},
-        {"Satoshi", "RVNBTC",   100000000,  0},
-        {"USDT",    "RVNUSDT",  1,          5}
-    };
 
 protected:
     void changeEvent(QEvent *e);
@@ -171,7 +157,7 @@ private:
 
     const PlatformStyle *platformStyle;
 
-    RavencoinPriceDisplay currentPriceDisplay = priceUnits[0];
+    const CurrencyUnitDetails* currentPriceDisplay = &CurrencyUnits::CurrencyOptions[0];
     bool unitChanged = true; //Setting this true makes the first price update not appear as an uptick
 
     /** Load the custome open sans fonts into the font database */
@@ -225,7 +211,8 @@ public Q_SLOTS:
     */
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
 
-    void onPriceUnitChange(int unitIndex);
+    void currencySelectionChanged(int unitIndex);
+    void onCurrencyChange(int newIndex);
 
     void getPriceInfo();
 

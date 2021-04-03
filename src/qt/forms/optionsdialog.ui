@@ -610,6 +610,30 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_DisplayCurrency">
+         <item>
+          <widget class="QLabel" name="currencyUnitIndexLabel">
+           <property name="text">
+            <string>&amp;Currency Unit:</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::PlainText</enum>
+           </property>
+           <property name="buddy">
+            <cstring>currencyUnitIndex</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QValueComboBox" name="currencyUnitIndex">
+           <property name="toolTip">
+            <string>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3_Display">
          <item>
           <widget class="QLabel" name="thirdPartyTxUrlsLabel">

@@ -112,6 +112,10 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
 #endif
 
     ui->unit->setModel(new RavenUnits(this));
+    QStringList currencyList;
+    for(int unitNum = 0; unitNum < CurrencyUnits::count() ; unitNum++) {
+        ui->currencyUnitIndex->addItem(QString(CurrencyUnits::CurrencyOptions[unitNum].Header), unitNum);
+    }
 
     /* Widget-to-option mapper */
     mapper = new QDataWidgetMapper(this);
@@ -206,6 +210,7 @@ void OptionsDialog::setMapper()
     /* Display */
     mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
+    mapper->addMapping(ui->currencyUnitIndex, OptionsModel::DisplayCurrencyIndex);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
 }
 

@@ -6,6 +6,8 @@
 #ifndef RAVEN_QT_OPTIONSDIALOG_H
 #define RAVEN_QT_OPTIONSDIALOG_H
 
+#include "currencyunits.h"
+
 #include <QDialog>
 #include <QValidator>
 

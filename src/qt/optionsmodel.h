@@ -40,6 +40,7 @@ public:
         ProxyIPTor,             // QString
         ProxyPortTor,           // int
         DisplayUnit,            // RavenUnits::Unit
+        DisplayCurrencyIndex,   // int
         ThirdPartyTxUrls,       // QString
         Language,               // QString
         CoinControlFeatures,    // bool
@@ -60,12 +61,15 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
     /** Updates current unit in memory, settings and emits displayUnitChanged(newUnit) signal */
     void setDisplayUnit(const QVariant &value);
+    /** Updates current unit in memory, settings and emits displayCurrencyIndexChanged(newIndex) signal */
+    void setDisplayCurrencyIndex(const QVariant &value);
 
     /* Explicit getters */
     bool getHideTrayIcon() const { return fHideTrayIcon; }
     bool getMinimizeToTray() const { return fMinimizeToTray; }
     bool getMinimizeOnClose() const { return fMinimizeOnClose; }
     int getDisplayUnit() const { return nDisplayUnit; }
+    int getDisplayCurrencyIndex() const { return nDisplayCurrencyIndex; }
     QString getThirdPartyTxUrls() const { return strThirdPartyTxUrls; }
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
@@ -84,6 +88,7 @@ private:
     bool fMinimizeOnClose;
     QString language;
     int nDisplayUnit;
+    int nDisplayCurrencyIndex;
     QString strThirdPartyTxUrls;
     bool fCoinControlFeatures;
     /** RVN START*/
@@ -100,6 +105,7 @@ private:
     void checkAndMigrate();
 Q_SIGNALS:
     void displayUnitChanged(int unit);
+    void displayCurrencyIndexChanged(int unit);
     void coinControlFeaturesChanged(bool);
     void customFeeFeaturesChanged(bool);
     void hideTrayIconChanged(bool);

@@ -225,6 +225,7 @@ RAVEN_QT_H = \
   qt/coincontroldialog.h \
   qt/coincontroltreewidget.h \
   qt/csvmodelwriter.h \
+  qt/currencyunits.h \
   qt/darkstyle.h \
   qt/editaddressdialog.h \
   qt/guiconstants.h \

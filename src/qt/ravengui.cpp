@@ -105,6 +105,18 @@ const std::string RavenGUI::DEFAULT_UIPLATFORM =
  * collisions in the future with additional wallets */
 const QString RavenGUI::DEFAULT_WALLET = "~Default";
 
+/* Bit of a bodge, c++ really doesn't want you to predefine values
+ * in only header files, so we do one-time value assignment here. */
+std::array<CurrencyUnitDetails, 5> CurrencyUnits::CurrencyOptions = { {
+    { "BTC",    "RVNBTC"  , 1,          8},
+    { "mBTC",   "RVNBTC"  , 1000,       5},
+    { "µBTC",   "RVNBTC"  , 1000000,    2},
+    { "Satoshi","RVNBTC"  , 100000000,  0},
+    { "USDT",   "RVNUSDT" , 1,          5}
+} };
+
+static bool ThreadSafeMessageBox(RavenGUI *gui, const std::string& message, const std::string& caption, unsigned int style);
+
 RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *networkStyle, QWidget *parent) :
     QMainWindow(parent),
     enableWallet(false),
@@ -734,8 +746,8 @@ void RavenGUI::createToolBars()
 
         comboRvnUnit = new QComboBox(headerWidget);
         QStringList list;
-        for(int unitNum = 0; unitNum < (int)(sizeof(priceUnits) / sizeof(priceUnits[0])); unitNum++) {
-            list.append(priceUnits[unitNum].Header);
+        for(int unitNum = 0; unitNum < CurrencyUnits::count(); unitNum++) {
+            list.append(QString(CurrencyUnits::CurrencyOptions[unitNum].Header));
         }
         comboRvnUnit->addItems(list);
         comboRvnUnit->setFixedHeight(26);
@@ -801,7 +813,7 @@ void RavenGUI::createToolBars()
                     // Evaluate the current and next numbers and assign a color (green for positive, red for negative)
                     bool ok;
                     if (!list.isEmpty()) {
-                        double next = list.first().toDouble(&ok) * this->currentPriceDisplay.Scalar;
+                        double next = list.first().toDouble(&ok) * this->currentPriceDisplay->Scalar;
                         if (!ok) {
                             labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             labelCurrentPrice->setText("");
@@ -818,7 +830,7 @@ void RavenGUI::createToolBars()
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             }
                             this->unitChanged = false;
-                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', this->currentPriceDisplay.Decimals)));
+                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', this->currentPriceDisplay->Decimals)));
                             labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));
                         }
                     }
@@ -829,7 +841,7 @@ void RavenGUI::createToolBars()
 
 
         // Signal change of displayed price units, must get new conversion ratio
-        connect(comboRvnUnit, SIGNAL(activated(int)), this, SLOT(onPriceUnitChange(int)));
+        connect(comboRvnUnit, SIGNAL(activated(int)), this, SLOT(currencySelectionChanged(int)));
         // Create the timer
         connect(pricingTimer, SIGNAL(timeout()), this, SLOT(getPriceInfo()));
         pricingTimer->start(10000);
@@ -974,6 +986,17 @@ void RavenGUI::setClientModel(ClientModel *_clientModel)
 
             // initialize the disable state of the tray icon with the current value in the model.
             setTrayIconVisible(optionsModel->getHideTrayIcon());
+
+            // Signal to notify the settings have updated the display currency
+            connect(optionsModel,SIGNAL(displayCurrencyIndexChanged(int)), this, SLOT(onCurrencyChange(int)));
+
+            int savedCurrencyIndex = optionsModel->getDisplayCurrencyIndex();
+            if(savedCurrencyIndex > 0 && savedCurrencyIndex < CurrencyUnits::count()) {
+                //...
+                comboRvnUnit->setCurrentIndex(savedCurrencyIndex);
+            } else {
+                comboRvnUnit->setCurrentIndex(0);
+            }
         }
     } else {
         // Disable possibility to show main window via action
@@ -1847,22 +1870,35 @@ void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
     }
 }
 
-void RavenGUI::onPriceUnitChange(int unitIndex)
+/** Triggered only when the user changes the combobox on the main GUI */
+void RavenGUI::currencySelectionChanged(int unitIndex)
 {
-    qDebug() << "RavenGUI::onPriceUnitChange: " + QString::number(unitIndex);
+    if(clientModel && clientModel->getOptionsModel())
+    {
+        clientModel->getOptionsModel()->setDisplayCurrencyIndex(unitIndex);
+    }
+}
 
-    if(unitIndex < 0 || unitIndex >= (int)(sizeof(priceUnits) / sizeof(priceUnits[0]))){
+/** Triggered when the options model's display currency is updated */
+void RavenGUI::onCurrencyChange(int newIndex)
+{
+    qDebug() << "RavenGUI::onPriceUnitChange: " + QString::number(newIndex);
+
+    if(newIndex < 0 || newIndex >= CurrencyUnits::count()){
         return;
     }
 
     this->unitChanged = true;
-    this->currentPriceDisplay = priceUnits[unitIndex];
+    this->currentPriceDisplay = &CurrencyUnits::CurrencyOptions[newIndex];
+    //Update the main GUI box in case this was changed from the settings screen
+    //This will fire the event again, but the options model prevents the infinite loop
+    this->comboRvnUnit->setCurrentIndex(newIndex);
     this->getPriceInfo();
 }
 
 void RavenGUI::getPriceInfo()
 {
-    request->setUrl(QUrl(QString("https://api.binance.com/api/v1/ticker/price?symbol=%1").arg(this->currentPriceDisplay.Ticker)));
+    request->setUrl(QUrl(QString("https://api.binance.com/api/v1/ticker/price?symbol=%1").arg(this->currentPriceDisplay->Ticker)));
     networkManager->get(*request);
 }
 
