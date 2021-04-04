@@ -30,7 +30,7 @@ if [[ ${OS} == "windows" ]]; then
     osslsigncode \
     nsis \
     pkg-config \
-    python \
+    python3 \
     rename \
     zip \
     bison
@@ -58,12 +58,15 @@ elif [[ ${OS} == "osx" ]]; then
     libz-dev \
     p7zip-full \
     pkg-config \
-    python \
-    python-dev \
-    python-setuptools \
+    python-is-python3 \
+    python3 \
+    python3-dev \
+    python3-setuptools \
     s3curl \
     sleuthkit \
-    bison
+    bison \
+    libtinfo5
+    
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     apt -y install \
     apt-file \
@@ -87,7 +90,8 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     nsis \
     pbuilder \
     pkg-config \
-    python \
+    python-is-python3 \
+    python3 \
     rename \
     ubuntu-dev-tools \
     xkb-data \
@@ -114,7 +118,8 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     git \
     libtool \
     pkg-config \
-    python \
+    python-is-python3 \
+    python3 \
     bison
 else
     echo "you must pass the OS to build for"

@@ -111,6 +111,7 @@ $(package)_config_opts_darwin += -no-feature-corewlan
 $(package)_config_opts_darwin += -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
 
 ifneq ($(build_os),darwin)
+$(package)_config_opts_darwin = OPENSSL_LIBS="-lssl -lcrypto -pthread -ldl"
 $(package)_config_opts_darwin += -xplatform macx-clang-linux
 $(package)_config_opts_darwin += -device-option MAC_SDK_PATH=$(OSX_SDK)
 $(package)_config_opts_darwin += -device-option MAC_SDK_VERSION=$(OSX_SDK_VERSION)

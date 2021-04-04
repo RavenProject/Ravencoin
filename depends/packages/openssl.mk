@@ -28,6 +28,7 @@ $(package)_config_opts+=no-shared
 $(package)_config_opts+=no-ssl-trace
 $(package)_config_opts+=no-ssl2
 $(package)_config_opts+=no-ssl3
+$(package)_config_opts+=no-tests
 $(package)_config_opts+=no-unit-test
 $(package)_config_opts+=no-weak-ssl-ciphers
 $(package)_config_opts+=no-whirlpool
@@ -37,29 +38,41 @@ $(package)_config_opts+=$($(package)_cflags) $($(package)_cppflags)
 $(package)_config_opts_linux=-fPIC -Wa,--noexecstack
 $(package)_config_opts_x86_64_linux=linux-x86_64
 $(package)_config_opts_i686_linux=linux-generic32
-$(package)_config_opts_arm_linux=--cross-compile-prefix=arm-linux-gnueabihf- linux-generic32
+$(package)_config_opts_arm_linux=linux-generic32
 $(package)_config_opts_aarch64_linux=linux-generic64
 $(package)_config_opts_mipsel_linux=linux-generic32
 $(package)_config_opts_mips_linux=linux-generic32
 $(package)_config_opts_powerpc_linux=linux-generic32
-$(package)_config_opts_x86_64_darwin=darwin64-x86_64-cc
-$(package)_config_opts_x86_64_mingw32=--cross-compile-prefix=x86_64-w64-mingw32- mingw64
-$(package)_config_opts_i686_mingw32=--cross-compile-prefix=i686-w64-mingw32- mingw32
+$(package)_config_opts_x86_64_darwin=AR=$(host_prefix)/native/bin/x86_64-apple-darwin14-ar
+$(package)_config_opts_x86_64_darwin+=RANLIB=$(host_prefix)/native/bin/x86_64-apple-darwin14-ranlib
+$(package)_config_opts_x86_64_darwin+=darwin64-x86_64-cc
+
+$(package)_config_opts_x86_64_mingw32=mingw64
+$(package)_config_opts_i686_mingw32=mingw32
+
+ifneq (,$(findstring clang,$($(package)_cxx)))
+$(package)_toolset_$(host_os)=clang
+else
+$(package)_toolset_$(host_os)=gcc
+endif
 endef
 
 define $(package)_preprocess_cmds
 endef
 
 define $(package)_config_cmds
+  CC="$($(package)_cc)" \
+  CXXFLAGS="$($(package)_ccflags)" \
   ./Configure $($(package)_config_opts)
 endef
 
 define $(package)_build_cmds
-  $(MAKE) -j1 build_libs libcrypto.pc libssl.pc openssl.pc
+  sed -i.old 's/INSTALL_PROGRAMS=apps\/openssl/INSTALL_PROGRAMS=/g' Makefile && \
+  $(MAKE) -j1 build_libs
 endef
 
 define $(package)_stage_cmds
-  $(MAKE) DESTDIR=$($(package)_staging_dir) -j1 install_sw
+  $(MAKE) DESTDIR=$($(package)_staging_dir) -j1 install_dev
 endef
 
 define $(package)_postprocess_cmds
