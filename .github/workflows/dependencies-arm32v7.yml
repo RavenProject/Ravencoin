@@ -3,12 +3,12 @@ name: Dependencies - Arm32v7
 on:
   pull_request:
     branches:
-      - master
+      - depends
     paths:
       - 'depends/**'
   push:
     branches:
-      - master
+      - depends
     paths:
       - 'depends/**'
 
