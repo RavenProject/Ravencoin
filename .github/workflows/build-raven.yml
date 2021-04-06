@@ -27,7 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        OS: [ 'windows', 'linux', 'linux-disable-wallet', 'osx', 'arm32v7', 'arm32v7-disable-wallet' ]
+        OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet' ]
+#       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'osx', 'arm32v7', 'arm32v7-disable-wallet' ]
 
     steps:
     - name: Checkout the Code
@@ -36,7 +37,7 @@ jobs:
     - name: Install Build Tools
       run: sudo ${SCRIPTS}/00-install-deps.sh ${{ MATRIX.OS }}
 
-    - name: Copy Build Dependencies
+    - name: Copy and Build Dependencies
       run: ${SCRIPTS}/02-copy-build-dependencies.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
 
     - name: Add Dependencies to the System PATH
