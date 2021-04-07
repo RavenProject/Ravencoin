@@ -1666,6 +1666,381 @@ UniValue reissue(const JSONRPCRequest& request)
     result.push_back(txid);
     return result;
 }
+
+/**
+ * Sweep
+ *
+ * Attempts to sweep from a private key. The default is to sweep all assets and
+ * RVN, but can be limited to either all of the RVN or one asset type by passing
+ * the optional argument `asset_filter`.
+ */
+UniValue sweep(const JSONRPCRequest& request)
+{
+    // Ensure that we have a wallet to sweep into
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    // If we are requesting help, have no assets, or have passed in too many / few
+    //   arguments then just show the help.
+    if (request.fHelp || !AreAssetsDeployed() || request.params.size() > 2 || request.params.size() < 1)
+        throw std::runtime_error(
+                "sweep \"privkey\" ( \"asset_name\" | \"RVN\" ) \n"
+                + AssetActivationWarning() +
+                "\nCreates a transaction to transfer all RVN, and all Assets from a given address -- with only the private key as input.\n"
+                "\nDefault to funding from RVN held in the address, fallback to using RVN held in wallet for transaction fee."
+                "\nDefault to sweeping all assets, but can also all with RVN to sweep only RVN, or to sweep only one asset."
+                "\nThis differs from import because a paper certficate provided with artwork or a one-of-a-kind item can include a paper"
+                " certficate-of-authenticity. Once swept it the paper certificate can be safely discarded as the token is secured by the new address.\n"
+
+                "\nArguments:\n"
+                "1. \"privkey\"               (string, required) private key of addresses from which to sweep\n"
+                "2. \"asset_name\"            (string, optional, default=\"\") name of the asset to sweep or RVN"
+
+                "\nResult:\n"
+                "\"txhex\"                    (string) The transaction hash in hex\n"
+
+                "\nExamples:\n"
+                + HelpExampleCli("sweep", "\"privkey\"")
+                + HelpExampleRpc("sweep", "\"privkey\" \"ASSET_NAME\"")
+                + HelpExampleRpc("sweep", "\"privkey\" \"RVN\"")
+        );
+
+    // See whether we should sweep everything or only a specific asset
+    // Default is to sweep everything (TODO: Should default be `RVN`?)
+    std::string asset_name = "";
+    if (!request.params[1].isNull()) {
+        asset_name = request.params[1].get_str();
+    }
+
+    // Convert the private key to a usable key
+    CRavenSecret secret;
+    std::string private_key = request.params[0].get_str();
+    if (!secret.SetString(private_key)) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key encoding");
+
+    // Verify that the key is valid
+    CKey sweep_key = secret.GetKey();
+    if (!sweep_key.IsValid()) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Private key outside allowed range");
+
+    // Verify that the public address is also valid
+    CPubKey pub_key = sweep_key.GetPubKey();
+    assert(sweep_key.VerifyPubKey(pub_key));
+    CKeyID addr = pub_key.GetID();
+    std::string addr_str = EncodeDestination(addr);
+
+    // Keep track of the private keys necessary for the transaction
+    std::set<std::string> signatures = {private_key};
+
+    // Create a base JSONRPCRequest to use for all subsequent operations as a copy
+    //   of the original request
+    JSONRPCRequest base_request = request;
+
+    // Helper method for calling RPC calls
+    auto CallRPC = [&base_request](const std::string& method, const UniValue& params)
+    {
+        base_request.strMethod = method;
+        base_request.params = params;
+
+        return tableRPC.execute(base_request);
+    };
+
+    // Get the balance for both ourselves and the swept address
+    CAmount our_balance = pwallet->GetBalance();
+    CAmount swept_balance;
+    {
+        UniValue swept_params = UniValue(UniValue::VARR);
+        UniValue swept_nested = UniValue(UniValue::VOBJ);
+        UniValue swept_addresses = UniValue(UniValue::VARR);
+
+        swept_addresses.push_back(addr_str);
+        swept_nested.pushKV("addresses", swept_addresses);
+        swept_params.push_back(swept_nested);
+
+        // Get the balances
+        UniValue balance = CallRPC("getaddressbalance", swept_params);
+
+        if (!ParseInt64(balance["balance"].getValStr(), &swept_balance)) {
+            throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Invalid balance for swept address!");
+        }
+    }
+
+    // Make sure that we can fund this transaction first
+    // TODO: I think that there is a more accurate way to calculate the fee,
+    //   as just always using the min transaction fee seems wrong.
+    if (swept_balance + our_balance < DEFAULT_MIN_RELAY_TX_FEE) {
+        throw JSONRPCError(
+            RPC_WALLET_INSUFFICIENT_FUNDS,
+            tfm::format(
+                "Please add RVN to address '%s' to be able to sweep asset '%s'",
+                addr_str,
+                asset_name
+            )
+        );
+    }
+
+    // Get two new addresses to sweep into: one for all of the assets and another
+    //   for the RVN
+    // TODO: Does generating multiple addresses which may not be used cause a performance hit?
+    std::string dest_ast_str = CallRPC("getnewaddress", UniValue(UniValue::VOBJ)).getValStr();
+    std::string dest_rvn_str = CallRPC("getnewaddress", UniValue(UniValue::VOBJ)).getValStr();
+
+    // Request the unspent transactions
+    // TODO: Should this be replaced with a call to the api.ravencoin.network?
+    // Format of params is as follows:
+    // {
+    //    addresses: ["PUB ADDR"],
+    //    assetName: "ASSET NAME"
+    // }
+    UniValue unspent;
+    UniValue unspent_rvn;
+    UniValue unspent_our_rvn;
+    {
+        // Helper method for getting UTXOs from an address of a specific asset
+        auto get_unspent = [&CallRPC](const std::string& addr, const std::string& asset) {
+            UniValue utxo_params = UniValue(UniValue::VARR);
+            UniValue utxo_inner  = UniValue(UniValue::VOBJ);
+            UniValue utxo_addrs  = UniValue(UniValue::VARR);
+            utxo_addrs.push_back(addr);
+            utxo_inner.pushKV("addresses", utxo_addrs);
+            utxo_inner.pushKV("assetName", asset);
+            utxo_params.push_back(utxo_inner);
+
+            return CallRPC("getaddressutxos", utxo_params);
+        };
+
+        // Get the specified asset UTXOs
+        unspent = get_unspent(addr_str, asset_name);
+
+        // We also get just the unspent RVN from the swept address for potential fee funding
+        unspent_rvn = get_unspent(addr_str, RVN);
+
+        // Get our unspent RVN for funding if the swept address does not have enough
+        unspent_our_rvn = CallRPC("listunspent", UniValue(UniValue::VNULL));
+    }
+
+    // Short out if there is nothing to sweep
+    if (unspent.size() == 0) {
+        throw JSONRPCError(RPC_TRANSACTION_REJECTED, "No assets to sweep!");
+    }
+
+    // Create a raw transaction with all of the unspent transactions
+    UniValue created_transaction;
+    {
+        UniValue create_params = UniValue(UniValue::VARR);
+        UniValue create_input = UniValue(UniValue::VARR);
+        UniValue create_dest = UniValue(UniValue::VOBJ);
+
+        // Keep track of how much more RVN we will need from either the swept
+        //   address or our own wallet.
+        // TODO: I think that there is a more accurate way to calculate the fee,
+        //   as just always using the min transaction fee seems wrong.
+        CAmount fee_left = DEFAULT_MIN_RELAY_TX_FEE;
+        CAmount fee_paid_by_us = 0;
+
+        // Calculate totals for the output of the transaction and map the inputs
+        //   into the correct format of {txid, vout}
+        std::map<std::string, CAmount> asset_totals;
+        for (size_t i = 0; i != unspent.size(); ++i) {
+            UniValue current_input = UniValue(UniValue::VOBJ);
+
+            const UniValue& current = unspent[i];
+            std::string curr_asset_name = current["assetName"].getValStr();
+            CAmount curr_amount;
+
+            // Parse the amount safely
+            if (!ParseInt64(current["satoshis"].getValStr(), &curr_amount)) {
+                throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Invalid amount in UTXOs!");
+            }
+
+            // Subtract from the fee if RVN is being added to the list of inputs and
+            //   subtract from the total sent.
+            // Note: We do this because this allows for any RVN being swept to pay
+            //   the fee rather than our own address.
+            if (fee_left != 0 && curr_asset_name == RVN) {
+                CAmount fee_diff = fee_left - curr_amount;
+
+                fee_paid_by_us += (fee_diff > 0) ? curr_amount : fee_left;
+                fee_left = (fee_diff > 0) ? fee_diff : 0;
+            }
+
+            // Update the total
+            // Note: [] access creates a default value if not in map
+            asset_totals[curr_asset_name] += curr_amount;
+
+            // Add to input
+            current_input.pushKV("txid", current["txid"]);
+            current_input.pushKV("vout", current["outputIndex"]);
+            create_input.push_back(current_input);
+        }
+
+        // If we still have some fee left, then try to fund from the swept address
+        //   first (assumming we haven't swept for RVN or everything [which includes RVN])
+        //   and then try to fund from our own wallets. Since we checked above
+        //   if the balances worked out, then there is no way it will fail here.
+        if (fee_left != 0) {
+            if (
+                (asset_name != RVN && asset_name != "") && // We haven't already considered RVN in our sweep above
+                swept_balance != 0                         // We have funds to try
+            ) {
+                // Add as many UTXOs as needed until we either run out or successfully
+                //   fund the transaction
+                for (size_t i = 0; i != unspent_rvn.size() && fee_left != 0; ++i) {
+                    UniValue current_input = UniValue(UniValue::VOBJ);
+
+                    const UniValue& current = unspent_rvn[i];
+                    CAmount curr_amount;
+
+                    // Parse the amount safely
+                    if (!ParseInt64(current["satoshis"].getValStr(), &curr_amount)) {
+                        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Invalid amount in UTXOs!");
+                    }
+
+                    // Add it to the input
+                    current_input.pushKV("txid", current["txid"]);
+                    current_input.pushKV("vout", current["outputIndex"]);
+                    create_input.push_back(current_input);
+
+                    // Update the fee and keep any change that may be incurred
+                    if (fee_left >= curr_amount) {
+                        fee_left -= curr_amount;
+                    } else {
+                        // Send change back to the swept address
+                        CAmount change = curr_amount - fee_left;
+
+                        create_dest.pushKV(addr_str, ValueFromAmount(change));
+                        fee_left = 0;
+                    }
+                }
+            }
+
+            // Fund the rest with our wallet, if needed
+            if (fee_left != 0) {
+                // Add as many UTXOs as needed until we either run out or successfully
+                //   fund the transaction
+                for (size_t i = 0; i != unspent_our_rvn.size() && fee_left != 0; ++i) {
+                    UniValue current_input = UniValue(UniValue::VOBJ);
+
+                    const UniValue& current = unspent_our_rvn[i];
+                    CAmount curr_amount = AmountFromValue(current["amount"]);
+                    bool is_safe = current["safe"].getBool();
+
+                    // Skip unsafe coins
+                    // TODO: Is this wanted behaviour?
+                    if (!is_safe) continue;
+
+                    // Add it to the input
+                    current_input.pushKV("txid", current["txid"]);
+                    current_input.pushKV("vout", current["vout"]);
+                    create_input.push_back(current_input);
+
+                    // Add it to the totals
+                    asset_totals[RVN] += curr_amount;
+
+                    // Add our private key to the transaction for signing
+                    UniValue utxo_nested = UniValue(UniValue::VARR);
+                    utxo_nested.push_back(current["address"].getValStr());
+                    UniValue utxo_privkey = CallRPC("dumpprivkey", utxo_nested);
+                    signatures.insert(utxo_privkey.getValStr());
+
+                    // Update the fee and keep track of how much to pay off at the end
+                    if (fee_left > curr_amount) {
+                        fee_left -= curr_amount;
+                        fee_paid_by_us += curr_amount;
+                    } else {
+                        fee_paid_by_us += fee_left;
+                        fee_left = 0;
+                    }
+                }
+
+                // Sanity check
+                if (fee_left != 0) {
+                    throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Funds available does not match funds required. Do you have unsafe transactions?");
+                }
+            }
+        }
+
+        // Convert the totals into their corresponding object types
+        // Note: Structure of complete output is as follows
+        // {
+        //     "DESTINATION ADDRESS": {
+        //         "transfer": {
+        //             "RVN": Total RVN to sweep,
+        //             "Example Asset": Total Asset count,
+        //             ...
+        //         }
+        //     }
+        // }
+        UniValue curr_transfer = UniValue(UniValue::VOBJ);
+        for (const auto& it : asset_totals) {
+            std::string curr_asset_name = it.first;
+            CAmount curr_amount = it.second;
+
+            // We skip RVN here becuase we need to send that to another of our addresses
+            if (curr_asset_name == RVN) continue;
+
+            curr_transfer.pushKV(curr_asset_name, ValueFromAmount(curr_amount));
+        }
+
+        // Add the RVN output, if available
+        if (asset_totals.find(RVN) != asset_totals.end()) {
+            CAmount rvn_amount = asset_totals[RVN] - fee_paid_by_us;
+
+            // Only add RVN to the output if there is some left over after the fee
+            if (rvn_amount != 0) {
+                create_dest.pushKV(dest_rvn_str, ValueFromAmount(rvn_amount));
+            }
+        }
+
+        // Finish wrapping the transfer, if there are any
+        if (curr_transfer.size() != 0) {
+            UniValue nested_transfer = UniValue(UniValue::VOBJ);
+            nested_transfer.pushKV("transfer", curr_transfer);
+            create_dest.pushKV(dest_ast_str, nested_transfer);
+        }
+
+        // Add the inputs and outputs
+        create_params.push_back(create_input);
+        create_params.push_back(create_dest);
+
+        // Call the RPC to create the transaction
+        created_transaction = CallRPC("createrawtransaction", create_params);
+    }
+
+    // Sign the transaction with the swept private key
+    UniValue signed_transaction;
+    {
+        UniValue signed_params = UniValue(UniValue::VARR);
+        UniValue signed_privkeys = UniValue(UniValue::VARR);
+
+        // Use the supplied private key to allow for the transaction to occur
+        for (const auto& it : signatures) {
+            signed_privkeys.push_back(it);
+        }
+
+        signed_params.push_back(created_transaction);
+        signed_params.push_back(UniValue(UniValue::VNULL)); // We use NULL for prevtxs since there aren't any
+        signed_params.push_back(signed_privkeys);
+
+        // Call the RPC to sign the transaction
+        signed_transaction = CallRPC("signrawtransaction", signed_params);
+    }
+
+    // Commit the transaction to the network
+    UniValue completed_transaction;
+    {
+        UniValue completed_params = UniValue(UniValue::VARR);
+
+        // Only use the hex from the previous RPC
+        // TODO: Should we allow high fees?
+        completed_params.push_back(signed_transaction["hex"].getValStr());
+
+        // Call the RPC to complete the transaction
+        completed_transaction = CallRPC("sendrawtransaction", completed_params);
+    }
+
+    return completed_transaction;
+}
 #endif
 
 UniValue listassets(const JSONRPCRequest& request)
@@ -3048,6 +3423,7 @@ static const CRPCCommand commands[] =
     { "assets",   "transferfromaddresses",      &transferfromaddresses,      {"asset_name", "from_addresses", "qty", "to_address", "message", "expire_time", "rvn_change_address", "asset_change_address"}},
     { "assets",   "transfer",                   &transfer,                   {"asset_name", "qty", "to_address", "message", "expire_time", "change_address", "asset_change_address"}},
     { "assets",   "reissue",                    &reissue,                    {"asset_name", "qty", "to_address", "change_address", "reissuable", "new_units", "new_ipfs"}},
+    { "assets",   "sweep",                      &sweep,                      {"privkey", "asset_name"}},
 #endif
     { "assets",   "listassets",                 &listassets,                 {"asset", "verbose", "count", "start"}},
     { "assets",   "getcacheinfo",               &getcacheinfo,               {}},
