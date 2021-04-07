@@ -990,13 +990,8 @@ void RavenGUI::setClientModel(ClientModel *_clientModel)
             // Signal to notify the settings have updated the display currency
             connect(optionsModel,SIGNAL(displayCurrencyIndexChanged(int)), this, SLOT(onCurrencyChange(int)));
 
-            int savedCurrencyIndex = optionsModel->getDisplayCurrencyIndex();
-            if(savedCurrencyIndex > 0 && savedCurrencyIndex < CurrencyUnits::count()) {
-                //...
-                comboRvnUnit->setCurrentIndex(savedCurrencyIndex);
-            } else {
-                comboRvnUnit->setCurrentIndex(0);
-            }
+            // Init the currency display from settings
+            this->onCurrencyChange(optionsModel->getDisplayCurrencyIndex());
         }
     } else {
         // Disable possibility to show main window via action
