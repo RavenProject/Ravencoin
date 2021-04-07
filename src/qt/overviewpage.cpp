@@ -522,7 +522,7 @@ void OverviewPage::handleAssetRightClicked(const QModelIndex &index)
             else if (action->objectName() == "Copy Amount")
                 GUIUtil::setClipboard(index.data(AssetTableModel::FormattedAmountRole).toString());
             else if (action->objectName() == "Browse") {
-                QDesktopServices::openUrl(QUrl::fromUserInput("https://cloudflare-ipfs.com/ipfs/" + ipfshash));
+                QDesktopServices::openUrl(QUrl::fromUserInput("https://ipfs.io/ipfs/" + ipfshash));
             }
         }
     }
@@ -699,6 +699,6 @@ void OverviewPage::openIPFSForAsset(const QModelIndex &index)
 
     // If the ipfs hash isn't there or doesn't start with Qm, disable the action item
     if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0) {
-        QDesktopServices::openUrl(QUrl::fromUserInput("https://cloudflare-ipfs.com/ipfs/" + ipfshash));
+        QDesktopServices::openUrl(QUrl::fromUserInput("https://ipfs.io/ipfs/" + ipfshash));
     }
 }
