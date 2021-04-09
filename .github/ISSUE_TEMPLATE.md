@@ -1,8 +1,8 @@
 <!--- Remove sections that do not apply -->
 
-This issue tracker is only for technical issues related to bitcoin-core.
+This issue tracker is only for technical issues related to Ravencoin.
 
-General ravencoin questions and/or support requests and are best directed to the [Ravencoin Discord](https://discord.gg/GwtXdyc).
+General Ravencoin questions and/or support requests and are best directed to the [Ravencoin Discord](https://discord.gg/GwtXdyc).
 
 For reporting security issues, please direct message one of the core developers in discord.
 
