@@ -335,6 +335,8 @@ RES_ICONS = \
   qt/res/icons/receive_selected.png \
   qt/res/icons/refresh.png \
   qt/res/icons/remove.png \
+  qt/res/icons/restricted_asset.png \
+  qt/res/icons/restricted_asset_selected.png \
   qt/res/icons/send.png \
   qt/res/icons/send_selected.png \
   qt/res/icons/synced.png \
