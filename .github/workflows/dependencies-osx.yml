@@ -3,12 +3,12 @@ name: Dependencies - Mac OS X
 on:
   pull_request:
     branches:
-      - master
+      - depends
     paths:
       - 'depends/**'
   push:
     branches:
-      - master
+      - depends
     paths:
       - 'depends/**'
 
