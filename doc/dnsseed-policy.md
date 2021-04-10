@@ -43,12 +43,12 @@ related to the DNS seed operation.
 
 If these expectations cannot be satisfied the operator should
 discontinue providing services and contact the active Raven
-Core development team as well as posting on
-[raven-dev](https://lists.linuxfoundation.org/mailman/listinfo/raven-dev).
+Core development team by sending an email to:
+[feedback@ravencoin.org](mailto:feedback@ravencoin.org).
 
 Behavior outside of these expectations may be reasonable in some
 situations but should be discussed in public in advance.
 
 See also
 ----------
-- [raven-seeder](https://github.com/sipa/raven-seeder) is a reference implementation of a DNS seed.
+- [ravencoin-seeder](https://github.com/RavenProject/ravencoin-seeder) is a reference implementation of a DNS seed.
