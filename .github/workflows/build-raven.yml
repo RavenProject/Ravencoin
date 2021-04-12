@@ -19,7 +19,6 @@ on:
 
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
-  AWS_S3_ENABLE: ${{ secrets.AWS_S3_ENABLE }}
 
 jobs:
   build:
@@ -58,18 +57,6 @@ jobs:
     - name: Package Up the Build
       run: ${SCRIPTS}/06-package.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
     
-    - name: Upload Build to the Nightly Site
-      if: env.AWS_S3_ENABLE == 'true'
-      uses: jakejarvis/s3-sync-action@master
-      with:
-        args: --acl public-read --follow-symlinks
-      env:
-        SOURCE_DIR: "${{ GITHUB.WORKSPACE }}/release/"
-        DEST_DIR: "${{ secrets.AWS_S3_LOCATION }}/${{ MATRIX.OS }}/"
-        AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
     - name: Upload Artifacts to Job
       uses: actions/upload-artifact@master
       with:
