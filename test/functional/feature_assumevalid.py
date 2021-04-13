@@ -8,7 +8,7 @@
 Test logic for skipping signature validation on old blocks.
 
 Test logic for skipping signature validation on blocks which we've assumed
-valid (https://github.com/RavenProject/Ravencoin/pull/9484)
+valid (https://github.com/bitcoin/bitcoin/pull/9484)
 
 We build a chain that includes and invalid signature for one of the
 transactions:

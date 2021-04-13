@@ -1,13 +1,12 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Raven
-Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
- irc://#raven@freenode.net
+Upstream-Name: Ravencoin
 Source: https://github.com/RavenProject/Ravencoin
 
 Files: *
-Copyright: 2009-2017, Raven Core Developers
+Copyright: 2009-2017, Bitcoin Core Developers
+           2017-2020, Raven Core Developers
 License: Expat
-Comment: The Raven Core Developers encompasses the current developers listed on raven.org,
+Comment: The Bitcoin Core Developers encompasses the current developers listed on bitcoin.org,
          as well as the numerous contributors to the project.
 
 Files: debian/*
@@ -81,9 +80,8 @@ Files: src/qt/res/icons/about.png
        src/qt/res/icons/raven.*
        share/pixmaps/raven*
        src/qt/res/src/raven.svg
-Copyright: Bitboy, Jonas Schnelli
+Copyright: The Raven Core Developers
 License: public-domain
-Comment: Site: https://raventalk.org/?topic=1756.0
 
 
 License: Expat
