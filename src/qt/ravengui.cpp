@@ -68,6 +68,7 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
+#include <QComboBox>
 
 // Fixing Boost 1.73 compile errors
 #include <boost/bind/bind.hpp>
@@ -103,6 +104,18 @@ const std::string RavenGUI::DEFAULT_UIPLATFORM =
 /** Display name for default wallet name. Uses tilde to avoid name
  * collisions in the future with additional wallets */
 const QString RavenGUI::DEFAULT_WALLET = "~Default";
+
+/* Bit of a bodge, c++ really doesn't want you to predefine values
+ * in only header files, so we do one-time value assignment here. */
+std::array<CurrencyUnitDetails, 5> CurrencyUnits::CurrencyOptions = { {
+    { "BTC",    "RVNBTC"  , 1,          8},
+    { "mBTC",   "RVNBTC"  , 1000,       5},
+    { "µBTC",   "RVNBTC"  , 1000000,    2},
+    { "Satoshi","RVNBTC"  , 100000000,  0},
+    { "USDT",   "RVNUSDT" , 1,          5}
+} };
+
+static bool ThreadSafeMessageBox(RavenGUI *gui, const std::string& message, const std::string& caption, unsigned int style);
 
 RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *networkStyle, QWidget *parent) :
     QMainWindow(parent),
@@ -149,6 +162,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     headerWidget(0),
     labelCurrentMarket(0),
     labelCurrentPrice(0),
+    comboRvnUnit(0),
     pricingTimer(0),
     networkManager(0),
     request(0),
@@ -702,7 +716,7 @@ void RavenGUI::createToolBars()
         QString widgetBackgroundSytleSheet = QString(".QWidget{background-color: %1}").arg(platformStyle->TopWidgetBackGroundColor().name());
 
         // Set the headers widget options
-        headerWidget->setContentsMargins(0,0,0,50);
+        headerWidget->setContentsMargins(0,25,0,0);
         headerWidget->setStyleSheet(widgetBackgroundSytleSheet);
         headerWidget->setGraphicsEffect(GUIUtil::getShadowEffect());
         headerWidget->setFixedHeight(75);
@@ -715,11 +729,10 @@ void RavenGUI::createToolBars()
 
         // Set the pricing information
         QHBoxLayout* priceLayout = new QHBoxLayout(headerWidget);
-        priceLayout->setContentsMargins(QMargins());
+        priceLayout->setContentsMargins(0,0,0,25);
         priceLayout->setDirection(QBoxLayout::LeftToRight);
         priceLayout->setAlignment(Qt::AlignVCenter);
         labelCurrentMarket->setContentsMargins(50,0,0,0);
-        labelCurrentMarket->setFixedHeight(75);
         labelCurrentMarket->setAlignment(Qt::AlignVCenter);
         labelCurrentMarket->setStyleSheet(STRING_LABEL_COLOR);
         labelCurrentMarket->setFont(currentMarketFont);
@@ -727,25 +740,26 @@ void RavenGUI::createToolBars()
 
         QString currentPriceStyleSheet = ".QLabel{color: %1;}";
         labelCurrentPrice->setContentsMargins(25,0,0,0);
-        labelCurrentPrice->setFixedHeight(75);
         labelCurrentPrice->setAlignment(Qt::AlignVCenter);
         labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
         labelCurrentPrice->setFont(currentMarketFont);
 
-        QLabel* labelBtcRvn = new QLabel();
-        labelBtcRvn->setText("BTC / RVN");
-        labelBtcRvn->setContentsMargins(15,0,0,0);
-        labelBtcRvn->setFixedHeight(75);
-        labelBtcRvn->setAlignment(Qt::AlignVCenter);
-        labelBtcRvn->setStyleSheet(STRING_LABEL_COLOR);
-        labelBtcRvn->setFont(currentMarketFont);
+        comboRvnUnit = new QComboBox(headerWidget);
+        QStringList list;
+        for(int unitNum = 0; unitNum < CurrencyUnits::count(); unitNum++) {
+            list.append(QString(CurrencyUnits::CurrencyOptions[unitNum].Header));
+        }
+        comboRvnUnit->addItems(list);
+        comboRvnUnit->setFixedHeight(26);
+        comboRvnUnit->setContentsMargins(5,0,0,0);
+        comboRvnUnit->setStyleSheet(STRING_LABEL_COLOR);
+        comboRvnUnit->setFont(currentMarketFont);
 
         labelVersionUpdate->setText("<a href=\"https://github.com/RavenProject/Ravencoin/releases\">New Wallet Version Available</a>");
         labelVersionUpdate->setTextFormat(Qt::RichText);
         labelVersionUpdate->setTextInteractionFlags(Qt::TextBrowserInteraction);
         labelVersionUpdate->setOpenExternalLinks(true);
         labelVersionUpdate->setContentsMargins(0,0,15,0);
-        labelVersionUpdate->setFixedHeight(75);
         labelVersionUpdate->setAlignment(Qt::AlignVCenter);
         labelVersionUpdate->setStyleSheet(STRING_LABEL_COLOR);
         labelVersionUpdate->setFont(currentMarketFont);
@@ -754,7 +768,7 @@ void RavenGUI::createToolBars()
         priceLayout->setGeometry(headerWidget->rect());
         priceLayout->addWidget(labelCurrentMarket, 0, Qt::AlignVCenter | Qt::AlignLeft);
         priceLayout->addWidget(labelCurrentPrice, 0,  Qt::AlignVCenter | Qt::AlignLeft);
-        priceLayout->addWidget(labelBtcRvn, 0 , Qt::AlignVCenter | Qt::AlignLeft);
+        priceLayout->addWidget(comboRvnUnit, 0 , Qt::AlignBottom| Qt::AlignLeft);
         priceLayout->addStretch();
         priceLayout->addWidget(labelVersionUpdate, 0 , Qt::AlignVCenter | Qt::AlignRight);
 
@@ -799,7 +813,7 @@ void RavenGUI::createToolBars()
                     // Evaluate the current and next numbers and assign a color (green for positive, red for negative)
                     bool ok;
                     if (!list.isEmpty()) {
-                        double next = list.first().toDouble(&ok);
+                        double next = list.first().toDouble(&ok) * this->currentPriceDisplay->Scalar;
                         if (!ok) {
                             labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             labelCurrentPrice->setText("");
@@ -808,14 +822,15 @@ void RavenGUI::createToolBars()
                             if (!ok) {
                                 current = 0.00000000;
                             } else {
-                                if (next < current)
+                                if (next < current && !this->unitChanged)
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("red"));
-                                else if (next > current)
+                                else if (next > current && !this->unitChanged)
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg("green"));
                                 else
                                     labelCurrentPrice->setStyleSheet(currentPriceStyleSheet.arg(COLOR_LABELS.name()));
                             }
-                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', 8)));
+                            this->unitChanged = false;
+                            labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', this->currentPriceDisplay->Decimals)));
                             labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));
                         }
                     }
@@ -824,6 +839,9 @@ void RavenGUI::createToolBars()
 
         connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+
+        // Signal change of displayed price units, must get new conversion ratio
+        connect(comboRvnUnit, SIGNAL(activated(int)), this, SLOT(currencySelectionChanged(int)));
         // Create the timer
         connect(pricingTimer, SIGNAL(timeout()), this, SLOT(getPriceInfo()));
         pricingTimer->start(10000);
@@ -968,6 +986,12 @@ void RavenGUI::setClientModel(ClientModel *_clientModel)
 
             // initialize the disable state of the tray icon with the current value in the model.
             setTrayIconVisible(optionsModel->getHideTrayIcon());
+
+            // Signal to notify the settings have updated the display currency
+            connect(optionsModel,SIGNAL(displayCurrencyIndexChanged(int)), this, SLOT(onCurrencyChange(int)));
+
+            // Init the currency display from settings
+            this->onCurrencyChange(optionsModel->getDisplayCurrencyIndex());
         }
     } else {
         // Disable possibility to show main window via action
@@ -1773,11 +1797,11 @@ UnitDisplayStatusBarControl::UnitDisplayStatusBarControl(const PlatformStyle *pl
     const QFontMetrics fm(font());
     for (const RavenUnits::Unit unit : units)
     {
-    	#ifndef QTversionPreFiveEleven
-        	max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
-        #else
-        	max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
-        #endif
+    #ifndef QTversionPreFiveEleven
+        max_width = qMax(max_width, fm.horizontalAdvance(RavenUnits::name(unit)));
+    #else
+        max_width = qMax(max_width, fm.width(RavenUnits::name(unit)));
+    #endif
     }
     setMinimumSize(max_width, 0);
     setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -1841,9 +1865,35 @@ void UnitDisplayStatusBarControl::onMenuSelection(QAction* action)
     }
 }
 
+/** Triggered only when the user changes the combobox on the main GUI */
+void RavenGUI::currencySelectionChanged(int unitIndex)
+{
+    if(clientModel && clientModel->getOptionsModel())
+    {
+        clientModel->getOptionsModel()->setDisplayCurrencyIndex(unitIndex);
+    }
+}
+
+/** Triggered when the options model's display currency is updated */
+void RavenGUI::onCurrencyChange(int newIndex)
+{
+    qDebug() << "RavenGUI::onPriceUnitChange: " + QString::number(newIndex);
+
+    if(newIndex < 0 || newIndex >= CurrencyUnits::count()){
+        return;
+    }
+
+    this->unitChanged = true;
+    this->currentPriceDisplay = &CurrencyUnits::CurrencyOptions[newIndex];
+    //Update the main GUI box in case this was changed from the settings screen
+    //This will fire the event again, but the options model prevents the infinite loop
+    this->comboRvnUnit->setCurrentIndex(newIndex);
+    this->getPriceInfo();
+}
+
 void RavenGUI::getPriceInfo()
 {
-    request->setUrl(QUrl("https://api.binance.com/api/v1/ticker/price?symbol=RVNBTC"));
+    request->setUrl(QUrl(QString("https://api.binance.com/api/v1/ticker/price?symbol=%1").arg(this->currentPriceDisplay->Ticker)));
     networkManager->get(*request);
 }
 
