@@ -1340,31 +1340,39 @@ void CreateAssetDialog::updateMinFeeLabel()
 
 void CreateAssetDialog::setUniqueSelected()
 {
-    ui->reissuableBox->setChecked(false);
     ui->quantitySpinBox->setValue(1);
-    ui->unitBox->setValue(0);
-    ui->reissuableBox->setDisabled(true);
-    ui->unitBox->setDisabled(true);
     ui->quantitySpinBox->setDisabled(true);
+
+    ui->unitBox->setValue(0);
+    ui->unitBox->setDisabled(true);
+
+    ui->reissuableBox->setChecked(false);
+    ui->reissuableBox->setDisabled(true);
 }
 
 void CreateAssetDialog::setQualifierSelected()
 {
-    ui->reissuableBox->setChecked(false);
     ui->quantitySpinBox->setValue(1);
     ui->quantitySpinBox->setMaximum(10);
+    ui->quantitySpinBox->setDisabled(false);
+    
     ui->unitBox->setValue(0);
-    ui->reissuableBox->setDisabled(true);
     ui->unitBox->setDisabled(true);
+
+    ui->reissuableBox->setChecked(false);
+    ui->reissuableBox->setDisabled(true);
 }
 
 void CreateAssetDialog::clearSelected()
 {
-    ui->reissuableBox->setDisabled(false);
-    ui->unitBox->setDisabled(false);
+    ui->quantitySpinBox->setMaximum(21000000000);
     ui->quantitySpinBox->setDisabled(false);
-    ui->reissuableBox->setChecked(true);
+
     ui->unitBox->setValue(0);
+    ui->unitBox->setDisabled(false);
+    
+    ui->reissuableBox->setChecked(true);
+    ui->reissuableBox->setDisabled(false);
 }
 
 void CreateAssetDialog::updateAssetList()
@@ -1432,6 +1440,7 @@ void CreateAssetDialog::clear()
     ui->assetFullName->clear();
     ui->unitBox->setDisabled(false);
     ui->quantitySpinBox->setDisabled(false);
+    ui->quantitySpinBox->setMaximum(21000000000);
     ui->nameText->setEnabled(true);
 
     ui->reissuableBox->setDisabled(false);
