@@ -14,6 +14,10 @@
 #include <consensus/validation.h>
 #include <consensus/tx_verify.h>
 #include <validation.h>
+#ifdef ENABLE_WALLET
+#include <wallet/db.h>
+#include <wallet/wallet.h>
+#endif
 
 BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
@@ -539,5 +543,68 @@ BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
         BOOST_CHECK(fCheck);
         BOOST_CHECK(state.GetRejectReason() == "bad-txns-asset-reissued-amount-isn't-zero");
     }
+
+#ifdef ENABLE_WALLET
+    BOOST_AUTO_TEST_CASE(asset_tx_enforce_coinbase_test)
+    {
+        BOOST_TEST_MESSAGE("Running Asset TX Enforce Coinbase Test");
+
+        SelectParams(CBaseChainParams::MAIN);
+
+        // Build wallet
+        bitdb.MakeMock();
+        std::unique_ptr<CWalletDBWrapper> dbw(new CWalletDBWrapper(&bitdb, "wallet_test.dat"));
+        CWallet wallet(std::move(dbw));
+        bool firstRun;
+        wallet.LoadWallet(firstRun);
+
+        // Build coinbasescript
+        std::shared_ptr<CReserveScript> coinbaseScript;
+        wallet.GetScriptForMining(coinbaseScript);
+
+        // Create coinbase transaction.
+        CMutableTransaction coinbaseTx;
+        coinbaseTx.vin.resize(1);
+        coinbaseTx.vin[0].prevout.SetNull();
+
+        // Resize the coinbase vout to allow for an additional transaction
+        coinbaseTx.vout.resize(2);
+
+        // Add in the initial coinbase data
+        coinbaseTx.vout[0].scriptPubKey = coinbaseScript->reserveScript;
+        coinbaseTx.vout[0].nValue = GetBlockSubsidy(100, GetParams().GetConsensus());
+        coinbaseTx.vin[0].scriptSig = CScript() << 100 << OP_0;
+
+        // Create a transfer asset
+        CAssetTransfer transferAsset("COINBASE_TEST", 100);
+        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
+        transferAsset.ConstructTransaction(scriptPubKey);
+
+        // Add the transfer asset script into the coinbase
+        coinbaseTx.vout[1].scriptPubKey = scriptPubKey;
+        coinbaseTx.vout[1].nValue = 0;
+
+        // Create the transaction and state objects
+        CTransaction tx(coinbaseTx);
+        CValidationState state;
+
+        // Setting the coinbase check to true
+        // This check should now fail on the CheckTransaction call
+        SetEnforcedCoinbase(true);
+        bool fCheck = CheckTransaction(tx, state, true);
+        BOOST_CHECK(!fCheck);
+        BOOST_CHECK(state.GetRejectReason() == "bad-txns-coinbase-contains-asset-txes");
+
+        // Setting the coinbase check to false
+        // This check should now pass the CheckTransaction call
+        SetEnforcedCoinbase(false);
+        fCheck = CheckTransaction(tx, state, true);
+        BOOST_CHECK(fCheck);
+
+        // Remove wallet used for testing
+        bitdb.Flush(true);
+        bitdb.Reset();
+    }
+#endif
 
 BOOST_AUTO_TEST_SUITE_END()
