@@ -415,6 +415,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     sendAction = new QAction(tr("Send Asset"), this);
     QAction *copyAmountAction = new QAction(tr("Copy Amount"), this);
     QAction *copyNameAction = new QAction(tr("Copy Name"), this);
+    copyHashAction = new QAction(tr("Copy Hash"), this);
     issueSub = new QAction(tr("Issue Sub Asset"), this);
     issueUnique = new QAction(tr("Issue Unique Asset"), this);
     reissue = new QAction(tr("Reissue Asset"), this);
@@ -426,6 +427,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     reissue->setObjectName("Reissue");
     copyNameAction->setObjectName("Copy Name");
     copyAmountAction->setObjectName("Copy Amount");
+    copyHashAction->setObjectName("Copy Hash");
     openURL->setObjectName("Browse");
 
     // context menu
@@ -434,7 +436,9 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     contextMenu->addAction(issueSub);
     contextMenu->addAction(issueUnique);
     contextMenu->addAction(reissue);
+    contextMenu->addSeparator();
     contextMenu->addAction(openURL);
+    contextMenu->addAction(copyHashAction);
     contextMenu->addSeparator();
     contextMenu->addAction(copyNameAction);
     contextMenu->addAction(copyAmountAction);
@@ -491,6 +495,12 @@ void OverviewPage::handleAssetRightClicked(const QModelIndex &index)
             openURL->setDisabled(true);
         }
 
+        if (ipfshash.count() > 0) {
+            copyHashAction->setDisabled(false);
+        } else {
+            copyHashAction->setDisabled(true);
+        }
+
         if (!index.data(AssetTableModel::AdministratorRole).toBool()) {
             issueSub->setDisabled(true);
             issueUnique->setDisabled(true);
@@ -522,6 +532,8 @@ void OverviewPage::handleAssetRightClicked(const QModelIndex &index)
                 GUIUtil::setClipboard(index.data(AssetTableModel::AssetNameRole).toString());
             else if (action->objectName() == "Copy Amount")
                 GUIUtil::setClipboard(index.data(AssetTableModel::FormattedAmountRole).toString());
+            else if (action->objectName() == "Copy Hash")
+                GUIUtil::setClipboard(ipfshash);
             else if (action->objectName() == "Browse") {
                 QDesktopServices::openUrl(QUrl::fromUserInput(ipfsbrowser.replace("%s", ipfshash)));
             }
