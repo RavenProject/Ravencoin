@@ -135,7 +135,8 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
 
     ui->comboBox->setModel(proxy);
     ui->comboBox->setEditable(true);
-    ui->comboBox->lineEdit()->setPlaceholderText("Select an asset");
+    ui->comboBox->lineEdit()->setPlaceholderText(tr("Select an asset to reissue.."));
+    ui->comboBox->lineEdit()->setToolTip(tr("Select the asset you want to reissue."));
 
     completer = new QCompleter(proxy,this);
     completer->setCompletionMode(QCompleter::PopupCompletion);
@@ -368,6 +369,9 @@ void ReissueAssetDialog::setupAssetDataView(const PlatformStyle *platformStyle)
 
     ui->currentDataLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->currentDataLabel->setFont(GUIUtil::getTopLabelFont());
+
+    ui->labelReissueAsset->setStyleSheet(STRING_LABEL_COLOR);
+    ui->labelReissueAsset->setFont(GUIUtil::getTopLabelFont());
 
     ui->reissueAssetDataLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->reissueAssetDataLabel->setFont(GUIUtil::getTopLabelFont());
