@@ -48,6 +48,7 @@ These dependencies are required:
  libssl      | Crypto           | Random Number Generation, Elliptic Curve Cryptography
  libboost    | Utility          | Library for threading, data structures, etc
  libevent    | Networking       | OS independent asynchronous networking
+ libdb++     | Utility          | Contains headers and static libraries for the Berkeley DB library
 
 Optional dependencies:
 
@@ -73,11 +74,24 @@ tuned to conserve memory with additional CXXFLAGS:
 
     ./configure CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768"
 
-Dependency Build Instructions: Ubuntu & Debian
-----------------------------------------------
+Alternatively, or in addition, debugging information can be skipped for compilation. The default compile flags are
+`-g -O2`, and can be changed with:
+
+    ./configure CXXFLAGS="-O2"
+
+Finally, clang (often less resource hungry) can be used instead of gcc, which is used by default:
+
+    ./configure CXX=clang++ CC=clang
+
+## Linux Distribution Specific Instructions
+
+### Ubuntu & Debian
+
+#### Dependency Build Instructions
+
 Build requirements:
 
-    sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3
+    sudo apt-get install build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3 libdb++-dev
 
 Options when installing required Boost library files:
 
@@ -106,6 +120,7 @@ BerkeleyDB 5.1 or later, which break binary wallet compatibility with the distri
 are based on BerkeleyDB 4.8. If you do not care about wallet compatibility,
 pass `--with-incompatible-bdb` to configure.
 
+Otherwise, you can build from self-compiled `depends` (see above).
 See the section "Disable-wallet mode" to build Raven Core without wallet.
 
 Optional (see --with-miniupnpc and --enable-upnp-default):
@@ -139,8 +154,11 @@ libqrencode (optional) can be installed with:
 Once these are installed, they will be found by configure and a raven-qt executable will be
 built by default.
 
-Dependency Build Instructions: Fedora
--------------------------------------
+
+### Fedora
+
+#### Dependency Build Instructions
+
 Build requirements:
 
     sudo dnf install gcc-c++ libtool make autoconf automake openssl-devel libevent-devel boost-devel libdb4-devel libdb4-cxx-devel python3
@@ -149,7 +167,11 @@ Optional:
 
     sudo dnf install miniupnpc-devel
 
-To build with Qt 5 (recommended) you need the following:
+ZMQ dependencies (provides ZMQ API):
+
+    sudo dnf install zeromq-devel
+
+To build with Qt 5 you need the following:
 
     sudo dnf install qt5-qttools-devel qt5-qtbase-devel protobuf-devel
 

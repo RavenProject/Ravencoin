@@ -109,9 +109,14 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     }
 #if QT_VERSION >= 0x040700
     ui->thirdPartyTxUrls->setPlaceholderText("https://example.com/tx/%s");
+    ui->ipfsUrl->setPlaceholderText("https://ipfs.io/ipfs/%s");
 #endif
 
     ui->unit->setModel(new RavenUnits(this));
+    QStringList currencyList;
+    for(int unitNum = 0; unitNum < CurrencyUnits::count() ; unitNum++) {
+        ui->currencyUnitIndex->addItem(QString(CurrencyUnits::CurrencyOptions[unitNum].Header), unitNum);
+    }
 
     /* Widget-to-option mapper */
     mapper = new QDataWidgetMapper(this);
@@ -168,6 +173,7 @@ void OptionsDialog::setModel(OptionsModel *_model)
     /* Display */
     connect(ui->lang, SIGNAL(valueChanged()), this, SLOT(showRestartWarning()));
     connect(ui->thirdPartyTxUrls, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
+    connect(ui->ipfsUrl, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
     connect(ui->darkModeCheckBox, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
 }
 
@@ -206,7 +212,9 @@ void OptionsDialog::setMapper()
     /* Display */
     mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
+    mapper->addMapping(ui->currencyUnitIndex, OptionsModel::DisplayCurrencyIndex);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
+    mapper->addMapping(ui->ipfsUrl, OptionsModel::IpfsUrl);
 }
 
 void OptionsDialog::setOkButtonState(bool fState)
@@ -232,6 +240,12 @@ void OptionsDialog::on_resetButton_clicked()
     }
 }
 
+void OptionsDialog::on_ipfsUrlReset_clicked()
+{
+    /* reset third-party IPFS viewer URL to default setting. */
+    ui->ipfsUrl->setText("https://ipfs.io/ipfs/%s");
+}
+
 void OptionsDialog::on_openRavenConfButton_clicked()
 {
     /* explain the purpose of the config file */
@@ -254,6 +268,12 @@ void OptionsDialog::on_okButton_clicked()
 void OptionsDialog::on_cancelButton_clicked()
 {
     reject();
+}
+
+void OptionsDialog::on_thirdPartyTxUrlsReset_clicked()
+{
+    // reset thirdPartyTxUrls to default
+    ui->thirdPartyTxUrls->setText("https://api.ravencoin.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.ravencoin.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s");
 }
 
 void OptionsDialog::on_hideTrayIcon_stateChanged(int fState)

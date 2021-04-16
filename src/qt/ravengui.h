@@ -11,6 +11,7 @@
 #endif
 
 #include "amount.h"
+#include "currencyunits.h"
 
 #include <QLabel>
 #include <QMainWindow>
@@ -18,6 +19,7 @@
 #include <QMenu>
 #include <QPoint>
 #include <QSystemTrayIcon>
+#include <QComboBox>
 
 class ClientModel;
 class NetworkStyle;
@@ -77,6 +79,7 @@ public:
         HD44_ENABLED = 2
     };
 
+
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
@@ -132,6 +135,7 @@ private:
     QWidget *headerWidget;
     QLabel *labelCurrentMarket;
     QLabel *labelCurrentPrice;
+    QComboBox *comboRvnUnit;
     QTimer *pricingTimer;
     QNetworkAccessManager* networkManager;
     QNetworkRequest* request;
@@ -152,6 +156,9 @@ private:
     int spinnerFrame;
 
     const PlatformStyle *platformStyle;
+
+    const CurrencyUnitDetails* currentPriceDisplay = &CurrencyUnits::CurrencyOptions[0];
+    bool unitChanged = true; //Setting this true makes the first price update not appear as an uptick
 
     /** Load the custome open sans fonts into the font database */
     void loadFonts();
@@ -203,6 +210,9 @@ public Q_SLOTS:
        @param[in] ret       pointer to a bool that will be modified to whether Ok was clicked (modal only)
     */
     void message(const QString &title, const QString &message, unsigned int style, bool *ret = nullptr);
+
+    void currencySelectionChanged(int unitIndex);
+    void onCurrencyChange(int newIndex);
 
     void getPriceInfo();
 
@@ -324,5 +334,6 @@ private Q_SLOTS:
     /** Tells underlying optionsModel to update its current display unit. */
     void onMenuSelection(QAction* action);
 };
+
 
 #endif // RAVEN_QT_RAVENGUI_H

@@ -76,6 +76,7 @@ Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
 #elif defined(QT_QPA_PLATFORM_COCOA)
 Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin);
+Q_IMPORT_PLUGIN(QMacStylePlugin);
 #endif
 #endif
 #endif
@@ -606,7 +607,6 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(raven);
     Q_INIT_RESOURCE(raven_locale);
 
-    RavenApplication app(argc, argv);
 #if QT_VERSION > 0x050100
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -618,6 +618,10 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
 #if QT_VERSION >= 0x050500
+
+    // This should be after the attributes.
+    RavenApplication app(argc, argv);
+
     // Because of the POODLE attack it is recommended to disable SSLv3 (https://disablessl3.com/),
     // so set SSL protocols to TLS1.0+.
     QSslConfiguration sslconf = QSslConfiguration::defaultConfiguration();

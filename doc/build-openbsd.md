@@ -1,6 +1,6 @@
 OpenBSD build guide
 ======================
-(updated for OpenBSD 6.1)
+(updated for OpenBSD 6.7)
 
 This guide describes how to build ravend and command-line utilities on OpenBSD.
 
@@ -12,21 +12,35 @@ Preparation
 Run the following as root to install the base dependencies for building:
 
 ```bash
-pkg_add gmake libtool libevent
+pkg_add git gmake libevent libtool boost
+pkg_add qt5 # (optional for enabling the GUI)
 pkg_add autoconf # (select highest version, e.g. 2.69)
-pkg_add automake # (select highest version, e.g. 1.15)
-pkg_add python # (select highest version, e.g. 3.5)
+pkg_add automake # (select highest version, e.g. 1.16)
+pkg_add python # (select highest version, e.g. 3.8)
+
+git clone https://github.com/RavenProject/Ravencoin.git
 ```
 
 See [dependencies.md](dependencies.md) for a complete overview.
 
-GCC
--------
+**Important**: From OpenBSD 6.2 onwards a C++11-supporting clang compiler is
+part of the base image, and while building it is necessary to make sure that
+this compiler is used and not ancient g++ 4.2.1. This is done by appending
+`CC=cc CC_FOR_BUILD=cc CXX=c++` to configuration commands. Mixing different
+compilers within the same executable will result in errors.
 
-The default C++ compiler that comes with OpenBSD 5.9 is g++ 4.2. This version is old (from 2007), and is not able to compile the current version of Raven Core, primarily as it has no C++11 support, but even before there were issues. So here we will be installing a newer compiler:
+### Building BerkeleyDB
+
+BerkeleyDB is only necessary for the wallet functionality. To skip this, pass
+`--disable-wallet` to `./configure` and skip to the next section.
+
+It is recommended to use Berkeley DB 4.8. You cannot use the BerkeleyDB library
+from ports, for the same reason as boost above (g++/libstd++ incompatibility).
+If you have to build it yourself, you can use [the installation script included
+in contrib/](/contrib/install_db4.sh) like so:
 
 ```bash
-pkg_add g++ # (select newest 4.x version, e.g. 4.9.3)
+./contrib/install_db4.sh `pwd` CC=cc CXX=c++
 ```
 
 This compiler will not overwrite the system compiler, it will be installed as `egcc` and `eg++` in `/usr/local/bin`.
@@ -99,7 +113,7 @@ The standard ulimit restrictions in OpenBSD are very strict:
     data(kbytes)         1572864
 
 This is, unfortunately, no longer enough to compile some `.cpp` files in the project,
-at least with gcc 4.9.3 (see issue https://github.com/RavenProject/Ravencoin/issues/6658).
+at least with gcc 4.9.3 (see issue https://github.com/bitcoin/bitcoin/issues/6658).
 If your user is in the `staff` group the limit can be raised with:
 
     ulimit -d 3000000

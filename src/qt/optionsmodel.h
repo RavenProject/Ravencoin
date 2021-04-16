@@ -40,7 +40,9 @@ public:
         ProxyIPTor,             // QString
         ProxyPortTor,           // int
         DisplayUnit,            // RavenUnits::Unit
+        DisplayCurrencyIndex,   // int
         ThirdPartyTxUrls,       // QString
+        IpfsUrl,                // QString
         Language,               // QString
         CoinControlFeatures,    // bool
         ThreadsScriptVerif,     // int
@@ -60,13 +62,17 @@ public:
     bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
     /** Updates current unit in memory, settings and emits displayUnitChanged(newUnit) signal */
     void setDisplayUnit(const QVariant &value);
+    /** Updates current unit in memory, settings and emits displayCurrencyIndexChanged(newIndex) signal */
+    void setDisplayCurrencyIndex(const QVariant &value);
 
     /* Explicit getters */
     bool getHideTrayIcon() const { return fHideTrayIcon; }
     bool getMinimizeToTray() const { return fMinimizeToTray; }
     bool getMinimizeOnClose() const { return fMinimizeOnClose; }
     int getDisplayUnit() const { return nDisplayUnit; }
+    int getDisplayCurrencyIndex() const { return nDisplayCurrencyIndex; }
     QString getThirdPartyTxUrls() const { return strThirdPartyTxUrls; }
+    QString getIpfsUrl() const { return strIpfsUrl; }
     bool getProxySettings(QNetworkProxy& proxy) const;
     bool getCoinControlFeatures() const { return fCoinControlFeatures; }
     bool getCustomFeeFeatures() const { return fCustomFeeFeatures; }
@@ -84,7 +90,9 @@ private:
     bool fMinimizeOnClose;
     QString language;
     int nDisplayUnit;
+    int nDisplayCurrencyIndex;
     QString strThirdPartyTxUrls;
+    QString strIpfsUrl;
     bool fCoinControlFeatures;
     /** RVN START*/
     bool fCustomFeeFeatures;
@@ -100,6 +108,7 @@ private:
     void checkAndMigrate();
 Q_SIGNALS:
     void displayUnitChanged(int unit);
+    void displayCurrencyIndexChanged(int unit);
     void coinControlFeaturesChanged(bool);
     void customFeeFeaturesChanged(bool);
     void hideTrayIconChanged(bool);
