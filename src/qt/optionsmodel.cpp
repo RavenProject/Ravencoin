@@ -11,7 +11,6 @@
 
 #include "ravenunits.h"
 #include "guiutil.h"
-
 #include "amount.h"
 #include "init.h"
 #include "validation.h" // For DEFAULT_SCRIPTCHECK_THREADS
@@ -20,6 +19,7 @@
 #include "txdb.h" // for -dbcache defaults
 #include "intro.h"
 #include "platformstyle.h"
+#include "guiconstants.h" // for DEFAULT_IPFS_VIEWER and DEFAULT_THIRD_PARTY_BROWSERS
 
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -80,11 +80,11 @@ void OptionsModel::Init(bool resetSettings)
     nDisplayCurrencyIndex = settings.value("nDisplayCurrencyIndex", 0).toInt();
 
     if (!settings.contains("strThirdPartyTxUrls"))
-        settings.setValue("strThirdPartyTxUrls",   "https://api.ravencoin.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.ravencoin.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s");
+        settings.setValue("strThirdPartyTxUrls", DEFAULT_THIRD_PARTY_BROWSERS);
     strThirdPartyTxUrls = settings.value("strThirdPartyTxUrls", "").toString();
 
     if (!settings.contains("strIpfsUrl"))
-        settings.setValue("strIpfsUrl", "https://ipfs.io/ipfs/%s");
+        settings.setValue("strIpfsUrl", DEFAULT_IPFS_VIEWER);
     strIpfsUrl = settings.value("strIpfsUrl", "").toString();
 
     if (!settings.contains("fCoinControlFeatures"))
