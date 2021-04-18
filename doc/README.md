@@ -135,7 +135,7 @@ Ravencoin repo's [root README](https://github.com/RavenProject/Ravencoin/blob/ma
 - [Benchmarking](https://github.com/RavenProject/Ravencoin/blob/master/doc/benchmarking.md)
 
 ### Resources
-- Discuss on chat [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
+- Discuss on chat [Discord](https://discord.gg/jn6uhur), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
 - Find out more on the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
 - Visit the project home [Ravencoin.org](https://ravencoin.org)
 
