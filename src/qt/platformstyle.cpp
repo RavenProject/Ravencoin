@@ -212,9 +212,11 @@ QColor PlatformStyle::WidgetBackGroundColor() const
 QColor PlatformStyle::SendEntriesBackGroundColor() const
 {
     if (darkModeEnabled)
-        return QColor(21,20,17);
+     // return QColor(21,20,17);
+        return COLOR_SENDENTRIES_BACKGROUND_DARK;
 
-    return QColor("#faf9f6");
+//  return QColor("#faf9f6");
+    return COLOR_SENDENTRIES_BACKGROUND;
 }
 
 QColor PlatformStyle::ShadowColor() const

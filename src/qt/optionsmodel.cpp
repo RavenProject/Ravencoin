@@ -18,7 +18,7 @@
 #include "net.h"
 #include "netbase.h"
 #include "txdb.h" // for -dbcache defaults
-#include "intro.h" 
+#include "intro.h"
 #include "platformstyle.h"
 
 #ifdef ENABLE_WALLET
@@ -61,7 +61,7 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("fHideTrayIcon", false);
     fHideTrayIcon = settings.value("fHideTrayIcon").toBool();
     Q_EMIT hideTrayIconChanged(fHideTrayIcon);
-    
+
     if (!settings.contains("fMinimizeToTray"))
         settings.setValue("fMinimizeToTray", false);
     fMinimizeToTray = settings.value("fMinimizeToTray").toBool() && !fHideTrayIcon;
@@ -74,10 +74,18 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("nDisplayUnit"))
         settings.setValue("nDisplayUnit", RavenUnits::RVN);
     nDisplayUnit = settings.value("nDisplayUnit").toInt();
+    
+    if (!settings.contains("nDisplayCurrencyIndex"))
+        settings.setValue("nDisplayCurrencyIndex", 0);
+    nDisplayCurrencyIndex = settings.value("nDisplayCurrencyIndex", 0).toInt();
 
     if (!settings.contains("strThirdPartyTxUrls"))
-        settings.setValue("strThirdPartyTxUrls", "");
+        settings.setValue("strThirdPartyTxUrls",   "https://api.ravencoin.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.ravencoin.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s");
     strThirdPartyTxUrls = settings.value("strThirdPartyTxUrls", "").toString();
+
+    if (!settings.contains("strIpfsUrl"))
+        settings.setValue("strIpfsUrl", "https://ipfs.io/ipfs/%s");
+    strIpfsUrl = settings.value("strIpfsUrl", "").toString();
 
     if (!settings.contains("fCoinControlFeatures"))
         settings.setValue("fCoinControlFeatures", false);
@@ -267,8 +275,12 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
 #endif
         case DisplayUnit:
             return nDisplayUnit;
+        case DisplayCurrencyIndex:
+            return nDisplayCurrencyIndex;
         case ThirdPartyTxUrls:
             return strThirdPartyTxUrls;
+        case IpfsUrl:
+            return strIpfsUrl;
         case Language:
             return settings.value("language");
         case CoinControlFeatures:
@@ -395,10 +407,20 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case DisplayUnit:
             setDisplayUnit(value);
             break;
+        case DisplayCurrencyIndex:
+            setDisplayCurrencyIndex(value);
+            break;
         case ThirdPartyTxUrls:
             if (strThirdPartyTxUrls != value.toString()) {
                 strThirdPartyTxUrls = value.toString();
                 settings.setValue("strThirdPartyTxUrls", strThirdPartyTxUrls);
+                setRestartRequired(true);
+            }
+            break;
+        case IpfsUrl:
+            if (strIpfsUrl != value.toString()) {
+                strIpfsUrl = value.toString();
+                settings.setValue("strIpfsUrl", strIpfsUrl);
                 setRestartRequired(true);
             }
             break;
@@ -462,6 +484,18 @@ void OptionsModel::setDisplayUnit(const QVariant &value)
     }
 }
 
+/** Updates current currency unit in memory and settings */
+void OptionsModel::setDisplayCurrencyIndex(const QVariant &value)
+{
+    if (!value.isNull() && value.toInt() != nDisplayCurrencyIndex)
+    {
+        QSettings settings;
+        nDisplayCurrencyIndex = value.toInt();
+        settings.setValue("nDisplayCurrencyIndex", nDisplayCurrencyIndex);
+        Q_EMIT displayCurrencyIndexChanged(nDisplayCurrencyIndex);
+    }
+}
+
 bool OptionsModel::getProxySettings(QNetworkProxy& proxy) const
 {
     // Directly query current base proxy, because
@@ -502,7 +536,7 @@ void OptionsModel::checkAndMigrate()
     if (settingsVersion < CLIENT_VERSION)
     {
         // -dbcache was bumped from 100 to 300 in 0.13
-        // see https://github.com/RavenProject/Ravencoin/pull/8273
+        // see https://github.com/bitcoin/bitcoin/pull/8273
         // force people to upgrade to the new value if they are using 100MB
         if (settingsVersion < 130000 && settings.contains("nDatabaseCache") && settings.value("nDatabaseCache").toLongLong() == 100)
             settings.setValue("nDatabaseCache", (qint64)nDefaultDbCache);

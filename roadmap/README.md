@@ -39,11 +39,11 @@ The RVN used to issue assets will be sent to a burn address, which will reduce t
 
 Asset transfers require the standard RVN transaction fees for transfer from one address to another.
 
-#### Metadata
+#### Metadata (Complete)
 
 Metadata about the token can be stored in IPFS.
 
-#### Rewards
+#### Rewards (Complete)
 
 Reward capabilities will be added to allow payment (in RVN) to all holders of an asset. Payments of RVN would be distributed to all asset holders pro rata. This is useful for paying dividends, dividing payments, or rewarding a group of token holders.
 
@@ -53,7 +53,7 @@ Example: A small software company issues an asset GAMECO that represents a share
 
 Raven may increase the blocksize from 2 MB to X MB to allow for more on-chain transactions.
 
-### Phase 3 - Rewards
+### Phase 3 - Rewards (Complete)
 
 Rewards allow payment in RVN to asset holders.
 
@@ -70,7 +70,7 @@ Some examples of unique assets:
 *  In game assets. A game ZYX_GAME could create unique limited edition in-game assets that are owned and used by the game player. Example: ZYX_GAME#Sword005 and ZYX_GAME#Purse
 *  RVN based unique assets can be tied to real world assets. Create an asset named GOLDVAULT. Each gold coin or gold bar in a vault can be serialized and audited. Associated unique assets GOLDVAULT#444322 and GOLDVAULT#555994 can be created to represent the specific assets in the physical gold vault. The public nature of the chain allows for full transparency.
 
-### Phase 5 - Messaging
+### Phase 5 - Messaging (Complete - in consensus)
 
 Messaging to token holders by authorized senders will be layered on top of the Phase 4 unique assets. See [KAAAWWW Protocol](https://medium.com/@tronblack/ravencoin-kaaawww-2f72077aece) for additional information.
 
@@ -78,7 +78,7 @@ Messaging to token holders by authorized senders will be layered on top of the P
 [More on preventing message spam...](./messaging-antispam/README.md)  
 [More on IPFS...](./ipfs/README.md)  
 
-### Phase 6 - Voting
+### Phase 6 - Voting (Available now using non-expiring UTXO based tokens)
 
 Voting will be accomplished by creating and distributing parallel tokens to token holders. These tokens can be sent to RVN addresses to record a vote.
 
@@ -97,6 +97,12 @@ Speeds adoption into the larger crypto ecosystem.
 Switches to a default of generating a 128 bit seed from which the master key is generated.  This allows easy backup for anyone that doesn't import private keys.  Warnings added to back up wallet.dat when importing private keys.
 
 [More on Mnemonic Seed...](./mnemonic-seed/README.md)
+
+### Phase 9 - Restricted Assets (Complete)
+
+* Tags
+* Restricted assets with rules honoring tags
+
 
 ### Appendix A - RPC commands for assets
 

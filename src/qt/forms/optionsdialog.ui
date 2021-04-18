@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -610,6 +610,30 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_DisplayCurrency">
+         <item>
+          <widget class="QLabel" name="currencyUnitIndexLabel">
+           <property name="text">
+            <string>&amp;Currency Unit:</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::PlainText</enum>
+           </property>
+           <property name="buddy">
+            <cstring>currencyUnitIndex</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QValueComboBox" name="currencyUnitIndex">
+           <property name="toolTip">
+            <string>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3_Display">
          <item>
           <widget class="QLabel" name="thirdPartyTxUrlsLabel">
@@ -628,6 +652,41 @@
           <widget class="QLineEdit" name="thirdPartyTxUrls">
            <property name="toolTip">
             <string>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="thirdPartyTxUrlsReset">
+           <property name="text">
+            <string>Reset</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4_Display" stretch="0,0,0">
+         <item>
+          <widget class="QLabel" name="ipfsUrlLabel">
+           <property name="toolTip">
+            <string>Third party URL for IPFS-viewer. %s in the URL is replaced by IPFS hash.</string>
+           </property>
+           <property name="text">
+            <string>IPFS Viewer URL</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="ipfsUrl">
+           <property name="toolTip">
+            <string>Third party URL for IPFS-viewer. %s in the URL is replaced by IPFS hash.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="ipfsUrlReset">
+           <property name="text">
+            <string>Reset</string>
            </property>
           </widget>
          </item>

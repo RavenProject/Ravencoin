@@ -1207,7 +1207,7 @@
        <item>
         <widget class="QPushButton" name="addButton">
          <property name="toolTip">
-          <string>Send to multiple recipients at once</string>
+          <string>Transfer to multiple recipients at once</string>
          </property>
          <property name="text">
           <string>Add &amp;Recipient</string>
