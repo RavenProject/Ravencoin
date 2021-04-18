@@ -704,7 +704,7 @@
     <item row="0" column="0">
      <widget class="QLabel" name="payToLabel_is">
       <property name="text">
-       <string>Pay To:</string>
+       <string>Transfer to:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1233,7 +1233,7 @@
     <item row="0" column="0">
      <widget class="QLabel" name="payToLabel_s">
       <property name="text">
-       <string>Pay To:</string>
+       <string>Transfer to:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
