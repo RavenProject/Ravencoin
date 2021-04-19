@@ -120,7 +120,9 @@ QT_FORMS_UI = \
   qt/forms/restrictedassignqualifier.ui \
   qt/forms/restrictedfreezeaddress.ui \
   qt/forms/sendassetsentry.ui \
-  qt/forms/mnemonicdialog.ui
+  qt/forms/mnemonicdialog1.ui \
+  qt/forms/mnemonicdialog2.ui \
+  qt/forms/mnemonicdialog3.ui
 
 QT_MOC_CPP = \
   qt/moc_addressbookpage.cpp \
