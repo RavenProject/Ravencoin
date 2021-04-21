@@ -28,7 +28,7 @@ regularly to indicate new official, stable release versions of Raven Core.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Developer IRC is inactive please join us on discord in #development. https://discord.gg/jn6uhur
+Developer IRC is inactive please join us on discord in #development. https://discord.gg/fndp4NBGct
 
 Testing
 -------
