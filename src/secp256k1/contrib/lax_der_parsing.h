@@ -1,8 +1,8 @@
-/**********************************************************************
- * Copyright (c) 2015 Pieter Wuille                                   *
- * Distributed under the MIT software license, see the accompanying   *
- * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
- **********************************************************************/
+/***********************************************************************
+ * Copyright (c) 2015 Pieter Wuille                                    *
+ * Distributed under the MIT software license, see the accompanying    *
+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
+ ***********************************************************************/
 
 /****
  * Please do not link this file directly. It is not part of the libsecp256k1
@@ -68,7 +68,7 @@ extern "C" {
  *  This function will accept any valid DER encoded signature, even if the
  *  encoded numbers are out of range. In addition, it will accept signatures
  *  which violate the DER spec in various ways. Its purpose is to allow
- *  validation of the Raven blockchain, which includes non-DER signatures
+ *  validation of the Bitcoin blockchain, which includes non-DER signatures
  *  from before the network rules were updated to enforce DER. Note that
  *  the set of supported violations is a strict subset of what OpenSSL will
  *  accept.
