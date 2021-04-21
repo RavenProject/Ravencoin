@@ -67,7 +67,7 @@ elif [[ ${OS} == "osx" ]]; then
     bison \
     libtinfo5
     
-elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
+elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" || ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
     apt -y install \
     apt-file \
     autoconf \
@@ -97,6 +97,9 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     xkb-data \
     zip \
     bison
+
+
+
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     apt -y install \
     autoconf \

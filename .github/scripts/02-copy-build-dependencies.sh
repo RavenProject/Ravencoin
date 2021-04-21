@@ -14,7 +14,7 @@ echo "----------------------------------------"
 echo "OS: ${OS}"
 echo "----------------------------------------"
 
-if [[ ${OS} == "arm32v7-disable-wallet" || ${OS} == "linux-disable-wallet" ]]; then
+if [[ ${OS} == "arm32v7-disable-wallet" || ${OS} == "linux-disable-wallet" || ${OS} == "aarch64-disable-wallet" ]]; then
     OS=`echo ${OS} | cut -d"-" -f1`
 fi
 
@@ -47,6 +47,8 @@ if [[ ${GITHUB_REF} =~ "release" || ${FORCEBUILDDEPS} = "1" ]]; then
         make HOST=x86_64-linux-gnu -j2
     elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
         make HOST=arm-linux-gnueabihf -j2
+    elif [[ ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
+        make HOST=aarch64-linux-gnu -j2
     fi
 else
     echo "----------------------------------------"

@@ -216,6 +216,42 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     else
         echo "release directory doesn't exist"
     fi
+elif [[ ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
+
+    make install DESTDIR=${STAGE_DIR}/${DISTNAME}
+
+    cd ${STAGE_DIR}
+    find . -name "lib*.la" -delete
+    find . -name "lib*.a" -delete
+    rm -rf ${DISTNAME}/lib/pkgconfig
+    if [[ -e ${STAGE_DIR}/${DISTNAME}/bin ]]; then
+        find ${DISTNAME}/bin -type f -executable -exec ${GITHUB_WORKSPACE}/contrib/devtools/split-debug.sh {} {} {}.dbg \;
+    else
+        echo "${STAGE_DIR}/${DISTNAME}/bin doesn't exist. $?"
+    fi
+    if [[ -e ${STAGE_DIR}/${DISTNAME}/lib ]]; then
+        find ${DISTNAME}/lib -type f -exec ${GITHUB_WORKSPACE}/contrib/devtools/split-debug.sh {} {} {}.dbg \;
+    else
+        echo "${STAGE_DIR}/${DISTNAME}/lib doesn't exist. $?"
+    fi
+
+    if [[ -e ${RELEASE_LOCATION} ]]; then
+        cd ${STAGE_DIR}
+        find ${DISTNAME}/ -not -name "*.dbg" | sort | tar --no-recursion --mode='u+rw,go+r-w,a+X' --owner=0 --group=0 -c -T - | gzip -9n > ${RELEASE_LOCATION}/${DISTNAME}-aarch64-linux-gnu.tar.gz
+        if [[ -e ${RELEASE_LOCATION}/${DISTNAME}-aarch64-linux-gnu.tar.gz ]]; then
+            cd ${RELEASE_LOCATION}
+            md5sum ${DISTNAME}-aarch64-linux-gnu.tar.gz >> ${DISTNAME}-aarch64-linux-gnu.tar.gz.md5sum
+            sha256sum ${DISTNAME}-aarch64-linux-gnu.tar.gz >> ${DISTNAME}-aarch64-linux-gnu.tar.gz.sha256sum
+        else
+            echo "${DISTNAME}-aarch64-linux-gnu.tar.gz doesn't exist. $?"
+            exit 1
+        fi
+        cd ${STAGE_DIR}
+        cp -Rf ${DISTNAME}/bin/ravend .
+        cp -Rf ${DISTNAME}/bin/raven-cli .
+    else
+        echo "release directory doesn't exist"
+    fi
 else
     echo "You must pass an OS."
     echo "Usage: ${0} <operating system> <github workspace path> <github base ref>"
