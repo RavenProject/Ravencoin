@@ -50,7 +50,7 @@ Please refer to the [Git manual](https://git-scm.com/doc) for more information
 about Git.
 
   - Push changes to your fork
-  - Create pull request
+  - Create pull request to the develop branch
 
 The title of the pull request should be prefixed by the component or area that
 the pull request affects. Valid areas as:
