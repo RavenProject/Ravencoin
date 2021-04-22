@@ -36,7 +36,16 @@ jobs:
     - name: Install Build Tools
       run: sudo ${SCRIPTS}/00-install-deps.sh ${{ MATRIX.OS }}
 
-    - name: Copy and Build Dependencies
+    - name: Cache dependencies.
+      uses: actions/cache@v2
+      with:
+       path: |
+        ${{ GITHUB.WORKSPACE }}/depends/built
+        ${{ GITHUB.WORKSPACE }}/depends/sources
+        ${{ GITHUB.WORKSPACE }}/depends/work
+       key: ${{ MATRIX.OS }}
+      
+    - name: Build dependencies.
       run: ${SCRIPTS}/02-copy-build-dependencies.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
 
     - name: Add Dependencies to the System PATH
