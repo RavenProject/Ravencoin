@@ -121,4 +121,10 @@ static const int MAX_URI_LENGTH = 255;
 #define QAPP_APP_NAME_DEFAULT "Raven-Qt"
 #define QAPP_APP_NAME_TESTNET "Raven-Qt-testnet"
 
+/* Default third party browser urls */
+#define DEFAULT_THIRD_PARTY_BROWSERS "https://api.ravencoin.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.ravencoin.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s"
+
+/* Default IPFS viewer */
+#define DEFAULT_IPFS_VIEWER "https://ipfs.io/ipfs/%s"
+
 #endif // RAVEN_QT_GUICONSTANTS_H

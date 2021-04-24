@@ -13,6 +13,7 @@
 #include "ravenunits.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
+#include "guiconstants.h" // for DEFAULT_IPFS_VIEWER and DEFAULT_THIRD_PARTY_BROWSERS
 
 #include "validation.h" // for DEFAULT_SCRIPTCHECK_THREADS and MAX_SCRIPTCHECK_THREADS
 #include "netbase.h"
@@ -109,7 +110,7 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     }
 #if QT_VERSION >= 0x040700
     ui->thirdPartyTxUrls->setPlaceholderText("https://example.com/tx/%s");
-    ui->ipfsUrl->setPlaceholderText("https://ipfs.io/ipfs/%s");
+    ui->ipfsUrl->setPlaceholderText(DEFAULT_IPFS_VIEWER);
 #endif
 
     ui->unit->setModel(new RavenUnits(this));
@@ -243,7 +244,7 @@ void OptionsDialog::on_resetButton_clicked()
 void OptionsDialog::on_ipfsUrlReset_clicked()
 {
     /* reset third-party IPFS viewer URL to default setting. */
-    ui->ipfsUrl->setText("https://ipfs.io/ipfs/%s");
+    ui->ipfsUrl->setText(DEFAULT_IPFS_VIEWER);
 }
 
 void OptionsDialog::on_openRavenConfButton_clicked()
@@ -273,7 +274,7 @@ void OptionsDialog::on_cancelButton_clicked()
 void OptionsDialog::on_thirdPartyTxUrlsReset_clicked()
 {
     // reset thirdPartyTxUrls to default
-    ui->thirdPartyTxUrls->setText("https://api.ravencoin.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.ravencoin.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s");
+    ui->thirdPartyTxUrls->setText(DEFAULT_THIRD_PARTY_BROWSERS);
 }
 
 void OptionsDialog::on_hideTrayIcon_stateChanged(int fState)
