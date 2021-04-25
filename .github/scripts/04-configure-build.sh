@@ -25,6 +25,13 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     else
         CONFIG_SITE=${GITHUB_WORKSPACE}/depends/arm-linux-gnueabihf/share/config.site ./configure --prefix=/ --disable-ccache --disable-maintainer-mode --disable-dependency-tracking --enable-glibc-back-compat --enable-reduce-exports --disable-bench --disable-gui-tests CFLAGS="-O2 -g" CXXFLAGS="-O2 -g" LDFLAGS="-static-libstdc++"
     fi
+elif [[ ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
+    if [[ ${OS} == "aarch64-disable-wallet" ]]; then
+        EXTRA_OPTS="--disable-wallet"
+        CONFIG_SITE=${GITHUB_WORKSPACE}/depends/aarch64-linux-gnu/share/config.site ./configure --prefix=/ --enable-glibc-back-compat --enable-reduce-exports LDFLAGS=-static-libstdc++ --disable-tests --with-libs=no --with-gui=no ${EXTRA_OPTS}
+    else
+        CONFIG_SITE=${GITHUB_WORKSPACE}/depends/aarch64-linux-gnu/share/config.site ./configure --prefix=/ --disable-ccache --disable-maintainer-mode --disable-dependency-tracking --enable-glibc-back-compat --enable-reduce-exports --disable-bench --disable-gui-tests CFLAGS="-O2 -g" CXXFLAGS="-O2 -g" LDFLAGS="-static-libstdc++"
+    fi
 else
     echo "You must pass an OS."
     echo "Usage: ${0} <operating system> <github workspace path> <disable wallet (true | false)>"
