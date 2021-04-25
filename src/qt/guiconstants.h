@@ -47,11 +47,11 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /* Background color, very light gray */
 #define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
 /* Ravencoin dark orange */
-#define COLOR_DARK_ORANGE QColor("#f05339")
+#define COLOR_DARK_ORANGE QColor("#f05239")
 /* Ravencoin light orange */
 #define COLOR_LIGHT_ORANGE QColor("#f79433")
 /* Ravencoin dark blue */
-#define COLOR_DARK_BLUE QColor("#475eaa")
+#define COLOR_DARK_BLUE QColor("#384192")
 /* Ravencoin light blue */
 #define COLOR_LIGHT_BLUE QColor("#5874cf")
 /* Ravencoin asset text */
