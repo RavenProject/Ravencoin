@@ -17,6 +17,8 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     export PATH=${GITHUB_WORKSPACE}/depends/x86_64-linux-gnu/native/bin:${PATH}
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     export PATH=${GITHUB_WORKSPACE}/depends/arm-linux-gnueabihf/native/bin:${PATH}
+elif [[ ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
+    export PATH=${GITHUB_WORKSPACE}/depends/aarch64-linux-gnu/native/bin:${PATH}
 else
     echo "You must pass an OS."
     echo "Usage: ${0} <operating system> <github workspace path>"
