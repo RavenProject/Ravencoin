@@ -37,6 +37,7 @@ if [[ ${OS} == "windows" ]]; then
 
     update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix 
 
+
 elif [[ ${OS} == "osx" ]]; then
     apt -y install \
     autoconf \
@@ -58,7 +59,6 @@ elif [[ ${OS} == "osx" ]]; then
     libz-dev \
     p7zip-full \
     pkg-config \
-    python-is-python3 \
     python3 \
     python3-dev \
     python3-setuptools \
@@ -80,17 +80,16 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" || ${OS} == "aarch64
     ca-certificates \
     curl \
     g++-aarch64-linux-gnu \
-    g++-9-aarch64-linux-gnu \
-    g++-9-multilib \
-    gcc-9-aarch64-linux-gnu \
-    gcc-9-multilib \
+    g++-8-aarch64-linux-gnu \
+    g++-8-multilib \
+    gcc-8-aarch64-linux-gnu \
+    gcc-8-multilib \
     git \
     gnupg \
     libtool \
     nsis \
     pbuilder \
     pkg-config \
-    python-is-python3 \
     python3 \
     rename \
     ubuntu-dev-tools \
@@ -111,20 +110,21 @@ elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then
     ca-certificates \
     curl \
     g++-aarch64-linux-gnu \
-    g++-9-aarch64-linux-gnu \
-    gcc-9-aarch64-linux-gnu \
+    g++-8-aarch64-linux-gnu \
+    gcc-8-aarch64-linux-gnu \
     g++-arm-linux-gnueabihf \
-    g++-9-arm-linux-gnueabihf \
-    gcc-9-arm-linux-gnueabihf \
-    g++-9-multilib \
-    gcc-9-multilib \
+    g++-8-arm-linux-gnueabihf \
+    gcc-8-arm-linux-gnueabihf \
+    g++-8-multilib \
+    gcc-8-multilib \
     git \
     libtool \
     pkg-config \
-    python-is-python3 \
     python3 \
     bison
 else
     echo "you must pass the OS to build for"
     exit 1
 fi
+    update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 2
