@@ -10,12 +10,15 @@ on:
       - develop
       - release*
     paths-ignore:
-      - 'docs/**'
+      - 'binaries/**'
+      - 'community/**'
+      - 'contrib/**'
+      - 'doc/**'
       - 'roadmap/**'
+      - 'share/**'
       - 'static-builds/**'
       - 'whitepaper/**'
-      - 'binaries/**'
-      - 'contrib/**'
+      - '*.md'
 
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
