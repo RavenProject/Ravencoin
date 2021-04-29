@@ -28,6 +28,8 @@ The `master` branch is regularly built and tested, but is not guaranteed to be
 completely stable. [Tags](https://github.com/RavenProject/Ravencoin/tags) are created
 regularly to indicate new official, stable release versions of Raven Core.
 
+Active development is done in the `develop` branch. 
+
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Developer IRC is inactive please join us on discord in #development. https://discord.gg/fndp4NBGct
@@ -40,9 +42,7 @@ requests than we can review and test on short notice. Please be patient and help
 other people's pull requests, and remember this is a security-critical project where any mistake might cost people
 lots of money.
 
-Testnet is now up and running and available to use during development. There is an issue when connecting to the testnet that requires the use of the -maxtipage parameter in order to connect to the test network initially. After the initial launch the -maxtipage parameter is not required.
-
-Use this command to initially start ravend on the testnet. <code>./ravend -testnet -maxtipage=259200</code>
+Testnet is up and running and available to use during development.
 
 ### Automated Testing
 

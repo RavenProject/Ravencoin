@@ -489,13 +489,10 @@ Subtrees
 ----------
 
 Several parts of the repository are subtrees of software maintained elsewhere.
-
-Some of these are maintained by active developers of Raven Core, in which case changes should probably go
-directly upstream without being PRed directly against the project.  They will be merged back in the next
-subtree merge.
+They will be merged back in the next subtree merge.
 
 Others are external projects without a tight relationship with our project.  Changes to these should also
-be sent upstream but bugfixes may also be prudent to PR against Raven Core so that they can be integrated
+be sent upstream but bugfixes may also be prudent to PR against Ravencoin so that they can be integrated
 quickly.  Cosmetic changes should be purely taken upstream.
 
 There is a tool in contrib/devtools/git-subtree-check.sh to check a subtree directory for consistency with
@@ -709,7 +706,3 @@ A few guidelines for introducing and reviewing new RPC interfaces:
   - *Rationale*: If a RPC response is not a JSON object then it is harder to avoid API breakage if
     new data in the response is needed.
 
-
-IRC Required Commit
----------------------
-Required to register on IRC

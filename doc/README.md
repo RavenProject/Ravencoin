@@ -36,12 +36,9 @@ sudo apt update
 sudo apt install libevent-dev libboost-all-dev libminiupnpc10 libzmq5 software-properties-common
 ```
 
-The wallet requires version 4.8 of the Berkeley DB. The easiest way to get it is from the bitcoin repository:
+The wallet requires version 4.8 of the Berkeley DB. The easiest way to get it is to build it with the script contrib/install_db4.sh
 
-```
-sudo add-apt-repository ppa:bitcoin/bitcoin
-sudo apt update
-sudo apt install libdb4.8-dev libdb4.8++-dev
+
 ```
 
 The GUI wallet requires the QR Code encoding library. Install with:

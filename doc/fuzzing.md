@@ -1,4 +1,4 @@
-Fuzz-testing Raven Core
+Fuzz-testing Ravencoin
 ==========================
 
 A special test harness `test_raven_fuzzy` is provided to provide an easy
