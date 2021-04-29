@@ -1,14 +1,14 @@
 Build instructions for Ravencoin 
 =================================
-Ubuntu 21.04 - Hirsute Hippo
----------------------------------
+
 This will install most of the dependencies from ubuntu.
 The only one we build, is Berkeley DB 4.8.
 
 
-Install dependencies:
+Ubuntu 21.04 - Hirsute Hippo - Install dependencies:
 ----------------------------
-`$ sudo apt install build-essential
+`$ sudo apt install 
+build-essential
 libssl-dev
 libboost-chrono1.71-dev
 libboost-filesystem1.71-dev
@@ -23,6 +23,47 @@ libexpat1-dev
 libdbus-1-dev
 libfontconfig-dev
 libfreetype-dev
+libice-dev
+libsm-dev
+libx11-dev
+libxau-dev
+libxext-dev
+libevent-dev
+libxcb1-dev
+libxkbcommon-dev
+libminiupnpc-dev
+libprotobuf-dev
+libqrencode-dev
+xcb-proto
+x11proto-xext-dev
+x11proto-dev
+xtrans-dev
+zlib1g-dev
+libczmq-dev
+autoconf
+automake
+libtool
+protobuf-compiler
+`
+
+Ubuntu 18.04 - Bionic Beaver - Install dependencies:
+----------------------------
+`$ sudo apt install 
+build-essential
+libssl-dev
+libboost-chrono-dev
+libboost-filesystem-dev
+libboost-program-options-dev
+libboost-system-dev
+libboost-thread-dev
+libboost-test-dev
+qtbase5-dev
+qttools5-dev
+bison
+libexpat1-dev
+libdbus-1-dev
+libfontconfig-dev
+libfreetype6-dev
 libice-dev
 libsm-dev
 libx11-dev
@@ -76,13 +117,11 @@ __Download and build Berkeley DB 4.8__
 
 `contrib/install_db4.sh ../`
 
-_This requires [PR#934](https://github.com/RavenProject/Ravencoin/pull/934) to be merged into develop._
-
 __The build process:__
 
 `./autogen.sh`
 
-`export BDB_PREFIX='$HOME/src/db4'`
+`export BDB_PREFIX=$HOME/src/db4`
 
 `./configure BDB_LIBS="-L${BDB_PREFIX}/lib -ldb_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --prefix=/usr/local` 
 
@@ -100,9 +139,4 @@ ravend and raven-cli are in `src/`
 
 __Optional:__
 
-`sudo make install`  # if you want to install the binaries to /usr/local/bin.
-
-
-
-
-
+`sudo make install`  # if you want to install the binaries to /usr/local/bin (if this prefix was used above).
