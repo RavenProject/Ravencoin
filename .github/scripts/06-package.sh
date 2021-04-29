@@ -15,11 +15,8 @@ if [[ ! ${OS} || ! ${GITHUB_WORKSPACE} || ! ${GITHUB_BASE_REF} ]]; then
 fi
 
 cd ${GITHUB_WORKSPACE}
-MAJOR=`grep "define(_CLIENT_VERSION_MAJOR" configure.ac | cut -d"," -f2 | cut -d" " -f2 | cut -d")" -f1`
-MINOR=`grep "define(_CLIENT_VERSION_MINOR" configure.ac | cut -d"," -f2 | cut -d" " -f2 | cut -d")" -f1`
-REVISION=`grep "define(_CLIENT_VERSION_REVISION" configure.ac | cut -d"," -f2 | cut -d" " -f2 | cut -d")" -f1`
-BUILD=`grep "define(_CLIENT_VERSION_BUILD" configure.ac | cut -d"," -f2 | cut -d" " -f2 | cut -d")" -f1`
-VERSION="${MAJOR}.${MINOR}.${REVISION}.${BUILD}"
+PKGVERSION=`grep "PACKAGE_VERSION" src/config/raven-config.h | cut -d\" -f2`
+VERSION="${PKGVERSION}"
 SHORTHASH=`git rev-parse --short HEAD`
 RELEASE_LOCATION="${GITHUB_WORKSPACE}/release"
 STAGE_DIR="${GITHUB_WORKSPACE}/stage"
