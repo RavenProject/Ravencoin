@@ -34,6 +34,10 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
             /*.name =*/ "coinbase",
             /*.gbt_force =*/ true,
+    },
+    {
+            /*.name =*/ "p2sh_assets",
+            /*.gbt_force =*/ true,
     }
 };
 

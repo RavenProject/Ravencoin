@@ -452,11 +452,19 @@ void CTxMemPool::addAddressIndex(const CTxMemPoolEntry &entry, const CCoinsViewC
                 uint160 hashBytes;
                 std::string assetName;
                 CAmount assetAmount;
-                if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
-                    CMempoolAddressDeltaKey key(1, hashBytes, assetName, txhash, j, 1);
-                    CMempoolAddressDelta delta(entry.GetTime(), assetAmount * -1, input.prevout.hash, input.prevout.n);
-                    mapAddress.insert(std::make_pair(key, delta));
-                    inserted.push_back(key);
+                int nScriptType;
+                if (ParseAssetScript(prevout.scriptPubKey,hashBytes, nScriptType, assetName, assetAmount)) {
+                    if (nScriptType == TX_SCRIPTHASH) {
+                        CMempoolAddressDeltaKey key(2, hashBytes, assetName, txhash, j, 1);
+                        CMempoolAddressDelta delta(entry.GetTime(), assetAmount * -1, input.prevout.hash, input.prevout.n);
+                        mapAddress.insert(std::make_pair(key, delta));
+                        inserted.push_back(key);
+                    } else if (nScriptType == TX_PUBKEYHASH) {
+                        CMempoolAddressDeltaKey key(1, hashBytes, assetName, txhash, j, 1);
+                        CMempoolAddressDelta delta(entry.GetTime(), assetAmount * -1, input.prevout.hash, input.prevout.n);
+                        mapAddress.insert(std::make_pair(key, delta));
+                        inserted.push_back(key);
+                    }
                 }
             }
             /** RVN END */
@@ -488,11 +496,17 @@ void CTxMemPool::addAddressIndex(const CTxMemPoolEntry &entry, const CCoinsViewC
                 uint160 hashBytes;
                 std::string assetName;
                 CAmount assetAmount;
-                if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
-                    std::pair<addressDeltaMap::iterator, bool> ret;
-                    CMempoolAddressDeltaKey key(1, hashBytes, assetName, txhash, k, 0);
-                    mapAddress.insert(std::make_pair(key, CMempoolAddressDelta(entry.GetTime(), assetAmount)));
-                    inserted.push_back(key);
+                int nScriptType;
+                if (ParseAssetScript(out.scriptPubKey, hashBytes, nScriptType, assetName, assetAmount)) {
+                    if (nScriptType == TX_SCRIPTHASH) {
+                        CMempoolAddressDeltaKey key(2, hashBytes, assetName, txhash, k, 0);
+                        mapAddress.insert(std::make_pair(key, CMempoolAddressDelta(entry.GetTime(), assetAmount * -1)));
+                        inserted.push_back(key);
+                    } else if (nScriptType == TX_PUBKEYHASH) {
+                        CMempoolAddressDeltaKey key(1, hashBytes, assetName, txhash, k, 0);
+                        mapAddress.insert(std::make_pair(key, CMempoolAddressDelta(entry.GetTime(), assetAmount * -1)));
+                        inserted.push_back(key);
+                    }
                 }
             }
             /** RVN END */

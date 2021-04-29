@@ -194,6 +194,7 @@ struct COutputEntry
 struct CAssetOutputEntry
 {
     txnouttype type;
+    txnouttype scriptType;
     std::string assetName;
     CTxDestination destination;
     CAmount nAmount;
