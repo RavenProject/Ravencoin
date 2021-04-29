@@ -655,9 +655,15 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
         i++;
         bool fIsAsset = false;
         int nType = 0;
+        int nScriptType = 0;
         bool fIsOwner = false;
-        if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
+        if (txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner))
             fIsAsset = true;
+
+        if (fIsAsset && nScriptType == TX_SCRIPTHASH) {
+            if (!AreP2SHAssetsAllowed())
+                return state.DoS(0, false, REJECT_INVALID, "bad-txns-p2sh-assets-not-active");
+        }
 
         if (assetCache) {
             if (fIsAsset && !AreAssetsDeployed())
@@ -687,7 +693,8 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             CAssetTransfer transfer;
             std::string address = "";
             if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
-                return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize", false, "", tx.GetHash());
+                return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize", false, "",
+                                 tx.GetHash());
 
             if (!ContextualCheckTransferAsset(assetCache, transfer, address, strError))
                 return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
@@ -828,8 +835,9 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
         } else {
             for (auto out : tx.vout) {
                 int nType;
+                int nScriptType;
                 bool _isOwner;
-                if (out.scriptPubKey.IsAssetScript(nType, _isOwner)) {
+                if (out.scriptPubKey.IsAssetScript(nType, nScriptType, _isOwner)) {
                     if (nType != TX_TRANSFER_ASSET) {
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction", false, "", tx.GetHash());
                     }

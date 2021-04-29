@@ -105,7 +105,7 @@ const char* GetTxnOutputType(txnouttype t);
  * @param[out]  vSolutionsRet  Vector of parsed pubkeys and hashes
  * @return                     True if script matches standard template
  */
-bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet);
+bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, txnouttype& scriptTypeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet);
 
 /**
  * Parse a standard scriptPubKey for the destination address. Assigns result to
@@ -123,7 +123,7 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
  * Returns true if successful. Currently does not extract address from
  * pay-to-witness scripts.
  */
-bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<CTxDestination>& addressRet, int& nRequiredRet);
+bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, txnouttype& scriptType, std::vector<CTxDestination>& addressRet, int& nRequiredRet);
 
 /**
  * Generate a Raven scriptPubKey for the given CTxDestination. Returns a P2PKH
