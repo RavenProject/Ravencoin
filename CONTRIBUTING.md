@@ -26,7 +26,7 @@ To contribute a patch, the workflow is as follows:
 
   - Fork repository
   - Create topic branch
-  - Commit patches
+  - Create pull request
 
 The project coding conventions in the [developer notes](doc/developer-notes.md)
 must be adhered to.
@@ -55,9 +55,12 @@ about Git.
 The title of the pull request should be prefixed by the component or area that
 the pull request affects. Valid areas as:
 
+
+  - *Build* for changes to the build-system
   - *Consensus* for changes to consensus critical code
+  - *Depends* for changes to depends
   - *Docs* for changes to the documentation
-  - *Qt* for changes to raven-qt
+  - *GUI* for changes to raven-qt
   - *Mining* for changes to the mining code
   - *Net* or *P2P* for changes to the peer-to-peer network code
   - *RPC/REST/ZMQ* for changes to the RPC, REST or ZMQ APIs
@@ -78,7 +81,7 @@ Examples:
 
     Consensus: Add new opcode for RIP-XXXX OP_CHECKAWESOMESIG
     Net: Automatically create hidden service, listen on Tor
-    Qt: Add feed bump button
+    GUI: Add feed bump button
     Trivial: Fix typo in init.cpp
 
 Note that translations should not be submitted as pull requests, please see
@@ -169,11 +172,11 @@ workload on reviewing.
 "Decision Making" Process
 -------------------------
 
-The following applies to code changes to the Raven Core project (and related
-projects such as libsecp256k1), and is not to be confused with overall Raven
+The following applies to code changes to the Ravencoin project (and related
+projects) and is not to be confused with overall Ravencoin
 Network Protocol consensus changes.
 
-Whether a pull request is merged into Raven Core rests with the project merge
+Whether a pull request is merged into Ravencoin rests with the project merge
 maintainers and ultimately the project lead.
 
 Maintainers will take into consideration if a patch is in line with the general
@@ -191,7 +194,7 @@ In general, all pull requests must:
   - Where bugs are fixed, where possible, there should be unit tests
     demonstrating the bug and also proving the fix. This helps prevent regression.
 
-Patches that change Raven consensus rules are considerably more involved than
+Patches that change Ravencoin consensus rules are considerably more involved than
 normal because they affect the entire ecosystem and so must be preceded by
 extensive mailing list discussions and have a numbered RIP. While each case will
 be different, one should be prepared to expend more time and effort than for
@@ -232,9 +235,9 @@ higher in terms of discussion and peer review requirements, keeping in mind that
 mistakes could be very costly to the wider community. This includes refactoring
 of consensus critical code.
 
-Where a patch set proposes to change the Raven consensus, it must have been
-discussed extensively on the mailing list and Discord, be accompanied by a widely
-discussed RIP and have a generally widely perceived technical consensus of being
+Where a patch set proposes to change the Ravencoin consensus, it must have been
+discussed extensively, be accompanied by a widely discussed RIP and 
+have a generally widely perceived technical consensus of being
 a worthwhile change based on the judgement of the maintainers.
 
 ### Finding Reviewers
@@ -263,7 +266,7 @@ about:
     [Git Blame feature](https://help.github.com/articles/tracing-changes-in-a-file/). Simply
     find the person touching the code you are touching before you and see if you can find
     them and give them a nudge. Don't be incessant about the nudging though.
-  - Finally, if all else fails, ask on IRC or elsewhere for someone to give your pull request
+  - Finally, if all else fails, ask on Discord or elsewhere for someone to give your pull request
     a look. If you think you've been waiting an unreasonably long amount of time (month+) for
     no particular reason (few lines changed, etc), this is totally fine. Try to return the favor
     when someone else is asking for feedback on their code, and universe balances out.
@@ -272,7 +275,7 @@ about:
 Release Policy
 --------------
 
-The project leader is the release manager for each Raven Core release.
+The RavenQT-SIG selects a release manager for each Ravencoin release.
 
 Copyright
 ---------
