@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -21,10 +21,10 @@ static const int GETHEADERS_VERSION = 31800;
 //! assetdata network request is allowed for this version
 static const int ASSETDATA_VERSION = 70017;
 
-//! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
+//! getassetdata return asstnotfound, and assetdata doesn't have blockhash in the data
 static const int X16RV2_VERSION = 70025;
 
-//! getassetdata reutrn asstnotfound, and assetdata doesn't have blockhash in the data
+//! getassetdata return asstnotfound, and assetdata doesn't have blockhash in the data
 static const int KAWPOW_VERSION = 70027;
 
 //! disconnect from peers older than this proto version
