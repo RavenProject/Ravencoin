@@ -352,6 +352,28 @@ void WalletView::unlockWallet()
         dlg.exec();
     }
 }
+void WalletView::getMyWords()
+{
+    // Create the box and set the default text.
+    QMessageBox box;
+    box.setWindowTitle(tr("Recovery information"));
+    box.setText(tr("No words available."));
+
+    // Check for HD-wallet and set text if not HD-wallet.
+    if(!walletModel->hd44Enabled())
+        box.setText(tr("This wallet is not a HD wallet, words not supported."));
+
+    // Unlock wallet requested by wallet model
+    WalletView::unlockWallet();
+
+    // Make sure wallet is unlocked before trying to fetch the words.
+    // When unlocked, set the text to 12words and passphrase.
+    if (walletModel->getEncryptionStatus() != WalletModel::Locked)
+        box.setText(walletModel->getMyWords());
+
+    // Show the box
+    box.exec();
+}
 
 void WalletView::usedSendingAddresses()
 {

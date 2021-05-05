@@ -181,6 +181,14 @@ void WalletFrame::unlockWallet()
         walletView->unlockWallet();
 }
 
+void WalletFrame::getMyWords()
+{
+    WalletView *walletView = currentWalletView();
+    if (walletView)
+        walletView->getMyWords();
+}
+
+
 void WalletFrame::usedSendingAddresses()
 {
     WalletView *walletView = currentWalletView();
