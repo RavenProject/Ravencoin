@@ -894,7 +894,7 @@ QString WalletModel::getMyWords() const
     
     // Handle passphrase.
     QString myPass = tr("Passphrase:");
-    int myPass_isize = myPass.size();
+    const int myPass_isize = myPass.size();
 
     for (const auto &p : vchPassphrase) myPass.append(p);
 
@@ -902,6 +902,8 @@ QString WalletModel::getMyWords() const
     if (myPass_isize < myPass.size())
         myWords.append(myPass);
     
+    // Lock wallet - we got what we wanted.
+    wallet->Lock();
     return myWords;
 }
 
