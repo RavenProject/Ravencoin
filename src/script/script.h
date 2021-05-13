@@ -669,6 +669,7 @@ public:
     bool IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner) const;
     bool IsAssetScript(int& nTXType, int& nScriptType, bool& fIsOwner, int& nStartingIndex) const;
     bool IsP2SHAssetScript() const;
+    bool IsPreP2SHAssetScript() const;
     bool IsNewAsset() const;
     bool IsOwnerAsset() const;
     bool IsReissueAsset() const;

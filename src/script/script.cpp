@@ -250,6 +250,21 @@ bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& isOwner) const
     return IsAssetScript(nType, nScriptType, isOwner, start);
 }
 
+bool CScript::IsPreP2SHAssetScript() const
+{
+    // check for special cases, only active pre-p2sh-asset activation.
+    if( (*this)[0] == OP_HASH160
+        && (*this)[1] == 0x14
+        && (*this)[22] == OP_EQUAL
+        && (*this)[23] == OP_0
+        && (*this)[24] == OP_0
+        && (*this)[25] == OP_RVN_ASSET
+    )
+        return true;
+    else
+        return false;
+}
+
 bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner, int& nStartingIndex) const
 {
     if (this->size() > 31) {

@@ -654,13 +654,17 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
     for (const auto& txout : tx.vout) {
         i++;
         bool fIsAsset = false;
+        bool fIsSpecial = false;
         int nType = 0;
         int nScriptType = 0;
         bool fIsOwner = false;
         if (txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner))
             fIsAsset = true;
 
-        if (fIsAsset && nScriptType == TX_SCRIPTHASH) {
+        if(!AreP2SHAssetsAllowed() && txout.scriptPubKey.IsPreP2SHAssetScript())
+            fIsSpecial = true;
+
+        if (fIsAsset && nScriptType == TX_SCRIPTHASH && !fIsSpecial) {
             if (!AreP2SHAssetsAllowed())
                 return state.DoS(0, false, REJECT_INVALID, "bad-txns-p2sh-assets-not-active");
         }
