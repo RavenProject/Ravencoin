@@ -653,18 +653,29 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
     int i = 0;
     for (const auto& txout : tx.vout) {
         i++;
+
+        // These values are subject to change, by isAssetScript a few lines down.
         bool fIsAsset = false;
+        bool fIsSpecial = false;
         int nType = 0;
         int nScriptType = 0;
         bool fIsOwner = false;
+
+        // This changes the values of the passed arguments.
         if (txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner))
             fIsAsset = true;
 
-        if (fIsAsset && nScriptType == TX_SCRIPTHASH) {
+        if(!AreP2SHAssetsAllowed()) {
+            // This resets nScriptType to TX_PUBKEYHASH 
+            fIsSpecial = txout.scriptPubKey.IsPreP2SHAssetScript(nScriptType);
+        }
+
+
+/*        if (fIsAsset && nScriptType == TX_SCRIPTHASH && !fIsSpecial) {
             if (!AreP2SHAssetsAllowed())
                 return state.DoS(0, false, REJECT_INVALID, "bad-txns-p2sh-assets-not-active");
         }
-
+*/
         if (assetCache) {
             if (fIsAsset && !AreAssetsDeployed())
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-is-asset-and-asset-not-active");
