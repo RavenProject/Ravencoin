@@ -3,7 +3,7 @@
 //
 // Use fields 100+ for extensions;
 // to avoid conflicts, register extensions at:
-// https://en.raven.it/wiki/Payment_Request
+// https://en.bitcoin.it/wiki/Payment_Request
 //
 
 syntax = "proto2";
