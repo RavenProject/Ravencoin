@@ -35,8 +35,8 @@
 #include <boost/bind/bind.hpp>
 using namespace boost::placeholders;
 
-SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) :
-    QWidget(0, f), curAlignment(0)
+SplashScreen::SplashScreen(const NetworkStyle* networkStyle)
+    : QWidget(), curAlignment(0)
 {
     // set reference point, paddings
     int paddingRight            = 50;

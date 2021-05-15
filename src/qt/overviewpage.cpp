@@ -20,6 +20,7 @@
 #include "assetrecord.h"
 
 #include <QAbstractItemDelegate>
+#include <QDateTime>
 #include <QPainter>
 #include <QDesktopServices>
 #include <QMouseEvent>
