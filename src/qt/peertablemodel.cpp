@@ -209,8 +209,7 @@ QVariant PeerTableModel::headerData(int section, Qt::Orientation orientation, in
 
 Qt::ItemFlags PeerTableModel::flags(const QModelIndex &index) const
 {
-    if(!index.isValid())
-        return 0;
+    if(!index.isValid()) return Qt::NoItemFlags;
 
     Qt::ItemFlags retval = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     return retval;
