@@ -256,8 +256,6 @@ bool CScript::IsPreP2SHAssetScript() const
     if( (*this)[0] == OP_HASH160
         && (*this)[1] == 0x14
         && (*this)[22] == OP_EQUAL
-        && (*this)[23] == OP_0
-        && (*this)[24] == OP_0
         && (*this)[25] == OP_RVN_ASSET
     )
         return true;
