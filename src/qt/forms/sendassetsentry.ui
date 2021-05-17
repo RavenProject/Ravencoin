@@ -216,7 +216,7 @@
     <item row="2" column="0">
      <widget class="QLabel" name="payToLabel">
       <property name="text">
-       <string>Pay &amp;To:</string>
+       <string>Transfer &amp;To:</string>
       </property>
       <property name="alignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
