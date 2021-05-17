@@ -32,6 +32,13 @@
 #define bswap32 __builtin_bswap32
 #define bswap64 __builtin_bswap64
 
+#elif __FreeBSD__
+
+#include <sys/endian.h>
+
+#define bswap32 __builtin_bswap32
+#define bswap64 __builtin_bswap64
+
 #else
 
 #include <endian.h>
