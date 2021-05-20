@@ -20,6 +20,7 @@
 #include <QPoint>
 #include <QSystemTrayIcon>
 #include <QComboBox>
+#include <QDateTime>
 
 class ClientModel;
 class NetworkStyle;

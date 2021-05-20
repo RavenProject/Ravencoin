@@ -30,6 +30,7 @@
 #include <wallet/wallet.h>
 #endif
 
+#include <QDateTime>
 #include <QDir>
 #include <QKeyEvent>
 #include <QMenu>
