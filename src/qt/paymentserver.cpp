@@ -23,7 +23,6 @@
 #include <QApplication>
 #include <QByteArray>
 #include <QDataStream>
-#include <QDateTime>
 #include <QDebug>
 #include <QFile>
 #include <QFileOpenEvent>
@@ -409,15 +408,11 @@ void PaymentServer::handleURIOrFile(const QString& s)
 
     if (s.startsWith(RAVEN_IPC_PREFIX, Qt::CaseInsensitive)) // raven: URI
     {
-#if QT_VERSION < 0x050000
-        QUrl uri(s);
-#else
         QUrlQuery uri((QUrl(s)));
-#endif
         if (uri.hasQueryItem("r")) // payment request URI
         {
             QByteArray temp;
-            temp.append(uri.queryItemValue("r"));
+            temp.append(uri.queryItemValue("r").toUtf8());
             QString decoded = QUrl::fromPercentEncoding(temp);
             QUrl fetchUrl(decoded, QUrl::StrictMode);
 
