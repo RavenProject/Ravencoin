@@ -712,7 +712,18 @@ void OverviewPage::openIPFSForAsset(const QModelIndex &index)
     QString ipfsbrowser = walletModel->getOptionsModel()->getIpfsUrl();
 
     // If the ipfs hash isn't there or doesn't start with Qm, disable the action item
-    if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0 && ipfsbrowser.indexOf("http") == 0) {
-        QDesktopServices::openUrl(QUrl::fromUserInput(ipfsbrowser.replace("%s", ipfshash)));
+    if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0 && ipfsbrowser.indexOf("http") == 0)
+    {
+        QUrl ipfsurl = QUrl::fromUserInput(ipfsbrowser.replace("%s", ipfshash));
+
+        // Create the box with everything.
+        if(QMessageBox::Yes == QMessageBox::question(this,
+                                                        tr("Open IPFS content?"),
+                                                        tr("Open the following IPFS content in your default browser?\n")
+                                                        + ipfsurl.toString()
+                                                    ))
+        {
+        QDesktopServices::openUrl(ipfsurl);
+        }
     }
 }
