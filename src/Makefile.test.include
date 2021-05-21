@@ -27,6 +27,7 @@ GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.r
 RAVEN_TESTS =\
   test/assets/asset_tests.cpp \
   test/assets/serialization_tests.cpp \
+  test/assets/asset_p2sh_tests.cpp \
   test/assets/asset_tx_tests.cpp \
   test/assets/cache_tests.cpp \
   test/assets/asset_reissue_tests.cpp \
