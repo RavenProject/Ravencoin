@@ -44,7 +44,7 @@ const char* GetTxnOutputType(txnouttype t)
     return nullptr;
 }
 
-bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
+bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, txnouttype& scriptTypeRet, std::vector<std::vector<unsigned char> >& vSolutionsRet)
 {
     // Templates
     static std::multimap<txnouttype, CScript> mTemplates;
@@ -73,12 +73,22 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
     }
     /** RVN START */
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (scriptPubKey.IsAssetScript(nType, fIsOwner)) {
+    if (scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner)) {
         typeRet = (txnouttype)nType;
-        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
-        vSolutionsRet.push_back(hashBytes);
-        return true;
+        scriptTypeRet = (txnouttype)nScriptType;
+
+        if (scriptTypeRet == TX_SCRIPTHASH) {
+            std::vector<unsigned char> hashBytes(scriptPubKey.begin()+2, scriptPubKey.begin()+22);
+            vSolutionsRet.push_back(hashBytes);
+            return true;
+        } else if (scriptTypeRet == TX_PUBKEYHASH) {
+            std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
+            vSolutionsRet.push_back(hashBytes);
+            return true;
+        }
+        return false;
     }
     /** RVN END */
 
@@ -149,6 +159,7 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
                     if (m < 1 || n < 1 || m > n || vSolutionsRet.size()-2 != n)
                         return false;
                 }
+
                 return true;
             }
             if (!script1.GetOp(pc1, opcode1, vch1))
@@ -211,7 +222,8 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
 {
     std::vector<valtype> vSolutions;
     txnouttype whichType;
-    if (!Solver(scriptPubKey, whichType, vSolutions)) {
+    txnouttype scriptType;
+    if (!Solver(scriptPubKey, whichType, scriptType, vSolutions)) {
         return false;
     }
 
@@ -235,7 +247,11 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
         return true;
     /** RVN START */
     } else if (whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_TRANSFER_ASSET) {
-        addressRet = CKeyID(uint160(vSolutions[0]));
+        if (scriptType == TX_SCRIPTHASH) {
+            addressRet = CScriptID(uint160(vSolutions[0]));
+        } else {
+            addressRet = CKeyID(uint160(vSolutions[0]));
+        }
         return true;
     } else if (whichType == TX_RESTRICTED_ASSET_DATA) {
         if (vSolutions.size()) {
@@ -248,12 +264,13 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
     return false;
 }
 
-bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<CTxDestination>& addressRet, int& nRequiredRet)
+bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, txnouttype& scriptType, std::vector<CTxDestination>& addressRet, int& nRequiredRet)
 {
     addressRet.clear();
     typeRet = TX_NONSTANDARD;
+    scriptType = TX_NONSTANDARD;
     std::vector<valtype> vSolutions;
-    if (!Solver(scriptPubKey, typeRet, vSolutions))
+    if (!Solver(scriptPubKey, typeRet, scriptType, vSolutions))
         return false;
     if (typeRet == TX_NULL_DATA) {
         // This is data, not addresses
@@ -381,8 +398,9 @@ CScript GetScriptForWitness(const CScript& redeemscript)
     CScript ret;
 
     txnouttype typ;
+    txnouttype scriptTyp;
     std::vector<std::vector<unsigned char> > vSolutions;
-    if (Solver(redeemscript, typ, vSolutions)) {
+    if (Solver(redeemscript, typ, scriptTyp, vSolutions)) {
         if (typ == TX_PUBKEY) {
             unsigned char h160[20];
             CHash160().Write(&vSolutions[0][0], vSolutions[0].size()).Finalize(h160);
