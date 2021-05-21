@@ -254,8 +254,11 @@ bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner, int& n
 {
     if (this->size() > 31) {
         // Extra-fast test for pay-to-script-hash CScripts:
-        if ( (*this)[0] == OP_HASH160 && (*this)[1] == 0x14 && (*this)[22] == OP_EQUAL) {
-
+        if ( (*this)[0] == OP_HASH160
+          && (*this)[1] == 0x14
+          && (*this)[22] == OP_EQUAL
+          && (*this)[23] == OP_RVN_ASSET    // OP_RVN_ASSET is always in the 23 index of the P2SH script if it exists
+          ) {
             // If this is of the P2SH type, we need to return this type so we know how to interact and solve it
             nScriptType = TX_SCRIPTHASH;
         } else {
@@ -266,8 +269,7 @@ bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner, int& n
         // Initialize the index
         int index = -1;
 
-        // OP_RVN_ASSET is always in the 23 index of the P2SH script if it exists
-        if (nScriptType == TX_SCRIPTHASH && (*this)[23] == OP_RVN_ASSET) {
+        if (nScriptType == TX_SCRIPTHASH) {
             // We have a potential asset interacting with a P2SH
             index = SearchForRVN(*this, 25);
 
