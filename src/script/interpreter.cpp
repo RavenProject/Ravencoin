@@ -297,6 +297,7 @@ bool EvalScript(std::vector<std::vector<unsigned char> > &stack, const CScript &
 
     CScript::const_iterator pc = script.begin();
     CScript::const_iterator pend = script.end();
+
     CScript::const_iterator pbegincodehash = script.begin();
     opcodetype opcode;
     valtype vchPushValue;
@@ -1602,7 +1603,7 @@ bool VerifyScript(const CScript &scriptSig, const CScript &scriptPubKey, const C
     }
 
     // Additional validation for spend-to-script-hash transactions:
-    if ((flags & SCRIPT_VERIFY_P2SH) && scriptPubKey.IsPayToScriptHash())
+    if ((flags & SCRIPT_VERIFY_P2SH) && (scriptPubKey.IsPayToScriptHash() || scriptPubKey.IsP2SHAssetScript()))
     {
         // scriptSig must be literals-only or validation fails
         if (!scriptSig.IsPushOnly())

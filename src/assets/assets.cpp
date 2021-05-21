@@ -3169,8 +3169,9 @@ bool IsScriptNewAsset(const CScript& scriptPubKey)
 bool IsScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex)
 {
     int nType = 0;
-    bool fIsOwner =false;
-    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+    int nScriptType = 0;
+    bool fIsOwner = false;
+    if (scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex)) {
         return nType == TX_NEW_ASSET && !fIsOwner;
     }
     return false;
@@ -3185,8 +3186,9 @@ bool IsScriptNewUniqueAsset(const CScript& scriptPubKey)
 bool IsScriptNewUniqueAsset(const CScript &scriptPubKey, int &nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+    if (!scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex))
         return false;
 
     CNewAsset asset;
@@ -3210,8 +3212,9 @@ bool IsScriptNewMsgChannelAsset(const CScript& scriptPubKey)
 bool IsScriptNewMsgChannelAsset(const CScript &scriptPubKey, int &nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+    if (!scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex))
         return false;
 
     CNewAsset asset;
@@ -3236,8 +3239,9 @@ bool IsScriptOwnerAsset(const CScript& scriptPubKey)
 bool IsScriptOwnerAsset(const CScript& scriptPubKey, int& nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner =false;
-    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+    if (scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex)) {
         return nType == TX_NEW_ASSET && fIsOwner;
     }
 
@@ -3253,8 +3257,9 @@ bool IsScriptReissueAsset(const CScript& scriptPubKey)
 bool IsScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner =false;
-    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+    if (scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex)) {
         return nType == TX_REISSUE_ASSET;
     }
 
@@ -3270,8 +3275,9 @@ bool IsScriptTransferAsset(const CScript& scriptPubKey)
 bool IsScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex)) {
+    if (scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex)) {
         return nType == TX_TRANSFER_ASSET;
     }
 
@@ -3287,8 +3293,9 @@ bool IsScriptNewQualifierAsset(const CScript& scriptPubKey)
 bool IsScriptNewQualifierAsset(const CScript &scriptPubKey, int &nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+    if (!scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex))
         return false;
 
     CNewAsset asset;
@@ -3312,8 +3319,9 @@ bool IsScriptNewRestrictedAsset(const CScript& scriptPubKey)
 bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex)
 {
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (!scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+    if (!scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStartingIndex))
         return false;
 
     CNewAsset asset;
@@ -3506,12 +3514,15 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
     std::string assetName = "";
 
     int nType = 0;
+    int nScriptType = 0;
     bool fIsOwner = false;
-    if (!script.IsAssetScript(nType, fIsOwner)) {
+    if (!script.IsAssetScript(nType, nScriptType, fIsOwner)) {
         return false;
     }
 
     txnouttype type = txnouttype(nType);
+    txnouttype scriptType = txnouttype(nScriptType);
+    data.scriptType = scriptType;
 
     // Get the New Asset or Transfer Asset from the scriptPubKey
     if (type == TX_NEW_ASSET && !fIsOwner) {
@@ -4439,13 +4450,13 @@ void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reiss
     }
 }
 
-bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount) {
+bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, int& nScriptType, std::string &assetName, CAmount &assetAmount) {
     int nType;
     bool fIsOwner;
     int _nStartingPoint;
     std::string _strAddress;
     bool isAsset = false;
-    if (scriptPubKey.IsAssetScript(nType, fIsOwner, _nStartingPoint)) {
+    if (scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, _nStartingPoint)) {
         if (nType == TX_NEW_ASSET) {
             if (fIsOwner) {
                 if (OwnerAssetFromScript(scriptPubKey, assetName, _strAddress)) {
@@ -4489,8 +4500,16 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
 //        LogPrintf("%s : Found no asset in script: %s", __func__, HexStr(scriptPubKey));
     }
     if (isAsset) {
+        if (nScriptType == TX_SCRIPTHASH) {
+            hashBytes = uint160(std::vector <unsigned char>(scriptPubKey.begin()+2, scriptPubKey.begin()+22));
+        } else if (nScriptType == TX_PUBKEYHASH) {
+            hashBytes = uint160(std::vector <unsigned char>(scriptPubKey.begin()+3, scriptPubKey.begin()+23));
+        } else {
+            return false;
+        }
+
 //        LogPrintf("%s : Found assets in script at address %s : %s (%s)", __func__, _strAddress, assetName, assetAmount);
-        hashBytes = uint160(std::vector <unsigned char>(scriptPubKey.begin()+3, scriptPubKey.begin()+23));
+
         return true;
     }
     return false;

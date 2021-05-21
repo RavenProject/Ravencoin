@@ -150,8 +150,9 @@ public:
         if (pwallet && pwallet->GetCScript(scriptID, subscript)) {
             std::vector<CTxDestination> addresses;
             txnouttype whichType;
+            txnouttype scriptType;
             int nRequired;
-            ExtractDestinations(subscript, whichType, addresses, nRequired);
+            ExtractDestinations(subscript, whichType, scriptType, addresses, nRequired);
             obj.push_back(Pair("script", GetTxnOutputType(whichType)));
             obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
             UniValue a(UniValue::VARR);
