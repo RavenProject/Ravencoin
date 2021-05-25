@@ -581,8 +581,11 @@ void RavenGUI::createToolBars()
 {
     if(walletFrame)
     {
+        QSettings settings;
+        bool IconsOnly = settings.value("fToolbarIconsOnly", false).toBool();
+
         /** RVN START */
-        // Create the orange background and the vertical tool bar
+        // Create the background and the vertical tool bar
         QWidget* toolbarWidget = new QWidget();
 
         QString widgetStyleSheet = ".QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
@@ -590,17 +593,32 @@ void RavenGUI::createToolBars()
         toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightBlueColor().name(), platformStyle->DarkBlueColor().name()));
 
         QLabel* label = new QLabel();
-        label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
         label->setContentsMargins(0,0,0,50);
+
+        if(IconsOnly) {
+            label->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+            label->setAlignment(Qt::AlignLeft);
+        }
+        else {
+            label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
+        }
         label->setStyleSheet(".QLabel{background-color: transparent;}");
+
         /** RVN END */
 
         QToolBar *toolbar = new QToolBar();
         toolbar->setStyle(style());
-        toolbar->setMinimumWidth(label->width());
         toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
         toolbar->setMovable(false);
-        toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+        if(IconsOnly) {
+            toolbar->setMaximumWidth(65);
+            toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        }
+        else {
+            toolbar->setMinimumWidth(label->width());
+            toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        }
         toolbar->addAction(overviewAction);
         toolbar->addAction(sendCoinsAction);
         toolbar->addAction(receiveCoinsAction);
