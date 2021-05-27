@@ -6,12 +6,14 @@
 #include "modaloverlay.h"
 #include "ui_modaloverlay.h"
 
+#include <clientversion.h>
 #include "guiutil.h"
 
 #include "chainparams.h"
 
 #include <QResizeEvent>
 #include <QPropertyAnimation>
+#include <QString>
 
 ModalOverlay::ModalOverlay(QWidget *parent) :
 QWidget(parent),
@@ -30,6 +32,7 @@ userClosed(false)
 
     blockProcessTime.clear();
     setVisible(false);
+    ui->versionLabel->setText(QString::fromStdString(FormatFullVersion()));
 }
 
 ModalOverlay::~ModalOverlay()
