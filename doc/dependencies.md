@@ -14,7 +14,7 @@ These are the dependencies currently used by Raven Core. You can find instructio
 | Clang | [11.0.1](http://llvm.org/releases/download.html) |  (C++11 support) |  |  |  |
 | D-Bus | [1.10.18](https://cgit.freedesktop.org/dbus/dbus/tree/NEWS?h=dbus-1.10) |  | No | Yes |  |
 | ds_store    | 1.3.0  | | | | |
-| Expat | [2.3.0](https://libexpat.github.io/) |  | Yes | Yes |  |
+| Expat | [2.4.1](https://libexpat.github.io/) |  | Yes | Yes |  |
 | fontconfig | [2.12.1](https://www.freedesktop.org/software/fontconfig/release/) |  | No | Yes |  |
 | FreeType | [2.7.1](http://download.savannah.gnu.org/releases/freetype) |  | No |  |  |
 | GCC |  | [4.7+](https://gcc.gnu.org/) |  |  |  |
