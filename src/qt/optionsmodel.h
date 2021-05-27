@@ -114,6 +114,7 @@ Q_SIGNALS:
     void coinControlFeaturesChanged(bool);
     void customFeeFeaturesChanged(bool);
     void hideTrayIconChanged(bool);
+    void updateIconsOnlyToolbar(bool);
 };
 
 #endif // RAVEN_QT_OPTIONSMODEL_H

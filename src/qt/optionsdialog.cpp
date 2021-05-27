@@ -176,7 +176,6 @@ void OptionsDialog::setModel(OptionsModel *_model)
     connect(ui->thirdPartyTxUrls, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
     connect(ui->ipfsUrl, SIGNAL(textChanged(const QString &)), this, SLOT(showRestartWarning()));
     connect(ui->darkModeCheckBox, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
-    connect(ui->toolbarIconsOnly, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning()));
 }
 
 void OptionsDialog::setMapper()

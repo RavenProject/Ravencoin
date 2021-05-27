@@ -332,7 +332,7 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case ToolbarIconsOnly:
             fToolbarIconsOnly = value.toBool();
             settings.setValue("fToolbarIconsOnly", fToolbarIconsOnly);
-            setRestartRequired(true);
+            Q_EMIT updateIconsOnlyToolbar(fToolbarIconsOnly);
             break;
         case MapPortUPnP: // core option - can be changed on-the-fly
             settings.setValue("fUseUPnP", value.toBool());
