@@ -224,7 +224,7 @@ public Q_SLOTS:
 
     void getLatestVersion();
 
-    /** Reads setting IconsOnly true/false and updates toolbar accordingly. */
+    /** IconsOnly true/false and updates toolbar accordingly. */
     void updateIconsOnlyToolbar(bool);
 
 #ifdef ENABLE_WALLET
