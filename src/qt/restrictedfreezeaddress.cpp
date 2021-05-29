@@ -177,7 +177,7 @@ void FreezeAddress::check()
 
     bool failed = false;
     if (!IsAssetNameAnRestricted(restricted_asset.toStdString())){
-        showWarning(tr("Must have a restricteds asset selected"));
+        showWarning(tr("Must have a restricted asset selected"));
         failed = true;
     }
 
