@@ -607,27 +607,25 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(raven);
     Q_INIT_RESOURCE(raven_locale);
 
-#if QT_VERSION > 0x050100
+#if QT_VERSION > 0x050600
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
-#if QT_VERSION >= 0x050600
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 #ifdef Q_OS_MAC
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
+
 #if QT_VERSION >= 0x050500
-
-    // This should be after the attributes.
-    RavenApplication app(argc, argv);
-
     // Because of the POODLE attack it is recommended to disable SSLv3 (https://disablessl3.com/),
     // so set SSL protocols to TLS1.0+.
     QSslConfiguration sslconf = QSslConfiguration::defaultConfiguration();
     sslconf.setProtocol(QSsl::TlsV1_0OrLater);
     QSslConfiguration::setDefaultConfiguration(sslconf);
 #endif
+
+    // This should be after the attributes.
+    RavenApplication app(argc, argv);
 
     // Register meta types used for QMetaObject::invokeMethod
     qRegisterMetaType< bool* >();
