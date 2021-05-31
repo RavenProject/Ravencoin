@@ -367,21 +367,21 @@ void RavenGUI::createActions()
     tabGroup->addAction(historyAction);
 
     /** RVN START */
-    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
-    transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
-    transferAssetAction->setToolTip(transferAssetAction->statusTip());
-    transferAssetAction->setCheckable(true);
-    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
-    transferAssetAction->setFont(font);
-    tabGroup->addAction(transferAssetAction);
-
     createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
     createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
     createAssetAction->setToolTip(createAssetAction->statusTip());
     createAssetAction->setCheckable(true);
-    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     createAssetAction->setFont(font);
     tabGroup->addAction(createAssetAction);
+
+    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
+    transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
+    transferAssetAction->setToolTip(transferAssetAction->statusTip());
+    transferAssetAction->setCheckable(true);
+    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    transferAssetAction->setFont(font);
+    tabGroup->addAction(transferAssetAction);
 
     manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_manage_selected", ":/icons/asset_manage"), tr("&Manage Assets"), this);
     manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
@@ -395,7 +395,7 @@ void RavenGUI::createActions()
     messagingAction->setStatusTip(tr("Coming Soon"));
     messagingAction->setToolTip(messagingAction->statusTip());
     messagingAction->setCheckable(true);
-    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+//    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
     messagingAction->setFont(font);
     tabGroup->addAction(messagingAction);
 
@@ -403,7 +403,7 @@ void RavenGUI::createActions()
     votingAction->setStatusTip(tr("Coming Soon"));
     votingAction->setToolTip(votingAction->statusTip());
     votingAction->setCheckable(true);
-    votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    // votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_V));
     votingAction->setFont(font);
     tabGroup->addAction(votingAction);
 
@@ -411,7 +411,7 @@ void RavenGUI::createActions()
     restrictedAssetAction->setStatusTip(tr("Manage restricted assets"));
     restrictedAssetAction->setToolTip(restrictedAssetAction->statusTip());
     restrictedAssetAction->setCheckable(true);
-//    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
     restrictedAssetAction->setFont(font);
     tabGroup->addAction(restrictedAssetAction);
 
