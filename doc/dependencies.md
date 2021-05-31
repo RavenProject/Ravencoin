@@ -20,7 +20,7 @@ These are the dependencies currently used by Raven Core. You can find instructio
 | GCC |  | [4.7+](https://gcc.gnu.org/) |  |  |  |
 | HarfBuzz-NG |  |  |  |  |  |
 | libdmg-hfsplus | | | | | |
-| libevent | [2.1.11-stable](https://github.com/libevent/libevent/releases) | 2.0.22 | No |  |  |
+| libevent | [2.1.12-stable](https://github.com/libevent/libevent/releases) | 2.0.22 | No |  |  |
 | libICE    | 1.0.9  | | | | |
 | libjpeg |  |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L75) |
 | libpng |  |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L74) |
