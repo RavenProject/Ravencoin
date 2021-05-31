@@ -581,36 +581,54 @@ void RavenGUI::createToolBars()
 {
     if(walletFrame)
     {
+        QSettings settings;
+        bool IconsOnly = settings.value("fToolbarIconsOnly", false).toBool();
+
         /** RVN START */
-        // Create the orange background and the vertical tool bar
+        // Create the background and the vertical tool bar
         QWidget* toolbarWidget = new QWidget();
 
         QString widgetStyleSheet = ".QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
 
         toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightBlueColor().name(), platformStyle->DarkBlueColor().name()));
 
-        QLabel* label = new QLabel();
-        label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
-        label->setContentsMargins(0,0,0,50);
-        label->setStyleSheet(".QLabel{background-color: transparent;}");
+        labelToolbar = new QLabel();
+        labelToolbar->setContentsMargins(0,0,0,50);
+        labelToolbar->setAlignment(Qt::AlignLeft);
+
+        if(IconsOnly) {
+            labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+        }
+        else {
+            labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
+        }
+        labelToolbar->setStyleSheet(".QLabel{background-color: transparent;}");
+
         /** RVN END */
 
-        QToolBar *toolbar = new QToolBar();
-        toolbar->setStyle(style());
-        toolbar->setMinimumWidth(label->width());
-        toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
-        toolbar->setMovable(false);
-        toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        toolbar->addAction(overviewAction);
-        toolbar->addAction(sendCoinsAction);
-        toolbar->addAction(receiveCoinsAction);
-        toolbar->addAction(historyAction);
-        toolbar->addAction(createAssetAction);
-        toolbar->addAction(transferAssetAction);
-        toolbar->addAction(manageAssetAction);
-//        toolbar->addAction(messagingAction);
-//        toolbar->addAction(votingAction);
-        toolbar->addAction(restrictedAssetAction);
+        m_toolbar = new QToolBar();
+        m_toolbar->setStyle(style());
+        m_toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
+        m_toolbar->setMovable(false);
+
+        if(IconsOnly) {
+            m_toolbar->setMaximumWidth(65);
+            m_toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        }
+        else {
+            m_toolbar->setMinimumWidth(labelToolbar->width());
+            m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        }
+        m_toolbar->addAction(overviewAction);
+        m_toolbar->addAction(sendCoinsAction);
+        m_toolbar->addAction(receiveCoinsAction);
+        m_toolbar->addAction(historyAction);
+        m_toolbar->addAction(createAssetAction);
+        m_toolbar->addAction(transferAssetAction);
+        m_toolbar->addAction(manageAssetAction);
+//        m_toolbar->addAction(messagingAction);
+//        m_toolbar->addAction(votingAction);
+        m_toolbar->addAction(restrictedAssetAction);
 
         QString openSansFontString = "font: normal 22pt \"Open Sans\";";
         QString normalString = "font: normal 22pt \"Arial\";";
@@ -629,22 +647,22 @@ void RavenGUI::createToolBars()
                                ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
                                ".QToolButton:disabled {color: gray;}";
 
-        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
+        m_toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
                                                 platformStyle->ToolBarSelectedTextColor().name(),
                                                 platformStyle->DarkOrangeColor().name(), stringToUse));
 
-        toolbar->setOrientation(Qt::Vertical);
-        toolbar->setIconSize(QSize(40, 40));
+        m_toolbar->setOrientation(Qt::Vertical);
+        m_toolbar->setIconSize(QSize(40, 40));
 
-        QLayout* lay = toolbar->layout();
+        QLayout* lay = m_toolbar->layout();
         for(int i = 0; i < lay->count(); ++i)
             lay->itemAt(i)->setAlignment(Qt::AlignLeft);
 
         overviewAction->setChecked(true);
 
         QVBoxLayout* ravenLabelLayout = new QVBoxLayout(toolbarWidget);
-        ravenLabelLayout->addWidget(label);
-        ravenLabelLayout->addWidget(toolbar);
+        ravenLabelLayout->addWidget(labelToolbar);
+        ravenLabelLayout->addWidget(m_toolbar);
         ravenLabelLayout->setDirection(QBoxLayout::TopToBottom);
         ravenLabelLayout->addStretch(1);
 
@@ -894,6 +912,20 @@ void RavenGUI::createToolBars()
     }
 }
 
+void RavenGUI::updateIconsOnlyToolbar(bool IconsOnly)
+{
+    if(IconsOnly) {
+        labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+        m_toolbar->setMaximumWidth(65);
+        m_toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    }
+    else {
+        labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
+        m_toolbar->setMinimumWidth(labelToolbar->width());
+        m_toolbar->setMaximumWidth(255);
+        m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);        
+    }
+}
 void RavenGUI::setClientModel(ClientModel *_clientModel)
 {
     this->clientModel = _clientModel;
@@ -941,6 +973,10 @@ void RavenGUI::setClientModel(ClientModel *_clientModel)
 
             // Init the currency display from settings
             this->onCurrencyChange(optionsModel->getDisplayCurrencyIndex());
+
+            // Signal to update toolbar on iconsonly checkbox clicked.
+            connect(optionsModel, SIGNAL(updateIconsOnlyToolbar(bool)), this, SLOT(updateIconsOnlyToolbar(bool)));
+
         }
     } else {
         // Disable possibility to show main window via action

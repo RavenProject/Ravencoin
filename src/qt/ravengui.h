@@ -144,6 +144,10 @@ private:
     QLabel *labelVersionUpdate = nullptr;
     QNetworkAccessManager* networkVersionManager = nullptr;
     QNetworkRequest* versionRequest = nullptr;
+
+    QLabel *labelToolbar = nullptr;
+    QToolBar *m_toolbar = nullptr;
+
     /** RVN END */
 
     QSystemTrayIcon *trayIcon = nullptr;
@@ -219,6 +223,9 @@ public Q_SLOTS:
     void getPriceInfo();
 
     void getLatestVersion();
+
+    /** IconsOnly true/false and updates toolbar accordingly. */
+    void updateIconsOnlyToolbar(bool);
 
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.

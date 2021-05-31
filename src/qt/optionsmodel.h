@@ -31,6 +31,7 @@ public:
         StartAtStartup,         // bool
         HideTrayIcon,           // bool
         MinimizeToTray,         // bool
+        ToolbarIconsOnly,       // bool
         MapPortUPnP,            // bool
         MinimizeOnClose,        // bool
         ProxyUse,               // bool
@@ -88,6 +89,7 @@ private:
     bool fHideTrayIcon;
     bool fMinimizeToTray;
     bool fMinimizeOnClose;
+    bool fToolbarIconsOnly;
     QString language;
     int nDisplayUnit;
     int nDisplayCurrencyIndex;
@@ -112,6 +114,7 @@ Q_SIGNALS:
     void coinControlFeaturesChanged(bool);
     void customFeeFeaturesChanged(bool);
     void hideTrayIconChanged(bool);
+    void updateIconsOnlyToolbar(bool);
 };
 
 #endif // RAVEN_QT_OPTIONSMODEL_H

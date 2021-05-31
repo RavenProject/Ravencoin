@@ -216,6 +216,7 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->currencyUnitIndex, OptionsModel::DisplayCurrencyIndex);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
     mapper->addMapping(ui->ipfsUrl, OptionsModel::IpfsUrl);
+    mapper->addMapping(ui->toolbarIconsOnly, OptionsModel::ToolbarIconsOnly);
 }
 
 void OptionsDialog::setOkButtonState(bool fState)
