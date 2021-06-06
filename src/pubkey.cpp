@@ -1,9 +1,9 @@
-// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2009-2020 The Bitcoin Core developers
 // Copyright (c) 2017-2019 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "pubkey.h"
+#include <pubkey.h>
 
 #include <secp256k1.h>
 #include <secp256k1_recovery.h>
@@ -297,4 +297,8 @@ ECCVerifyHandle::~ECCVerifyHandle()
         secp256k1_context_destroy(secp256k1_context_verify);
         secp256k1_context_verify = nullptr;
     }
+}
+
+const secp256k1_context* GetVerifyContext() {
+    return secp256k1_context_verify;
 }
