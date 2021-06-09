@@ -146,6 +146,7 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
 
 
     ui->addressText->installEventFilter(this);
+    ui->comboBox->installEventFilter(this);
     ui->lineEditVerifierString->installEventFilter(this);
 }
 
@@ -257,6 +258,12 @@ bool ReissueAssetDialog::eventFilter(QObject *sender, QEvent *event)
         if(event->type()== QEvent::FocusIn)
         {
             hideInvalidVerifierStringMessage();
+        }
+    } else if (sender == ui->comboBox)
+    {
+        if(event->type()== QEvent::Show)
+        {
+            updateAssetsList();
         }
     }
     return QWidget::eventFilter(sender,event);
