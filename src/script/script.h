@@ -667,7 +667,7 @@ public:
     bool IsAssetScript() const;
     bool IsAssetScript(int& nType, bool& fIsOwner) const;
     bool IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner) const;
-    bool IsAssetScript(int& nTXType, int& nScriptType, bool& fIsOwner, int& nStartingIndex) const;
+    bool IsAssetScript(int& nTXType, int& nScriptType, bool& fIsOwner, int& nStartingIndex, bool nP2Active = true) const;
     bool IsP2SHAssetScript() const;
     bool IsNewAsset() const;
     bool IsOwnerAsset() const;
