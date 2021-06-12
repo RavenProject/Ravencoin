@@ -723,9 +723,13 @@ void ReissueAssetDialog::onAssetSelected(int index)
         ss.precision(asset->units);
         ss << std::fixed << value.get_real();
 
-        ui->unitSpinBox->setValue(asset->units);
         ui->unitSpinBox->setMinimum(asset->units);
+        ui->unitSpinBox->setValue(asset->units);
 
+        if (asset->units == MAX_ASSET_UNITS) {
+            ui->unitSpinBox->setDisabled(true);
+        }
+        
         ui->quantitySpinBox->setMaximum(21000000000 - value.get_real());
 
         ui->currentAssetData->clear();
