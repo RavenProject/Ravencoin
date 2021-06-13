@@ -1713,7 +1713,7 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
                      this->GetHash().ToString());
             address = CNoDestination();
         }
- 
+
         if (!txout.scriptPubKey.IsAssetScript()) {
             COutputEntry output = {address, txout.nValue, (int) i};
 
