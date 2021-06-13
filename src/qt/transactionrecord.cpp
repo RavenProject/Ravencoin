@@ -5,6 +5,7 @@
 
 #include "transactionrecord.h"
 
+#include "transactionview.h"
 #include "assets/assets.h"
 #include "base58.h"
 #include "consensus/consensus.h"
@@ -315,12 +316,12 @@ bool TransactionRecord::isSwapTransaction(const CWallet *wallet, const CWalletTx
 
     bool isSwap = false;
     std::map<std::string, std::string> mapValue = wtx.mapValue;
-    for(int i=0;i < wtx.tx->vin.size(); i++)
+    for(size_t i=0; i < wtx.tx->vin.size(); i++)
     {
         auto tx_vin = wtx.tx->vin[i];
 
         std::string vin_script = ScriptToAsmStr(tx_vin.scriptSig, true);
-        auto fIsSingleSign = vin_script.find("[SINGLE|ANYONECANPAY]") != -1;
+        auto fIsSingleSign = vin_script.find("[SINGLE|ANYONECANPAY]") != std::string::npos;
         isminetype mine = wallet->IsMine(tx_vin);
 
         if(fIsSingleSign)
@@ -420,19 +421,19 @@ bool TransactionRecord::isSwapTransaction(const CWallet *wallet, const CWalletTx
                 //Amount represents the asset we sent, no matter the perspective
                 sub.credit = recvAmount;
                 std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
-                sub.assetName = strprintf("%s (Traded away %s)", recvType, asset_qty_format);
+                sub.assetName = strprintf("%s (%s %s)", TransactionView::tr("Traded Away").toUtf8().constData(), recvType, asset_qty_format);
             } else if (fSentAssets) {
                 //Sell!
                 //Total price paid, need to use net calculation when we executed
                 sub.credit = mine ? myReceievedOutput.nValue : nNet;
                 std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
-                sub.assetName = strprintf("RVN (Sold %s)", asset_qty_format);
+                sub.assetName = strprintf("RVN (%s %s)", TransactionView::tr("Sold").toUtf8().constData(), asset_qty_format);
             } else if (fRecvAssets) {
                 //Buy!
                 //Total price paid, need to use net calculation when we executed
                 sub.credit = (mine ? -myProvidedInput.nValue : nNet);
                 std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(recvType), recvAmount, 2).toUtf8().constData();
-                sub.assetName = strprintf("RVN (Bought %s)", asset_qty_format);
+                sub.assetName = strprintf("RVN (%s %s)", TransactionView::tr("Bought").toUtf8().constData(), asset_qty_format);
             } else {
                 LogPrintf("\tFell Through!\n");
                 return false; //!
