@@ -1713,7 +1713,7 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
                      this->GetHash().ToString());
             address = CNoDestination();
         }
-
+        
         if (!txout.scriptPubKey.IsAssetScript()) {
             COutputEntry output = {address, txout.nValue, (int) i};
 
@@ -1734,7 +1734,7 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
                 GetAssetData(txout.scriptPubKey, assetoutput);
 
                 // The only asset type we send is transfer_asset. We need to skip all other types for the sent category
-                if (nDebit > 0 && assetoutput.type == TX_TRANSFER_ASSET)
+                if (assetoutput.type == TX_TRANSFER_ASSET)
                     assetsSent.emplace_back(assetoutput);
 
                 if (fIsMine & filter)
