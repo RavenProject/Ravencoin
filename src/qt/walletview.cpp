@@ -175,6 +175,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
 
     /** RVN START */
     assetsPage->setModel(_walletModel);
+    atomicSwapsPage->setModel(_walletModel);
     createAssetsPage->setModel(_walletModel);
     manageAssetsPage->setModel(_walletModel);
     restrictedAssetsPage->setModel(_walletModel);
