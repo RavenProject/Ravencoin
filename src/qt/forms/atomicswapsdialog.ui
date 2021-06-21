@@ -176,7 +176,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Create Asset</string>
+          <string>Execute Swap</string>
          </property>
         </widget>
        </item>

@@ -148,90 +148,52 @@ void AtomicSwapsDialog::CheckFormState()
 {
     disableCreateButton(); // Disable the button by default
     hideMessage();
-
-    bool validSwap = false;
+    
     QString errorMessage;
+    AtomicSwapDetails partialSwap(ui->signedPartialText->toPlainText().toUtf8().constData());
 
-    CMutableTransaction mtx;
-
-    if (!DecodeHexTx(mtx, ui->signedPartialText->toPlainText().toUtf8().constData(), true))
-        errorMessage = tr("Unable to decode partial transaction");
-    else
+    bool validSwap = AttemptParseTransaction(partialSwap, errorMessage);
+     
+    if (validSwap)
     {
-        if(mtx.vin.size() != 1 || mtx.vout.size() != 1)
-            errorMessage = tr("Input contains an invalid number of inputs/outputs.");
-        else
+        auto formattedProvided = RavenUnits::formatWithCustomName(partialSwap.ProvidedType, partialSwap.ProvidedQuantity, 2);
+        auto formattedExpected = RavenUnits::formatWithCustomName(partialSwap.ExpectedType, partialSwap.ExpectedQuantity, 2);
+
+        //This is from the perspective of the trade
+        switch(partialSwap.Type)
         {
-            CTxIn swap_vin = mtx.vin[0];
-            CTxOut swap_vout = mtx.vout[0];
-
-            auto vin_script = ScriptToAsmStr(swap_vin.scriptSig, true);
-            auto fIsSingleSign = vin_script.find("[SINGLE|ANYONECANPAY]") != std::string::npos;
-
-            if(!fIsSingleSign)
-                errorMessage = tr("Must be signed with SINGLE|ANYONECANPAY");
-            else
+            case AtmoicSwapType::Buy:
             {
-                Coin vinCoin;
-                if (!pcoinsTip->GetCoin(swap_vin.prevout, vinCoin))
-                    errorMessage = tr("Unable to lookup previous transaction. It is either spent, or this transaction is for another ravencoin network.");
-                else
-                {
-                    //If the swap expects assets, that means WE are sending.
-                    bool fSendAsset = swap_vout.scriptPubKey.IsAssetScript();
-                    bool fRecvAsset = vinCoin.IsAsset();
-
-                    std::string assetName;
-                    std::string currency = "RVN";
-                    double quantity;
-                    
-                    std::string sentType;CAmount sendAmount;
-                    std::string recvType;CAmount recvAmount;
-                    if(fSendAsset) GetAssetInfoFromScript(swap_vout.scriptPubKey, sentType, sendAmount);
-                    if(fRecvAsset) GetAssetInfoFromScript(vinCoin.out.scriptPubKey, recvType, recvAmount);
-                    
-                    if(fSendAsset && fRecvAsset)
-                    {
-                        ui->tradeTypeLabel->setText(tr("Trade Order (You are trading assets for assets)"));
-                        ui->assetNameLabel->setText(QString::fromStdString(recvType));
-                        totalPrice = sendAmount;
-                        unitPrice = (CAmount)((double)totalPrice / recvAmount); //Consider our input the "currency"
-                        validSwap = true;
-
-                        //std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
-                    }
-                    else if(fSendAsset)
-                    {
-                        ui->tradeTypeLabel->setText(tr("Buy Order (You are selling assets)"));
-                        ui->assetNameLabel->setText(QString::fromStdString(sentType));
-                        totalPrice = vinCoin.out.nValue;
-                        unitPrice = (CAmount)((double)totalPrice / sendAmount);
-
-                        validSwap = true;
-                        //std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
-                    }
-                    else if(fRecvAsset)
-                    {
-                        ui->tradeTypeLabel->setText(tr("Sell Order (You are purchasing assets)"));
-                        ui->assetNameLabel->setText(QString::fromStdString(recvType));
-                        totalPrice = swap_vout.nValue;
-                        unitPrice = (CAmount)((double)totalPrice / recvAmount);
-
-                        validSwap = true;
-                        //std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(recvType), recvAmount, 2).toUtf8().constData();
-                    }
-                    else
-                    {
-                        ui->tradeTypeLabel->setText(tr("Unknown swap type"));
-                    }
-                }
+                ui->tradeTypeLabel->setText(tr("Buy Order (You are selling assets)"));
+                ui->assetNameLabel->setText(formattedExpected);
+                ui->totalPriceLabel->setText(QString("+") + formattedProvided); //Indicate we are getting money
+                //Shows up as X.XXXXXX RVN/YYYYY
+                auto formattedUnit = RavenUnits::formatWithCustomName(partialSwap.ProvidedType, partialSwap.UnitPrice);
+                ui->unitPriceLabel->setText(QString("%1/[%2]").arg(formattedUnit).arg(partialSwap.ExpectedType));
+                ui->summaryLabel->setText(tr("You are selling your %1 for %2").arg(formattedExpected).arg(formattedProvided));
+                break;
+            }
+            case AtmoicSwapType::Sell:
+            {
+                ui->tradeTypeLabel->setText(tr("Sell Order (You are purchasing assets)"));
+                ui->assetNameLabel->setText(formattedProvided);
+                ui->totalPriceLabel->setText(formattedExpected);
+                auto formattedUnit = RavenUnits::formatWithCustomName(partialSwap.ExpectedType, partialSwap.UnitPrice);
+                ui->unitPriceLabel->setText(QString("%1/[%2]").arg(formattedUnit).arg(partialSwap.ProvidedType));
+                ui->summaryLabel->setText(tr("You are buying %1 for %2").arg(formattedProvided).arg(formattedExpected));
+                break;
+            }
+            case AtmoicSwapType::Trade:
+            {
+                ui->tradeTypeLabel->setText(tr("Trade Order (You are trading assets for assets)"));
+                ui->assetNameLabel->setText(formattedProvided);
+                ui->totalPriceLabel->setText(formattedExpected);
+                auto formattedUnit = RavenUnits::formatWithCustomName(partialSwap.ProvidedType, partialSwap.UnitPrice);
+                ui->unitPriceLabel->setText(QString("%1/[%2]").arg(formattedUnit).arg(partialSwap.ExpectedType));
+                ui->summaryLabel->setText(tr("You are trading your %1 for their %2").arg(formattedExpected).arg(formattedProvided));
+                break;
             }
         }
-    }
-     
-    if (validSwap) {
-        ui->totalPriceLabel->setText(RavenUnits::format(RavenUnits::RVN, totalPrice));
-        ui->unitPriceLabel->setText(RavenUnits::format(RavenUnits::RVN, unitPrice * COIN));
 
         showValidMessage("Valid!");
         enableCreateButton();
@@ -239,6 +201,91 @@ void AtomicSwapsDialog::CheckFormState()
         showMessage(errorMessage);
         disableCreateButton();
     }
+}
+
+bool AtomicSwapsDialog::AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage)
+{
+    if (!DecodeHexTx(result.Transaction, result.Raw, true))
+    {
+        errorMessage = tr("Unable to decode partial transaction");
+        return false;
+    }
+        
+    if(result.Transaction.vin.size() != 1 || result.Transaction.vout.size() != 1)
+    {
+        errorMessage = tr("Input contains an invalid number of inputs/outputs.");
+        return false;
+    }
+    
+    CTxIn swap_vin = result.Transaction.vin[0];
+    CTxOut swap_vout = result.Transaction.vout[0];
+
+    auto vin_script = ScriptToAsmStr(swap_vin.scriptSig, true);
+    auto fIsSingleSign = vin_script.find("[SINGLE|ANYONECANPAY]") != std::string::npos;
+
+    if(!fIsSingleSign)
+    {
+        errorMessage = tr("Must be signed with SINGLE|ANYONECANPAY");
+        return false;
+    }
+
+    Coin vinCoin;
+    if (!pcoinsTip->GetCoin(swap_vin.prevout, vinCoin))
+    {
+        errorMessage = tr("Unable to lookup previous transaction. It is either spent, or this transaction is for another ravencoin network.");
+        return false;
+    }
+    
+    //These are from our perspective. Do we need to send or do we receive assets.
+    bool fSendAsset = swap_vout.scriptPubKey.IsAssetScript();
+    bool fRecvAsset = vinCoin.IsAsset();
+    
+    AtmoicSwapType tradeType;
+    CAmount totalPrice, unitPrice;
+    std::string sendType;CAmount sendAmount;
+    std::string recvType;CAmount recvAmount;
+    if(fSendAsset) GetAssetInfoFromScript(swap_vout.scriptPubKey, sendType, sendAmount);
+    if(fRecvAsset) GetAssetInfoFromScript(vinCoin.out.scriptPubKey, recvType, recvAmount);
+    
+    if(fSendAsset && fRecvAsset)
+    {
+        tradeType = AtmoicSwapType::Trade;
+        totalPrice = sendAmount;
+        unitPrice = (CAmount)((double)totalPrice / recvAmount * COIN); //Consider our input the "currency"
+    }
+    else if(fSendAsset)
+    {
+        tradeType = AtmoicSwapType::Buy;
+        totalPrice = vinCoin.out.nValue;
+        unitPrice = (CAmount)((double)totalPrice / sendAmount * COIN);
+
+        recvType = "RVN";
+        recvAmount = totalPrice;
+    }
+    else if(fRecvAsset)
+    {
+        tradeType = AtmoicSwapType::Sell;
+        totalPrice = swap_vout.nValue;
+        unitPrice = (CAmount)((double)totalPrice / recvAmount * COIN);
+
+        sendType = "RVN";
+        sendAmount = totalPrice;
+    }
+    else
+    {
+        errorMessage = tr("Unknown swap type");
+        return false;
+    }
+
+    //Need to flip the perspective for the trade itself
+    result.Type = tradeType;
+    result.ProvidedType = QString::fromStdString(recvType);
+    result.ExpectedType = QString::fromStdString(sendType);
+    result.ProvidedQuantity = recvAmount;
+    result.ExpectedQuantity = sendAmount;
+    result.UnitPrice = unitPrice;
+
+    return true;
 }
 
 /** SLOTS */
@@ -254,3 +301,5 @@ void AtomicSwapsDialog::clear()
     hideMessage();
     disableCreateButton();
 }
+
+/** Helper functions **/

@@ -25,6 +25,31 @@ class QSortFilterProxyModel;
 class QCompleter;
 QT_END_NAMESPACE
 
+enum AtmoicSwapType
+{
+    Buy,
+    Sell,
+    Trade
+};
+
+struct AtomicSwapDetails
+{
+    std::string Raw;
+    AtmoicSwapType Type;
+    QString ProvidedType;
+    QString ExpectedType;
+    CAmount ProvidedQuantity;
+    CAmount ExpectedQuantity;
+    CAmount UnitPrice;
+
+    CMutableTransaction Transaction;
+
+    AtomicSwapDetails(std::string RawTranscation)
+        :Raw(RawTranscation)
+    {
+    }
+};
+
 /** Dialog for execution and creation of atomic swaps. */
 class AtomicSwapsDialog : public QDialog
 {
@@ -48,9 +73,6 @@ private:
     ClientModel *clientModel;
     WalletModel *model;
 
-    CAmount totalPrice;
-    CAmount unitPrice;
-
     const PlatformStyle *platformStyle;
 
     void setUpValues();
@@ -60,6 +82,7 @@ private:
     void disableCreateButton();
     void enableCreateButton();
     void CheckFormState();
+    bool AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage);
 
 private Q_SLOTS:
     void onSignedPartialChanged();
