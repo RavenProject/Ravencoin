@@ -25,7 +25,7 @@ class QSortFilterProxyModel;
 class QCompleter;
 QT_END_NAMESPACE
 
-enum AtmoicSwapType
+enum AtomicSwapType
 {
     Buy,
     Sell,
@@ -35,12 +35,13 @@ enum AtmoicSwapType
 struct AtomicSwapDetails
 {
     std::string Raw;
-    AtmoicSwapType Type;
+    AtomicSwapType Type;
     QString ProvidedType;
     QString ExpectedType;
     CAmount ProvidedQuantity;
     CAmount ExpectedQuantity;
     CAmount UnitPrice;
+    CTxDestination SwapDestination;
 
     CMutableTransaction Transaction;
 
@@ -48,6 +49,10 @@ struct AtomicSwapDetails
         :Raw(RawTranscation)
     {
     }
+
+    bool FindAssetUTXOs(CWallet* wallet, CCoinControl ctrl, std::map<std::string, std::vector<COutput> > mapAssetCoins, CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
+    bool FindRavenUTXOs(CWallet* wallet, CCoinControl ctrl, std::vector<COutput> vAvailableCoins, CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
+    bool SignTransaction(CWallet* wallet, CMutableTransaction& finalTx, CMutableTransaction& signedTx);
 };
 
 /** Dialog for execution and creation of atomic swaps. */
@@ -73,19 +78,24 @@ private:
     ClientModel *clientModel;
     WalletModel *model;
 
+    std::shared_ptr<AtomicSwapDetails> loadedSwap;
+    bool validSwap;
+
     const PlatformStyle *platformStyle;
 
     void setUpValues();
     void showMessage(QString string);
     void showValidMessage(QString string);
     void hideMessage();
-    void disableCreateButton();
-    void enableCreateButton();
+    void disableExecuteButton();
+    void enableExecuteButton();
     void CheckFormState();
     bool AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage);
+    bool AttemptCompleteTransaction(CMutableTransaction& finalTransaction, AtomicSwapDetails& result, QString& errorMessage);
 
 private Q_SLOTS:
     void onSignedPartialChanged();
+    void onExecuteSwap();
 
     void setBalance(const CAmount& balance, const CAmount& unconfirmedBalance, const CAmount& immatureBalance,
                     const CAmount& watchOnlyBalance, const CAmount& watchUnconfBalance, const CAmount& watchImmatureBalance);

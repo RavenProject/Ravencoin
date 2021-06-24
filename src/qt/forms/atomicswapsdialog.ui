@@ -168,7 +168,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
        <item>
-        <widget class="QPushButton" name="createAssetButton">
+        <widget class="QPushButton" name="executeSwapButton">
          <property name="minimumSize">
           <size>
            <width>150</width>
