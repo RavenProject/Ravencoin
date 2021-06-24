@@ -44,14 +44,19 @@ struct AtomicSwapDetails
     CTxDestination SwapDestination;
 
     CMutableTransaction Transaction;
+    CMutableTransaction SignedFinal;
 
     AtomicSwapDetails(std::string RawTranscation)
         :Raw(RawTranscation)
     {
     }
 
-    bool FindAssetUTXOs(CWallet* wallet, CCoinControl ctrl, std::map<std::string, std::vector<COutput> > mapAssetCoins, CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
-    bool FindRavenUTXOs(CWallet* wallet, CCoinControl ctrl, std::vector<COutput> vAvailableCoins, CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
+    QString GetSummary();
+
+    bool FindAssetUTXOs(CWallet* wallet, CCoinControl ctrl, std::map<std::string, std::vector<COutput> > mapAssetCoins, 
+                        CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
+    bool FindRavenUTXOs(CWallet* wallet, CCoinControl ctrl, std::vector<COutput> vAvailableCoins, 
+                        CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
     bool SignTransaction(CWallet* wallet, CMutableTransaction& finalTx, CMutableTransaction& signedTx);
 };
 
@@ -91,7 +96,8 @@ private:
     void enableExecuteButton();
     void CheckFormState();
     bool AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage);
-    bool AttemptCompleteTransaction(CMutableTransaction& finalTransaction, AtomicSwapDetails& result, QString& errorMessage);
+    bool AttemptCompleteTransaction(CMutableTransaction& signedTransaction, AtomicSwapDetails& result, QString& errorMessage);
+    bool AttemptTransmit(AtomicSwapDetails& result);
 
 private Q_SLOTS:
     void onSignedPartialChanged();
