@@ -415,7 +415,7 @@ void RavenGUI::createActions()
     restrictedAssetAction->setFont(font);
     tabGroup->addAction(restrictedAssetAction);
 
-    atomicSwapsAction = new QAction(platformStyle->SingleColorIcon(":/icons/tx_atomic_swap"), tr("&Atomic Swaps"), this);
+    atomicSwapsAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/atomic_swap_selected", ":/icons/atomic_swap"), tr("&Atomic Swaps"), this);
     atomicSwapsAction->setStatusTip(tr("Manage atomic swaps (purchases, sales, trades)"));
     atomicSwapsAction->setToolTip(atomicSwapsAction->statusTip());
     atomicSwapsAction->setCheckable(true);

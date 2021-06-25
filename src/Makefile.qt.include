@@ -295,6 +295,8 @@ RES_ICONS = \
   qt/res/icons/asset_manage_selected.png \
   qt/res/icons/asset_transfer.png \
   qt/res/icons/asset_transfer_selected.png \
+  qt/res/icons/atomic_swap.png \
+  qt/res/icons/atomic_swap_selected.png \
   qt/res/icons/ravencointext.png \
   qt/res/icons/raven.ico \
   qt/res/icons/raven_testnet.ico \
