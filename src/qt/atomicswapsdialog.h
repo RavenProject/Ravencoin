@@ -95,9 +95,9 @@ private:
     void disableExecuteButton();
     void enableExecuteButton();
     void CheckFormState();
-    bool AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage);
+    bool AttemptParseTransaction(AtomicSwapDetails& result, QString& errorMessage);
     bool AttemptCompleteTransaction(CMutableTransaction& signedTransaction, AtomicSwapDetails& result, QString& errorMessage);
-    bool AttemptTransmit(AtomicSwapDetails& result, CTransactionRef sentTx, QString errorMessage);
+    bool AttemptTransmit(AtomicSwapDetails& result, CTransactionRef sentTx, QString& errorMessage);
 
 private Q_SLOTS:
     void clear(bool clearAll);

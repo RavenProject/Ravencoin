@@ -169,7 +169,7 @@ void AtomicSwapsDialog::onExecuteSwap()
     }
 }
 
-bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result, CTransactionRef sentTx, QString errorMessage)
+bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result, CTransactionRef sentTx, QString& errorMessage)
 {
     std::string address = EncodeDestination(result.SwapDestination);
     CAmount nFeeRequired = result.FeeTotal;
@@ -199,7 +199,7 @@ bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result, CTransactionR
     questionString.append("<hr />");
     if(result.Type != AtomicSwapType::Trade)
     {
-        CAmount totalAmount = result.Type == AtomicSwapType::Buy ? result.ExpectedQuantity : result.ProvidedQuantity;
+        CAmount totalAmount = (result.Type == AtomicSwapType::Sell) ? result.ExpectedQuantity : result.ProvidedQuantity;
         QStringList alternativeUnits;
         for (RavenUnits::Unit u : RavenUnits::availableUnits())
         {
@@ -279,6 +279,9 @@ void AtomicSwapsDialog::CheckFormState()
 {
     clear(false);
     
+    if(ui->signedPartialText->toPlainText().isEmpty())
+        return;
+
     QString errorMessage;
     this->loadedSwap = std::make_shared<AtomicSwapDetails>(ui->signedPartialText->toPlainText().toUtf8().constData());
      
@@ -337,18 +340,18 @@ void AtomicSwapsDialog::CheckFormState()
         {
             this->validSwap = false;
             
-            showMessage(tr("Unable to complete partial. - ") + errorMessage);
+            showMessage(tr("Unable to complete signed partial.\n%1").arg(errorMessage));
             disableExecuteButton();
         }
     } else {
         this->validSwap = false;
-
-        showMessage(errorMessage);
+        if(!errorMessage.isEmpty())
+            showMessage(tr("Invalid Swap.\n%1").arg(errorMessage));
         disableExecuteButton();
     }
 }
 
-bool AtomicSwapsDialog::AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage)
+bool AtomicSwapsDialog::AttemptParseTransaction(AtomicSwapDetails& result, QString& errorMessage)
 {
     if (!DecodeHexTx(result.Transaction, result.Raw, true))
     {
@@ -377,7 +380,7 @@ bool AtomicSwapsDialog::AttemptParseTransaction(AtomicSwapDetails& result, QStri
     Coin vinCoin;
     if (!pcoinsTip->GetCoin(swap_vin.prevout, vinCoin))
     {
-        errorMessage = tr("Unable to lookup previous transaction. It is either spent, or this transaction is for another ravencoin network.");
+        errorMessage = tr("Trade already executed, or this transaction is for another ravencoin network.");
         return false;
     }
 
@@ -599,7 +602,7 @@ bool AtomicSwapDetails::FindAssetUTXOs(CWallet* wallet, CCoinControl ctrl, std::
         finalTx.vin.push_back(CTxIn(asset.outpoint, CScript(), nSequence));
 
 
-    change = ExpectedQuantity - totalSupplied;
+    change = totalSupplied - ExpectedQuantity;
 
     if(change > 0) {
         LogPrintf("Sending self asset change.\n");
