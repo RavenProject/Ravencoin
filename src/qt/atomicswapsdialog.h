@@ -43,6 +43,7 @@ struct AtomicSwapDetails
     CAmount UnitPrice;
     CTxDestination SwapDestination;
 
+    CAmount FeeTotal;
     CMutableTransaction Transaction;
     CMutableTransaction SignedFinal;
 
@@ -58,6 +59,7 @@ struct AtomicSwapDetails
     bool FindRavenUTXOs(CWallet* wallet, CCoinControl ctrl, std::vector<COutput> vAvailableCoins, 
                         CMutableTransaction& finalTx, CAmount& totalSupplied, CAmount& change);
     bool SignTransaction(CWallet* wallet, CMutableTransaction& finalTx, CMutableTransaction& signedTx);
+
 };
 
 /** Dialog for execution and creation of atomic swaps. */
@@ -71,8 +73,6 @@ public:
 
     void setClientModel(ClientModel *clientModel);
     void setModel(WalletModel *model);
-
-    void clear();
 
     QStringListModel* stringModel;
     QSortFilterProxyModel* proxy;
@@ -97,9 +97,10 @@ private:
     void CheckFormState();
     bool AttemptParseTransaction(AtomicSwapDetails& result, QString errorMessage);
     bool AttemptCompleteTransaction(CMutableTransaction& signedTransaction, AtomicSwapDetails& result, QString& errorMessage);
-    bool AttemptTransmit(AtomicSwapDetails& result);
+    bool AttemptTransmit(AtomicSwapDetails& result, CTransactionRef sentTx, QString errorMessage);
 
 private Q_SLOTS:
+    void clear(bool clearAll);
     void onSignedPartialChanged();
     void onExecuteSwap();
 

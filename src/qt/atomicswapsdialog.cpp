@@ -54,6 +54,7 @@ AtomicSwapsDialog::AtomicSwapsDialog(const PlatformStyle *_platformStyle, QWidge
     setWindowTitle("Create Assets");
     connect(ui->signedPartialText, SIGNAL(textChanged()), this, SLOT(onSignedPartialChanged()));
     connect(ui->executeSwapButton, SIGNAL(clicked()), this, SLOT(onExecuteSwap()));
+    connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(clear(true)));
 }
 
 void AtomicSwapsDialog::setClientModel(ClientModel *_clientModel)
@@ -80,7 +81,6 @@ void AtomicSwapsDialog::setModel(WalletModel *_model)
         adjustSize();
     }
 }
-
 
 AtomicSwapsDialog::~AtomicSwapsDialog()
 {
@@ -150,21 +150,29 @@ void AtomicSwapsDialog::onExecuteSwap()
 {
     if(this->validSwap)
     {
-        if(!AttemptTransmit(*loadedSwap))
+        CTransactionRef sentTx;
+        QString errorMessage;
+        if(!AttemptTransmit(*loadedSwap, sentTx, errorMessage))
         {
             //error :(
+            Q_EMIT message(tr("Execute Failed"), tr("Swap failed to execute.\n%1").arg(errorMessage), 
+                CClientUIInterface::MSG_ERROR);
         }
         else
         {
             //woot woot
+            const uint256& tx_hash = loadedSwap->SignedFinal.GetHash();
+            Q_EMIT message(tr("Execute Success"), tr("Swap executed succesfully.\ntxid: %1").arg(tx_hash.GetHex().c_str()), 
+                CClientUIInterface::MSG_WARNING);
+            clear(true);
         }
     }
 }
 
-bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result)
+bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result, CTransactionRef sentTx, QString errorMessage)
 {
     std::string address = EncodeDestination(result.SwapDestination);
-    CAmount nFeeRequired = 1000;
+    CAmount nFeeRequired = result.FeeTotal;
 
     // Format confirmation message
     QStringList formatted;
@@ -189,17 +197,20 @@ bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result)
 
     // add total amount in all subdivision units
     questionString.append("<hr />");
-    CAmount totalAmount = result.ExpectedQuantity;
-    QStringList alternativeUnits;
-    for (RavenUnits::Unit u : RavenUnits::availableUnits())
+    if(result.Type != AtomicSwapType::Trade)
     {
-        if(u != model->getOptionsModel()->getDisplayUnit())
-            alternativeUnits.append(RavenUnits::formatHtmlWithUnit(u, totalAmount));
+        CAmount totalAmount = result.Type == AtomicSwapType::Buy ? result.ExpectedQuantity : result.ProvidedQuantity;
+        QStringList alternativeUnits;
+        for (RavenUnits::Unit u : RavenUnits::availableUnits())
+        {
+            if(u != model->getOptionsModel()->getDisplayUnit())
+                alternativeUnits.append(RavenUnits::formatHtmlWithUnit(u, totalAmount));
+        }
+        questionString.append(tr("Total Amount %1")
+                                      .arg(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
+        questionString.append(QString("<span style='font-size:10pt;font-weight:normal;'><br />(=%2)</span>")
+                                      .arg(alternativeUnits.join(" " + tr("or") + "<br />")));
     }
-    questionString.append(tr("Total Amount %1")
-                                  .arg(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
-    questionString.append(QString("<span style='font-size:10pt;font-weight:normal;'><br />(=%2)</span>")
-                                  .arg(alternativeUnits.join(" " + tr("or") + "<br />")));
 
     QString titleQuestion;
     switch(result.Type)
@@ -219,13 +230,13 @@ bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result)
         return false;
     }
 
-    CTransactionRef tx(MakeTransactionRef(std::move(result.SignedFinal)));
-    const uint256& hashTx = tx->GetHash();
+    sentTx = MakeTransactionRef(std::move(result.SignedFinal));
+    const uint256& hashTx = sentTx->GetHash();
     CCoinsViewCache &view = *pcoinsTip;
 
     // now send the prepared transaction
     bool fHaveChain = false;
-    for (size_t o = 0; !fHaveChain && o < tx->vout.size(); o++) {
+    for (size_t o = 0; !fHaveChain && o < sentTx->vout.size(); o++) {
         const Coin& existingCoin = view.AccessCoin(COutPoint(hashTx, o));
         fHaveChain = !existingCoin.IsSpent();
     }
@@ -234,32 +245,39 @@ bool AtomicSwapsDialog::AttemptTransmit(AtomicSwapDetails& result)
         // push to local node and sync with wallets
         CValidationState state;
         bool fMissingInputs;
-        if (!::AcceptToMemoryPool(mempool, state, std::move(tx), &fMissingInputs,
+        if (!::AcceptToMemoryPool(mempool, state, std::move(sentTx), &fMissingInputs,
                                 nullptr /* plTxnReplaced */, false /* bypass_limits */, maxTxFee)) {
             if (state.IsInvalid()) {
                 LogPrintf("%i: %s\n", state.GetRejectCode(), state.GetRejectReason().c_str());
+                errorMessage = tr("%1: %2").arg(state.GetRejectCode()).arg(state.GetRejectReason().c_str());
                 return false;
             } else {
                 if (fMissingInputs) {
                     LogPrintf("Missing Inputs\n");
+                    errorMessage = "Missing Inputs";
                     return false;
                 }
                 LogPrintf("Fail: %s\n", state.GetRejectReason().c_str());
+                errorMessage = tr("Failed: %1").arg(state.GetRejectReason().c_str());
                 return false;
             }
+        } else {
+            return true;
         }
     } else if (fHaveChain) {
         LogPrintf("Already on chain\n");
+        errorMessage = tr("Transaction already sent.");
+        return false;
+    } else {
+        LogPrintf("Already in mempool\n");
+        errorMessage = tr("Transaction already in mempool.");
         return false;
     }
-
-    return true;
 }
 
 void AtomicSwapsDialog::CheckFormState()
 {
-    disableExecuteButton(); // Disable the button by default
-    hideMessage();
+    clear(false);
     
     QString errorMessage;
     this->loadedSwap = std::make_shared<AtomicSwapDetails>(ui->signedPartialText->toPlainText().toUtf8().constData());
@@ -499,11 +517,17 @@ void AtomicSwapsDialog::onSignedPartialChanged()
     CheckFormState();
 }
 
-void AtomicSwapsDialog::clear()
+void AtomicSwapsDialog::clear(bool clearAll)
 {
-    ui->signedPartialText->clear();
     hideMessage();
     disableExecuteButton();
+    ui->tradeTypeLabel->clear();
+    ui->assetNameLabel->clear();
+    ui->totalPriceLabel->clear();
+    ui->unitPriceLabel->clear();
+    ui->summaryLabel->clear();
+    if(clearAll)
+        ui->signedPartialText->clear();
 }
 
 /** Helper functions **/
@@ -709,6 +733,7 @@ bool AtomicSwapDetails::FindRavenUTXOs(CWallet* wallet, CCoinControl ctrl, std::
     }
 
     finalTx.vout[selfIdx].nValue = change;
+    FeeTotal = feeEstimate;
 
     return true;
 }
