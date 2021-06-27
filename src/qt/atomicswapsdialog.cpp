@@ -373,7 +373,7 @@ bool AtomicSwapsDialog::AttemptParseTransaction(AtomicSwapDetails& result, QStri
 
     if(!fIsSingleSign)
     {
-        errorMessage = tr("Must be signed with SINGLE|ANYONECANPAY");
+        errorMessage = tr("Must be signed with %1").arg("SINGLE|ANYONECANPAY");
         return false;
     }
 
