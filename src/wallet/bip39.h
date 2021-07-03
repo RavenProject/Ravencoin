@@ -41,8 +41,8 @@ struct LanguageDetails
 class CMnemonic
 {
 public:
-    static SecureString Generate(int strength);    // strength in bits
-    static SecureString FromData(const SecureVector& data, int len);
+    static SecureString Generate(int strength, int languageSelected = 0);    // strength in bits
+    static SecureString FromData(const SecureVector& data, int len, int languageSelected = 0);
     static bool Check(SecureString mnemonic, int languageSelected = -1);
     static int DetectLanguageSeed(SecureString mnemonic);
     static std::array<LanguageDetails, 8> GetLanguagesDetails();

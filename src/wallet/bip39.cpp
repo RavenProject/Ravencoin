@@ -37,19 +37,19 @@
 
 #include <openssl/evp.h>
 
-SecureString CMnemonic::Generate(int strength)
+SecureString CMnemonic::Generate(int strength, int languageSelected)
 {
     if (strength % 32 || strength < 128 || strength > 256) {
         return SecureString();
     }
     SecureVector data(32);
     GetStrongRandBytes(&data[0], 32);
-    SecureString mnemonic = FromData(data, strength / 8);
+    SecureString mnemonic = FromData(data, strength / 8, languageSelected);
     return mnemonic;
 }
 
 // SecureString CMnemonic::FromData(const uint8_t *data, int len)
-SecureString CMnemonic::FromData(const SecureVector& data, int len)
+SecureString CMnemonic::FromData(const SecureVector& data, int len, int languageSelected)
 {
     if (len % 4 || len < 16 || len > 32) {
         return SecureString();
@@ -67,6 +67,9 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len)
     int mlen = len * 3 / 4;
     SecureString mnemonic;
 
+    const char* const* wordlist;
+    wordlist = CMnemonic::GetLanguageWords(languageSelected);
+
     int i, j, idx;
     for (i = 0; i < mlen; i++) {
         idx = 0;
@@ -74,7 +77,7 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len)
             idx <<= 1;
             idx += (bits[(i * 11 + j) / 8] & (1 << (7 - ((i * 11 + j) % 8)))) > 0;
         }
-        mnemonic.append(CMnemonic::GetLanguagesDetails()[0].wordlist[idx]);
+        mnemonic.append(wordlist[idx]);
         if (i < mlen - 1) {
             mnemonic += ' ';
         }
