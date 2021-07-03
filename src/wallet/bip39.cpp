@@ -195,7 +195,7 @@ int CMnemonic::DetectLanguageSeed(SecureString mnemonic)
 
         int words_founds = 0;
 
-        int required_words_to_detect = 7;
+        int required_words_to_detect = CMnemonic::GetLanguagesDetails()[lang].minimumWordsCheckLang;
         int words_readed = 0;
 
         bool searching_is_ok = true;
