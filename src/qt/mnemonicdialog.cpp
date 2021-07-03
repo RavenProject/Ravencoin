@@ -10,6 +10,7 @@
 #include <ui_mnemonicdialog1.h>
 #include <ui_mnemonicdialog2.h>
 #include <ui_mnemonicdialog3.h>
+#include <wallet/bip39.h>
 
 #if !TEST
   #include <qt/guiutil.h>
@@ -166,6 +167,13 @@ MnemonicDialog3::MnemonicDialog3(QWidget *parent) :
     ui->setupUi(this);
 
     MnemonicDialog3::ui->seedwordsEdit->installEventFilter(this);
+
+    std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> languagesDetails = CMnemonic::GetLanguagesDetails();    
+   
+    for(int langNum = 0; langNum < NUM_LANGUAGES_BIP39_SUPPORTED; langNum++) {
+        MnemonicDialog3::ui->languageSeedWords->addItem(languagesDetails[langNum].Label);
+    }
+    MnemonicDialog3::ui->languageSeedWords->installEventFilter(this);
 };
 
 bool MnemonicDialog3::eventFilter(QObject *obj, QEvent *ev)
@@ -194,12 +202,16 @@ void MnemonicDialog3::on_acceptButton_clicked()
     std::string words = MnemonicDialog3::ui->seedwordsEdit->toPlainText().toStdString();
     std::string passphrase = MnemonicDialog3::ui->passphraseEdit->text().toStdString();
 
+    int languageSelected = MnemonicDialog3::ui->languageSeedWords->currentIndex();
+
 #if TEST
     std::string my_words;
     std::string my_passphrase;
+    int my_languageSelected;
 #endif
     my_words = words;
     my_passphrase = passphrase;
+    int my_languageSelected = languageSelected;
 
 #if TEST
     // NOTE: default mnemonic passphrase is an empty string
@@ -208,7 +220,7 @@ void MnemonicDialog3::on_acceptButton_clicked()
     SecureString tmp(my_words.begin(), my_words.end());
 
     // NOTE: default mnemonic passphrase is an empty string
-    if (!CMnemonic::Check(tmp)) {
+    if (!CMnemonic::Check(tmp, my_languageSelected)) {
 #endif
 
         MnemonicDialog3::ui->lblHelp->setText(tr("Words are not valid, please check the words and try again"));

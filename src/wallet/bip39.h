@@ -27,12 +27,26 @@
 
 #include "support/allocators/secure.h"
 
+const unsigned int NUM_LANGUAGES_BIP39_SUPPORTED = 8;
+
+struct LanguageDetails
+{
+    const char* Label;
+    const char* name;
+    const int minimumWordsCheckLang;
+    const char * const* wordlist;
+};
+
+
 class CMnemonic
 {
 public:
     static SecureString Generate(int strength);    // strength in bits
     static SecureString FromData(const SecureVector& data, int len);
-    static bool Check(SecureString mnemonic);
+    static bool Check(SecureString mnemonic, int languageSelected = -1);
+    static int DetectLanguageSeed(SecureString mnemonic);
+    static std::array<LanguageDetails, 8> GetLanguagesDetails();
+    static const char * const* GetLanguageWords(int lang);
     static void ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
 private:
     CMnemonic() {};

@@ -117,6 +117,9 @@
       <string/>
      </property>
     </widget>
+   </item>   
+   <item>
+    <widget class="QComboBox" name="languageSeedWords"/>
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox">
