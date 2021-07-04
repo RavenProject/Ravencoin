@@ -98,7 +98,7 @@ MnemonicDialog2::MnemonicDialog2(QWidget *parent) :
     std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> languagesDetails = CMnemonic::GetLanguagesDetails();    
    
     for(int langNum = 0; langNum < NUM_LANGUAGES_BIP39_SUPPORTED; langNum++) {
-        MnemonicDialog2::ui->languageSeedWords->addItem(languagesDetails[langNum].Label);
+        MnemonicDialog2::ui->languageSeedWords->addItem(languagesDetails[langNum].label);
     }
     MnemonicDialog2::ui->languageSeedWords->installEventFilter(this);
 
@@ -182,7 +182,7 @@ MnemonicDialog3::MnemonicDialog3(QWidget *parent) :
     std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> languagesDetails = CMnemonic::GetLanguagesDetails();    
    
     for(int langNum = 0; langNum < NUM_LANGUAGES_BIP39_SUPPORTED; langNum++) {
-        MnemonicDialog3::ui->languageSeedWords->addItem(languagesDetails[langNum].Label);
+        MnemonicDialog3::ui->languageSeedWords->addItem(languagesDetails[langNum].label);
     }
     MnemonicDialog3::ui->languageSeedWords->installEventFilter(this);
 };
@@ -193,6 +193,7 @@ bool MnemonicDialog3::eventFilter(QObject *obj, QEvent *ev)
     {
         // Clear invalid flag on focus
         MnemonicDialog3::ui->lblHelp->clear();
+        MnemonicDialog3::ui->lblWarningJapanese->clear();
     }
     return QWidget::eventFilter(obj, ev);
 }
@@ -234,7 +235,14 @@ void MnemonicDialog3::on_acceptButton_clicked()
     if (!CMnemonic::Check(tmp, my_languageSelected)) {
 #endif
 
-        MnemonicDialog3::ui->lblHelp->setText(tr("Words are not valid, please check the words and try again"));
+        MnemonicDialog3::ui->lblHelp->setText(tr("Words are not valid, please check the words and the language, and try again."));
+        
+        if (CMnemonic::GetLanguagesDetails()[my_languageSelected].name == JAPANESE){
+            MnemonicDialog3::ui->lblWarningJapanese->setText(tr("In Japanese, please use standard space, ideographic japanese space is not supported."));
+        }else {
+            MnemonicDialog3::ui->lblWarningJapanese->clear();
+        }
+         
         my_words.clear();
         my_passphrase.clear();
         return;

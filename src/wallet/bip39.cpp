@@ -162,14 +162,14 @@ bool CMnemonic::Check(SecureString mnemonic, int languageSelected)
 std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> CMnemonic::GetLanguagesDetails()
 {
     return {{
-        {"English", "english", 12, wordlist_en},
-        {"Spanish", "spanish", 3, wordlist_es},
-        {"French", "french", 12, wordlist_fr},
-        {"Japanese", "japanese", 3, wordlist_ja},
-        {"Chinese Simplified", "chinese_simplified", 12, wordlist_zh_s},
-        {"Chinese Traditional", "chinese_traditional", 12, wordlist_zh_t},
-        {"Korean", "korean", 3, wordlist_ko},
-        {"Italian", "italian", 3, wordlist_it}
+        {"English", ENGLISH, 12, wordlist_en},
+        {"Spanish", SPANISH, 3, wordlist_es},
+        {"French", FRENCH, 12, wordlist_fr},
+        {"Japanese", JAPANESE, 3, wordlist_ja},
+        {"Chinese Simplified", CHINESE_SIMPLIFIED, 12, wordlist_zh_s},
+        {"Chinese Traditional", CHINESE_TRADITIONAL, 12, wordlist_zh_t},
+        {"Korean", KOREAN, 3, wordlist_ko},
+        {"Italian", ITALIAN, 3, wordlist_it}
     }};
 }
 
@@ -179,7 +179,7 @@ const char* const* CMnemonic::GetLanguageWords(int lang)
         return CMnemonic::GetLanguagesDetails()[lang].wordlist;
     }
 
-    return CMnemonic::GetLanguagesDetails()[0].wordlist;
+    return CMnemonic::GetLanguagesDetails()[DEFAULT_LANG].wordlist;
 }
 
 int CMnemonic::DetectLanguageSeed(SecureString mnemonic)

@@ -27,25 +27,37 @@
 
 #include "support/allocators/secure.h"
 
-const unsigned int NUM_LANGUAGES_BIP39_SUPPORTED = 8;
+const int NUM_LANGUAGES_BIP39_SUPPORTED = 8;
+
+const int DEFAULT_LANG = 0;
+
+const int NOT_LANG_DEFINED = -1;
+
+const char *const ENGLISH = "english";
+const char *const SPANISH = "spanish";
+const char *const FRENCH = "french";
+const char *const JAPANESE = "japanese";
+const char *const CHINESE_SIMPLIFIED = "chinese_simplified";
+const char *const CHINESE_TRADITIONAL = "chinese_traditional";
+const char *const KOREAN = "korean";
+const char *const ITALIAN = "italian";
 
 struct LanguageDetails
 {
-    const char* Label;
+    const char* label;
     const char* name;
     const int minimumWordsCheckLang;
     const char * const* wordlist;
 };
 
-
 class CMnemonic
 {
 public:
-    static SecureString Generate(int strength, int languageSelected = 0);    // strength in bits
-    static SecureString FromData(const SecureVector& data, int len, int languageSelected = 0);
-    static bool Check(SecureString mnemonic, int languageSelected = -1);
+    static SecureString Generate(int strength, int languageSelected = DEFAULT_LANG);    // strength in bits
+    static SecureString FromData(const SecureVector& data, int len, int languageSelected = DEFAULT_LANG);
+    static bool Check(SecureString mnemonic, int languageSelected = NOT_LANG_DEFINED);
     static int DetectLanguageSeed(SecureString mnemonic);
-    static std::array<LanguageDetails, 8> GetLanguagesDetails();
+    static std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> GetLanguagesDetails();
     static const char * const* GetLanguageWords(int lang);
     static void ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
 private:
