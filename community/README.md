@@ -40,6 +40,8 @@ We’re all in this together. There are new capabilities included in the latest 
     * UI improvements
     * List of Tags per Address
     * Tighter integration with IPFS
+    * Address Book RPC commands (add destinataire / remove destinataire)
+    * removeaddress RPC commad (to remove a watched address after importaddress)
 * Mobile wallet enhancements
     * Fix dark mode on RVN Wallet
     * Fix GitHub Issues on Wallet
