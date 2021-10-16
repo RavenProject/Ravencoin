@@ -196,7 +196,7 @@ struct CAssetOutputEntry
     txnouttype type;
     std::string assetName;
     CTxDestination destination;
-    CAmount nAmount;
+    CAmount nAmount = 0;
     std::string message;
     int64_t expireTime;
     int vout;
@@ -1080,6 +1080,7 @@ public:
     /** should probably be renamed to IsRelevantToMe */
     bool IsFromMe(const CTransaction& tx) const;
     CAmount GetDebit(const CTransaction& tx, const isminefilter& filter) const;
+    CAmount HasMyAssets(const CTransaction& tx) const;
     /** Returns whether all of the inputs match the filter */
     bool IsAllFromMe(const CTransaction& tx, const isminefilter& filter) const;
     CAmount GetCredit(const CTransaction& tx, const isminefilter& filter) const;
