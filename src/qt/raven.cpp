@@ -213,7 +213,7 @@ class RavenApplication: public QApplication
 {
     Q_OBJECT
 public:
-    explicit RavenApplication(int &argc, char **argv);
+    explicit RavenApplication();
     ~RavenApplication();
 
 #ifdef ENABLE_WALLET
@@ -364,8 +364,11 @@ void RavenCore::shutdown()
     }
 }
 
-RavenApplication::RavenApplication(int &argc, char **argv):
-    QApplication(argc, argv),
+static int qt_argc = 1;
+static const char* qt_argv = "raven-qt";
+
+RavenApplication::RavenApplication():
+    QApplication(qt_argc, const_cast<char **>(&qt_argv)),
     coreThread(0),
     optionsModel(0),
     clientModel(0),
@@ -625,7 +628,7 @@ int main(int argc, char *argv[])
 #endif
 
     // This should be after the attributes.
-    RavenApplication app(argc, argv);
+    RavenApplication app;
 
     // Register meta types used for QMetaObject::invokeMethod
     qRegisterMetaType< bool* >();
