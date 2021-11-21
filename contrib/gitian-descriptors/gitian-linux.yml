@@ -19,12 +19,10 @@ packages:
 - "libtool"
 - "patch"
 - "pkg-config"
-- "python"
 - "python3"
 - "bison"
 - "gcc-8-multilib"
 - "g++-8-multilib"
-- "build-essential"
 # Cross compilation HOSTS:
 #  - arm-linux-gnueabihf
 - "binutils-arm-linux-gnueabihf"
