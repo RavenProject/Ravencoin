@@ -76,7 +76,7 @@ script: |
         then
             echo '#!/usr/bin/env bash' > ${WRAP_DIR}/${i}-${prog}
             echo "REAL=\`which -a ${i}-${prog}-8 | grep -v ${WRAP_DIR}/${i}-${prog} | head -1\`" >> ${WRAP_DIR}/${i}-${prog}
-            echo "export LD_PRELOAD='/usr/x86_64-linux-gnu/faketime/libfaketime.so.1'" >> ${WRAP_DIR}/${i}-${prog}
+            echo "export LD_PRELOAD='/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1'" >> ${WRAP_DIR}/${i}-${prog}
             echo "export FAKETIME=\"$1\"" >> ${WRAP_DIR}/${i}-${prog}
             echo "\$REAL \"\$@\"" >> $WRAP_DIR/${i}-${prog}
             chmod +x ${WRAP_DIR}/${i}-${prog}
