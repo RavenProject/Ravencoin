@@ -43,6 +43,8 @@ $(package)_config_opts_aarch64_linux=linux-generic64
 $(package)_config_opts_mipsel_linux=linux-generic32
 $(package)_config_opts_mips_linux=linux-generic32
 $(package)_config_opts_powerpc_linux=linux-generic32
+$(package)_config_opts_x86_64_darwin=AR=$(host_prefix)/native/bin/x86_64-apple-darwin14-ar
+$(package)_config_opts_x86_64_darwin+=RANLIB=$(host_prefix)/native/bin/x86_64-apple-darwin14-ranlib
 $(package)_config_opts_x86_64_darwin+=darwin64-x86_64-cc
 
 $(package)_config_opts_x86_64_mingw32=mingw64
