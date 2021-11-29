@@ -15,12 +15,14 @@ public:
     explicit AssetFilterProxy(QObject *parent = 0);
 
     void setAssetNamePrefix(const QString &assetNamePrefix);
+    void setAssetNameContains(const QString &assetNameContains);
 
 protected:
     bool filterAcceptsRow(int source_row, const QModelIndex & source_parent) const;
 
 private:
     QString assetNamePrefix;
+    QString assetNameContains;
 };
 
 

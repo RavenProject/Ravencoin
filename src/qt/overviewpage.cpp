@@ -703,7 +703,7 @@ void OverviewPage::assetSearchChanged()
 {
     if (!assetFilter)
         return;
-    assetFilter->setAssetNamePrefix(ui->assetSearch->text());
+    assetFilter->setAssetNameContains(ui->assetSearch->text());
 }
 
 void OverviewPage::openIPFSForAsset(const QModelIndex &index)
