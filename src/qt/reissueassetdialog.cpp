@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -146,6 +146,7 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
 
 
     ui->addressText->installEventFilter(this);
+    ui->comboBox->installEventFilter(this);
     ui->lineEditVerifierString->installEventFilter(this);
 }
 
@@ -257,6 +258,12 @@ bool ReissueAssetDialog::eventFilter(QObject *sender, QEvent *event)
         if(event->type()== QEvent::FocusIn)
         {
             hideInvalidVerifierStringMessage();
+        }
+    } else if (sender == ui->comboBox)
+    {
+        if(event->type()== QEvent::Show)
+        {
+            updateAssetsList();
         }
     }
     return QWidget::eventFilter(sender,event);
@@ -723,9 +730,13 @@ void ReissueAssetDialog::onAssetSelected(int index)
         ss.precision(asset->units);
         ss << std::fixed << value.get_real();
 
-        ui->unitSpinBox->setValue(asset->units);
         ui->unitSpinBox->setMinimum(asset->units);
+        ui->unitSpinBox->setValue(asset->units);
 
+        if (asset->units == MAX_ASSET_UNITS) {
+            ui->unitSpinBox->setDisabled(true);
+        }
+        
         ui->quantitySpinBox->setMaximum(21000000000 - value.get_real());
 
         ui->currentAssetData->clear();

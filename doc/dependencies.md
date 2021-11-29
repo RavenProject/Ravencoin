@@ -14,13 +14,13 @@ These are the dependencies currently used by Raven Core. You can find instructio
 | Clang | [11.0.1](http://llvm.org/releases/download.html) |  (C++11 support) |  |  |  |
 | D-Bus | [1.10.18](https://cgit.freedesktop.org/dbus/dbus/tree/NEWS?h=dbus-1.10) |  | No | Yes |  |
 | ds_store    | 1.3.0  | | | | |
-| Expat | [2.3.0](https://libexpat.github.io/) |  | Yes | Yes |  |
+| Expat | [2.4.1](https://libexpat.github.io/) |  | Yes | Yes |  |
 | fontconfig | [2.12.1](https://www.freedesktop.org/software/fontconfig/release/) |  | No | Yes |  |
 | FreeType | [2.7.1](http://download.savannah.gnu.org/releases/freetype) |  | No |  |  |
 | GCC |  | [4.7+](https://gcc.gnu.org/) |  |  |  |
 | HarfBuzz-NG |  |  |  |  |  |
 | libdmg-hfsplus | | | | | |
-| libevent | [2.1.11-stable](https://github.com/libevent/libevent/releases) | 2.0.22 | No |  |  |
+| libevent | [2.1.12-stable](https://github.com/libevent/libevent/releases) | 2.0.22 | No |  |  |
 | libICE    | 1.0.9  | | | | |
 | libjpeg |  |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L75) |
 | libpng |  |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L74) |
@@ -36,7 +36,7 @@ These are the dependencies currently used by Raven Core. You can find instructio
 | protobuf | [2.6.1](https://github.com/google/protobuf/releases) |  | No |  |  |
 | Python (tests) |  | [3.4](https://www.python.org/downloads) |  |  |  |
 | qrencode | [3.4.4](https://fukuchi.org/works/qrencode) |  | No |  |  |
-| Qt | [5.12.10](https://download.qt.io/official_releases/qt/) | 4.7+ | No |  |  |
+| Qt | [5.12.11](https://download.qt.io/official_releases/qt/) | 4.7+ | No |  |  |
 | XCB | 1.10 |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L94) (Linux only) |
 | xkbcommon | 0.8.4 |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L93) (Linux only) |
 | ZeroMQ | [4.1.5](https://github.com/zeromq/libzmq/releases) |  | No |  |  |

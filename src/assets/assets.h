@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -549,7 +549,7 @@ bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::str
 #endif
 
 /** Helper method for extracting address bytes, asset name and amount from an asset script */
-bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount);
+bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, int& nScriptType, std::string &assetName, CAmount &assetAmount);
 
 /** Helper method for extracting #TAGS from a verifier string */
 void ExtractVerifierStringQualifiers(const std::string& verifier, std::set<std::string>& qualifiers);

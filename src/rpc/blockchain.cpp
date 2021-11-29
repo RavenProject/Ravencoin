@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -1504,6 +1504,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     BIP9SoftForkDescPushBack(bip9_softforks, "transfer_script", consensusParams, Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE);
     BIP9SoftForkDescPushBack(bip9_softforks, "enforce", consensusParams, Consensus::DEPLOYMENT_ENFORCE_VALUE);
     BIP9SoftForkDescPushBack(bip9_softforks, "coinbase", consensusParams, Consensus::DEPLOYMENT_COINBASE_ASSETS);
+    BIP9SoftForkDescPushBack(bip9_softforks, "p2sh_assets", consensusParams, Consensus::DEPLOYMENT_P2SH_ASSETS);
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
 

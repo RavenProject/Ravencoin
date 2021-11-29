@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -120,64 +120,6 @@ static bool ThreadSafeMessageBox(RavenGUI *gui, const std::string& message, cons
 RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *networkStyle, QWidget *parent) :
     QMainWindow(parent),
     enableWallet(false),
-    clientModel(0),
-    walletFrame(0),
-    unitDisplayControl(0),
-    labelWalletEncryptionIcon(0),
-    labelWalletHDStatusIcon(0),
-    connectionsControl(0),
-    labelBlocksIcon(0),
-    progressBarLabel(0),
-    progressBar(0),
-    progressDialog(0),
-    appMenuBar(0),
-    overviewAction(0),
-    historyAction(0),
-    quitAction(0),
-    sendCoinsAction(0),
-    sendCoinsMenuAction(0),
-    usedSendingAddressesAction(0),
-    usedReceivingAddressesAction(0),
-    signMessageAction(0),
-    verifyMessageAction(0),
-    aboutAction(0),
-    receiveCoinsAction(0),
-    receiveCoinsMenuAction(0),
-    optionsAction(0),
-    toggleHideAction(0),
-    encryptWalletAction(0),
-    backupWalletAction(0),
-    changePassphraseAction(0),
-    getMyWordsAction(0),
-    aboutQtAction(0),
-    openRPCConsoleAction(0),
-    openWalletRepairAction(0),
-    openAction(0),
-    showHelpMessageAction(0),
-    transferAssetAction(0),
-    createAssetAction(0),
-    manageAssetAction(0),
-    messagingAction(0),
-    votingAction(0),
-    restrictedAssetAction(0),
-    headerWidget(0),
-    labelCurrentMarket(0),
-    labelCurrentPrice(0),
-    comboRvnUnit(0),
-    pricingTimer(0),
-    networkManager(0),
-    request(0),
-    labelVersionUpdate(0),
-    networkVersionManager(0),
-    versionRequest(0),
-    trayIcon(0),
-    trayIconMenu(0),
-    notificator(0),
-    rpcConsole(0),
-    helpMessageDialog(0),
-    modalOverlay(0),
-    prevBlocks(0),
-    spinnerFrame(0),
     platformStyle(_platformStyle)
 
 {
@@ -425,21 +367,21 @@ void RavenGUI::createActions()
     tabGroup->addAction(historyAction);
 
     /** RVN START */
-    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
-    transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
-    transferAssetAction->setToolTip(transferAssetAction->statusTip());
-    transferAssetAction->setCheckable(true);
-    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
-    transferAssetAction->setFont(font);
-    tabGroup->addAction(transferAssetAction);
-
     createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
     createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
     createAssetAction->setToolTip(createAssetAction->statusTip());
     createAssetAction->setCheckable(true);
-    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     createAssetAction->setFont(font);
     tabGroup->addAction(createAssetAction);
+
+    transferAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_transfer_selected", ":/icons/asset_transfer"), tr("&Transfer Assets"), this);
+    transferAssetAction->setStatusTip(tr("Transfer assets to RVN addresses"));
+    transferAssetAction->setToolTip(transferAssetAction->statusTip());
+    transferAssetAction->setCheckable(true);
+    transferAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    transferAssetAction->setFont(font);
+    tabGroup->addAction(transferAssetAction);
 
     manageAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_manage_selected", ":/icons/asset_manage"), tr("&Manage Assets"), this);
     manageAssetAction->setStatusTip(tr("Manage assets you are the administrator of"));
@@ -453,7 +395,7 @@ void RavenGUI::createActions()
     messagingAction->setStatusTip(tr("Coming Soon"));
     messagingAction->setToolTip(messagingAction->statusTip());
     messagingAction->setCheckable(true);
-    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+//    messagingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
     messagingAction->setFont(font);
     tabGroup->addAction(messagingAction);
 
@@ -461,7 +403,7 @@ void RavenGUI::createActions()
     votingAction->setStatusTip(tr("Coming Soon"));
     votingAction->setToolTip(votingAction->statusTip());
     votingAction->setCheckable(true);
-    votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    // votingAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_V));
     votingAction->setFont(font);
     tabGroup->addAction(votingAction);
 
@@ -469,7 +411,7 @@ void RavenGUI::createActions()
     restrictedAssetAction->setStatusTip(tr("Manage restricted assets"));
     restrictedAssetAction->setToolTip(restrictedAssetAction->statusTip());
     restrictedAssetAction->setCheckable(true);
-//    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_9));
+    restrictedAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
     restrictedAssetAction->setFont(font);
     tabGroup->addAction(restrictedAssetAction);
 
@@ -639,36 +581,54 @@ void RavenGUI::createToolBars()
 {
     if(walletFrame)
     {
+        QSettings settings;
+        bool IconsOnly = settings.value("fToolbarIconsOnly", false).toBool();
+
         /** RVN START */
-        // Create the orange background and the vertical tool bar
+        // Create the background and the vertical tool bar
         QWidget* toolbarWidget = new QWidget();
 
         QString widgetStyleSheet = ".QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
 
         toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightBlueColor().name(), platformStyle->DarkBlueColor().name()));
 
-        QLabel* label = new QLabel();
-        label->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
-        label->setContentsMargins(0,0,0,50);
-        label->setStyleSheet(".QLabel{background-color: transparent;}");
+        labelToolbar = new QLabel();
+        labelToolbar->setContentsMargins(0,0,0,50);
+        labelToolbar->setAlignment(Qt::AlignLeft);
+
+        if(IconsOnly) {
+            labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+        }
+        else {
+            labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
+        }
+        labelToolbar->setStyleSheet(".QLabel{background-color: transparent;}");
+
         /** RVN END */
 
-        QToolBar *toolbar = new QToolBar();
-        toolbar->setStyle(style());
-        toolbar->setMinimumWidth(label->width());
-        toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
-        toolbar->setMovable(false);
-        toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        toolbar->addAction(overviewAction);
-        toolbar->addAction(sendCoinsAction);
-        toolbar->addAction(receiveCoinsAction);
-        toolbar->addAction(historyAction);
-        toolbar->addAction(createAssetAction);
-        toolbar->addAction(transferAssetAction);
-        toolbar->addAction(manageAssetAction);
-//        toolbar->addAction(messagingAction);
-//        toolbar->addAction(votingAction);
-        toolbar->addAction(restrictedAssetAction);
+        m_toolbar = new QToolBar();
+        m_toolbar->setStyle(style());
+        m_toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
+        m_toolbar->setMovable(false);
+
+        if(IconsOnly) {
+            m_toolbar->setMaximumWidth(65);
+            m_toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        }
+        else {
+            m_toolbar->setMinimumWidth(labelToolbar->width());
+            m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        }
+        m_toolbar->addAction(overviewAction);
+        m_toolbar->addAction(sendCoinsAction);
+        m_toolbar->addAction(receiveCoinsAction);
+        m_toolbar->addAction(historyAction);
+        m_toolbar->addAction(createAssetAction);
+        m_toolbar->addAction(transferAssetAction);
+        m_toolbar->addAction(manageAssetAction);
+//        m_toolbar->addAction(messagingAction);
+//        m_toolbar->addAction(votingAction);
+        m_toolbar->addAction(restrictedAssetAction);
 
         QString openSansFontString = "font: normal 22pt \"Open Sans\";";
         QString normalString = "font: normal 22pt \"Arial\";";
@@ -687,22 +647,22 @@ void RavenGUI::createToolBars()
                                ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
                                ".QToolButton:disabled {color: gray;}";
 
-        toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
+        m_toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
                                                 platformStyle->ToolBarSelectedTextColor().name(),
                                                 platformStyle->DarkOrangeColor().name(), stringToUse));
 
-        toolbar->setOrientation(Qt::Vertical);
-        toolbar->setIconSize(QSize(40, 40));
+        m_toolbar->setOrientation(Qt::Vertical);
+        m_toolbar->setIconSize(QSize(40, 40));
 
-        QLayout* lay = toolbar->layout();
+        QLayout* lay = m_toolbar->layout();
         for(int i = 0; i < lay->count(); ++i)
             lay->itemAt(i)->setAlignment(Qt::AlignLeft);
 
         overviewAction->setChecked(true);
 
         QVBoxLayout* ravenLabelLayout = new QVBoxLayout(toolbarWidget);
-        ravenLabelLayout->addWidget(label);
-        ravenLabelLayout->addWidget(toolbar);
+        ravenLabelLayout->addWidget(labelToolbar);
+        ravenLabelLayout->addWidget(m_toolbar);
         ravenLabelLayout->setDirection(QBoxLayout::TopToBottom);
         ravenLabelLayout->addStretch(1);
 
@@ -952,6 +912,20 @@ void RavenGUI::createToolBars()
     }
 }
 
+void RavenGUI::updateIconsOnlyToolbar(bool IconsOnly)
+{
+    if(IconsOnly) {
+        labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+        m_toolbar->setMaximumWidth(65);
+        m_toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    }
+    else {
+        labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/ravencointext")));
+        m_toolbar->setMinimumWidth(labelToolbar->width());
+        m_toolbar->setMaximumWidth(255);
+        m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);        
+    }
+}
 void RavenGUI::setClientModel(ClientModel *_clientModel)
 {
     this->clientModel = _clientModel;
@@ -999,6 +973,10 @@ void RavenGUI::setClientModel(ClientModel *_clientModel)
 
             // Init the currency display from settings
             this->onCurrencyChange(optionsModel->getDisplayCurrencyIndex());
+
+            // Signal to update toolbar on iconsonly checkbox clicked.
+            connect(optionsModel, SIGNAL(updateIconsOnlyToolbar(bool)), this, SLOT(updateIconsOnlyToolbar(bool)));
+
         }
     } else {
         // Disable possibility to show main window via action

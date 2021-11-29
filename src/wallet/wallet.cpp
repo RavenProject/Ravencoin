@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -38,6 +38,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
+#include <random>
 #include <tinyformat.h>
 
 #include "assets/assets.h"
@@ -109,9 +110,10 @@ public:
 
     void Process(const CScript &script) {
         txnouttype type;
+        txnouttype scriptType;
         std::vector<CTxDestination> vDest;
         int nRequired;
-        if (ExtractDestinations(script, type, vDest, nRequired)) {
+        if (ExtractDestinations(script, type, scriptType, vDest, nRequired)) {
             for (const CTxDestination &dest : vDest)
                 boost::apply_visitor(*this, dest);
         }
@@ -1622,45 +1624,6 @@ int64_t CWalletTx::GetTxTime() const
     return n ? n : nTimeReceived;
 }
 
-int CWalletTx::GetRequestCount() const
-{
-    // Returns -1 if it wasn't being tracked
-    int nRequests = -1;
-    {
-        LOCK(pwallet->cs_wallet);
-        if (IsCoinBase())
-        {
-            // Generated block
-            if (!hashUnset())
-            {
-                std::map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
-                if (mi != pwallet->mapRequestCount.end())
-                    nRequests = (*mi).second;
-            }
-        }
-        else
-        {
-            // Did anyone request this transaction?
-            std::map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(GetHash());
-            if (mi != pwallet->mapRequestCount.end())
-            {
-                nRequests = (*mi).second;
-
-                // How about the block it's in?
-                if (nRequests == 0 && !hashUnset())
-                {
-                    std::map<uint256, int>::const_iterator _mi = pwallet->mapRequestCount.find(hashBlock);
-                    if (_mi != pwallet->mapRequestCount.end())
-                        nRequests = (*_mi).second;
-                    else
-                        nRequests = 1; // If it's in someone else's block it must have got out
-                }
-            }
-        }
-    }
-    return nRequests;
-}
-
 void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
                            std::list<COutputEntry>& listSent, CAmount& nFee, std::string& strSentAccount, const isminefilter& filter) const {
 
@@ -2423,8 +2386,9 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
             for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
 
                 int nType;
+                int nScriptType;
                 bool fIsOwner;
-                bool isAssetScript = pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner);
+                bool isAssetScript = pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner);
                 if (coinControl && !isAssetScript && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint((*it).first, i)))
                     continue;
 
@@ -2749,7 +2713,7 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
     std::vector<CInputCoin> vValue;
     CAmount nTotalLower = 0;
 
-    random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+    Shuffle(vCoins.begin(), vCoins.end(), FastRandomContext());
 
     for (const COutput &output : vCoins)
     {
@@ -2952,7 +2916,7 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
     std::map<COutPoint, CAmount> mapValueAmount;
     CAmount nTotalLower = 0;
 
-    random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+    Shuffle(vCoins.begin(), vCoins.end(), FastRandomContext());
     #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
     for (const COutput &output : vCoins)
     {
@@ -2973,9 +2937,10 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
 
         //-------------------------------
 
-        int nType = -1;
+        int nType = 0;
+        int nScriptType = 0;
         bool fIsOwner = false;
-        if (!coin.txout.scriptPubKey.IsAssetScript(nType, fIsOwner)) {
+        if (!coin.txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner)) {
             continue;
         }
 
@@ -3871,9 +3836,6 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CCon
                 NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);
             }
         }
-
-        // Track how many getdata requests our transaction gets
-        mapRequestCount[wtxNew.GetHash()] = 0;
 
         if (fBroadcastTransactions)
         {

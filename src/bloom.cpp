@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -166,8 +166,9 @@ bool CBloomFilter::IsRelevantAndUpdate(const CTransaction& tx)
                 else if ((nFlags & BLOOM_UPDATE_MASK) == BLOOM_UPDATE_P2PUBKEY_ONLY)
                 {
                     txnouttype type;
+                    txnouttype scriptType;
                     std::vector<std::vector<unsigned char> > vSolutions;
-                    if (Solver(txout.scriptPubKey, type, vSolutions) &&
+                    if (Solver(txout.scriptPubKey, type, scriptType, vSolutions) &&
                             (type == TX_PUBKEY || type == TX_MULTISIG))
                         insert(COutPoint(hash, i));
                 }

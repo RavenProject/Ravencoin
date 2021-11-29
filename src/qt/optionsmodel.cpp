@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -69,6 +69,10 @@ void OptionsModel::Init(bool resetSettings)
     if (!settings.contains("fMinimizeOnClose"))
         settings.setValue("fMinimizeOnClose", false);
     fMinimizeOnClose = settings.value("fMinimizeOnClose").toBool();
+
+    if (!settings.contains("fToolbarIconsOnly"))
+        settings.setValue("fToolbarIconsOnly", false);
+    fToolbarIconsOnly = settings.value("fToolbarIconsOnly").toBool();
 
     // Display
     if (!settings.contains("nDisplayUnit"))
@@ -232,6 +236,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
             return fHideTrayIcon;
         case MinimizeToTray:
             return fMinimizeToTray;
+        case ToolbarIconsOnly:
+            return fToolbarIconsOnly;
         case MapPortUPnP:
 #ifdef USE_UPNP
             return settings.value("fUseUPnP");
@@ -322,6 +328,11 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case MinimizeToTray:
             fMinimizeToTray = value.toBool();
             settings.setValue("fMinimizeToTray", fMinimizeToTray);
+            break;
+        case ToolbarIconsOnly:
+            fToolbarIconsOnly = value.toBool();
+            settings.setValue("fToolbarIconsOnly", fToolbarIconsOnly);
+            Q_EMIT updateIconsOnlyToolbar(fToolbarIconsOnly);
             break;
         case MapPortUPnP: // core option - can be changed on-the-fly
             settings.setValue("fUseUPnP", value.toBool());

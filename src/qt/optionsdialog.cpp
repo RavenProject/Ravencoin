@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -216,6 +216,7 @@ void OptionsDialog::setMapper()
     mapper->addMapping(ui->currencyUnitIndex, OptionsModel::DisplayCurrencyIndex);
     mapper->addMapping(ui->thirdPartyTxUrls, OptionsModel::ThirdPartyTxUrls);
     mapper->addMapping(ui->ipfsUrl, OptionsModel::IpfsUrl);
+    mapper->addMapping(ui->toolbarIconsOnly, OptionsModel::ToolbarIconsOnly);
 }
 
 void OptionsDialog::setOkButtonState(bool fState)

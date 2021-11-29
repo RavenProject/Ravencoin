@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -161,7 +161,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nTimeout = 1628877600; // UTC: Fri Aug 13 2021 18:00:00
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideMinerConfirmationWindow = 2016;
-
+	consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].bit = 11;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nStartTime = 1682956800; // UTC: Mon Mai 01 2023 18:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nTimeout = 1714579200; // UTC: Wed Mai 01 2024 18:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideRuleChangeActivationThreshold = 2016; // 100% required, hardly happens
+//        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideMinerConfirmationWindow = 2016;
+	    
 
         // The best chain should have at least this much work
         consensus.nMinimumChainWork = uint256S("000000000000000000000000000000000000000000000020d4ac871fb7009b63"); // Block 1186833
@@ -215,7 +221,8 @@ public:
                 { 740000, uint256S("0x00000000000027d11bf1e7a3b57d3c89acc1722f39d6e08f23ac3a07e16e3172")},
                 { 909251, uint256S("0x000000000000694c9a363eff06518aa7399f00014ce667b9762f9a4e7a49f485")},
                 { 1040000, uint256S("0x000000000000138e2690b06b1ddd8cf158c3a5cf540ee5278debdcdffcf75839")},
-                { 1186833, uint256S("0x0000000000000d4840d4de1f7d943542c2aed532bd5d6527274fc0142fa1a410")}
+                { 1186833, uint256S("0x0000000000000d4840d4de1f7d943542c2aed532bd5d6527274fc0142fa1a410")},
+                { 1610000, uint256S("0x000000000001f1a67604ace3320cf722039f1b706b46a4d95e1d8502729b3046")}
             }
         };
 
@@ -323,6 +330,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nTimeout = 1628877600; // UTC: Fri Aug 13 2021 18:00:00
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideMinerConfirmationWindow = 2016;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].bit = 11;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nStartTime = 1619971200; // UTC: Sun May 02 2021 18:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nTimeout = 1651507200; // UTC: Mon May 02 2022 18:00:00
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideMinerConfirmationWindow = 2016;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000168050db560b4");
@@ -436,7 +448,8 @@ public:
                     { 225, uint256S("0x000003465e3e0167322eb8269ce91246bbc211e293bc5fbf6f0a0d12c1ccb363")},
                     {223408, uint256S("0x000000012a0c09dd6456ab19018cc458648dec762b04f4ddf8ef8108eae69db9")},
                     {232980, uint256S("0x000000007b16ae547fce76c3308dbeec2090cde75de74ab5dfcd6f60d13f089b")},
-                    {257610, uint256S("0x000000006272208605c4df3b54d4d5515759105e7ffcb258e8cd8077924ffef1")}
+                    {257610, uint256S("0x000000006272208605c4df3b54d4d5515759105e7ffcb258e8cd8077924ffef1")},
+                    {587000, uint256S("0x000000040ca00d88c1c3be8fb298365304a6fa13af95b8fa2a689ad6736e37f6")}
             }
         };
 
@@ -531,8 +544,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].bit = 8;
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nTimeout = 999999999999ULL;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideRuleChangeActivationThreshold = 208;
-        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideMinerConfirmationWindow = 288;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideRuleChangeActivationThreshold = 108;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_SCRIPT_SIZE].nOverrideMinerConfirmationWindow = 144;
         consensus.vDeployments[Consensus::DEPLOYMENT_ENFORCE_VALUE].bit = 9;
         consensus.vDeployments[Consensus::DEPLOYMENT_ENFORCE_VALUE].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ENFORCE_VALUE].nTimeout = 999999999999ULL;
@@ -543,6 +556,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nTimeout = 999999999999ULL;
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideRuleChangeActivationThreshold = 400;
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideMinerConfirmationWindow = 500;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].bit = 11;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nTimeout = 999999999999ULL;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideRuleChangeActivationThreshold = 108;
+        consensus.vDeployments[Consensus::DEPLOYMENT_P2SH_ASSETS].nOverrideMinerConfirmationWindow = 144;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");

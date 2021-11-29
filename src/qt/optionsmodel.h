@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -31,6 +31,7 @@ public:
         StartAtStartup,         // bool
         HideTrayIcon,           // bool
         MinimizeToTray,         // bool
+        ToolbarIconsOnly,       // bool
         MapPortUPnP,            // bool
         MinimizeOnClose,        // bool
         ProxyUse,               // bool
@@ -88,6 +89,7 @@ private:
     bool fHideTrayIcon;
     bool fMinimizeToTray;
     bool fMinimizeOnClose;
+    bool fToolbarIconsOnly;
     QString language;
     int nDisplayUnit;
     int nDisplayCurrencyIndex;
@@ -112,6 +114,7 @@ Q_SIGNALS:
     void coinControlFeaturesChanged(bool);
     void customFeeFeaturesChanged(bool);
     void hideTrayIconChanged(bool);
+    void updateIconsOnlyToolbar(bool);
 };
 
 #endif // RAVEN_QT_OPTIONSMODEL_H

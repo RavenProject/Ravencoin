@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -1882,20 +1882,30 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         std::string assetName;
                         CAmount assetAmount;
                         uint160 hashBytes;
+                        int nScriptType;
 
-                        if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
-//                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
+                        if (ParseAssetScript(out.scriptPubKey, hashBytes, nScriptType, assetName, assetAmount)) {
+
+                            if (nScriptType == TX_PUBKEYHASH) {
+//                                std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
 //                                      << ", " << i << ", " << hash.GetHex() << ", " << k << ", " << "true" << ", " << assetAmount << std::endl;
 
-                            // undo receiving activity
-                            addressIndex.push_back(std::make_pair(
-                                    CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, k,
-                                                     false), assetAmount));
+                                // undo receiving activity
+                                addressIndex.push_back(std::make_pair(
+                                        CAddressIndexKey(1, hashBytes, assetName, pindex->nHeight, i, hash, k,
+                                                         false), assetAmount));
 
-                            // undo unspent index
-                            addressUnspentIndex.push_back(
-                                    std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), assetName, hash, k),
-                                                   CAddressUnspentValue()));
+                                // undo unspent index
+                                addressUnspentIndex.push_back(
+                                        std::make_pair(CAddressUnspentKey(1, hashBytes, assetName, hash, k),
+                                                       CAddressUnspentValue()));
+                            } else if (nScriptType == TX_SCRIPTHASH) {
+                                // undo receiving activity
+                                addressIndex.push_back(std::make_pair(CAddressIndexKey(2, hashBytes, assetName, pindex->nHeight, i, hash, k, false), assetAmount));
+
+                                // undo unspent index
+                                addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, hashBytes, assetName, hash, k), CAddressUnspentValue()));
+                            }
                         } else {
                             continue;
                         }
@@ -2211,21 +2221,31 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                             std::string assetName;
                             CAmount assetAmount;
                             uint160 hashBytes;
+                            int nScriptType;
 
-                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
+                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, nScriptType, assetName, assetAmount)) {
+                                if (nScriptType == TX_PUBKEYHASH) {
 //                                std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
 //                                          << ", " << i << ", " << hash.GetHex() << ", " << j << ", " << "true" << ", " << assetAmount * -1 << std::endl;
 
-                                // undo spending activity
-                                addressIndex.push_back(std::make_pair(
-                                        CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, j,
-                                                         true), assetAmount * -1));
+                                    // undo spending activity
+                                    addressIndex.push_back(std::make_pair(
+                                            CAddressIndexKey(1, hashBytes, assetName, pindex->nHeight, i, hash,
+                                                             j,
+                                                             true), assetAmount * -1));
 
-                                // restore unspent index
-                                addressUnspentIndex.push_back(std::make_pair(
-                                        CAddressUnspentKey(1, uint160(hashBytes), assetName, input.prevout.hash,
-                                                           input.prevout.n),
-                                        CAddressUnspentValue(assetAmount, prevout.scriptPubKey, undo.nHeight)));
+                                    // restore unspent index
+                                    addressUnspentIndex.push_back(std::make_pair(
+                                            CAddressUnspentKey(1, hashBytes, assetName, input.prevout.hash,
+                                                               input.prevout.n),
+                                            CAddressUnspentValue(assetAmount, prevout.scriptPubKey, undo.nHeight)));
+                                } else if (nScriptType == TX_SCRIPTHASH) {
+                                    // undo spending activity
+                                    addressIndex.push_back(std::make_pair(CAddressIndexKey(2, hashBytes, assetName, pindex->nHeight, i, hash, j, true), assetAmount * -1));
+
+                                    // restore unspent index
+                                    addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, hashBytes, assetName, input.prevout.hash, input.prevout.n), CAddressUnspentValue(assetAmount, prevout.scriptPubKey, undo.nHeight)));
+                                }
                             } else {
                                 continue;
                             }
@@ -2577,6 +2597,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                     bool isAsset = false;
                     std::string assetName;
                     CAmount assetAmount;
+                    int nScriptType = 0;
 
                     if (prevout.scriptPubKey.IsPayToScriptHash()) {
                         hashBytes = uint160(std::vector <unsigned char>(prevout.scriptPubKey.begin()+2, prevout.scriptPubKey.begin()+22));
@@ -2593,8 +2614,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                             hashBytes.SetNull();
                             addressType = 0;
 
-                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
-                                addressType = 1;
+                            if (ParseAssetScript(prevout.scriptPubKey, hashBytes, nScriptType, assetName, assetAmount)) {
+                                if (nScriptType == TX_PUBKEYHASH) {
+                                    addressType = 1;
+                                } else if (nScriptType == TX_SCRIPTHASH) {
+                                    addressType = 2;
+                                }
+
                                 isAsset = true;
                             }
                         }
@@ -2689,19 +2715,26 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         std::string assetName;
                         CAmount assetAmount;
                         uint160 hashBytes;
+                        int nScriptType;
+                        int addressType = 0;
 
-                        if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
+                        if (ParseAssetScript(out.scriptPubKey, hashBytes, nScriptType, assetName, assetAmount)) {
+                            if (nScriptType == TX_PUBKEYHASH) {
+                                addressType = 1;
+                            } else if (nScriptType == TX_SCRIPTHASH) {
+                                addressType = 2;
+                            }
 //                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
 //                                      << ", " << i << ", " << txhash.GetHex() << ", " << k << ", " << "true" << ", " << assetAmount << std::endl;
 
                             // record receiving activity
                             addressIndex.push_back(std::make_pair(
-                                    CAddressIndexKey(1, hashBytes, assetName, pindex->nHeight, i, txhash, k, false),
+                                    CAddressIndexKey(addressType, hashBytes, assetName, pindex->nHeight, i, txhash, k, false),
                                     assetAmount));
 
                             // record unspent output
                             addressUnspentIndex.push_back(
-                                    std::make_pair(CAddressUnspentKey(1, hashBytes, assetName, txhash, k),
+                                    std::make_pair(CAddressUnspentKey(addressType, hashBytes, assetName, txhash, k),
                                                    CAddressUnspentValue(assetAmount, out.scriptPubKey,
                                                                         pindex->nHeight)));
                         }
@@ -4905,9 +4938,9 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
         if (!ReadBlockFromDisk(block, pindex, chainparams.GetConsensus()))
             return error("VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
         // check level 1: verify block validity
-        bool fCheckPoW = true;
-        bool fCheckMerkleRoot = true;
-        bool fDBCheck = true;
+        const bool fCheckPoW = true;
+        const bool fCheckMerkleRoot = true;
+        const bool fDBCheck = true;
         if (nCheckLevel >= 1 && !CheckBlock(block, state, chainparams.GetConsensus(), fCheckPoW, fCheckMerkleRoot, fDBCheck)) // fCheckAssetDuplicate set to false, because we don't want to fail because the asset exists in our database, when loading blocks from our asset databse
             return error("%s: *** found bad block at %d, hash=%s (%s)\n", __func__,
                          pindex->nHeight, pindex->GetBlockHash().ToString(), FormatStateMessage(state));
@@ -5834,6 +5867,15 @@ bool IsRestrictedActive(unsigned int nBlockNumber)
     } else {
         return AreRestrictedAssetsDeployed();
     }
+}
+
+bool AreP2SHAssetsAllowed()
+{
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_P2SH_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        return true;
+
+    return false;
 }
 
 CAssetsCache* GetCurrentAssetCache()

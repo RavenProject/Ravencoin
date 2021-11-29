@@ -1,5 +1,5 @@
 // Copyright (c) 2017-2017 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -653,11 +653,19 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
     int i = 0;
     for (const auto& txout : tx.vout) {
         i++;
-        bool fIsAsset = false;
+
+        // Values are subject to change, by isAssetScript a few lines down.
         int nType = 0;
+        int nScriptType = 0;
+        int nStart = 0;
         bool fIsOwner = false;
-        if (txout.scriptPubKey.IsAssetScript(nType, fIsOwner))
-            fIsAsset = true;
+
+        // False until BIP9 consensus activates P2SH for Assets.
+        bool fP2Active = AreP2SHAssetsAllowed();
+
+        // Returns true if operations on assets are found in the script.
+        // It will also possibly change the values of the arguments, as they are passed by reference.
+        bool fIsAsset = txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStart, fP2Active);
 
         if (assetCache) {
             if (fIsAsset && !AreAssetsDeployed())
@@ -687,7 +695,8 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             CAssetTransfer transfer;
             std::string address = "";
             if (!TransferAssetFromScript(txout.scriptPubKey, transfer, address))
-                return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize", false, "", tx.GetHash());
+                return state.DoS(100, false, REJECT_INVALID, "bad-tx-asset-transfer-bad-deserialize", false, "",
+                                 tx.GetHash());
 
             if (!ContextualCheckTransferAsset(assetCache, transfer, address, strError))
                 return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
@@ -828,8 +837,9 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
         } else {
             for (auto out : tx.vout) {
                 int nType;
+                int nScriptType;
                 bool _isOwner;
-                if (out.scriptPubKey.IsAssetScript(nType, _isOwner)) {
+                if (out.scriptPubKey.IsAssetScript(nType, nScriptType, _isOwner)) {
                     if (nType != TX_TRANSFER_ASSET) {
                         return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-transaction", false, "", tx.GetHash());
                     }

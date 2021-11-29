@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 The Raven Core developers
+// Copyright (c) 2018-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -216,7 +216,7 @@ bool ScanForMessageChannels(std::string& strError)
             }
 
             for (auto out : ptx->vout) {
-                int nType = -1;
+                int nType = 0;
                 bool fOwner = false;
                 if (vpwallets[0]->IsMine(out) == ISMINE_SPENDABLE) { // Is the out mine
                     if (out.scriptPubKey.IsAssetScript(nType, fOwner)) {

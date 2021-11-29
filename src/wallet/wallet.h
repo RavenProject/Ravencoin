@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -194,6 +194,7 @@ struct COutputEntry
 struct CAssetOutputEntry
 {
     txnouttype type;
+    txnouttype scriptType;
     std::string assetName;
     CTxDestination destination;
     CAmount nAmount;
@@ -490,7 +491,6 @@ public:
     bool IsTrusted() const;
 
     int64_t GetTxTime() const;
-    int GetRequestCount() const;
 
     // RelayWalletTransaction may only be called if fBroadcastTransactions!
     bool RelayWalletTransaction(CConnman* connman);
@@ -827,7 +827,6 @@ public:
 
     int64_t nOrderPosNext;
     uint64_t nAccountingEntryNumber;
-    std::map<uint256, int> mapRequestCount;
 
     std::map<CTxDestination, CAddressBookData> mapAddressBook;
 
@@ -1097,16 +1096,6 @@ public:
     bool DelAddressBook(const CTxDestination& address);
 
     const std::string& GetAccountName(const CScript& scriptPubKey) const;
-
-    void Inventory(const uint256 &hash) override
-    {
-        {
-            LOCK(cs_wallet);
-            std::map<uint256, int>::iterator mi = mapRequestCount.find(hash);
-            if (mi != mapRequestCount.end())
-                (*mi).second++;
-        }
-    }
 
     void GetScriptForMining(std::shared_ptr<CReserveScript> &script); // override;
     
