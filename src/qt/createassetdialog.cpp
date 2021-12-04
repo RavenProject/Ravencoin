@@ -38,6 +38,8 @@
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
 #include <QCompleter>
+#include <QUrl>
+#include <QDesktopServices>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
 #define QTversionPreFiveEleven
@@ -51,6 +53,7 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
     ui->setupUi(this);
     setWindowTitle("Create Assets");
     connect(ui->ipfsBox, SIGNAL(clicked()), this, SLOT(ipfsStateChanged()));
+    connect(ui->openIpfsButton, SIGNAL(clicked()), this, SLOT(openIpfsBrowser()));
     connect(ui->availabilityButton, SIGNAL(clicked()), this, SLOT(checkAvailabilityClicked()));
     connect(ui->nameText, SIGNAL(textChanged(QString)), this, SLOT(onNameChanged(QString)));
     connect(ui->addressText, SIGNAL(textChanged(QString)), this, SLOT(onAddressNameChanged(QString)));
@@ -264,6 +267,8 @@ void CreateAssetDialog::setUpValues()
     ui->unitBox->setValue(0);
     ui->reissuableBox->setCheckState(Qt::CheckState::Checked);
     ui->ipfsText->hide();
+    ui->openIpfsButton->hide();
+    ui->openIpfsButton->setDisabled(true);
     hideMessage();
     CheckFormState();
     ui->availabilityButton->setDisabled(true);
@@ -432,12 +437,12 @@ void CreateAssetDialog::toggleIPFSText()
 {
     if (ui->ipfsBox->isChecked()) {
         ui->ipfsText->show();
+        ui->openIpfsButton->show();
     } else {
+        ui->openIpfsButton->hide();
         ui->ipfsText->hide();
         ui->ipfsText->clear();
     }
-
-    CheckFormState();
 }
 
 void CreateAssetDialog::showMessage(QString string)
@@ -492,6 +497,8 @@ void CreateAssetDialog::enableCreateButton()
 
 bool CreateAssetDialog::checkIPFSHash(QString hash)
 {
+    ui->openIpfsButton->setDisabled(true);
+
     if (!hash.isEmpty()) {
         std::string error;
         if (!CheckEncoded(DecodeAssetData(hash.toStdString()), error)) {
@@ -505,7 +512,8 @@ bool CreateAssetDialog::checkIPFSHash(QString hash)
             showMessage(tr("IPFS/Txid Hash must have size of 46 characters, or 64 hex characters"));
             disableCreateButton();
             return false;
-        } else if (DecodeAssetData(hash.toStdString()).empty()) {
+        }
+        else if (DecodeAssetData(hash.toStdString()).empty()) {
             showMessage(tr("IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash"));
             disableCreateButton();
             return false;
@@ -515,6 +523,8 @@ bool CreateAssetDialog::checkIPFSHash(QString hash)
     // No problems where found with the hash, reset the border, and hide the messages.
     hideMessage();
     ui->ipfsText->setStyleSheet("");
+    ui->openIpfsButton->setDisabled(false);
+    
 
     return true;
 }
@@ -523,6 +533,8 @@ void CreateAssetDialog::CheckFormState()
 {
     disableCreateButton(); // Disable the button by default
     hideMessage();
+    ui->openIpfsButton->setDisabled(true);
+    ui->availabilityButton->setDisabled(true);
 
     const CTxDestination dest = DecodeDestination(ui->addressText->text().toStdString());
 
@@ -540,7 +552,7 @@ void CreateAssetDialog::CheckFormState()
         }
     }
 
-    if (!assetNameValid && name.size() != 0) {
+    if (!assetNameValid && name.size() > 2) {
         ui->nameText->setStyleSheet(STYLE_INVALID);
         showMessage(error.c_str());
         ui->availabilityButton->setDisabled(true);
@@ -636,6 +648,26 @@ void CreateAssetDialog::checkAvailabilityClicked()
     }
 
     CheckFormState();
+}
+
+void CreateAssetDialog::openIpfsBrowser()
+{
+    QString ipfshash = ui->ipfsText->text();
+    QString ipfsbrowser = model->getOptionsModel()->getIpfsUrl();
+
+    // If the ipfs hash isn't there or doesn't start with Qm, disable the action item
+    if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0 && ipfsbrowser.indexOf("http") == 0)
+    {
+        QUrl ipfsurl = QUrl::fromUserInput(ipfsbrowser.replace("%s", ipfshash));
+
+        // Create the box with everything.
+        if(QMessageBox::Yes == QMessageBox::question(this,
+                                                        tr("Open IPFS content?"),
+                                                        tr("Open the following IPFS content in your default browser?\n")
+                                                        + ipfsurl.toString()
+                                                    ))
+        QDesktopServices::openUrl(ipfsurl);
+    }
 }
 
 void CreateAssetDialog::onNameChanged(QString name)
@@ -1440,6 +1472,7 @@ void CreateAssetDialog::clear()
     ui->reissuableBox->setChecked(true);
     ui->ipfsBox->setChecked(false);
     ui->ipfsText->hide();
+    ui->openIpfsButton->hide();
     ui->assetList->hide();
     ui->assetList->setCurrentIndex(0);
     type = 0;
