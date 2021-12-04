@@ -40,6 +40,8 @@
 #include <QStringListModel>
 #include <QSortFilterProxyModel>
 #include <QCompleter>
+#include <QUrl>
+#include <QDesktopServices>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 11, 0)
 #define QTversionPreFiveEleven
@@ -56,6 +58,7 @@ ReissueAssetDialog::ReissueAssetDialog(const PlatformStyle *_platformStyle, QWid
     connect(ui->comboBox, SIGNAL(activated(int)), this, SLOT(onAssetSelected(int)));
     connect(ui->quantitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(onQuantityChanged(double)));
     connect(ui->ipfsBox, SIGNAL(clicked()), this, SLOT(onIPFSStateChanged()));
+    connect(ui->openIpfsButton, SIGNAL(clicked()), this, SLOT(openIpfsBrowser()));
     connect(ui->ipfsText, SIGNAL(textChanged(QString)), this, SLOT(onIPFSHashChanged(QString)));
     connect(ui->addressText, SIGNAL(textChanged(QString)), this, SLOT(onAddressNameChanged(QString)));
     connect(ui->reissueAssetButton, SIGNAL(clicked()), this, SLOT(onReissueAssetClicked()));
@@ -277,6 +280,7 @@ void ReissueAssetDialog::setUpValues()
 
     ui->reissuableBox->setCheckState(Qt::CheckState::Checked);
     ui->ipfsText->setDisabled(true);
+    ui->openIpfsButton->setDisabled(true);
     hideMessage();
 
     ui->unitExampleLabel->setStyleSheet("font-weight: bold");
@@ -526,9 +530,14 @@ void ReissueAssetDialog::CheckFormState()
         }
     }
 
-    if (ui->ipfsBox->isChecked())
-        if (!checkIPFSHash(ui->ipfsText->text()))
+    if (ui->ipfsBox->isChecked()) {
+        if (!checkIPFSHash(ui->ipfsText->text())) {
+            ui->openIpfsButton->setDisabled(true);
             return;
+        }
+        else
+            ui->openIpfsButton->setDisabled(false);
+    }
 
     if (fReissuingRestricted) {
 
@@ -584,6 +593,8 @@ void ReissueAssetDialog::CheckFormState()
     enableReissueButton();
     hideMessage();
 }
+
+
 
 void ReissueAssetDialog::disableAll()
 {
@@ -850,6 +861,26 @@ void ReissueAssetDialog::onIPFSHashChanged(QString hash)
         CheckFormState();
 
     buildUpdatedData();
+}
+
+void ReissueAssetDialog::openIpfsBrowser()
+{
+    QString ipfshash = ui->ipfsText->text();
+    QString ipfsbrowser = model->getOptionsModel()->getIpfsUrl();
+
+    // If the ipfs hash isn't there or doesn't start with Qm, disable the action item
+    if (ipfshash.count() > 0 && ipfshash.indexOf("Qm") == 0 && ipfsbrowser.indexOf("http") == 0)
+    {
+        QUrl ipfsurl = QUrl::fromUserInput(ipfsbrowser.replace("%s", ipfshash));
+
+        // Create the box with everything.
+        if(QMessageBox::Yes == QMessageBox::question(this,
+                                                        tr("Open IPFS content?"),
+                                                        tr("Open the following IPFS content in your default browser?\n")
+                                                        + ipfsurl.toString()
+                                                    ))
+        QDesktopServices::openUrl(ipfsurl);
+    }
 }
 
 void ReissueAssetDialog::onAddressNameChanged(QString address)
