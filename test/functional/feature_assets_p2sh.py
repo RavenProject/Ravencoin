@@ -517,7 +517,7 @@ class AssetTest(RavenTestFramework):
 
         # Change the signature by changing a single hex character at index 25
         signature_list = list(asset_signature_hex)
-        if signature_list[mutate_location] is '0':
+        if signature_list[mutate_location] == '0':
             signature_list[mutate_location] = '1'
         else:
             signature_list[mutate_location] = '0'
