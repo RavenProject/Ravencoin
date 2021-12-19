@@ -3317,7 +3317,6 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     /** RVN END */
 
     {
-        CCoinsViewCache view(pcoinsTip);
         /** RVN START */
         // Create the empty asset cache, that will be sent into the connect block
         // All new data will be added to the cache, and will be flushed back into passets after a successful

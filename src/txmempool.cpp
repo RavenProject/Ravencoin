@@ -984,7 +984,7 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                     if (i != mapTx.end()) {
                         CValidationState state;
                         std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                        if (!setAlreadyRemoving.count(hash) && !Consensus::CheckTxAssets(i->GetTx(), state, pcoinsTip, passets, false, vReissueAssets)) {
+                        if (!setAlreadyRemoving.count(hash) && !Consensus::CheckTxAssets(i->GetTx(), state, pcoinsTip.get(), passets, false, vReissueAssets)) {
                             entries.push_back(&*i);
                             trans.emplace_back(i->GetTx());
                             setAlreadyRemoving.insert(hash);
