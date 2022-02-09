@@ -356,8 +356,10 @@ void WalletView::getMyWords()
 {
     // Create the box and set the default text.
     QMessageBox box;
-    box.setWindowTitle(tr("Recovery information"));
+    box.setWindowTitle(tr("Recovery information. (Will close after 5 min)"));
     box.setText(tr("No words available."));
+    box.setStandardButtons(QMessageBox::Close);
+    box.button(QMessageBox::Close)->animateClick(300000);
 
     // Check for HD-wallet and set text if not HD-wallet.
     if(!walletModel->hd44Enabled())
