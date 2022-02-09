@@ -253,20 +253,20 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Passphrase:</string>
+      <string>Seed Extension Word:</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QLineEdit" name="passphraseEdit">
         <property name="toolTip">
-         <string>You will need the Passphrase if your previous wallet used one.</string>
+         <string>The Seed Extension Word is like adding a password to your randomly generated seed phrase. If someone finds your written 12 word seed phrase, but you’ve chosen to use a Seed Extension Word, they will not be able to access your wallet.</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="passwordLabel">
         <property name="text">
-         <string>Enter the Passphrase from your previous wallet if it used one.</string>
+         <string>Enter the Seed Extension Word from your previous wallet (if it used one).</string>
         </property>
        </widget>
       </item>
@@ -304,8 +304,8 @@
      <item row="1" column="1">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Please continue to remember your 12 seed words and Passphrase before Accepting.
-They are not recoverable !!</string>
+        <string>Please continue to remember your 12 seed words and extension word before accepting.
+They are not recoverable!!</string>
        </property>
       </widget>
      </item>
