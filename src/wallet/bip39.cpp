@@ -22,7 +22,7 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
+#include <array>
 #include "wallet/bip39.h"
 #include "crypto/sha256.h"
 #include "random.h"
