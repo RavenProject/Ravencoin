@@ -368,7 +368,7 @@ void RavenGUI::createActions()
 
     /** RVN START */
     createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
-    createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
+    createAssetAction->setStatusTip(tr("Create new assets"));
     createAssetAction->setToolTip(createAssetAction->statusTip());
     createAssetAction->setCheckable(true);
     createAssetAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
@@ -1521,7 +1521,7 @@ void RavenGUI::checkAssets()
         transferAssetAction->setDisabled(false);
         transferAssetAction->setToolTip(tr("Transfer assets to RVN addresses"));
         createAssetAction->setDisabled(false);
-        createAssetAction->setToolTip(tr("Create new main/sub/unique assets"));
+        createAssetAction->setToolTip(tr("Create new assets"));
         manageAssetAction->setDisabled(false);
         }
     else {
