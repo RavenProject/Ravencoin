@@ -2303,8 +2303,6 @@ bool CConnman::Start(CScheduler& scheduler, const Options& connOptions)
 {
     Init(connOptions);
 
-    nTotalBytesRecv = 0;
-    nTotalBytesSent = 0;
     nMaxOutboundTotalBytesSentInCycle = 0;
     nMaxOutboundCycleStartTime = 0;
 
