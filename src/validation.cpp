@@ -2551,6 +2551,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         {
             CAmount txfee = 0;
             if (!Consensus::CheckTxInputs(tx, state, view, pindex->nHeight, txfee)) {
+                state.SetFailedTransaction(tx.GetHash());
                 return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
             }
             nFees += txfee;
@@ -4067,10 +4068,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
             fCheckBlock = CHECK_BLOCK_TRANSACTION_FALSE;
         }
 
-        if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock))
+        if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock)) {
+            state.SetFailedTransaction(tx.GetHash());
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(),
                                            state.GetDebugMessage(), state.GetRejectReason()));
+        }
     }
 
     unsigned int nSigOps = 0;
