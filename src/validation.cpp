@@ -4069,7 +4069,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
         }
 
         if (!CheckTransaction(*tx, state, fCheckDuplicates, fCheckMempool, fCheckBlock)) {
-            state.SetFailedTransaction(tx.GetHash());
+            state.SetFailedTransaction(tx->GetHash());
             return state.Invalid(false, state.GetRejectCode(), state.GetRejectReason(),
                                  strprintf("Transaction check failed (tx hash %s) %s %s", tx->GetHash().ToString(),
                                            state.GetDebugMessage(), state.GetRejectReason()));
