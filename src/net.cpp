@@ -2303,8 +2303,16 @@ bool CConnman::Start(CScheduler& scheduler, const Options& connOptions)
 {
     Init(connOptions);
 
-    nMaxOutboundTotalBytesSentInCycle = 0;
-    nMaxOutboundCycleStartTime = 0;
+    {
+        LOCK(cs_totalBytesRecv);
+        nTotalBytesRecv = 0;
+    }
+    {
+        LOCK(cs_totalBytesSent);
+        nTotalBytesSent = 0;
+        nMaxOutboundTotalBytesSentInCycle = 0;
+        nMaxOutboundCycleStartTime = 0;
+    }
 
     LogPrintf("Connection Manager: Start");
 
