@@ -197,7 +197,7 @@ struct CAssetOutputEntry
     txnouttype scriptType;
     std::string assetName;
     CTxDestination destination;
-    CAmount nAmount;
+    CAmount nAmount = 0;
     std::string message;
     int64_t expireTime;
     int vout;
@@ -336,7 +336,7 @@ public:
      * on this raven node, and set to 0 for transactions that were created
      * externally and came in through the network or sendrawtransaction RPC.
      */
-    char fFromMe;
+    bool fFromMe;
     std::string strFromAccount;
     int64_t nOrderPos; //!< position in ordered transaction list
 
@@ -407,7 +407,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         if (ser_action.ForRead())
             Init(nullptr);
-        char fSpent = false;
+        bool fSpent = false;
 
         if (!ser_action.ForRead())
         {
@@ -1079,6 +1079,7 @@ public:
     /** should probably be renamed to IsRelevantToMe */
     bool IsFromMe(const CTransaction& tx) const;
     CAmount GetDebit(const CTransaction& tx, const isminefilter& filter) const;
+    CAmount HasMyAssets(const CTransaction& tx) const;
     /** Returns whether all of the inputs match the filter */
     bool IsAllFromMe(const CTransaction& tx, const isminefilter& filter) const;
     CAmount GetCredit(const CTransaction& tx, const isminefilter& filter) const;

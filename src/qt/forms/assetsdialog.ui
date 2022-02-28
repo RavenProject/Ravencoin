@@ -20,19 +20,19 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <property name="spacing">
-      <number>34</number>
+      <number>20</number>
      </property>
      <property name="leftMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <property name="topMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <property name="rightMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <property name="bottomMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <item>
       <widget class="QFrame" name="frameAssetControl">
@@ -604,8 +604,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>964</width>
-          <height>165</height>
+          <width>1010</width>
+          <height>257</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
@@ -633,10 +633,13 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>100</height>
             </size>
            </property>
           </spacer>
