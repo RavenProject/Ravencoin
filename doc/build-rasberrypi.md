@@ -28,6 +28,7 @@ cd build
 wget http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz
 tar -xzvf db-4.8.30.NC.tar.gz
 cd db-4.8.30.NC/build_unix/
+sudo cp /usr/share/misc/config.guess ../dist/config.guess
 ../dist/configure --enable-cxx
 make -j4 # If error, remove the -j4
 sudo make install
