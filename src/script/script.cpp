@@ -362,9 +362,16 @@ bool CScript::IsNullAsset() const
 
 bool CScript::IsNullAssetTxDataScript() const
 {
-    return (this->size() > 23 &&
+    bool p2pkh =  (this->size() > 23 &&
             (*this)[0] == OP_RVN_ASSET &&
             (*this)[1] == 0x14);
+
+    bool p2sh = (this->size() > 23 &&
+                 (*this)[0] == OP_RVN_ASSET &&
+                 (*this)[1] == OP_1NEGATE &&
+                 (*this)[2] == 0x14);
+
+    return p2sh || p2pkh;
 }
 
 bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const

@@ -2047,7 +2047,7 @@ UniValue listtagsforaddress(const JSONRPCRequest &request)
 
 UniValue listaddressesfortag(const JSONRPCRequest& request)
 {
-    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() !=1)
+    if (request.fHelp || !AreRestrictedAssetsDeployed() || request.params.size() != 1)
         throw std::runtime_error(
                 "listaddressesfortag tag_name\n"
                 + RestrictedActivationWarning() +

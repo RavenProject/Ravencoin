@@ -35,6 +35,7 @@
 #define OFFSET_THREE 3
 #define OFFSET_FOUR 4
 #define OFFSET_TWENTY_THREE 23
+#define OFFSET_TWENTY_FOUR 24
 
 
 std::map<uint256, std::string> mapReissuedTx;
@@ -857,8 +858,16 @@ bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& asse
 
     strAddress = EncodeDestination(destination);
 
+    // Only used for P2PKH addresses
+    int offset = OFFSET_TWENTY_THREE;
+
+    // Only used for P2SH addresses
+    if (scriptPubKey[1] == OP_1NEGATE) {
+        offset = OFFSET_TWENTY_FOUR;
+    }
+
     std::vector<unsigned char> vchAssetData;
-    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + OFFSET_TWENTY_THREE, scriptPubKey.end());
+    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + offset, scriptPubKey.end());
     CDataStream ssData(vchAssetData, SER_NETWORK, PROTOCOL_VERSION);
 
     try {
