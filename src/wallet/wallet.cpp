@@ -110,10 +110,9 @@ public:
 
     void Process(const CScript &script) {
         txnouttype type;
-        txnouttype scriptType;
         std::vector<CTxDestination> vDest;
         int nRequired;
-        if (ExtractDestinations(script, type, scriptType, vDest, nRequired)) {
+        if (ExtractDestinations(script, type, vDest, nRequired)) {
             for (const CTxDestination &dest : vDest)
                 boost::apply_visitor(*this, dest);
         }
@@ -2399,9 +2398,8 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
             for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++) {
 
                 int nType;
-                int nScriptType;
                 bool fIsOwner;
-                bool isAssetScript = pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner);
+                bool isAssetScript = pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner);
                 if (coinControl && !isAssetScript && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint((*it).first, i)))
                     continue;
 
@@ -2950,10 +2948,9 @@ bool CWallet::SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMi
 
         //-------------------------------
 
-        int nType = 0;
-        int nScriptType = 0;
+        int nType = -1;
         bool fIsOwner = false;
-        if (!coin.txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner)) {
+        if (!coin.txout.scriptPubKey.IsAssetScript(nType, fIsOwner)) {
             continue;
         }
 

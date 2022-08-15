@@ -159,7 +159,6 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
                         UniValue& out, bool fIncludeHex)
 {
     txnouttype type;
-    txnouttype scriptType;
     std::vector<CTxDestination> addresses;
     int nRequired;
 
@@ -167,7 +166,7 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
     if (fIncludeHex)
         out.pushKV("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end()));
 
-    if (!ExtractDestinations(scriptPubKey, type, scriptType, addresses, nRequired)) {
+    if (!ExtractDestinations(scriptPubKey, type, addresses, nRequired)) {
         out.pushKV("type", GetTxnOutputType(type));
         return;
     }
