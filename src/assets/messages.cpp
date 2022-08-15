@@ -216,7 +216,7 @@ bool ScanForMessageChannels(std::string& strError)
             }
 
             for (auto out : ptx->vout) {
-                int nType = 0;
+                int nType = -1;
                 bool fOwner = false;
                 if (vpwallets[0]->IsMine(out) == ISMINE_SPENDABLE) { // Is the out mine
                     if (out.scriptPubKey.IsAssetScript(nType, fOwner)) {
