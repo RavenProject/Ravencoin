@@ -653,19 +653,17 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
     int i = 0;
     for (const auto& txout : tx.vout) {
         i++;
-
-        // Values are subject to change, by isAssetScript a few lines down.
+        bool fIsAsset = false;
         int nType = 0;
         int nScriptType = 0;
-        int nStart = 0;
         bool fIsOwner = false;
+        if (txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner))
+            fIsAsset = true;
 
-        // False until BIP9 consensus activates P2SH for Assets.
-        bool fP2Active = AreP2SHAssetsAllowed();
-
-        // Returns true if operations on assets are found in the script.
-        // It will also possibly change the values of the arguments, as they are passed by reference.
-        bool fIsAsset = txout.scriptPubKey.IsAssetScript(nType, nScriptType, fIsOwner, nStart, fP2Active);
+        if (fIsAsset && nScriptType == TX_SCRIPTHASH) {
+            if (!AreP2SHAssetsAllowed())
+                return state.DoS(0, false, REJECT_INVALID, "bad-txns-p2sh-assets-not-active");
+        }
 
         if (assetCache) {
             if (fIsAsset && !AreAssetsDeployed())

@@ -250,15 +250,11 @@ bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& isOwner) const
     return IsAssetScript(nType, nScriptType, isOwner, start);
 }
 
-bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner, int& nStartingIndex, bool nP2Active) const
+bool CScript::IsAssetScript(int& nType, int& nScriptType, bool& fIsOwner, int& nStartingIndex) const
 {
     if (this->size() > 31) {
         // Extra-fast test for pay-to-script-hash CScripts:
-        if ( (*this)[0] == OP_HASH160
-            && (*this)[1] == 0x14
-            && (*this)[22] == OP_EQUAL
-            && nP2Active == true
-            ) {
+        if ( (*this)[0] == OP_HASH160 && (*this)[1] == 0x14 && (*this)[22] == OP_EQUAL) {
 
             // If this is of the P2SH type, we need to return this type so we know how to interact and solve it
             nScriptType = TX_SCRIPTHASH;
