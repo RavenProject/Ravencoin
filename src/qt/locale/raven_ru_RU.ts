@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ru_RU">
+<TS language="ru_RU" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -151,142 +149,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Подписать &amp;сообщение...</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Транзакции</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Просмотр истории транзакций</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>В&amp;ыход</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Выйти</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>&amp;О программе %1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>Показать информацию о %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>О библиотеке &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Показать информацию о библиотеке Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Опции...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Зашифровать кошелёк</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Создать резервную копию бумажника</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Изменить пароль...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Адреса для отправки...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Адреса для получения...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Открыть &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Syncing Headers (%1%)...</source>
-        <translation>Синхронизация заголовков (%1%)...</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Окно отладки</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Проверить сообщение...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven Core</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Кошелек</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Отправить</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Получить</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Показать / Спрятать</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Файл</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Настройки</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Помощь</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>Опции командной строки</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Ошибка</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Предупреждение</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Информация</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Готов</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>Подключение к пирам...</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -344,6 +219,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -352,6 +230,12 @@
     </context>
 <context>
     <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -388,6 +272,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Progress</source>
@@ -397,6 +293,9 @@
         <source>Hide</source>
         <translation>Спрятать</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -418,10 +317,6 @@
     <message>
         <source>MB</source>
         <translation>МБ</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Разрешить входящие соеденения</translation>
     </message>
     <message>
         <source>&amp;Reset Options</source>
@@ -476,10 +371,6 @@
         <translation>&amp;Окно</translation>
     </message>
     <message>
-        <source>Hide tray icon</source>
-        <translation>Спрятать иконку в трее</translation>
-    </message>
-    <message>
         <source>&amp;OK</source>
         <translation>&amp;ОК</translation>
     </message>
@@ -493,10 +384,6 @@
     <message>
         <source>Immature:</source>
         <translation>Незрелые:</translation>
-    </message>
-    <message>
-        <source>Balances</source>
-        <translation>Балансы</translation>
     </message>
     <message>
         <source>Total:</source>
@@ -527,25 +414,9 @@
         <source>Enter a Raven address (e.g. %1)</source>
         <translation>Введите Raven-адрес (напр. %1)</translation>
     </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n часов</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n день</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n неделя</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 и %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n год</numerusform></translation>
     </message>
     </context>
 <context>
@@ -621,22 +492,6 @@
         <translation>1 &amp;год</translation>
     </message>
     <message>
-        <source>%1 B</source>
-        <translation>%1  Б</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1  КБ</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1  МБ</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 ГБ</translation>
-    </message>
-    <message>
         <source>never</source>
         <translation>никогда</translation>
     </message>
@@ -653,6 +508,133 @@
         <translation>Неизвестно</translation>
     </message>
 </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Подписать &amp;сообщение...</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Транзакции</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Просмотр истории транзакций</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>В&amp;ыход</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Выйти</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>&amp;О программе %1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>Показать информацию о %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>О библиотеке &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Показать информацию о библиотеке Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Опции...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Зашифровать кошелёк</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Создать резервную копию бумажника</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Изменить пароль...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Адреса для отправки...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Адреса для получения...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Открыть &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Синхронизация заголовков (%1%)...</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Проверить сообщение...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven Core</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Кошелек</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Отправить</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Получить</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Показать / Спрятать</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Файл</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Помощь</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>Опции командной строки</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Ошибка</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Предупреждение</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Информация</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Готов</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Подключение к пирам...</translation>
+    </message>
+    </context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
@@ -705,6 +687,15 @@
         <source>(no label)</source>
         <translation>(нет метки)</translation>
     </message>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>

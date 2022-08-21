@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="eu_ES">
+<TS language="eu_ES" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -203,7 +201,168 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
+    </context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <source>Amount:</source>
+        <translation>Kopurua</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Kopurua</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Kopiatu helbidea</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Kopiatu etiketa</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(etiketarik ez)</translation>
+    </message>
+    </context>
+<context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
+    <name>EditAddressDialog</name>
+    <message>
+        <source>Edit Address</source>
+        <translation>Editatu helbidea</translation>
+    </message>
+    <message>
+        <source>&amp;Label</source>
+        <translation>&amp;Etiketa</translation>
+    </message>
+    <message>
+        <source>&amp;Address</source>
+        <translation>&amp;Helbidea</translation>
+    </message>
+    <message>
+        <source>New receiving address</source>
+        <translation>Jasotzeko helbide berria</translation>
+    </message>
+    <message>
+        <source>New sending address</source>
+        <translation>Bidaltzeko helbide berria</translation>
+    </message>
+    <message>
+        <source>Edit receiving address</source>
+        <translation>Editatu jasotzeko helbidea</translation>
+    </message>
+    <message>
+        <source>Edit sending address</source>
+        <translation>Editatu bidaltzeko helbidea</translation>
+    </message>
+    <message>
+        <source>The entered address "%1" is already in the address book.</source>
+        <translation>Sartu berri den helbidea, "%1", helbide-liburuan dago jadanik.</translation>
+    </message>
+    <message>
+        <source>Could not unlock wallet.</source>
+        <translation>Ezin desblokeatu zorroa.</translation>
+    </message>
+    <message>
+        <source>New key generation failed.</source>
+        <translation>Gako berriaren sorrerak huts egin du.</translation>
+    </message>
+</context>
+<context>
+    <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
+    <name>HelpMessageDialog</name>
+    </context>
+<context>
+    <name>Intro</name>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
+    <name>ModalOverlay</name>
+    <message>
+        <source>Form</source>
+        <translation>Inprimakia</translation>
+    </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
+<context>
+    <name>OpenURIDialog</name>
+    </context>
+<context>
+    <name>OptionsDialog</name>
+    <message>
+        <source>Options</source>
+        <translation>Aukerak</translation>
+    </message>
+    </context>
+<context>
+    <name>OverviewPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Inprimakia</translation>
+    </message>
+    </context>
+<context>
+    <name>PaymentServer</name>
+    </context>
+<context>
+    <name>PeerTableModel</name>
+    </context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>Amount</source>
+        <translation>Kopurua</translation>
+    </message>
+    </context>
+<context>
+    <name>QObject::QObject</name>
+    </context>
+<context>
+    <name>QRImageWidget</name>
+    </context>
+<context>
+    <name>RPCConsole</name>
     </context>
 <context>
     <name>RavenGUI</name>
@@ -260,16 +419,8 @@
         <translation>&amp;Artxiboa</translation>
     </message>
     <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Ezarpenak</translation>
-    </message>
-    <message>
         <source>&amp;Help</source>
         <translation>&amp;Laguntza</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Fitxen tresna-barra</translation>
     </message>
     <message>
         <source>Up to date</source>
@@ -295,131 +446,6 @@
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
         <translation>Zorroa &lt;b&gt;enkriptatuta&lt;/b&gt; eta &lt;b&gt;blokeatuta&lt;/b&gt; dago une honetan</translation>
     </message>
-    </context>
-<context>
-    <name>CoinControlDialog</name>
-    <message>
-        <source>Amount:</source>
-        <translation>Kopurua</translation>
-    </message>
-    <message>
-        <source>Amount</source>
-        <translation>Kopurua</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation>Data</translation>
-    </message>
-    <message>
-        <source>Copy address</source>
-        <translation>Kopiatu helbidea</translation>
-    </message>
-    <message>
-        <source>Copy label</source>
-        <translation>Kopiatu etiketa</translation>
-    </message>
-    <message>
-        <source>(no label)</source>
-        <translation>(etiketarik ez)</translation>
-    </message>
-    </context>
-<context>
-    <name>EditAddressDialog</name>
-    <message>
-        <source>Edit Address</source>
-        <translation>Editatu helbidea</translation>
-    </message>
-    <message>
-        <source>&amp;Label</source>
-        <translation>&amp;Etiketa</translation>
-    </message>
-    <message>
-        <source>&amp;Address</source>
-        <translation>&amp;Helbidea</translation>
-    </message>
-    <message>
-        <source>New receiving address</source>
-        <translation>Jasotzeko helbide berria</translation>
-    </message>
-    <message>
-        <source>New sending address</source>
-        <translation>Bidaltzeko helbide berria</translation>
-    </message>
-    <message>
-        <source>Edit receiving address</source>
-        <translation>Editatu jasotzeko helbidea</translation>
-    </message>
-    <message>
-        <source>Edit sending address</source>
-        <translation>Editatu bidaltzeko helbidea</translation>
-    </message>
-    <message>
-        <source>The entered address "%1" is already in the address book.</source>
-        <translation>Sartu berri den helbidea, "%1", helbide-liburuan dago jadanik.</translation>
-    </message>
-    <message>
-        <source>Could not unlock wallet.</source>
-        <translation>Ezin desblokeatu zorroa.</translation>
-    </message>
-    <message>
-        <source>New key generation failed.</source>
-        <translation>Gako berriaren sorrerak huts egin du.</translation>
-    </message>
-</context>
-<context>
-    <name>FreespaceChecker</name>
-    </context>
-<context>
-    <name>HelpMessageDialog</name>
-    </context>
-<context>
-    <name>Intro</name>
-    </context>
-<context>
-    <name>ModalOverlay</name>
-    <message>
-        <source>Form</source>
-        <translation>Inprimakia</translation>
-    </message>
-    </context>
-<context>
-    <name>OpenURIDialog</name>
-    </context>
-<context>
-    <name>OptionsDialog</name>
-    <message>
-        <source>Options</source>
-        <translation>Aukerak</translation>
-    </message>
-    </context>
-<context>
-    <name>OverviewPage</name>
-    <message>
-        <source>Form</source>
-        <translation>Inprimakia</translation>
-    </message>
-    </context>
-<context>
-    <name>PaymentServer</name>
-    </context>
-<context>
-    <name>PeerTableModel</name>
-    </context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Amount</source>
-        <translation>Kopurua</translation>
-    </message>
-    </context>
-<context>
-    <name>QObject::QObject</name>
-    </context>
-<context>
-    <name>QRImageWidget</name>
-    </context>
-<context>
-    <name>RPCConsole</name>
     </context>
 <context>
     <name>ReceiveCoinsDialog</name>
@@ -483,6 +509,15 @@
     </message>
     </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -524,10 +559,6 @@
         <translation>K&amp;opurua:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>Ordaindu &amp;honi:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Etiketa:</translation>
     </message>
@@ -546,10 +577,6 @@
     <message>
         <source>Message:</source>
         <translation>Mezua</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Ordaindu honi:</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
@@ -703,7 +730,7 @@
         <source>Amount removed from or added to balance.</source>
         <translation>Saldoan kendu edo gehitutako kopurua.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>TransactionView</name>
     <message>
@@ -807,7 +834,7 @@
         <source>Send Coins</source>
         <translation>Bidali txanponak</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -828,10 +855,6 @@
     <message>
         <source>Rescanning...</source>
         <translation>Birbilatzen...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Zamaketa amaitua</translation>
     </message>
     </context>
 </TS>

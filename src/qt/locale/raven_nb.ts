@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="nb">
+<TS language="nb" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -9,7 +7,7 @@
     </message>
     <message>
         <source>Create a new address</source>
-        <translation>Opprett en ny addresse</translation>
+        <translation>Opprett ny addresse</translation>
     </message>
     <message>
         <source>&amp;New</source>
@@ -17,7 +15,7 @@
     </message>
     <message>
         <source>Copy the currently selected address to the system clipboard</source>
-        <translation>Kopier den valgte adressen til systemets utklippstavle</translation>
+        <translation>Kopier adressen til utklippstavlen</translation>
     </message>
     <message>
         <source>&amp;Copy</source>
@@ -45,11 +43,11 @@
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>Velg adressen å sende mynter til</translation>
+        <translation>Velg adressen myntene skal sendes til</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>Velg adressen til å motta mynter med</translation>
+        <translation>Velg adressen som skal motta mynter</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
@@ -73,11 +71,11 @@
     </message>
     <message>
         <source>&amp;Copy Address</source>
-        <translation>&amp;Kopier Adresse</translation>
+        <translation>&amp;Kopier adresse</translation>
     </message>
     <message>
         <source>Copy &amp;Label</source>
-        <translation>Kopier &amp;Merkelapp</translation>
+        <translation>Kopier &amp;merkelapp</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
@@ -119,15 +117,15 @@
     <name>AskPassphraseDialog</name>
     <message>
         <source>Passphrase Dialog</source>
-        <translation>Dialog for Adgangsfrase</translation>
+        <translation>Vindu for adgangsfrase</translation>
     </message>
     <message>
         <source>Enter passphrase</source>
-        <translation>Angi adgangsfrase</translation>
+        <translation>Angi adgangsfrase:</translation>
     </message>
     <message>
         <source>New passphrase</source>
-        <translation>Ny adgangsfrase</translation>
+        <translation>Ny adgangsfrase:</translation>
     </message>
     <message>
         <source>Repeat new passphrase</source>
@@ -223,6 +221,454 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    <message>
+        <source>Asset Selection</source>
+        <translation>Velg Aktivum</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Mengde:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Støv:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Avgift:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Etter støv:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Veksel:</translation>
+    </message>
+    <message>
+        <source>(un)select all</source>
+        <translation>(av)velg alle</translation>
+    </message>
+    <message>
+        <source>Tree mode</source>
+        <translation>Tre modus</translation>
+    </message>
+    <message>
+        <source>List mode</source>
+        <translation>Liste modus</translation>
+    </message>
+    <message>
+        <source>View assets that you have the ownership asset for</source>
+        <translation>Vis aktivum du eier</translation>
+    </message>
+    <message>
+        <source>View Administrator Assets</source>
+        <translation>Vis administrator aktivum</translation>
+    </message>
+    <message>
+        <source>Asset</source>
+        <translation>Aktivum</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Antall</translation>
+    </message>
+    <message>
+        <source>Received with label</source>
+        <translation>Mottatt med merke</translation>
+    </message>
+    <message>
+        <source>Received with address</source>
+        <translation>Mottatt med adresse</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Dato</translation>
+    </message>
+    <message>
+        <source>Confirmations</source>
+        <translation>Bekreftelser</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Bekreftet</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Kopier adresse</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Kopier merke</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Kopier antall</translation>
+    </message>
+    <message>
+        <source>Copy transaction ID</source>
+        <translation>Kopier transaksjons-ID</translation>
+    </message>
+    <message>
+        <source>Lock unspent</source>
+        <translation>Lås ubrukt</translation>
+    </message>
+    <message>
+        <source>Unlock unspent</source>
+        <translation>Lås opp ubrukt</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Kopier antall</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Kopier avgift</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Kopier etter avgift</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Kopier bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Kopier støv</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Kopier veksel</translation>
+    </message>
+    <message>
+        <source>(%1 locked)</source>
+        <translation>(%1 låst)</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>Ja</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>Nei</translation>
+    </message>
+    <message>
+        <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
+        <translation>Denne teksten blir rød hvis noen av mottakerene får en mengde som er mindre enn støv-grensen.</translation>
+    </message>
+    <message>
+        <source>Can vary +/- %1 satoshi(s) per input.</source>
+        <translation>Kan variere +/- %1 satoshi(s) per inngang.</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(ingen merke)</translation>
+    </message>
+    <message>
+        <source>change from %1 (%2)</source>
+        <translation>veksel fra %1 (%2)</translation>
+    </message>
+    <message>
+        <source>(change)</source>
+        <translation>(veksel)</translation>
+    </message>
+</context>
+<context>
+    <name>AssetTableModel</name>
+    <message>
+        <source>Name</source>
+        <translation>Navn</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation>Antall</translation>
+    </message>
+</context>
+<context>
+    <name>AssetsDialog</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Send mynter</translation>
+    </message>
+    <message>
+        <source>Asset Control Features</source>
+        <translation>Aktivum detaljkontroll</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Innganger..</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatisk valgt</translation>
+    </message>
+    <message>
+        <source>Insufficient funds!</source>
+        <translation>For lite mynter</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Støv:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Gebyr:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Etter gebyr:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Veksel:</translation>
+    </message>
+    <message>
+        <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
+        <translation>Hvis dette er aktivert, men adressen for veksel er tom eller ugyldig, vil veksel bli sendt til en nygenerert adresse.</translation>
+    </message>
+    <message>
+        <source>Custom change address</source>
+        <translation>Egendefinert adresse for veksel</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Transaksjonsgebyr:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Velg...</translation>
+    </message>
+    <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Bruk av standardgebyr kan ende med at transaksjonen tar flere timer, dager eller aldri blir verifisert. Vurder å velge avgift maneult eller å vente til du har verifisert hele kjeden.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Advarsel: Beregning av gebyr er ikke mulig</translation>
+    </message>
+    <message>
+        <source>collapse fee-settings</source>
+        <translation>Legg ned gebyrinnstillinger</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Skjul</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Hvis den egendefinerte avgiften er satt til 1000 satoshis og transaksjonen bare er 250 bytes, da vil "per kilobyte" bare betale 250 satoshis i gebyr, mens "minstebeløp" betaler 1000 satoshis. For transaksjoner større enn en kilobyte vil begge betale for antall kilobyte.</translation>
+    </message>
+    <message>
+        <source>per kilobyte</source>
+        <translation>per kilobyte</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Betaling av bare minimumsavgiften går helt fint så lenge det er mindre transaksjonsvolum enn plass i blokkene. Men vær klar over at dette kan ende opp i en transaksjon som aldri blir bekreftet når det er mer etterspørsel etter Raven-transaksjoner enn nettverket kan behandle.</translation>
+    </message>
+    <message>
+        <source>(read the tooltip)</source>
+        <translation>(les verktøytipset)</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Anbefalt:</translation>
+    </message>
+    <message>
+        <source>Custom:</source>
+        <translation>Egendefinert:</translation>
+    </message>
+    <message>
+        <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
+        <translation>(Smartgebyr ikke innført ennå. Dette tar vanligvis noen blokker...)</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Tid for bekreftelse:</translation>
+    </message>
+    <message>
+        <source>Confirm the send action</source>
+        <translation>Bekreft sending</translation>
+    </message>
+    <message>
+        <source>S&amp;end</source>
+        <translation>S&amp;end</translation>
+    </message>
+    <message>
+        <source>Clear all fields of the form.</source>
+        <translation>Fjern alle felter fra skjemaet.</translation>
+    </message>
+    <message>
+        <source>Clear &amp;All</source>
+        <translation>Fjern &amp;Alt</translation>
+    </message>
+    <message>
+        <source>Transfer to multiple recipients at once</source>
+        <translation>Send til flere enn en mottaker</translation>
+    </message>
+    <message>
+        <source>Add &amp;Recipient</source>
+        <translation>Legg til &amp;Mottaker</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Saldo:</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Kopier antall</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Kopier antall</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Kopier gebyr</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Kopier etter gebyr</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Kopier bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Kopier støv</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Kopier veksel</translation>
+    </message>
+    <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blokker)</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 til %2</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to send?</source>
+        <translation>Er du sikker på du vil sende?</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>lagt til som transaksjonsgebyr</translation>
+    </message>
+    <message>
+        <source>Confirm send assets</source>
+        <translation>Bekreft sending</translation>
+    </message>
+    <message>
+        <source>The recipient address is not valid. Please recheck.</source>
+        <translation>Mottakeradressen er ugyldig. Vennligst sjekk.</translation>
+    </message>
+    <message>
+        <source>The amount to pay must be larger than 0.</source>
+        <translation>Antall må være større enn 0</translation>
+    </message>
+    <message>
+        <source>The amount exceeds your balance.</source>
+        <translation>Antall er større enn saldo</translation>
+    </message>
+    <message>
+        <source>Transaction creation failed!</source>
+        <translation>Opprettelse av transaksjonen feilet.</translation>
+    </message>
+    <message>
+        <source>The transaction was rejected with the following reason: %1</source>
+        <translation>Transaksjonen ble avvist: %1</translation>
+    </message>
+    <message>
+        <source>Payment request expired.</source>
+        <translation>Betalingsforespørsel utgått.</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Advarsel: Ugyldig Ravenadresse</translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Advarsel: Ukjent vekseladresse</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Bekreft egendefinert vekseladresse</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation>Adressen du valgte for veksel, er ikke en del av denne lommeboken. Litt eller alt av mynter fra denne lommeboken kan bli sendt til denne adressen. Er du sikker?</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(ingen merkelapp)</translation>
+    </message>
+</context>
+<context>
+    <name>AssignQualifier</name>
+    <message>
+        <source>Frame</source>
+        <translation>Ramme</translation>
+    </message>
+    <message>
+        <source>Select Type:</source>
+        <translation>Velg type:</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>IPFS / Hash:</source>
+        <translation>IPFS / Hash:</translation>
+    </message>
+    <message>
+        <source>Custom Change Address</source>
+        <translation>Egendefinert vekseladresse</translation>
+    </message>
+    <message>
+        <source>Check</source>
+        <translation>Sjekk</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Fjern</translation>
+    </message>
+    <message>
+        <source>Submit</source>
+        <translation>Send inn</translation>
+    </message>
+    <message>
+        <source>Unable to preform action at this time</source>
+        <translation>Kan ikke gjennomføre handlingen akkurat nå</translation>
+    </message>
+</context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -231,303 +677,6 @@
     <message>
         <source>Banned Until</source>
         <translation>Utestengt til</translation>
-    </message>
-</context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Signer &amp;melding...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Synkroniserer med nettverk...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Oversikt</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Node</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Vis generell oversikt over lommeboken</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Transaksjoner</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Vis transaksjonshistorikk</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>&amp;Avslutt</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Avslutt applikasjonen</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation> &amp;Om %1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>Vis informasjon om %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Om &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Vis informasjon om Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Innstillinger...</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>Endre innstilinger for %1</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Krypter Lommebok...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>Lag &amp;Sikkerhetskopi av Lommebok...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Endre Adgangsfrase...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Utsendingsadresser...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Mottaksadresser...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Åpne &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>Klikk for å deaktivere nettverksaktivitet</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>Nettverksaktivitet deaktivert</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>Klikk for å aktivere nettverksaktivitet igjen.</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Reindekserer blokker på harddisk...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Send til en Raven-adresse</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Sikkerhetskopier lommebok til annet sted</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Endre adgangsfrasen brukt for kryptering av lommebok</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Feilsøkingsvindu</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Åpne konsoll for feilsøk og diagnostikk</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Verifiser melding...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Lommebok</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Send</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Motta</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Vis / Skjul</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Vis eller skjul hovedvinduet</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Krypter de private nøklene som tilhører lommeboken din</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Signer en melding med Raven-adressene dine for å bevise at du eier dem</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Bekreft meldinger for å være sikker på at de ble signert av en angitt Raven-adresse</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Fil</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Innstillinger</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Hjelp</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Verktøylinje for faner</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Forespør betalinger (genererer QR-koder og raven: URIer)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Vis listen av brukte utsendingsadresser og merkelapper</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Vis listen over bruke mottaksadresser og merkelapper</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Åpne en Raven: URI eller betalingsetterspørring</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Kommandolinjevalg</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>%n aktiv forbindelse til Raven-nettverket</numerusform><numerusform>%n aktive forbindelser til Raven-nettverket</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>Lastet %n blokk med transaksjonshistorikk.</numerusform><numerusform>Lastet %n blokker med transaksjonshistorikk.</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 bak</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Siste mottatte blokk ble generert for %1 siden.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Transaksjoner etter dette vil ikke være synlige enda.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Feil</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Advarsel</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informasjon</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Oppdatert</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 klient</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>Kobler til likemannsnettverket...</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Laster ned...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Dato: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Beløp: %1:
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Type: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Merkelapp: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Adresse: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Sendt transaksjon</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Innkommende transaksjon</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Lommeboken er &lt;b&gt;kryptert&lt;/b&gt; og for tiden &lt;b&gt;låst opp&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Lommeboken er &lt;b&gt;kryptert&lt;/b&gt; og for tiden &lt;b&gt;låst&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>En fatal feil har inntruffet. Raven kan ikke lenger trygt fortsette, og må derfor avslutte.</translation>
     </message>
 </context>
 <context>
@@ -605,6 +754,10 @@
         <translation>Kopier adresse</translation>
     </message>
     <message>
+        <source>Copy label</source>
+        <translation>Kopier &amp;merkelapp</translation>
+    </message>
+    <message>
         <source>Copy amount</source>
         <translation>Kopier beløp</translation>
     </message>
@@ -613,12 +766,32 @@
         <translation>Kopier transaksjons-ID</translation>
     </message>
     <message>
+        <source>Lock unspent</source>
+        <translation>Lås ubrukt</translation>
+    </message>
+    <message>
+        <source>Unlock unspent</source>
+        <translation>Lås opp ubrukt</translation>
+    </message>
+    <message>
         <source>Copy quantity</source>
         <translation>Kopier mengde</translation>
     </message>
     <message>
         <source>Copy fee</source>
         <translation>Kopier gebyr</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Kopier etter gebyr</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Kopier bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Kopier støv</translation>
     </message>
     <message>
         <source>Copy change</source>
@@ -637,6 +810,10 @@
         <translation>nei</translation>
     </message>
     <message>
+        <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
+        <translation>Denne teksten blir rød hvis noen av mottakerene får en mengde som er mindre enn støv-grensen.</translation>
+    </message>
+    <message>
         <source>Can vary +/- %1 satoshi(s) per input.</source>
         <translation>Kan variere +/- %1 satoshi(er) per input.</translation>
     </message>
@@ -651,6 +828,333 @@
     <message>
         <source>(change)</source>
         <translation>(veksel)</translation>
+    </message>
+</context>
+<context>
+    <name>CreateAssetDialog</name>
+    <message>
+        <source>Coin Control Features</source>
+        <translation>Myntkontroll Funksjoner</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Inndata...</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatisk valgt</translation>
+    </message>
+    <message>
+        <source>Insufficient funds!</source>
+        <translation>Utilstrekkelige midler!</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Støv:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Gebyr:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Etter Gebyr:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Veksel:</translation>
+    </message>
+    <message>
+        <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
+        <translation>Hvis dette er aktivert, men adressen for veksel er tom eller ugyldig, vil veksel bli sendt til en nygenerert adresse.</translation>
+    </message>
+    <message>
+        <source>Custom change address</source>
+        <translation>Egendefinert vekseladresse</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Navn</translation>
+    </message>
+    <message>
+        <source>A-Z 0-9 and . or _ as the second character</source>
+        <translation>A-Z 0-9 og . eller _ som andre tegn</translation>
+    </message>
+    <message>
+        <source>The name of the asset you would like to create</source>
+        <translation>Navnet på aktivumet du ønsker å lage</translation>
+    </message>
+    <message>
+        <source>Check Availabilty</source>
+        <translation>Sjekk tilgjengelighet</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Adresse:</translation>
+    </message>
+    <message>
+        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>RVN adressen som skal eie aktivumet. (Du må eie denne adressen). La stå tom for å lage ny adresse.</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Advarsel:</translation>
+    </message>
+    <message>
+        <source>The number of assets that will be created</source>
+        <translation>Antall aktivum som blir laget</translation>
+    </message>
+    <message>
+        <source>Units:</source>
+        <translation>Desimaler</translation>
+    </message>
+    <message>
+        <source>How divisble the assets will be (e.g. 8 = 1.00000000, 2 = 1.00)</source>
+        <translation>Antall desimaler, (F.eks: 8 = 1.00000000, 2 = 1.00)</translation>
+    </message>
+    <message>
+        <source>e.g. 1</source>
+        <translation>f.eks. 1</translation>
+    </message>
+    <message>
+        <source>If the owner of this asset will be able to issue more assets in the future</source>
+        <translation>Om eieren av dette aktivum skal ha mulighet til å lage flere</translation>
+    </message>
+    <message>
+        <source>Add IPFS/Txid Hash</source>
+        <translation>Legg til IPFS/Txid Hash</translation>
+    </message>
+    <message>
+        <source>ERROR TEXT</source>
+        <translation>ERRROR TEKST</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Transaksjonsgebyr:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Velg...</translation>
+    </message>
+    <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Bruk av standardgebyr kan ende med at transaksjonen tar flere timer, dager eller aldri blir verifisert. Vurder å velge avgift maneult eller å vente til du har verifisert hele kjeden.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Advarsel: Beregning av gebyr er ikke mulig</translation>
+    </message>
+    <message>
+        <source>collapse fee-settings</source>
+        <translation>Legg ned gebyrinnstillinger</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Skjul</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Hvis den egendefinerte avgiften er satt til 1000 satoshis og transaksjonen bare er 250 bytes, da vil "per kilobyte" bare betale 250 satoshis i gebyr, mens "minstebeløp" betaler 1000 satoshis. For transaksjoner større enn en kilobyte vil begge betale for antall kilobyte.</translation>
+    </message>
+    <message>
+        <source>per kilobyte</source>
+        <translation>per kilobyte</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Betaling av bare minimumsavgiften går helt fint så lenge det er mindre transaksjonsvolum enn plass i blokkene. Men vær klar over at dette kan ende opp i en transaksjon som aldri blir bekreftet når det er mer etterspørsel etter Raven-transaksjoner enn nettverket kan behandle.</translation>
+    </message>
+    <message>
+        <source>(read the tooltip)</source>
+        <translation>(les verktøytipset)</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Anbefalt:</translation>
+    </message>
+    <message>
+        <source>C&amp;ustom:</source>
+        <translation>Egendefinert:</translation>
+    </message>
+    <message>
+        <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
+        <translation>(Smartgebyr ikke innført ennå. Dette tar vanligvis noen blokker...)</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Tid for bekreftelse:</translation>
+    </message>
+    <message>
+        <source>Create Asset</source>
+        <translation>Lag aktivum</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Fjern</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Saldo:</translation>
+    </message>
+    <message>
+        <source>123.456 RVN</source>
+        <translation>123.456 RVN</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Kopier antall</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Kopier antall</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Kopier gebyr</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Kopier etter gebyr</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Kopier bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Kopier støv</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Kopier veksel</translation>
+    </message>
+    <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blokker)</translation>
+    </message>
+    <message>
+        <source>Main Asset</source>
+        <translation>Hovedaktivum</translation>
+    </message>
+    <message>
+        <source>Sub Asset</source>
+        <translation>Underaktivum</translation>
+    </message>
+    <message>
+        <source>Unique Asset</source>
+        <translation>Unikt aktivum</translation>
+    </message>
+    <message>
+        <source>Messaging Channel Asset</source>
+        <translation>Meldingsaktivum</translation>
+    </message>
+    <message>
+        <source>Restricted Asset</source>
+        <translation>Begrenset aktivum</translation>
+    </message>
+    <message>
+        <source>Asset Type</source>
+        <translation>Type aktivum</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters</source>
+        <translation>IPFS/Txid Hash må starte med 'Qm' og være 46 tegn (IPFS) eller 64 hex tegn (Txid hash).</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid Hash must have size of 46 characters, or 64 hex characters</source>
+        <translation>IPFS/Txid Hash må starte med 'Qm' og være 46 tegn (IPFS) eller 64 hex tegn (Txid hash).</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash</source>
+        <translation>IPFS/Txid hash ikke gyldig. Vennligst bruk en gyldig verdi.</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Advarsel: Ugyldig Ravenadresse</translation>
+    </message>
+    <message>
+        <source>Valid Asset</source>
+        <translation>Gyldig aktivum</translation>
+    </message>
+    <message>
+        <source>Invalid: Asset name already in use</source>
+        <translation>Ugyldig: Aktivumnavn er allerede brukt</translation>
+    </message>
+    <message>
+        <source>Error: Asset Database not in sync</source>
+        <translation>Feil: Aktivumdatabase ikke synkronisert</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 til %2</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to send?</source>
+        <translation>Er du sikker på du vil sende?</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>lagt til som transaksjonsgebyr</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Totalbeløp: %1:</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>eller</translation>
+    </message>
+    <message>
+        <source>Confirm send assets</source>
+        <translation>Bekreft sending</translation>
+    </message>
+    <message>
+        <source>Invalid: </source>
+        <translation>Ugyldig:</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>&amp;Kopier</translation>
+    </message>
+    <message>
+        <source>Transaction ID Copied</source>
+        <translation>Transaksjons-ID kopiert</translation>
+    </message>
+    <message>
+        <source>Asset transaction sent to network:</source>
+        <translation>Aktivumtransasjon sendt til nettverk:</translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Advarsel: Ukjent vekseladresse</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Bekreft egendefinert vekseladresse</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation>Adressen du valgte for veksel, er ikke en del av denne lommeboken. Litt eller alt av mynter fra denne lommeboken kan bli sendt til denne adressen. Er du sikker?</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(ingen merkelapp)</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Betal kun nødvendig gebyr %1</translation>
     </message>
 </context>
 <context>
@@ -692,6 +1196,10 @@
         <translation>Rediger utsendingsadresse</translation>
     </message>
     <message>
+        <source>The entered address "%1" is already in the address book.</source>
+        <translation>Adressen %1 er i adresseboken fra før.</translation>
+    </message>
+    <message>
         <source>Could not unlock wallet.</source>
         <translation>Kunne ikke låse opp lommebok.</translation>
     </message>
@@ -723,6 +1231,88 @@
         <translation>Kan ikke lage datamappe her.</translation>
     </message>
 </context>
+<context>
+    <name>FreezeAddress</name>
+    <message>
+        <source>Frame</source>
+        <translation>Ramme</translation>
+    </message>
+    <message>
+        <source>Restricted Asset:</source>
+        <translation>Begrenset aktivum</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Adresse:</translation>
+    </message>
+    <message>
+        <source>Custom Change Address</source>
+        <translation>Egendefinert vekseladresse</translation>
+    </message>
+    <message>
+        <source>IPFS / Hash:</source>
+        <translation>IPFS / Hash:</translation>
+    </message>
+    <message>
+        <source>Single Address Options</source>
+        <translation>Alternativer for enkeltadresser</translation>
+    </message>
+    <message>
+        <source>Global Options </source>
+        <translation>Globale alternativer</translation>
+    </message>
+    <message>
+        <source>Free&amp;ze trading on this address</source>
+        <translation>Lås handling med denne adressen</translation>
+    </message>
+    <message>
+        <source>Unfreeze tradin&amp;g on this address</source>
+        <translation>Lås opp handling med denne adressen</translation>
+    </message>
+    <message>
+        <source>Check</source>
+        <translation>Sjekk</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Fjern</translation>
+    </message>
+    <message>
+        <source>Submit</source>
+        <translation>Send inn</translation>
+    </message>
+    <message>
+        <source>Data has been validated, You can now submit the restriction transaction</source>
+        <translation>Data er kontrollert. Du kan sende begrensningstransaksjonen.</translation>
+    </message>
+    <message>
+        <source>Address is already frozen</source>
+        <translation>Adressen er allerede låst</translation>
+    </message>
+    <message>
+        <source>Address is not frozen</source>
+        <translation>Adressen er ikke låst</translation>
+    </message>
+    <message>
+        <source>Restricted asset is already frozen globally</source>
+        <translation>Begrenset aktivum er allerede låst globalt</translation>
+    </message>
+    <message>
+        <source>Restricted asset is not frozen globally</source>
+        <translation>Begrenset aktivum er ikke låst globalt</translation>
+    </message>
+    <message>
+        <source>Unable to preform action at this time</source>
+        <translation>Kan ikke gjennomføre handlingen akkurat nå</translation>
+    </message>
+</context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    <message>
+        <source>Warning: transaction while syncing wallet!</source>
+        <translation>Advarsel: transaksjon mens synkroninsering pågår!</translation>
+    </message>
+    </context>
 <context>
     <name>HelpMessageDialog</name>
     <message>
@@ -797,6 +1387,14 @@
         <translation>Bruk en egendefinert datamappe:</translation>
     </message>
     <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>The wallet will also be stored in this directory.</source>
+        <translation>Lommeboken blir lagret i denne mappen.</translation>
+    </message>
+    <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
         <translation>Feil: Den oppgitte datamappen "%1" kan ikke opprettes.</translation>
     </message>
@@ -814,10 +1412,70 @@
     </message>
 </context>
 <context>
+    <name>MnemonicDialog</name>
+    <message>
+        <source>HD Wallet Setup</source>
+        <translation>Oppsett av HD lommebok</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog1</name>
+    <message>
+        <source>HD Wallet Setup</source>
+        <translation>Oppsett av HD lommebok</translation>
+    </message>
+    <message>
+        <source>Select the type of wallet to create.</source>
+        <translation>Velg lommeboktype</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Aksepter</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    <message>
+        <source>New HD Wallet Creation</source>
+        <translation>Oppsett av ny HD lommebok</translation>
+    </message>
+    <message>
+        <source>Warning: </source>
+        <translation>Advarsel:</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Aksepter</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>Tilbake</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    <message>
+        <source>Warning: </source>
+        <translation>Advarsel:</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Aksepter</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>Tilbake</translation>
+    </message>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
         <translation>Skjema</translation>
+    </message>
+    <message>
+        <source>Number of blocks left</source>
+        <translation>Antall blokker igjen</translation>
     </message>
     <message>
         <source>Unknown...</source>
@@ -846,6 +1504,57 @@
     <message>
         <source>Hide</source>
         <translation>Skjul</translation>
+    </message>
+    <message>
+        <source>Unknown. Syncing Headers (%1)...</source>
+        <translation>Ukjent. Synkroniserer blokkhoder (%1)...</translation>
+    </message>
+</context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    <message>
+        <source>Date</source>
+        <translation>Dato</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Asset Name</source>
+        <translation>Aktivumnavn</translation>
+    </message>
+    <message>
+        <source>Tagged</source>
+        <translation>Merket</translation>
+    </message>
+    <message>
+        <source>Untagged</source>
+        <translation>Ikke merket</translation>
+    </message>
+    <message>
+        <source>Frozen</source>
+        <translation>Fryst</translation>
+    </message>
+    <message>
+        <source>Unfrozen</source>
+        <translation>Ikke fryst</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Annet</translation>
+    </message>
+    <message>
+        <source>watch-only</source>
+        <translation>Kun observerbar:</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(ingen merkelapp)</translation>
     </message>
     </context>
 <context>
@@ -890,14 +1599,6 @@
         <translation>Antall script &amp;verifikasjonstråder</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>Tillat tilkoblinger fra utsiden</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Tillatt innkommende tilkoblinger</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>IP-adressen til proxyen (f.eks. IPv4: 127.0.0.1 / IPv6: ::1)</translation>
     </message>
@@ -910,12 +1611,12 @@
         <translation>Tredjepart URLer (f. eks. en blokkutforsker) som dukker opp i transaksjonsfanen som kontekst meny elementer. %s i URLen er erstattet med transaksjonen sin hash. Flere URLer er separert av en vertikal linje |.</translation>
     </message>
     <message>
-        <source>Third party transaction URLs</source>
-        <translation>Tredjepart transaksjon URLer</translation>
-    </message>
-    <message>
         <source>Active command-line options that override above options:</source>
         <translation>Aktive kommandolinjevalg som overstyrer valgene ovenfor:</translation>
+    </message>
+    <message>
+        <source>Open Configuration File</source>
+        <translation>Åpne konfigurasjonsfil</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
@@ -962,6 +1663,14 @@
         <translation>Sett opp port ved hjelp av &amp;UPnP</translation>
     </message>
     <message>
+        <source>Accept connections from outside.</source>
+        <translation>Tillat tilkoblinger fra utsiden</translation>
+    </message>
+    <message>
+        <source>Allow incomin&amp;g connections</source>
+        <translation>Tillatt innkommende tilkoblinger</translation>
+    </message>
+    <message>
         <source>Connect to the Raven network through a SOCKS5 proxy.</source>
         <translation>Koble til Raven-nettverket gjennom en SOCKS5 proxy.</translation>
     </message>
@@ -986,10 +1695,6 @@
         <translation>Brukt for å nå noder via:</translation>
     </message>
     <message>
-        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
-        <translation>Viser om angitt SOCKS5 mellomtjener blir brukt for å nå noder via denne nettverkstypen.</translation>
-    </message>
-    <message>
         <source>IPv4</source>
         <translation>IPv4</translation>
     </message>
@@ -1006,20 +1711,8 @@
         <translation>Koble til Raven-nettverket gjennom en separat SOCKS5 mellomtjener for Tor skjulte tjenester.</translation>
     </message>
     <message>
-        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
-        <translation>Bruk separat SOCKS5 mellomtjener for å nå noder via Tor skjulte tjenester:</translation>
-    </message>
-    <message>
         <source>&amp;Window</source>
         <translation>&amp;Vindu</translation>
-    </message>
-    <message>
-        <source>&amp;Hide the icon from the system tray.</source>
-        <translation>&amp;Skjul ikonet fra oppgavelinjen.</translation>
-    </message>
-    <message>
-        <source>Hide tray icon</source>
-        <translation>Skjul søppel ikon</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1032,6 +1725,14 @@
     <message>
         <source>M&amp;inimize on close</source>
         <translation>M&amp;inimer ved lukking</translation>
+    </message>
+    <message>
+        <source>Only show toolbar icons. No text.</source>
+        <translation>Vis kun ikoner, ingen tekst.</translation>
+    </message>
+    <message>
+        <source>&amp;Icons only</source>
+        <translation>Bare ikoner</translation>
     </message>
     <message>
         <source>&amp;Display</source>
@@ -1052,6 +1753,22 @@
     <message>
         <source>Whether to show coin control features or not.</source>
         <translation>Skal myntkontroll funksjoner vises eller ikke.</translation>
+    </message>
+    <message>
+        <source>&amp;Third party transaction URLs</source>
+        <translation>URLer til tjenester for transaksjonsvisning</translation>
+    </message>
+    <message>
+        <source>Third party URL for IPFS-viewer. %s in the URL is replaced by IPFS hash.</source>
+        <translation>Tredjeparts URL for IPFS-fremviser. %s i URLen blir erstattet med IPFS-koden.</translation>
+    </message>
+    <message>
+        <source>IPFS Viewer URL</source>
+        <translation>IPFS fremviser URL</translation>
+    </message>
+    <message>
+        <source>Enable Dark Mode</source>
+        <translation>Aktiver mørkt tema</translation>
     </message>
     <message>
         <source>&amp;OK</source>
@@ -1080,6 +1797,10 @@
     <message>
         <source>Client will be shut down. Do you want to proceed?</source>
         <translation>Klienten vil bli lukket. Ønsker du å gå videre?</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Feil</translation>
     </message>
     <message>
         <source>This change would require a client restart.</source>
@@ -1129,10 +1850,6 @@
         <translation>Minet saldo har ikke modnet enda</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>Saldoer</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>Totalt:</translation>
     </message>
@@ -1141,12 +1858,24 @@
         <translation>Din nåværende saldo</translation>
     </message>
     <message>
+        <source>RVN Balances</source>
+        <translation>RVN Oversikt</translation>
+    </message>
+    <message>
         <source>Your current balance in watch-only addresses</source>
         <translation>Din nåværende balanse i kun observerbare adresser</translation>
     </message>
     <message>
         <source>Spendable:</source>
         <translation>Kan brukes:</translation>
+    </message>
+    <message>
+        <source>Asset Balances</source>
+        <translation>Aktivumbeholdning</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Søk</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1164,9 +1893,55 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>Nåværende totale balanse i kun observerbare adresser</translation>
     </message>
+    <message>
+        <source>Send Asset</source>
+        <translation>Send aktivum</translation>
+    </message>
+    <message>
+        <source>Copy Amount</source>
+        <translation>Kopier mengde</translation>
+    </message>
+    <message>
+        <source>Copy Name</source>
+        <translation>Kopier navn</translation>
+    </message>
+    <message>
+        <source>Copy Hash</source>
+        <translation>Kopier hash</translation>
+    </message>
+    <message>
+        <source>Issue Sub Asset</source>
+        <translation>Utsted underaktivum</translation>
+    </message>
+    <message>
+        <source>Issue Unique Asset</source>
+        <translation>Utsted unikt aktivum</translation>
+    </message>
+    <message>
+        <source>Reissue Asset</source>
+        <translation>Endre aktivum</translation>
+    </message>
+    <message>
+        <source>Open IPFS in Browser</source>
+        <translation>Åpne IPFS i nettleser</translation>
+    </message>
+    <message>
+        <source>Open IPFS content?</source>
+        <translation>Åpne IPFS-innhold?</translation>
+    </message>
+    <message>
+        <source>Open the following IPFS content in your default browser?
+</source>
+        <translation>Åpne dette IPFS-innholdet i standard nettleser?
+</translation>
+    </message>
 </context>
 <context>
     <name>PaymentServer</name>
+    <message>
+        <source>Payment request error</source>
+        <translation>Betalingsforespørsel feilet</translation>
+    </message>
     </context>
 <context>
     <name>PeerTableModel</name>
@@ -1217,33 +1992,9 @@
         <source>%1 ms</source>
         <translation>%1 ms</translation>
     </message>
-    <message numerus="yes">
-        <source>%n second(s)</source>
-        <translation><numerusform>%n sekund</numerusform><numerusform>%n sekunder</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n minute(s)</source>
-        <translation><numerusform>%n minutt</numerusform><numerusform>%n minutter</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n time</numerusform><numerusform>%n timer</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n dag</numerusform><numerusform>%n dager</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n uke</numerusform><numerusform>%n uker</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 og %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n år</numerusform><numerusform>%n år</numerusform></translation>
     </message>
     </context>
 <context>
@@ -1372,7 +2123,7 @@
     </message>
     <message>
         <source>Synced Headers</source>
-        <translation>Synkroniserte Blokkhoder</translation>
+        <translation>Synkroniserte blokkhoder</translation>
     </message>
     <message>
         <source>Synced Blocks</source>
@@ -1443,10 +2194,6 @@
         <translation>&amp;Nettverkstrafikk</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Fjern</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Totalt</translation>
     </message>
@@ -1483,28 +2230,24 @@
         <translation>1 &amp;år</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Bruk opp og ned pil for å navigere historikken, og &lt;b&gt;Ctrl-L&lt;/b&gt; for å tømme skjermen.</translation>
+        <source>&amp;Disconnect</source>
+        <translation>Koble ifra</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to reindex?</source>
+        <translation>Er du sikker på du vil reindeksere?</translation>
+    </message>
+    <message>
+        <source>Confirm reindex</source>
+        <translation>Bekreft reindeksering</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Skriv &lt;b&gt;help&lt;/b&gt; for en oversikt over kommandoer.</translation>
     </message>
     <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
+        <source>Network activity disabled</source>
+        <translation>Nettverksaktivitet deaktivert</translation>
     </message>
     <message>
         <source>(node id: %1)</source>
@@ -1537,6 +2280,327 @@
     <message>
         <source>Unknown</source>
         <translation>Ukjent</translation>
+    </message>
+</context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Signer &amp;melding...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Synkroniserer med nettverk...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Oversikt</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Node</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Vis generell oversikt over lommeboken</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Transaksjoner</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Vis transaksjonshistorikk</translation>
+    </message>
+    <message>
+        <source>&amp;Create Assets</source>
+        <translation>&amp;Opprett aktivum</translation>
+    </message>
+    <message>
+        <source>&amp;Transfer Assets</source>
+        <translation>Aktivumover&amp;føring</translation>
+    </message>
+    <message>
+        <source>&amp;Manage Assets</source>
+        <translation>&amp;Aktivumbehandling</translation>
+    </message>
+    <message>
+        <source>&amp;Restricted Assets</source>
+        <translation>Begrensede aktivum</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>&amp;Avslutt</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Avslutt applikasjonen</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation> &amp;Om %1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>Vis informasjon om %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Om &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Vis informasjon om Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Innstillinger...</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>Endre innstilinger for %1</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Krypter Lommebok...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>Lag &amp;Sikkerhetskopi av Lommebok...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Endre Adgangsfrase...</translation>
+    </message>
+    <message>
+        <source>&amp;Get my words...</source>
+        <translation>&amp;Vis mine ord...</translation>
+    </message>
+    <message>
+        <source>&amp;Debug Window</source>
+        <translation>&amp;Feilsøkingsvindu</translation>
+    </message>
+    <message>
+        <source>&amp;Wallet Repair</source>
+        <translation>Lommebokreparasjon</translation>
+    </message>
+    <message>
+        <source>Open wallet repair options</source>
+        <translation>Åpne lommebokreparasjon</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Utsendingsadresser...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Mottaksadresser...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Åpne &amp;URI...</translation>
+    </message>
+    <message>
+        <source>&amp;Wallet</source>
+        <translation>Lommebok</translation>
+    </message>
+    <message>
+        <source>Ravencoin Market Price</source>
+        <translation>Ravencoin markedspris</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>Klikk for å deaktivere nettverksaktivitet</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>Nettverksaktivitet deaktivert</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>Klikk for å aktivere nettverksaktivitet igjen.</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Synkroniserer blokkhoder (%1)...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Reindekserer blokker på harddisk...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Send til en Raven-adresse</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Sikkerhetskopier lommebok til annet sted</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Endre adgangsfrasen brukt for kryptering av lommebok</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Åpne konsoll for feilsøk og diagnostikk</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Verifiser melding...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Lommebok</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Send</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Motta</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Vis / Skjul</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Vis eller skjul hovedvinduet</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Krypter de private nøklene som tilhører lommeboken din</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Signer en melding med Raven-adressene dine for å bevise at du eier dem</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Bekreft meldinger for å være sikker på at de ble signert av en angitt Raven-adresse</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Fil</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Hjelp</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Forespør betalinger (genererer QR-koder og raven: URIer)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Vis listen av brukte utsendingsadresser og merkelapper</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Vis listen over bruke mottaksadresser og merkelapper</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Åpne en Raven: URI eller betalingsetterspørring</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Kommandolinjevalg</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 bak</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Siste mottatte blokk ble generert for %1 siden.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Transaksjoner etter dette vil ikke være synlige enda.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Feil</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Advarsel</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informasjon</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Oppdatert</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 klient</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Kobler til likemannsnettverket...</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Laster ned...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Dato: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Beløp: %1:
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Type: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Merkelapp: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Adresse: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Sendt transaksjon</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Innkommende transaksjon</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Lommeboken er &lt;b&gt;kryptert&lt;/b&gt; og for tiden &lt;b&gt;låst opp&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Lommeboken er &lt;b&gt;kryptert&lt;/b&gt; og for tiden &lt;b&gt;låst&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <translation>En fatal feil har inntruffet. Raven kan ikke lenger trygt fortsette, og må derfor avslutte.</translation>
     </message>
 </context>
 <context>
@@ -1610,6 +2674,14 @@
         <translation>Fjern</translation>
     </message>
     <message>
+        <source>Copy URI</source>
+        <translation>Kopier &amp;URI</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Kopier &amp;merkelapp</translation>
+    </message>
+    <message>
         <source>Copy amount</source>
         <translation>Kopier beløp</translation>
     </message>
@@ -1633,8 +2705,16 @@
         <translation>&amp;Lagre Bilde...</translation>
     </message>
     <message>
+        <source>URI</source>
+        <translation>URI:</translation>
+    </message>
+    <message>
         <source>Address</source>
         <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Mengde</translation>
     </message>
     <message>
         <source>Label</source>
@@ -1664,6 +2744,243 @@
         <translation>(ingen merkelapp)</translation>
     </message>
     </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    <message>
+        <source>Coin Control Features</source>
+        <translation>Myntkontroll Funksjoner</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Innganger..</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatisk valgt</translation>
+    </message>
+    <message>
+        <source>Insufficient funds!</source>
+        <translation>Utilstrekkelige midler!</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Mengde:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Støv:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Gebyr:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Etter Gebyr:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Veksel:</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Adresse:</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Advarsel:</translation>
+    </message>
+    <message>
+        <source>Unit:</source>
+        <translation>Desimaler</translation>
+    </message>
+    <message>
+        <source>Change IPFS/Txid Hash</source>
+        <translation>Endre IPFS/Txid kode</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Transaksjonsgebyr:</translation>
+    </message>
+    <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Bruk av standardgebyr kan ende med at transaksjonen tar flere timer, dager eller aldri blir verifisert. Vurder å velge avgift maneult eller å vente til du har verifisert hele kjeden.</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>Hvis den egendefinerte avgiften er satt til 1000 satoshis og transaksjonen bare er 250 bytes, da vil "per kilobyte" bare betale 250 satoshis i gebyr, mens "minstebeløp" betaler 1000 satoshis. For transaksjoner større enn en kilobyte vil begge betale for antall kilobyte.</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Betaling av bare minimumsavgiften går helt fint så lenge det er mindre transaksjonsvolum enn plass i blokkene. Men vær klar over at dette kan ende opp i en transaksjon som aldri blir bekreftet når det er mer etterspørsel etter Raven-transaksjoner enn nettverket kan behandle.</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Anbefalt:</translation>
+    </message>
+    <message>
+        <source>IPFS Hash</source>
+        <translation>IPFS kode</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>lagt til som transaksjonsgebyr</translation>
+    </message>
+    <message>
+        <source>Transaction ID Copied</source>
+        <translation>Transaksjons-ID kopiert</translation>
+    </message>
+    <message>
+        <source>Asset transaction sent to network:</source>
+        <translation>Aktivumtransasjon sendt til nettverk:</translation>
+    </message>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    <message>
+        <source>Asset Balances</source>
+        <translation>Aktivumbeholdning</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Søk</translation>
+    </message>
+    <message>
+        <source>Address List</source>
+        <translation>Adresseliste</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Saldo:</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>lagt til som transaksjonsgebyr</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Totalantall: %1:</translation>
+    </message>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    <message>
+        <source>This is an asset payment</source>
+        <translation>Dette er en aktivumoverføring</translation>
+    </message>
+    <message>
+        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
+        <translation>En melding som var tilknyttet ravenen: URI vil bli lagret med transaksjonen for din oversikt. Denne meldingen vil ikke bli sendt over Raven-nettverket.</translation>
+    </message>
+    <message>
+        <source>Memo:</source>
+        <translation>Memo:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>Enter a label for this address to add it to the list of used addresses</source>
+        <translation>Skriv inn en merkelapp for denne adressen for å legge den til listen av brukte adresser</translation>
+    </message>
+    <message>
+        <source>&amp;Label:</source>
+        <translation>&amp;Merkelapp:</translation>
+    </message>
+    <message>
+        <source>Asset:</source>
+        <translation>Aktivum</translation>
+    </message>
+    <message>
+        <source>The Raven address to send the payment to</source>
+        <translation>Raven-adressen det skal overføres til</translation>
+    </message>
+    <message>
+        <source>Choose previously used address</source>
+        <translation>Velg tidligere brukt adresse</translation>
+    </message>
+    <message>
+        <source>Alt+A</source>
+        <translation>Alt+A</translation>
+    </message>
+    <message>
+        <source>Paste address from clipboard</source>
+        <translation>Lim inn adresse fra utklippstavlen</translation>
+    </message>
+    <message>
+        <source>Alt+P</source>
+        <translation>Alt+P</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Fjern denne oppføringen</translation>
+    </message>
+    <message>
+        <source>Message:</source>
+        <translation>&amp;Melding:</translation>
+    </message>
+    <message>
+        <source>Transfer &amp;To:</source>
+        <translation>Overfør til:</translation>
+    </message>
+    <message>
+        <source>Transfer Administrator Asset</source>
+        <translation>Overfør administrator aktivum</translation>
+    </message>
+    <message>
+        <source>This is an unauthenticated payment request.</source>
+        <translation>Dette er en uautorisert betalingsetterspørring.</translation>
+    </message>
+    <message>
+        <source>Transfer to:</source>
+        <translation>Overfør til:</translation>
+    </message>
+    <message>
+        <source>A&amp;mount:</source>
+        <translation>Antall:</translation>
+    </message>
+    <message>
+        <source>This is an authenticated payment request.</source>
+        <translation>Dette er en autorisert betalingsetterspørring.</translation>
+    </message>
+    <message>
+        <source>Enter a label for this address to add it to your address book</source>
+        <translation>Skriv inn en merkelapp for denne adressen for å legge den til listen av brukte adresser</translation>
+    </message>
+    <message>
+        <source>Select to view administrator assets to transfer</source>
+        <translation>Vis administrator aktivum</translation>
+    </message>
+    <message>
+        <source>Select an asset to transfer</source>
+        <translation>Velg aktivum for overføring</translation>
+    </message>
+    <message>
+        <source>This restricted asset has been frozen globally. No transfers can be sent on the network.</source>
+        <translation>Dette begrensede aktivumet har blitt låst golbalt. Det kan ikke sendes på nettverket.</translation>
+    </message>
+    <message>
+        <source>Wallet Balance</source>
+        <translation>Lommeboksaldo</translation>
+    </message>
+    <message>
+        <source>Select an administrator asset to transfer</source>
+        <translation>Velg administrator aktivum for overføring</translation>
+    </message>
+    <message>
+        <source>Warning: Transferring administrator asset</source>
+        <translation>Advarsel: Overføring av administrator aktivum.</translation>
+    </message>
+</context>
 <context>
     <name>SendCoinsDialog</name>
     <message>
@@ -1727,6 +3044,14 @@
         <translation>Velg...</translation>
     </message>
     <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Bruk av standardgebyr kan ende med at transaksjonen tar flere timer, dager eller aldri blir verifisert. Vurder å velge avgift maneult eller å vente til du har verifisert hele kjeden.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Advarsel: Beregning av gebyr er ikke mulig</translation>
+    </message>
+    <message>
         <source>collapse fee-settings</source>
         <translation>Legg ned gebyrinnstillinger</translation>
     </message>
@@ -1741,10 +3066,6 @@
     <message>
         <source>Hide</source>
         <translation>Skjul</translation>
-    </message>
-    <message>
-        <source>total at least</source>
-        <translation>minstebeløp</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
@@ -1767,14 +3088,6 @@
         <translation>(Smartgebyr ikke innført ennå. Dette tar vanligvis noen blokker...)</translation>
     </message>
     <message>
-        <source>normal</source>
-        <translation>normal</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>rask</translation>
-    </message>
-    <message>
         <source>Send to multiple recipients at once</source>
         <translation>Send til flere enn en mottaker</translation>
     </message>
@@ -1789,6 +3102,10 @@
     <message>
         <source>Dust:</source>
         <translation>Støv:</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Tid for bekreftelse:</translation>
     </message>
     <message>
         <source>Clear &amp;All</source>
@@ -1819,12 +3136,92 @@
         <translation>Kopier gebyr</translation>
     </message>
     <message>
+        <source>Copy after fee</source>
+        <translation>Kopier etter gebyr</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Kopier bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Kopier støv</translation>
+    </message>
+    <message>
         <source>Copy change</source>
         <translation>Kopier veksel</translation>
     </message>
     <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blokker)</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 til %2</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to send?</source>
+        <translation>Er du sikker på du vil sende?</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>lagt til som transaksjonsgebyr</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Totalantall: %1:</translation>
+    </message>
+    <message>
         <source>or</source>
         <translation>eller</translation>
+    </message>
+    <message>
+        <source>Confirm send coins</source>
+        <translation>Bekreft sending</translation>
+    </message>
+    <message>
+        <source>The recipient address is not valid. Please recheck.</source>
+        <translation>Mottakeradressen er ugyldig. Vennligst sjekk.</translation>
+    </message>
+    <message>
+        <source>The amount to pay must be larger than 0.</source>
+        <translation>Antall må være større enn 0</translation>
+    </message>
+    <message>
+        <source>The amount exceeds your balance.</source>
+        <translation>Antall er større enn saldo</translation>
+    </message>
+    <message>
+        <source>Transaction creation failed!</source>
+        <translation>Opprettelse av transaksjonen feilet.</translation>
+    </message>
+    <message>
+        <source>The transaction was rejected with the following reason: %1</source>
+        <translation>Transaksjonen ble avvist: %1</translation>
+    </message>
+    <message>
+        <source>Payment request expired.</source>
+        <translation>Betalingsforespørsel utgått.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Betal kun nødvendig gebyr %1</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Advarsel: Ugyldig Ravenadresse</translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Advarsel: Ukjent vekseladresse</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Bekreft egendefinert vekseladresse</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation>Adressen du valgte for veksel, er ikke en del av denne lommeboken. Litt eller alt av mynter fra denne lommeboken kan bli sendt til denne adressen. Er du sikker?</translation>
     </message>
     <message>
         <source>(no label)</source>
@@ -1836,10 +3233,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>&amp;Beløp:</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>Betal &amp;Til:</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -1886,8 +3279,16 @@
         <translation>Melding:</translation>
     </message>
     <message>
+        <source>Send &amp;To:</source>
+        <translation>Send til:</translation>
+    </message>
+    <message>
         <source>This is an unauthenticated payment request.</source>
         <translation>Dette er en uautorisert betalingsetterspørring.</translation>
+    </message>
+    <message>
+        <source>Send to:</source>
+        <translation>Send til:</translation>
     </message>
     <message>
         <source>This is an authenticated payment request.</source>
@@ -1902,14 +3303,14 @@
         <translation>En melding som var tilknyttet ravenen: URI vil bli lagret med transaksjonen for din oversikt. Denne meldingen vil ikke bli sendt over Raven-nettverket.</translation>
     </message>
     <message>
-        <source>Pay To:</source>
-        <translation>Betal Til:</translation>
-    </message>
-    <message>
         <source>Memo:</source>
         <translation>Memo:</translation>
     </message>
-    </context>
+    <message>
+        <source>Enter a label for this address to add it to your address book</source>
+        <translation>Skriv inn en merkelapp for denne adressen for å legge den til listen av brukte adresser</translation>
+    </message>
+</context>
 <context>
     <name>SendConfirmationDialog</name>
     <message>
@@ -2060,6 +3461,10 @@
         <translation>ikke akseptert</translation>
     </message>
     <message>
+        <source>Transaction fee</source>
+        <translation>Transaksjonsgebyr:</translation>
+    </message>
+    <message>
         <source>Message</source>
         <translation>Melding</translation>
     </message>
@@ -2070,6 +3475,26 @@
     <message>
         <source>Transaction ID</source>
         <translation>Transaksjons-ID</translation>
+    </message>
+    <message>
+        <source>Transaction total size</source>
+        <translation>Transaksjonstørrelse </translation>
+    </message>
+    <message>
+        <source>Debug information</source>
+        <translation>Feilsøkingsinformasjon</translation>
+    </message>
+    <message>
+        <source>Transaction</source>
+        <translation>Transaksjon</translation>
+    </message>
+    <message>
+        <source>Inputs</source>
+        <translation>Innganger..</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Antall</translation>
     </message>
     </context>
 <context>
@@ -2086,8 +3511,20 @@
         <translation>Dato</translation>
     </message>
     <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
         <source>Label</source>
         <translation>Merkelapp</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Antall</translation>
+    </message>
+    <message>
+        <source>Asset</source>
+        <translation>Aktivum</translation>
     </message>
     <message>
         <source>Offline</source>
@@ -2098,12 +3535,52 @@
         <translation>Ubekreftet</translation>
     </message>
     <message>
+        <source>Generated but not accepted</source>
+        <translation>Generert men ikke akseptert</translation>
+    </message>
+    <message>
+        <source>Received with</source>
+        <translation>Mottatt med</translation>
+    </message>
+    <message>
+        <source>Received from</source>
+        <translation>Mottatt fra</translation>
+    </message>
+    <message>
         <source>Sent to</source>
         <translation>Sendt til</translation>
     </message>
     <message>
+        <source>Payment to yourself</source>
+        <translation>Betaling til deg selv</translation>
+    </message>
+    <message>
+        <source>Asset Issued</source>
+        <translation>Aktivum opprettet</translation>
+    </message>
+    <message>
+        <source>Assets Received</source>
+        <translation>Aktivum mottatt</translation>
+    </message>
+    <message>
+        <source>Assets Sent</source>
+        <translation>Aktivum sendt</translation>
+    </message>
+    <message>
         <source>(no label)</source>
         <translation>(ingen merkelapp)</translation>
+    </message>
+    <message>
+        <source>Transaction status. Hover over this field to show number of confirmations.</source>
+        <translation>Transaksjonstatus. Hold over dette feltet for å vise antall bekreftelser.</translation>
+    </message>
+    <message>
+        <source>Date and time that the transaction was received.</source>
+        <translation>Dato og tidspunkt transaksjonen ble mottatt.</translation>
+    </message>
+    <message>
+        <source>Type of transaction.</source>
+        <translation>Transaksjonstype.</translation>
     </message>
     </context>
 <context>
@@ -2133,6 +3610,10 @@
         <translation>Dette året</translation>
     </message>
     <message>
+        <source>Received with</source>
+        <translation>Mottatt med</translation>
+    </message>
+    <message>
         <source>Sent to</source>
         <translation>Sendt til</translation>
     </message>
@@ -2141,8 +3622,24 @@
         <translation>Til deg selv</translation>
     </message>
     <message>
+        <source>Other</source>
+        <translation>Annet</translation>
+    </message>
+    <message>
+        <source>Min amount</source>
+        <translation>Minstebeløp</translation>
+    </message>
+    <message>
+        <source>Asset name</source>
+        <translation>Aktivumnavn</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Kopier adresse</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Kopier &amp;merkelapp</translation>
     </message>
     <message>
         <source>Copy amount</source>
@@ -2153,12 +3650,40 @@
         <translation>Kopier transaksjons-ID</translation>
     </message>
     <message>
+        <source>Copy raw transaction</source>
+        <translation>Kopier rå transaksjon</translation>
+    </message>
+    <message>
+        <source>Copy full transaction details</source>
+        <translation>Kopier alle transaksjonsdetaljer</translation>
+    </message>
+    <message>
+        <source>Edit label</source>
+        <translation>Rediger merkelapp</translation>
+    </message>
+    <message>
+        <source>Show transaction details</source>
+        <translation>Vis transaksjonsdetaljer</translation>
+    </message>
+    <message>
+        <source>Export Transaction History</source>
+        <translation>Eksporter transaksjonshistorie</translation>
+    </message>
+    <message>
         <source>Comma separated file (*.csv)</source>
         <translation>Kommaseparert fil (*.csv)</translation>
     </message>
     <message>
+        <source>Confirmed</source>
+        <translation>Bekreftet</translation>
+    </message>
+    <message>
         <source>Date</source>
         <translation>Dato</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
     </message>
     <message>
         <source>Label</source>
@@ -2169,10 +3694,30 @@
         <translation>Adresse</translation>
     </message>
     <message>
+        <source>Asset</source>
+        <translation>Aktivum</translation>
+    </message>
+    <message>
         <source>Exporting Failed</source>
         <translation>Eksportering feilet</translation>
     </message>
-    </context>
+    <message>
+        <source>Exporting Successful</source>
+        <translation>Eksport vellykket</translation>
+    </message>
+    <message>
+        <source>Asset Received</source>
+        <translation>Aktivum mottatt</translation>
+    </message>
+    <message>
+        <source>Asset Sent</source>
+        <translation>Aktivum sendt</translation>
+    </message>
+    <message>
+        <source>to</source>
+        <translation>til</translation>
+    </message>
+</context>
 <context>
     <name>UnitDisplayStatusBarControl</name>
     <message>
@@ -2185,9 +3730,33 @@
     </context>
 <context>
     <name>WalletModel</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Send mynter</translation>
+    </message>
     </context>
 <context>
     <name>WalletView</name>
+    <message>
+        <source>&amp;Export</source>
+        <translation>&amp;Eksporter</translation>
+    </message>
+    <message>
+        <source>Export the data in the current tab to a file</source>
+        <translation>Eksporter data fra nåværende fane til fil</translation>
+    </message>
+    <message>
+        <source>Backup Wallet</source>
+        <translation>Lag &amp;Sikkerhetskopi av Lommebok...</translation>
+    </message>
+    <message>
+        <source>Backup Failed</source>
+        <translation>Sikkerhetskopi feilet</translation>
+    </message>
+    <message>
+        <source>Backup Successful</source>
+        <translation>Sikkerhetskopi vellykket</translation>
+    </message>
     </context>
 <context>
     <name>raven-core</name>
@@ -2210,6 +3779,10 @@
     <message>
         <source>Accept command line and JSON-RPC commands</source>
         <translation>Ta imot kommandolinje- og JSON-RPC-kommandoer</translation>
+    </message>
+    <message>
+        <source>Distributed under the MIT software license, see the accompanying file %s or %s</source>
+        <translation>Distribuert under MIT programvare lisensen. Les medfølgende fil %s eller %s</translation>
     </message>
     <message>
         <source>If &lt;category&gt; is not supplied or if &lt;category&gt; = 1, output all debugging information.</source>
@@ -2250,6 +3823,10 @@
     <message>
         <source>Raven Core</source>
         <translation>Raven Core</translation>
+    </message>
+    <message>
+        <source>The %s developers</source>
+        <translation>Utviklerne av %s</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>
@@ -2360,12 +3937,16 @@
         <translation>Ugyldig eller ingen skaperblokk funnet. Feil datamappe for nettverk?</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>Ugyldig -onion adresse: '%s'</translation>
-    </message>
-    <message>
         <source>Keep the transaction memory pool below &lt;n&gt; megabytes (default: %u)</source>
         <translation>Hold transaksjonsminnet under &lt;n&gt; megabytes (standard: %u)</translation>
+    </message>
+    <message>
+        <source>Loading P2P addresses...</source>
+        <translation>Laster P2P adresser...</translation>
+    </message>
+    <message>
+        <source>Loading banlist...</source>
+        <translation>Laster svarteliste...</translation>
     </message>
     <message>
         <source>Not enough file descriptors available.</source>
@@ -2392,12 +3973,20 @@
         <translation>Beskjæringsmodus er ikke kompatibel med -txindex.</translation>
     </message>
     <message>
-        <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
-        <translation>Sett databasen sin størrelse på hurtigbufferen i megabytes (%d til %d, standardverdi: %d)</translation>
+        <source>Rebuild chain state and block index from the blk*.dat files on disk</source>
+        <translation>Gjennoppbygger kjedestatus og blokk-indeks fra blk*.dat filene på datamaskinen.</translation>
     </message>
     <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>Sett maks blokkstørrelse i bytes (standardverdi: %d)</translation>
+        <source>Rebuild chain state from the currently indexed blocks</source>
+        <translation>Gjennoppbygger kjedestatus fra indekserte blokker</translation>
+    </message>
+    <message>
+        <source>Rewinding blocks...</source>
+        <translation>Reverserer blokker...</translation>
+    </message>
+    <message>
+        <source>Set database cache size in megabytes (%d to %d, default: %d)</source>
+        <translation>Sett databasen sin størrelse på hurtigbufferen i megabytes (%d til %d, standardverdi: %d)</translation>
     </message>
     <message>
         <source>Specify wallet file (within data directory)</source>
@@ -2406,6 +3995,10 @@
     <message>
         <source>The source code is available from %s.</source>
         <translation>Kildekoden er tilgjengelig fra %s.</translation>
+    </message>
+    <message>
+        <source>Transaction fee and change calculation failed</source>
+        <translation>Beregning av transaksjonsgebyr og veksel feilet</translation>
     </message>
     <message>
         <source>Unsupported argument -benchmark ignored, use -debug=bench.</source>
@@ -2420,6 +4013,10 @@
         <translation>Feil: Argumentet -tor er ikke støttet, bruk -onion.</translation>
     </message>
     <message>
+        <source>Upgrading UTXO database</source>
+        <translation>Oppgraderer UTXO databasen</translation>
+    </message>
+    <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Bruk UPnP for å sette opp lytteport (standardverdi: %u)</translation>
     </message>
@@ -2430,10 +4027,6 @@
     <message>
         <source>Verifying blocks...</source>
         <translation>Verifiserer blokker...</translation>
-    </message>
-    <message>
-        <source>Verifying wallet...</source>
-        <translation>Verifiserer lommebok...</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
@@ -2450,10 +4043,6 @@
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
         <translation>Bind til gitt adresse og hvitlist peers som kobler seg til den. Bruk [host]:port notasjon for IPv6</translation>
-    </message>
-    <message>
-        <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>Bind til gitt adresse for å lytte for JSON-RPC-tilkoblinger. Bruk [host]:port notasjon for IPv6. Dette alternativet kan angis flere ganger (standardverdi: bind til alle grensesnitt)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
@@ -2492,10 +4081,6 @@
         <translation>Bruk tilfeldig identitet for hver proxytilkobling. Dette muliggjør TOR stream isolasjon (standardverdi: %u)</translation>
     </message>
     <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>Sett maksimum størrelse for transaksjoner med høy prioritet / lavt gebyr, i bytes (standardverdi: %d)</translation>
-    </message>
-    <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
         <translation>Transaksjonsbeløpet er for lite til å sendes etter at gebyret er fratrukket</translation>
     </message>
@@ -2526,6 +4111,10 @@
     <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Feil ved lesing fra database, stenger ned.</translation>
+    </message>
+    <message>
+        <source>Error upgrading chainstate database</source>
+        <translation>Feil ved oppgradering av kjedestatus-database</translation>
     </message>
     <message>
         <source>Imports blocks from external blk000??.dat file on startup</source>
@@ -2570,10 +4159,6 @@
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>Send spor-/feilsøkingsinformasjon til konsollen istedenfor filen debug.log</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Send transaksjoner uten transaksjonsgebyr hvis mulig (standardverdi: %u)</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -2628,8 +4213,16 @@
         <translation>Brukernavn for JSON-RPC forbindelser</translation>
     </message>
     <message>
+        <source>Verifying wallet(s)...</source>
+        <translation>Verifiserer lommebok...</translation>
+    </message>
+    <message>
         <source>Warning</source>
         <translation>Advarsel</translation>
+    </message>
+    <message>
+        <source>Warning: unknown new rules activated (versionbit %i)</source>
+        <translation>Advarsel: ukjente nye regler aktivert. (Versjonsbit %i)</translation>
     </message>
     <message>
         <source>Whether to operate in a blocks only mode (default: %u)</source>
@@ -2654,10 +4247,6 @@
     <message>
         <source>Allow DNS lookups for -addnode, -seednode and -connect</source>
         <translation>Tillat oppslag i DNS for -addnode, -seednode og -connect</translation>
-    </message>
-    <message>
-        <source>Loading addresses...</source>
-        <translation>Laster adresser...</translation>
     </message>
     <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
@@ -2712,6 +4301,10 @@
         <translation>Bruk separate SOCKS5 proxyer for å nå noder via Tor skjulte tjenester (standardverdi: %s)</translation>
     </message>
     <message>
+        <source>%s is set very high!</source>
+        <translation>%s er satt veldig høyt!</translation>
+    </message>
+    <message>
         <source>(default: %s)</source>
         <translation>(standardverdi: %s)</translation>
     </message>
@@ -2726,10 +4319,6 @@
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
         <translation>Inkludere IP-adresser i feilsøkingslogg (standardverdi: %u)</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Ugyldig -proxy adresse: '%s'</translation>
     </message>
     <message>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: %u or testnet: %u)</source>
@@ -2772,6 +4361,10 @@
         <translation>Angi størrelse på nøkkel-lager til &lt;n&gt; (standardverdi: %u)</translation>
     </message>
     <message>
+        <source>Set maximum BIP141 block weight (default: %d)</source>
+        <translation>Sett maksimal BIP141 blokk tyngde (standard: %d)</translation>
+    </message>
+    <message>
         <source>Set the number of threads to service RPC calls (default: %d)</source>
         <translation>Sett antall tråder til betjening av RPC-kall (standardverdi: %d)</translation>
     </message>
@@ -2792,8 +4385,36 @@
         <translation>Bruk ubekreftet veksel ved sending av transaksjoner (standardverdi: %u)</translation>
     </message>
     <message>
+        <source>Starting network threads...</source>
+        <translation>Starter nettverkstråder...</translation>
+    </message>
+    <message>
+        <source>The wallet will avoid paying less than the minimum relay fee.</source>
+        <translation>Lommeboken vil ikke betale mindre enn den minste videresendingsavgiften.</translation>
+    </message>
+    <message>
+        <source>This is the minimum transaction fee you pay on every transaction.</source>
+        <translation>Dette er det minste transaksjonsgebyret du kan betale for hver transaksjon.</translation>
+    </message>
+    <message>
+        <source>This is the transaction fee you will pay if you send a transaction.</source>
+        <translation>Dette er transaksjonsgebyret du må betale hvis du sender en transaksjon.</translation>
+    </message>
+    <message>
         <source>Threshold for disconnecting misbehaving peers (default: %u)</source>
         <translation>Grenseverdi for å koble fra noder med dårlig oppførsel (standardverdi: %u)</translation>
+    </message>
+    <message>
+        <source>Transaction amounts must not be negative</source>
+        <translation>Transaksjonen kan ikke ha negativt mengde</translation>
+    </message>
+    <message>
+        <source>Transaction has too long of a mempool chain</source>
+        <translation>Transaksjonen har for lang mempool-kjede</translation>
+    </message>
+    <message>
+        <source>Transaction must have at least one recipient</source>
+        <translation>Transaksjonen må ha minst en mottaker</translation>
     </message>
     <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
@@ -2808,10 +4429,6 @@
         <translation>Laster blokkindeks...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Legg til node for tilkobling og hold forbindelsen åpen</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Laster lommebok...</translation>
     </message>
@@ -2820,16 +4437,8 @@
         <translation>Kan ikke nedgradere lommebok</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Kan ikke skrive standardadresse</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Leser gjennom...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Ferdig med lasting</translation>
     </message>
     <message>
         <source>Error</source>

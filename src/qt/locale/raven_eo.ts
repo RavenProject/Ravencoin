@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="eo">
+<TS language="eo" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -135,260 +133,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Subskribi &amp;mesaĝon...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Sinkronigante kun reto...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Superrigardo</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Nodo</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Vidigi ĝeneralan superrigardon de la monujo</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Transakcioj</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Esplori historion de transakcioj</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>&amp;Eliri</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Eliri la aplikaĵon</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Pri &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Vidigi informojn pri Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Agordoj...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>Ĉifri &amp;Monujon...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Krei sekurkopion de la monujo...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>Ŝanĝi &amp;Pasfrazon...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Sendaj adresoj...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Ricevaj adresoj...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Malfermi &amp;URI-on...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Reindeksado de blokoj sur disko...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Sendi monon al Bitmon-adreso</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Krei alilokan sekurkopion de monujo</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Ŝanĝi la pasfrazon por ĉifri la monujon</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>Sen&amp;cimiga fenestro</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Malfermi konzolon de sencimigo kaj diagnozo</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Kontroli mesaĝon...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Bitmono</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Monujo</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Sendi</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Ricevi</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Montri / Kaŝi</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Montri aŭ kaŝi la ĉefan fenestron</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Ĉifri la privatajn ŝlosilojn de via monujo</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Subskribi mesaĝojn per via Bitmon-adresoj por pravigi, ke vi estas la posedanto</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Kontroli mesaĝojn por kontroli ĉu ili estas subskribitaj per specifaj Bitmon-adresoj</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Dosiero</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Agordoj</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Helpo</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Langeto-breto</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Peti pagon (kreas QR-kodojn kaj URI-ojn kun prefikso raven:)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Vidigi la liston de uzitaj sendaj adresoj kaj etikedoj</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Vidigi la liston de uzitaj ricevaj adresoj kaj etikedoj</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Malfermi raven:-URI-on aŭ pagpeton</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Komandliniaj agordaĵoj</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>mankas %1</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Lasta ricevita bloko kreiĝis antaŭ %1.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Transakcioj por tio ankoraŭ ne videblas.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Eraro</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Averto</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informoj</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Ĝisdata</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Ĝisdatigante...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Dato: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Sumo: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Tipo: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Etikedo: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Adreso: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Sendita transakcio</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Envenanta transakcio</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Monujo estas &lt;b&gt;ĉifrita&lt;/b&gt; kaj aktuale &lt;b&gt;malŝlosita&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Monujo estas &lt;b&gt;ĉifrita&lt;/b&gt; kaj aktuale &lt;b&gt;ŝlosita&lt;/b&gt;</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -462,6 +219,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -508,6 +268,12 @@
     </message>
 </context>
 <context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -548,10 +314,18 @@
         <source>Error</source>
         <translation>Eraro</translation>
     </message>
-    <message numerus="yes">
-        <source>%n GB of free space available</source>
-        <translation><numerusform>%n gigabajto de libera loko disponeble</numerusform><numerusform>%n gigabajtoj de libera loko disponebla.</numerusform></translation>
-    </message>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
     </context>
 <context>
     <name>ModalOverlay</name>
@@ -563,6 +337,9 @@
         <source>Last block time</source>
         <translation>Horo de la lasta bloko</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -600,14 +377,6 @@
     <message>
         <source>MB</source>
         <translation>MB</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside</source>
-        <translation>Akcepti konektojn el ekstere</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Permesi envenantajn konektojn</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
@@ -743,10 +512,6 @@
     <message>
         <source>Mined balance that has not yet matured</source>
         <translation>Minita saldo, kiu ankoraŭ ne maturiĝis</translation>
-    </message>
-    <message>
-        <source>Balances</source>
-        <translation>Saldoj</translation>
     </message>
     <message>
         <source>Total:</source>
@@ -899,10 +664,6 @@
         <translation>&amp;Reta Trafiko</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Forigi ĉion</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Totaloj</translation>
     </message>
@@ -923,28 +684,249 @@
         <translation>Malplenigi konzolon</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Uzu la sagojn supran kaj malsupran por esplori la historion, kaj &lt;b&gt;stir-L&lt;/b&gt; por malplenigi la ekranon.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Tajpu &lt;b&gt;help&lt;/b&gt; por superrigardo de la disponeblaj komandoj.</translation>
     </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
     <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
+        <source>Sign &amp;message...</source>
+        <translation>Subskribi &amp;mesaĝon...</translation>
     </message>
     <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
+        <source>Synchronizing with network...</source>
+        <translation>Sinkronigante kun reto...</translation>
     </message>
     <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
+        <source>&amp;Overview</source>
+        <translation>&amp;Superrigardo</translation>
     </message>
     <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
+        <source>Node</source>
+        <translation>Nodo</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Vidigi ĝeneralan superrigardon de la monujo</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Transakcioj</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Esplori historion de transakcioj</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>&amp;Eliri</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Eliri la aplikaĵon</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Pri &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Vidigi informojn pri Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Agordoj...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>Ĉifri &amp;Monujon...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Krei sekurkopion de la monujo...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>Ŝanĝi &amp;Pasfrazon...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Sendaj adresoj...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Ricevaj adresoj...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Malfermi &amp;URI-on...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Reindeksado de blokoj sur disko...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Sendi monon al Bitmon-adreso</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Krei alilokan sekurkopion de monujo</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Ŝanĝi la pasfrazon por ĉifri la monujon</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Malfermi konzolon de sencimigo kaj diagnozo</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Kontroli mesaĝon...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Bitmono</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Monujo</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Sendi</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Ricevi</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Montri / Kaŝi</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Montri aŭ kaŝi la ĉefan fenestron</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Ĉifri la privatajn ŝlosilojn de via monujo</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Subskribi mesaĝojn per via Bitmon-adresoj por pravigi, ke vi estas la posedanto</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Kontroli mesaĝojn por kontroli ĉu ili estas subskribitaj per specifaj Bitmon-adresoj</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Dosiero</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Helpo</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Peti pagon (kreas QR-kodojn kaj URI-ojn kun prefikso raven:)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Vidigi la liston de uzitaj sendaj adresoj kaj etikedoj</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Vidigi la liston de uzitaj ricevaj adresoj kaj etikedoj</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Malfermi raven:-URI-on aŭ pagpeton</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Komandliniaj agordaĵoj</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>mankas %1</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Lasta ricevita bloko kreiĝis antaŭ %1.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Transakcioj por tio ankoraŭ ne videblas.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Eraro</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Averto</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informoj</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Ĝisdata</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Ĝisdatigante...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Dato: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Sumo: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Tipo: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Etikedo: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Adreso: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Sendita transakcio</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Envenanta transakcio</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Monujo estas &lt;b&gt;ĉifrita&lt;/b&gt; kaj aktuale &lt;b&gt;malŝlosita&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Monujo estas &lt;b&gt;ĉifrita&lt;/b&gt; kaj aktuale &lt;b&gt;ŝlosita&lt;/b&gt;</translation>
     </message>
     </context>
 <context>
@@ -1027,6 +1009,15 @@
         <source>(no label)</source>
         <translation>(neniu etikedo)</translation>
     </message>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -1118,10 +1109,6 @@
         <translation>&amp;Sumo:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>&amp;Ricevonto:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Etikedo:</translation>
     </message>
@@ -1156,10 +1143,6 @@
     <message>
         <source>Enter a label for this address to add it to the list of used addresses</source>
         <translation>Tajpu etikedon por tiu ĉi adreso por aldoni ĝin al la listo de uzitaj adresoj</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Pagi Al:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -1396,10 +1379,6 @@
         <translation>Geneza bloko aŭ netrovita aŭ neĝusta. Ĉu eble la datadir de la reto malĝustas?</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>Nevalida -onion-adreso: '%s'</translation>
-    </message>
-    <message>
         <source>Not enough file descriptors available.</source>
         <translation>Nesufiĉa nombro de dosierpriskribiloj disponeblas.</translation>
     </message>
@@ -1410,10 +1389,6 @@
     <message>
         <source>Verifying blocks...</source>
         <translation>Kontrolado de blokoj...</translation>
-    </message>
-    <message>
-        <source>Verifying wallet...</source>
-        <translation>Kontrolado de monujo...</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
@@ -1476,14 +1451,6 @@
         <translation>Permesi DNS-elserĉojn por -addnote, -seednote kaj -connect</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Ŝarĝante adresojn...</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Nevalid adreso -proxy: '%s'</translation>
-    </message>
-    <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
         <translation>Nekonata reto specifita en -onlynet: '%s'</translation>
     </message>
@@ -1496,10 +1463,6 @@
         <translation>Ŝarĝante blok-indekson...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Aldoni nodon por alkonekti kaj provi daŭrigi la malferman konekton</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Ŝargado de monujo...</translation>
     </message>
@@ -1508,16 +1471,8 @@
         <translation>Ne eblas malpromocii monujon</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Ne eblas skribi defaŭltan adreson</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Reskanado...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Ŝargado finiĝis</translation>
     </message>
     <message>
         <source>Error</source>

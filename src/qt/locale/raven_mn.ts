@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="mn">
+<TS language="mn" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -59,126 +57,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>&amp;Зурвас хавсаргах...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Сүлжээтэй тааруулж байна...</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Нод</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>Гүйлгээнүүд</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Гүйлгээнүүдийн түүхийг харах</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>Гарах</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Програмаас Гарах</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>&amp;Клиентийн тухай</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Клиентийн тухай мэдээллийг харуул</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Сонголтууд...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Түрүйвчийг цоожлох...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Түрүйвчийг Жоорлох...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Нууц Үгийг Солих...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>Хүлээн авах хаяг</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Түрүйвчийг цоожлох нууц үгийг солих</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Оношилгоо ба засварын консолыг онгойлго</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Биткойн</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Түрүйвч</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Харуул / Нуу</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Файл</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Тохиргоо</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Тусламж</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Алдаа</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Мэдээллэл</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Шинэчлэгдсэн</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Гадагшаа гүйлгээ</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Дотогшоо гүйлгээ</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Түрүйвч &lt;b&gt;цоожтой&lt;/b&gt; ба одоогоор цоож &lt;b&gt;онгорхой&lt;/b&gt; байна</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Түрүйвч &lt;b&gt;цоожтой&lt;/b&gt; ба одоогоор цоож &lt;b&gt;хаалттай&lt;/b&gt; байна</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -204,6 +95,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -220,6 +114,12 @@
     </context>
 <context>
     <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -240,11 +140,26 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Last block time</source>
         <translation>Сүүлийн блокийн хугацаа</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -366,6 +281,121 @@
     </message>
     </context>
 <context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>&amp;Зурвас хавсаргах...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Сүлжээтэй тааруулж байна...</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Нод</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>Гүйлгээнүүд</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Гүйлгээнүүдийн түүхийг харах</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>Гарах</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Програмаас Гарах</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>&amp;Клиентийн тухай</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Клиентийн тухай мэдээллийг харуул</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Сонголтууд...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Түрүйвчийг цоожлох...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Түрүйвчийг Жоорлох...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Нууц Үгийг Солих...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>Хүлээн авах хаяг</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Түрүйвчийг цоожлох нууц үгийг солих</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Оношилгоо ба засварын консолыг онгойлго</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Биткойн</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Түрүйвч</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Харуул / Нуу</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Файл</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Тусламж</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Алдаа</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Мэдээллэл</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Шинэчлэгдсэн</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Гадагшаа гүйлгээ</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Дотогшоо гүйлгээ</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Түрүйвч &lt;b&gt;цоожтой&lt;/b&gt; ба одоогоор цоож &lt;b&gt;онгорхой&lt;/b&gt; байна</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Түрүйвч &lt;b&gt;цоожтой&lt;/b&gt; ба одоогоор цоож &lt;b&gt;хаалттай&lt;/b&gt; байна</translation>
+    </message>
+    </context>
+<context>
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>&amp;Amount:</source>
@@ -401,6 +431,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -456,10 +495,6 @@
         <translation>Дүн:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>Тѳлѳх &amp;хаяг:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Шошго:</translation>
     </message>
@@ -478,10 +513,6 @@
     <message>
         <source>Message:</source>
         <translation>Зурвас:</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Тѳлѳх хаяг:</translation>
     </message>
     </context>
 <context>
@@ -562,14 +593,6 @@
         <translation>Мэдээллэл</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Хаягуудыг ачааллаж байна...</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Эдгээр прокси хаягнууд буруу байна: '%s'</translation>
-    </message>
-    <message>
         <source>Insufficient funds</source>
         <translation>Таны дансны үлдэгдэл хүрэлцэхгүй байна</translation>
     </message>
@@ -578,20 +601,12 @@
         <translation>Блокийн индексүүдийг ачааллаж байна...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Холболт хийхийн тулд мѳн холболтой онгорхой хадгалхын тулд шинэ нод нэм</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Түрүйвчийг ачааллаж байна...</translation>
     </message>
     <message>
         <source>Rescanning...</source>
         <translation>Ахин уншиж байна...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Ачааллаж дууслаа</translation>
     </message>
     <message>
         <source>Error</source>

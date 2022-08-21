@@ -32,19 +32,19 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <property name="spacing">
-      <number>34</number>
+      <number>20</number>
      </property>
      <property name="leftMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <property name="topMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <property name="rightMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <property name="bottomMargin">
-      <number>40</number>
+      <number>20</number>
      </property>
      <item>
       <widget class="QFrame" name="frameCoinControl">
@@ -593,6 +593,12 @@
      </item>
      <item>
       <widget class="QFrame" name="frameAssetData">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>220</height>
+        </size>
+       </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
@@ -826,6 +832,13 @@
               </property>
               <property name="placeholderText">
                <string>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="openIpfsButton">
+              <property name="text">
+               <string>Browse IPFS</string>
               </property>
              </widget>
             </item>

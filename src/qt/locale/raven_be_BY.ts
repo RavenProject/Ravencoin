@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="be_BY">
+<TS language="be_BY" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -219,256 +217,19 @@
     </message>
 </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Падпісаць паведамленне...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Сінхранізацыя з сецівам...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>Агляд</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Вузел</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Паказвае агульныя звесткі аб гаманцы</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>Транзакцыі</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Праглядзець гісторыю транзакцый</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>Выйсці</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Выйсці з праграмы</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Аб Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Паказаць інфармацыю аб Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>Опцыі...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>Зашыфраваць Гаманец...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>Стварыць копію гаманца...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Change Passphrase...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>Адрасы дасылання...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>Адрасы прымання...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Адчыниць &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Пераіндэксацыя блокаў на дыску...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Даслаць манеты на Біткойн-адрас</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Зрабіце копію гаманца ў іншае месца</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Змяніць пароль шыфравання гаманца</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>Вакно адладкі</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Адкрыць кансоль дыягностыкі і адладкі</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>Праверыць паведамленне...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Біткойн</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Гаманец</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>Даслаць</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>Атрымаць</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Паказаць / Схаваць</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Паказаць альбо схаваць галоўнае вакно</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Зашыфраваць прыватныя ключы, якия належаць вашаму гаманцу</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Падпісаць паведамленне з дапамогай Біткойн-адраса каб даказаць, што яно належыць вам</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Спраўдзіць паведамленне з дапамогай Біткойн-адраса каб даказаць, што яно належыць вам</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>Ф&amp;айл</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>Наладкі</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>Дапамога</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Запатрабаваць плацёж (генеруецца QR-код для біткойн URI)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Паказаць спіс адрасоў і метак для дасылання</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Паказаць спіс адрасоў і метак для прымання</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Адкрыць біткойн: URI ці запыт плацяжу</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>Опцыі каманднага радка</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 таму</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Апошні прыняты блок генераваны %1 таму.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Транзакцыи пасля гэтай не будуць бачныя.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Памылка</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Увага</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Інфармацыя</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Сінхранізавана</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Наганяем...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Дата: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Колькасць: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Тып: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Метка: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Адрас: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Дасланыя транзакцыі</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Прынятыя транзакцыі</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Гаманец &lt;b&gt;зашыфраваны&lt;/b&gt; і зараз &lt;b&gt;разблакаваны&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Гаманец &lt;b&gt;зашыфраваны&lt;/b&gt; і зараз &lt;b&gt;заблакаваны&lt;/b&gt;</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -590,6 +351,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -648,6 +412,12 @@
     </message>
     </context>
 <context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>(%1-bit)</source>
@@ -682,11 +452,26 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
         <translation>Форма</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -752,6 +537,247 @@
     </message>
     </context>
 <context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Падпісаць паведамленне...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Сінхранізацыя з сецівам...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>Агляд</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Вузел</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Паказвае агульныя звесткі аб гаманцы</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>Транзакцыі</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Праглядзець гісторыю транзакцый</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>Выйсці</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Выйсці з праграмы</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Аб Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Паказаць інфармацыю аб Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>Опцыі...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>Зашыфраваць Гаманец...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>Стварыць копію гаманца...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Change Passphrase...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>Адрасы дасылання...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>Адрасы прымання...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Адчыниць &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Пераіндэксацыя блокаў на дыску...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Даслаць манеты на Біткойн-адрас</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Зрабіце копію гаманца ў іншае месца</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Змяніць пароль шыфравання гаманца</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Адкрыць кансоль дыягностыкі і адладкі</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>Праверыць паведамленне...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Біткойн</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Гаманец</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>Даслаць</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>Атрымаць</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Паказаць / Схаваць</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Паказаць альбо схаваць галоўнае вакно</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Зашыфраваць прыватныя ключы, якия належаць вашаму гаманцу</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Падпісаць паведамленне з дапамогай Біткойн-адраса каб даказаць, што яно належыць вам</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Спраўдзіць паведамленне з дапамогай Біткойн-адраса каб даказаць, што яно належыць вам</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>Ф&amp;айл</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>Дапамога</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Запатрабаваць плацёж (генеруецца QR-код для біткойн URI)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Паказаць спіс адрасоў і метак для дасылання</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Паказаць спіс адрасоў і метак для прымання</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Адкрыць біткойн: URI ці запыт плацяжу</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>Опцыі каманднага радка</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 таму</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Апошні прыняты блок генераваны %1 таму.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Транзакцыи пасля гэтай не будуць бачныя.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Памылка</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Увага</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Інфармацыя</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Сінхранізавана</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Наганяем...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Дата: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Колькасць: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Тып: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Метка: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Адрас: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Дасланыя транзакцыі</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Прынятыя транзакцыі</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Гаманец &lt;b&gt;зашыфраваны&lt;/b&gt; і зараз &lt;b&gt;разблакаваны&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Гаманец &lt;b&gt;зашыфраваны&lt;/b&gt; і зараз &lt;b&gt;заблакаваны&lt;/b&gt;</translation>
+    </message>
+    </context>
+<context>
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>&amp;Amount:</source>
@@ -811,6 +837,15 @@
         <source>(no label)</source>
         <translation>непазначаны</translation>
     </message>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -902,10 +937,6 @@
         <translation>Колькасць:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>Заплаціць да:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>Метка:</translation>
     </message>
@@ -924,10 +955,6 @@
     <message>
         <source>Message:</source>
         <translation>Паведамленне:</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Заплаціць да:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -1097,7 +1124,7 @@
         <source>Amount removed from or added to balance.</source>
         <translation>Колькасць аднятая ці даданая да балансу.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>TransactionView</name>
     <message>
@@ -1229,7 +1256,7 @@
         <source>Send Coins</source>
         <translation>Даслаць Манеты</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -1304,10 +1331,6 @@
         <translation>Праверка блокаў...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>Праверка гаманца...</translation>
-    </message>
-    <message>
         <source>Wallet options:</source>
         <translation>Опцыі гаманца:</translation>
     </message>
@@ -1356,10 +1379,6 @@
         <translation>Выканаць каманду калі лепшы блок зменіцца (%s замяняецца на хэш блока)</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Загружаем адрасы...</translation>
-    </message>
-    <message>
         <source>Insufficient funds</source>
         <translation>Недастаткова сродкаў</translation>
     </message>
@@ -1378,10 +1397,6 @@
     <message>
         <source>Rescanning...</source>
         <translation>Перасканаванне...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Загрузка выканана</translation>
     </message>
     <message>
         <source>Error</source>

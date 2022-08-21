@@ -7,17 +7,23 @@
 
 AssetFilterProxy::AssetFilterProxy(QObject *parent) :
         QSortFilterProxyModel(parent),
-        assetNamePrefix()
+        assetNamePrefix(),
+        assetNameContains()
 {
 }
 
 bool AssetFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-
     QString assetName = index.data(AssetTableModel::AssetNameRole).toString();
 
-    if(!assetName.startsWith(assetNamePrefix, Qt::CaseInsensitive))
+    if(assetNameContains.isEmpty()) {
+        if(!assetName.startsWith(assetNamePrefix, Qt::CaseInsensitive))
+            return false;
+
+        return true;
+    }
+    if(!assetName.contains(assetNameContains, Qt::CaseInsensitive))
         return false;
 
     return true;
@@ -26,5 +32,11 @@ bool AssetFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &source
 void AssetFilterProxy::setAssetNamePrefix(const QString &_assetNamePrefix)
 {
     this->assetNamePrefix = _assetNamePrefix;
+    invalidateFilter();
+}
+
+void AssetFilterProxy::setAssetNameContains(const QString &_assetNameContains)
+{
+    this->assetNameContains = _assetNameContains;
     invalidateFilter();
 }

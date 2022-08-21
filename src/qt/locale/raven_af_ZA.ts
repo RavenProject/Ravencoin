@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="af_ZA">
+<TS language="af_ZA" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -175,7 +173,172 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
+    </context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <source>Amount:</source>
+        <translation>Bedrag:</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Bedrag</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Datum</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Maak kopie van adres</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Kopieer bedrag</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(geen etiket)</translation>
+    </message>
+    </context>
+<context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
+    <name>EditAddressDialog</name>
+    <message>
+        <source>&amp;Label</source>
+        <translation>&amp;Etiket</translation>
+    </message>
+    <message>
+        <source>&amp;Address</source>
+        <translation>&amp;Adres</translation>
+    </message>
+    <message>
+        <source>New receiving address</source>
+        <translation>Nuwe ontvangende adres</translation>
+    </message>
+    <message>
+        <source>New sending address</source>
+        <translation>Nuwe stuurende adres</translation>
+    </message>
+    <message>
+        <source>Edit receiving address</source>
+        <translation>Wysig ontvangende adres</translation>
+    </message>
+    <message>
+        <source>Edit sending address</source>
+        <translation>Wysig stuurende adres</translation>
+    </message>
+    <message>
+        <source>Could not unlock wallet.</source>
+        <translation>Kon nie die beursie oopsluit nie.</translation>
+    </message>
+    </context>
+<context>
+    <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
+    <name>HelpMessageDialog</name>
+    <message>
+        <source>Usage:</source>
+        <translation>Gebruik:</translation>
+    </message>
+    </context>
+<context>
+    <name>Intro</name>
+    <message>
+        <source>Error</source>
+        <translation>Fout</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
+    <name>ModalOverlay</name>
+    <message>
+        <source>Form</source>
+        <translation>Vorm</translation>
+    </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
+<context>
+    <name>OpenURIDialog</name>
+    </context>
+<context>
+    <name>OptionsDialog</name>
+    <message>
+        <source>Options</source>
+        <translation>Opsies</translation>
+    </message>
+    <message>
+        <source>W&amp;allet</source>
+        <translation>&amp;Beursie</translation>
+    </message>
+    </context>
+<context>
+    <name>OverviewPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Vorm</translation>
+    </message>
+    </context>
+<context>
+    <name>PaymentServer</name>
+    </context>
+<context>
+    <name>PeerTableModel</name>
+    </context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>Amount</source>
+        <translation>Bedrag</translation>
+    </message>
+    </context>
+<context>
+    <name>QObject::QObject</name>
+    </context>
+<context>
+    <name>QRImageWidget</name>
+    </context>
+<context>
+    <name>RPCConsole</name>
+    <message>
+        <source>&amp;Information</source>
+        <translation>Informasie</translation>
+    </message>
     </context>
 <context>
     <name>RavenGUI</name>
@@ -228,16 +391,8 @@
         <translation>&amp;Lêer</translation>
     </message>
     <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Instellings</translation>
-    </message>
-    <message>
         <source>&amp;Help</source>
         <translation>&amp;Hulp</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Blad nutsbalk</translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -253,135 +408,6 @@
     </message>
     <message>
         <source>Information</source>
-        <translation>Informasie</translation>
-    </message>
-    </context>
-<context>
-    <name>CoinControlDialog</name>
-    <message>
-        <source>Amount:</source>
-        <translation>Bedrag:</translation>
-    </message>
-    <message>
-        <source>Amount</source>
-        <translation>Bedrag</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation>Datum</translation>
-    </message>
-    <message>
-        <source>Copy address</source>
-        <translation>Maak kopie van adres</translation>
-    </message>
-    <message>
-        <source>Copy amount</source>
-        <translation>Kopieer bedrag</translation>
-    </message>
-    <message>
-        <source>(no label)</source>
-        <translation>(geen etiket)</translation>
-    </message>
-    </context>
-<context>
-    <name>EditAddressDialog</name>
-    <message>
-        <source>&amp;Label</source>
-        <translation>&amp;Etiket</translation>
-    </message>
-    <message>
-        <source>&amp;Address</source>
-        <translation>&amp;Adres</translation>
-    </message>
-    <message>
-        <source>New receiving address</source>
-        <translation>Nuwe ontvangende adres</translation>
-    </message>
-    <message>
-        <source>New sending address</source>
-        <translation>Nuwe stuurende adres</translation>
-    </message>
-    <message>
-        <source>Edit receiving address</source>
-        <translation>Wysig ontvangende adres</translation>
-    </message>
-    <message>
-        <source>Edit sending address</source>
-        <translation>Wysig stuurende adres</translation>
-    </message>
-    <message>
-        <source>Could not unlock wallet.</source>
-        <translation>Kon nie die beursie oopsluit nie.</translation>
-    </message>
-    </context>
-<context>
-    <name>FreespaceChecker</name>
-    </context>
-<context>
-    <name>HelpMessageDialog</name>
-    <message>
-        <source>Usage:</source>
-        <translation>Gebruik:</translation>
-    </message>
-    </context>
-<context>
-    <name>Intro</name>
-    <message>
-        <source>Error</source>
-        <translation>Fout</translation>
-    </message>
-    </context>
-<context>
-    <name>ModalOverlay</name>
-    <message>
-        <source>Form</source>
-        <translation>Vorm</translation>
-    </message>
-    </context>
-<context>
-    <name>OpenURIDialog</name>
-    </context>
-<context>
-    <name>OptionsDialog</name>
-    <message>
-        <source>Options</source>
-        <translation>Opsies</translation>
-    </message>
-    <message>
-        <source>W&amp;allet</source>
-        <translation>&amp;Beursie</translation>
-    </message>
-    </context>
-<context>
-    <name>OverviewPage</name>
-    <message>
-        <source>Form</source>
-        <translation>Vorm</translation>
-    </message>
-    </context>
-<context>
-    <name>PaymentServer</name>
-    </context>
-<context>
-    <name>PeerTableModel</name>
-    </context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Amount</source>
-        <translation>Bedrag</translation>
-    </message>
-    </context>
-<context>
-    <name>QObject::QObject</name>
-    </context>
-<context>
-    <name>QRImageWidget</name>
-    </context>
-<context>
-    <name>RPCConsole</name>
-    <message>
-        <source>&amp;Information</source>
         <translation>Informasie</translation>
     </message>
     </context>
@@ -437,6 +463,15 @@
         <source>(no label)</source>
         <translation>(geen etiket)</translation>
     </message>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -759,7 +794,7 @@
         <source>Send Coins</source>
         <translation>Stuur Munstukke</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -786,10 +821,6 @@
         <translation>Informasie</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Laai adresse...</translation>
-    </message>
-    <message>
         <source>Insufficient funds</source>
         <translation>Onvoldoende fondse</translation>
     </message>
@@ -800,10 +831,6 @@
     <message>
         <source>Loading wallet...</source>
         <translation>Laai beursie...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Klaar gelaai</translation>
     </message>
     <message>
         <source>Error</source>

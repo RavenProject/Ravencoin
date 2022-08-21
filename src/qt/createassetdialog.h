@@ -94,12 +94,14 @@ private:
     void updateFeeMinimizedLabel();
     void minimizeFeeSection(bool fMinimize);
 
-    //Validation
+    // Validation
+    // Returns true if this is an IPFS-hash or TXID.
     bool checkIPFSHash(QString hash);
 
 private Q_SLOTS:
     void ipfsStateChanged();
     void checkAvailabilityClicked();
+    void openIpfsBrowser();
     void onNameChanged(QString name);
     void onAddressNameChanged(QString address);
     void onIPFSHashChanged(QString hash);

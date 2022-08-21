@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2021 The Raven Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -90,7 +90,8 @@ BASE_SCRIPTS= [
     'feature_assets_mempool.py',
     'feature_restricted_assets.py',
     'feature_raw_restricted_assets.py',
-    'wallet_bip44.py',
+    'wallet_bip44.py',    
+    'wallet_bip44_multilanguage.py',
     'mining_prioritisetransaction.py',
     'feature_maxreorgdepth.py 4 --height=60 --tip_age=0 --should_reorg=0',      # Don't Reorg
     'feature_maxreorgdepth.py 3 --height=60 --tip_age=0 --should_reorg=1',      # Reorg (low peer count)

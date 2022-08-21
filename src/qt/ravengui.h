@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -90,72 +90,76 @@ protected:
     bool eventFilter(QObject *object, QEvent *event);
 
 private:
-    ClientModel *clientModel;
-    WalletFrame *walletFrame;
+    ClientModel *clientModel = nullptr;
+    WalletFrame *walletFrame = nullptr;
 
-    UnitDisplayStatusBarControl *unitDisplayControl;
-    QLabel *labelWalletEncryptionIcon;
-    QLabel *labelWalletHDStatusIcon;
-    QLabel *connectionsControl;
-    QLabel *labelBlocksIcon;
-    QLabel *progressBarLabel;
-    QProgressBar *progressBar;
-    QProgressDialog *progressDialog;
+    UnitDisplayStatusBarControl *unitDisplayControl = nullptr;
+    QLabel *labelWalletEncryptionIcon = nullptr;
+    QLabel *labelWalletHDStatusIcon = nullptr;
+    QLabel *connectionsControl = nullptr;
+    QLabel *labelBlocksIcon = nullptr;
+    QLabel *progressBarLabel = nullptr;
+    QProgressBar *progressBar = nullptr;
+    QProgressDialog *progressDialog = nullptr;
 
-    QMenuBar *appMenuBar;
-    QAction *overviewAction;
-    QAction *historyAction;
-    QAction *quitAction;
-    QAction *sendCoinsAction;
-    QAction *sendCoinsMenuAction;
-    QAction *usedSendingAddressesAction;
-    QAction *usedReceivingAddressesAction;
-    QAction *signMessageAction;
-    QAction *verifyMessageAction;
-    QAction *aboutAction;
-    QAction *receiveCoinsAction;
-    QAction *receiveCoinsMenuAction;
-    QAction *optionsAction;
-    QAction *toggleHideAction;
-    QAction *encryptWalletAction;
-    QAction *backupWalletAction;
-    QAction *changePassphraseAction;
-    QAction *aboutQtAction;
-    QAction *openRPCConsoleAction;
-    QAction *openWalletRepairAction;
-    QAction *openAction;
-    QAction *showHelpMessageAction;
+    QMenuBar *appMenuBar = nullptr;
+    QAction *getMyWordsAction = nullptr;
+    QAction *overviewAction = nullptr;
+    QAction *historyAction = nullptr;
+    QAction *quitAction = nullptr;
+    QAction *sendCoinsAction = nullptr;
+    QAction *sendCoinsMenuAction = nullptr;
+    QAction *usedSendingAddressesAction = nullptr;
+    QAction *usedReceivingAddressesAction = nullptr;
+    QAction *signMessageAction = nullptr;
+    QAction *verifyMessageAction = nullptr;
+    QAction *aboutAction = nullptr;
+    QAction *receiveCoinsAction = nullptr;
+    QAction *receiveCoinsMenuAction = nullptr;
+    QAction *optionsAction = nullptr;
+    QAction *toggleHideAction = nullptr;
+    QAction *encryptWalletAction = nullptr;
+    QAction *backupWalletAction = nullptr;
+    QAction *changePassphraseAction = nullptr;
+    QAction *aboutQtAction = nullptr;
+    QAction *openRPCConsoleAction = nullptr;
+    QAction *openWalletRepairAction = nullptr;
+    QAction *openAction = nullptr;
+    QAction *showHelpMessageAction = nullptr;
 
     /** RVN START */
-    QAction *transferAssetAction;
-    QAction *createAssetAction;
-    QAction *manageAssetAction;
-    QAction *messagingAction;
-    QAction *votingAction;
-    QAction *restrictedAssetAction;
-    QAction *getMyWordsAction;
-    QWidget *headerWidget;
-    QLabel *labelCurrentMarket;
-    QLabel *labelCurrentPrice;
-    QComboBox *comboRvnUnit;
-    QTimer *pricingTimer;
-    QNetworkAccessManager* networkManager;
-    QNetworkRequest* request;
-    QLabel *labelVersionUpdate;
-    QNetworkAccessManager* networkVersionManager;
-    QNetworkRequest* versionRequest;
+    QAction *transferAssetAction = nullptr;
+    QAction *createAssetAction = nullptr;
+    QAction *manageAssetAction = nullptr;
+    QAction *messagingAction = nullptr;
+    QAction *votingAction = nullptr;
+    QAction *restrictedAssetAction = nullptr;
+    QWidget *headerWidget = nullptr;
+    QLabel *labelCurrentMarket = nullptr;
+    QLabel *labelCurrentPrice = nullptr;
+    QComboBox *comboRvnUnit = nullptr;
+    QTimer *pricingTimer = nullptr;
+    QNetworkAccessManager* networkManager = nullptr;
+    QNetworkRequest* request = nullptr;
+    QLabel *labelVersionUpdate = nullptr;
+    QNetworkAccessManager* networkVersionManager = nullptr;
+    QNetworkRequest* versionRequest = nullptr;
+
+    QLabel *labelToolbar = nullptr;
+    QToolBar *m_toolbar = nullptr;
+
     /** RVN END */
 
-    QSystemTrayIcon *trayIcon;
-    QMenu *trayIconMenu;
-    Notificator *notificator;
-    RPCConsole *rpcConsole;
-    HelpMessageDialog *helpMessageDialog;
-    ModalOverlay *modalOverlay;
+    QSystemTrayIcon *trayIcon = nullptr;
+    QMenu *trayIconMenu = nullptr;
+    Notificator *notificator = nullptr;
+    RPCConsole *rpcConsole = nullptr;
+    HelpMessageDialog *helpMessageDialog = nullptr;
+    ModalOverlay *modalOverlay = nullptr;
 
     /** Keep track of previous number of blocks, to detect progress */
-    int prevBlocks;
-    int spinnerFrame;
+    int prevBlocks = 0;
+    int spinnerFrame = 0;
 
     const PlatformStyle *platformStyle;
 
@@ -219,6 +223,9 @@ public Q_SLOTS:
     void getPriceInfo();
 
     void getLatestVersion();
+
+    /** IconsOnly true/false and updates toolbar accordingly. */
+    void updateIconsOnlyToolbar(bool);
 
 #ifdef ENABLE_WALLET
     /** Set the encryption status as shown in the UI.

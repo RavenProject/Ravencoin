@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -703,7 +703,7 @@ void OverviewPage::assetSearchChanged()
 {
     if (!assetFilter)
         return;
-    assetFilter->setAssetNamePrefix(ui->assetSearch->text());
+    assetFilter->setAssetNameContains(ui->assetSearch->text());
 }
 
 void OverviewPage::openIPFSForAsset(const QModelIndex &index)

@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="mk_MK">
+<TS language="mk_MK" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -63,172 +61,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Потпиши &amp;порака...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Синхронизација со мрежата...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Преглед</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Јазол</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Трансакции</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Преглед на историјата на трансакции</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>И&amp;злез</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Напушти ја апликацијата</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>За &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Прикажи информации за Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Опции...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Криптирање на Паричник...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Бекап на Паричник...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Измени Тајна Фраза...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Адреси за Испраќање...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Адреси за Примање...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Отвори &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Повторно индексирање на блокови од дискот...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Испрати биткоини на Биткоин адреса</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Потврди порака...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Биткоин</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Паричник</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Испрати</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Прими</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Прикажи / Сокриј</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Криптирај ги приватните клучеви кои припаѓаат на твојот паричник</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Подесувања</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Помош</translation>
-    </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>Обработен %n блок од историјата на трансакции.</numerusform><numerusform>Обработени %n блокови од историјата на трансакции.</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 позади</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Грешка</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Предупредување</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Во тек</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Дата: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Сума: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Тип: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Етикета: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Адреса: %1
-</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -266,6 +111,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -288,6 +136,12 @@
     </message>
     </context>
 <context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -306,7 +160,22 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -434,21 +303,162 @@
         <source>&amp;Console</source>
         <translation>&amp;Конзола</translation>
     </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
     <message>
-        <source>%1 B</source>
-        <translation>%1 Б</translation>
+        <source>Sign &amp;message...</source>
+        <translation>Потпиши &amp;порака...</translation>
     </message>
     <message>
-        <source>%1 KB</source>
-        <translation>%1 КБ</translation>
+        <source>Synchronizing with network...</source>
+        <translation>Синхронизација со мрежата...</translation>
     </message>
     <message>
-        <source>%1 MB</source>
-        <translation>%1 МБ</translation>
+        <source>&amp;Overview</source>
+        <translation>&amp;Преглед</translation>
     </message>
     <message>
-        <source>%1 GB</source>
-        <translation>%1 ГБ</translation>
+        <source>Node</source>
+        <translation>Јазол</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Трансакции</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Преглед на историјата на трансакции</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>И&amp;злез</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Напушти ја апликацијата</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>За &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Прикажи информации за Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Опции...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Криптирање на Паричник...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Бекап на Паричник...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Измени Тајна Фраза...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Адреси за Испраќање...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Адреси за Примање...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Отвори &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Повторно индексирање на блокови од дискот...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Испрати биткоини на Биткоин адреса</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Потврди порака...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Биткоин</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Паричник</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Испрати</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Прими</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Прикажи / Сокриј</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Криптирај ги приватните клучеви кои припаѓаат на твојот паричник</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Помош</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 позади</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Грешка</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Предупредување</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Во тек</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Дата: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Сума: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Тип: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Етикета: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Адреса: %1
+</translation>
     </message>
     </context>
 <context>
@@ -491,6 +501,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>

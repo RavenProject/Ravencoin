@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -213,7 +213,7 @@ class RavenApplication: public QApplication
 {
     Q_OBJECT
 public:
-    explicit RavenApplication(int &argc, char **argv);
+    explicit RavenApplication();
     ~RavenApplication();
 
 #ifdef ENABLE_WALLET
@@ -364,8 +364,11 @@ void RavenCore::shutdown()
     }
 }
 
-RavenApplication::RavenApplication(int &argc, char **argv):
-    QApplication(argc, argv),
+static int qt_argc = 1;
+static const char* qt_argv = "raven-qt";
+
+RavenApplication::RavenApplication():
+    QApplication(qt_argc, const_cast<char **>(&qt_argv)),
     coreThread(0),
     optionsModel(0),
     clientModel(0),
@@ -427,8 +430,8 @@ void RavenApplication::createOptionsModel(bool resetSettings)
 void RavenApplication::createWindow(const NetworkStyle *networkStyle)
 {
     window = new RavenGUI(platformStyle, networkStyle, 0);
-    window->setMinimumSize(200,200);
-    window->setBaseSize(640,640);
+    window->setMinimumSize(1024,700);
+    window->setBaseSize(1024,700);
 
     pollShutdownTimer = new QTimer(window);
     connect(pollShutdownTimer, SIGNAL(timeout()), window, SLOT(detectShutdown()));
@@ -607,27 +610,25 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(raven);
     Q_INIT_RESOURCE(raven_locale);
 
-#if QT_VERSION > 0x050100
+#if QT_VERSION > 0x050600
     // Generate high-dpi pixmaps
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-#endif
-#if QT_VERSION >= 0x050600
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 #ifdef Q_OS_MAC
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
+
 #if QT_VERSION >= 0x050500
-
-    // This should be after the attributes.
-    RavenApplication app(argc, argv);
-
     // Because of the POODLE attack it is recommended to disable SSLv3 (https://disablessl3.com/),
     // so set SSL protocols to TLS1.0+.
     QSslConfiguration sslconf = QSslConfiguration::defaultConfiguration();
     sslconf.setProtocol(QSsl::TlsV1_0OrLater);
     QSslConfiguration::setDefaultConfiguration(sslconf);
 #endif
+
+    // This should be after the attributes.
+    RavenApplication app;
 
     // Register meta types used for QMetaObject::invokeMethod
     qRegisterMetaType< bool* >();

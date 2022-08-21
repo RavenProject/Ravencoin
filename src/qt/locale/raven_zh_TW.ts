@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh_TW">
+<TS language="zh_TW" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -223,6 +221,18 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -231,327 +241,6 @@
     <message>
         <source>Banned Until</source>
         <translation>禁止期限</translation>
-    </message>
-</context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>簽署訊息...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>正在跟網路進行同步...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>總覽</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>節點</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>顯示錢包一般總覽</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>交易</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>瀏覽交易紀錄</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>結束</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>結束應用程式</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>關於%1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>顯示 %1 的相關資訊</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>關於 &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>顯示 Qt 相關資訊</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>選項...</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>修改 %1 的設定選項</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>加密錢包...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>備份錢包...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>改變密碼...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>付款位址...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>收款位址...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>開啓 URI...</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>按一下就會不使用網路。</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>網路活動關閉了。</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>按一下就又會使用網路。</translation>
-    </message>
-    <message>
-        <source>Syncing Headers (%1%)...</source>
-        <translation>正在同步前導資料(%1%)中...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>正在為磁碟裡的區塊重建索引...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>付錢給一個 Raven 位址</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>把錢包備份到其它地方</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>改變錢包加密用的密碼</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>除錯視窗</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>開啓除錯和診斷主控台</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>驗證訊息...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>錢包</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>付款</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>收款</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>顯示或隱藏</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>顯示或隱藏主視窗</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>把錢包中的密鑰加密</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>用 Raven 位址簽署訊息來證明位址是你的</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>驗證訊息是用來確定訊息是用指定的 Raven 位址簽署的</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>檔案</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>設定</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>說明</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>分頁工具列</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>要求付款(產生 QR Code 和 raven 付款協議的資源識別碼: URI)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>顯示已使用過的付款位址和標記的清單</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>顯示已使用過的收款位址和標記的清單</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>開啓 raven 協議的資源識別碼(URI)或付款要求</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>命令列選項</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>%n 個運作中的 Raven 網路連線</numerusform></translation>
-    </message>
-    <message>
-        <source>Indexing blocks on disk...</source>
-        <translation>正在為磁碟裡的區塊建立索引...</translation>
-    </message>
-    <message>
-        <source>Processing blocks on disk...</source>
-        <translation>正在處理磁碟裡的區塊資料...</translation>
-    </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>已經處理了 %n 個區塊的交易紀錄。</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>落後 %1</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>最近收到的區塊是在 %1 以前生出來的。</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>暫時會看不到在這之後的交易。</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>錯誤</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>警告</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>資訊</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>最新狀態</translation>
-    </message>
-    <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>顯示 %1 的說明訊息，來取得可用命令列選項的列表</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 客戶端軟體</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>正在跟其他節點連線中...</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>正在趕進度...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>日期: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>金額: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>種類: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>標記: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>位址: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>付款交易</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>收款交易</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
-        <translation>產生 HD 金鑰&lt;b&gt;已經啟用&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
-        <translation>產生 HD 金鑰&lt;b&gt;已經停用&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>錢包&lt;b&gt;已加密&lt;/b&gt;並且&lt;b&gt;解鎖中&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>錢包&lt;b&gt;已加密&lt;/b&gt;並且&lt;b&gt;上鎖中&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>發生了致命的錯誤。Raven 軟體沒辦法再繼續安全執行，只好結束。</translation>
     </message>
 </context>
 <context>
@@ -706,6 +395,9 @@
     </message>
 </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -784,6 +476,12 @@
     </message>
 </context>
 <context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -853,10 +551,6 @@
         <translation>因為這是程式第一次啓動，你可以選擇 %1 儲存資料的地方。</translation>
     </message>
     <message>
-        <source>%1 will download and store a copy of the Raven block chain. At least %2GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>%1 會下載並儲存一份 Raven 區塊鏈的拷貝。至少有 %2GB 的資料會儲存到這個目錄中，並且還會持續增長。另外錢包資料也會儲存在這個目錄。</translation>
-    </message>
-    <message>
         <source>Use the default data directory</source>
         <translation>使用預設的資料目錄</translation>
     </message>
@@ -872,15 +566,19 @@
         <source>Error</source>
         <translation>錯誤</translation>
     </message>
-    <message numerus="yes">
-        <source>%n GB of free space available</source>
-        <translation><numerusform>可用空間尚存 %n GB</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>(of %n GB needed)</source>
-        <translation><numerusform>(需要 %n GB)</numerusform></translation>
-    </message>
-</context>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
 <context>
     <name>ModalOverlay</name>
     <message>
@@ -932,6 +630,9 @@
         <translation>不明。正在同步前導資料(%1)中...</translation>
     </message>
 </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
 <context>
     <name>OpenURIDialog</name>
     <message>
@@ -986,14 +687,6 @@
         <translation>指令碼驗證執行緒數目</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>接受外來連線</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>接受外來連線</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>代理伺服器的網際網路位址(像是 IPv4 的 127.0.0.1 或 IPv6 的 ::1)</translation>
     </message>
@@ -1004,10 +697,6 @@
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
         <translation>在交易頁籤的情境選單出現的第三方網址連結(URL)，比如說區塊探索網站。網址中的 %s 會被取代為交易的雜湊值。可以用直線符號 | 來分隔多個連結。</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>交易的第三方網址連結</translation>
     </message>
     <message>
         <source>Active command-line options that override above options:</source>
@@ -1082,10 +771,6 @@
         <translation>用來跟其他節點聯絡的中介:</translation>
     </message>
     <message>
-        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
-        <translation>如果對這種網路類型，有指定用來跟其他節點聯絡的 SOCKS5 代理伺服器的話，就會顯示在這裡。</translation>
-    </message>
-    <message>
         <source>IPv4</source>
         <translation>IPv4</translation>
     </message>
@@ -1102,20 +787,8 @@
         <translation>透過另外的 SOCKS5 代理伺服器來連線到 Raven 網路中的 Tor 隱藏服務。</translation>
     </message>
     <message>
-        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
-        <translation>用另外的 SOCKS5 代理伺服器，來透過 Tor 隱藏服務跟其他節點聯絡:</translation>
-    </message>
-    <message>
         <source>&amp;Window</source>
         <translation>視窗</translation>
-    </message>
-    <message>
-        <source>&amp;Hide the icon from the system tray.</source>
-        <translation>不在通知區顯示圖示。</translation>
-    </message>
-    <message>
-        <source>Hide tray icon</source>
-        <translation>不顯示通知區圖示</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1229,10 +902,6 @@
         <translation>還沒成熟的開採金額</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>餘額</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>總金額:</translation>
     </message>
@@ -1264,7 +933,7 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>所有只能看位址的目前全部餘額</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1374,7 +1043,7 @@
         <source>Ping</source>
         <translation>Ping  時間</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>QObject</name>
     <message>
@@ -1413,39 +1082,15 @@
         <source>%1 ms</source>
         <translation>%1 毫秒</translation>
     </message>
-    <message numerus="yes">
-        <source>%n second(s)</source>
-        <translation><numerusform>%n 秒鐘</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n minute(s)</source>
-        <translation><numerusform>%n 分鐘</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n 小時</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n 天</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n 星期</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1又 %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n 年</numerusform></translation>
     </message>
     <message>
         <source>%1 didn't yet exit safely...</source>
         <translation>%1 還沒有安全地結束...</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>QObject::QObject</name>
     <message>
@@ -1663,10 +1308,6 @@
         <translation>網路流量</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>清掉</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>總計</translation>
     </message>
@@ -1719,36 +1360,12 @@
         <translation>歡迎使用 %1 的 RPC 主控台。</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>請用上下游標鍵來瀏覽先前指令的紀錄，並用 &lt;b&gt;Ctrl-L&lt;/b&gt; 來清畫面。</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>請打 &lt;b&gt;help&lt;/b&gt; 來看可用指令的簡介。</translation>
     </message>
     <message>
-        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
-        <translation>警告:  已知有詐騙集團會叫人在這個畫面輸入指令，以偷取他們錢包的內容物。請不要在沒有充分理解指令可能造成後果的情況下使用主控台。</translation>
-    </message>
-    <message>
         <source>Network activity disabled</source>
         <translation>網路活動已關閉</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 B (位元組)</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB (千位元組)</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB (百萬位元組)</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB (十億位元組)</translation>
     </message>
     <message>
         <source>(node id: %1)</source>
@@ -1781,6 +1398,307 @@
     <message>
         <source>Unknown</source>
         <translation>不明</translation>
+    </message>
+</context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>簽署訊息...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>正在跟網路進行同步...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>總覽</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>節點</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>顯示錢包一般總覽</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>交易</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>瀏覽交易紀錄</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>結束</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>結束應用程式</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>關於%1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>顯示 %1 的相關資訊</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>關於 &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>顯示 Qt 相關資訊</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>選項...</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>修改 %1 的設定選項</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>加密錢包...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>備份錢包...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>改變密碼...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>付款位址...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>收款位址...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>開啓 URI...</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>按一下就會不使用網路。</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>網路活動關閉了。</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>按一下就又會使用網路。</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>正在同步前導資料(%1%)中...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>正在為磁碟裡的區塊重建索引...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>付錢給一個 Raven 位址</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>把錢包備份到其它地方</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>改變錢包加密用的密碼</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>開啓除錯和診斷主控台</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>驗證訊息...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>錢包</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>付款</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>收款</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>顯示或隱藏</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>顯示或隱藏主視窗</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>把錢包中的密鑰加密</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>用 Raven 位址簽署訊息來證明位址是你的</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>驗證訊息是用來確定訊息是用指定的 Raven 位址簽署的</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>檔案</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>說明</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>要求付款(產生 QR Code 和 raven 付款協議的資源識別碼: URI)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>顯示已使用過的付款位址和標記的清單</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>顯示已使用過的收款位址和標記的清單</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>開啓 raven 協議的資源識別碼(URI)或付款要求</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>命令列選項</translation>
+    </message>
+    <message>
+        <source>Indexing blocks on disk...</source>
+        <translation>正在為磁碟裡的區塊建立索引...</translation>
+    </message>
+    <message>
+        <source>Processing blocks on disk...</source>
+        <translation>正在處理磁碟裡的區塊資料...</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>落後 %1</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>最近收到的區塊是在 %1 以前生出來的。</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>暫時會看不到在這之後的交易。</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>錯誤</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>警告</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>資訊</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>最新狀態</translation>
+    </message>
+    <message>
+        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <translation>顯示 %1 的說明訊息，來取得可用命令列選項的列表</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 客戶端軟體</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>正在跟其他節點連線中...</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>正在趕進度...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>日期: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>金額: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>種類: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>標記: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>位址: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>付款交易</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>收款交易</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
+        <translation>產生 HD 金鑰&lt;b&gt;已經啟用&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
+        <translation>產生 HD 金鑰&lt;b&gt;已經停用&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>錢包&lt;b&gt;已加密&lt;/b&gt;並且&lt;b&gt;解鎖中&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>錢包&lt;b&gt;已加密&lt;/b&gt;並且&lt;b&gt;上鎖中&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <translation>發生了致命的錯誤。Raven 軟體沒辦法再繼續安全執行，只好結束。</translation>
     </message>
 </context>
 <context>
@@ -1957,6 +1875,15 @@
     </message>
 </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -2035,10 +1962,6 @@
         <translation>隱藏</translation>
     </message>
     <message>
-        <source>total at least</source>
-        <translation>總共最少</translation>
-    </message>
-    <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
         <translation>當交易量少於區塊可容納的空間時，只付最低手續費不會有什麽問題。但是當交易量的需求成長到超過整體網路可以處理的量時，可能會造成一筆一直不會被確認的交易。</translation>
     </message>
@@ -2057,14 +1980,6 @@
     <message>
         <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
         <translation>(手續費智慧演算法還沒準備好。通常都要等幾個區塊才行...)</translation>
-    </message>
-    <message>
-        <source>normal</source>
-        <translation>正常</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>快速</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -2190,10 +2105,6 @@
         <source>Payment request expired.</source>
         <translation>付款的要求過期了。</translation>
     </message>
-    <message numerus="yes">
-        <source>%n block(s)</source>
-        <translation><numerusform>%n 個區塊</numerusform></translation>
-    </message>
     <message>
         <source>Pay only the required fee of %1</source>
         <translation>只付必要的手續費 %1</translation>
@@ -2224,10 +2135,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>金額:</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>付給:</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2288,10 +2195,6 @@
     <message>
         <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
         <translation>附加在 Raven 付款協議的資源識別碼(URI)中的訊息，會和交易內容一起存起來，給你自己做參考。注意: 這個訊息不會送到 Raven 網路上。</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>付給:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2475,10 +2378,6 @@
 </context>
 <context>
     <name>TransactionDesc</name>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>到下 %n 個區塊生出來前可修改</numerusform></translation>
-    </message>
     <message>
         <source>Open until %1</source>
         <translation>到 %1 前可修改</translation>
@@ -2523,10 +2422,6 @@
         <source>, has not been successfully broadcast yet</source>
         <translation>，還沒成功公告出去</translation>
     </message>
-    <message numerus="yes">
-        <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>，已公告給 %n 個節點</numerusform></translation>
-    </message>
     <message>
         <source>Date</source>
         <translation>日期</translation>
@@ -2566,10 +2461,6 @@
     <message>
         <source>Credit</source>
         <translation>入帳</translation>
-    </message>
-    <message numerus="yes">
-        <source>matures in %n more block(s)</source>
-        <translation><numerusform>再等 %n 個區塊生出來後成熟</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -2673,10 +2564,6 @@
         <source>Label</source>
         <translation>標記:</translation>
     </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>到下 %n 個區塊生出來前可修改</numerusform></translation>
-    </message>
     <message>
         <source>Open until %1</source>
         <translation>到 %1 前可修改</translation>
@@ -2773,7 +2660,7 @@
         <source>Amount removed from or added to balance.</source>
         <translation>要減掉或加進餘額的金額。</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>TransactionView</name>
     <message>
@@ -2949,7 +2836,7 @@
         <source>Send Coins</source>
         <translation>付款</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -2984,7 +2871,7 @@
         <source>The wallet data was successfully saved to %1.</source>
         <translation>錢包的資料已經成功儲存到 %1 了。</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>raven-core</name>
     <message>
@@ -3007,14 +2894,6 @@
         <source>Accept command line and JSON-RPC commands</source>
         <translation>接受指令列和 JSON-RPC 指令
 </translation>
-    </message>
-    <message>
-        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
-        <translation>是否接受外來連線(預設值: 當沒有 -proxy 或 -connect/-noconnect 時為 1)</translation>
-    </message>
-    <message>
-        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
-        <translation>只連線到指定的節點。用 -noconnect 或是 -connect=0 可以關閉自動連線。</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file %s or %s</source>
@@ -3083,10 +2962,6 @@
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
         <translation>清掉錢包裡的所有交易，並且在下次啟動時，使用 -rescan 來從區塊鏈中復原回來。</translation>
-    </message>
-    <message>
-        <source>Error loading %s: You can't enable HD on a already existing non-HD wallet</source>
-        <translation>載入 %s 發生錯誤：不能對已存在的非 HD 錢包啟用 HD 功能。</translation>
     </message>
     <message>
         <source>Error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
@@ -3163,10 +3038,6 @@
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
         <translation>警告: 我們和某些連線的節點對於區塊鏈結的決定不同！你可能需要升級，或是需要等其它的節點升級。</translation>
-    </message>
-    <message>
-        <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
-        <translation>改變 -txindex 參數後，必須要用 -reindex-chainstate 參數來重建資料庫</translation>
     </message>
     <message>
         <source>%s corrupt, salvage failed</source>
@@ -3269,10 +3140,6 @@
         <translation>載入檔案 %s 時發生錯誤: 這個錢包需要新版的 %s</translation>
     </message>
     <message>
-        <source>Error loading %s: You can't disable HD on a already existing HD wallet</source>
-        <translation>載入 %s 發生錯誤：不能對已存在的 HD 錢包停用 HD 功能。</translation>
-    </message>
-    <message>
         <source>Error loading block database</source>
         <translation>載入區塊資料庫時發生錯誤</translation>
     </message>
@@ -3299,10 +3166,6 @@
     <message>
         <source>Initialization sanity check failed. %s is shutting down.</source>
         <translation>初始化時的基本檢查失敗了。%s 就要關閉了。</translation>
-    </message>
-    <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>無效的 -onion 位址: '%s'</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -3365,10 +3228,6 @@
         <translation>設定資料庫快取大小是多少百萬位元組(MB，範圍: %d 到 %d，預設值: %d)</translation>
     </message>
     <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>設定區塊大小上限成多少位元組(預設值: %d)</translation>
-    </message>
-    <message>
         <source>Specify wallet file (within data directory)</source>
         <translation>指定錢包檔(會在資料目錄中)</translation>
     </message>
@@ -3409,10 +3268,6 @@
         <translation>正在驗證區塊資料...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>正在驗證錢包資料...</translation>
-    </message>
-    <message>
         <source>Wallet %s resides outside data directory %s</source>
         <translation>錢包檔 %s 沒有在資料目錄 %s 裡面</translation>
     </message>
@@ -3435,10 +3290,6 @@
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
         <translation>和指定的位址繫結，並且把連線過來的節點放進白名單。IPv6 請用 [主機]:通訊埠 這種格式</translation>
-    </message>
-    <message>
-        <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>和指定的位址繫結以聽候 JSON-RPC 連線。IPv6 請用 [主機]:通訊埠 這種格式。這個選項可以設定多次。(預設值: 跟所有網路界面上的位址繫結)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
@@ -3477,16 +3328,8 @@
         <translation>對每個代理連線使用隨機產生的憑證。這個選項會開啟 Tor 的串流隔離(預設值: %u)</translation>
     </message>
     <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>設定高優先度或低手續費的交易資料大小上限成多少位元組(預設值: %d)</translation>
-    </message>
-    <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
         <translation>扣除手續費後的交易金額太少而不能傳送</translation>
-    </message>
-    <message>
-        <source>Use hierarchical deterministic key generation (HD) after BIP32. Only has effect during wallet creation/first start</source>
-        <translation>在 BIP32 開始作用後，啟用階層式可預期性密鑰產生方式(HD)。只有在產生新錢包或第一次啟動時才有作用。</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
@@ -3559,10 +3402,6 @@
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>在終端機顯示追蹤或除錯資訊，而不是寫到檔案 debug.log 中</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>盡可能送出不用付手續費的交易(預設值: %u)</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -3649,10 +3488,6 @@
         <translation>允許對 -addnode, -seednode, -connect 的參數使用域名查詢 </translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>正在載入位址資料...</translation>
-    </message>
-    <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
         <translation>(1 表示保留交易描述資料，像是帳戶使用者和付款請求資訊；2 表示丟掉交易描述資料)</translation>
     </message>
@@ -3691,10 +3526,6 @@
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
         <translation>輸出除錯資訊(預設值: %u, 不一定要指定 &lt;category&gt;)</translation>
-    </message>
-    <message>
-        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
-        <translation>是否允許在節點位址數目不足時，使用域名查詢來搜尋節點 (預設值: 當沒用 -connect/-noconnect 時為 1)</translation>
     </message>
     <message>
         <source>Sets the serialization of raw transaction or block hex returned in non-verbose mode, non-segwit(0) or segwit(1) (default: %d)</source>
@@ -3763,10 +3594,6 @@
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
         <translation>在除錯輸出內容中包含網際網路位址(預設值: %u)</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>無效的 -proxy 位址: '%s'</translation>
     </message>
     <message>
         <source>Keypool ran out, please call keypoolrefill first</source>
@@ -3885,10 +3712,6 @@
         <translation>正在載入區塊索引...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>增加一個要連線的節線，並試著保持對它的連線暢通</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>正在載入錢包資料...</translation>
     </message>
@@ -3897,16 +3720,8 @@
         <translation>沒辦法把錢包格式降級</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>沒辦法把預設位址寫進去</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>正在重新掃描...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>載入完成</translation>
     </message>
     <message>
         <source>Error</source>

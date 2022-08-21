@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="hi_IN">
+<TS language="hi_IN" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -47,111 +45,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>नेटवर्क से समकालिक (मिल) रहा है ...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;विवरण</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>वॉलेट का सामानया विवरण दिखाए !</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp; लेन-देन
-</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>देखिए पुराने लेन-देन के विवरण !</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>बाहर जायें</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>अप्लिकेशन से बाहर निकलना !</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;विकल्प</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;बैकप वॉलेट</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>पहचान शब्द/अक्षर जो वॉलेट एनक्रिपशन के लिए इस्तेमाल किया है उसे बदलिए!</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>बीटकोइन</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>वॉलेट</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;फाइल</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;सेट्टिंग्स</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;मदद</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>टैबस टूलबार</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 पीछे</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>भूल</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>चेतावनी</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>जानकारी</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>नवीनतम</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>भेजी ट्रांजक्शन</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>प्राप्त हुई ट्रांजक्शन</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>वॉलेट एन्क्रिप्टेड है तथा अभी लॉक्ड नहीं है</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>वॉलेट एन्क्रिप्टेड है तथा अभी लॉक्ड है</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -173,6 +79,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -189,6 +98,12 @@
     </context>
 <context>
     <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -209,11 +124,26 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
         <translation>फार्म</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -281,6 +211,102 @@
     </message>
     </context>
 <context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>नेटवर्क से समकालिक (मिल) रहा है ...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;विवरण</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>वॉलेट का सामानया विवरण दिखाए !</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp; लेन-देन
+</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>देखिए पुराने लेन-देन के विवरण !</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>बाहर जायें</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>अप्लिकेशन से बाहर निकलना !</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;विकल्प</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;बैकप वॉलेट</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>पहचान शब्द/अक्षर जो वॉलेट एनक्रिपशन के लिए इस्तेमाल किया है उसे बदलिए!</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>बीटकोइन</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>वॉलेट</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;फाइल</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;मदद</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 पीछे</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>भूल</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>चेतावनी</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>जानकारी</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>नवीनतम</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>भेजी ट्रांजक्शन</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>प्राप्त हुई ट्रांजक्शन</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>वॉलेट एन्क्रिप्टेड है तथा अभी लॉक्ड नहीं है</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>वॉलेट एन्क्रिप्टेड है तथा अभी लॉक्ड है</translation>
+    </message>
+    </context>
+<context>
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>&amp;Amount:</source>
@@ -300,6 +326,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -331,10 +366,6 @@
         <translation>अमाउंट:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>प्राप्तकर्ता:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>लेबल:</translation>
     </message>
@@ -349,10 +380,6 @@
     <message>
         <source>Alt+P</source>
         <translation>Alt-P</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>प्राप्तकर्ता:</translation>
     </message>
     </context>
 <context>
@@ -437,20 +464,12 @@
         <translation>ब्लॉक्स जाँचे जा रहा है...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>वॉलेट जाँचा जा रहा है...</translation>
-    </message>
-    <message>
         <source>Information</source>
         <translation>जानकारी</translation>
     </message>
     <message>
         <source>Warning</source>
         <translation>चेतावनी</translation>
-    </message>
-    <message>
-        <source>Loading addresses...</source>
-        <translation>पता पुस्तक आ रही है...</translation>
     </message>
     <message>
         <source>Loading block index...</source>
@@ -463,10 +482,6 @@
     <message>
         <source>Rescanning...</source>
         <translation>रि-स्केनी-इंग...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>लोड हो गया|</translation>
     </message>
     <message>
         <source>Error</source>

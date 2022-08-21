@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="bg">
+<TS language="bg" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
-        <translation>Десен клик за промяна на адреса или името</translation>
+        <translation>Десен клик за промяна на адрес или име</translation>
     </message>
     <message>
         <source>Create a new address</source>
@@ -219,6 +217,246 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    <message>
+        <source>Asset Selection</source>
+        <translation>Избор на актив</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>количество:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>байта:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>сума</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>прах</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>такса:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>След таксата:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>смени:</translation>
+    </message>
+    <message>
+        <source>(un)select all</source>
+        <translation>премахни маркировката</translation>
+    </message>
+    <message>
+        <source>Tree mode</source>
+        <translation>режим тип дърво</translation>
+    </message>
+    <message>
+        <source>List mode</source>
+        <translation>режим списък</translation>
+    </message>
+    <message>
+        <source>View Administrator Assets</source>
+        <translation>покажи администраторски активи</translation>
+    </message>
+    <message>
+        <source>Asset</source>
+        <translation>активи</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>сума</translation>
+    </message>
+    <message>
+        <source>Received with label</source>
+        <translation>Получени с име</translation>
+    </message>
+    <message>
+        <source>Received with address</source>
+        <translation>Получени с адрес</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>дата</translation>
+    </message>
+    <message>
+        <source>Confirmations</source>
+        <translation>Потвърждения</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Потвърдено</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Копирай адрес</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Копирай етикет</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Копирай сума</translation>
+    </message>
+    <message>
+        <source>Copy transaction ID</source>
+        <translation>Копирай ID на трансакцията</translation>
+    </message>
+    <message>
+        <source>Lock unspent</source>
+        <translation>Заключване на неизхарченото</translation>
+    </message>
+    <message>
+        <source>Unlock unspent</source>
+        <translation>Отключване на неизхарченото</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Копирай количество</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Копирай такса</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Копиране на байтовете</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Копирай прахта:</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Копирай ресто</translation>
+    </message>
+    <message>
+        <source>(%1 locked)</source>
+        <translation>(%1 заключен)</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>да</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>не</translation>
+    </message>
+    <message>
+        <source>Can vary +/- %1 satoshi(s) per input.</source>
+        <translation>Може да вариира +/- %1 сатоши на input</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(без име)</translation>
+    </message>
+    <message>
+        <source>change from %1 (%2)</source>
+        <translation>ресто от %1 (%2)</translation>
+    </message>
+    <message>
+        <source>(change)</source>
+        <translation>(промяна)</translation>
+    </message>
+</context>
+<context>
+    <name>AssetTableModel</name>
+    <message>
+        <source>Name</source>
+        <translation>Име</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation>Количество</translation>
+    </message>
+</context>
+<context>
+    <name>AssetsDialog</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Изпращане</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>такса:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>ресто:</translation>
+    </message>
+    <message>
+        <source>Custom change address</source>
+        <translation>Промени персонализирания адрес</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Такса за транзакцията:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Избери...</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Плащане на минимална такса би било достатъчно при слаб трафик и обем на транзакциите по-малък от големината на блока. Бъдете внимателни, транзакцията може да не бъде потвърдена и изпълнена ако заявените Рейвън транзакции са повече от възможността на мрежата да обработи</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Копиране на байтовете</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Копирай ресто</translation>
+    </message>
+    <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 блока)</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 към %2</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Заплати само изискуемата такса от %1</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Внимание! Невалиден Рейвън адрес</translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Внимание, неизвестна промяна на адрес.</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Потвърдете промяната на адреса</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation> Адреса, който сте избрали за промяна не е част от този портфейл. Част или цялата наличност от вашия портфейл може да бъде изпратена на този адрес. Сигурен ли сте?</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(без име)</translation>
+    </message>
+</context>
+<context>
+    <name>AssignQualifier</name>
+    <message>
+        <source>Custom Change Address</source>
+        <translation>Промени персонализирания адрес</translation>
+    </message>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -229,303 +467,6 @@
         <translation>Със забранен достъп до</translation>
     </message>
 </context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Подписване на &amp;съобщение...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Синхронизиране с мрежата...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Баланс</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Сървър</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Обобщена информация за портфейла</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Транзакции</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>История на транзакциите</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>Из&amp;ход</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Изход от приложението</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>Относно %1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>Покажи информация относно %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>За &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Покажи информация за Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Опции...</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>Промени настройки за %1</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Шифриране на портфейла...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Запазване на портфейла...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Смяна на паролата...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Изпращане на адресите...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Получаване на адресите...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Отвори &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>Натиснете за деактивиране на мрежата</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>Мрежата деактивирана</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>Натиснете за повторно активиране на мрежата</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Повторно индексиране на блоковете на диска...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Изпращане към Биткоин адрес</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Запазване на портфейла на друго място</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Променя паролата за портфейла</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Прозорец за отстраняване на грешки</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Отворете конзолата за диагностика и отстраняване на грешки</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Проверка на съобщение...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Биткоин</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Портфейл</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Изпращане</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Получаване</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Показване / Скриване</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Показване и скриване на основния прозорец</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Шифроване на личните ключове,които принадлежат на портфейла Ви.</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Пишете съобщения със своя Биткойн адрес за да докажете,че е ваш.</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Потвърждаване на съобщения  за да се знае,че са написани с дадените Биткойн адреси.</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Файл</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Настройки</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Помощ</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Раздели</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Изискване на плащания(генерира QR кодове и биткойн: URIs)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Показване на списъка с използвани адреси и имена</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Покажи списък с използваните адреси и имена.</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Отворете биткойн: URI  или заявка за плащане</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Налични команди</translation>
-    </message>
-    <message>
-        <source>Indexing blocks on disk...</source>
-        <translation>Индексиране на блокове на диска...</translation>
-    </message>
-    <message>
-        <source>Processing blocks on disk...</source>
-        <translation>Обработване на блокове на диска...</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 зад</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Последния получен блок е генериран преди %1.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Транзакции след това няма все още да бъдат видими.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Грешка</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Предупреждение</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Информация</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Синхронизиран</translation>
-    </message>
-    <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>Покажи %1 помощно съобщение за да получиш лист с възможни Биткойн команди</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 клиент</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>Свързване с пиъри</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Зарежда блокове...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Дата: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Сума: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Тип: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Етикет: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Адрес: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Изходяща транзакция</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Входяща транзакция</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Портфейлът е &lt;b&gt;криптиран&lt;/b&gt; и &lt;b&gt;отключен&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Портфейлът е &lt;b&gt;криптиран&lt;/b&gt; и &lt;b&gt;заключен&lt;/b&gt;</translation>
-    </message>
-    </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
@@ -657,6 +598,10 @@
         <translation>не</translation>
     </message>
     <message>
+        <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
+        <translation>Етикетът се оцветява в червено, ако потребителят получи сума, която е по-ниска от актуалният праг на прахта.</translation>
+    </message>
+    <message>
         <source>(no label)</source>
         <translation>(без име)</translation>
     </message>
@@ -669,6 +614,29 @@
         <translation>(промени)</translation>
     </message>
 </context>
+<context>
+    <name>CreateAssetDialog</name>
+    <message>
+        <source>Custom change address</source>
+        <translation>Промени персонализирания адрес</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Скрий</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Препоръчано:</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Време за потвърждение:</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Потвърдете промяната на адреса</translation>
+    </message>
+    </context>
 <context>
     <name>EditAddressDialog</name>
     <message>
@@ -748,6 +716,38 @@
     </message>
 </context>
 <context>
+    <name>FreezeAddress</name>
+    <message>
+        <source>Restricted Asset:</source>
+        <translation>ограничен актив:</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>адрес:</translation>
+    </message>
+    <message>
+        <source>Custom Change Address</source>
+        <translation>Промени персонализирания адрес</translation>
+    </message>
+    <message>
+        <source>IPFS / Hash:</source>
+        <translation>IPFS / Hash:</translation>
+    </message>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    <message>
+        <source>You are trying to send a transaction while your wallet is not fully synced. This is not recommended because the transaction might get stuck in your wallet. Are you sure you want to proceed?
+
+Recommended action: Fully sync your wallet before sending a transaction.
+</source>
+        <translation>Опитвате се да изпратите транзакция докато портфейлът не е синхронизиран. Това действие не се препоръчва, тъй като транзакцията може да заседне в портфейла. Сигурен ли сте, че искате да продължите?
+
+Препоръчано действие: синхронизирайте напълно портфейла преди да извършите транзакцията
+</translation>
+    </message>
+</context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -817,6 +817,10 @@
         <translation>Програмата се стартира за първи път вие може да изберете къде %1 ще се запаметят данните.</translation>
     </message>
     <message>
+        <source>If you have chosen to limit block chain storage (pruning), the historical data must still be downloaded and processed, but will be deleted afterward to keep your disk usage low.</source>
+        <translation>Ако сте избрали да ограничите съхранението на block chain (pruning), данните от историята трябва да се даунлоуднат и процесират, след което ще бъдат изтрити с цел ниска използваемост на диска.</translation>
+    </message>
+    <message>
         <source>Use the default data directory</source>
         <translation>Използване на директория по подразбиране</translation>
     </message>
@@ -825,9 +829,33 @@
         <translation>Използване на директория ръчно</translation>
     </message>
     <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
         <source>Error</source>
         <translation>Грешка</translation>
     </message>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    <message>
+        <source>Go Back</source>
+        <translation>Върни назад</translation>
+    </message>
+    <message>
+        <source>Words are not valid, please generate new words and try again</source>
+        <translation>Невалидни думи, моля създайте нови и опитайте отново</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog3</name>
     </context>
 <context>
     <name>ModalOverlay</name>
@@ -836,16 +864,75 @@
         <translation>Формуляр</translation>
     </message>
     <message>
+        <source>Number of blocks left</source>
+        <translation>Останали брой блокове</translation>
+    </message>
+    <message>
+        <source>Unknown...</source>
+        <translation>незвестно</translation>
+    </message>
+    <message>
         <source>Last block time</source>
         <translation>Време на последния блок</translation>
+    </message>
+    <message>
+        <source>Progress</source>
+        <translation>Напредък</translation>
     </message>
     <message>
         <source>calculating...</source>
         <translation>Изчисляване...</translation>
     </message>
     <message>
+        <source>Estimated time left until synced</source>
+        <translation>Очаквано време до синхронизацията</translation>
+    </message>
+    <message>
         <source>Hide</source>
         <translation>Скрий</translation>
+    </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    <message>
+        <source>Date</source>
+        <translation>Дата</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Тип</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Адрес</translation>
+    </message>
+    <message>
+        <source>Asset Name</source>
+        <translation>име на актив</translation>
+    </message>
+    <message>
+        <source>Tagged</source>
+        <translation>маркиран</translation>
+    </message>
+    <message>
+        <source>Untagged</source>
+        <translation>немаркиран</translation>
+    </message>
+    <message>
+        <source>Frozen</source>
+        <translation>Замразено</translation>
+    </message>
+    <message>
+        <source>Unfrozen</source>
+        <translation>Размрази</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Други</translation>
+    </message>
+    <message>
+        <source>watch-only</source>
+        <translation>само гледане</translation>
     </message>
     </context>
 <context>
@@ -886,20 +973,8 @@
         <translation>Брой на скриптове и &amp;нишки за потвърждение</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>Приемай връзки отвън</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Позволи входящите връзки</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>IP адрес на прокси (напр. за IPv4: 127.0.0.1 / за IPv6: ::1)</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>URL адреси на трети страни</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
@@ -1018,6 +1093,14 @@
         <translation>Изисква се рестартиране на клиента за активиране на извършените промени.</translation>
     </message>
     <message>
+        <source>Configuration options</source>
+        <translation>Опции за настройки</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Грешка</translation>
+    </message>
+    <message>
         <source>This change would require a client restart.</source>
         <translation>Тази промяна изисква рестартиране на клиента Ви.</translation>
     </message>
@@ -1059,10 +1142,6 @@
     <message>
         <source>Mined balance that has not yet matured</source>
         <translation>Миниран баланс,който все още не се е развил</translation>
-    </message>
-    <message>
-        <source>Balances</source>
-        <translation>Баланс</translation>
     </message>
     <message>
         <source>Total:</source>
@@ -1154,7 +1233,23 @@
         <source>User Agent</source>
         <translation>Клиент на потребителя</translation>
     </message>
-    </context>
+    <message>
+        <source>Node/Service</source>
+        <translation>node/услуги</translation>
+    </message>
+    <message>
+        <source>Ping</source>
+        <translation>ping</translation>
+    </message>
+    <message>
+        <source>Sent</source>
+        <translation>Изпратени</translation>
+    </message>
+    <message>
+        <source>Received</source>
+        <translation>Получени</translation>
+    </message>
+</context>
 <context>
     <name>QObject</name>
     <message>
@@ -1291,6 +1386,18 @@
         <translation>Версия</translation>
     </message>
     <message>
+        <source>Wallet Path</source>
+        <translation>Пътека към портфейла</translation>
+    </message>
+    <message>
+        <source>Recover transactions</source>
+        <translation>Възстанови транзакции</translation>
+    </message>
+    <message>
+        <source>Rebuild index</source>
+        <translation>Изгради индекс отново</translation>
+    </message>
+    <message>
         <source>User Agent</source>
         <translation>Клиент на потребителя</translation>
     </message>
@@ -1331,10 +1438,6 @@
         <translation>&amp;Мрежов Трафик</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Изчисти</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Общо:</translation>
     </message>
@@ -1355,28 +1458,24 @@
         <translation>Изчисти конзолата</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Използвайте стрелки надолу и нагореза разглеждане на историятаот команди и &lt;b&gt;Ctrl-L&lt;/b&gt; за изчистване на конзолата.</translation>
+        <source>1 &amp;hour</source>
+        <translation>1 &amp;час</translation>
+    </message>
+    <message>
+        <source>1 &amp;day</source>
+        <translation>1 &amp;ден</translation>
+    </message>
+    <message>
+        <source>1 &amp;week</source>
+        <translation>1 &amp;седмица</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Въведeте &lt;/b&gt;помощ&lt;/b&gt; за да видите наличните команди.</translation>
     </message>
     <message>
-        <source>%1 B</source>
-        <translation>%1 Байт</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 Килобайт</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 Мегабайт</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 Гигабайт</translation>
+        <source>(node id: %1)</source>
+        <translation>(node id: %1)</translation>
     </message>
     <message>
         <source>via %1</source>
@@ -1407,6 +1506,311 @@
         <translation>Неизвестен</translation>
     </message>
 </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Подписване на &amp;съобщение...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Синхронизиране с мрежата...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Баланс</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Сървър</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Обобщена информация за портфейла</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Транзакции</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>История на транзакциите</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>Из&amp;ход</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Изход от приложението</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>Относно %1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>Покажи информация относно %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>За &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Покажи информация за Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Опции...</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>Промени настройки за %1</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Шифриране на портфейла...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Запазване на портфейла...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Смяна на паролата...</translation>
+    </message>
+    <message>
+        <source>Open wallet repair options</source>
+        <translation>Отвори опциите за поправяне на портфейла</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Изпращане на адресите...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Получаване на адресите...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Отвори &amp;URI...</translation>
+    </message>
+    <message>
+        <source>&amp;Wallet</source>
+        <translation>&amp;Wallet</translation>
+    </message>
+    <message>
+        <source>Ravencoin Market Price</source>
+        <translation>Пазарна цена на Ravencoin</translation>
+    </message>
+    <message>
+        <source>Brought to you by binance.com</source>
+        <translation>Допринесено от binance.com</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>Натиснете за деактивиране на мрежата</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>Мрежата деактивирана</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>Натиснете за повторно активиране на мрежата</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Синхронизирай Headers (%1%)...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Повторно индексиране на блоковете на диска...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Изпращане към Биткоин адрес</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Запазване на портфейла на друго място</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Променя паролата за портфейла</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Отворете конзолата за диагностика и отстраняване на грешки</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Проверка на съобщение...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Биткоин</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Портфейл</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Изпращане</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Получаване</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Показване / Скриване</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Показване и скриване на основния прозорец</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Шифроване на личните ключове,които принадлежат на портфейла Ви.</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Пишете съобщения със своя Биткойн адрес за да докажете,че е ваш.</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Потвърждаване на съобщения  за да се знае,че са написани с дадените Биткойн адреси.</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Файл</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Помощ</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Изискване на плащания(генерира QR кодове и биткойн: URIs)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Показване на списъка с използвани адреси и имена</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Покажи списък с използваните адреси и имена.</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Отворете биткойн: URI  или заявка за плащане</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Налични команди</translation>
+    </message>
+    <message>
+        <source>Indexing blocks on disk...</source>
+        <translation>Индексиране на блокове на диска...</translation>
+    </message>
+    <message>
+        <source>Processing blocks on disk...</source>
+        <translation>Обработване на блокове на диска...</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 зад</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Последния получен блок е генериран преди %1.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Транзакции след това няма все още да бъдат видими.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Грешка</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Предупреждение</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Информация</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Синхронизиран</translation>
+    </message>
+    <message>
+        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <translation>Покажи %1 помощно съобщение за да получиш лист с възможни Биткойн команди</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 клиент</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Свързване с пиъри</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Зарежда блокове...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Дата: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Сума: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Тип: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Етикет: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Адрес: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Изходяща транзакция</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Входяща транзакция</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Портфейлът е &lt;b&gt;криптиран&lt;/b&gt; и &lt;b&gt;отключен&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Портфейлът е &lt;b&gt;криптиран&lt;/b&gt; и &lt;b&gt;заключен&lt;/b&gt;</translation>
+    </message>
+    </context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
@@ -1450,8 +1854,16 @@
         <translation>Показване</translation>
     </message>
     <message>
+        <source>Remove the selected entries from the list</source>
+        <translation>Премахни избраните полета от списъка</translation>
+    </message>
+    <message>
         <source>Remove</source>
         <translation>Премахване</translation>
+    </message>
+    <message>
+        <source>Copy URI</source>
+        <translation>Копирай URI</translation>
     </message>
     <message>
         <source>Copy label</source>
@@ -1491,6 +1903,10 @@
     <message>
         <source>Payment information</source>
         <translation>Данни за плащането</translation>
+    </message>
+    <message>
+        <source>URI</source>
+        <translation>URI</translation>
     </message>
     <message>
         <source>Address</source>
@@ -1534,6 +1950,107 @@
     <message>
         <source>(no message)</source>
         <translation>(без съобщение)</translation>
+    </message>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    <message>
+        <source>Custom change address</source>
+        <translation>Промени персонализирания адрес</translation>
+    </message>
+    <message>
+        <source>Verifier String:</source>
+        <translation>Verifier String:</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Предупреждение</translation>
+    </message>
+    <message>
+        <source>e.g. 1.00000000</source>
+        <translation>напр. 1.00000000</translation>
+    </message>
+    <message>
+        <source>Change IPFS/Txid Hash</source>
+        <translation>Смени IPFS/Txid Hash</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Време за потвърждение:</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Изчистване</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Салдо</translation>
+    </message>
+    <message>
+        <source>123.456 RVN</source>
+        <translation>123.456 RVN</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Копирай брой</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Копирай сума</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Копиране на такса</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Потвърдете промяната на адреса</translation>
+    </message>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    <message>
+        <source>Failed to generate the correct transaction. Please try again</source>
+        <translation>Транзакцията не беше генерирана. Моля опитайте отново</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Сума %1</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>или</translation>
+    </message>
+    <message>
+        <source>Confirm adding qualifier</source>
+        <translation>Потвърди добавянето на параметъра</translation>
+    </message>
+    <message>
+        <source>Confirm removing qualifier</source>
+        <translation>Потвърди отстраняването на параметъра</translation>
+    </message>
+</context>
+<context>
+    <name>SendAssetsEntry</name>
+    <message>
+        <source>Alt+A</source>
+        <translation>Alt+A</translation>
+    </message>
+    <message>
+        <source>Alt+P</source>
+        <translation>Alt+P</translation>
+    </message>
+    <message>
+        <source>Message:</source>
+        <translation>Съобщение:</translation>
+    </message>
+    <message>
+        <source>Transfer to:</source>
+        <translation>Прехвърли към:</translation>
+    </message>
+    <message>
+        <source>Select an asset to transfer</source>
+        <translation>Избери актив за прехвърляне</translation>
     </message>
     </context>
 <context>
@@ -1583,6 +2100,10 @@
         <translation>Ако тази опция е активирана,но адресът на промяна е празен или невалиден,промяната ще бъде изпратена на новосъздаден адрес.</translation>
     </message>
     <message>
+        <source>Custom change address</source>
+        <translation>Промени персонализирания адрес</translation>
+    </message>
+    <message>
         <source>Transaction Fee:</source>
         <translation>Такса за транзакцията:</translation>
     </message>
@@ -1599,24 +2120,12 @@
         <translation>Скрий</translation>
     </message>
     <message>
-        <source>total at least</source>
-        <translation>Крайна сума поне</translation>
-    </message>
-    <message>
         <source>Recommended:</source>
         <translation>Препоръчителна:</translation>
     </message>
     <message>
         <source>Custom:</source>
         <translation>По избор:</translation>
-    </message>
-    <message>
-        <source>normal</source>
-        <translation>нормален</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>бърз</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -1723,6 +2232,10 @@
         <translation>Внимание:Неизвестен адрес за промяна</translation>
     </message>
     <message>
+        <source>Confirm custom change address</source>
+        <translation>Потвърдете промяната на адреса</translation>
+    </message>
+    <message>
         <source>(no label)</source>
         <translation>(без име)</translation>
     </message>
@@ -1732,10 +2245,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>С&amp;ума:</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>Плати &amp;На:</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -1768,10 +2277,6 @@
     <message>
         <source>Message:</source>
         <translation>Съобщение:</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Плащане на:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2134,6 +2639,10 @@
         <translation>Емитирани</translation>
     </message>
     <message>
+        <source>Assets Sent</source>
+        <translation>Изпратен актив</translation>
+    </message>
+    <message>
         <source>watch-only</source>
         <translation>само гледане</translation>
     </message>
@@ -2161,7 +2670,7 @@
         <source>Amount removed from or added to balance.</source>
         <translation>Сума извадена или добавена към баланса.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>TransactionView</name>
     <message>
@@ -2221,6 +2730,14 @@
         <translation>Минимална сума</translation>
     </message>
     <message>
+        <source>Asset name</source>
+        <translation>име на актив</translation>
+    </message>
+    <message>
+        <source>Abandon transaction</source>
+        <translation>Излез от транзакцията</translation>
+    </message>
+    <message>
         <source>Copy address</source>
         <translation>Копирай адрес</translation>
     </message>
@@ -2243,6 +2760,10 @@
     <message>
         <source>Show transaction details</source>
         <translation>Подробности за транзакцията</translation>
+    </message>
+    <message>
+        <source>Browse with:</source>
+        <translation>Разглеждай с:</translation>
     </message>
     <message>
         <source>Export Transaction History</source>
@@ -2277,6 +2798,10 @@
         <translation>Адрес</translation>
     </message>
     <message>
+        <source>Asset</source>
+        <translation>актив</translation>
+    </message>
+    <message>
         <source>ID</source>
         <translation>ИД</translation>
     </message>
@@ -2291,6 +2816,14 @@
     <message>
         <source>The transaction history was successfully saved to %1.</source>
         <translation>Историята с транзакциите беше успешно запазена в %1.</translation>
+    </message>
+    <message>
+        <source>Asset Sent</source>
+        <translation>Изпратен актив</translation>
+    </message>
+    <message>
+        <source>Copy asset name</source>
+        <translation>Копирай име на актива</translation>
     </message>
     <message>
         <source>Range:</source>
@@ -2317,7 +2850,7 @@
         <source>Send Coins</source>
         <translation>Изпращане</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -2352,7 +2885,7 @@
         <source>The wallet data was successfully saved to %1.</source>
         <translation>Информацията за портфейла беше успешно запазена в %1.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>raven-core</name>
     <message>
@@ -2372,8 +2905,16 @@
         <translation>Въведете Ваш публичен адрес</translation>
     </message>
     <message>
+        <source>Pruning blockstore...</source>
+        <translation>Pruning blockstore...</translation>
+    </message>
+    <message>
         <source>Raven Core</source>
         <translation>Биткойн ядро</translation>
+    </message>
+    <message>
+        <source>The %s developers</source>
+        <translation>%s програмисти</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>
@@ -2384,12 +2925,36 @@
         <translation>Настройки на връзката:</translation>
     </message>
     <message>
+        <source>Copyright (C) %i-%i</source>
+        <translation>Copyright (C) %i-%i</translation>
+    </message>
+    <message>
         <source>Do you want to rebuild the block database now?</source>
         <translation>Желаете ли да пресъздадете базата данни с блокове сега?</translation>
     </message>
     <message>
         <source>Error initializing block database</source>
         <translation>Грешка в пускането на базата данни с блокове</translation>
+    </message>
+    <message>
+        <source>Error loading %s</source>
+        <translation>Грешка при зареждането %s</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet corrupted</source>
+        <translation>Грешка при зареждането %s: повреден портфейл</translation>
+    </message>
+    <message>
+        <source>Error loading %s: Wallet requires newer version of %s</source>
+        <translation>Грешка при зареждането %s: портфейла изисква нова версия на %s</translation>
+    </message>
+    <message>
+        <source>Error loading block database</source>
+        <translation>Грешка в зареждането на базата данни с блокове</translation>
+    </message>
+    <message>
+        <source>Error opening block database</source>
+        <translation>Грешка в отварянето на базата данни с блокове</translation>
     </message>
     <message>
         <source>Error: Disk space is low!</source>
@@ -2404,12 +2969,32 @@
         <translation>Внасяне...</translation>
     </message>
     <message>
-        <source>Verifying blocks...</source>
-        <translation>Проверка на блоковете...</translation>
+        <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
+        <translation>Невалидна сума за -%s=1: '%s'</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>Проверка на портфейла...</translation>
+        <source>Invalid amount for -discardfee=&lt;amount&gt;: '%s'</source>
+        <translation>Невалидна сума за-discardfee=1: '%s' </translation>
+    </message>
+    <message>
+        <source>Invalid amount for -fallbackfee=&lt;amount&gt;: '%s'</source>
+        <translation>Невалидна сума -fallbackfee=1: '%s' </translation>
+    </message>
+    <message>
+        <source>Print this help message and exit</source>
+        <translation>Принтирай съобщението за помощ и излез</translation>
+    </message>
+    <message>
+        <source>Print version and exit</source>
+        <translation>Принтирай версията и излез</translation>
+    </message>
+    <message>
+        <source>Prune mode is incompatible with -txindex.</source>
+        <translation>Модус Prune е несъвместим с -txindex.</translation>
+    </message>
+    <message>
+        <source>Verifying blocks...</source>
+        <translation>Проверка на блоковете...</translation>
     </message>
     <message>
         <source>Wallet options:</source>
@@ -2422,6 +3007,18 @@
     <message>
         <source>Information</source>
         <translation>Информация</translation>
+    </message>
+    <message>
+        <source>Invalid -onion address or hostname: '%s'</source>
+        <translation>Невалиден -onion адрес или hostname: '%s'</translation>
+    </message>
+    <message>
+        <source>Invalid -proxy address or hostname: '%s'</source>
+        <translation>Невалиден -proxy адрес или hostname: '%s'</translation>
+    </message>
+    <message>
+        <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</source>
+        <translation>Невалидна сума за -paytxfee=1: '%s' (трябва да е най-малко %s)</translation>
     </message>
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
@@ -2452,12 +3049,20 @@
         <translation>Парола за  JSON-RPC връзките</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Зареждане на адреси...</translation>
+        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services (default: %s)</source>
+        <translation>Използвай отделно SOCKS5 proxy за да се свържеш с peers чрез Tor hidden services (default: %s)</translation>
     </message>
     <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Невалиден -proxy address: '%s'</translation>
+        <source>Warning: Wallet file corrupt, data salvaged! Original %s saved as %s in %s; if your balance or transactions are incorrect you should restore from a backup.</source>
+        <translation>Внимание: повреден файл в портфейла, данните са в безопастност! Оригиналният %s е запазен като %s в %s; ако салдото или транзакциите не са коректни, възстановете ги от backup-а</translation>
+    </message>
+    <message>
+        <source>(default: %s)</source>
+        <translation>(default: %s)</translation>
+    </message>
+    <message>
+        <source>Error loading wallet %s. -wallet filename must be a regular file.</source>
+        <translation>Грешка при зареждането на портфейл %s. -името на файла на портфейла трябва да е коректен файл.</translation>
     </message>
     <message>
         <source>Specify configuration file (default: %s)</source>
@@ -2484,12 +3089,12 @@
         <translation>Зареждане на портфейла...</translation>
     </message>
     <message>
-        <source>Rescanning...</source>
-        <translation>Преразглеждане на последовтелността от блокове...</translation>
+        <source>Cannot downgrade wallet</source>
+        <translation>Не може да понижи портфейла</translation>
     </message>
     <message>
-        <source>Done loading</source>
-        <translation>Зареждането е завършено</translation>
+        <source>Rescanning...</source>
+        <translation>Преразглеждане на последовтелността от блокове...</translation>
     </message>
     <message>
         <source>Error</source>

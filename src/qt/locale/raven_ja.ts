@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ja">
+<TS language="ja" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -223,6 +221,18 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -231,327 +241,6 @@
     <message>
         <source>Banned Until</source>
         <translation>以下の時間までbanする:</translation>
-    </message>
-</context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>メッセージの署名... (&amp;m)</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>ネットワークに同期中……</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>概要(&amp;O)</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>ノード</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>ウォレットの概要を見る</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>取引(&amp;T)</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>取引履歴を閲覧</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>終了(&amp;E)</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>アプリケーションを終了</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>%1 について (&amp;A)</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>%1 の情報を表示</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Qt について(&amp;Q)</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Qt の情報を表示</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>オプション... (&amp;O)</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>%1 の設定を変更する</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>ウォレットの暗号化... (&amp;E)</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>ウォレットのバックアップ... (&amp;B)</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>パスフレーズの変更... (&amp;C)</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>送金先アドレス一覧 (&amp;S)...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>受け取り用アドレス一覧 (&amp;R)...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>URI を開く (&amp;U)...</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>クリックするとネットワーク活動を無効化します。</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>ネットワーク活動は無効化されました。</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>クリックするとネットワーク活動を再び有効化します。</translation>
-    </message>
-    <message>
-        <source>Syncing Headers (%1%)...</source>
-        <translation>未知。ヘッダを同期しています (%1%)...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>ディスク上のブロックのインデックスを再作成中...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Raven アドレスにコインを送る</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>ウォレットを他の場所にバックアップ</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>ウォレット暗号化用パスフレーズの変更</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>デバッグ ウインドウ (&amp;D)</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>デバッグと診断コンソールを開く</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>メッセージの検証... (&amp;V)</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>ウォレット</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>送金 (&amp;S)</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>入金 (&amp;R)</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>見る/隠す (&amp;S)</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>メイン ウインドウを表示または非表示</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>あなたのウォレットの秘密鍵を暗号化します</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>あなたが所有していることを証明するために、あなたの Raven アドレスでメッセージに署名してください</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>指定された Raven アドレスで署名されたことを確認するためにメッセージを検証します</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>ファイル(&amp;F)</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>設定(&amp;S)</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>ヘルプ(&amp;H)</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>タブツールバー</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>支払いを要求する (QRコードとraven:ではじまるURIを生成する)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>使用済みの送金用アドレスとラベルの一覧を表示する</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>支払いを受け取るアドレスとラベルのリストを表示する</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>raven: URIまたは支払いリクエストを開く</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>コマンドラインオプション (&amp;C)</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>%n の Raven ネットワークへのアクティブな接続</numerusform></translation>
-    </message>
-    <message>
-        <source>Indexing blocks on disk...</source>
-        <translation>ディスク上のブロックのインデックスを作成しています...</translation>
-    </message>
-    <message>
-        <source>Processing blocks on disk...</source>
-        <translation>ディスク上のブロックを処理しています...</translation>
-    </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>トランザクション履歴の %n ブロックを処理しました。</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 遅延</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>最後に受信されたブロックは %1 前に生成されました。</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>この後の取引はまだ表示されません。</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>エラー</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>警告</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>情報</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>バージョンは最新です</translation>
-    </message>
-    <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>有効な Raven のコマンドライン オプションを見るために %1 のヘルプメッセージを表示します。</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 クライアント</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>ピアに接続しています...</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>追跡中...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>日付: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>総額: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>タイプ: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>ラベル: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>アドレス: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>送金取引</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>着金取引</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
-        <translation>HD鍵生成は&lt;b&gt;有効化&lt;/b&gt;されています</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
-        <translation>HD鍵生成は&lt;b&gt;無効化&lt;/b&gt;されています</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>ウォレットは&lt;b&gt;暗号化されて、アンロックされています&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>ウォレットは&lt;b&gt;暗号化されて、ロックされています&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>致命的なエラーが発生しました。Raven は安全に継続することができず終了するでしょう。</translation>
     </message>
 </context>
 <context>
@@ -706,6 +395,9 @@
     </message>
 </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -784,6 +476,12 @@
     </message>
 </context>
 <context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -853,10 +551,6 @@
         <translation>これはプログラム最初の起動です。%1 がデータを保存する場所を選択して下さい。</translation>
     </message>
     <message>
-        <source>%1 will download and store a copy of the Raven block chain. At least %2GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>%1 は、ビットコインのブロックチェーンのコピーを、ダウンロードして保存します。少なくとも %2 ギガバイトのデータが、このディレクトリに保存されます。そしてそれは時間と共に増加します。またウォレットもこのディレクトリに保存されます。</translation>
-    </message>
-    <message>
         <source>Use the default data directory</source>
         <translation>初期値のデータ ディレクトリを使用</translation>
     </message>
@@ -872,15 +566,19 @@
         <source>Error</source>
         <translation>エラー</translation>
     </message>
-    <message numerus="yes">
-        <source>%n GB of free space available</source>
-        <translation><numerusform>%n GBの空き容量が利用可能</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>(of %n GB needed)</source>
-        <translation><numerusform>(%n GB必要)</numerusform></translation>
-    </message>
-</context>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
 <context>
     <name>ModalOverlay</name>
     <message>
@@ -932,6 +630,9 @@
         <translation>未知。ヘッダを同期しています (%1)...</translation>
     </message>
 </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
 <context>
     <name>OpenURIDialog</name>
     <message>
@@ -986,14 +687,6 @@
         <translation>スクリプト検証用スレッド数 (&amp;V)</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>外部からの接続を許可する</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>外部からの接続を許可する</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>プロキシのIPアドレス (例えば IPv4: 127.0.0.1 / IPv6: ::1)</translation>
     </message>
@@ -1004,10 +697,6 @@
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
         <translation>トランザクションタブのコンテキストメニュー項目に表示する、サードパーティURL (例えばブロックエクスプローラ)。URL中の%sはトランザクションのハッシュ値に置き換えられます。垂直バー | で区切ることで、複数のURLを指定できます。</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>サードパーティのトランザクションURL</translation>
     </message>
     <message>
         <source>Active command-line options that override above options:</source>
@@ -1082,10 +771,6 @@
         <translation>ピアへ到達するために使われた方法:</translation>
     </message>
     <message>
-        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
-        <translation>このネットワークタイプ経由で、与えられたデフォルトのSOCKS5プロキシを使用してピアに到達した場合に表示する。</translation>
-    </message>
-    <message>
         <source>IPv4</source>
         <translation>IPv4</translation>
     </message>
@@ -1102,20 +787,8 @@
         <translation>Tor秘匿サービスを利用するため、独立なSOCKS5プロキシ経由でRavenネットワークに接続する</translation>
     </message>
     <message>
-        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
-        <translation>Tor秘匿サービス経由でピアに到達するため、独立なSOCKS5プロキシを利用する:</translation>
-    </message>
-    <message>
         <source>&amp;Window</source>
         <translation>ウインドウ (&amp;W)</translation>
-    </message>
-    <message>
-        <source>&amp;Hide the icon from the system tray.</source>
-        <translation>システムトレイのアイコンを隠す (&amp;H)</translation>
-    </message>
-    <message>
-        <source>Hide tray icon</source>
-        <translation>トレイアイコンを隠す</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1229,10 +902,6 @@
         <translation>完成していない採掘された残高</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>残高</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>合計:</translation>
     </message>
@@ -1264,7 +933,7 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>監視限定アドレス内の現在の全残高</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1374,7 +1043,7 @@
         <source>Ping</source>
         <translation>Ping</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>QObject</name>
     <message>
@@ -1413,39 +1082,15 @@
         <source>%1 ms</source>
         <translation>%1ミリ秒</translation>
     </message>
-    <message numerus="yes">
-        <source>%n second(s)</source>
-        <translation><numerusform>%n 秒</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n minute(s)</source>
-        <translation><numerusform>%n 分</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n 時間</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n 日</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n 週間</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 と %2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n 年</numerusform></translation>
     </message>
     <message>
         <source>%1 didn't yet exit safely...</source>
         <translation>%1 はまだ安全に終了していません...</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>QObject::QObject</name>
     <message>
@@ -1663,10 +1308,6 @@
         <translation>ネットワーク (&amp;N)</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>クリア(&amp;C)</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>合計</translation>
     </message>
@@ -1719,36 +1360,12 @@
         <translation>%1 のRPCコンソールへようこそ。</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>上下の矢印で履歴をたどれます。 &lt;b&gt;Ctrl-L&lt;/b&gt; でスクリーンを消去できます。</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>使用可能なコマンドを見るには &lt;b&gt;help&lt;/b&gt; と入力します。</translation>
     </message>
     <message>
-        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
-        <translation>警告: 詐欺師が活動しており、ユーザに対してここにコマンドを入力させることでウォレットの中身を盗もうとしています。コマンドの結果を完全に理解していない限り、このコンソールは利用しないでください。</translation>
-    </message>
-    <message>
         <source>Network activity disabled</source>
         <translation>ネットワーク活動は無効化されました</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
     </message>
     <message>
         <source>(node id: %1)</source>
@@ -1781,6 +1398,307 @@
     <message>
         <source>Unknown</source>
         <translation>未知</translation>
+    </message>
+</context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>メッセージの署名... (&amp;m)</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>ネットワークに同期中……</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>概要(&amp;O)</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>ノード</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>ウォレットの概要を見る</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>取引(&amp;T)</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>取引履歴を閲覧</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>終了(&amp;E)</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>アプリケーションを終了</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>%1 について (&amp;A)</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>%1 の情報を表示</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Qt について(&amp;Q)</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Qt の情報を表示</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>オプション... (&amp;O)</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>%1 の設定を変更する</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>ウォレットの暗号化... (&amp;E)</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>ウォレットのバックアップ... (&amp;B)</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>パスフレーズの変更... (&amp;C)</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>送金先アドレス一覧 (&amp;S)...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>受け取り用アドレス一覧 (&amp;R)...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>URI を開く (&amp;U)...</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>クリックするとネットワーク活動を無効化します。</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>ネットワーク活動は無効化されました。</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>クリックするとネットワーク活動を再び有効化します。</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>未知。ヘッダを同期しています (%1%)...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>ディスク上のブロックのインデックスを再作成中...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Raven アドレスにコインを送る</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>ウォレットを他の場所にバックアップ</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>ウォレット暗号化用パスフレーズの変更</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>デバッグと診断コンソールを開く</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>メッセージの検証... (&amp;V)</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>ウォレット</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>送金 (&amp;S)</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>入金 (&amp;R)</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>見る/隠す (&amp;S)</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>メイン ウインドウを表示または非表示</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>あなたのウォレットの秘密鍵を暗号化します</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>あなたが所有していることを証明するために、あなたの Raven アドレスでメッセージに署名してください</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>指定された Raven アドレスで署名されたことを確認するためにメッセージを検証します</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>ファイル(&amp;F)</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>ヘルプ(&amp;H)</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>支払いを要求する (QRコードとraven:ではじまるURIを生成する)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>使用済みの送金用アドレスとラベルの一覧を表示する</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>支払いを受け取るアドレスとラベルのリストを表示する</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>raven: URIまたは支払いリクエストを開く</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>コマンドラインオプション (&amp;C)</translation>
+    </message>
+    <message>
+        <source>Indexing blocks on disk...</source>
+        <translation>ディスク上のブロックのインデックスを作成しています...</translation>
+    </message>
+    <message>
+        <source>Processing blocks on disk...</source>
+        <translation>ディスク上のブロックを処理しています...</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 遅延</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>最後に受信されたブロックは %1 前に生成されました。</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>この後の取引はまだ表示されません。</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>エラー</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>警告</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>情報</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>バージョンは最新です</translation>
+    </message>
+    <message>
+        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <translation>有効な Raven のコマンドライン オプションを見るために %1 のヘルプメッセージを表示します。</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 クライアント</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>ピアに接続しています...</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>追跡中...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>日付: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>総額: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>タイプ: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>ラベル: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>アドレス: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>送金取引</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>着金取引</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
+        <translation>HD鍵生成は&lt;b&gt;有効化&lt;/b&gt;されています</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
+        <translation>HD鍵生成は&lt;b&gt;無効化&lt;/b&gt;されています</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>ウォレットは&lt;b&gt;暗号化されて、アンロックされています&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>ウォレットは&lt;b&gt;暗号化されて、ロックされています&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <translation>致命的なエラーが発生しました。Raven は安全に継続することができず終了するでしょう。</translation>
     </message>
 </context>
 <context>
@@ -1957,6 +1875,15 @@
     </message>
 </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -2035,10 +1962,6 @@
         <translation>隠す</translation>
     </message>
     <message>
-        <source>total at least</source>
-        <translation>最小手数料</translation>
-    </message>
-    <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
         <translation>ブロックの容量に比べてトランザクション流量が少ないうちは最小手数料のみの支払で十分です。しかしながらネットワークが処理しきれないほどravenトランザクションの需要がひとたび生まれてしまった場合には、永遠に検証がされないトランザクションになってしまう可能性があることに注意してください。</translation>
     </message>
@@ -2057,14 +1980,6 @@
     <message>
         <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
         <translation>（スマート手数料はまだ初期化されていません。これにはおおよそ数ブロックほどかかります……）</translation>
-    </message>
-    <message>
-        <source>normal</source>
-        <translation>普通</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>高速</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -2190,17 +2105,9 @@
         <source>Payment request expired.</source>
         <translation>支払いリクエストの期限が切れました。</translation>
     </message>
-    <message numerus="yes">
-        <source>%n block(s)</source>
-        <translation><numerusform>%n ブロック</numerusform></translation>
-    </message>
     <message>
         <source>Pay only the required fee of %1</source>
         <translation>要求手数料 %1 のみを支払う</translation>
-    </message>
-    <message numerus="yes">
-        <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>%n ブロック以内に検証が開始されると予想されます。</numerusform></translation>
     </message>
     <message>
         <source>Warning: Invalid Raven address</source>
@@ -2228,10 +2135,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>金額(&amp;A):</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>送り先(&amp;T):</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2292,10 +2195,6 @@
     <message>
         <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
         <translation>raven: URIに添付されていたメッセージです。これは参照用としてトランザクションとともに保存されます。注意：このメッセージはRavenネットワークを通して送信されるわけではありません。</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>支払先:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2479,10 +2378,6 @@
 </context>
 <context>
     <name>TransactionDesc</name>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n 以上のブロックを開く</numerusform></translation>
-    </message>
     <message>
         <source>Open until %1</source>
         <translation>ユニット %1 を開く</translation>
@@ -2527,10 +2422,6 @@
         <source>, has not been successfully broadcast yet</source>
         <translation>まだブロードキャストが成功していません</translation>
     </message>
-    <message numerus="yes">
-        <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>%n ノードにブロードキャスト</numerusform></translation>
-    </message>
     <message>
         <source>Date</source>
         <translation>日付</translation>
@@ -2570,10 +2461,6 @@
     <message>
         <source>Credit</source>
         <translation>クレジット</translation>
-    </message>
-    <message numerus="yes">
-        <source>matures in %n more block(s)</source>
-        <translation><numerusform>あと %n ブロックで成熟します</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -2677,10 +2564,6 @@
         <source>Label</source>
         <translation>ラベル</translation>
     </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n 以上のブロックを開く</numerusform></translation>
-    </message>
     <message>
         <source>Open until %1</source>
         <translation>ユニット %1 を開く</translation>
@@ -2777,7 +2660,7 @@
         <source>Amount removed from or added to balance.</source>
         <translation>残高に追加または削除された総額。</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>TransactionView</name>
     <message>
@@ -2953,7 +2836,7 @@
         <source>Send Coins</source>
         <translation>コインを送る</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -2988,7 +2871,7 @@
         <source>The wallet data was successfully saved to %1.</source>
         <translation>ウォレット データは正常に%1に保存されました。</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>raven-core</name>
     <message>
@@ -3010,14 +2893,6 @@
     <message>
         <source>Accept command line and JSON-RPC commands</source>
         <translation>コマンドラインと JSON-RPC コマンドを許可</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
-        <translation>外部からの接続を許可 (初期値: -proxy または -connect/-noconnect を使用していない場合は1)</translation>
-    </message>
-    <message>
-        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
-        <translation>指定されたノードにのみ接続を行う; -noconnect または -connect=0 だけを指定すると自動接続を無効化します</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file %s or %s</source>
@@ -3086,10 +2961,6 @@
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
         <translation>ウォレットの全トランザクションを削除し、これらを-rescanオプションを用いることで起動時にブロックチェインのデータのみからリカバリします。</translation>
-    </message>
-    <message>
-        <source>Error loading %s: You can't enable HD on a already existing non-HD wallet</source>
-        <translation>%s の読み込みエラー: 非HDウォレットが既に存在するため、HDウォレットを有効化できません</translation>
     </message>
     <message>
         <source>Error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
@@ -3166,10 +3037,6 @@
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
         <translation>警告: ピアと完全に合意が取れていないようです！このノードまたは他のノードのアップグレードが必要なようです。</translation>
-    </message>
-    <message>
-        <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
-        <translation>-txindex を変更するには -reindex-chainstate を使用してデータベースを再構築する必要があります</translation>
     </message>
     <message>
         <source>%s corrupt, salvage failed</source>
@@ -3273,10 +3140,6 @@
         <translation>%s の読み込みに失敗しました: ウォレットの読み込みにはより新しいバージョンの %s が必要です</translation>
     </message>
     <message>
-        <source>Error loading %s: You can't disable HD on a already existing HD wallet</source>
-        <translation>%s の読み込みエラー: HDウォレットが既に存在するため、HDウォレットを無効化できません</translation>
-    </message>
-    <message>
         <source>Error loading block database</source>
         <translation>ブロック データベースの読み込みエラー</translation>
     </message>
@@ -3303,10 +3166,6 @@
     <message>
         <source>Initialization sanity check failed. %s is shutting down.</source>
         <translation>初期化時の健全性チェックに失敗しました。%s を終了します。</translation>
-    </message>
-    <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>無効な -onion アドレス：'%s'</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -3369,10 +3228,6 @@
         <translation>データベースのキャッシュサイズをメガバイトで設定 (%dから%d。初期値: %d)</translation>
     </message>
     <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>最大ブロックサイズをバイトで設定 (初期値: %d)</translation>
-    </message>
-    <message>
         <source>Specify wallet file (within data directory)</source>
         <translation>ウォレットのファイルを指定　(データ・ディレクトリの中に)</translation>
     </message>
@@ -3413,10 +3268,6 @@
         <translation>ブロックの検証中...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>ウォレットの検証中...</translation>
-    </message>
-    <message>
         <source>Wallet %s resides outside data directory %s</source>
         <translation>財布 %s はデータ・ディレクトリ%sの外にあります</translation>
     </message>
@@ -3439,10 +3290,6 @@
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
         <translation>指定されたアドレスおよび、そこに接続を行ってきたホワイトリストのピアに対してバインドを行います。IPv6の場合には [host]:port 表記を使用してください</translation>
-    </message>
-    <message>
-        <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>指定されたアドレスに対して JSON-RPC 接続をリッスンしするようバインドします。IPv6の場合には [host]:port 表記を使用してください。このオプションは複数回指定することが可能です (初期値: すべてのインターフェースに対してバインドする)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
@@ -3481,16 +3328,8 @@
         <translation>認証情報をプロキシー接続ごとにランダム化する。これによりTorストリーム分離をすることができます (規定値: %u)</translation>
     </message>
     <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>最優先/最低手数料の最大サイズをバイトで指定 (初期値: %d)</translation>
-    </message>
-    <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
         <translation>手数料差引後のトランザクションの金額が小さすぎるため、送金できません。</translation>
-    </message>
-    <message>
-        <source>Use hierarchical deterministic key generation (HD) after BIP32. Only has effect during wallet creation/first start</source>
-        <translation>BIP32 に従った階層的決定性鍵生成方式 (HD) を利用します。ウォレットの生成時ないし最初に起動した時にのみ有効です。</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
@@ -3563,10 +3402,6 @@
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>トレース/デバッグ情報を debug.log ファイルの代わりにコンソールへ送る</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>可能な場合には手数料ゼロのトランザクションとしてトランザクションを送信する (初期値: %u)</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -3653,10 +3488,6 @@
         <translation>-addnode, -seednode と -connect で DNS ルックアップを許可する</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>アドレスを読み込んでいます...</translation>
-    </message>
-    <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
         <translation>(1 = トランザクションのメタデータ、例えばアカウントの所有者や支払リクエストの内容を保持する, 2 = トランザクションのメタデータを破棄する)</translation>
     </message>
@@ -3695,10 +3526,6 @@
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
         <translation>デバッグ情報を出力する (初期値: %u, &lt;category&gt; の指定は任意です)</translation>
-    </message>
-    <message>
-        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
-        <translation>保有するピアアドレスが少ない場合、DNS ルックアップによりピアアドレスを問い合わせる (-connect/-noconnect を使っていない場合の初期値: 1)</translation>
     </message>
     <message>
         <source>Sets the serialization of raw transaction or block hex returned in non-verbose mode, non-segwit(0) or segwit(1) (default: %d)</source>
@@ -3767,10 +3594,6 @@
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
         <translation>デバッグ出力にIPアドレスを含める (初期値: %u)</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>無効な -proxy アドレス: '%s'</translation>
     </message>
     <message>
         <source>Keypool ran out, please call keypoolrefill first</source>
@@ -3889,10 +3712,6 @@
         <translation>ブロック インデックスを読み込んでいます...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>接続するノードを追加し接続を保持します</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>ウォレットを読み込んでいます...</translation>
     </message>
@@ -3901,16 +3720,8 @@
         <translation>ウォレットのダウングレードはできません</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>初期値のアドレスを書き込むことができません</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>再スキャン中...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>読み込み完了</translation>
     </message>
     <message>
         <source>Error</source>

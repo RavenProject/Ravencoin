@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="nl">
+<TS language="nl" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -223,6 +221,186 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    <message>
+        <source>Asset Selection</source>
+        <translation>Asset Selectie</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Hoeveelheid: </translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes: </translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Bedrag:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Stof:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Transactiekosten:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Na transactiekosten:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Verander: </translation>
+    </message>
+    <message>
+        <source>(un)select all</source>
+        <translation>(de)selecteer alles </translation>
+    </message>
+    <message>
+        <source>Tree mode</source>
+        <translation>Boom modus</translation>
+    </message>
+    <message>
+        <source>List mode</source>
+        <translation>Lijst modus</translation>
+    </message>
+    <message>
+        <source>View assets that you have the ownership asset for</source>
+        <translation>Bekijk de assets waarvan u eigenaarsasset bezit</translation>
+    </message>
+    <message>
+        <source>View Administrator Assets</source>
+        <translation>Bekijk Eigenaarsassets</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Bedrag: </translation>
+    </message>
+    <message>
+        <source>Received with label</source>
+        <translation>Ontvangen met etiket</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Datum</translation>
+    </message>
+    <message>
+        <source>Confirmations</source>
+        <translation>Bevestigingen</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Bevestigd</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Kopieer adres</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Kopieer label</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Kopieer bedrag</translation>
+    </message>
+    <message>
+        <source>Copy transaction ID</source>
+        <translation>Kopieer transactie-ID</translation>
+    </message>
+    <message>
+        <source>Lock unspent</source>
+        <translation>Blokkeer ongebruikte</translation>
+    </message>
+    <message>
+        <source>Unlock unspent</source>
+        <translation>Deblokkeer ongebruikte</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Kopieer aantal</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Kopieer vergoeding</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>ja</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>nee</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(geen label)</translation>
+    </message>
+    <message>
+        <source>(change)</source>
+        <translation>(aanpassen)</translation>
+    </message>
+</context>
+<context>
+    <name>AssetTableModel</name>
+    <message>
+        <source>Name</source>
+        <translation>Naam</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation>Hoeveelheid</translation>
+    </message>
+</context>
+<context>
+    <name>AssetsDialog</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Verzend munten</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Invoer..</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Aantal:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Verander: </translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Kies...</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Verbergen</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Aanbevolen:</translation>
+    </message>
+    <message>
+        <source>Clear all fields of the form.</source>
+        <translation>Wis alle formulier velden</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Balans:</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 naar %2</translation>
+    </message>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -231,327 +409,6 @@
     <message>
         <source>Banned Until</source>
         <translation>Geband tot</translation>
-    </message>
-</context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>&amp;Onderteken bericht...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Synchroniseren met netwerk...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Overzicht</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Node</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Toon algemeen overzicht van uw portemonnee</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Transacties</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Blader door transactiegescheidenis</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>A&amp;fsluiten</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Programma afsluiten</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>&amp;Over %1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>Toon informatie over %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Over &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Toon informatie over Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Opties...</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>Wijzig configuratieopties voor %1</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Versleutel Portemonnee...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Backup Portemonnee...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Wijzig Wachtwoord</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Verstuuradressen...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Ontvang adressen...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Open &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>Klik om de netwerkactiviteit te stoppen.</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>Netwerkactiviteit gestopt.</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>Klik om de netwerkactiviteit opnieuw te starten.</translation>
-    </message>
-    <message>
-        <source>Syncing Headers (%1%)...</source>
-        <translation>Kopteksten synchroniseren (%1%)...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Bezig met herindexeren van blokken op harde schijf...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Verstuur munten naar een Ravenadres</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Backup portemonnee naar een andere locatie</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Wijzig het wachtwoord voor uw portemonneversleuteling</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Debugscherm</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Open debugging en diagnostische console</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Verifiëer bericht...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Portemonnee</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Verstuur</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Ontvangen</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Toon / Verberg</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Toon of verberg het hoofdvenster</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Versleutel de geheime sleutels die bij uw portemonnee horen</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Onderteken berichten met uw Ravenadressen om te bewijzen dat u deze adressen bezit</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verifiëer handtekeningen om zeker te zijn dat de berichten zijn ondertekend met de gespecificeerde Ravenadressen</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Bestand</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Instellingen</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Hulp</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Tab-werkbalk</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Vraag betaling aan (genereert QR-codes en raven: URI's)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Toon de lijst met gebruikte verstuuradressen en -labels</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Toon de lijst met gebruikte ontvangst adressen en labels</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Open een raven: URI of betalingsverzoek</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Opdrachtregelopties</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>%n actieve verbinding met Ravennetwerk</numerusform></translation>
-    </message>
-    <message>
-        <source>Indexing blocks on disk...</source>
-        <translation>Bezig met indexeren van blokken op harde schijf...</translation>
-    </message>
-    <message>
-        <source>Processing blocks on disk...</source>
-        <translation>Bezig met verwerken van blokken op harde schijf...</translation>
-    </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>%n blok aan transactiegeschiedenis verwerkt.</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 achter</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Laatst ontvangen blok was %1 geleden gegenereerd.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Transacties na dit moment zullen nu nog niet zichtbaar zijn.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Fout</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Waarschuwing</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informatie</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Bijgewerkt</translation>
-    </message>
-    <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>Toon het %1 hulpbericht om een lijst te krijgen met mogelijke Raven commandoregelopties</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 client</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>Gelijke worden verbonden...</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Aan het bijwerken...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Datum: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Aantal: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Type: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Label: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Adres: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Verstuurde transactie</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Binnenkomende transactie</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
-        <translation>HD sleutel voortbrenging is &lt;b&gt;ingeschakeld&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
-        <translation>HD sleutel voortbrenging is &lt;b&gt;uitgeschakeld&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Portemonnee is &lt;b&gt;versleuteld&lt;/b&gt; en momenteel &lt;b&gt;geopend&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Portemonnee is &lt;b&gt;versleuteld&lt;/b&gt; en momenteel &lt;b&gt;gesloten&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>Een fatale fout heeft zich voorgedaan. Raven kan niet veilig worden verdergezet en wordt afgesloten.</translation>
     </message>
 </context>
 <context>
@@ -706,6 +563,85 @@
     </message>
 </context>
 <context>
+    <name>CreateAssetDialog</name>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatisch geselecteerd</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Aantal:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Naam:</translation>
+    </message>
+    <message>
+        <source>Check Availabilty</source>
+        <translation>Controleer beschikbaarheid</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Adres:</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Waarschuwing:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Kies...</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Verberg</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Aanbevolen:</translation>
+    </message>
+    <message>
+        <source>Create Asset</source>
+        <translation>Maak Asset</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wis</translation>
+    </message>
+    <message>
+        <source>123.456 RVN</source>
+        <translation>123.456 RVN</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Waarschuwing: Ongeldig Ravenadres</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>of</translation>
+    </message>
+    <message>
+        <source>Invalid: </source>
+        <translation>Ongeldig:</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopie</translation>
+    </message>
+    <message>
+        <source>Transaction ID Copied</source>
+        <translation>Transactie ID gekopieerd</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(geen label)</translation>
+    </message>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -784,6 +720,42 @@
     </message>
 </context>
 <context>
+    <name>FreezeAddress</name>
+    <message>
+        <source>Address:</source>
+        <translation>Adres:</translation>
+    </message>
+    <message>
+        <source>Check</source>
+        <translation>Controle</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wis</translation>
+    </message>
+    <message>
+        <source>Submit</source>
+        <translation>Bevestig</translation>
+    </message>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    <message>
+        <source>Warning: transaction while syncing wallet!</source>
+        <translation>Waarschuwing: transactie tijdens portemonnee synchronisatie!</translation>
+    </message>
+    <message>
+        <source>You are trying to send a transaction while your wallet is not fully synced. This is not recommended because the transaction might get stuck in your wallet. Are you sure you want to proceed?
+
+Recommended action: Fully sync your wallet before sending a transaction.
+</source>
+        <translation>U probeert om een transactie te doen terwijl uw wallet nog niet volledig gesynchroniseerd is. Dit is niet aanbevolen want de transactie kan mogelijk vastlopen in uw wallet. Weet u zeker dat u verder wil gaan?
+
+Aanbevolen actie: Synchroniseer uw wallet volledig vooraleer uw transactie te verzenden.
+</translation>
+    </message>
+</context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -853,16 +825,24 @@
         <translation>Omdat dit de eerste keer is dat het programma gestart is, kunt u nu kiezen waar %1 de data moet opslaan.</translation>
     </message>
     <message>
-        <source>%1 will download and store a copy of the Raven block chain. At least %2GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>%1 zal een kopie van de Raven blokketen downloaden en opslaan. Tenminste %2 GB aan data wordt opgeslagen in deze map en het zal groeien in de tijd. De portemonnee wordt ook in deze map opgeslagen.</translation>
-    </message>
-    <message>
         <source>Use the default data directory</source>
         <translation>Gebruik de standaard gegevensmap</translation>
     </message>
     <message>
         <source>Use a custom data directory:</source>
         <translation>Gebruik een persoonlijke gegevensmap:</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Approximately %1 GB of data will be stored in this directory.</source>
+        <translation>Ongeveer %1 GB data zal in deze directory worden opgeslagen.</translation>
+    </message>
+    <message>
+        <source>The wallet will also be stored in this directory.</source>
+        <translation>De portemonnee zal ook in deze directory worden opgeslagen.</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -872,15 +852,71 @@
         <source>Error</source>
         <translation>Fout</translation>
     </message>
-    <message numerus="yes">
-        <source>%n GB of free space available</source>
-        <translation><numerusform>%n GB aan vrije opslagruimte beschikbaar</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>(of %n GB needed)</source>
-        <translation><numerusform>(van %n GB nodig)</numerusform></translation>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    <message>
+        <source>HD Wallet Setup</source>
+        <translation>HD Portemonnee Setup</translation>
     </message>
 </context>
+<context>
+    <name>MnemonicDialog1</name>
+    <message>
+        <source>HD Wallet Setup</source>
+        <translation>HD portemonnee Setup</translation>
+    </message>
+    <message>
+        <source>Select the type of wallet to create.</source>
+        <translation>Selecteer het type portemonnee om aan te maken</translation>
+    </message>
+    <message>
+        <source>Please choose what you would like to do:</source>
+        <translation>Selecteer aub wat u wilt doen:</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Accepteer</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    <message>
+        <source>Passphrase:</source>
+        <translation>Wachtwoordzin:</translation>
+    </message>
+    <message>
+        <source>Warning: </source>
+        <translation>Waarschuwing:</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Accepteer</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>Terug</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    <message>
+        <source>Passphrase:</source>
+        <translation>Wachtwoordzin:</translation>
+    </message>
+    <message>
+        <source>Warning: </source>
+        <translation>Waarschuwing</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Accepteer</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>Terug</translation>
+    </message>
+    </context>
 <context>
     <name>ModalOverlay</name>
     <message>
@@ -932,6 +968,33 @@
         <translation>Onbekend. Kopteksten synchroniseren (%1%)...</translation>
     </message>
 </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    <message>
+        <source>Date</source>
+        <translation>Datum</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adres</translation>
+    </message>
+    <message>
+        <source>Frozen</source>
+        <translation>Bevroren</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Anders</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(geen label)</translation>
+    </message>
+    </context>
 <context>
     <name>OpenURIDialog</name>
     <message>
@@ -986,16 +1049,12 @@
         <translation>Aantal threads voor &amp;scriptverificatie</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>Accepteer binnenkomende verbindingen</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Sta inkomende verbindingen toe</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>IP-adres van de proxy (bijv. IPv4: 127.0.0.1 / IPv6: ::1)</translation>
+    </message>
+    <message>
+        <source>&amp;Hide tray icon</source>
+        <translation>&amp;Verberg prullenbak</translation>
     </message>
     <message>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Exit in the menu.</source>
@@ -1006,12 +1065,12 @@
         <translation>URL's van derden (bijvoorbeeld block explorer) die in de transacties tab verschijnen als contextmenuelementen. %s in de URL is vervangen door transactiehash. Verscheidene URL's zijn gescheiden door een verticale streep |.  </translation>
     </message>
     <message>
-        <source>Third party transaction URLs</source>
-        <translation>Transactie-URLs van derde partijen</translation>
-    </message>
-    <message>
         <source>Active command-line options that override above options:</source>
         <translation>Actieve opdrachtregelopties die bovenstaande opties overschrijven:</translation>
+    </message>
+    <message>
+        <source>Open Configuration File</source>
+        <translation>Open configuratie bestand</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
@@ -1058,6 +1117,10 @@
         <translation>Portmapping via &amp;UPnP</translation>
     </message>
     <message>
+        <source>Allow incomin&amp;g connections</source>
+        <translation>Accepteer inkomende connecties</translation>
+    </message>
+    <message>
         <source>Connect to the Raven network through a SOCKS5 proxy.</source>
         <translation>Verbind met het Ravennetwerk via een SOCKS5 proxy.</translation>
     </message>
@@ -1082,10 +1145,6 @@
         <translation>Gebruikt om peers te bereiken via:</translation>
     </message>
     <message>
-        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
-        <translation>Vertoningen, als de opgegeven standaard SOCKS5-proxy is gebruikt om peers te benaderen via dit type netwerk.</translation>
-    </message>
-    <message>
         <source>IPv4</source>
         <translation>IPv4</translation>
     </message>
@@ -1102,20 +1161,8 @@
         <translation>Maak verbinding met Ravennetwerk door een aparte SOCKS5-proxy voor verborgen diensten van Tor.</translation>
     </message>
     <message>
-        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
-        <translation>Gebruikt aparte SOCKS5-proxy om peers te bereiken via verborgen diensten van Tor:</translation>
-    </message>
-    <message>
         <source>&amp;Window</source>
         <translation>&amp;Scherm</translation>
-    </message>
-    <message>
-        <source>&amp;Hide the icon from the system tray.</source>
-        <translation>&amp;Verberg het icoon van de systeembalk.</translation>
-    </message>
-    <message>
-        <source>Hide tray icon</source>
-        <translation>Verberg systeembalk icoon</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1154,6 +1201,14 @@
         <translation>Munt controle functies weergeven of niet.</translation>
     </message>
     <message>
+        <source>Reset</source>
+        <translation>Herstel</translation>
+    </message>
+    <message>
+        <source>Enable Dark Mode</source>
+        <translation>Inschakelen Dark Mode</translation>
+    </message>
+    <message>
         <source>&amp;OK</source>
         <translation>&amp;OK</translation>
     </message>
@@ -1180,6 +1235,14 @@
     <message>
         <source>Client will be shut down. Do you want to proceed?</source>
         <translation>Applicatie zal worden afgesloten. Wilt u doorgaan?</translation>
+    </message>
+    <message>
+        <source>Configuration options</source>
+        <translation>Configuratie opties</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Fout</translation>
     </message>
     <message>
         <source>This change would require a client restart.</source>
@@ -1229,10 +1292,6 @@
         <translation>Gedolven saldo dat nog niet tot wasdom is gekomen</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>Saldi</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>Totaal:</translation>
     </message>
@@ -1241,12 +1300,20 @@
         <translation>Uw totale saldo</translation>
     </message>
     <message>
+        <source>RVN Balances</source>
+        <translation>RVN Balance</translation>
+    </message>
+    <message>
         <source>Your current balance in watch-only addresses</source>
         <translation>Uw huidige balans in alleen-bekijkbare adressen</translation>
     </message>
     <message>
         <source>Spendable:</source>
         <translation>Besteedbaar:</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Zoeken</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1264,7 +1331,19 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>Huidige balans in alleen-bekijkbare adressen.</translation>
     </message>
-</context>
+    <message>
+        <source>Send Asset</source>
+        <translation>Verstuur Asset</translation>
+    </message>
+    <message>
+        <source>Copy Name</source>
+        <translation>Kopieer naam</translation>
+    </message>
+    <message>
+        <source>Copy Hash</source>
+        <translation>Kopieer Hash</translation>
+    </message>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1374,6 +1453,14 @@
         <source>Ping</source>
         <translation>Ping</translation>
     </message>
+    <message>
+        <source>Sent</source>
+        <translation>Versturen</translation>
+    </message>
+    <message>
+        <source>Received</source>
+        <translation>Ontvangen</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>
@@ -1413,37 +1500,17 @@
         <source>%1 ms</source>
         <translation>%1 ms</translation>
     </message>
-    <message numerus="yes">
-        <source>%n second(s)</source>
-        <translation><numerusform>%n seconde</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n minute(s)</source>
-        <translation><numerusform>%n minuut</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>%n uur</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>%n dag</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>%n week</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 en %2</translation>
     </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>%n jaar</numerusform></translation>
-    </message>
     <message>
         <source>%1 didn't yet exit safely...</source>
         <translation>%1 sloot nog niet veilig af...</translation>
+    </message>
+    <message>
+        <source>unknown</source>
+        <translation>onbekend</translation>
     </message>
 </context>
 <context>
@@ -1591,6 +1658,10 @@
         <translation>Gesynchroniseerde blokken</translation>
     </message>
     <message>
+        <source>Recover transactions</source>
+        <translation>Herstel transacties</translation>
+    </message>
+    <message>
         <source>User Agent</source>
         <translation>User Agent</translation>
     </message>
@@ -1663,10 +1734,6 @@
         <translation>&amp;Netwerkverkeer</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Wissen</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Totalen</translation>
     </message>
@@ -1719,36 +1786,12 @@
         <translation>Welkom bij de %1 RPC-console.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Gebruik de pijltjestoetsen om door de geschiedenis te navigeren, en &lt;b&gt;Ctrl-L&lt;/b&gt; om het scherm leeg te maken.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Typ &lt;b&gt;help&lt;/b&gt; voor een overzicht van de beschikbare opdrachten.</translation>
     </message>
     <message>
-        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
-        <translation>WAARSCHUWING: Er zijn Scammers actief geweest, die gebruikers vragen om hier commando's te typen, waardoor de inhoud van hun portefeuille werd gestolen. Gebruik deze console niet zonder de toedracht van een opdracht volledig te begrijpen.</translation>
-    </message>
-    <message>
         <source>Network activity disabled</source>
         <translation>Netwerkactiviteit uitgeschakeld</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 Kb</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 Gb</translation>
     </message>
     <message>
         <source>(node id: %1)</source>
@@ -1781,6 +1824,315 @@
     <message>
         <source>Unknown</source>
         <translation>Onbekend</translation>
+    </message>
+</context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>&amp;Onderteken bericht...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Synchroniseren met netwerk...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Overzicht</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Node</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Toon algemeen overzicht van uw portemonnee</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Transacties</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Blader door transactiegescheidenis</translation>
+    </message>
+    <message>
+        <source>Coming Soon</source>
+        <translation>Binnenkort beschikbaar</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>A&amp;fsluiten</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Programma afsluiten</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>&amp;Over %1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>Toon informatie over %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Over &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Toon informatie over Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Opties...</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>Wijzig configuratieopties voor %1</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Versleutel Portemonnee...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Backup Portemonnee...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Wijzig Wachtwoord</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Verstuuradressen...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Ontvang adressen...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Open &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>Klik om de netwerkactiviteit te stoppen.</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>Netwerkactiviteit gestopt.</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>Klik om de netwerkactiviteit opnieuw te starten.</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Kopteksten synchroniseren (%1%)...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Bezig met herindexeren van blokken op harde schijf...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Verstuur munten naar een Ravenadres</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Backup portemonnee naar een andere locatie</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Wijzig het wachtwoord voor uw portemonneversleuteling</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Open debugging en diagnostische console</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Verifiëer bericht...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Portemonnee</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Verstuur</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Ontvangen</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Toon / Verberg</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Toon of verberg het hoofdvenster</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Versleutel de geheime sleutels die bij uw portemonnee horen</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Onderteken berichten met uw Ravenadressen om te bewijzen dat u deze adressen bezit</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Verifiëer handtekeningen om zeker te zijn dat de berichten zijn ondertekend met de gespecificeerde Ravenadressen</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Bestand</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Hulp</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Vraag betaling aan (genereert QR-codes en raven: URI's)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Toon de lijst met gebruikte verstuuradressen en -labels</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Toon de lijst met gebruikte ontvangst adressen en labels</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Open een raven: URI of betalingsverzoek</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Opdrachtregelopties</translation>
+    </message>
+    <message>
+        <source>Indexing blocks on disk...</source>
+        <translation>Bezig met indexeren van blokken op harde schijf...</translation>
+    </message>
+    <message>
+        <source>Processing blocks on disk...</source>
+        <translation>Bezig met verwerken van blokken op harde schijf...</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 achter</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Laatst ontvangen blok was %1 geleden gegenereerd.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Transacties na dit moment zullen nu nog niet zichtbaar zijn.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Fout</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Waarschuwing</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informatie</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Bijgewerkt</translation>
+    </message>
+    <message>
+        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <translation>Toon het %1 hulpbericht om een lijst te krijgen met mogelijke Raven commandoregelopties</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 client</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Gelijke worden verbonden...</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Aan het bijwerken...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Datum: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Aantal: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Type: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Label: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Adres: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Verstuurde transactie</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Binnenkomende transactie</translation>
+    </message>
+    <message>
+        <source>Assets not yet active</source>
+        <translation>Assets nog niet actief</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
+        <translation>HD sleutel voortbrenging is &lt;b&gt;ingeschakeld&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
+        <translation>HD sleutel voortbrenging is &lt;b&gt;uitgeschakeld&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Portemonnee is &lt;b&gt;versleuteld&lt;/b&gt; en momenteel &lt;b&gt;geopend&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Portemonnee is &lt;b&gt;versleuteld&lt;/b&gt; en momenteel &lt;b&gt;gesloten&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <translation>Een fatale fout heeft zich voorgedaan. Raven kan niet veilig worden verdergezet en wordt afgesloten.</translation>
     </message>
 </context>
 <context>
@@ -1957,6 +2309,119 @@
     </message>
 </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    <message>
+        <source>Inputs...</source>
+        <translation>Invoer...</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatisch geselecteerd</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Adres:</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Waarschuwing:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Kies...</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Verbergen</translation>
+    </message>
+    <message>
+        <source>per kilobyte</source>
+        <translation>per kilobyte</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Aanbevolen:</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Wissen</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>Ja</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>Nee</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Naam</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>of</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Kopie</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(geen label)</translation>
+    </message>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Verstuur munten</translation>
+    </message>
+    <message>
+        <source>Address List</source>
+        <translation>Adreslijst</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>of</translation>
+    </message>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    <message>
+        <source>Memo:</source>
+        <translation>Nota:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Hoeveelheid:</translation>
+    </message>
+    <message>
+        <source>&amp;Label:</source>
+        <translation>&amp;Label: </translation>
+    </message>
+    <message>
+        <source>Alt+A</source>
+        <translation>ALT+A</translation>
+    </message>
+    <message>
+        <source>Alt+P</source>
+        <translation>ALT+P</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Verwijder dit item</translation>
+    </message>
+    <message>
+        <source>Message:</source>
+        <translation>Bericht:</translation>
+    </message>
+    <message>
+        <source>Transfer to:</source>
+        <translation>Verzenden naar:</translation>
+    </message>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -2035,10 +2500,6 @@
         <translation>Verbergen</translation>
     </message>
     <message>
-        <source>total at least</source>
-        <translation>totaal ten minste</translation>
-    </message>
-    <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
         <translation>De minimale toeslag betalen is prima mits het transactievolume kleiner is dan de ruimte in de blokken. Let wel op dat dit tot gevolg kan hebben dat een transactie nooit wordt bevestigd als er meer vraag is naar raventransacties dan het netwerk kan verwerken.</translation>
     </message>
@@ -2057,14 +2518,6 @@
     <message>
         <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
         <translation>(Slimme transactiekosten is nog niet geïnitialiseerd. Dit duurt meestal een paar blokken...)</translation>
-    </message>
-    <message>
-        <source>normal</source>
-        <translation>normaal</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>snel</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -2190,17 +2643,9 @@
         <source>Payment request expired.</source>
         <translation>Betalingsverzoek verlopen.</translation>
     </message>
-    <message numerus="yes">
-        <source>%n block(s)</source>
-        <translation><numerusform>%n blok</numerusform></translation>
-    </message>
     <message>
         <source>Pay only the required fee of %1</source>
         <translation>Betaal alleen de verplichte transactiekosten van %1</translation>
-    </message>
-    <message numerus="yes">
-        <source>Estimated to begin confirmation within %n block(s).</source>
-        <translation><numerusform>Schatting is dat bevestiging begint over %n blok.</numerusform></translation>
     </message>
     <message>
         <source>Warning: Invalid Raven address</source>
@@ -2228,10 +2673,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>B&amp;edrag:</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>Betaal &amp;Aan:</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2292,10 +2733,6 @@
     <message>
         <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
         <translation>Een bericht dat werd toegevoegd aan de raven: URI welke wordt opgeslagen met de transactie ter referentie. Opmerking: Dit bericht zal niet worden verzonden over het Ravennetwerk.</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Betaal Aan:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2479,10 +2916,6 @@
 </context>
 <context>
     <name>TransactionDesc</name>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>Open voor nog %n blok</numerusform></translation>
-    </message>
     <message>
         <source>Open until %1</source>
         <translation>Open tot %1</translation>
@@ -2566,10 +2999,6 @@
     <message>
         <source>Credit</source>
         <translation>Credit</translation>
-    </message>
-    <message numerus="yes">
-        <source>matures in %n more block(s)</source>
-        <translation><numerusform>komt beschikbaar na %n nieuwe blok</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -2673,10 +3102,6 @@
         <source>Label</source>
         <translation>Label</translation>
     </message>
-    <message numerus="yes">
-        <source>Open for %n more block(s)</source>
-        <translation><numerusform>Open voor nog %n blok</numerusform></translation>
-    </message>
     <message>
         <source>Open until %1</source>
         <translation>Open tot %1</translation>
@@ -2773,7 +3198,7 @@
         <source>Amount removed from or added to balance.</source>
         <translation>Bedrag verwijderd van of toegevoegd aan saldo.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>TransactionView</name>
     <message>
@@ -2949,7 +3374,7 @@
         <source>Send Coins</source>
         <translation>Verstuur munten</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -2984,7 +3409,7 @@
         <source>The wallet data was successfully saved to %1.</source>
         <translation>De portemonneedata is succesvol opgeslagen in %1.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>raven-core</name>
     <message>
@@ -3006,14 +3431,6 @@
     <message>
         <source>Accept command line and JSON-RPC commands</source>
         <translation>Aanvaard opdrachtregel- en JSON-RPC-opdrachten</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
-        <translation>Accepteer verbindingen van buitenaf (standaard: 1 indien geen -proxy of -connect/-noconnect werd opgegeven)</translation>
-    </message>
-    <message>
-        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
-        <translation>Verbind enkel met de opgegeven knooppunt(en); -noconnect of -connect = 0 alleen om automatische verbindingen uit te schakelen</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file %s or %s</source>
@@ -3082,10 +3499,6 @@
     <message>
         <source>Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup</source>
         <translation>Verwijder alle transacties van de portemonnee en herstel alleen de delen van de blokketen door -rescan tijdens het opstarten</translation>
-    </message>
-    <message>
-        <source>Error loading %s: You can't enable HD on a already existing non-HD wallet</source>
-        <translation>Fout bij het laden van %s: Je kan HD niet activeren voor een reeds bestaande niet-HD portemonnee</translation>
     </message>
     <message>
         <source>Error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
@@ -3162,10 +3575,6 @@
     <message>
         <source>Warning: We do not appear to fully agree with our peers! You may need to upgrade, or other nodes may need to upgrade.</source>
         <translation>Waarschuwing: Het lijkt erop dat we geen consensus kunnen vinden met onze peers! Mogelijk dient u te upgraden, of andere nodes moeten wellicht upgraden.</translation>
-    </message>
-    <message>
-        <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
-        <translation>Om -txindex te kunnen veranderen dient u de database opnieuw te bouwen met gebruik van -reindex-chainstate.</translation>
     </message>
     <message>
         <source>%s corrupt, salvage failed</source>
@@ -3268,10 +3677,6 @@
         <translation>Fout bij laden %s: Portemonnee vereist een nieuwere versie van %s</translation>
     </message>
     <message>
-        <source>Error loading %s: You can't disable HD on a already existing HD wallet</source>
-        <translation>Fout bij het laden van %s: Je kan HD niet deactiveren voor een reeds bestaande HD portemonnee</translation>
-    </message>
-    <message>
         <source>Error loading block database</source>
         <translation>Fout bij het laden van blokkendatabase</translation>
     </message>
@@ -3298,10 +3703,6 @@
     <message>
         <source>Initialization sanity check failed. %s is shutting down.</source>
         <translation>Initialisatie sanity check mislukt. %s is aan het afsluiten.</translation>
-    </message>
-    <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>Ongeldig -onion adres '%s'</translation>
     </message>
     <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
@@ -3364,10 +3765,6 @@
         <translation>Zet database cache grootte in megabytes (%d tot %d, standaard: %d)</translation>
     </message>
     <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>Stel maximum blokgrootte in in bytes (standaard: %d)</translation>
-    </message>
-    <message>
         <source>Specify wallet file (within data directory)</source>
         <translation>Specificeer het portemonnee bestand (vanuit de gegevensmap)</translation>
     </message>
@@ -3408,10 +3805,6 @@
         <translation>Blokken aan het controleren...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>Portemonnee aan het controleren...</translation>
-    </message>
-    <message>
         <source>Wallet %s resides outside data directory %s</source>
         <translation>Portemonnee %s bevindt zich buiten de gegevensmap %s</translation>
     </message>
@@ -3434,10 +3827,6 @@
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
         <translation>Bind aan opgegeven adres en keur peers die ermee verbinden goed. Gebruik [host]:poort notatie voor IPv6</translation>
-    </message>
-    <message>
-        <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>Bind aan gegeven adres om te luisteren voor JSON-RPC verbindingen. Gebruik [host]:poort notatie voor IPv6. Deze optie kan meerdere keren gespecificeerd worden (standaard: bind aan alle interfaces.</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
@@ -3476,16 +3865,8 @@
         <translation>Gebruik willekeurige inloggegevens voor elke proxyverbinding. Dit maakt streamislatie voor Tor mogelijk (standaard: %u)</translation>
     </message>
     <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>Stel maximumgrootte in bytes in voor hoge-prioriteits-/lage-transactiekosten-transacties (standaard: %d)</translation>
-    </message>
-    <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
         <translation>Het transactiebedrag is te klein om te versturen nadat de transactiekosten in mindering zijn gebracht</translation>
-    </message>
-    <message>
-        <source>Use hierarchical deterministic key generation (HD) after BIP32. Only has effect during wallet creation/first start</source>
-        <translation>Gebruik hiërarchische deterministische sleutelgeneratie (HD) na BIP32. Dit heeft enkel effect bij het aanmaken van portemonnees of het eerste gebruik</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
@@ -3558,10 +3939,6 @@
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>Verzend trace/debug-info naar de console in plaats van het debug.log-bestand</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>Indien mogelijk, verstuur zonder transactiekosten (standaard: %u)</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -3648,10 +4025,6 @@
         <translation>Sta DNS-naslag toe voor -addnode, -seednode en -connect</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Adressen aan het laden...</translation>
-    </message>
-    <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
         <translation>(1 = behoudt tx meta data bijv. account eigenaar en betalingsverzoek informatie, 2. sla tx meta data niet op)</translation>
     </message>
@@ -3690,10 +4063,6 @@
     <message>
         <source>Output debugging information (default: %u, supplying &lt;category&gt; is optional)</source>
         <translation>Output extra debugginginformatie (standaard: %u, het leveren van &lt;categorie&gt; is optioneel)</translation>
-    </message>
-    <message>
-        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
-        <translation>Query voor peer-adressen via DNS-lookup , indien laag aan adressen  (default: 1 unless -connect/-noconnect)</translation>
     </message>
     <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
@@ -3758,10 +4127,6 @@
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
         <translation>IP-adressen toevoegen in de debuguitvoer (standaard: %u)</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Ongeldig -proxy adres: '%s'</translation>
     </message>
     <message>
         <source>Keypool ran out, please call keypoolrefill first</source>
@@ -3880,10 +4245,6 @@
         <translation>Blokindex aan het laden...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Voeg een node om naar te verbinden toe en probeer de verbinding open te houden</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Portemonnee aan het laden...</translation>
     </message>
@@ -3892,16 +4253,8 @@
         <translation>Kan portemonnee niet downgraden</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Kan standaardadres niet schrijven</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
-        <translation>Blokketen aan het herscannen...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Klaar met laden</translation>
+        <translation>Aan het herscannen...</translation>
     </message>
     <message>
         <source>Error</source>

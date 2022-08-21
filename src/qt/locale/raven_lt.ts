@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="lt">
+<TS language="lt" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -67,203 +65,24 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>Banned Until</source>
         <translation>Užblokuotas iki</translation>
     </message>
 </context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Pasirašyti ži&amp;nutę...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Sinchronizavimas su tinklu ...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Apžvalga</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Taškas</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Rodyti piniginės bendrą apžvalgą</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Sandoriai</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Apžvelgti sandorių istoriją</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>&amp;Išeiti</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Išjungti programą</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>&amp;Apie %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Apie &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Rodyti informaciją apie Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Parinktys...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Užšifruoti piniginę...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Backup piniginę...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Keisti slaptafrazę...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Siunčiami adresai...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Gaunami adresai...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Atidaryti &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Blokai iš naujo indeksuojami...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Siųsti monetas Raven adresui</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Daryti piniginės atsarginę kopiją</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Pakeisti slaptafrazę naudojamą piniginės užšifravimui</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Derinimo langas</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Atverti derinimo ir diagnostikos konsolę</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Tikrinti žinutę...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Piniginė</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Siųsti</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Gauti</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Rodyti / Slėpti</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Rodyti arba slėpti pagrindinį langą</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Užšifruoti privačius raktus, kurie priklauso jūsų piniginei</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Failas</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Nustatymai</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Pagalba</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Kortelių įrankinė</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>Komandinės eilutės parametrai</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Klaida</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Įspėjimas</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informacija</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Atnaujinta</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Vejamasi...</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Sandoris nusiųstas</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Ateinantis sandoris</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Piniginė &lt;b&gt;užšifruota&lt;/b&gt; ir šiuo metu &lt;b&gt;atrakinta&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Piniginė &lt;b&gt;užšifruota&lt;/b&gt; ir šiuo metu &lt;b&gt;užrakinta&lt;/b&gt;</translation>
-    </message>
-    </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
@@ -324,6 +143,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -344,6 +166,12 @@
         <source>name</source>
         <translation>pavadinimas</translation>
     </message>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -376,6 +204,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
@@ -385,6 +225,9 @@
         <source>Last block time</source>
         <translation>Paskutinio bloko laikas</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -645,10 +488,6 @@
         <translation>&amp;Konsolė</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>Išvalyti</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Viso:</translation>
     </message>
@@ -661,22 +500,6 @@
         <translation>Išvalyti konsolę</translation>
     </message>
     <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
-    </message>
-    <message>
         <source>never</source>
         <translation>Niekada</translation>
     </message>
@@ -687,6 +510,185 @@
     <message>
         <source>No</source>
         <translation>Ne</translation>
+    </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Pasirašyti ži&amp;nutę...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Sinchronizavimas su tinklu ...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Apžvalga</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Taškas</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Rodyti piniginės bendrą apžvalgą</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Sandoriai</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Apžvelgti sandorių istoriją</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>&amp;Išeiti</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Išjungti programą</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>&amp;Apie %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Apie &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Rodyti informaciją apie Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Parinktys...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Užšifruoti piniginę...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Backup piniginę...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Keisti slaptafrazę...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Siunčiami adresai...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Gaunami adresai...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Atidaryti &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Blokai iš naujo indeksuojami...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Siųsti monetas Raven adresui</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Daryti piniginės atsarginę kopiją</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Pakeisti slaptafrazę naudojamą piniginės užšifravimui</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Atverti derinimo ir diagnostikos konsolę</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Tikrinti žinutę...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Piniginė</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Siųsti</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Gauti</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Rodyti / Slėpti</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Rodyti arba slėpti pagrindinį langą</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Užšifruoti privačius raktus, kurie priklauso jūsų piniginei</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Failas</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Pagalba</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>Komandinės eilutės parametrai</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Klaida</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Įspėjimas</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informacija</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Atnaujinta</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Vejamasi...</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Sandoris nusiųstas</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Ateinantis sandoris</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Piniginė &lt;b&gt;užšifruota&lt;/b&gt; ir šiuo metu &lt;b&gt;atrakinta&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Piniginė &lt;b&gt;užšifruota&lt;/b&gt; ir šiuo metu &lt;b&gt;užrakinta&lt;/b&gt;</translation>
     </message>
     </context>
 <context>
@@ -721,6 +723,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -792,10 +803,6 @@
         <translation>Su&amp;ma:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>Mokėti &amp;gavėjui:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>Ž&amp;ymė:</translation>
     </message>
@@ -814,10 +821,6 @@
     <message>
         <source>Message:</source>
         <translation>Žinutė:</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Mokėti gavėjui:</translation>
     </message>
     </context>
 <context>
@@ -950,10 +953,6 @@
         <translation>Tikrinami blokai...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>Tikrinama piniginė...</translation>
-    </message>
-    <message>
         <source>Information</source>
         <translation>Informacija</translation>
     </message>
@@ -978,14 +977,6 @@
         <translation>Leisti DNS paiešką sujungimui ir mazgo pridėjimui</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Užkraunami adresai...</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Neteisingas proxy adresas: '%s'</translation>
-    </message>
-    <message>
         <source>Insufficient funds</source>
         <translation>Nepakanka lėšų</translation>
     </message>
@@ -994,24 +985,12 @@
         <translation>Įkeliamas blokų indeksas...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Pridėti mazgą prie sujungti su and attempt to keep the connection open</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Užkraunama piniginė...</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Negalima parašyti įprasto adreso</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Peržiūra</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Įkėlimas baigtas</translation>
     </message>
     <message>
         <source>Error</source>

@@ -119,6 +119,9 @@
     </widget>
    </item>
    <item>
+    <widget class="QComboBox" name="languageSeedWords"/>
+   </item>
+   <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>BIP39 Compliant Seed Words:</string>
@@ -199,20 +202,22 @@
    <item>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
-      <string>Passphrase:</string>
+      <string>Optional Seed Extension Word:</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QLineEdit" name="passphraseEdit">
         <property name="toolTip">
-         <string>Enter a Passphrase to protect your seed words  (optional).</string>
+         <string>A 12 word seed phrase is a useful way of backing up a wallet, because it is a system for generating the keys to all Ravencoin and Assets. However, anyone who finds/learns your seed phrase will likewise have control of your wallet. For this reason, some users choose to add another level of security to these 12 words. Unlike your 12 word phrase, which is generated randomly, this 13th word (known as the Seed Extension Word) is something the user comes up with themselves and memorizes, or stores separately from their seed phrase.
+                
+                The Seed Extension Word is like adding a password to your randomly generated seed phrase. If someone finds your written 12 word seed phrase, but you’ve chosen to use a Seed Extension Word, they will not be able to access your wallet.</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="passphraseLabel">
         <property name="text">
-         <string>You may enter an optional Passphrase to protect your seed words.</string>
+         <string>You may enter an optional extension word to protect your seed.</string>
         </property>
        </widget>
       </item>
@@ -250,8 +255,8 @@
      <item row="1" column="1">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Please write down your 12 seed words and Passphrase before Accepting. 
-They are not recoverable !!</string>
+        <string>Please write down your 12 seed words and the optional seed extension word before accepting.
+They are not recoverable!!</string>
        </property>
       </widget>
      </item>

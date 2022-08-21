@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ka">
+<TS language="ka" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -103,266 +101,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>ხელ&amp;მოწერა</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>ქსელთან სინქრონიზება...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>მიმ&amp;ოხილვა</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>კვანძი</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>საფულის ზოგადი მიმოხილვა</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;ტრანსაქციები</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>ტრანსაქციების ისტორიის დათვალიერება</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>&amp;გასვლა</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>გასვლა</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>%1-ის &amp;შესახებ</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>%1-ის შესახებ ინფორმაციის ჩვენება</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>&amp;Qt-ს შესახებ</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>ინფორმაცია Qt-ს შესახებ</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;ოპციები</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>საფულის &amp;დაშიფრვა</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>საფულის &amp;არქივირება</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>ფრაზა-პაროლის შე&amp;ცვლა</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>გაგზავნის მი&amp;სამართი</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>მიღების მისამა&amp;რთი</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>&amp;URI-ის გახსნა...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>დისკზე ბლოკების რეინდექსაცია...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>მონეტების გაგზავნა Raven-მისამართზე</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>საფულის არქივირება სხვა ადგილზე</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>საფულის დაშიფრვის ფრაზა-პაროლის შეცვლა</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>და&amp;ხვეწის ფანჯარა</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>დახვეწისა და გიაგნოსტიკის კონსოლის გაშვება</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;ვერიფიკაცია</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>საფულე</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;გაგზავნა</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;მიღება</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;ჩვენება/დაფარვა</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>მთავარი ფანჯრის ჩვენება/დაფარვა</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>თქვენი საფულის პირადი გასაღებების დაშიფრვა</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>მესიჯებზე ხელმოწერა თქვენი Raven-მისამართებით იმის დასტურად, რომ ის თქვენია</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>შეამოწმეთ, რომ მესიჯები ხელმოწერილია მითითებული Raven-მისამართით</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;ფაილი</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;პარამეტრები</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;დახმარება</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>ბარათების პანელი</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>გადახდის მოთხოვნა (შეიქმნება QR-კოდები და raven: ბმულები)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>გამოყენებული გაგზავნის მისამართებისა და ნიშნულების სიის ჩვენება</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>გამოყენებული მიღების მისამართებისა და ნიშნულების სიის ჩვენება</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>raven: URI-ის ან გადახდის მოთხოვნის გახსნა</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>საკომანდო სტრიქონის ოპ&amp;ციები</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 გავლილია</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>ბოლო მიღებული ბლოკის გენერირებიდან გასულია %1</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>შემდგომი ტრანსაქციები ნაჩვენები ჯერ არ იქნება.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>შეცდომა</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>გაფრთხილება</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>ინფორმაცია</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>განახლებულია</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 კლიენტი</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>მიმდინარეობს განახლება...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>თარიღი: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>რაოდენობა: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>ტიპი: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>მისამართი: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>გაგზავნილი ტრანსაქციები</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>მიღებული ტრანსაქციები</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>საფულე &lt;b&gt;დაშიფრულია&lt;/b&gt; და ამჟამად &lt;b&gt;განბლოკილია&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>საფულე &lt;b&gt;დაშიფრულია&lt;/b&gt; და ამჟამად &lt;b&gt;დაბლოკილია&lt;/b&gt;</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -436,6 +187,9 @@
     </message>
 </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -481,6 +235,12 @@
         <translation>კატალოგის აქ შექმნა შეუძლებელია.</translation>
     </message>
 </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
 <context>
     <name>HelpMessageDialog</name>
     <message>
@@ -534,15 +294,19 @@
         <source>Error</source>
         <translation>შეცდომა</translation>
     </message>
-    <message numerus="yes">
-        <source>%n GB of free space available</source>
-        <translation><numerusform>ხელმისაწვდომია თავისუფალი სივრცის %n გბ</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>(of %n GB needed)</source>
-        <translation><numerusform>(საჭირო %n გბ-დან)</numerusform></translation>
-    </message>
-</context>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
 <context>
     <name>ModalOverlay</name>
     <message>
@@ -569,6 +333,9 @@
         <source>Hide</source>
         <translation>დამალვა</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -885,10 +652,6 @@
         <translation>&amp;ქსელის ტრაფიკი</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;წაშლა</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>სულ:</translation>
     </message>
@@ -909,28 +672,255 @@
         <translation>კონსოლის გასუფთავება</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>კლავიშები "ზევით" და "ქვევით" - ისტორიაში მოძრაობა, &lt;b&gt;Ctrl-L&lt;/b&gt; - ეკრანის გასუფთავება.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>აკრიფეთ &lt;b&gt;help&lt;/b&gt; ფაშვებული ბრძანებების სანახავად.</translation>
     </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
     <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
+        <source>Sign &amp;message...</source>
+        <translation>ხელ&amp;მოწერა</translation>
     </message>
     <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
+        <source>Synchronizing with network...</source>
+        <translation>ქსელთან სინქრონიზება...</translation>
     </message>
     <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
+        <source>&amp;Overview</source>
+        <translation>მიმ&amp;ოხილვა</translation>
     </message>
     <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
+        <source>Node</source>
+        <translation>კვანძი</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>საფულის ზოგადი მიმოხილვა</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;ტრანსაქციები</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>ტრანსაქციების ისტორიის დათვალიერება</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>&amp;გასვლა</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>გასვლა</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>%1-ის &amp;შესახებ</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>%1-ის შესახებ ინფორმაციის ჩვენება</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>&amp;Qt-ს შესახებ</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>ინფორმაცია Qt-ს შესახებ</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;ოპციები</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>საფულის &amp;დაშიფრვა</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>საფულის &amp;არქივირება</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>ფრაზა-პაროლის შე&amp;ცვლა</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>გაგზავნის მი&amp;სამართი</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>მიღების მისამა&amp;რთი</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>&amp;URI-ის გახსნა...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>დისკზე ბლოკების რეინდექსაცია...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>მონეტების გაგზავნა Raven-მისამართზე</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>საფულის არქივირება სხვა ადგილზე</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>საფულის დაშიფრვის ფრაზა-პაროლის შეცვლა</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>დახვეწისა და გიაგნოსტიკის კონსოლის გაშვება</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;ვერიფიკაცია</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>საფულე</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;გაგზავნა</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;მიღება</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;ჩვენება/დაფარვა</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>მთავარი ფანჯრის ჩვენება/დაფარვა</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>თქვენი საფულის პირადი გასაღებების დაშიფრვა</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>მესიჯებზე ხელმოწერა თქვენი Raven-მისამართებით იმის დასტურად, რომ ის თქვენია</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>შეამოწმეთ, რომ მესიჯები ხელმოწერილია მითითებული Raven-მისამართით</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;ფაილი</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;დახმარება</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>გადახდის მოთხოვნა (შეიქმნება QR-კოდები და raven: ბმულები)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>გამოყენებული გაგზავნის მისამართებისა და ნიშნულების სიის ჩვენება</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>გამოყენებული მიღების მისამართებისა და ნიშნულების სიის ჩვენება</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>raven: URI-ის ან გადახდის მოთხოვნის გახსნა</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>საკომანდო სტრიქონის ოპ&amp;ციები</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 გავლილია</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>ბოლო მიღებული ბლოკის გენერირებიდან გასულია %1</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>შემდგომი ტრანსაქციები ნაჩვენები ჯერ არ იქნება.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>შეცდომა</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>გაფრთხილება</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>ინფორმაცია</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>განახლებულია</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 კლიენტი</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>მიმდინარეობს განახლება...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>თარიღი: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>რაოდენობა: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>ტიპი: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>მისამართი: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>გაგზავნილი ტრანსაქციები</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>მიღებული ტრანსაქციები</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>საფულე &lt;b&gt;დაშიფრულია&lt;/b&gt; და ამჟამად &lt;b&gt;განბლოკილია&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>საფულე &lt;b&gt;დაშიფრულია&lt;/b&gt; და ამჟამად &lt;b&gt;დაბლოკილია&lt;/b&gt;</translation>
     </message>
     </context>
 <context>
@@ -1029,6 +1019,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -1132,10 +1131,6 @@
         <translation>&amp;რაოდენობა</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>ადრესა&amp;ტი:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>ნიშნუ&amp;ლი:</translation>
     </message>
@@ -1174,10 +1169,6 @@
     <message>
         <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
         <translation>მესიჯი, რომელიც თან ერთვის მონეტებს:  URI, რომელიც შეინახება ტრანსაქციასთან ერთად თქვენთვის. შენიშვნა: მესიჯი არ გაყვება გადახდას ბითქოინის ქსელში.</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>ადრესატი:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -1398,16 +1389,8 @@
         <translation>საწყისი ბლოკი არ არსებობს ან არასწორია. ქსელის მონაცემთა კატალოგი datadir ხომ არის არასწორი?</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>არასწორია მისამართი -onion: '%s'</translation>
-    </message>
-    <message>
         <source>Not enough file descriptors available.</source>
         <translation>არ არის საკმარისი ფაილ-დესკრიპტორები.</translation>
-    </message>
-    <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>ბლოკის მაქსიმალური ზომის განსაზღვრა ბაიტებში (ნადულისხმევი: %d)</translation>
     </message>
     <message>
         <source>Specify wallet file (within data directory)</source>
@@ -1416,10 +1399,6 @@
     <message>
         <source>Verifying blocks...</source>
         <translation>ბლოკების ვერიფიკაცია...</translation>
-    </message>
-    <message>
-        <source>Verifying wallet...</source>
-        <translation>საფულის ვერიფიკაცია...</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
@@ -1432,10 +1411,6 @@
     <message>
         <source>Execute command when a relevant alert is received or we see a really long fork (%s in cmd is replaced by message)</source>
         <translation>ბრძანების შესრულება შესაბამისი უწყების მიღებისას ან როცა შეინიშნება საგრძნობი გახლეჩა (cmd-ში %s შეიცვლება მესიჯით)</translation>
-    </message>
-    <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>მაღალპრიორიტეტული/დაბალსაკომისიოიანი ტრანსაქციების მაქსიმალური ზომა ბაიტებში (ნაგულისხმევი: %d)</translation>
     </message>
     <message>
         <source>Information</source>
@@ -1486,14 +1461,6 @@
         <translation>DNS-ძებნის დაშვება -addnode, -seednode და -connect-სათვის</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>მისამართების ჩატვირთვა...</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>არასწორია მისამართი -proxy: '%s'</translation>
-    </message>
-    <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
         <translation>-onlynet-ში მითითებულია უცნობი ქსელი: '%s'</translation>
     </message>
@@ -1506,10 +1473,6 @@
         <translation>ბლოკების ინდექსის ჩატვირთვა...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>მისაერთებელი კვანძის დამატება და მიერთების შეძლებისდაგვარად შენარჩუნება</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>საფულის ჩატვირთვა...</translation>
     </message>
@@ -1518,16 +1481,8 @@
         <translation>საფულის ძველ ვერსიაზე გადაყვანა შეუძლებელია</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>ვერ ხერხდება ნაგულისხმევი მისამართის ჩაწერა</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>სკანირება...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>ჩატვირთვა დასრულებულია</translation>
     </message>
     <message>
         <source>Error</source>

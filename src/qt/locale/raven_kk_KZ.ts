@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="kk_KZ">
+<TS language="kk_KZ" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -47,7 +45,148 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
+    </context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <source>Amount:</source>
+        <translation>Саны</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Комиссия</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Шаң</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Комиссия алу кейін</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Саны</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Күні</translation>
+    </message>
+    <message>
+        <source>Confirmations</source>
+        <translation>Растау саны</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Растық</translation>
+    </message>
+    </context>
+<context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
+    <name>EditAddressDialog</name>
+    <message>
+        <source>&amp;Label</source>
+        <translation>таңба</translation>
+    </message>
+    <message>
+        <source>&amp;Address</source>
+        <translation>Адрес</translation>
+    </message>
+    </context>
+<context>
+    <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
+    <name>HelpMessageDialog</name>
+    </context>
+<context>
+    <name>Intro</name>
+    <message>
+        <source>Error</source>
+        <translation>қате</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
+    <name>ModalOverlay</name>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
+<context>
+    <name>OpenURIDialog</name>
+    </context>
+<context>
+    <name>OptionsDialog</name>
+    <message>
+        <source>W&amp;allet</source>
+        <translation>Әмиян</translation>
+    </message>
+    </context>
+<context>
+    <name>OverviewPage</name>
+    </context>
+<context>
+    <name>PaymentServer</name>
+    </context>
+<context>
+    <name>PeerTableModel</name>
+    </context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>Amount</source>
+        <translation>Саны</translation>
+    </message>
+    <message>
+        <source>%1 and %2</source>
+        <translation>%1 немесе %2</translation>
+    </message>
+    </context>
+<context>
+    <name>QObject::QObject</name>
+    </context>
+<context>
+    <name>QRImageWidget</name>
+    </context>
+<context>
+    <name>RPCConsole</name>
+    <message>
+        <source>&amp;Information</source>
+        <translation>Информация</translation>
+    </message>
     </context>
 <context>
     <name>RavenGUI</name>
@@ -117,111 +256,6 @@
     </message>
     </context>
 <context>
-    <name>CoinControlDialog</name>
-    <message>
-        <source>Amount:</source>
-        <translation>Саны</translation>
-    </message>
-    <message>
-        <source>Fee:</source>
-        <translation>Комиссия</translation>
-    </message>
-    <message>
-        <source>Dust:</source>
-        <translation>Шаң</translation>
-    </message>
-    <message>
-        <source>After Fee:</source>
-        <translation>Комиссия алу кейін</translation>
-    </message>
-    <message>
-        <source>Amount</source>
-        <translation>Саны</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation>Күні</translation>
-    </message>
-    <message>
-        <source>Confirmations</source>
-        <translation>Растау саны</translation>
-    </message>
-    <message>
-        <source>Confirmed</source>
-        <translation>Растық</translation>
-    </message>
-    </context>
-<context>
-    <name>EditAddressDialog</name>
-    <message>
-        <source>&amp;Label</source>
-        <translation>таңба</translation>
-    </message>
-    <message>
-        <source>&amp;Address</source>
-        <translation>Адрес</translation>
-    </message>
-    </context>
-<context>
-    <name>FreespaceChecker</name>
-    </context>
-<context>
-    <name>HelpMessageDialog</name>
-    </context>
-<context>
-    <name>Intro</name>
-    <message>
-        <source>Error</source>
-        <translation>қате</translation>
-    </message>
-    </context>
-<context>
-    <name>ModalOverlay</name>
-    </context>
-<context>
-    <name>OpenURIDialog</name>
-    </context>
-<context>
-    <name>OptionsDialog</name>
-    <message>
-        <source>W&amp;allet</source>
-        <translation>Әмиян</translation>
-    </message>
-    </context>
-<context>
-    <name>OverviewPage</name>
-    </context>
-<context>
-    <name>PaymentServer</name>
-    </context>
-<context>
-    <name>PeerTableModel</name>
-    </context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Amount</source>
-        <translation>Саны</translation>
-    </message>
-    <message>
-        <source>%1 and %2</source>
-        <translation>%1 немесе %2</translation>
-    </message>
-    </context>
-<context>
-    <name>QObject::QObject</name>
-    </context>
-<context>
-    <name>QRImageWidget</name>
-    </context>
-<context>
-    <name>RPCConsole</name>
-    <message>
-        <source>&amp;Information</source>
-        <translation>Информация</translation>
-    </message>
-    </context>
-<context>
     <name>ReceiveCoinsDialog</name>
     <message>
         <source>&amp;Amount:</source>
@@ -233,6 +267,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>

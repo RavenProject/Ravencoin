@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="he">
+<TS language="he" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -223,6 +221,18 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -231,311 +241,6 @@
     <message>
         <source>Banned Until</source>
         <translation>חסום עד</translation>
-    </message>
-</context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>&amp;חתימה על הודעה…</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>בסנכרון עם הרשת…</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;סקירה</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>מפרק</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>הצגת סקירה כללית של הארנק</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>ה&amp;עברות</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>עיון בהיסטוריית ההעברות</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>י&amp;ציאה</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>יציאה מהתכנית</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>&amp;אודות %1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>הצג מידע על %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>על אודות Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>הצגת מידע על Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;אפשרויות…</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>שינוי אפשרויות התצורה עבור %1</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>ה&amp;צפנת הארנק…</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;גיבוי הארנק…</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>ה&amp;חלפת מילת הצופן…</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>כתובת ה&amp;שליחה…</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>כתובות ה&amp;קבלה…</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>פתיחת &amp;כתובת משאב…</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>יש ללחוץ כדי לנטרל פעילות רשת.</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>פעילות הרשת נוטרלה.</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>יש ללחוץ כדי להפעיל את פעילות הרשת מחדש.</translation>
-    </message>
-    <message>
-        <source>Syncing Headers (%1%)...</source>
-        <translation>הכותרות מתעדכנות (%1%)...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>המקטעים נוספים למפתח בכונן…</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>שליחת מטבעות לכתובת ביטקוין</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>גיבוי הארנק למיקום אחר</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>החלפת מילת הצופן להצפנת הארנק</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>חלון &amp;ניפוי</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>פתיחת לוח הבקרה לאבחון ולניפוי</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;אימות הודעה…</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>ביטקוין</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>ארנק</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;שליחה</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;קבלה</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>ה&amp;צגה / הסתרה</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>הצגה או הסתרה של החלון הראשי</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>הצפנת המפתחות הפרטיים ששייכים לארנק שלך</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>חתום על הודעות עם כתובות הביטקוין שלך כדי להוכיח שהן בבעלותך</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>אמת הודעות כדי להבטיח שהן נחתמו עם כתובת ביטקוין מסוימות</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;קובץ</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>ה&amp;גדרות</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>ע&amp;זרה</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>סרגל כלים לשוניות</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>בקשת תשלומים (יצירה של קודים מסוג QR וסכימות כתובות משאב של :raven)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>הצג את רשימת הכתובות לשליחה שהיו בשימוש לרבות התוויות</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>הצגת רשימת הכתובות והתוויות הנמצאות בשימוש</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>פתיחת ביטקוין: כתובת משאב או בקשת תשלום</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>אפשרויות &amp;שורת הפקודה</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>חיבור אחד פעיל לרשת ביטקוין</numerusform><numerusform>%n חיבורים פעילים לרשת ביטקוין</numerusform></translation>
-    </message>
-    <message>
-        <source>Processing blocks on disk...</source>
-        <translation>מעבד בלוקים על הדיסק...</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 מאחור</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>המקטע האחרון שהתקבל נוצר לפני %1.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>ההעברות שבוצעו לאחר העברה זו לא יופיעו.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>שגיאה</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>אזהרה</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>מידע</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>עדכני</translation>
-    </message>
-    <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>יש להציג את הודעת העזרה של %1 כדי להציג רשימה עם אפשרויות שורת פקודה לביטקוין</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>לקוח %1</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>מתבצעת התחברות לעמיתים…</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>מתבצע עדכון…</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>תאריך: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>כמות: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>סוג: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>תווית: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>כתובת: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>העברת שליחה</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>העברת קבלה</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>הארנק &lt;b&gt;מוצפן&lt;/b&gt; ו&lt;b&gt;פתוח&lt;/b&gt; כרגע</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>הארנק &lt;b&gt;מוצפן&lt;/b&gt; ו&lt;b&gt;נעול&lt;/b&gt; כרגע</translation>
-    </message>
-    <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>אירעה שגיאה חמורה. אין אפשרות להשתמש עוד בביטקוין באופן מאובטח והיישום ייסגר.</translation>
     </message>
 </context>
 <context>
@@ -678,6 +383,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -755,6 +463,12 @@
         <translation>לא ניתן ליצור כאן תיקיית נתונים.</translation>
     </message>
 </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
 <context>
     <name>HelpMessageDialog</name>
     <message>
@@ -842,6 +556,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
@@ -884,6 +610,9 @@
         <translation>לא ידוע. הכותרות מתעדכנות (%1)…</translation>
     </message>
 </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
 <context>
     <name>OpenURIDialog</name>
     <message>
@@ -938,24 +667,12 @@
         <translation>מספר תהליכי ה&amp;אימות של הסקריפט</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>קבלת חיבורים מבחוץ</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>לאפשר חיבורים נכנסים</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>כתובת ה־IP של המתווך (לדוגמה IPv4: 127.0.0.1‏ / IPv6: ::1)</translation>
     </message>
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
         <translation>כתובות צד־שלישי (כגון: סייר מקטעים) שמופיעים בלשונית ההעברות בתור פריטים בתפריט ההקשר. %s בכתובת מוחלף בגיבוב ההעברה. מספר כתובות יופרדו בפס אנכי |.</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>כתובות העברה צד־שלישי</translation>
     </message>
     <message>
         <source>Active command-line options that override above options:</source>
@@ -1032,14 +749,6 @@
     <message>
         <source>&amp;Window</source>
         <translation>&amp;חלון</translation>
-    </message>
-    <message>
-        <source>&amp;Hide the icon from the system tray.</source>
-        <translation>ה&amp;סתרת הסמל ממגש המערכת.</translation>
-    </message>
-    <message>
-        <source>Hide tray icon</source>
-        <translation>הסתרת הסמל במגש המערכת</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1153,10 +862,6 @@
         <translation>מאזן שנכרה וטרם הבשיל</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>מאזנים</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>סך הכול:</translation>
     </message>
@@ -1188,7 +893,7 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>המאזן הכולל הנוכחי בכתובות לצפייה בלבד</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1301,39 +1006,15 @@
         <source>%1 ms</source>
         <translation>%1 מילישניות</translation>
     </message>
-    <message numerus="yes">
-        <source>%n second(s)</source>
-        <translation><numerusform>שנייה אחת</numerusform><numerusform>%n שניות</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n minute(s)</source>
-        <translation><numerusform>דקה אחת</numerusform><numerusform>%n דקות</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n hour(s)</source>
-        <translation><numerusform>שעה אחת</numerusform><numerusform>%n שעות</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n day(s)</source>
-        <translation><numerusform>יום אחד</numerusform><numerusform>%n ימים</numerusform></translation>
-    </message>
-    <message numerus="yes">
-        <source>%n week(s)</source>
-        <translation><numerusform>שבוע אחד</numerusform><numerusform>%n שבועות</numerusform></translation>
-    </message>
     <message>
         <source>%1 and %2</source>
         <translation>%1 ו%2</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n year(s)</source>
-        <translation><numerusform>שנה אחת</numerusform><numerusform>%n שנים</numerusform></translation>
     </message>
     <message>
         <source>%1 didn't yet exit safely...</source>
         <translation>הסגירה של %1 לא הושלמה בהצלחה עדיין…</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>QObject::QObject</name>
     <message>
@@ -1535,10 +1216,6 @@
         <translation>&amp;תעבורת רשת</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;ניקוי</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>סכומים</translation>
     </message>
@@ -1591,32 +1268,12 @@
         <translation>ברוך בואך למסוף ה־RPC של %1.</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>יש להשתמש בחצים למעלה ולמטה כדי לנווט בהיסטוריה, וב־&lt;b&gt;Ctrl-L&lt;/b&gt; כדי לנקות את המסך.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>ניתן להקליד &lt;b&gt;help&lt;/b&gt; לקבלת סקירה של הפקודות הזמינות.</translation>
     </message>
     <message>
         <source>Network activity disabled</source>
         <translation>פעילות הרשת נוטרלה</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 ב׳</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 ק״ב</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 מ״ב</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 ג״ב</translation>
     </message>
     <message>
         <source>via %1</source>
@@ -1645,6 +1302,295 @@
     <message>
         <source>Unknown</source>
         <translation>לא ידוע</translation>
+    </message>
+</context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>&amp;חתימה על הודעה…</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>בסנכרון עם הרשת…</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;סקירה</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>מפרק</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>הצגת סקירה כללית של הארנק</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>ה&amp;עברות</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>עיון בהיסטוריית ההעברות</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>י&amp;ציאה</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>יציאה מהתכנית</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>&amp;אודות %1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>הצג מידע על %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>על אודות Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>הצגת מידע על Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;אפשרויות…</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>שינוי אפשרויות התצורה עבור %1</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>ה&amp;צפנת הארנק…</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;גיבוי הארנק…</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>ה&amp;חלפת מילת הצופן…</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>כתובת ה&amp;שליחה…</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>כתובות ה&amp;קבלה…</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>פתיחת &amp;כתובת משאב…</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>יש ללחוץ כדי לנטרל פעילות רשת.</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>פעילות הרשת נוטרלה.</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>יש ללחוץ כדי להפעיל את פעילות הרשת מחדש.</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>הכותרות מתעדכנות (%1%)...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>המקטעים נוספים למפתח בכונן…</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>שליחת מטבעות לכתובת ביטקוין</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>גיבוי הארנק למיקום אחר</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>החלפת מילת הצופן להצפנת הארנק</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>פתיחת לוח הבקרה לאבחון ולניפוי</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;אימות הודעה…</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>ביטקוין</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>ארנק</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;שליחה</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;קבלה</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>ה&amp;צגה / הסתרה</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>הצגה או הסתרה של החלון הראשי</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>הצפנת המפתחות הפרטיים ששייכים לארנק שלך</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>חתום על הודעות עם כתובות הביטקוין שלך כדי להוכיח שהן בבעלותך</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>אמת הודעות כדי להבטיח שהן נחתמו עם כתובת ביטקוין מסוימות</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;קובץ</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>ע&amp;זרה</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>בקשת תשלומים (יצירה של קודים מסוג QR וסכימות כתובות משאב של :raven)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>הצג את רשימת הכתובות לשליחה שהיו בשימוש לרבות התוויות</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>הצגת רשימת הכתובות והתוויות הנמצאות בשימוש</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>פתיחת ביטקוין: כתובת משאב או בקשת תשלום</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>אפשרויות &amp;שורת הפקודה</translation>
+    </message>
+    <message>
+        <source>Processing blocks on disk...</source>
+        <translation>מעבד בלוקים על הדיסק...</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 מאחור</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>המקטע האחרון שהתקבל נוצר לפני %1.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>ההעברות שבוצעו לאחר העברה זו לא יופיעו.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>שגיאה</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>אזהרה</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>מידע</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>עדכני</translation>
+    </message>
+    <message>
+        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <translation>יש להציג את הודעת העזרה של %1 כדי להציג רשימה עם אפשרויות שורת פקודה לביטקוין</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>לקוח %1</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>מתבצעת התחברות לעמיתים…</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>מתבצע עדכון…</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>תאריך: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>כמות: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>סוג: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>תווית: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>כתובת: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>העברת שליחה</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>העברת קבלה</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>הארנק &lt;b&gt;מוצפן&lt;/b&gt; ו&lt;b&gt;פתוח&lt;/b&gt; כרגע</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>הארנק &lt;b&gt;מוצפן&lt;/b&gt; ו&lt;b&gt;נעול&lt;/b&gt; כרגע</translation>
+    </message>
+    <message>
+        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <translation>אירעה שגיאה חמורה. אין אפשרות להשתמש עוד בביטקוין באופן מאובטח והיישום ייסגר.</translation>
     </message>
 </context>
 <context>
@@ -1813,6 +1759,15 @@
     </message>
     </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -1887,24 +1842,12 @@
         <translation>הסתר</translation>
     </message>
     <message>
-        <source>total at least</source>
-        <translation>סה''כ לפחות</translation>
-    </message>
-    <message>
         <source>Recommended:</source>
         <translation>מומלץ:</translation>
     </message>
     <message>
         <source>Custom:</source>
         <translation>מותאם אישית:</translation>
-    </message>
-    <message>
-        <source>normal</source>
-        <translation>רגיל</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>מהיר</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -2018,10 +1961,6 @@
         <source>Payment request expired.</source>
         <translation>בקשת התשלום פגה.</translation>
     </message>
-    <message numerus="yes">
-        <source>%n block(s)</source>
-        <translation><numerusform>מקטע אחד</numerusform><numerusform>%n מקטעים</numerusform></translation>
-    </message>
     <message>
         <source>Pay only the required fee of %1</source>
         <translation>תשלום של העמלה הנדרשת בלבד על סך %1</translation>
@@ -2052,10 +1991,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>&amp;כמות:</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>לשלם ל&amp;טובת:</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2112,10 +2047,6 @@
     <message>
         <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
         <translation>הודעה שצורפה לביטקוין: כתובת שתאוחסן בהעברה לצורך מעקב מצדך. לתשומת לבך: הודעה זו לא תישלח ברשת הביטקוין.</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>תשלום לטובת:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2641,7 +2572,7 @@
         <source>Send Coins</source>
         <translation>שליחת מטבעות</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -2676,7 +2607,7 @@
         <source>The wallet data was successfully saved to %1.</source>
         <translation>נתוני הארנק נשמרו בהצלחה אל %1.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>raven-core</name>
     <message>
@@ -2698,10 +2629,6 @@
     <message>
         <source>Accept command line and JSON-RPC commands</source>
         <translation>קבלת פקודות משורת הפקודה ומ־JSON-RPC</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
-        <translation>קבלת חיבורים מבחוץ (בררת מחדל: 1 אם לא במצב ‎-proxy או ‎-connect/-noconnet)</translation>
     </message>
     <message>
         <source>Error: A fatal internal error occurred, see debug.log for details</source>
@@ -2738,10 +2665,6 @@
     <message>
         <source>Warning: The network does not appear to fully agree! Some miners appear to be experiencing issues.</source>
         <translation>אזהרה: נראה כי הרשת אינה מסכימה באופן מלא! חלק מהכורים חווים תקלות.</translation>
-    </message>
-    <message>
-        <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
-        <translation>עליך לבנות מחדש את מסד הנתונים בעזרת ‎-reindex-chainstate כדי לשנות את ‎-txindex</translation>
     </message>
     <message>
         <source>-maxmempool must be at least %d MB</source>
@@ -2828,10 +2751,6 @@
         <translation>מקטע הפתיח הוא שגוי או לא נמצא. תיקיית נתונים שגויה עבור הרשת?</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>כתובת onion- שגויה: '%s'</translation>
-    </message>
-    <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
         <translation>סכום שגוי עבור ‎-%s=&lt;amount&gt;:‏ '%s'</translation>
     </message>
@@ -2864,20 +2783,12 @@
         <translation>הגדרת גודל מטמון מסדי הנתונים במגה בתים (%d עד %d, בררת מחדל: %d)</translation>
     </message>
     <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>הגדרת קובץ מקטע מרבי בבתים (בררת מחדל: %d)</translation>
-    </message>
-    <message>
         <source>Specify wallet file (within data directory)</source>
         <translation>ציון קובץ ארנק (בתוך תיקיית הנתונים)</translation>
     </message>
     <message>
         <source>Verifying blocks...</source>
         <translation>המקטעים מאומתים…</translation>
-    </message>
-    <message>
-        <source>Verifying wallet...</source>
-        <translation>הארנק מאומת…</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
@@ -3000,10 +2911,6 @@
         <translation>הפעלת בדיקת DNS עבור ‎-addnode,‏ ‎-seednode ו־‎-connect</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>הכתובות בטעינה…</translation>
-    </message>
-    <message>
         <source>Unsupported argument -socks found. Setting SOCKS version isn't possible anymore, only SOCKS5 proxies are supported.</source>
         <translation>המשתנה ‎-socks נמצא אך אין בו תמיכה עוד. הגדרת גרסת SOCKS אינה אפשרית עוד, קיימת תמיכה רק ב־SOCKS5.</translation>
     </message>
@@ -3022,10 +2929,6 @@
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
         <translation>לכלול את כתובת ה־IP בפלט ניפוי השגיאות (בררת מחדל: %u)</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>כתובת ‎-proxy לא תקינה: '%s'</translation>
     </message>
     <message>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: %u or testnet: %u)</source>
@@ -3100,10 +3003,6 @@
         <translation>מפתח המקטעים נטען…</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>הוספת מפרק להתחברות ולנסות לשמור על החיבור פתוח</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>הארנק בטעינה…</translation>
     </message>
@@ -3112,16 +3011,8 @@
         <translation>לא ניתן להחזיר את גרסת הארנק</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>לא ניתן לכתוב את כתובת בררת המחדל</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>סריקה מחדש…</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>טעינה הושלמה</translation>
     </message>
     <message>
         <source>Error</source>

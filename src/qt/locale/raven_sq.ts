@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="sq">
+<TS language="sq" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -175,8 +173,217 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     </context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <source>Coin Selection</source>
+        <translation>Zgjedhja e monedhes</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Shuma:</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Sasia</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Kopjo adresën</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>po</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>jo</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(pa etiketë)</translation>
+    </message>
+    </context>
+<context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
+    <name>EditAddressDialog</name>
+    <message>
+        <source>Edit Address</source>
+        <translation>Ndrysho Adresën</translation>
+    </message>
+    <message>
+        <source>&amp;Label</source>
+        <translation>&amp;Etiketë</translation>
+    </message>
+    <message>
+        <source>&amp;Address</source>
+        <translation>&amp;Adresa</translation>
+    </message>
+    <message>
+        <source>New receiving address</source>
+        <translation>Adresë e re pritëse</translation>
+    </message>
+    <message>
+        <source>New sending address</source>
+        <translation>Adresë e re dërgimi</translation>
+    </message>
+    <message>
+        <source>Edit receiving address</source>
+        <translation>Ndrysho adresën pritëse</translation>
+    </message>
+    <message>
+        <source>Edit sending address</source>
+        <translation>ndrysho adresën dërguese</translation>
+    </message>
+    <message>
+        <source>The entered address "%1" is already in the address book.</source>
+        <translation>Adresa e dhënë "%1" është e zënë në librin e adresave. </translation>
+    </message>
+    <message>
+        <source>Could not unlock wallet.</source>
+        <translation>Nuk mund të ç'kyçet portofoli.</translation>
+    </message>
+    <message>
+        <source>New key generation failed.</source>
+        <translation>Krijimi i çelësit të ri dështoi.</translation>
+    </message>
+</context>
+<context>
+    <name>FreespaceChecker</name>
+    <message>
+        <source>name</source>
+        <translation>emri</translation>
+    </message>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
+    <name>HelpMessageDialog</name>
+    <message>
+        <source>version</source>
+        <translation>versioni</translation>
+    </message>
+    </context>
+<context>
+    <name>Intro</name>
+    <message>
+        <source>Welcome</source>
+        <translation>Miresevini</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Problem</translation>
+    </message>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
+    <name>ModalOverlay</name>
+    <message>
+        <source>Form</source>
+        <translation>Formilarë</translation>
+    </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
+<context>
+    <name>OpenURIDialog</name>
+    </context>
+<context>
+    <name>OptionsDialog</name>
+    <message>
+        <source>Options</source>
+        <translation>Opsionet</translation>
+    </message>
+    <message>
+        <source>W&amp;allet</source>
+        <translation>Portofol</translation>
+    </message>
+    </context>
+<context>
+    <name>OverviewPage</name>
+    <message>
+        <source>Form</source>
+        <translation>Formilarë</translation>
+    </message>
+    </context>
+<context>
+    <name>PaymentServer</name>
+    </context>
+<context>
+    <name>PeerTableModel</name>
+    </context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>Amount</source>
+        <translation>Sasia</translation>
+    </message>
+    <message>
+        <source>%1 and %2</source>
+        <translation>%1 dhe %2</translation>
+    </message>
+    </context>
+<context>
+    <name>QObject::QObject</name>
+    </context>
+<context>
+    <name>QRImageWidget</name>
+    </context>
+<context>
+    <name>RPCConsole</name>
+    <message>
+        <source>&amp;Information</source>
+        <translation>Informacion</translation>
+    </message>
+    <message>
+        <source>&amp;Open</source>
+        <translation>&amp;Hap</translation>
+    </message>
+    <message>
+        <source>never</source>
+        <translation>asnjehere</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>i/e panjohur</translation>
+    </message>
+</context>
 <context>
     <name>RavenGUI</name>
     <message>
@@ -240,16 +447,8 @@
         <translation>&amp;Skedar</translation>
     </message>
     <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Konfigurimet</translation>
-    </message>
-    <message>
         <source>&amp;Help</source>
         <translation>&amp;Ndihmë</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Shiriti i mjeteve</translation>
     </message>
     <message>
         <source>%1 behind</source>
@@ -288,183 +487,6 @@
         <translation>Portofoli po &lt;b&gt; enkriptohet&lt;/b&gt; dhe është &lt;b&gt; i kyçur&lt;/b&gt;</translation>
     </message>
     </context>
-<context>
-    <name>CoinControlDialog</name>
-    <message>
-        <source>Coin Selection</source>
-        <translation>Zgjedhja e monedhes</translation>
-    </message>
-    <message>
-        <source>Amount:</source>
-        <translation>Shuma:</translation>
-    </message>
-    <message>
-        <source>Amount</source>
-        <translation>Sasia</translation>
-    </message>
-    <message>
-        <source>Date</source>
-        <translation>Data</translation>
-    </message>
-    <message>
-        <source>Copy address</source>
-        <translation>Kopjo adresën</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation>po</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation>jo</translation>
-    </message>
-    <message>
-        <source>(no label)</source>
-        <translation>(pa etiketë)</translation>
-    </message>
-    </context>
-<context>
-    <name>EditAddressDialog</name>
-    <message>
-        <source>Edit Address</source>
-        <translation>Ndrysho Adresën</translation>
-    </message>
-    <message>
-        <source>&amp;Label</source>
-        <translation>&amp;Etiketë</translation>
-    </message>
-    <message>
-        <source>&amp;Address</source>
-        <translation>&amp;Adresa</translation>
-    </message>
-    <message>
-        <source>New receiving address</source>
-        <translation>Adresë e re pritëse</translation>
-    </message>
-    <message>
-        <source>New sending address</source>
-        <translation>Adresë e re dërgimi</translation>
-    </message>
-    <message>
-        <source>Edit receiving address</source>
-        <translation>Ndrysho adresën pritëse</translation>
-    </message>
-    <message>
-        <source>Edit sending address</source>
-        <translation>ndrysho adresën dërguese</translation>
-    </message>
-    <message>
-        <source>The entered address "%1" is already in the address book.</source>
-        <translation>Adresa e dhënë "%1" është e zënë në librin e adresave. </translation>
-    </message>
-    <message>
-        <source>Could not unlock wallet.</source>
-        <translation>Nuk mund të ç'kyçet portofoli.</translation>
-    </message>
-    <message>
-        <source>New key generation failed.</source>
-        <translation>Krijimi i çelësit të ri dështoi.</translation>
-    </message>
-</context>
-<context>
-    <name>FreespaceChecker</name>
-    <message>
-        <source>name</source>
-        <translation>emri</translation>
-    </message>
-    </context>
-<context>
-    <name>HelpMessageDialog</name>
-    <message>
-        <source>version</source>
-        <translation>versioni</translation>
-    </message>
-    </context>
-<context>
-    <name>Intro</name>
-    <message>
-        <source>Welcome</source>
-        <translation>Miresevini</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Problem</translation>
-    </message>
-    </context>
-<context>
-    <name>ModalOverlay</name>
-    <message>
-        <source>Form</source>
-        <translation>Formilarë</translation>
-    </message>
-    </context>
-<context>
-    <name>OpenURIDialog</name>
-    </context>
-<context>
-    <name>OptionsDialog</name>
-    <message>
-        <source>Options</source>
-        <translation>Opsionet</translation>
-    </message>
-    <message>
-        <source>W&amp;allet</source>
-        <translation>Portofol</translation>
-    </message>
-    </context>
-<context>
-    <name>OverviewPage</name>
-    <message>
-        <source>Form</source>
-        <translation>Formilarë</translation>
-    </message>
-    </context>
-<context>
-    <name>PaymentServer</name>
-    </context>
-<context>
-    <name>PeerTableModel</name>
-    </context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Amount</source>
-        <translation>Sasia</translation>
-    </message>
-    <message>
-        <source>%1 and %2</source>
-        <translation>%1 dhe %2</translation>
-    </message>
-    </context>
-<context>
-    <name>QObject::QObject</name>
-    </context>
-<context>
-    <name>QRImageWidget</name>
-    </context>
-<context>
-    <name>RPCConsole</name>
-    <message>
-        <source>&amp;Information</source>
-        <translation>Informacion</translation>
-    </message>
-    <message>
-        <source>&amp;Open</source>
-        <translation>&amp;Hap</translation>
-    </message>
-    <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Pastro</translation>
-    </message>
-    <message>
-        <source>never</source>
-        <translation>asnjehere</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>i/e panjohur</translation>
-    </message>
-</context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
@@ -515,6 +537,15 @@
     </message>
     </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -560,10 +591,6 @@
         <translation>Sh&amp;uma:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>Paguaj &amp;drejt:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Etiketë:</translation>
     </message>
@@ -578,10 +605,6 @@
     <message>
         <source>Alt+P</source>
         <translation>Alt+P</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Paguaj drejt:</translation>
     </message>
     <message>
         <source>Enter a label for this address to add it to your address book</source>
@@ -771,7 +794,7 @@
         <source>Send Coins</source>
         <translation>Dërgo Monedha</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>

@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ro">
+<TS language="ro" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -43,10 +41,74 @@
         <source>&amp;Delete</source>
         <translation>Șterge</translation>
     </message>
+    <message>
+        <source>Choose the address to send coins to</source>
+        <translation>Alegeți adresa unde trimiteți monena</translation>
+    </message>
+    <message>
+        <source>Choose the address to receive coins with</source>
+        <translation>Alege adresa unde primești moneda</translation>
+    </message>
+    <message>
+        <source>C&amp;hoose</source>
+        <translation>Alege</translation>
+    </message>
+    <message>
+        <source>Sending addresses</source>
+        <translation>Trimite adrese</translation>
+    </message>
+    <message>
+        <source>Receiving addresses</source>
+        <translation>Primește Adrese</translation>
+    </message>
+    <message>
+        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Acestea sunt adresele Raven pentru efectuarea plăților . Intotdeauna verifică cantitatea si adresa de primire inainte de a efectua tranzactia</translation>
+    </message>
+    <message>
+        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Acestea sunt adresele Raven pentru a primi plățile.Este recomandat să folosești o noua adresă pentru fiecare tranzacție</translation>
+    </message>
+    <message>
+        <source>&amp;Copy Address</source>
+        <translation>Copiază adresa</translation>
+    </message>
+    <message>
+        <source>Copy &amp;Label</source>
+        <translation>Copiază &amp; Etichetă</translation>
+    </message>
+    <message>
+        <source>&amp;Edit</source>
+        <translation>Editează</translation>
+    </message>
+    <message>
+        <source>Export Address List</source>
+        <translation>Exporta lista de adrese</translation>
+    </message>
+    <message>
+        <source>Comma separated file (*.csv)</source>
+        <translation>Fișier separat prin virgula (*.csv)</translation>
+    </message>
+    <message>
+        <source>Exporting Failed</source>
+        <translation>Eroare de exportare</translation>
+    </message>
     </context>
 <context>
     <name>AddressTableModel</name>
-    </context>
+    <message>
+        <source>Label</source>
+        <translation>Etichetă</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresă</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(fără etichetă)</translation>
+    </message>
+</context>
 <context>
     <name>AskPassphraseDialog</name>
     <message>
@@ -65,6 +127,98 @@
         <source>Repeat new passphrase</source>
         <translation>Repetati noua parolă</translation>
     </message>
+    <message>
+        <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;ten or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
+        <translation>Introdu noua parolă pentru portofel.&lt;br/&gt;Te rugăm să foloseşti o parolă formată din &lt;b&gt;cel puţin zece caractere aleatorii&lt;/b&gt; sau &lt;b&gt;cel puţin opt cuvinte&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Encrypt wallet</source>
+        <translation>Criptează portofelul</translation>
+    </message>
+    <message>
+        <source>This operation needs your wallet passphrase to unlock the wallet.</source>
+        <translation>Această operațiune necesită parola portofelului pentru a-l debloca.</translation>
+    </message>
+    <message>
+        <source>Unlock wallet</source>
+        <translation>Deblocare portofel</translation>
+    </message>
+    <message>
+        <source>This operation needs your wallet passphrase to decrypt the wallet.</source>
+        <translation>Această operațiune necesită parola portofelului pentru a-l decripta. </translation>
+    </message>
+    <message>
+        <source>Decrypt wallet</source>
+        <translation>Decriptează portofelul</translation>
+    </message>
+    <message>
+        <source>Change passphrase</source>
+        <translation>Schimbă parola</translation>
+    </message>
+    <message>
+        <source>Enter the old passphrase and new passphrase to the wallet.</source>
+        <translation>Introdu parola actuală şi noua parolă a portofelului.</translation>
+    </message>
+    <message>
+        <source>Confirm wallet encryption</source>
+        <translation>Confirmă criptarea portofelului</translation>
+    </message>
+    <message>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR RAVENS&lt;/b&gt;!</source>
+        <translation>Atenţie: dacă criptezi portofelul şi pierzi parola, &lt;b&gt;VEI PIERDE TOATE MONEDELE&lt;/b&gt;!</translation>
+    </message>
+    <message>
+        <source>Are you sure you wish to encrypt your wallet?</source>
+        <translation>Eşti sigur că doreşti să criptezi portofelul?</translation>
+    </message>
+    <message>
+        <source>Wallet encrypted</source>
+        <translation>Portofelul este criptat</translation>
+    </message>
+    <message>
+        <source>Wallet encryption failed</source>
+        <translation>Criptarea portofelului a eşuat</translation>
+    </message>
+    <message>
+        <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
+        <translation>Criptarea portofelului a eşuat din cauza unei erori interne. Portofelul a rămas necriptat.</translation>
+    </message>
+    <message>
+        <source>The supplied passphrases do not match.</source>
+        <translation>Parolele furnizate nu coincid.</translation>
+    </message>
+    <message>
+        <source>Wallet unlock failed</source>
+        <translation>Deblocarea portofelului a eşuat</translation>
+    </message>
+    <message>
+        <source>The passphrase entered for the wallet decryption was incorrect.</source>
+        <translation>Parola introdusă pentru decriptarea portofelului este greşită.</translation>
+    </message>
+    <message>
+        <source>Wallet decryption failed</source>
+        <translation>Decriptarea portofelului a eşuat</translation>
+    </message>
+    <message>
+        <source>Wallet passphrase was successfully changed.</source>
+        <translation>Parola portofelului a fost schimbată cu succes.</translation>
+    </message>
+    <message>
+        <source>Warning: The Caps Lock key is on!</source>
+        <translation>Atenţie: este activată tasta pentru litere mari!</translation>
+    </message>
+</context>
+<context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
     </context>
 <context>
     <name>BanTableModel</name>
@@ -77,217 +231,6 @@
         <translation>Blocat până</translation>
     </message>
 </context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Semnează &amp;mesajul...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Se sincronizează cu rețeaua</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Nod</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Arată o prezentare generală a portofelului.</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Tranzacții</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Navighează în istoricul tranzacțiilor</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Părăsește aplicația</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Despre &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Arată informații despre Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Opțiuni...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Criptează portofelul...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Backup portofel</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Schimbă parola...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Trimite adresele...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Primește adresele...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Deschide &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Trimite monedele către o adresă Raven</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Fă o copie de rezervă a portofelului într-o altă locație</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Schimbă parola folosită pentru criptarea portofelului</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Fereastra pentru depanare</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Pornește consola pentru depanare si diagnoză</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Verifică mesajul...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Portofel</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Trimite</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Primește</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Arată/Ascunde</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Arată sau ascunde fereastra principală</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Criptează cheile private care aparțin portofelului tău.</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Semnează mesajele cu adresa ta de Raven pentru a face dovada că îți aparțin.</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verifică mesajele cu scopul de a asigura faptul că au fost semnate cu adresa de Raven specificată.</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Fișier</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Setări</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Ajutor</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Cerere plată (generează coduri QR și raven: URIs)</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Deschide un raven: URI sau cerere de plată</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 în urmă</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Ultimul bloc primit a fost generat acum %1</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Eroare</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Atenționare</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informație</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Actual</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Data: %1</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Cantitate: %1</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Tip: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Etichetă: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Adresa: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Trimite tranzacția</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Portofelul este &lt;b&gt;criptat&lt;/b&gt; și în prezent &lt;b&gt;deblocat&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Portofelul este &lt;b&gt;criptat&lt;/b&gt; și în prezent &lt;b&gt;blocat&lt;/b&gt;</translation>
-    </message>
-    </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
@@ -348,6 +291,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -368,6 +314,12 @@
         <source>Directory already exists. Add %1 if you intend to create a new directory here.</source>
         <translation>Directoriul există deja. Adaugă %1 dacă ai intenționat să creezi aici un directoriu nou.</translation>
     </message>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -398,13 +350,24 @@
         <source>Error</source>
         <translation>Eroare</translation>
     </message>
-    <message numerus="yes">
-        <source>%n GB of free space available</source>
-        <translation><numerusform>%n GB de spațiu liber disponibil</numerusform><numerusform>%n GB de spațiu liber disponibil</numerusform><numerusform>%n GB de spațiu liber disponibil</numerusform></translation>
-    </message>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
     </context>
 <context>
     <name>ModalOverlay</name>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -426,14 +389,6 @@
     <message>
         <source>MB</source>
         <translation>MB</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside</source>
-        <translation>Acceptă conexiuni externe</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Acceptă conexiunea care sosește</translation>
     </message>
     <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
@@ -625,22 +580,6 @@
         <translation>1 &amp;an</translation>
     </message>
     <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
-    </message>
-    <message>
         <source>Yes</source>
         <translation>Da</translation>
     </message>
@@ -653,6 +592,209 @@
         <translation>Necunoscut</translation>
     </message>
 </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Semnează &amp;mesajul...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Se sincronizează cu rețeaua</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Nod</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Arată o prezentare generală a portofelului.</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Tranzacții</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Navighează în istoricul tranzacțiilor</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Părăsește aplicația</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Despre &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Arată informații despre Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Opțiuni...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Criptează portofelul...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Backup portofel</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Schimbă parola...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Trimite adresele...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Primește adresele...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Deschide &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Trimite monedele către o adresă Raven</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Fă o copie de rezervă a portofelului într-o altă locație</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Schimbă parola folosită pentru criptarea portofelului</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Pornește consola pentru depanare si diagnoză</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Verifică mesajul...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Portofel</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Trimite</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Primește</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Arată/Ascunde</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Arată sau ascunde fereastra principală</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Criptează cheile private care aparțin portofelului tău.</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Semnează mesajele cu adresa ta de Raven pentru a face dovada că îți aparțin.</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Verifică mesajele cu scopul de a asigura faptul că au fost semnate cu adresa de Raven specificată.</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Fișier</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Ajutor</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Cerere plată (generează coduri QR și raven: URIs)</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Deschide un raven: URI sau cerere de plată</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 în urmă</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Ultimul bloc primit a fost generat acum %1</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Eroare</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Atenționare</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informație</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Actual</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Data: %1</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Cantitate: %1</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Tip: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Etichetă: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Adresa: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Trimite tranzacția</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Portofelul este &lt;b&gt;criptat&lt;/b&gt; și în prezent &lt;b&gt;deblocat&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Portofelul este &lt;b&gt;criptat&lt;/b&gt; și în prezent &lt;b&gt;blocat&lt;/b&gt;</translation>
+    </message>
+    </context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
@@ -677,6 +819,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>

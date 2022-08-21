@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="lv_LV">
+<TS language="lv_LV" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -63,218 +61,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Parakstīt &amp;ziņojumu...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Sinhronizācija ar tīklu...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Pārskats</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Node</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Rādīt vispārēju maciņa pārskatu</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Transakcijas</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Skatīt transakciju vēsturi</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>&amp;Iziet</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Aizvērt programmu</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Par &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Parādīt informāciju par Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Iespējas...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>Šifrēt &amp;maciņu...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Maciņa Rezerves Kopija...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>Mainīt &amp;Paroli...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Sūtīšanas adreses...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>Saņemšanas &amp;adreses...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Atvērt &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Bloku reindeksēšana no diska...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Nosūtīt bitkoinus uz Raven adresi</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Izveidot maciņa rezerves kopiju citur</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Mainīt maciņa šifrēšanas paroli</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Atkļūdošanas logs</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Atvērt atkļūdošanas un diagnostikas konsoli</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Pārbaudīt ziņojumu...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Maciņš</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Sūtīt</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Saņemt</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Rādīt / Paslēpt</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Parādīt vai paslēpt galveno Logu</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Šifrēt privātās atslēgas kuras pieder tavam maciņam</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Parakstīt ziņojumus ar savām Raven adresēm lai pierādītu ka tās pieder tev</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Pārbaudīt ziņojumus lai pārliecinātos, ka tie tika parakstīti ar norādītajām Raven adresēm</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Fails</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Uzstādījumi</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Palīdzība</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Ciļņu rīkjosla</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Pieprasīt maksājumus (izveido QR kodu un raven: URIs)</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Atvērt raven URI vai maksājuma pieprasījumu</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Komandrindas iespējas</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 aizmugurē</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Transakcijas pēc šī vel nebūs redzamas</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Kļūda</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Brīdinājums</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informācija</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Sinhronizēts</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Sinhronizējos...</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Transakcija nosūtīta</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Ienākoša transakcija</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Maciņš ir &lt;b&gt;šifrēts&lt;/b&gt; un pašlaik &lt;b&gt;atslēgts&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Maciņš ir &lt;b&gt;šifrēts&lt;/b&gt; un pašlaik &lt;b&gt;slēgts&lt;/b&gt;</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -332,6 +131,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -365,6 +167,12 @@
         <translation>Šeit nevar izveidot datu mapi.</translation>
     </message>
 </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
 <context>
     <name>HelpMessageDialog</name>
     <message>
@@ -408,6 +216,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
@@ -417,6 +237,9 @@
         <source>Last block time</source>
         <translation>Pēdējā bloka laiks</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -460,20 +283,12 @@
         <translation>Skriptu &amp;pārbaudes pavedienu skaits</translation>
     </message>
     <message>
-        <source>Allow incoming connections</source>
-        <translation>Atļaut ienākošos savienojumus</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>Starpniekservera IP adrese (piem. IPv4: 127.0.0.1 / IPv6: ::1)</translation>
     </message>
     <message>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Exit in the menu.</source>
         <translation>Minimizēt nevis aizvērt aplikāciju, kad logs tiek aizvērts. Kad šī iespēja ir ieslēgta, aplikācija tiks aizvērta, izvēloties Aizvērt izvēlnē.</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>Trešo personu transakciju URLs</translation>
     </message>
     <message>
         <source>Active command-line options that override above options:</source>
@@ -725,10 +540,6 @@
         <translation>&amp;Tīkla Satiksme</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Notīrīt</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Kopsummas</translation>
     </message>
@@ -749,28 +560,207 @@
         <translation>Notīrīt konsoli</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Izmantojiet bultiņas uz augšu un leju, lai pārvietotos pa vēsturi, un &lt;b&gt;Ctrl-L&lt;/b&gt; ekrāna notīrīšanai.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Ierakstiet &lt;b&gt;help&lt;/b&gt; lai iegūtu pieejamo komandu sarakstu.</translation>
     </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
     <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
+        <source>Sign &amp;message...</source>
+        <translation>Parakstīt &amp;ziņojumu...</translation>
     </message>
     <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
+        <source>Synchronizing with network...</source>
+        <translation>Sinhronizācija ar tīklu...</translation>
     </message>
     <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
+        <source>&amp;Overview</source>
+        <translation>&amp;Pārskats</translation>
     </message>
     <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
+        <source>Node</source>
+        <translation>Node</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Rādīt vispārēju maciņa pārskatu</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Transakcijas</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Skatīt transakciju vēsturi</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>&amp;Iziet</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Aizvērt programmu</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Par &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Parādīt informāciju par Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Iespējas...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>Šifrēt &amp;maciņu...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Maciņa Rezerves Kopija...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>Mainīt &amp;Paroli...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Sūtīšanas adreses...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>Saņemšanas &amp;adreses...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Atvērt &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Bloku reindeksēšana no diska...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Nosūtīt bitkoinus uz Raven adresi</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Izveidot maciņa rezerves kopiju citur</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Mainīt maciņa šifrēšanas paroli</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Atvērt atkļūdošanas un diagnostikas konsoli</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Pārbaudīt ziņojumu...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Maciņš</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Sūtīt</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Saņemt</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Rādīt / Paslēpt</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Parādīt vai paslēpt galveno Logu</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Šifrēt privātās atslēgas kuras pieder tavam maciņam</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Parakstīt ziņojumus ar savām Raven adresēm lai pierādītu ka tās pieder tev</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Pārbaudīt ziņojumus lai pārliecinātos, ka tie tika parakstīti ar norādītajām Raven adresēm</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Fails</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Palīdzība</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Pieprasīt maksājumus (izveido QR kodu un raven: URIs)</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Atvērt raven URI vai maksājuma pieprasījumu</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Komandrindas iespējas</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 aizmugurē</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Transakcijas pēc šī vel nebūs redzamas</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Kļūda</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Brīdinājums</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informācija</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Sinhronizēts</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Sinhronizējos...</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Transakcija nosūtīta</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Ienākoša transakcija</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Maciņš ir &lt;b&gt;šifrēts&lt;/b&gt; un pašlaik &lt;b&gt;atslēgts&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Maciņš ir &lt;b&gt;šifrēts&lt;/b&gt; un pašlaik &lt;b&gt;slēgts&lt;/b&gt;</translation>
     </message>
     </context>
 <context>
@@ -845,6 +835,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -936,10 +935,6 @@
         <translation>Apjo&amp;ms</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>&amp;Saņēmējs:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Nosaukums:</translation>
     </message>
@@ -970,10 +965,6 @@
     <message>
         <source>Message:</source>
         <translation>Ziņojums:</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Maksāt:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -1162,10 +1153,6 @@
         <translation>Pārbauda blokus...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>Pārbauda maciņu...</translation>
-    </message>
-    <message>
         <source>Wallet options:</source>
         <translation>Maciņa iespējas:</translation>
     </message>
@@ -1214,14 +1201,6 @@
         <translation>Atļaut DNS uzmeklēšanu priekš -addnode, -seednode un -connect</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Ielādē adreses...</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Nederīga -proxy adrese: '%s'</translation>
-    </message>
-    <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
         <translation>-onlynet komandā norādīts nepazīstams tīkls: '%s'</translation>
     </message>
@@ -1234,10 +1213,6 @@
         <translation>Ielādē bloku indeksu...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Pievienot mezglu, kam pievienoties un turēt savienojumu atvērtu</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Ielādē maciņu...</translation>
     </message>
@@ -1246,16 +1221,8 @@
         <translation>Nevar maciņa formātu padarīt vecāku</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Nevar ierakstīt adresi pēc noklusēšanas</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Skanēju no jauna...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Ielāde pabeigta</translation>
     </message>
     <message>
         <source>Error</source>

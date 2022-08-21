@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="la">
+<TS language="la" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -51,198 +49,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Signa &amp;nuntium...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Synchronizans cum rete...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Summarium</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Monstra generale summarium cassidilis</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Transactiones</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Inspicio historiam transactionum</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>E&amp;xi</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Exi applicatione</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Informatio de &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Monstra informationem de Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Optiones</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Cifra Cassidile...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Conserva Cassidile...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Muta tesseram...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Recreans indicem frustorum in disco...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Mitte nummos ad inscriptionem Raven</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Conserva cassidile in locum alium</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Muta tesseram utam pro cassidilis cifrando</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>Fenestra &amp;Debug</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Aperi terminalem debug et diagnosticalem</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Verifica nuntium...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Cassidile</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Mitte</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Accipe</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Monstra/Occulta</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Monstra vel occulta Fenestram principem</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Cifra claves privatas quae cassidili tui sunt</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Signa nuntios cum tuis inscriptionibus Raven ut demonstres te eas possidere</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verifica nuntios ut certus sis eos signatos esse cum specificatis inscriptionibus Raven</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Plica</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Configuratio</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Auxilium</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Tabella instrumentorum "Tabs"</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>Optiones mandati initiantis</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 post</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Postremum acceptum frustum generatum est %1 abhinc.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Transactiones post hoc nondum visibiles erunt.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Error</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Monitio</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Informatio</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Recentissimo</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Persequens...</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Transactio missa</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Transactio incipiens</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Cassidile &lt;b&gt;cifratum&lt;/b&gt; est et iam nunc &lt;b&gt;reseratum&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Cassidile &lt;b&gt;cifratum&lt;/b&gt; est et iam nunc &lt;b&gt;seratum&lt;/b&gt;</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -264,6 +83,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -280,6 +102,12 @@
     </context>
 <context>
     <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -308,6 +136,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
@@ -317,6 +157,9 @@
         <source>Last block time</source>
         <translation>Hora postremi frusti</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -521,12 +364,187 @@
         <translation>Vacuefac terminale</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Utere sagittis sursum deorsumque ut per historiam naviges, et &lt;b&gt;Ctrl+L&lt;/b&gt; ut scrinium vacuefacias.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Scribe &lt;b&gt;help&lt;/b&gt; pro summario possibilium mandatorum.</translation>
+    </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Signa &amp;nuntium...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Synchronizans cum rete...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Summarium</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Monstra generale summarium cassidilis</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Transactiones</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Inspicio historiam transactionum</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>E&amp;xi</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Exi applicatione</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Informatio de &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Monstra informationem de Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Optiones</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Cifra Cassidile...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Conserva Cassidile...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Muta tesseram...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Recreans indicem frustorum in disco...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Mitte nummos ad inscriptionem Raven</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Conserva cassidile in locum alium</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Muta tesseram utam pro cassidilis cifrando</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Aperi terminalem debug et diagnosticalem</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Verifica nuntium...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Cassidile</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Mitte</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Accipe</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Monstra/Occulta</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Monstra vel occulta Fenestram principem</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Cifra claves privatas quae cassidili tui sunt</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Signa nuntios cum tuis inscriptionibus Raven ut demonstres te eas possidere</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Verifica nuntios ut certus sis eos signatos esse cum specificatis inscriptionibus Raven</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Plica</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Auxilium</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>Optiones mandati initiantis</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 post</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Postremum acceptum frustum generatum est %1 abhinc.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Transactiones post hoc nondum visibiles erunt.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Monitio</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Informatio</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Recentissimo</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Persequens...</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Transactio missa</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Transactio incipiens</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Cassidile &lt;b&gt;cifratum&lt;/b&gt; est et iam nunc &lt;b&gt;reseratum&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Cassidile &lt;b&gt;cifratum&lt;/b&gt; est et iam nunc &lt;b&gt;seratum&lt;/b&gt;</translation>
     </message>
     </context>
 <context>
@@ -553,6 +571,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -604,10 +631,6 @@
         <translation>&amp;Quantitas:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>Pensa &amp;Ad:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Titulus:</translation>
     </message>
@@ -626,10 +649,6 @@
     <message>
         <source>Message:</source>
         <translation>Nuntius:</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Pensa Ad:</translation>
     </message>
     </context>
 <context>
@@ -826,10 +845,6 @@
         <translation>Verificante frusta...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>Verificante cassidilem...</translation>
-    </message>
-    <message>
         <source>Information</source>
         <translation>Informatio</translation>
     </message>
@@ -874,14 +889,6 @@
         <translation>Permitte quaerenda DNS pro -addnode, -seednode, et -connect</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Legens inscriptiones...</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Inscriptio -proxy non valida: '%s'</translation>
-    </message>
-    <message>
         <source>Unknown network specified in -onlynet: '%s'</source>
         <translation>Ignotum rete specificatum in -onlynet: '%s'</translation>
     </message>
@@ -894,10 +901,6 @@
         <translation>Legens indicem frustorum...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Adice nodum cui conectere et conare sustinere conexionem apertam</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Legens cassidile...</translation>
     </message>
@@ -906,16 +909,8 @@
         <translation>Non posse cassidile regredi</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Non posse scribere praedefinitam inscriptionem</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Iterum perlegens...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Completo lengendi</translation>
     </message>
     <message>
         <source>Error</source>

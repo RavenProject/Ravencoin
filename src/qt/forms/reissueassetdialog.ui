@@ -10,6 +10,18 @@
     <height>1051</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>800</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string notr="true">Transaction details</string>
   </property>
@@ -38,6 +50,12 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>600</width>
+         <height>194</height>
+        </size>
        </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
@@ -524,7 +542,7 @@
                <bool>false</bool>
               </property>
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -578,6 +596,18 @@
      </item>
      <item>
       <widget class="QFrame" name="frame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>600</width>
+         <height>220</height>
+        </size>
+       </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
@@ -587,6 +617,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
          <number>0</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
         </property>
         <property name="bottomMargin">
          <number>12</number>
@@ -636,6 +669,9 @@
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="bottomMargin">
+             <number>3</number>
+            </property>
             <item>
              <widget class="QLabel" name="assetNameLabel">
               <property name="sizePolicy">
@@ -698,6 +734,9 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="bottomMargin">
+             <number>3</number>
+            </property>
             <item>
              <widget class="QLabel" name="addressLabel">
               <property name="text">
@@ -719,6 +758,9 @@
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_15">
+            <property name="bottomMargin">
+             <number>3</number>
+            </property>
             <item>
              <widget class="QLabel" name="labelVerifierString">
               <property name="text">
@@ -746,6 +788,9 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <property name="spacing">
              <number>34</number>
+            </property>
+            <property name="bottomMargin">
+             <number>3</number>
             </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -831,6 +876,9 @@
             <property name="spacing">
              <number>0</number>
             </property>
+            <property name="bottomMargin">
+             <number>3</number>
+            </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_10">
               <property name="rightMargin">
@@ -895,6 +943,13 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="openIpfsButton">
+                <property name="text">
+                 <string>Browse IPFS</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
            </layout>
@@ -938,12 +993,27 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_9">
+      <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0">
        <property name="spacing">
-        <number>34</number>
+        <number>20</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
        </property>
        <item>
         <widget class="QFrame" name="frame_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>150</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -1012,6 +1082,18 @@
        </item>
        <item>
         <widget class="QFrame" name="frame_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>150</height>
+          </size>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -1581,6 +1663,9 @@
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_8">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetFixedSize</enum>
+       </property>
        <item>
         <widget class="QPushButton" name="reissueAssetButton">
          <property name="minimumSize">

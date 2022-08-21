@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2021 The Raven Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -356,8 +356,10 @@ void WalletView::getMyWords()
 {
     // Create the box and set the default text.
     QMessageBox box;
-    box.setWindowTitle(tr("Recovery information"));
+    box.setWindowTitle(tr("Recovery information. (Will close after 5 min)"));
     box.setText(tr("No words available."));
+    box.setStandardButtons(QMessageBox::Close);
+    box.button(QMessageBox::Close)->animateClick(300000);
 
     // Check for HD-wallet and set text if not HD-wallet.
     if(!walletModel->hd44Enabled())

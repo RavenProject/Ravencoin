@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="ne">
+<TS language="ne" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -84,6 +82,18 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -94,6 +104,152 @@
         <translation>प्रतिबन्धित समय</translation>
     </message>
 </context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <source>Amount</source>
+        <translation>रकम</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>ठेगाना कपी गर्नुहोस्
+</translation>
+    </message>
+    </context>
+<context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
+    <name>EditAddressDialog</name>
+    </context>
+<context>
+    <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
+<context>
+    <name>HelpMessageDialog</name>
+    </context>
+<context>
+    <name>Intro</name>
+    </context>
+<context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
+    <name>ModalOverlay</name>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    </context>
+<context>
+    <name>OpenURIDialog</name>
+    </context>
+<context>
+    <name>OptionsDialog</name>
+    <message>
+        <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
+        <translation>इन्टरफेसमा र सिक्का पठाउँदा देखिने डिफल्ट उपविभाजन एकाइ चयन गर्नुहोस् ।</translation>
+    </message>
+    </context>
+<context>
+    <name>OverviewPage</name>
+    <message>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
+        <translation>देखाइएको सूचना पूरानो हुन सक्छ । कनेक्सन स्थापित भएपछि, तपाईंको वालेट बिटकोइन नेटवर्कमा स्वचालित रूपमा समिकरण हुन्छ , तर यो प्रक्रिया अहिले सम्म पूरा भएको छैन ।</translation>
+    </message>
+    <message>
+        <source>Watch-only:</source>
+        <translation>हेर्ने-मात्र:</translation>
+    </message>
+    <message>
+        <source>Available:</source>
+        <translation>उपलब्ध:</translation>
+    </message>
+    <message>
+        <source>Your current spendable balance</source>
+        <translation>तपाईंको खर्च गर्न मिल्ने ब्यालेन्स</translation>
+    </message>
+    <message>
+        <source>Pending:</source>
+        <translation>विचाराधिन:</translation>
+    </message>
+    <message>
+        <source>Total of transactions that have yet to be confirmed, and do not yet count toward the spendable balance</source>
+        <translation>अझै पुष्टि हुन बाँकी र खर्च गर्न मिल्ने ब्यालेन्समा गणना गर्न नमिल्ने जम्मा कारोबार</translation>
+    </message>
+    <message>
+        <source>Immature:</source>
+        <translation>अपरिपक्व:</translation>
+    </message>
+    <message>
+        <source>Mined balance that has not yet matured</source>
+        <translation>अझै परिपक्व नभएको खनन गरिएको ब्यालेन्स</translation>
+    </message>
+    <message>
+        <source>Mined balance in watch-only addresses that has not yet matured</source>
+        <translation>अहिलेसम्म परिपक्व नभएको खनन गरिएको, हेर्ने-मात्र ठेगानामा रहेको ब्यालेन्स</translation>
+    </message>
+    <message>
+        <source>Current total balance in watch-only addresses</source>
+        <translation>हेर्ने-मात्र ठेगानामा रहेको हालको जम्मा ब्यालेन्स</translation>
+    </message>
+    </context>
+<context>
+    <name>PaymentServer</name>
+    </context>
+<context>
+    <name>PeerTableModel</name>
+    <message>
+        <source>User Agent</source>
+        <translation>प्रयोगकर्ता एजेन्ट</translation>
+    </message>
+    <message>
+        <source>Node/Service</source>
+        <translation>नोड/सेव</translation>
+    </message>
+    </context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>Amount</source>
+        <translation>रकम</translation>
+    </message>
+    <message>
+        <source>Enter a Raven address (e.g. %1)</source>
+        <translation>कृपया बिटकोइन ठेगाना प्रवेश गर्नुहोस् (उदाहरण %1)</translation>
+    </message>
+    </context>
+<context>
+    <name>QObject::QObject</name>
+    </context>
+<context>
+    <name>QRImageWidget</name>
+    </context>
+<context>
+    <name>RPCConsole</name>
+    <message>
+        <source>User Agent</source>
+        <translation>प्रयोगकर्ता एजेन्ट</translation>
+    </message>
+    <message>
+        <source>Ping Time</source>
+        <translation>पिङ समय</translation>
+    </message>
+    </context>
 <context>
     <name>RavenGUI</name>
     <message>
@@ -197,142 +353,8 @@
         <translation>वालेट इन्क्रिप्सनमा प्रयोग हुने इन्क्रिप्सन पासफ्रेज परिवर्तन गर्नुहोस्</translation>
     </message>
     <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;amp;डिबग विन्डो</translation>
-    </message>
-    <message>
         <source>Open debugging and diagnostic console</source>
         <translation>डिबगिङ र डायाग्नोस्टिक कन्सोल खोल्नुहोस्</translation>
-    </message>
-    </context>
-<context>
-    <name>CoinControlDialog</name>
-    <message>
-        <source>Amount</source>
-        <translation>रकम</translation>
-    </message>
-    <message>
-        <source>Copy address</source>
-        <translation>ठेगाना कपी गर्नुहोस्
-</translation>
-    </message>
-    </context>
-<context>
-    <name>EditAddressDialog</name>
-    </context>
-<context>
-    <name>FreespaceChecker</name>
-    </context>
-<context>
-    <name>HelpMessageDialog</name>
-    </context>
-<context>
-    <name>Intro</name>
-    <message>
-        <source>%1 will download and store a copy of the Raven block chain. At least %2GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>%1 ले बिटकोइन ब्लक चेनको एउटा प्रतिलिपि डाउनलोड र भण्डारण गर्नेछ । यो निर्देशिकामा कम्तिमा पनि %2GB डाटा भण्डारण गरिनेछ, र यो समयसँगै बढ्नेछ । वालेटलाई पनि यो निर्देशिकामा भण्डारण गरिनेछ ।</translation>
-    </message>
-    </context>
-<context>
-    <name>ModalOverlay</name>
-    </context>
-<context>
-    <name>OpenURIDialog</name>
-    </context>
-<context>
-    <name>OptionsDialog</name>
-    <message>
-        <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>इन्टरफेसमा र सिक्का पठाउँदा देखिने डिफल्ट उपविभाजन एकाइ चयन गर्नुहोस् ।</translation>
-    </message>
-    </context>
-<context>
-    <name>OverviewPage</name>
-    <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>देखाइएको सूचना पूरानो हुन सक्छ । कनेक्सन स्थापित भएपछि, तपाईंको वालेट बिटकोइन नेटवर्कमा स्वचालित रूपमा समिकरण हुन्छ , तर यो प्रक्रिया अहिले सम्म पूरा भएको छैन ।</translation>
-    </message>
-    <message>
-        <source>Watch-only:</source>
-        <translation>हेर्ने-मात्र:</translation>
-    </message>
-    <message>
-        <source>Available:</source>
-        <translation>उपलब्ध:</translation>
-    </message>
-    <message>
-        <source>Your current spendable balance</source>
-        <translation>तपाईंको खर्च गर्न मिल्ने ब्यालेन्स</translation>
-    </message>
-    <message>
-        <source>Pending:</source>
-        <translation>विचाराधिन:</translation>
-    </message>
-    <message>
-        <source>Total of transactions that have yet to be confirmed, and do not yet count toward the spendable balance</source>
-        <translation>अझै पुष्टि हुन बाँकी र खर्च गर्न मिल्ने ब्यालेन्समा गणना गर्न नमिल्ने जम्मा कारोबार</translation>
-    </message>
-    <message>
-        <source>Immature:</source>
-        <translation>अपरिपक्व:</translation>
-    </message>
-    <message>
-        <source>Mined balance that has not yet matured</source>
-        <translation>अझै परिपक्व नभएको खनन गरिएको ब्यालेन्स</translation>
-    </message>
-    <message>
-        <source>Balances</source>
-        <translation>ब्यालेन्स</translation>
-    </message>
-    <message>
-        <source>Mined balance in watch-only addresses that has not yet matured</source>
-        <translation>अहिलेसम्म परिपक्व नभएको खनन गरिएको, हेर्ने-मात्र ठेगानामा रहेको ब्यालेन्स</translation>
-    </message>
-    <message>
-        <source>Current total balance in watch-only addresses</source>
-        <translation>हेर्ने-मात्र ठेगानामा रहेको हालको जम्मा ब्यालेन्स</translation>
-    </message>
-</context>
-<context>
-    <name>PaymentServer</name>
-    </context>
-<context>
-    <name>PeerTableModel</name>
-    <message>
-        <source>User Agent</source>
-        <translation>प्रयोगकर्ता एजेन्ट</translation>
-    </message>
-    <message>
-        <source>Node/Service</source>
-        <translation>नोड/सेव</translation>
-    </message>
-    </context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>Amount</source>
-        <translation>रकम</translation>
-    </message>
-    <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>कृपया बिटकोइन ठेगाना प्रवेश गर्नुहोस् (उदाहरण %1)</translation>
-    </message>
-    </context>
-<context>
-    <name>QObject::QObject</name>
-    </context>
-<context>
-    <name>QRImageWidget</name>
-    </context>
-<context>
-    <name>RPCConsole</name>
-    <message>
-        <source>User Agent</source>
-        <translation>प्रयोगकर्ता एजेन्ट</translation>
-    </message>
-    <message>
-        <source>Ping Time</source>
-        <translation>पिङ समय</translation>
     </message>
     </context>
 <context>
@@ -343,6 +365,15 @@
     </context>
 <context>
     <name>RecentRequestsTableModel</name>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -458,10 +489,6 @@
         <translation>UPnP प्रयोग गरेर सुन्ने पोर्टलाई म्याप गर्नुहोस् (सुन्दा र -प्रोक्सी नहुँदा डिफल्ट: 1)</translation>
     </message>
     <message>
-        <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
-        <translation>तपाईंले -चेनस्टेट-पुनः सूचकांकबाट -txindex परिवर्तन प्रयोग गरेर डाटाबेस पुनर्निर्माण गर्नु आवश्यक छ</translation>
-    </message>
-    <message>
         <source>%s corrupt, salvage failed</source>
         <translation>%s मा क्षति, बचाव विफल भयो</translation>
     </message>
@@ -542,10 +569,6 @@
         <translation>ब्लक प्रमाणित गरिँदै...</translation>
     </message>
     <message>
-        <source>Verifying wallet...</source>
-        <translation>वालेट प्रमाणित गरिँदै...</translation>
-    </message>
-    <message>
         <source>Wallet %s resides outside data directory %s</source>
         <translation>वालेट %s डाटा निर्देशिका %s बाहिरमा बस्छ</translation>
     </message>
@@ -568,10 +591,6 @@
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
         <translation>दिइएको ठेगानामा बाँध्नुहोस् र यसमा कनेक्ट गर्ने सहकर्मीलाई श्वेतसूचीमा राख्नुहोस् । IPv6 लागि [होस्ट]:पोर्ट संकेतन प्रयोग गर्नुहोस्</translation>
-    </message>
-    <message>
-        <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>JSON-RPC कनेक्सन सुन्नको लागि दिइएको ठेगानामा बाँध्नुहोस् । IPv6 लागि [होस्ट]:पोर्ट संकेतन प्रयोग गर्नुहोस् । यो विकल्पलाई धेरै पटक निर्दिष्ट गर्न सकिन्छ (डिफल्ट: सबै इन्टरफेसमा बाँध्नुहोस्)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
@@ -610,16 +629,8 @@
         <translation>हरेक प्रोक्सी कनेक्सनका लागि क्रेडिन्सियल अनियमित बनाउनुहोस् । यसले टोर स्ट्रिमको अलगावलाई सक्षम पार्छ (डिफल्ट: %u)</translation>
     </message>
     <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>बाइटमा उच्च-प्राथमिकता/कम शुल्कको कारोबारको अधिकतम आकार सेट गर्नुहोस् (डिफल्ट: %d)</translation>
-    </message>
-    <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
         <translation>कारोबार रकम शुल्क कटौती गरेपछि पठाउँदा धेरै नै सानो हुन्छ</translation>
-    </message>
-    <message>
-        <source>Use hierarchical deterministic key generation (HD) after BIP32. Only has effect during wallet creation/first start</source>
-        <translation>BIP32 पछि पदानुक्रमित निर्धारक की सिर्जना (HD) प्रयोग गर्नुहोस् ।. केवल वालेट सिर्जना/पहिलो सुरुवातको समयमा प्रभाव पार्छ</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>

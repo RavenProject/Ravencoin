@@ -1,11 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="tr">
+<TS language="tr" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
         <source>Right-click to edit address or label</source>
-        <translation>Adres veya etiketi düzenlemek için sağ tıklayınız.</translation>
+        <translation>Adres veya etiketi düzenlemek için sağ tıkla</translation>
     </message>
     <message>
         <source>Create a new address</source>
@@ -17,7 +15,7 @@
     </message>
     <message>
         <source>Copy the currently selected address to the system clipboard</source>
-        <translation>Seçili adresi panoya kopyala</translation>
+        <translation>Seçili adresi sistem panosuna kopyala</translation>
     </message>
     <message>
         <source>&amp;Copy</source>
@@ -33,7 +31,7 @@
     </message>
     <message>
         <source>Export the data in the current tab to a file</source>
-        <translation>Açık olan sekmedeki verileri bir dosyaya aktar</translation>
+        <translation>Mevcut sekmedeki verileri bir dosyaya aktar</translation>
     </message>
     <message>
         <source>&amp;Export</source>
@@ -45,11 +43,11 @@
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>Parayı göndermek istediğiniz adresi seçiniz</translation>
+        <translation>Coin göndermek istediğiniz adresi seçiniz</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>Parayı almak istediğiniz adresi seçiniz</translation>
+        <translation>Coin almak istediğiniz adresi seçiniz</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
@@ -57,7 +55,7 @@
     </message>
     <message>
         <source>Sending addresses</source>
-        <translation>Gönderilen adresler</translation>
+        <translation>Gönderim adresleri</translation>
     </message>
     <message>
         <source>Receiving addresses</source>
@@ -97,7 +95,7 @@
     </message>
     <message>
         <source>There was an error trying to save the address list to %1. Please try again.</source>
-        <translation>Adres listesinin %1 konumuna kaydedilmesi sırasında bir hata meydana geldi. Lütfen tekrar deneyin.</translation>
+        <translation>Adres listesinin %1 konumuna kaydedilmesi sırasında bir hata meydana geldi. Lütfen tekrar dene.</translation>
     </message>
 </context>
 <context>
@@ -123,7 +121,7 @@
     </message>
     <message>
         <source>Enter passphrase</source>
-        <translation>Parolayı giriniz</translation>
+        <translation>Parolayı gir</translation>
     </message>
     <message>
         <source>New passphrase</source>
@@ -131,7 +129,7 @@
     </message>
     <message>
         <source>Repeat new passphrase</source>
-        <translation>Yeni parolayı tekrarlayınız</translation>
+        <translation>Yeni parolayı tekrarla</translation>
     </message>
     <message>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;ten or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
@@ -155,7 +153,7 @@
     </message>
     <message>
         <source>Decrypt wallet</source>
-        <translation>Cüzdanın şifrelemesini aç</translation>
+        <translation>Cüzdan şifresini çöz</translation>
     </message>
     <message>
         <source>Change passphrase</source>
@@ -171,7 +169,7 @@
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR RAVENS&lt;/b&gt;!</source>
-        <translation>Uyarı: Eğer cüzdanınızı şifreler ve parolanızı kaybederseniz &lt;b&gt;TÜM BİTCOİNLERİNİZİ KAYBEDECEKSİNİZ&lt;/b&gt;!</translation>
+        <translation>Uyarı: Eğer cüzdanınızı şifreler ve parolanızı kaybederseniz &lt;b&gt;TÜM RAVENCOINLERİNİZİ KAYBEDECEKSİNİZ&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -223,6 +221,510 @@
     </message>
 </context>
 <context>
+    <name>AssetControlDialog</name>
+    <message>
+        <source>Asset Selection</source>
+        <translation>Asset Seçimi</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Miktar:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bayt:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Tutar:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Dust:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Ücret:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>Ücretten sonra:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Change:</translation>
+    </message>
+    <message>
+        <source>(un)select all</source>
+        <translation>(un)select all</translation>
+    </message>
+    <message>
+        <source>Tree mode</source>
+        <translation>Ağaç modu</translation>
+    </message>
+    <message>
+        <source>List mode</source>
+        <translation>Liste modu</translation>
+    </message>
+    <message>
+        <source>View assets that you have the ownership asset for</source>
+        <translation>View assets that you have the ownership asset for</translation>
+    </message>
+    <message>
+        <source>View Administrator Assets</source>
+        <translation>View Administrator Assets</translation>
+    </message>
+    <message>
+        <source>Asset</source>
+        <translation>Asset</translation>
+    </message>
+    <message>
+        <source>Amount</source>
+        <translation>Amount</translation>
+    </message>
+    <message>
+        <source>Received with label</source>
+        <translation>Received with label</translation>
+    </message>
+    <message>
+        <source>Received with address</source>
+        <translation>Received with address</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Date</translation>
+    </message>
+    <message>
+        <source>Confirmations</source>
+        <translation>Confirmations</translation>
+    </message>
+    <message>
+        <source>Confirmed</source>
+        <translation>Confirmed</translation>
+    </message>
+    <message>
+        <source>Copy address</source>
+        <translation>Copy address</translation>
+    </message>
+    <message>
+        <source>Copy label</source>
+        <translation>Copy label</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Copy amount</translation>
+    </message>
+    <message>
+        <source>Copy transaction ID</source>
+        <translation>Copy transaction ID</translation>
+    </message>
+    <message>
+        <source>Lock unspent</source>
+        <translation>Lock unspent</translation>
+    </message>
+    <message>
+        <source>Unlock unspent</source>
+        <translation>Unlock unspent</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Copy quantity</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Copy fee</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Copy after fee</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Copy bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Copy dust</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Copy change</translation>
+    </message>
+    <message>
+        <source>(%1 locked)</source>
+        <translation>(%1 locked)</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation>yes</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <source>This label turns red if any recipient receives an amount smaller than the current dust threshold.</source>
+        <translation>This label turns red if any recipient receives an amount smaller than the current dust threshold.</translation>
+    </message>
+    <message>
+        <source>Can vary +/- %1 satoshi(s) per input.</source>
+        <translation>Can vary +/- %1 satoshi(s) per input.</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(no label)</translation>
+    </message>
+    <message>
+        <source>change from %1 (%2)</source>
+        <translation>change from %1 (%2)</translation>
+    </message>
+    <message>
+        <source>(change)</source>
+        <translation>(change)</translation>
+    </message>
+</context>
+<context>
+    <name>AssetTableModel</name>
+    <message>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation>Quantity</translation>
+    </message>
+</context>
+<context>
+    <name>AssetsDialog</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Send Coins</translation>
+    </message>
+    <message>
+        <source>Asset Control Features</source>
+        <translation>Asset Control Features</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Inputs...</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatically selected</translation>
+    </message>
+    <message>
+        <source>Insufficient funds!</source>
+        <translation>Insufficient funds!</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Quantity:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Amount:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Dust:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Fee:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>After Fee:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Change:</translation>
+    </message>
+    <message>
+        <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
+        <translation>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</translation>
+    </message>
+    <message>
+        <source>Custom change address</source>
+        <translation>Custom change address</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Transaction Fee:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Choose...</translation>
+    </message>
+    <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Warning: Fee estimation is currently not possible.</translation>
+    </message>
+    <message>
+        <source>collapse fee-settings</source>
+        <translation>collapse fee-settings</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Hide</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
+    </message>
+    <message>
+        <source>per kilobyte</source>
+        <translation>per kilobyte</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</translation>
+    </message>
+    <message>
+        <source>(read the tooltip)</source>
+        <translation>(read the tooltip)</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Recommended:</translation>
+    </message>
+    <message>
+        <source>Custom:</source>
+        <translation>Custom:</translation>
+    </message>
+    <message>
+        <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
+        <translation>(Smart fee not initialized yet. This usually takes a few blocks...)</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Confirmation time target:</translation>
+    </message>
+    <message>
+        <source>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</source>
+        <translation>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</translation>
+    </message>
+    <message>
+        <source>Request Replace-By-Fee</source>
+        <translation>Request Replace-By-Fee</translation>
+    </message>
+    <message>
+        <source>Confirm the send action</source>
+        <translation>Confirm the send action</translation>
+    </message>
+    <message>
+        <source>S&amp;end</source>
+        <translation>S&amp;end</translation>
+    </message>
+    <message>
+        <source>Clear all fields of the form.</source>
+        <translation>Clear all fields of the form.</translation>
+    </message>
+    <message>
+        <source>Clear &amp;All</source>
+        <translation>Clear &amp;All</translation>
+    </message>
+    <message>
+        <source>Transfer to multiple recipients at once</source>
+        <translation>Transfer to multiple recipients at once</translation>
+    </message>
+    <message>
+        <source>Add &amp;Recipient</source>
+        <translation>Add &amp;Recipient</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Balance:</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Copy quantity</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Copy amount</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Copy fee</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Copy after fee</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Copy bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Copy dust</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Copy change</translation>
+    </message>
+    <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blocks)</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 to %2</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to send?</source>
+        <translation>Göndermek istediğine emin misin?</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>added as transaction fee</translation>
+    </message>
+    <message>
+        <source>Confirm send assets</source>
+        <translation>Confirm send assets</translation>
+    </message>
+    <message>
+        <source>The recipient address is not valid. Please recheck.</source>
+        <translation>The recipient address is not valid. Please recheck.</translation>
+    </message>
+    <message>
+        <source>The amount to pay must be larger than 0.</source>
+        <translation>The amount to pay must be larger than 0.</translation>
+    </message>
+    <message>
+        <source>The amount exceeds your balance.</source>
+        <translation>The amount exceeds your balance.</translation>
+    </message>
+    <message>
+        <source>The total exceeds your balance when the %1 transaction fee is included.</source>
+        <translation>The total exceeds your balance when the %1 transaction fee is included.</translation>
+    </message>
+    <message>
+        <source>Duplicate address found: addresses should only be used once each.</source>
+        <translation>Duplicate address found: addresses should only be used once each.</translation>
+    </message>
+    <message>
+        <source>Transaction creation failed!</source>
+        <translation>Transaction creation failed!</translation>
+    </message>
+    <message>
+        <source>The transaction was rejected with the following reason: %1</source>
+        <translation>The transaction was rejected with the following reason: %1</translation>
+    </message>
+    <message>
+        <source>A fee higher than %1 is considered an absurdly high fee.</source>
+        <translation>A fee higher than %1 is considered an absurdly high fee.</translation>
+    </message>
+    <message>
+        <source>Payment request expired.</source>
+        <translation>Payment request expired.</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Pay only the required fee of %1</translation>
+    </message>
+    <message numerus="yes">
+        <source>Estimated to begin confirmation within %n block(s).</source>
+        <translation><numerusform>Estimated to begin confirmation within %n block.</numerusform><numerusform>Estimated to begin confirmation within %n blocks.</numerusform></translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Warning: Invalid Raven address</translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Warning: Unknown change address</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Confirm custom change address</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(no label)</translation>
+    </message>
+</context>
+<context>
+    <name>AssignQualifier</name>
+    <message>
+        <source>Frame</source>
+        <translation>Frame</translation>
+    </message>
+    <message>
+        <source>Select Type:</source>
+        <translation>Select Type:</translation>
+    </message>
+    <message>
+        <source>Select Qualifier:</source>
+        <translation>Select Qualifier:</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Address:</translation>
+    </message>
+    <message>
+        <source>IPFS / Hash:</source>
+        <translation>IPFS / Hash:</translation>
+    </message>
+    <message>
+        <source>Custom Change Address</source>
+        <translation>Custom Change Address</translation>
+    </message>
+    <message>
+        <source>Check</source>
+        <translation>Check</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <source>Submit</source>
+        <translation>Submit</translation>
+    </message>
+    <message>
+        <source>Assign Qualifier</source>
+        <translation>Assign Qualifier</translation>
+    </message>
+    <message>
+        <source>Remove Qualifier</source>
+        <translation>Remove Qualifier</translation>
+    </message>
+    <message>
+        <source>Data has been validated, You can now submit the qualifier request</source>
+        <translation>Data has been validated, You can now submit the qualifier request</translation>
+    </message>
+    <message>
+        <source>Must have a qualifier asset selected</source>
+        <translation>Must have a qualifier asset selected</translation>
+    </message>
+    <message>
+        <source>Address already has the qualifier assigned to it</source>
+        <translation>Address already has the qualifier assigned to it</translation>
+    </message>
+    <message>
+        <source>Address doesn't have the qualifier, so we can't remove it</source>
+        <translation>Address doesn't have the qualifier, so we can't remove it</translation>
+    </message>
+    <message>
+        <source>Unable to preform action at this time</source>
+        <translation>Unable to preform action at this time</translation>
+    </message>
+</context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -231,327 +733,6 @@
     <message>
         <source>Banned Until</source>
         <translation>Şu zamana kadar yasaklı:</translation>
-    </message>
-</context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>&amp;İleti imzala...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Ağ ile senkronize ediliyor...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Genel bakış</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Düğüm</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Cüzdana genel bakışı göster</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;İşlemler</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>İşlem geçmişine gözat</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>Ç&amp;ık</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Uygulamadan çık</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>%1 &amp;Hakkında</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>%1 hakkında bilgi göster</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>&amp;Qt Hakkında</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Qt hakkında bilgi göster</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Seçenekler...</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>%1 için yapılandırma ayarlarını değiştir</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Cüzdanı Şifrele...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Cüzdanı Yedekle...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Parolayı Değiştir...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Gönderme adresleri...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Alma adresleri...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>&amp;URI Aç...</translation>
-    </message>
-    <message>
-        <source>Click to disable network activity.</source>
-        <translation>Ağ etkinliğini devre dışı bırakmak için tıklayın.</translation>
-    </message>
-    <message>
-        <source>Network activity disabled.</source>
-        <translation>Ağ etkinliği devre dışı bırakılmış.</translation>
-    </message>
-    <message>
-        <source>Click to enable network activity again.</source>
-        <translation>Ağ etkinliğini yeniden etkinleştirmek için tıklayın.</translation>
-    </message>
-    <message>
-        <source>Syncing Headers (%1%)...</source>
-        <translation>Üstbilgiler Senkronize Ediliyor (%1%)...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Diskteki bloklar yeniden indeksleniyor...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Bir raven adresine raven gönder</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Cüzdanı diğer bir konumda yedekle</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Cüzdan şifrelemesi için kullanılan parolayı değiştir</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Hata ayıklama penceresi</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Hata ayıklama ve teşhis penceresini aç</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>İletiyi &amp;kontrol et...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Cüzdan</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Gönder</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Al</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Göster / Gizle</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Ana pencereyi göster ya da gizle</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Cüzdanınıza ait özel anahtarları şifreleyin</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>İletileri adreslerin size ait olduğunu ispatlamak için Raven adresleri ile imzala</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Belirtilen Raven adresleri ile imzalandıklarından emin olmak için iletileri kontrol et</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Dosya</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Ayarlar</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Yardım</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Sekme araç çubuğu</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Ödeme talep et (QR kodu ve raven URI'si oluşturur)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Kullanılmış gönderme adresleri ve etiketlerin listesini göster</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Kullanılmış alım adresleri ve etiketlerin listesini göster</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Bir raven: bağlantısı ya da ödeme talebi aç</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Komut satırı seçenekleri</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>Raven şebekesine %n faal bağlantı</numerusform></translation>
-    </message>
-    <message>
-        <source>Indexing blocks on disk...</source>
-        <translation>Bloklar diske indeksleniyor...</translation>
-    </message>
-    <message>
-        <source>Processing blocks on disk...</source>
-        <translation>Bloklar diske işleniyor...</translation>
-    </message>
-    <message numerus="yes">
-        <source>Processed %n block(s) of transaction history.</source>
-        <translation><numerusform>Muamele tarihçesinden %n blok işlendi.</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 geride</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Son alınan blok %1 önce oluşturulmuştu.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Bundan sonraki işlemler henüz görüntülenemez.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Hata</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Uyarı</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Bilgi</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Güncel</translation>
-    </message>
-    <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>Olası Raven komut satırı seçeneklerinin listesini görmek için %1 yardım mesajını göster</translation>
-    </message>
-    <message>
-        <source>%1 client</source>
-        <translation>%1 istemci</translation>
-    </message>
-    <message>
-        <source>Connecting to peers...</source>
-        <translation>Eşlere bağlanılıyor...</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Aralık kapatılıyor...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Tarih: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Tutar: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Tür: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Etiket: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Adres: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>İşlem gönderildi</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Gelen işlem</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
-        <translation>HD anahtar oluşturma &lt;b&gt;etkin&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
-        <translation>HD anahtar oluşturma &lt;b&gt;devre dışı&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Cüzdan &lt;b&gt;şifrelenmiştir&lt;/b&gt; ve şu anda &lt;b&gt;kilidi açıktır&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Cüzdan &lt;b&gt;şifrelenmiştir&lt;/b&gt; ve şu anda &lt;b&gt;kilitlidir&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>Ölümcül bir hata oluştu. Raven yazılımı artık güvenli bir şekilde çalışmaya devam edemediği için kapatılacaktır.</translation>
     </message>
 </context>
 <context>
@@ -706,6 +887,381 @@
     </message>
 </context>
 <context>
+    <name>CreateAssetDialog</name>
+    <message>
+        <source>Coin Control Features</source>
+        <translation>Coin Control Features</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Inputs...</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatically selected</translation>
+    </message>
+    <message>
+        <source>Insufficient funds!</source>
+        <translation>Insufficient funds!</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Quantity:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Amount:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Dust:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Fee:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>After Fee:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Change:</translation>
+    </message>
+    <message>
+        <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
+        <translation>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</translation>
+    </message>
+    <message>
+        <source>Custom change address</source>
+        <translation>Custom change address</translation>
+    </message>
+    <message>
+        <source>Name:</source>
+        <translation>Name:</translation>
+    </message>
+    <message>
+        <source>A-Z 0-9 and . or _ as the second character</source>
+        <translation>A-Z 0-9 and . or _ as the second character</translation>
+    </message>
+    <message>
+        <source>The name of the asset you would like to create</source>
+        <translation>The name of the asset you would like to create</translation>
+    </message>
+    <message>
+        <source>Check Availabilty</source>
+        <translation>Check Availabilty</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Address:</translation>
+    </message>
+    <message>
+        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</translation>
+    </message>
+    <message>
+        <source>Verifier String:</source>
+        <translation>Verifier String:</translation>
+    </message>
+    <message>
+        <source>Create a verifier string built from Qualifier names e.g (#KYC &amp; #VALID). Leave blank to default to true</source>
+        <translation>Create a verifier string built from Qualifier names e.g (#KYC &amp; #VALID). Leave blank to default to true</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Warning:</translation>
+    </message>
+    <message>
+        <source>The number of assets that will be created</source>
+        <translation>The number of assets that will be created</translation>
+    </message>
+    <message>
+        <source>Units:</source>
+        <translation>Units:</translation>
+    </message>
+    <message>
+        <source>How divisble the assets will be (e.g. 8 = 1.00000000, 2 = 1.00)</source>
+        <translation>How divisble the assets will be (e.g. 8 = 1.00000000, 2 = 1.00)</translation>
+    </message>
+    <message>
+        <source>e.g. 1</source>
+        <translation>e.g. 1</translation>
+    </message>
+    <message>
+        <source>If the owner of this asset will be able to issue more assets in the future</source>
+        <translation>If the owner of this asset will be able to issue more assets in the future</translation>
+    </message>
+    <message>
+        <source>Reissuable</source>
+        <translation>Reissuable</translation>
+    </message>
+    <message>
+        <source>Does this asset have an ipfs hash to go with it</source>
+        <translation>Does this asset have an ipfs hash to go with it</translation>
+    </message>
+    <message>
+        <source>Add IPFS/Txid Hash</source>
+        <translation>Add IPFS/Txid Hash</translation>
+    </message>
+    <message>
+        <source>The ipfs/txid hash that contains information about the asset</source>
+        <translation>The ipfs/txid hash that contains information about the asset</translation>
+    </message>
+    <message>
+        <source>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</source>
+        <translation>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</translation>
+    </message>
+    <message>
+        <source>ERROR TEXT</source>
+        <translation>ERROR TEXT</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Transaction Fee:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Choose...</translation>
+    </message>
+    <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Warning: Fee estimation is currently not possible.</translation>
+    </message>
+    <message>
+        <source>collapse fee-settings</source>
+        <translation>collapse fee-settings</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Hide</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
+    </message>
+    <message>
+        <source>per kilobyte</source>
+        <translation>per kilobyte</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</translation>
+    </message>
+    <message>
+        <source>(read the tooltip)</source>
+        <translation>(read the tooltip)</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Recommended:</translation>
+    </message>
+    <message>
+        <source>C&amp;ustom:</source>
+        <translation>C&amp;ustom:</translation>
+    </message>
+    <message>
+        <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
+        <translation>(Smart fee not initialized yet. This usually takes a few blocks...)</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Confirmation time target:</translation>
+    </message>
+    <message>
+        <source>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</source>
+        <translation>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</translation>
+    </message>
+    <message>
+        <source>Request Replace-By-Fee</source>
+        <translation>Request Replace-By-Fee</translation>
+    </message>
+    <message>
+        <source>Create Asset</source>
+        <translation>Create Asset</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Balance:</translation>
+    </message>
+    <message>
+        <source>123.456 RVN</source>
+        <translation>123.456 RVN</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Copy quantity</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Copy amount</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Copy fee</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Copy after fee</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Copy bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Copy dust</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Copy change</translation>
+    </message>
+    <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blocks)</translation>
+    </message>
+    <message>
+        <source>Main Asset</source>
+        <translation>Main Asset</translation>
+    </message>
+    <message>
+        <source>Sub Asset</source>
+        <translation>Sub Asset</translation>
+    </message>
+    <message>
+        <source>Unique Asset</source>
+        <translation>Unique Asset</translation>
+    </message>
+    <message>
+        <source>Messaging Channel Asset</source>
+        <translation>Messaging Channel Asset</translation>
+    </message>
+    <message>
+        <source>Qualifier Asset</source>
+        <translation>Qualifier Asset</translation>
+    </message>
+    <message>
+        <source>Sub Qualifier Asset</source>
+        <translation>Sub Qualifier Asset</translation>
+    </message>
+    <message>
+        <source>Restricted Asset</source>
+        <translation>Restricted Asset</translation>
+    </message>
+    <message>
+        <source>Asset Type</source>
+        <translation>Asset Type</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters</source>
+        <translation>IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid Hash must have size of 46 characters, or 64 hex characters</source>
+        <translation>IPFS/Txid Hash must have size of 46 characters, or 64 hex characters</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash</source>
+        <translation>IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Warning: Invalid Raven address</translation>
+    </message>
+    <message>
+        <source>Warning: Restricted Assets Reissuance requires an address</source>
+        <translation>Warning: Restricted Assets Reissuance requires an address</translation>
+    </message>
+    <message>
+        <source>Valid Asset</source>
+        <translation>Valid Asset</translation>
+    </message>
+    <message>
+        <source>Invalid: Asset name already in use</source>
+        <translation>Invalid: Asset name already in use</translation>
+    </message>
+    <message>
+        <source>Error: Asset Database not in sync</source>
+        <translation>Error: Asset Database not in sync</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 to %2</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to send?</source>
+        <translation>Are you sure you want to send?</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>added as transaction fee</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Total Amount %1</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>or</translation>
+    </message>
+    <message>
+        <source>Confirm send assets</source>
+        <translation>Confirm send assets</translation>
+    </message>
+    <message>
+        <source>Invalid: </source>
+        <translation>Invalid: </translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copy</translation>
+    </message>
+    <message>
+        <source>Transaction ID Copied</source>
+        <translation>Transaction ID Copied</translation>
+    </message>
+    <message>
+        <source>Asset transaction sent to network:</source>
+        <translation>Asset transaction sent to network:</translation>
+    </message>
+    <message numerus="yes">
+        <source>Estimated to begin confirmation within %n block(s).</source>
+        <translation><numerusform>Estimated to begin confirmation within %n block.</numerusform><numerusform>Estimated to begin confirmation within %n blocks.</numerusform></translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Warning: Unknown change address</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Confirm custom change address</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(no label)</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Pay only the required fee of %1</translation>
+    </message>
+</context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -784,6 +1340,106 @@
     </message>
 </context>
 <context>
+    <name>FreezeAddress</name>
+    <message>
+        <source>Frame</source>
+        <translation>Frame</translation>
+    </message>
+    <message>
+        <source>Restricted Asset:</source>
+        <translation>Restricted Asset:</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Address:</translation>
+    </message>
+    <message>
+        <source>Custom Change Address</source>
+        <translation>Custom Change Address</translation>
+    </message>
+    <message>
+        <source>IPFS / Hash:</source>
+        <translation>IPFS / Hash:</translation>
+    </message>
+    <message>
+        <source>Single Address Options</source>
+        <translation>Single Address Options</translation>
+    </message>
+    <message>
+        <source>Global Options </source>
+        <translation>Global Options </translation>
+    </message>
+    <message>
+        <source>Free&amp;ze trading on this address</source>
+        <translation>Free&amp;ze trading on this address</translation>
+    </message>
+    <message>
+        <source>Unfreeze tradin&amp;g on this address</source>
+        <translation>Unfreeze tradin&amp;g on this address</translation>
+    </message>
+    <message>
+        <source>Freeze all &amp;trading for the selected restricted asset</source>
+        <translation>Freeze all &amp;trading for the selected restricted asset</translation>
+    </message>
+    <message>
+        <source>&amp;Unfreeze all trading for the selected restricted asset</source>
+        <translation>&amp;Unfreeze all trading for the selected restricted asset</translation>
+    </message>
+    <message>
+        <source>Check</source>
+        <translation>Check</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <source>Submit</source>
+        <translation>Submit</translation>
+    </message>
+    <message>
+        <source>Data has been validated, You can now submit the restriction transaction</source>
+        <translation>Data has been validated, You can now submit the restriction transaction</translation>
+    </message>
+    <message>
+        <source>Address is already frozen</source>
+        <translation>Address is already frozen</translation>
+    </message>
+    <message>
+        <source>Address is not frozen</source>
+        <translation>Address is not frozen</translation>
+    </message>
+    <message>
+        <source>Restricted asset is already frozen globally</source>
+        <translation>Restricted asset is already frozen globally</translation>
+    </message>
+    <message>
+        <source>Restricted asset is not frozen globally</source>
+        <translation>Restricted asset is not frozen globally</translation>
+    </message>
+    <message>
+        <source>Unable to preform action at this time</source>
+        <translation>Unable to preform action at this time</translation>
+    </message>
+</context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    <message>
+        <source>Warning: transaction while syncing wallet!</source>
+        <translation>Warning: transaction while syncing wallet!</translation>
+    </message>
+    <message>
+        <source>You are trying to send a transaction while your wallet is not fully synced. This is not recommended because the transaction might get stuck in your wallet. Are you sure you want to proceed?
+
+Recommended action: Fully sync your wallet before sending a transaction.
+</source>
+        <translation>You are trying to send a transaction while your wallet is not fully synced. This is not recommended because the transaction might get stuck in your wallet. Are you sure you want to proceed?
+
+Recommended action: Fully sync your wallet before sending a transaction.
+</translation>
+    </message>
+</context>
+<context>
     <name>HelpMessageDialog</name>
     <message>
         <source>version</source>
@@ -853,8 +1509,16 @@
         <translation>Bu programın ilk kez başlatılmasından dolayı %1 yazılımının verilerini nerede saklayacağını seçebilirsiniz.</translation>
     </message>
     <message>
-        <source>%1 will download and store a copy of the Raven block chain. At least %2GB of data will be stored in this directory, and it will grow over time. The wallet will also be stored in this directory.</source>
-        <translation>%1, Raven blok zincirinin bir kopyasını indirecek ve saklayacaktır. Bu klasörde en az %2 GB veri saklanacak ve bu zamanla artacaktır. Cüzdan da bu klasörde saklanacaktır.</translation>
+        <source>When you click OK, %1 will begin to download and process the full %4 block chain (%2GB) starting with the earliest transactions in %3 when %4 initially launched.</source>
+        <translation>When you click OK, %1 will begin to download and process the full %4 block chain (%2GB) starting with the earliest transactions in %3 when %4 initially launched.</translation>
+    </message>
+    <message>
+        <source>This initial synchronisation is very demanding, and may expose hardware problems with your computer that had previously gone unnoticed. Each time you run %1, it will continue downloading where it left off.</source>
+        <translation>This initial synchronisation is very demanding, and may expose hardware problems with your computer that had previously gone unnoticed. Each time you run %1, it will continue downloading where it left off.</translation>
+    </message>
+    <message>
+        <source>If you have chosen to limit block chain storage (pruning), the historical data must still be downloaded and processed, but will be deleted afterward to keep your disk usage low.</source>
+        <translation>If you have chosen to limit block chain storage (pruning), the historical data must still be downloaded and processed, but will be deleted afterward to keep your disk usage low.</translation>
     </message>
     <message>
         <source>Use the default data directory</source>
@@ -863,6 +1527,26 @@
     <message>
         <source>Use a custom data directory:</source>
         <translation>Özel bir veri klasörü kullan:</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>At least %1 GB of data will be stored in this directory, and it will grow over time.</source>
+        <translation>At least %1 GB of data will be stored in this directory, and it will grow over time.</translation>
+    </message>
+    <message>
+        <source>Approximately %1 GB of data will be stored in this directory.</source>
+        <translation>Approximately %1 GB of data will be stored in this directory.</translation>
+    </message>
+    <message>
+        <source>%1 will download and store a copy of the Raven block chain.</source>
+        <translation>%1 will download and store a copy of the Raven block chain.</translation>
+    </message>
+    <message>
+        <source>The wallet will also be stored in this directory.</source>
+        <translation>The wallet will also be stored in this directory.</translation>
     </message>
     <message>
         <source>Error: Specified data directory "%1" cannot be created.</source>
@@ -874,11 +1558,161 @@
     </message>
     <message numerus="yes">
         <source>%n GB of free space available</source>
-        <translation><numerusform>%n GB boş alan mevcuttur</numerusform></translation>
+        <translation><numerusform>%n GB of free space available</numerusform><numerusform>%n GB of free space available</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>(of %n GB needed)</source>
-        <translation><numerusform>(gereken %n GB alandan)</numerusform></translation>
+        <translation><numerusform>(of %n GB needed)</numerusform><numerusform>(of %n GB needed)</numerusform></translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog</name>
+    <message>
+        <source>HD Wallet Setup</source>
+        <translation>HD Wallet Setup</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog1</name>
+    <message>
+        <source>HD Wallet Setup</source>
+        <translation>HD Wallet Setup</translation>
+    </message>
+    <message>
+        <source>Select the type of wallet to create.</source>
+        <translation>Select the type of wallet to create.</translation>
+    </message>
+    <message>
+        <source>Since no wallet.dat file was found in the Raven block chain data directory, a wallet file will be created.</source>
+        <translation>Since no wallet.dat file was found in the Raven block chain data directory, a wallet file will be created.</translation>
+    </message>
+    <message>
+        <source>Please choose what you would like to do:</source>
+        <translation>Please choose what you would like to do:</translation>
+    </message>
+    <message>
+        <source>Create a new wallet using a new BIP39 compliant set of 12 seed words.</source>
+        <translation>Create a new wallet using a new BIP39 compliant set of 12 seed words.</translation>
+    </message>
+    <message>
+        <source>Re-create an existing wallet using a previously used BIP39 compliant set 
+    of 12 seed words which you know.</source>
+        <translation>Re-create an existing wallet using a previously used BIP39 compliant set 
+    of 12 seed words which you know.</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Accept</translation>
+    </message>
+    <message>
+        <source>You are choosing to create a new wallet using new seed words.</source>
+        <translation>You are choosing to create a new wallet using new seed words.</translation>
+    </message>
+    <message>
+        <source>You are choosing to re-create an old wallet using seed words which you know.</source>
+        <translation>You are choosing to re-create an old wallet using seed words which you know.</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog2</name>
+    <message>
+        <source>New HD Wallet Creation</source>
+        <translation>New HD Wallet Creation</translation>
+    </message>
+    <message>
+        <source>BIP39 Compliant Seed Words:</source>
+        <translation>BIP39 Compliant Seed Words:</translation>
+    </message>
+    <message>
+        <source>Generate New Seed Words</source>
+        <translation>Generate New Seed Words</translation>
+    </message>
+    <message>
+        <source>These 12 generated seed words will be used.</source>
+        <translation>These 12 generated seed words will be used.</translation>
+    </message>
+    <message>
+        <source>Passphrase:</source>
+        <translation>Passphrase:</translation>
+    </message>
+    <message>
+        <source>Enter a Passphrase to protect your seed words  (optional).</source>
+        <translation>Enter a Passphrase to protect your seed words  (optional).</translation>
+    </message>
+    <message>
+        <source>You may enter an optional Passphrase to protect your seed words.</source>
+        <translation>You may enter an optional Passphrase to protect your seed words.</translation>
+    </message>
+    <message>
+        <source>Warning: </source>
+        <translation>Warning: </translation>
+    </message>
+    <message>
+        <source>Please write down your 12 seed words and Passphrase before Accepting. 
+They are not recoverable !!</source>
+        <translation>Please write down your 12 seed words and Passphrase before Accepting. 
+They are not recoverable !!</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Accept</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>Go Back</translation>
+    </message>
+    <message>
+        <source>Words are not valid, please generate new words and try again</source>
+        <translation>Words are not valid, please generate new words and try again</translation>
+    </message>
+</context>
+<context>
+    <name>MnemonicDialog3</name>
+    <message>
+        <source>Previous HD Wallet Re-creation</source>
+        <translation>Previous HD Wallet Re-creation</translation>
+    </message>
+    <message>
+        <source>BIP39 Compliant Seed Words:</source>
+        <translation>BIP39 Compliant Seed Words:</translation>
+    </message>
+    <message>
+        <source>Enter the 12 seed words from your previous wallet here.</source>
+        <translation>Enter the 12 seed words from your previous wallet here.</translation>
+    </message>
+    <message>
+        <source>Passphrase:</source>
+        <translation>Passphrase:</translation>
+    </message>
+    <message>
+        <source>You will need the Passphrase if your previous wallet used one.</source>
+        <translation>You will need the Passphrase if your previous wallet used one.</translation>
+    </message>
+    <message>
+        <source>Enter the Passphrase from your previous wallet if it used one.</source>
+        <translation>Enter the Passphrase from your previous wallet if it used one.</translation>
+    </message>
+    <message>
+        <source>Warning: </source>
+        <translation>Warning: </translation>
+    </message>
+    <message>
+        <source>Please continue to remember your 12 seed words and Passphrase before Accepting.
+They are not recoverable !!</source>
+        <translation>Please continue to remember your 12 seed words and Passphrase before Accepting.
+They are not recoverable !!</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Accept</translation>
+    </message>
+    <message>
+        <source>Go Back</source>
+        <translation>Go Back</translation>
+    </message>
+    <message>
+        <source>Words are not valid, please check the words and try again</source>
+        <translation>Words are not valid, please check the words and try again</translation>
     </message>
 </context>
 <context>
@@ -930,6 +1764,69 @@
     <message>
         <source>Unknown. Syncing Headers (%1)...</source>
         <translation>Bilinmeyen. Üstbilgiler Senkronize Ediliyor (%1)...</translation>
+    </message>
+</context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
+    <message>
+        <source>Date</source>
+        <translation>Date</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Type</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Address</translation>
+    </message>
+    <message>
+        <source>Asset Name</source>
+        <translation>Asset Name</translation>
+    </message>
+    <message>
+        <source>Tagged</source>
+        <translation>Tagged</translation>
+    </message>
+    <message>
+        <source>Untagged</source>
+        <translation>Untagged</translation>
+    </message>
+    <message>
+        <source>Frozen</source>
+        <translation>Frozen</translation>
+    </message>
+    <message>
+        <source>Unfrozen</source>
+        <translation>Unfrozen</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Other</translation>
+    </message>
+    <message>
+        <source>watch-only</source>
+        <translation>watch-only</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(no label)</translation>
+    </message>
+    <message>
+        <source>Date and time that the transaction was received.</source>
+        <translation>Date and time that the transaction was received.</translation>
+    </message>
+    <message>
+        <source>Type of transaction.</source>
+        <translation>Type of transaction.</translation>
+    </message>
+    <message>
+        <source>User-defined intent/purpose of the transaction.</source>
+        <translation>User-defined intent/purpose of the transaction.</translation>
+    </message>
+    <message>
+        <source>The asset (or RVN) removed or added to balance.</source>
+        <translation>The asset (or RVN) removed or added to balance.</translation>
     </message>
 </context>
 <context>
@@ -986,32 +1883,52 @@
         <translation>İş parçacıklarını &amp;denetleme betiği sayısı</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>Dışarıdan gelen bağlantıları kabul et</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Gelen bağlantılara izin ver</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>Vekil sunucusunun IP adresi (mesela IPv4: 127.0.0.1 / IPv6: ::1)</translation>
+    </message>
+    <message>
+        <source>Shows if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
+        <translation>Shows if the supplied default SOCKS5 proxy is used to reach peers via this network type.</translation>
+    </message>
+    <message>
+        <source>Use separate SOCKS&amp;5 proxy to reach peers via Tor hidden services:</source>
+        <translation>Use separate SOCKS&amp;5 proxy to reach peers via Tor hidden services:</translation>
+    </message>
+    <message>
+        <source>Hide the icon from the system tray.</source>
+        <translation>Hide the icon from the system tray.</translation>
+    </message>
+    <message>
+        <source>&amp;Hide tray icon</source>
+        <translation>&amp;Hide tray icon</translation>
     </message>
     <message>
         <source>Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Exit in the menu.</source>
         <translation>Pencere kapatıldığında uygulamadan çıkmak yerine uygulamayı küçültür. Bu seçenek etkinleştirildiğinde, uygulama sadece menüden çıkış seçildiğinde kapanacaktır.</translation>
     </message>
     <message>
+        <source>&amp;Currency Unit:</source>
+        <translation>&amp;Currency Unit:</translation>
+    </message>
+    <message>
+        <source>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</source>
+        <translation>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</translation>
+    </message>
+    <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
         <translation>İşlemler sekmesinde bağlam menüsü unsurları olarak görünen üçüncü taraf bağlantıları (mesela bir blok tarayıcısı). URL'deki %s, işlem hash değeri ile değiştirilecektir. Birden çok bağlantılar düşey çubuklar | ile ayrılacaktır.</translation>
     </message>
     <message>
-        <source>Third party transaction URLs</source>
-        <translation>Üçüncü parti işlem URL'leri</translation>
-    </message>
-    <message>
         <source>Active command-line options that override above options:</source>
         <translation>Yukarıdaki seçeneklerin yerine geçen etkin komut satırı seçenekleri:</translation>
+    </message>
+    <message>
+        <source>Open the %1 configuration file from the working directory.</source>
+        <translation>Open the %1 configuration file from the working directory.</translation>
+    </message>
+    <message>
+        <source>Open Configuration File</source>
+        <translation>Open Configuration File</translation>
     </message>
     <message>
         <source>Reset all client options to default.</source>
@@ -1042,6 +1959,10 @@
         <translation>Para &amp;kontrolü özelliklerini etkinleştir</translation>
     </message>
     <message>
+        <source>Enable fee control features</source>
+        <translation>Enable fee control features</translation>
+    </message>
+    <message>
         <source>If you disable the spending of unconfirmed change, the change from a transaction cannot be used until that transaction has at least one confirmation. This also affects how your balance is computed.</source>
         <translation>Doğrulanmamış para üstünü harcamayı devre dışı bırakırsanız, bir işlemin para üstü bu işlem için en az bir doğrulama olana dek harcanamaz. Bu, aynı zamanda bakiyenizin nasıl hesaplandığını da etkiler.</translation>
     </message>
@@ -1056,6 +1977,14 @@
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Portları &amp;UPnP kullanarak haritala</translation>
+    </message>
+    <message>
+        <source>Accept connections from outside.</source>
+        <translation>Accept connections from outside.</translation>
+    </message>
+    <message>
+        <source>Allow incomin&amp;g connections</source>
+        <translation>Allow incomin&amp;g connections</translation>
     </message>
     <message>
         <source>Connect to the Raven network through a SOCKS5 proxy.</source>
@@ -1082,10 +2011,6 @@
         <translation>Eşlere ulaşmak için kullanılır, şu üzerinden:</translation>
     </message>
     <message>
-        <source>Shows, if the supplied default SOCKS5 proxy is used to reach peers via this network type.</source>
-        <translation>Bu ağ türü yoluyla eşlere bağlanmak için belirtilen varsayılan SOCKS5 vekil sunucusunun kullanılıp kullanılmadığını gösterir.</translation>
-    </message>
-    <message>
         <source>IPv4</source>
         <translation>IPv4</translation>
     </message>
@@ -1102,20 +2027,8 @@
         <translation>Raven ağına gizli Tor servisleri için ayrı bir SOCKS5 vekil sunucusu aracılığıyla bağlan.</translation>
     </message>
     <message>
-        <source>Use separate SOCKS5 proxy to reach peers via Tor hidden services:</source>
-        <translation>Eşlere gizli Tor servisleri ile ulaşmak için ayrı SOCKS5 vekil sunucusu kullan:</translation>
-    </message>
-    <message>
         <source>&amp;Window</source>
         <translation>&amp;Pencere</translation>
-    </message>
-    <message>
-        <source>&amp;Hide the icon from the system tray.</source>
-        <translation>Simgeyi görev çubuğundan &amp;gizle</translation>
-    </message>
-    <message>
-        <source>Hide tray icon</source>
-        <translation>Görev çubuğu simgesini gizle</translation>
     </message>
     <message>
         <source>Show only a tray icon after minimizing the window.</source>
@@ -1154,6 +2067,26 @@
         <translation>Para kontrol özelliklerinin gösterilip gösterilmeyeceğini ayarlar.</translation>
     </message>
     <message>
+        <source>&amp;Third party transaction URLs</source>
+        <translation>&amp;Third party transaction URLs</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation>Reset</translation>
+    </message>
+    <message>
+        <source>Third party URL for IPFS-viewer. %s in the URL is replaced by IPFS hash.</source>
+        <translation>Third party URL for IPFS-viewer. %s in the URL is replaced by IPFS hash.</translation>
+    </message>
+    <message>
+        <source>IPFS Viewer URL</source>
+        <translation>IPFS Viewer URL</translation>
+    </message>
+    <message>
+        <source>Enable Dark Mode</source>
+        <translation>Enable Dark Mode</translation>
+    </message>
+    <message>
         <source>&amp;OK</source>
         <translation>&amp;Tamam</translation>
     </message>
@@ -1180,6 +2113,22 @@
     <message>
         <source>Client will be shut down. Do you want to proceed?</source>
         <translation>İstemci kapanacaktır. Devam etmek istiyor musunuz?</translation>
+    </message>
+    <message>
+        <source>Configuration options</source>
+        <translation>Configuration options</translation>
+    </message>
+    <message>
+        <source>The configuration file is used to specify advanced user options which override GUI settings. Additionally, any command-line options will override this configuration file.</source>
+        <translation>The configuration file is used to specify advanced user options which override GUI settings. Additionally, any command-line options will override this configuration file.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>The configuration file could not be opened.</source>
+        <translation>The configuration file could not be opened.</translation>
     </message>
     <message>
         <source>This change would require a client restart.</source>
@@ -1229,10 +2178,6 @@
         <translation>Oluşturulan bakiye henüz olgunlaşmamıştır</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>Bakiyeler</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>Toplam:</translation>
     </message>
@@ -1241,12 +2186,24 @@
         <translation>Güncel toplam bakiyeniz</translation>
     </message>
     <message>
+        <source>RVN Balances</source>
+        <translation>RVN Balances</translation>
+    </message>
+    <message>
         <source>Your current balance in watch-only addresses</source>
         <translation>Sadece izlenen adreslerdeki güncel bakiyeniz</translation>
     </message>
     <message>
         <source>Spendable:</source>
         <translation>Harcanabilir:</translation>
+    </message>
+    <message>
+        <source>Asset Balances</source>
+        <translation>Asset Balances</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Search</translation>
     </message>
     <message>
         <source>Recent transactions</source>
@@ -1264,7 +2221,39 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>Sadece izlenen adreslerdeki güncel toplam bakiye</translation>
     </message>
-</context>
+    <message>
+        <source>Send Asset</source>
+        <translation>Send Asset</translation>
+    </message>
+    <message>
+        <source>Copy Amount</source>
+        <translation>Copy Amount</translation>
+    </message>
+    <message>
+        <source>Copy Name</source>
+        <translation>Copy Name</translation>
+    </message>
+    <message>
+        <source>Copy Hash</source>
+        <translation>Copy Hash</translation>
+    </message>
+    <message>
+        <source>Issue Sub Asset</source>
+        <translation>Issue Sub Asset</translation>
+    </message>
+    <message>
+        <source>Issue Unique Asset</source>
+        <translation>Issue Unique Asset</translation>
+    </message>
+    <message>
+        <source>Reissue Asset</source>
+        <translation>Reissue Asset</translation>
+    </message>
+    <message>
+        <source>Open IPFS in Browser</source>
+        <translation>Open IPFS in Browser</translation>
+    </message>
+    </context>
 <context>
     <name>PaymentServer</name>
     <message>
@@ -1374,6 +2363,14 @@
         <source>Ping</source>
         <translation>Ping</translation>
     </message>
+    <message>
+        <source>Sent</source>
+        <translation>Sent</translation>
+    </message>
+    <message>
+        <source>Received</source>
+        <translation>Received</translation>
+    </message>
 </context>
 <context>
     <name>QObject</name>
@@ -1415,23 +2412,23 @@
     </message>
     <message numerus="yes">
         <source>%n second(s)</source>
-        <translation><numerusform>%n saniye</numerusform></translation>
+        <translation><numerusform>%n second</numerusform><numerusform>%n seconds</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n minute(s)</source>
-        <translation><numerusform>%n dakika</numerusform></translation>
+        <translation><numerusform>%n minute</numerusform><numerusform>%n minutes</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n hour(s)</source>
-        <translation><numerusform>%n saat</numerusform></translation>
+        <translation><numerusform>%n hour</numerusform><numerusform>%n hours</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n day(s)</source>
-        <translation><numerusform>%n gün</numerusform></translation>
+        <translation><numerusform>%n day</numerusform><numerusform>%n days</numerusform></translation>
     </message>
     <message numerus="yes">
         <source>%n week(s)</source>
-        <translation><numerusform>%n hafta</numerusform></translation>
+        <translation><numerusform>%n week</numerusform><numerusform>%n weeks</numerusform></translation>
     </message>
     <message>
         <source>%1 and %2</source>
@@ -1439,11 +2436,31 @@
     </message>
     <message numerus="yes">
         <source>%n year(s)</source>
-        <translation><numerusform>%n yıl</numerusform></translation>
+        <translation><numerusform>%n year</numerusform><numerusform>%n years</numerusform></translation>
+    </message>
+    <message>
+        <source>%1 B</source>
+        <translation>%1 B</translation>
+    </message>
+    <message>
+        <source>%1 KB</source>
+        <translation>%1 KB</translation>
+    </message>
+    <message>
+        <source>%1 MB</source>
+        <translation>%1 MB</translation>
+    </message>
+    <message>
+        <source>%1 GB</source>
+        <translation>%1 GB</translation>
     </message>
     <message>
         <source>%1 didn't yet exit safely...</source>
         <translation>%1  henüz güvenli bir şekilde çıkış yapmamıştır...</translation>
+    </message>
+    <message>
+        <source>unknown</source>
+        <translation>unknown</translation>
     </message>
 </context>
 <context>
@@ -1547,6 +2564,10 @@
         <translation>Bellek kullanımı</translation>
     </message>
     <message>
+        <source>&amp;Reset</source>
+        <translation>&amp;Reset</translation>
+    </message>
+    <message>
         <source>Received</source>
         <translation>Alınan</translation>
     </message>
@@ -1589,6 +2610,54 @@
     <message>
         <source>Synced Blocks</source>
         <translation>Eşleşmiş Bloklar</translation>
+    </message>
+    <message>
+        <source>&amp;Wallet Repair</source>
+        <translation>&amp;Wallet Repair</translation>
+    </message>
+    <message>
+        <source>Wallet Repair Options</source>
+        <translation>Wallet Repair Options</translation>
+    </message>
+    <message>
+        <source>The buttons below will restart the wallet with command-line options to recover missing transactions or rebuild corrupt blockchain files.</source>
+        <translation>The buttons below will restart the wallet with command-line options to recover missing transactions or rebuild corrupt blockchain files.</translation>
+    </message>
+    <message>
+        <source>Wallet Path</source>
+        <translation>Wallet Path</translation>
+    </message>
+    <message>
+        <source>Rescan blockchain files</source>
+        <translation>Rescan blockchain files</translation>
+    </message>
+    <message>
+        <source>Recover transactions</source>
+        <translation>Recover transactions</translation>
+    </message>
+    <message>
+        <source>Rebuild index</source>
+        <translation>Rebuild index</translation>
+    </message>
+    <message>
+        <source>-rescan: Rescan the blockchain files on disk for missing wallet transactions. (Short process)</source>
+        <translation>-rescan: Rescan the blockchain files on disk for missing wallet transactions. (Short process)</translation>
+    </message>
+    <message>
+        <source>-zapwallettxes=1: Delete all wallet transactions and recover them with a rescan. (Keeps metadata)</source>
+        <translation>-zapwallettxes=1: Delete all wallet transactions and recover them with a rescan. (Keeps metadata)</translation>
+    </message>
+    <message>
+        <source>Use to recover balance when transactions fail to broadcast to the network.</source>
+        <translation>Use to recover balance when transactions fail to broadcast to the network.</translation>
+    </message>
+    <message>
+        <source>-reindex: Rebuild chain state and block index from the blk00*.dat files on disk. (Long process)</source>
+        <translation>-reindex: Rebuild chain state and block index from the blk00*.dat files on disk. (Long process)</translation>
+    </message>
+    <message>
+        <source>Use after importing private keys or restoring a wallet.dat backup.</source>
+        <translation>Use after importing private keys or restoring a wallet.dat backup.</translation>
     </message>
     <message>
         <source>User Agent</source>
@@ -1663,10 +2732,6 @@
         <translation>&amp;Ağ trafiği</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Temizle</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Toplamlar</translation>
     </message>
@@ -1715,40 +2780,32 @@
         <translation>&amp;Yasaklamayı Kaldır</translation>
     </message>
     <message>
-        <source>Welcome to the %1 RPC console.</source>
-        <translation>%1 RPC konsoluna hoş geldiniz.</translation>
+        <source>Are you sure you want to reindex?</source>
+        <translation>Are you sure you want to reindex?</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Tarihçede gezinmek için aşağı ve yukarı ok tuşlarını kullanınız, &lt;b&gt;Ctrl-L&lt;/b&gt; ile de ekranı temizleyebilirsiniz.</translation>
+        <source>Confirm reindex</source>
+        <translation>Confirm reindex</translation>
+    </message>
+    <message>
+        <source>Welcome to the %1 RPC console.</source>
+        <translation>%1 RPC konsoluna hoş geldiniz.</translation>
     </message>
     <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Mevcut komutların listesi için &lt;b&gt;help&lt;/b&gt; yazınız.</translation>
     </message>
     <message>
-        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramification of a command.</source>
-        <translation>UYARI: Raven dolandırıcılarının çok fazla etkin olduğu zamanlarda, dolandırıcılar bazı kullanıcılara buraya komutlar yazmalarını söylerek onların cüzdanlarındaki ravenleri çalmışlardır. Bir komutun sonuçlarını tam olarak anlamadan bu konsolu kullanmayın.</translation>
+        <source>Use up and down arrows to navigate history, and %1 to clear screen.</source>
+        <translation>Use up and down arrows to navigate history, and %1 to clear screen.</translation>
+    </message>
+    <message>
+        <source>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramifications of a command.</source>
+        <translation>WARNING: Scammers have been active, telling users to type commands here, stealing their wallet contents. Do not use this console without fully understanding the ramifications of a command.</translation>
     </message>
     <message>
         <source>Network activity disabled</source>
         <translation>Ağ etkinliği devre dışı bırakıldı</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
     </message>
     <message>
         <source>(node id: %1)</source>
@@ -1781,6 +2838,391 @@
     <message>
         <source>Unknown</source>
         <translation>Bilinmiyor</translation>
+    </message>
+</context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>&amp;İleti imzala...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Ağ ile senkronize ediliyor...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Genel bakış</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Düğüm</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Cüzdana genel bakışı göster</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;İşlemler</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>İşlem geçmişine gözat</translation>
+    </message>
+    <message>
+        <source>&amp;Create Assets</source>
+        <translation>&amp;Create Assets</translation>
+    </message>
+    <message>
+        <source>Create new main/sub/unique assets</source>
+        <translation>Create new main/sub/unique assets</translation>
+    </message>
+    <message>
+        <source>&amp;Transfer Assets</source>
+        <translation>&amp;Transfer Assets</translation>
+    </message>
+    <message>
+        <source>Transfer assets to RVN addresses</source>
+        <translation>Transfer assets to RVN addresses</translation>
+    </message>
+    <message>
+        <source>&amp;Manage Assets</source>
+        <translation>&amp;Manage Assets</translation>
+    </message>
+    <message>
+        <source>Manage assets you are the administrator of</source>
+        <translation>Manage assets you are the administrator of</translation>
+    </message>
+    <message>
+        <source>&amp;Messaging</source>
+        <translation>&amp;Messaging</translation>
+    </message>
+    <message>
+        <source>Coming Soon</source>
+        <translation>Coming Soon</translation>
+    </message>
+    <message>
+        <source>&amp;Voting</source>
+        <translation>&amp;Voting</translation>
+    </message>
+    <message>
+        <source>&amp;Restricted Assets</source>
+        <translation>&amp;Restricted Assets</translation>
+    </message>
+    <message>
+        <source>Manage restricted assets</source>
+        <translation>Manage restricted assets</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>Ç&amp;ık</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Uygulamadan çık</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>%1 &amp;Hakkında</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>%1 hakkında bilgi göster</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>&amp;Qt Hakkında</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Qt hakkında bilgi göster</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Seçenekler...</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>%1 için yapılandırma ayarlarını değiştir</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Cüzdanı Şifrele...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Cüzdanı Yedekle...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Parolayı Değiştir...</translation>
+    </message>
+    <message>
+        <source>&amp;Debug Window</source>
+        <translation>&amp;Debug Window</translation>
+    </message>
+    <message>
+        <source>&amp;Wallet Repair</source>
+        <translation>&amp;Wallet Repair</translation>
+    </message>
+    <message>
+        <source>Open wallet repair options</source>
+        <translation>Open wallet repair options</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Gönderme adresleri...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Alma adresleri...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>&amp;URI Aç...</translation>
+    </message>
+    <message>
+        <source>&amp;Wallet</source>
+        <translation>&amp;Wallet</translation>
+    </message>
+    <message>
+        <source>Ravencoin Market Price</source>
+        <translation>Ravencoin Market Price</translation>
+    </message>
+    <message>
+        <source>Brought to you by binance.com</source>
+        <translation>Brought to you by binance.com</translation>
+    </message>
+    <message>
+        <source>Click to disable network activity.</source>
+        <translation>Ağ etkinliğini devre dışı bırakmak için tıklayın.</translation>
+    </message>
+    <message>
+        <source>Network activity disabled.</source>
+        <translation>Ağ etkinliği devre dışı bırakılmış.</translation>
+    </message>
+    <message>
+        <source>Click to enable network activity again.</source>
+        <translation>Ağ etkinliğini yeniden etkinleştirmek için tıklayın.</translation>
+    </message>
+    <message>
+        <source>Syncing Headers (%1%)...</source>
+        <translation>Üstbilgiler Senkronize Ediliyor (%1%)...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Diskteki bloklar yeniden indeksleniyor...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Bir raven adresine raven gönder</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Cüzdanı diğer bir konumda yedekle</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Cüzdan şifrelemesi için kullanılan parolayı değiştir</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Hata ayıklama ve teşhis penceresini aç</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>İletiyi &amp;kontrol et...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Cüzdan</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Gönder</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Al</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Göster / Gizle</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Ana pencereyi göster ya da gizle</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Cüzdanınıza ait özel anahtarları şifreleyin</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>İletileri adreslerin size ait olduğunu ispatlamak için Raven adresleri ile imzala</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Belirtilen Raven adresleri ile imzalandıklarından emin olmak için iletileri kontrol et</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Dosya</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Yardım</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Ödeme talep et (QR kodu ve raven URI'si oluşturur)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Kullanılmış gönderme adresleri ve etiketlerin listesini göster</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Kullanılmış alım adresleri ve etiketlerin listesini göster</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Bir raven: bağlantısı ya da ödeme talebi aç</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Komut satırı seçenekleri</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n active connection(s) to Raven network</source>
+        <translation><numerusform>%n active connection to Raven network</numerusform><numerusform>%n active connections to Raven network</numerusform></translation>
+    </message>
+    <message>
+        <source>Indexing blocks on disk...</source>
+        <translation>Bloklar diske indeksleniyor...</translation>
+    </message>
+    <message>
+        <source>Processing blocks on disk...</source>
+        <translation>Bloklar diske işleniyor...</translation>
+    </message>
+    <message numerus="yes">
+        <source>Processed %n block(s) of transaction history.</source>
+        <translation><numerusform>Processed %n block of transaction history.</numerusform><numerusform>Processed %n blocks of transaction history.</numerusform></translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 geride</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Son alınan blok %1 önce oluşturulmuştu.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Bundan sonraki işlemler henüz görüntülenemez.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Hata</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Uyarı</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Bilgi</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Güncel</translation>
+    </message>
+    <message>
+        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <translation>Olası Raven komut satırı seçeneklerinin listesini görmek için %1 yardım mesajını göster</translation>
+    </message>
+    <message>
+        <source>%1 client</source>
+        <translation>%1 istemci</translation>
+    </message>
+    <message>
+        <source>Connecting to peers...</source>
+        <translation>Eşlere bağlanılıyor...</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Aralık kapatılıyor...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Tarih: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Tutar: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Tür: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Etiket: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Adres: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>İşlem gönderildi</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Gelen işlem</translation>
+    </message>
+    <message>
+        <source>Assets not yet active</source>
+        <translation>Assets not yet active</translation>
+    </message>
+    <message>
+        <source>Restricted Assets not yet active</source>
+        <translation>Restricted Assets not yet active</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;enabled&lt;/b&gt;</source>
+        <translation>HD anahtar oluşturma &lt;b&gt;etkin&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>HD key generation is &lt;b&gt;disabled&lt;/b&gt;</source>
+        <translation>HD anahtar oluşturma &lt;b&gt;devre dışı&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Cüzdan &lt;b&gt;şifrelenmiştir&lt;/b&gt; ve şu anda &lt;b&gt;kilidi açıktır&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Cüzdan &lt;b&gt;şifrelenmiştir&lt;/b&gt; ve şu anda &lt;b&gt;kilitlidir&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <translation>Ölümcül bir hata oluştu. Raven yazılımı artık güvenli bir şekilde çalışmaya devam edemediği için kapatılacaktır.</translation>
     </message>
 </context>
 <context>
@@ -1957,6 +3399,627 @@
     </message>
 </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    <message>
+        <source>Coin Control Features</source>
+        <translation>Coin Control Features</translation>
+    </message>
+    <message>
+        <source>Inputs...</source>
+        <translation>Inputs...</translation>
+    </message>
+    <message>
+        <source>automatically selected</source>
+        <translation>automatically selected</translation>
+    </message>
+    <message>
+        <source>Insufficient funds!</source>
+        <translation>Insufficient funds!</translation>
+    </message>
+    <message>
+        <source>Quantity:</source>
+        <translation>Quantity:</translation>
+    </message>
+    <message>
+        <source>Bytes:</source>
+        <translation>Bytes:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Amount:</translation>
+    </message>
+    <message>
+        <source>Dust:</source>
+        <translation>Dust:</translation>
+    </message>
+    <message>
+        <source>Fee:</source>
+        <translation>Fee:</translation>
+    </message>
+    <message>
+        <source>After Fee:</source>
+        <translation>After Fee:</translation>
+    </message>
+    <message>
+        <source>Change:</source>
+        <translation>Change:</translation>
+    </message>
+    <message>
+        <source>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</source>
+        <translation>If this is activated, but the change address is empty or invalid, change will be sent to a newly generated address.</translation>
+    </message>
+    <message>
+        <source>Custom change address</source>
+        <translation>Custom change address</translation>
+    </message>
+    <message>
+        <source>Reissue Asset</source>
+        <translation>Reissue Asset</translation>
+    </message>
+    <message>
+        <source>Select an asset to reissue:</source>
+        <translation>Select an asset to reissue:</translation>
+    </message>
+    <message>
+        <source>Address:</source>
+        <translation>Address:</translation>
+    </message>
+    <message>
+        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</translation>
+    </message>
+    <message>
+        <source>Verifier String:</source>
+        <translation>Verifier String:</translation>
+    </message>
+    <message>
+        <source>Create a verifier string built from Qualifier names e.g (#KYC &amp; #VALID). Leave blank not change this</source>
+        <translation>Create a verifier string built from Qualifier names e.g (#KYC &amp; #VALID). Leave blank not change this</translation>
+    </message>
+    <message>
+        <source>Warning:</source>
+        <translation>Warning:</translation>
+    </message>
+    <message>
+        <source>The number of assets that will be created</source>
+        <translation>The number of assets that will be created</translation>
+    </message>
+    <message>
+        <source>Unit:</source>
+        <translation>Unit:</translation>
+    </message>
+    <message>
+        <source>e.g. 1.00000000</source>
+        <translation>e.g. 1.00000000</translation>
+    </message>
+    <message>
+        <source>If the owner of this asset will be able to issue more assets in the future</source>
+        <translation>If the owner of this asset will be able to issue more assets in the future</translation>
+    </message>
+    <message>
+        <source>Reissuable</source>
+        <translation>Reissuable</translation>
+    </message>
+    <message>
+        <source>Change IPFS/Txid Hash</source>
+        <translation>Change IPFS/Txid Hash</translation>
+    </message>
+    <message>
+        <source>The ipfs/txid hash that contains information about the asset</source>
+        <translation>The ipfs/txid hash that contains information about the asset</translation>
+    </message>
+    <message>
+        <source>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</source>
+        <translation>The ipfs/txid hash that is associated with the asset being created (e.g. QmU4h365LYMHx...)</translation>
+    </message>
+    <message>
+        <source>ERROR TEXT</source>
+        <translation>ERROR TEXT</translation>
+    </message>
+    <message>
+        <source>Current Asset Settings</source>
+        <translation>Current Asset Settings</translation>
+    </message>
+    <message>
+        <source>Updated Asset Settings</source>
+        <translation>Updated Asset Settings</translation>
+    </message>
+    <message>
+        <source>Transaction Fee:</source>
+        <translation>Transaction Fee:</translation>
+    </message>
+    <message>
+        <source>Choose...</source>
+        <translation>Choose...</translation>
+    </message>
+    <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Warning: Fee estimation is currently not possible.</translation>
+    </message>
+    <message>
+        <source>collapse fee-settings</source>
+        <translation>collapse fee-settings</translation>
+    </message>
+    <message>
+        <source>Hide</source>
+        <translation>Hide</translation>
+    </message>
+    <message>
+        <source>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</source>
+        <translation>If the custom fee is set to 1000 satoshis and the transaction is only 250 bytes, then "per kilobyte" only pays 250 satoshis in fee, while "total at least" pays 1000 satoshis. For transactions bigger than a kilobyte both pay by kilobyte.</translation>
+    </message>
+    <message>
+        <source>per kilobyte</source>
+        <translation>per kilobyte</translation>
+    </message>
+    <message>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <translation>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</translation>
+    </message>
+    <message>
+        <source>(read the tooltip)</source>
+        <translation>(read the tooltip)</translation>
+    </message>
+    <message>
+        <source>Recommended:</source>
+        <translation>Recommended:</translation>
+    </message>
+    <message>
+        <source>Cus&amp;tom:</source>
+        <translation>Cus&amp;tom:</translation>
+    </message>
+    <message>
+        <source>(Smart fee not initialized yet. This usually takes a few blocks...)</source>
+        <translation>(Smart fee not initialized yet. This usually takes a few blocks...)</translation>
+    </message>
+    <message>
+        <source>Confirmation time target:</source>
+        <translation>Confirmation time target:</translation>
+    </message>
+    <message>
+        <source>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</source>
+        <translation>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</translation>
+    </message>
+    <message>
+        <source>Request Replace-By-Fee</source>
+        <translation>Request Replace-By-Fee</translation>
+    </message>
+    <message>
+        <source>Clear</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Balance:</translation>
+    </message>
+    <message>
+        <source>123.456 RVN</source>
+        <translation>123.456 RVN</translation>
+    </message>
+    <message>
+        <source>Copy quantity</source>
+        <translation>Copy quantity</translation>
+    </message>
+    <message>
+        <source>Copy amount</source>
+        <translation>Copy amount</translation>
+    </message>
+    <message>
+        <source>Copy fee</source>
+        <translation>Copy fee</translation>
+    </message>
+    <message>
+        <source>Copy after fee</source>
+        <translation>Copy after fee</translation>
+    </message>
+    <message>
+        <source>Copy bytes</source>
+        <translation>Copy bytes</translation>
+    </message>
+    <message>
+        <source>Copy dust</source>
+        <translation>Copy dust</translation>
+    </message>
+    <message>
+        <source>Copy change</source>
+        <translation>Copy change</translation>
+    </message>
+    <message>
+        <source>Select an asset to reissue..</source>
+        <translation>Select an asset to reissue..</translation>
+    </message>
+    <message>
+        <source>Select the asset you want to reissue.</source>
+        <translation>Select the asset you want to reissue.</translation>
+    </message>
+    <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blocks)</translation>
+    </message>
+    <message>
+        <source>Cost</source>
+        <translation>Cost</translation>
+    </message>
+    <message>
+        <source>Asset data couldn't be found</source>
+        <translation>Asset data couldn't be found</translation>
+    </message>
+    <message>
+        <source>Quantity is to large. Max is 21,000,000,000</source>
+        <translation>Quantity is to large. Max is 21,000,000,000</translation>
+    </message>
+    <message>
+        <source>Invalid Raven Destination Address</source>
+        <translation>Invalid Raven Destination Address</translation>
+    </message>
+    <message>
+        <source>Warning: Restricted Assets Issuance requires an address</source>
+        <translation>Warning: Restricted Assets Issuance requires an address</translation>
+    </message>
+    <message>
+        <source>Warning: Invalid Raven address</source>
+        <translation>Warning: Invalid Raven address</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation>Yes</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+    <message>
+        <source>Total Quantity</source>
+        <translation>Total Quantity</translation>
+    </message>
+    <message>
+        <source>Units</source>
+        <translation>Units</translation>
+    </message>
+    <message>
+        <source>Can Reisssue</source>
+        <translation>Can Reisssue</translation>
+    </message>
+    <message>
+        <source>IPFS Hash</source>
+        <translation>IPFS Hash</translation>
+    </message>
+    <message>
+        <source>Txid Hash</source>
+        <translation>Txid Hash</translation>
+    </message>
+    <message>
+        <source>Verifier String</source>
+        <translation>Verifier String</translation>
+    </message>
+    <message>
+        <source>Current Verifier String</source>
+        <translation>Current Verifier String</translation>
+    </message>
+    <message>
+        <source>Please select a asset from the menu to display the assets current settings</source>
+        <translation>Please select a asset from the menu to display the assets current settings</translation>
+    </message>
+    <message>
+        <source>Please select a asset from the menu to display the assets updated settings</source>
+        <translation>Please select a asset from the menu to display the assets updated settings</translation>
+    </message>
+    <message>
+        <source>Current Quantity</source>
+        <translation>Current Quantity</translation>
+    </message>
+    <message>
+        <source>Current Units</source>
+        <translation>Current Units</translation>
+    </message>
+    <message>
+        <source>Can Reissue</source>
+        <translation>Can Reissue</translation>
+    </message>
+    <message>
+        <source>Unknown data hash type</source>
+        <translation>Unknown data hash type</translation>
+    </message>
+    <message>
+        <source>Only IPFS Hashes allowed until RIP5 is activated</source>
+        <translation>Only IPFS Hashes allowed until RIP5 is activated</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters</source>
+        <translation>IPFS/Txid Hash must start with 'Qm' and be 46 characters or Txid Hash must have 64 hex characters</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid Hash must have size of 46 characters, or 64 hex characters</source>
+        <translation>IPFS/Txid Hash must have size of 46 characters, or 64 hex characters</translation>
+    </message>
+    <message>
+        <source>IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash</source>
+        <translation>IPFS/Txid hash is not valid. Please use a valid IPFS/Txid hash</translation>
+    </message>
+    <message>
+        <source>%1 to %2</source>
+        <translation>%1 to %2</translation>
+    </message>
+    <message>
+        <source>Are you sure you want to send?</source>
+        <translation>Are you sure you want to send?</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>added as transaction fee</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Total Amount %1</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>or</translation>
+    </message>
+    <message>
+        <source>Confirm reissue assets</source>
+        <translation>Confirm reissue assets</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation>Copy</translation>
+    </message>
+    <message>
+        <source>Transaction ID Copied</source>
+        <translation>Transaction ID Copied</translation>
+    </message>
+    <message>
+        <source>Asset transaction sent to network:</source>
+        <translation>Asset transaction sent to network:</translation>
+    </message>
+    <message numerus="yes">
+        <source>Estimated to begin confirmation within %n block(s).</source>
+        <translation><numerusform>Estimated to begin confirmation within %n block.</numerusform><numerusform>Estimated to begin confirmation within %n blocks.</numerusform></translation>
+    </message>
+    <message>
+        <source>Warning: Unknown change address</source>
+        <translation>Warning: Unknown change address</translation>
+    </message>
+    <message>
+        <source>Confirm custom change address</source>
+        <translation>Confirm custom change address</translation>
+    </message>
+    <message>
+        <source>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</source>
+        <translation>The address you selected for change is not part of this wallet. Any or all funds in your wallet may be sent to this address. Are you sure?</translation>
+    </message>
+    <message>
+        <source>(no label)</source>
+        <translation>(no label)</translation>
+    </message>
+    <message>
+        <source>Pay only the required fee of %1</source>
+        <translation>Pay only the required fee of %1</translation>
+    </message>
+</context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    <message>
+        <source>Send Coins</source>
+        <translation>Send Coins</translation>
+    </message>
+    <message>
+        <source>Asset Balances</source>
+        <translation>Asset Balances</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Search</translation>
+    </message>
+    <message>
+        <source>Address List</source>
+        <translation>Address List</translation>
+    </message>
+    <message>
+        <source>Balance:</source>
+        <translation>Balance:</translation>
+    </message>
+    <message>
+        <source>Failed to create a change address</source>
+        <translation>Failed to create a change address</translation>
+    </message>
+    <message>
+        <source>Failed to generate the correct transaction. Please try again</source>
+        <translation>Failed to generate the correct transaction. Please try again</translation>
+    </message>
+    <message>
+        <source>Freezing all trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</source>
+        <translation>Freezing all trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Unfreezing trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</source>
+        <translation>Unfreezing trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Freezing all trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from all addresses&lt;br&gt;</source>
+        <translation>Freezing all trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from all addresses&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Opening / Unfreezing all trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from all addresses&lt;br&gt;</source>
+        <translation>Opening / Unfreezing all trading of the restricted asset &lt;b&gt;%1&lt;/b&gt; from all addresses&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>added as transaction fee</source>
+        <translation>added as transaction fee</translation>
+    </message>
+    <message>
+        <source>Total Amount %1</source>
+        <translation>Total Amount %1</translation>
+    </message>
+    <message>
+        <source>or</source>
+        <translation>or</translation>
+    </message>
+    <message>
+        <source>Confirm adding restriction</source>
+        <translation>Confirm adding restriction</translation>
+    </message>
+    <message>
+        <source>Confirm removing resetricton</source>
+        <translation>Confirm removing resetricton</translation>
+    </message>
+    <message>
+        <source>Adding qualifier &lt;b&gt;%1&lt;/b&gt; to address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</source>
+        <translation>Adding qualifier &lt;b&gt;%1&lt;/b&gt; to address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Removing qualifier &lt;b&gt;%1&lt;/b&gt; from address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</source>
+        <translation>Removing qualifier &lt;b&gt;%1&lt;/b&gt; from address &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;</translation>
+    </message>
+    <message>
+        <source>Confirm adding qualifier</source>
+        <translation>Confirm adding qualifier</translation>
+    </message>
+    <message>
+        <source>Confirm removing qualifier</source>
+        <translation>Confirm removing qualifier</translation>
+    </message>
+</context>
+<context>
+    <name>SendAssetsEntry</name>
+    <message>
+        <source>This is an asset payment</source>
+        <translation>This is an asset payment</translation>
+    </message>
+    <message>
+        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
+        <translation>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</translation>
+    </message>
+    <message>
+        <source>Memo:</source>
+        <translation>Memo:</translation>
+    </message>
+    <message>
+        <source>Amount:</source>
+        <translation>Amount:</translation>
+    </message>
+    <message>
+        <source>Enter a label for this address to add it to the list of used addresses</source>
+        <translation>Enter a label for this address to add it to the list of used addresses</translation>
+    </message>
+    <message>
+        <source>&amp;Label:</source>
+        <translation>&amp;Label:</translation>
+    </message>
+    <message>
+        <source>Asset:</source>
+        <translation>Asset:</translation>
+    </message>
+    <message>
+        <source>The Raven address to send the payment to</source>
+        <translation>The Raven address to send the payment to</translation>
+    </message>
+    <message>
+        <source>Choose previously used address</source>
+        <translation>Choose previously used address</translation>
+    </message>
+    <message>
+        <source>Alt+A</source>
+        <translation>Alt+A</translation>
+    </message>
+    <message>
+        <source>Paste address from clipboard</source>
+        <translation>Paste address from clipboard</translation>
+    </message>
+    <message>
+        <source>Alt+P</source>
+        <translation>Alt+P</translation>
+    </message>
+    <message>
+        <source>Remove this entry</source>
+        <translation>Remove this entry</translation>
+    </message>
+    <message>
+        <source>Message:</source>
+        <translation>Message:</translation>
+    </message>
+    <message>
+        <source>Transfer Administrator Asset</source>
+        <translation>Transfer Administrator Asset</translation>
+    </message>
+    <message>
+        <source>Put a IPFS or Txid hash here to be sent with the asset transfer</source>
+        <translation>Put a IPFS or Txid hash here to be sent with the asset transfer</translation>
+    </message>
+    <message>
+        <source>This is an unauthenticated payment request.</source>
+        <translation>This is an unauthenticated payment request.</translation>
+    </message>
+    <message>
+        <source>Transfer to:</source>
+        <translation>Transfer to:</translation>
+    </message>
+    <message>
+        <source>A&amp;mount:</source>
+        <translation>A&amp;mount:</translation>
+    </message>
+    <message>
+        <source>This is an authenticated payment request.</source>
+        <translation>This is an authenticated payment request.</translation>
+    </message>
+    <message>
+        <source>Enter a label for this address to add it to your address book</source>
+        <translation>Enter a label for this address to add it to your address book</translation>
+    </message>
+    <message>
+        <source>Select to view administrator assets to transfer</source>
+        <translation>Select to view administrator assets to transfer</translation>
+    </message>
+    <message>
+        <source>Select an asset to transfer</source>
+        <translation>Select an asset to transfer</translation>
+    </message>
+    <message>
+        <source>Memos can only be added once RIP5 is voted in</source>
+        <translation>Memos can only be added once RIP5 is voted in</translation>
+    </message>
+    <message>
+        <source>This restricted asset has been frozen globally. No transfers can be sent on the network.</source>
+        <translation>This restricted asset has been frozen globally. No transfers can be sent on the network.</translation>
+    </message>
+    <message>
+        <source>Failed to get asset metadata for: </source>
+        <translation>Failed to get asset metadata for: </translation>
+    </message>
+    <message>
+        <source> The transaction in which the asset was issued must be mined into a block before you can transfer it</source>
+        <translation> The transaction in which the asset was issued must be mined into a block before you can transfer it</translation>
+    </message>
+    <message>
+        <source>Failed to get asset outpoints from database</source>
+        <translation>Failed to get asset outpoints from database</translation>
+    </message>
+    <message>
+        <source>Selected Balance</source>
+        <translation>Selected Balance</translation>
+    </message>
+    <message>
+        <source>Wallet Balance</source>
+        <translation>Wallet Balance</translation>
+    </message>
+    <message>
+        <source>Select an administrator asset to transfer</source>
+        <translation>Select an administrator asset to transfer</translation>
+    </message>
+    <message>
+        <source>Warning: Transferring administrator asset</source>
+        <translation>Warning: Transferring administrator asset</translation>
+    </message>
+</context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -2019,6 +4082,14 @@
         <translation>Seç...</translation>
     </message>
     <message>
+        <source>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</source>
+        <translation>Using the fallbackfee can result in sending a transaction that will take several hours or days (or never) to confirm. Consider choosing your fee manually or wait until you have validated the complete chain.</translation>
+    </message>
+    <message>
+        <source>Warning: Fee estimation is currently not possible.</source>
+        <translation>Warning: Fee estimation is currently not possible.</translation>
+    </message>
+    <message>
         <source>collapse fee-settings</source>
         <translation>ücret-ayarlarını-küçült</translation>
     </message>
@@ -2033,10 +4104,6 @@
     <message>
         <source>Hide</source>
         <translation>Gizle</translation>
-    </message>
-    <message>
-        <source>total at least</source>
-        <translation>toplam asgari</translation>
     </message>
     <message>
         <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
@@ -2059,12 +4126,12 @@
         <translation>(Zeki ücret henüz başlatılmadı. Bu genelde birkaç blok alır...)</translation>
     </message>
     <message>
-        <source>normal</source>
-        <translation>normal</translation>
+        <source>Request Replace-By-Fee</source>
+        <translation>Request Replace-By-Fee</translation>
     </message>
     <message>
-        <source>fast</source>
-        <translation>çabuk</translation>
+        <source>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</source>
+        <translation>Indicates that the sender may wish to replace this transaction with a new one paying higher fees (prior to being confirmed).</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -2131,6 +4198,10 @@
         <translation>Para üstünü kopyala</translation>
     </message>
     <message>
+        <source>%1 (%2 blocks)</source>
+        <translation>%1 (%2 blocks)</translation>
+    </message>
+    <message>
         <source>%1 to %2</source>
         <translation>%1 ögesinden %2 unsuruna</translation>
     </message>
@@ -2190,13 +4261,13 @@
         <source>Payment request expired.</source>
         <translation>Ödeme talebinin geçerlilik süresi bitti.</translation>
     </message>
-    <message numerus="yes">
-        <source>%n block(s)</source>
-        <translation><numerusform>%n blok</numerusform></translation>
-    </message>
     <message>
         <source>Pay only the required fee of %1</source>
         <translation>Sadece asgari ücret olan %1 tutarını öde</translation>
+    </message>
+    <message numerus="yes">
+        <source>Estimated to begin confirmation within %n block(s).</source>
+        <translation><numerusform>Estimated to begin confirmation within %n block.</numerusform><numerusform>Estimated to begin confirmation within %n blocks.</numerusform></translation>
     </message>
     <message>
         <source>Warning: Invalid Raven address</source>
@@ -2224,10 +4295,6 @@
     <message>
         <source>A&amp;mount:</source>
         <translation>T&amp;utar:</translation>
-    </message>
-    <message>
-        <source>Pay &amp;To:</source>
-        <translation>&amp;Şu adrese öde:</translation>
     </message>
     <message>
         <source>&amp;Label:</source>
@@ -2278,6 +4345,10 @@
         <translation>Bu, kimliği doğrulanmamış bir ödeme talebidir.</translation>
     </message>
     <message>
+        <source>Send to:</source>
+        <translation>Send to:</translation>
+    </message>
+    <message>
         <source>This is an authenticated payment request.</source>
         <translation>Bu, kimliği doğrulanmış bir ödeme talebidir.</translation>
     </message>
@@ -2288,10 +4359,6 @@
     <message>
         <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
         <translation>Referans için raven: URI'siyle iliştirilmiş işlemle birlikte depolanacak bir ileti. Not: Bu mesaj Raven ağı üzerinden gönderilmeyecektir.</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Şu adrese öde:</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2477,7 +4544,7 @@
     <name>TransactionDesc</name>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n taneden daha fazla blok için açık</numerusform></translation>
+        <translation><numerusform>Open for %n more block</numerusform><numerusform>Open for %n more blocks</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -2525,7 +4592,7 @@
     </message>
     <message numerus="yes">
         <source>, broadcast through %n node(s)</source>
-        <translation><numerusform>, %n düğüm aracılığıyla yayınlandı</numerusform></translation>
+        <translation><numerusform>, broadcast through %n node</numerusform><numerusform>, broadcast through %n nodes</numerusform></translation>
     </message>
     <message>
         <source>Date</source>
@@ -2569,7 +4636,7 @@
     </message>
     <message numerus="yes">
         <source>matures in %n more block(s)</source>
-        <translation><numerusform>%n ek blok sonrasında olgunlaşacak</numerusform></translation>
+        <translation><numerusform>matures in %n more block</numerusform><numerusform>matures in %n more blocks</numerusform></translation>
     </message>
     <message>
         <source>not accepted</source>
@@ -2624,6 +4691,10 @@
         <translation>Oluşturulan raven'lerin harcanabilmelerinden önce %1 blok beklemeleri gerekmektedir. Bu blok, oluşturduğunuzda, blok zincirine eklenmesi için ağda yayınlandı. Zincire eklenmesi başarısız olursa, durumu "kabul edilmedi" olarak değiştirilecek ve harcanamayacaktır. Bu, bazen başka bir düğüm sizden birkaç saniye önce ya da sonra blok oluşturursa meydana gelebilir.</translation>
     </message>
     <message>
+        <source>Net RVN amount</source>
+        <translation>Net RVN amount</translation>
+    </message>
+    <message>
         <source>Debug information</source>
         <translation>Hata ayıklama bilgisi</translation>
     </message>
@@ -2673,9 +4744,17 @@
         <source>Label</source>
         <translation>Etiket</translation>
     </message>
+    <message>
+        <source>Amount</source>
+        <translation>Amount</translation>
+    </message>
+    <message>
+        <source>Asset</source>
+        <translation>Asset</translation>
+    </message>
     <message numerus="yes">
         <source>Open for %n more block(s)</source>
-        <translation><numerusform>%n taneden daha fazla blok için açık</numerusform></translation>
+        <translation><numerusform>Open for %n more block</numerusform><numerusform>Open for %n more blocks</numerusform></translation>
     </message>
     <message>
         <source>Open until %1</source>
@@ -2738,6 +4817,22 @@
         <translation>Madenden çıkarılan</translation>
     </message>
     <message>
+        <source>Asset Issued</source>
+        <translation>Asset Issued</translation>
+    </message>
+    <message>
+        <source>Asset Reissued</source>
+        <translation>Asset Reissued</translation>
+    </message>
+    <message>
+        <source>Assets Received</source>
+        <translation>Assets Received</translation>
+    </message>
+    <message>
+        <source>Assets Sent</source>
+        <translation>Assets Sent</translation>
+    </message>
+    <message>
         <source>watch-only</source>
         <translation>sadece-izlenen</translation>
     </message>
@@ -2772,6 +4867,10 @@
     <message>
         <source>Amount removed from or added to balance.</source>
         <translation>Bakiyeden kaldırılan ya da bakiyeye eklenen tutar.</translation>
+    </message>
+    <message>
+        <source>The asset (or RVN) removed or added to balance.</source>
+        <translation>The asset (or RVN) removed or added to balance.</translation>
     </message>
 </context>
 <context>
@@ -2833,6 +4932,10 @@
         <translation>En düşük tutar</translation>
     </message>
     <message>
+        <source>Asset name</source>
+        <translation>Asset name</translation>
+    </message>
+    <message>
         <source>Abandon transaction</source>
         <translation>İşlemden vazgeç</translation>
     </message>
@@ -2869,6 +4972,10 @@
         <translation>İşlem ayrıntılarını göster</translation>
     </message>
     <message>
+        <source>Browse with:</source>
+        <translation>Browse with:</translation>
+    </message>
+    <message>
         <source>Export Transaction History</source>
         <translation>İşlem Tarihçesini Dışarı Aktar</translation>
     </message>
@@ -2901,6 +5008,10 @@
         <translation>Adres</translation>
     </message>
     <message>
+        <source>Asset</source>
+        <translation>Asset</translation>
+    </message>
+    <message>
         <source>ID</source>
         <translation>ID</translation>
     </message>
@@ -2919,6 +5030,26 @@
     <message>
         <source>The transaction history was successfully saved to %1.</source>
         <translation>İşlem tarihçesi %1 konumuna başarıyla kaydedildi.</translation>
+    </message>
+    <message>
+        <source>Asset Issued</source>
+        <translation>Asset Issued</translation>
+    </message>
+    <message>
+        <source>Asset Reissued</source>
+        <translation>Asset Reissued</translation>
+    </message>
+    <message>
+        <source>Asset Received</source>
+        <translation>Asset Received</translation>
+    </message>
+    <message>
+        <source>Asset Sent</source>
+        <translation>Asset Sent</translation>
+    </message>
+    <message>
+        <source>Copy asset name</source>
+        <translation>Copy asset name</translation>
     </message>
     <message>
         <source>Range:</source>
@@ -2949,7 +5080,7 @@
         <source>Send Coins</source>
         <translation>Raveni Gönder</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     <message>
@@ -2984,7 +5115,7 @@
         <source>The wallet data was successfully saved to %1.</source>
         <translation>Cüzdan verileri %1 konumuna başarıyla kaydedildi.</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>raven-core</name>
     <message>
@@ -3006,14 +5137,6 @@
     <message>
         <source>Accept command line and JSON-RPC commands</source>
         <translation>Komut satırı ve JSON-RPC komutlarını kabul et</translation>
-    </message>
-    <message>
-        <source>Accept connections from outside (default: 1 if no -proxy or -connect/-noconnect)</source>
-        <translation>Dışarıdan gelen bağlantıları kabul et (varsayılan: 1 eğer -proxy veya -connect/-noconnect yoksa)</translation>
-    </message>
-    <message>
-        <source>Connect only to the specified node(s); -noconnect or -connect=0 alone to disable automatic connections</source>
-        <translation>-noconnect ile yalnızca belirtilen düğümleri bağlayın veya yalnız otomatik bağlantıları devre dışı bırakmak için -connect=0 kullanın.</translation>
     </message>
     <message>
         <source>Distributed under the MIT software license, see the accompanying file %s or %s</source>
@@ -3084,12 +5207,12 @@
         <translation>Tüm cüzdan işlemlerini sil ve başlangıçta -rescan ile sadece blok zincirinin parçası olanları geri getir</translation>
     </message>
     <message>
-        <source>Error loading %s: You can't enable HD on a already existing non-HD wallet</source>
-        <translation>%s yüklenmesinde hata: zaten var olan ve HD olmayan bir cüzdanda HD etkinleştirilemez.</translation>
-    </message>
-    <message>
         <source>Error reading %s! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
         <translation>%s dosyasının okunması sırasında bir hata meydana geldi! Tüm anahtarlar doğru bir şekilde okundu, ancak işlem verileri ya da adres defteri ögeleri hatalı veya eksik olabilir.</translation>
+    </message>
+    <message>
+        <source>Exclude debugging information for a category. Can be used in conjunction with -debug=1 to output debug logs for all categories except one or more specified categories.</source>
+        <translation>Exclude debugging information for a category. Can be used in conjunction with -debug=1 to output debug logs for all categories except one or more specified categories.</translation>
     </message>
     <message>
         <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>
@@ -3120,6 +5243,10 @@
         <translation>%s programını faydalı buluyorsanız lütfen katkıda bulununuz. Yazılım hakkında daha fazla bilgi için %s adresini ziyaret ediniz.</translation>
     </message>
     <message>
+        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect used)</source>
+        <translation>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect used)</translation>
+    </message>
+    <message>
         <source>Reduce storage requirements by enabling pruning (deleting) of old blocks. This allows the pruneblockchain RPC to be called to delete specific blocks, and enables automatic pruning of old blocks if a target size in MiB is provided. This mode is incompatible with -txindex and -rescan. Warning: Reverting this setting requires re-downloading the entire blockchain. (default: 0 = disable pruning blocks, 1 = allow manual pruning via RPC, &gt;%u = automatically prune block files to stay under the specified target size in MiB)</source>
         <translation>Eski blokları budamayı (silme) etkinleştirerek depolama gereksinimlerini azaltın. Bu belirli blokları silmek için pruneblockchain uzak yordam çağrısına (RPC) izin verir. Eğer bloklar hedef mebibyte boyutuna ulaşırsa eski blokların otomatik olarak budanmasını sağlar. Bu kip, -txindex ve -rescan ile uyumsuzdur. Uyarı: Bu ayarı geri almak, blok zincirinin tamamını yeniden yüklemeyi gerektirir. (varsayılan: 0 = blok budaması devre dışı, 1 = RPC üzerinden manuel budamaya izin verir, &gt;%u = mebibyte olarak belirtilen hedef boyutun altında kalması için blok dosyalarını otomatik olarak budar)</translation>
     </message>
@@ -3138,6 +5265,14 @@
     <message>
         <source>This is a pre-release test build - use at your own risk - do not use for mining or merchant applications</source>
         <translation>Bu kararlı sürümden önceki bir deneme sürümüdür. - risklerini bilerek kullanma sorumluluğu sizdedir - raven oluşturmak ya da ticari uygulamalar için kullanmayınız</translation>
+    </message>
+    <message>
+        <source>This is the transaction fee you may discard if change is smaller than dust at this level</source>
+        <translation>This is the transaction fee you may discard if change is smaller than dust at this level</translation>
+    </message>
+    <message>
+        <source>Unable to replay blocks. You will need to rebuild the database using -reindex-chainstate.</source>
+        <translation>Unable to replay blocks. You will need to rebuild the database using -reindex-chainstate.</translation>
     </message>
     <message>
         <source>Unable to rewind the database to a pre-fork state. You will need to redownload the blockchain</source>
@@ -3164,8 +5299,12 @@
         <translation>Uyarı: Ağ eşlerimizle tamamen anlaşamamışız gibi görünüyor! Güncelleme yapmanız gerekebilir ya da diğer düğümlerin güncelleme yapmaları gerekebilir.</translation>
     </message>
     <message>
-        <source>You need to rebuild the database using -reindex-chainstate to change -txindex</source>
-        <translation>-txindex'i değiştirmek için veritabanını -reindex-chainstate kullanarak tekrar inşa etmeniz gerekmektedir</translation>
+        <source>Whether to save the mempool on shutdown and load on restart (default: %u)</source>
+        <translation>Whether to save the mempool on shutdown and load on restart (default: %u)</translation>
+    </message>
+    <message>
+        <source>%d of last 100 blocks have unexpected version</source>
+        <translation>%d of last 100 blocks have unexpected version</translation>
     </message>
     <message>
         <source>%s corrupt, salvage failed</source>
@@ -3178,6 +5317,10 @@
     <message>
         <source>&lt;category&gt; can be:</source>
         <translation>&lt;kategori&gt; şunlar olabilir:</translation>
+    </message>
+    <message>
+        <source>Accept connections from outside (default: 1 if no -proxy or -connect)</source>
+        <translation>Accept connections from outside (default: 1 if no -proxy or -connect)</translation>
     </message>
     <message>
         <source>Append comment to the user agent string</source>
@@ -3268,10 +5411,6 @@
         <translation>%s unsurunun yüklenmesinde hata oluştu: cüzdan %s programının yeni bir sürümüne ihtiyaç duyuyor</translation>
     </message>
     <message>
-        <source>Error loading %s: You can't disable HD on a already existing HD wallet</source>
-        <translation>%s yüklenmesinde hata: zaten var olan HD bir cüzdanda HD devre dışı bırakılamaz.</translation>
-    </message>
-    <message>
         <source>Error loading block database</source>
         <translation>Blok veritabanının yüklenmesinde hata</translation>
     </message>
@@ -3300,12 +5439,12 @@
         <translation>Başlatma sınaması başarısız oldu. %s kapatılıyor.</translation>
     </message>
     <message>
-        <source>Invalid -onion address: '%s'</source>
-        <translation>Geçersiz -onion adresi: '%s'</translation>
-    </message>
-    <message>
         <source>Invalid amount for -%s=&lt;amount&gt;: '%s'</source>
         <translation>-%s=&lt;tutar&gt; için geçersiz tutar: '%s'</translation>
+    </message>
+    <message>
+        <source>Invalid amount for -discardfee=&lt;amount&gt;: '%s'</source>
+        <translation>Invalid amount for -discardfee=&lt;amount&gt;: '%s'</translation>
     </message>
     <message>
         <source>Invalid amount for -fallbackfee=&lt;amount&gt;: '%s'</source>
@@ -3314,6 +5453,10 @@
     <message>
         <source>Keep the transaction memory pool below &lt;n&gt; megabytes (default: %u)</source>
         <translation>İşlem bellek alanını &lt;n&gt; megabayttan düşük tut (varsayılan: %u)</translation>
+    </message>
+    <message>
+        <source>Loading P2P addresses...</source>
+        <translation>Loading P2P addresses...</translation>
     </message>
     <message>
         <source>Loading banlist...</source>
@@ -3356,6 +5499,10 @@
         <translation>Zincir durumunu güncel olarak indekslenen bloklardan yeniden derle</translation>
     </message>
     <message>
+        <source>Replaying blocks...</source>
+        <translation>Replaying blocks...</translation>
+    </message>
+    <message>
         <source>Rewinding blocks...</source>
         <translation>Bloklar geri sarılıyor...</translation>
     </message>
@@ -3364,16 +5511,16 @@
         <translation>Veritabanı önbellek boyutunu megabayt olarak belirt (%d ilâ %d, varsayılan: %d)</translation>
     </message>
     <message>
-        <source>Set maximum block size in bytes (default: %d)</source>
-        <translation>En yüksek blok boyutunu bayt olarak ayarla (varsayılan: %d)</translation>
-    </message>
-    <message>
         <source>Specify wallet file (within data directory)</source>
         <translation>Cüzdan dosyası belirtiniz (veri klasörünün içinde)</translation>
     </message>
     <message>
         <source>The source code is available from %s.</source>
         <translation>Kaynak kod şuradan elde edilebilir: %s.</translation>
+    </message>
+    <message>
+        <source>Transaction fee and change calculation failed</source>
+        <translation>Transaction fee and change calculation failed</translation>
     </message>
     <message>
         <source>Unable to bind to %s on this computer. %s is probably already running.</source>
@@ -3392,6 +5539,14 @@
         <translation>Deskteklenmeyen -tor argümanı bulundu, -onion kullanınız.</translation>
     </message>
     <message>
+        <source>Unsupported logging category %s=%s.</source>
+        <translation>Unsupported logging category %s=%s.</translation>
+    </message>
+    <message>
+        <source>Upgrading UTXO database</source>
+        <translation>Upgrading UTXO database</translation>
+    </message>
+    <message>
         <source>Use UPnP to map the listening port (default: %u)</source>
         <translation>Dinleme portunu haritalamak için UPnP kullan (varsayılan: %u)</translation>
     </message>
@@ -3406,10 +5561,6 @@
     <message>
         <source>Verifying blocks...</source>
         <translation>Bloklar kontrol ediliyor...</translation>
-    </message>
-    <message>
-        <source>Verifying wallet...</source>
-        <translation>Cüzdan kontrol ediliyor...</translation>
     </message>
     <message>
         <source>Wallet %s resides outside data directory %s</source>
@@ -3434,10 +5585,6 @@
     <message>
         <source>Bind to given address and whitelist peers connecting to it. Use [host]:port notation for IPv6</source>
         <translation>Belirtilen adrese bağlan ve ona bağlanan eşleri beyaz listeye al. IPv6 için [makine]:port imlasını kullanınız</translation>
-    </message>
-    <message>
-        <source>Bind to given address to listen for JSON-RPC connections. Use [host]:port notation for IPv6. This option can be specified multiple times (default: bind to all interfaces)</source>
-        <translation>Belirtilen adrese bağlan ve JSON RPC bağlantıları için dinlemeye geç. IPv6 için [makine]:port imlasını kullanınız. Bu seçenek birden çok kez belirtilebilir (varsayılan: tüm arayüzlere bağlan)</translation>
     </message>
     <message>
         <source>Create new files with system default permissions, instead of umask 077 (only effective with disabled wallet functionality)</source>
@@ -3476,16 +5623,8 @@
         <translation>Her vekil bağlantısı için kimlik verilerini rastgele yap. Bu, Tor akış izolasyonunu etkinleştirir (varsayılan: %u)</translation>
     </message>
     <message>
-        <source>Set maximum size of high-priority/low-fee transactions in bytes (default: %d)</source>
-        <translation>Yüksek öncelikli/düşük ücretli işlemlerin en yüksek boyutunu bayt olarak ayarla (varsayılan: %d)</translation>
-    </message>
-    <message>
         <source>The transaction amount is too small to send after the fee has been deducted</source>
         <translation>Bu işlem, tutar düşüldükten sonra göndermek için çok düşük</translation>
-    </message>
-    <message>
-        <source>Use hierarchical deterministic key generation (HD) after BIP32. Only has effect during wallet creation/first start</source>
-        <translation>BIP32'den sonra hiyerarşik determinist (HD) anahtar üretimini kullan. Sadece cüzdan oluşturulmasında/ilk başlamada etkiye sahiptir.</translation>
     </message>
     <message>
         <source>Whitelisted peers cannot be DoS banned and their transactions are always relayed, even if they are already in the mempool, useful e.g. for a gateway</source>
@@ -3512,8 +5651,16 @@
         <translation>SOCKS5 vekil sunucusu vasıtasıyla bağlan</translation>
     </message>
     <message>
+        <source>Error loading %s: You can't disable HD on an already existing HD wallet</source>
+        <translation>Error loading %s: You can't disable HD on an already existing HD wallet</translation>
+    </message>
+    <message>
         <source>Error reading from database, shutting down.</source>
         <translation>Veritabanından okumada hata, kapatılıyor.</translation>
+    </message>
+    <message>
+        <source>Error upgrading chainstate database</source>
+        <translation>Error upgrading chainstate database</translation>
     </message>
     <message>
         <source>Imports blocks from external blk000??.dat file on startup</source>
@@ -3522,6 +5669,14 @@
     <message>
         <source>Information</source>
         <translation>Bilgi</translation>
+    </message>
+    <message>
+        <source>Invalid -onion address or hostname: '%s'</source>
+        <translation>Invalid -onion address or hostname: '%s'</translation>
+    </message>
+    <message>
+        <source>Invalid -proxy address or hostname: '%s'</source>
+        <translation>Invalid -proxy address or hostname: '%s'</translation>
     </message>
     <message>
         <source>Invalid amount for -paytxfee=&lt;amount&gt;: '%s' (must be at least %s)</source>
@@ -3558,10 +5713,6 @@
     <message>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>İzleme/hata ayıklama verilerini debug.log dosyası yerine konsola gönder</translation>
-    </message>
-    <message>
-        <source>Send transactions as zero-fee transactions if possible (default: %u)</source>
-        <translation>İşlemleri mümkünse ücretsiz olarak gönder (varsayılan: %u)</translation>
     </message>
     <message>
         <source>Show all debugging options (usage: --help -help-debug)</source>
@@ -3616,6 +5767,10 @@
         <translation>JSON-RPC bağlantıları için kullanıcı ismi</translation>
     </message>
     <message>
+        <source>Verifying wallet(s)...</source>
+        <translation>Verifying wallet(s)...</translation>
+    </message>
+    <message>
         <source>Warning</source>
         <translation>Uyarı</translation>
     </message>
@@ -3648,10 +5803,6 @@
         <translation>-addnode, -seednode ve -connect için DNS aramalarına izin ver</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Adresler yükleniyor...</translation>
-    </message>
-    <message>
         <source>(1 = keep tx meta data e.g. account owner and payment request information, 2 = drop tx meta data)</source>
         <translation>(1 = tx meta verilerini tut mesela hesap sahibi ve ödeme talebi bilgileri, 2 = tx meta verilerini at)</translation>
     </message>
@@ -3660,12 +5811,24 @@
         <translation>-maxtxfee çok yüksek bir değere ayarlanmış! Bu denli yüksek ücretler tek bir işlemde ödenebilir.</translation>
     </message>
     <message>
+        <source>Bind to given address to listen for JSON-RPC connections. This option is ignored unless -rpcallowip is also passed. Port is optional and overrides -rpcport. Use [host]:port notation for IPv6. This option can be specified multiple times (default: 127.0.0.1 and ::1 i.e., localhost, or if -rpcallowip has been specified, 0.0.0.0 and :: i.e., all addresses)</source>
+        <translation>Bind to given address to listen for JSON-RPC connections. This option is ignored unless -rpcallowip is also passed. Port is optional and overrides -rpcport. Use [host]:port notation for IPv6. This option can be specified multiple times (default: 127.0.0.1 and ::1 i.e., localhost, or if -rpcallowip has been specified, 0.0.0.0 and :: i.e., all addresses)</translation>
+    </message>
+    <message>
         <source>Do not keep transactions in the mempool longer than &lt;n&gt; hours (default: %u)</source>
         <translation>İşlemleri bellek alanında &lt;n&gt; saatten fazla tutma (varsayılan: %u)</translation>
     </message>
     <message>
         <source>Equivalent bytes per sigop in transactions for relay and mining (default: %u)</source>
         <translation>Oluşturma ve aktarma işlemlerinde sigop başına eşdeğer bayt (varsayılan: %u)</translation>
+    </message>
+    <message>
+        <source>Error loading %s: You can't enable HD on an already existing non-HD wallet</source>
+        <translation>Error loading %s: You can't enable HD on an already existing non-HD wallet</translation>
+    </message>
+    <message>
+        <source>Error loading wallet %s. -wallet parameter must only specify a filename (not a path).</source>
+        <translation>Error loading wallet %s. -wallet parameter must only specify a filename (not a path).</translation>
     </message>
     <message>
         <source>Fees (in %s/kB) smaller than this are considered zero fee for transaction creation (default: %s)</source>
@@ -3692,16 +5855,16 @@
         <translation>Hata ayıklama bilgisini dök (varsayılan: %u, &lt;kategori&gt; sağlanması seçime dayalıdır)</translation>
     </message>
     <message>
-        <source>Query for peer addresses via DNS lookup, if low on addresses (default: 1 unless -connect/-noconnect)</source>
-        <translation>Adres sayısı azaldıysa DNS sorgulamasıyla eş adresleri ara (varsayılan: 1  -connect/-noconnect kullanılmadıysa)</translation>
-    </message>
-    <message>
         <source>Sets the serialization of raw transaction or block hex returned in non-verbose mode, non-segwit(0) or segwit(1) (default: %d)</source>
         <translation>Ham işlemin serileştirilmesini ayarlar veya blok non-verbose, non-segwit(0) veya segwit(1) kipinde onaltılık değeri döndürür (default: %d)</translation>
     </message>
     <message>
         <source>Support filtering of blocks and transaction with bloom filters (default: %u)</source>
         <translation>Blokların ve işlemlerin bloom filtreleri ile süzülmesini destekle (varsayılan: %u)</translation>
+    </message>
+    <message>
+        <source>The fee rate (in %s/kB) that indicates your tolerance for discarding change by adding it to the fee (default: %s). Note: An output is discarded if it is dust at this rate, but we will always discard up to the dust relay fee and a discard fee above that is limited by the fee estimate for the longest target</source>
+        <translation>The fee rate (in %s/kB) that indicates your tolerance for discarding change by adding it to the fee (default: %s). Note: An output is discarded if it is dust at this rate, but we will always discard up to the dust relay fee and a discard fee above that is limited by the fee estimate for the longest target</translation>
     </message>
     <message>
         <source>This is the transaction fee you may pay when fee estimates are not available.</source>
@@ -3756,16 +5919,24 @@
         <translation>Eş adresleri sorgulaması için daima DNS aramasını kullan (varsayılan: %u)</translation>
     </message>
     <message>
+        <source>Error loading wallet %s. -wallet filename must be a regular file.</source>
+        <translation>Error loading wallet %s. -wallet filename must be a regular file.</translation>
+    </message>
+    <message>
+        <source>Error loading wallet %s. Duplicate -wallet filename specified.</source>
+        <translation>Error loading wallet %s. Duplicate -wallet filename specified.</translation>
+    </message>
+    <message>
+        <source>Error loading wallet %s. Invalid characters in -wallet filename.</source>
+        <translation>Error loading wallet %s. Invalid characters in -wallet filename.</translation>
+    </message>
+    <message>
         <source>How many blocks to check at startup (default: %u, 0 = all)</source>
         <translation>Başlangıçta kontrol edilecek blok sayısı (varsayılan: %u, 0 = hepsi)</translation>
     </message>
     <message>
         <source>Include IP addresses in debug output (default: %u)</source>
         <translation>Hata ayıklama çıktısına IP adreslerini dahil et (varsayılan: %u)</translation>
-    </message>
-    <message>
-        <source>Invalid -proxy address: '%s'</source>
-        <translation>Geçersiz -proxy adresi: '%s'</translation>
     </message>
     <message>
         <source>Keypool ran out, please call keypoolrefill first</source>
@@ -3884,10 +6055,6 @@
         <translation>Blok indeksi yükleniyor...</translation>
     </message>
     <message>
-        <source>Add a node to connect to and attempt to keep the connection open</source>
-        <translation>Bağlanılacak düğüm ekle ve bağlantıyı sürekli açık tutmaya çalış</translation>
-    </message>
-    <message>
         <source>Loading wallet...</source>
         <translation>Cüzdan yükleniyor...</translation>
     </message>
@@ -3896,16 +6063,8 @@
         <translation>Cüzdan eski biçime geri alınamaz</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Varsayılan adres yazılamadı</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Yeniden taranıyor...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Yükleme tamamlandı</translation>
     </message>
     <message>
         <source>Error</source>

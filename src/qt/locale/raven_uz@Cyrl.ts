@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="uz_Cyrl">
+<TS language="uz@Cyrl" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -67,234 +65,19 @@
     </message>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>&amp;Хабар ёзиш...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Тармоқ билан синхронланмоқда...</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Кўриб чиқиш</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Улам</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Ҳамённинг умумий кўринишини кўрсатиш</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Пул ўтказмалари</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Пул ўтказмалари тарихини кўриш</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>Ч&amp;иқиш</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Иловадан чиқиш</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>&amp;Qt ҳақида</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Qt ҳақидаги маълумотларни кўрсатиш</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Мосламалар...</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>Ҳамённи &amp;кодлаш...</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>Ҳамённи &amp;заҳиралаш...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>Махфий сўзни &amp;ўзгартириш...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Жўнатилувчи манзиллар...</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>&amp;Қабул қилувчи манзиллар...</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Интернет манзилни очиш</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Дискдаги блоклар қайта индексланмоқда...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Тангаларни Raven манзилига жўнатиш</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Ҳамённи бошқа манзилга заҳиралаш</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Паролни ўзгартириш ҳамённи кодлашда фойдаланилади</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Носозликни ҳал қилиш ойнаси</translation>
-    </message>
-    <message>
-        <source>Open debugging and diagnostic console</source>
-        <translation>Носозликни ҳал қилиш ва ташхис терминали</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>Хабарни &amp;тасдиқлаш...</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Ҳамён</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Жўнатиш</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Қабул қилиш</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>&amp;Кўрсатиш / Яшириш</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Асосий ойнани кўрсатиш ёки яшириш</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Ҳамёнингизга тегишли махфий калитларни кодлаш</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Raven манзилидан унинг эгаси эканлигингизни исботлаш учун хабарлар ёзинг</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Хабарларни махсус Raven манзилларингиз билан ёзилганлигига ишонч ҳосил қилиш учун уларни тасдиқланг</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;Файл</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp; Созламалар</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Ёрдам</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Ички ойналар асбоблар панели</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Тўловлар (QR кодлари ва raven ёрдамида яратишлар: URI’лар) сўраш</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Фойдаланилган жўнатилган манзиллар ва ёрлиқлар рўйхатини кўрсатиш</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Фойдаланилган қабул қилинган манзиллар ва ёрлиқлар рўйхатини кўрсатиш</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Raven’ни очиш: URI ёки тўлов сўрови</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>&amp;Буйруқлар сатри мосламалари</translation>
-    </message>
-    <message numerus="yes">
-        <source>%n active connection(s) to Raven network</source>
-        <translation><numerusform>%n та Raven тармоғига фаол уланиш мавжуд</numerusform></translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 орқада</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Сўнги қабул қилинган блок %1 олдин яратилган.</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Бундан кейинги пул ўтказмалари кўринмайдиган бўлади.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Хатолик</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Диққат</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Маълумот</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Янгиланган</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Банд қилинмоқда...</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Жўнатилган операция</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Кирувчи операция</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Ҳамён &lt;b&gt;кодланган&lt;/b&gt; ва вақтинча &lt;b&gt;қулфдан чиқарилган&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Ҳамён &lt;b&gt;кодланган&lt;/b&gt; ва вақтинча &lt;b&gt;қулфланган&lt;/b&gt;</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -356,6 +139,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -401,6 +187,12 @@
         <translation>Маълумотлар директориясини бу ерда яратиб бўлмайди..</translation>
     </message>
 </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
+    </context>
 <context>
     <name>HelpMessageDialog</name>
     <message>
@@ -448,6 +240,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
@@ -457,6 +261,9 @@
         <source>Last block time</source>
         <translation>Сўнгги блок вақти</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -500,20 +307,8 @@
         <translation>Мавзуларни &amp;тўғрилаш скрипти миқдори</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>Ташқаридан уланишларга рози бўлиш</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Кирувчи уланишларга рухсат бериш</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>Прокси IP манзили (масалан: IPv4: 127.0.0.1 / IPv6: ::1)</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>Бегона тараф ўтказмалари URL манзиллари</translation>
     </message>
     <message>
         <source>&amp;Network</source>
@@ -635,10 +430,6 @@
         <translation>Миналаштирилган баланс ҳалигача тайёр эмас</translation>
     </message>
     <message>
-        <source>Balances</source>
-        <translation>Баланслар</translation>
-    </message>
-    <message>
         <source>Total:</source>
         <translation>Жами:</translation>
     </message>
@@ -666,7 +457,7 @@
         <source>Current total balance in watch-only addresses</source>
         <translation>Жорий умумий баланс фақат кўринадиган манзилларда</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>PaymentServer</name>
     </context>
@@ -817,10 +608,6 @@
         <translation>&amp;Тармоқ трафиги</translation>
     </message>
     <message>
-        <source>&amp;Clear</source>
-        <translation>&amp;Тозалаш</translation>
-    </message>
-    <message>
         <source>Totals</source>
         <translation>Жами</translation>
     </message>
@@ -841,28 +628,8 @@
         <translation>Терминални тозалаш</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Тарихни кўриш учун тепага ва пастга кўрсаткичларидан фойдаланинг, экранни тозалаш учун &lt;b&gt;Ctrl-L&lt;/b&gt; тугмалар бирикмасидан фойдаланинг.</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Мавжуд буйруқларни кўриш учун &lt;b&gt;help&lt;/b&gt; деб ёзинг.</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 Б</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 КБ</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 МБ</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 ГБ</translation>
     </message>
     <message>
         <source>via %1</source>
@@ -893,6 +660,217 @@
         <translation>Номаълум</translation>
     </message>
 </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>&amp;Хабар ёзиш...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Тармоқ билан синхронланмоқда...</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Кўриб чиқиш</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Улам</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Ҳамённинг умумий кўринишини кўрсатиш</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Пул ўтказмалари</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Пул ўтказмалари тарихини кўриш</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>Ч&amp;иқиш</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Иловадан чиқиш</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>&amp;Qt ҳақида</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Qt ҳақидаги маълумотларни кўрсатиш</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Мосламалар...</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>Ҳамённи &amp;кодлаш...</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>Ҳамённи &amp;заҳиралаш...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>Махфий сўзни &amp;ўзгартириш...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Жўнатилувчи манзиллар...</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>&amp;Қабул қилувчи манзиллар...</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Интернет манзилни очиш</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Дискдаги блоклар қайта индексланмоқда...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Тангаларни Raven манзилига жўнатиш</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Ҳамённи бошқа манзилга заҳиралаш</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Паролни ўзгартириш ҳамённи кодлашда фойдаланилади</translation>
+    </message>
+    <message>
+        <source>Open debugging and diagnostic console</source>
+        <translation>Носозликни ҳал қилиш ва ташхис терминали</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>Хабарни &amp;тасдиқлаш...</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Ҳамён</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Жўнатиш</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Қабул қилиш</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>&amp;Кўрсатиш / Яшириш</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Асосий ойнани кўрсатиш ёки яшириш</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Ҳамёнингизга тегишли махфий калитларни кодлаш</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Raven манзилидан унинг эгаси эканлигингизни исботлаш учун хабарлар ёзинг</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Хабарларни махсус Raven манзилларингиз билан ёзилганлигига ишонч ҳосил қилиш учун уларни тасдиқланг</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;Файл</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>&amp;Ёрдам</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Тўловлар (QR кодлари ва raven ёрдамида яратишлар: URI’лар) сўраш</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Фойдаланилган жўнатилган манзиллар ва ёрлиқлар рўйхатини кўрсатиш</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Фойдаланилган қабул қилинган манзиллар ва ёрлиқлар рўйхатини кўрсатиш</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Raven’ни очиш: URI ёки тўлов сўрови</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>&amp;Буйруқлар сатри мосламалари</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 орқада</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Сўнги қабул қилинган блок %1 олдин яратилган.</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Бундан кейинги пул ўтказмалари кўринмайдиган бўлади.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Хатолик</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Диққат</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Маълумот</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Янгиланган</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Банд қилинмоқда...</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Жўнатилган операция</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Кирувчи операция</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Ҳамён &lt;b&gt;кодланган&lt;/b&gt; ва вақтинча &lt;b&gt;қулфдан чиқарилган&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Ҳамён &lt;b&gt;кодланган&lt;/b&gt; ва вақтинча &lt;b&gt;қулфланган&lt;/b&gt;</translation>
+    </message>
+    </context>
 <context>
     <name>ReceiveCoinsDialog</name>
     <message>
@@ -975,6 +953,15 @@
     <name>RecentRequestsTableModel</name>
     </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -1041,14 +1028,6 @@
         <translation>Тавсия этилган</translation>
     </message>
     <message>
-        <source>normal</source>
-        <translation>Нормал</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>Тезкор</translation>
-    </message>
-    <message>
         <source>Send to multiple recipients at once</source>
         <translation>Бирданига бир нечта қабул қилувчиларга жўнатиш</translation>
     </message>
@@ -1084,10 +1063,6 @@
         <translation>&amp;Миқдори:</translation>
     </message>
     <message>
-        <source>Pay &amp;To:</source>
-        <translation>&amp;Тўлов олувчи:</translation>
-    </message>
-    <message>
         <source>&amp;Label:</source>
         <translation>&amp;Ёрлиқ:</translation>
     </message>
@@ -1114,10 +1089,6 @@
     <message>
         <source>Message:</source>
         <translation>Хабар</translation>
-    </message>
-    <message>
-        <source>Pay To:</source>
-        <translation>Тўлов олувчи:</translation>
     </message>
     </context>
 <context>
@@ -1234,10 +1205,6 @@
         <translation>JSON-RPC уланишлари учун парол</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Манзиллар юкланмоқда...</translation>
-    </message>
-    <message>
         <source>Insufficient funds</source>
         <translation>Кам миқдор</translation>
     </message>
@@ -1252,10 +1219,6 @@
     <message>
         <source>Rescanning...</source>
         <translation>Қайта текшириб чиқилмоқда...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Юклаш тайёр</translation>
     </message>
     <message>
         <source>Error</source>

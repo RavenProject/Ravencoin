@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="zh">
+<TS language="zh" version="2.1">
 <context>
     <name>AddressBookPage</name>
     </context>
@@ -11,18 +9,19 @@
     <name>AskPassphraseDialog</name>
     </context>
 <context>
-    <name>BanTableModel</name>
+    <name>AssetControlDialog</name>
     </context>
 <context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Error</source>
-        <translation>错误</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>警告</translation>
-    </message>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
+    <name>BanTableModel</name>
     </context>
 <context>
     <name>CoinControlDialog</name>
@@ -32,10 +31,19 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     </context>
 <context>
     <name>FreespaceChecker</name>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -48,7 +56,22 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -78,6 +101,17 @@
     <name>RPCConsole</name>
     </context>
 <context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Error</source>
+        <translation>错误</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>警告</translation>
+    </message>
+    </context>
+<context>
     <name>ReceiveCoinsDialog</name>
     </context>
 <context>
@@ -89,6 +123,15 @@
         <source>Date</source>
         <translation>日期</translation>
     </message>
+    </context>
+<context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
     </context>
 <context>
     <name>SendCoinsDialog</name>
@@ -182,10 +225,6 @@
         <translation>警告</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>正在载入地址...</translation>
-    </message>
-    <message>
         <source>Insufficient funds</source>
         <translation>余额不足</translation>
     </message>
@@ -196,10 +235,6 @@
     <message>
         <source>Rescanning...</source>
         <translation>再次扫描...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>载入完成</translation>
     </message>
     <message>
         <source>Error</source>

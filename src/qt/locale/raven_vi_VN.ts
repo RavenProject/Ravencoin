@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
-<TS version="2.1" language="vi_VN">
+<TS language="vi_VN" version="2.1">
 <context>
     <name>AddressBookPage</name>
     <message>
@@ -87,6 +85,18 @@
     </message>
     </context>
 <context>
+    <name>AssetControlDialog</name>
+    </context>
+<context>
+    <name>AssetTableModel</name>
+    </context>
+<context>
+    <name>AssetsDialog</name>
+    </context>
+<context>
+    <name>AssignQualifier</name>
+    </context>
+<context>
     <name>BanTableModel</name>
     <message>
         <source>IP/Netmask</source>
@@ -97,267 +107,6 @@
         <translation>Bị cấm đến</translation>
     </message>
 </context>
-<context>
-    <name>RavenGUI</name>
-    <message>
-        <source>Sign &amp;message...</source>
-        <translation>Chứ ký &amp; Tin nhắn...</translation>
-    </message>
-    <message>
-        <source>Synchronizing with network...</source>
-        <translation>Đồng bộ hóa với mạng</translation>
-    </message>
-    <message>
-        <source>&amp;Overview</source>
-        <translation>&amp;Tổng quan</translation>
-    </message>
-    <message>
-        <source>Node</source>
-        <translation>Node</translation>
-    </message>
-    <message>
-        <source>Show general overview of wallet</source>
-        <translation>Hiện thỉ thông tin sơ lược chung về Ví</translation>
-    </message>
-    <message>
-        <source>&amp;Transactions</source>
-        <translation>&amp;Giao dịch</translation>
-    </message>
-    <message>
-        <source>Browse transaction history</source>
-        <translation>Duyệt tìm lịch sử giao dịch</translation>
-    </message>
-    <message>
-        <source>E&amp;xit</source>
-        <translation>T&amp;hoát</translation>
-    </message>
-    <message>
-        <source>Quit application</source>
-        <translation>Thoát chương trình</translation>
-    </message>
-    <message>
-        <source>&amp;About %1</source>
-        <translation>&amp;Thông tin về %1</translation>
-    </message>
-    <message>
-        <source>Show information about %1</source>
-        <translation>Hiện thông tin về %1</translation>
-    </message>
-    <message>
-        <source>About &amp;Qt</source>
-        <translation>Về &amp;Qt</translation>
-    </message>
-    <message>
-        <source>Show information about Qt</source>
-        <translation>Xem thông tin về Qt</translation>
-    </message>
-    <message>
-        <source>&amp;Options...</source>
-        <translation>&amp;Tùy chọn...</translation>
-    </message>
-    <message>
-        <source>Modify configuration options for %1</source>
-        <translation>Chỉnh sửa thiết đặt tùy chọn cho %1</translation>
-    </message>
-    <message>
-        <source>&amp;Encrypt Wallet...</source>
-        <translation>&amp;Mã hóa ví tiền</translation>
-    </message>
-    <message>
-        <source>&amp;Backup Wallet...</source>
-        <translation>&amp;Sao lưu ví tiền...</translation>
-    </message>
-    <message>
-        <source>&amp;Change Passphrase...</source>
-        <translation>&amp;Thay đổi mật khẩu...</translation>
-    </message>
-    <message>
-        <source>&amp;Sending addresses...</source>
-        <translation>&amp;Địa chỉ gửi</translation>
-    </message>
-    <message>
-        <source>&amp;Receiving addresses...</source>
-        <translation>Địa chỉ nhận</translation>
-    </message>
-    <message>
-        <source>Open &amp;URI...</source>
-        <translation>Mở &amp;URI...</translation>
-    </message>
-    <message>
-        <source>Reindexing blocks on disk...</source>
-        <translation>Đánh chỉ số (indexing) lại các khối (blocks) trên ổ đĩa ...</translation>
-    </message>
-    <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Gửi coins đến tài khoản Raven</translation>
-    </message>
-    <message>
-        <source>Backup wallet to another location</source>
-        <translation>Sao lưu ví tiền ở vị trí khác</translation>
-    </message>
-    <message>
-        <source>Change the passphrase used for wallet encryption</source>
-        <translation>Thay đổi cụm mật mã dùng cho mã hoá Ví</translation>
-    </message>
-    <message>
-        <source>&amp;Debug window</source>
-        <translation>&amp;Cửa sổ xử lý lỗi (debug)</translation>
-    </message>
-    <message>
-        <source>&amp;Verify message...</source>
-        <translation>&amp;Tin nhắn xác thực</translation>
-    </message>
-    <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
-    </message>
-    <message>
-        <source>Wallet</source>
-        <translation>Ví</translation>
-    </message>
-    <message>
-        <source>&amp;Send</source>
-        <translation>&amp;Gửi</translation>
-    </message>
-    <message>
-        <source>&amp;Receive</source>
-        <translation>&amp;Nhận</translation>
-    </message>
-    <message>
-        <source>&amp;Show / Hide</source>
-        <translation>Ẩn / H&amp;iện</translation>
-    </message>
-    <message>
-        <source>Show or hide the main Window</source>
-        <translation>Hiện hoặc ẩn cửa sổ chính</translation>
-    </message>
-    <message>
-        <source>Encrypt the private keys that belong to your wallet</source>
-        <translation>Mã hoá các khoá bí mật trong Ví của bạn.</translation>
-    </message>
-    <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Dùng địa chỉ Raven của bạn ký các tin nhắn để xác minh những nội dung tin nhắn đó là của bạn.</translation>
-    </message>
-    <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Kiểm tra các tin nhắn để chắc chắn rằng chúng được ký bằng các địa chỉ Raven xác định.</translation>
-    </message>
-    <message>
-        <source>&amp;File</source>
-        <translation>&amp;File</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Thiết lập</translation>
-    </message>
-    <message>
-        <source>&amp;Help</source>
-        <translation>Trợ &amp;giúp</translation>
-    </message>
-    <message>
-        <source>Tabs toolbar</source>
-        <translation>Thanh công cụ (toolbar)</translation>
-    </message>
-    <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Yêu cầu thanh toán(tạo mã QR và địa chỉ Raven: URLs)</translation>
-    </message>
-    <message>
-        <source>Show the list of used sending addresses and labels</source>
-        <translation>Hiện thỉ danh sách các địa chỉ và nhãn đã dùng để gửi.</translation>
-    </message>
-    <message>
-        <source>Show the list of used receiving addresses and labels</source>
-        <translation>Hiện thỉ danh sách các địa chỉ và nhãn đã dùng để nhận.</translation>
-    </message>
-    <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Mở raven:URL hoặc yêu cầu thanh toán</translation>
-    </message>
-    <message>
-        <source>&amp;Command-line options</source>
-        <translation>7Tùy chọn dòng lệnh</translation>
-    </message>
-    <message>
-        <source>%1 behind</source>
-        <translation>%1 chậm trễ</translation>
-    </message>
-    <message>
-        <source>Last received block was generated %1 ago.</source>
-        <translation>Khối (block) cuối cùng nhận được cách đây %1</translation>
-    </message>
-    <message>
-        <source>Transactions after this will not yet be visible.</source>
-        <translation>Những giao dịch sau đó sẽ không hiện thị.</translation>
-    </message>
-    <message>
-        <source>Error</source>
-        <translation>Lỗi</translation>
-    </message>
-    <message>
-        <source>Warning</source>
-        <translation>Chú ý</translation>
-    </message>
-    <message>
-        <source>Information</source>
-        <translation>Thông tin</translation>
-    </message>
-    <message>
-        <source>Up to date</source>
-        <translation>Đã cập nhật</translation>
-    </message>
-    <message>
-        <source>Catching up...</source>
-        <translation>Bắt kịp...</translation>
-    </message>
-    <message>
-        <source>Date: %1
-</source>
-        <translation>Ngày: %1
-</translation>
-    </message>
-    <message>
-        <source>Amount: %1
-</source>
-        <translation>Số lượng: %1
-</translation>
-    </message>
-    <message>
-        <source>Type: %1
-</source>
-        <translation>Loại: %1
-</translation>
-    </message>
-    <message>
-        <source>Label: %1
-</source>
-        <translation>Nhãn hiệu: %1
-</translation>
-    </message>
-    <message>
-        <source>Address: %1
-</source>
-        <translation>Địa chỉ: %1
-</translation>
-    </message>
-    <message>
-        <source>Sent transaction</source>
-        <translation>Giao dịch đã gửi</translation>
-    </message>
-    <message>
-        <source>Incoming transaction</source>
-        <translation>Giao dịch đang tới</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Ví tiền &lt;b&gt; đã được mã hóa&lt;/b&gt;và hiện &lt;b&gt;đang mở&lt;/b&gt;</translation>
-    </message>
-    <message>
-        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Ví tiền &lt;b&gt; đã được mã hóa&lt;/b&gt;và hiện &lt;b&gt;đang khóa&lt;/b&gt;</translation>
-    </message>
-    </context>
 <context>
     <name>CoinControlDialog</name>
     <message>
@@ -414,6 +163,9 @@
     </message>
     </context>
 <context>
+    <name>CreateAssetDialog</name>
+    </context>
+<context>
     <name>EditAddressDialog</name>
     <message>
         <source>Edit Address</source>
@@ -434,6 +186,12 @@
         <source>name</source>
         <translation>tên</translation>
     </message>
+    </context>
+<context>
+    <name>FreezeAddress</name>
+    </context>
+<context>
+    <name>GUIUtil::SyncWarningMessage</name>
     </context>
 <context>
     <name>HelpMessageDialog</name>
@@ -482,6 +240,18 @@
     </message>
     </context>
 <context>
+    <name>MnemonicDialog</name>
+    </context>
+<context>
+    <name>MnemonicDialog1</name>
+    </context>
+<context>
+    <name>MnemonicDialog2</name>
+    </context>
+<context>
+    <name>MnemonicDialog3</name>
+    </context>
+<context>
     <name>ModalOverlay</name>
     <message>
         <source>Form</source>
@@ -491,6 +261,9 @@
         <source>Hide</source>
         <translation>Ẩn</translation>
     </message>
+    </context>
+<context>
+    <name>MyRestrictedAssetsTableModel</name>
     </context>
 <context>
     <name>OpenURIDialog</name>
@@ -518,20 +291,8 @@
         <translation>MB</translation>
     </message>
     <message>
-        <source>Accept connections from outside</source>
-        <translation>Chấp nhận các kết nối từ bên ngoài</translation>
-    </message>
-    <message>
-        <source>Allow incoming connections</source>
-        <translation>Cho phép nhận kết nối</translation>
-    </message>
-    <message>
         <source>IP address of the proxy (e.g. IPv4: 127.0.0.1 / IPv6: ::1)</source>
         <translation>Địa chỉ IP của proxy (ví dụ IPv4: 127.0.0.1 / IPv6: ::1)</translation>
-    </message>
-    <message>
-        <source>Third party transaction URLs</source>
-        <translation>Phần mềm giao dịch bên thứ ba URLs</translation>
     </message>
     <message>
         <source>W&amp;allet</source>
@@ -679,28 +440,8 @@
         <translation>1&amp;năm</translation>
     </message>
     <message>
-        <source>Use up and down arrows to navigate history, and &lt;b&gt;Ctrl-L&lt;/b&gt; to clear screen.</source>
-        <translation>Sử dụng phím lên và xuống để di chuyển lịch sử, và &lt;b&gt;Ctrl-L&lt;/b&gt; để xóa màn hình</translation>
-    </message>
-    <message>
         <source>Type &lt;b&gt;help&lt;/b&gt; for an overview of available commands.</source>
         <translation>Gõ &lt;b&gt;help&lt;/b&gt; để xem nhưng câu lệnh có sẵn</translation>
-    </message>
-    <message>
-        <source>%1 B</source>
-        <translation>%1 B</translation>
-    </message>
-    <message>
-        <source>%1 KB</source>
-        <translation>%1 KB</translation>
-    </message>
-    <message>
-        <source>%1 MB</source>
-        <translation>%1 MB</translation>
-    </message>
-    <message>
-        <source>%1 GB</source>
-        <translation>%1 GB</translation>
     </message>
     <message>
         <source>never</source>
@@ -713,6 +454,255 @@
     <message>
         <source>No</source>
         <translation>Không</translation>
+    </message>
+    </context>
+<context>
+    <name>RavenGUI</name>
+    <message>
+        <source>Sign &amp;message...</source>
+        <translation>Chứ ký &amp; Tin nhắn...</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network...</source>
+        <translation>Đồng bộ hóa với mạng</translation>
+    </message>
+    <message>
+        <source>&amp;Overview</source>
+        <translation>&amp;Tổng quan</translation>
+    </message>
+    <message>
+        <source>Node</source>
+        <translation>Node</translation>
+    </message>
+    <message>
+        <source>Show general overview of wallet</source>
+        <translation>Hiện thỉ thông tin sơ lược chung về Ví</translation>
+    </message>
+    <message>
+        <source>&amp;Transactions</source>
+        <translation>&amp;Giao dịch</translation>
+    </message>
+    <message>
+        <source>Browse transaction history</source>
+        <translation>Duyệt tìm lịch sử giao dịch</translation>
+    </message>
+    <message>
+        <source>E&amp;xit</source>
+        <translation>T&amp;hoát</translation>
+    </message>
+    <message>
+        <source>Quit application</source>
+        <translation>Thoát chương trình</translation>
+    </message>
+    <message>
+        <source>&amp;About %1</source>
+        <translation>&amp;Thông tin về %1</translation>
+    </message>
+    <message>
+        <source>Show information about %1</source>
+        <translation>Hiện thông tin về %1</translation>
+    </message>
+    <message>
+        <source>About &amp;Qt</source>
+        <translation>Về &amp;Qt</translation>
+    </message>
+    <message>
+        <source>Show information about Qt</source>
+        <translation>Xem thông tin về Qt</translation>
+    </message>
+    <message>
+        <source>&amp;Options...</source>
+        <translation>&amp;Tùy chọn...</translation>
+    </message>
+    <message>
+        <source>Modify configuration options for %1</source>
+        <translation>Chỉnh sửa thiết đặt tùy chọn cho %1</translation>
+    </message>
+    <message>
+        <source>&amp;Encrypt Wallet...</source>
+        <translation>&amp;Mã hóa ví tiền</translation>
+    </message>
+    <message>
+        <source>&amp;Backup Wallet...</source>
+        <translation>&amp;Sao lưu ví tiền...</translation>
+    </message>
+    <message>
+        <source>&amp;Change Passphrase...</source>
+        <translation>&amp;Thay đổi mật khẩu...</translation>
+    </message>
+    <message>
+        <source>&amp;Sending addresses...</source>
+        <translation>&amp;Địa chỉ gửi</translation>
+    </message>
+    <message>
+        <source>&amp;Receiving addresses...</source>
+        <translation>Địa chỉ nhận</translation>
+    </message>
+    <message>
+        <source>Open &amp;URI...</source>
+        <translation>Mở &amp;URI...</translation>
+    </message>
+    <message>
+        <source>Reindexing blocks on disk...</source>
+        <translation>Đánh chỉ số (indexing) lại các khối (blocks) trên ổ đĩa ...</translation>
+    </message>
+    <message>
+        <source>Send coins to a Raven address</source>
+        <translation>Gửi coins đến tài khoản Raven</translation>
+    </message>
+    <message>
+        <source>Backup wallet to another location</source>
+        <translation>Sao lưu ví tiền ở vị trí khác</translation>
+    </message>
+    <message>
+        <source>Change the passphrase used for wallet encryption</source>
+        <translation>Thay đổi cụm mật mã dùng cho mã hoá Ví</translation>
+    </message>
+    <message>
+        <source>&amp;Verify message...</source>
+        <translation>&amp;Tin nhắn xác thực</translation>
+    </message>
+    <message>
+        <source>Raven</source>
+        <translation>Raven</translation>
+    </message>
+    <message>
+        <source>Wallet</source>
+        <translation>Ví</translation>
+    </message>
+    <message>
+        <source>&amp;Send</source>
+        <translation>&amp;Gửi</translation>
+    </message>
+    <message>
+        <source>&amp;Receive</source>
+        <translation>&amp;Nhận</translation>
+    </message>
+    <message>
+        <source>&amp;Show / Hide</source>
+        <translation>Ẩn / H&amp;iện</translation>
+    </message>
+    <message>
+        <source>Show or hide the main Window</source>
+        <translation>Hiện hoặc ẩn cửa sổ chính</translation>
+    </message>
+    <message>
+        <source>Encrypt the private keys that belong to your wallet</source>
+        <translation>Mã hoá các khoá bí mật trong Ví của bạn.</translation>
+    </message>
+    <message>
+        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <translation>Dùng địa chỉ Raven của bạn ký các tin nhắn để xác minh những nội dung tin nhắn đó là của bạn.</translation>
+    </message>
+    <message>
+        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <translation>Kiểm tra các tin nhắn để chắc chắn rằng chúng được ký bằng các địa chỉ Raven xác định.</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation>&amp;File</translation>
+    </message>
+    <message>
+        <source>&amp;Help</source>
+        <translation>Trợ &amp;giúp</translation>
+    </message>
+    <message>
+        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <translation>Yêu cầu thanh toán(tạo mã QR và địa chỉ Raven: URLs)</translation>
+    </message>
+    <message>
+        <source>Show the list of used sending addresses and labels</source>
+        <translation>Hiện thỉ danh sách các địa chỉ và nhãn đã dùng để gửi.</translation>
+    </message>
+    <message>
+        <source>Show the list of used receiving addresses and labels</source>
+        <translation>Hiện thỉ danh sách các địa chỉ và nhãn đã dùng để nhận.</translation>
+    </message>
+    <message>
+        <source>Open a raven: URI or payment request</source>
+        <translation>Mở raven:URL hoặc yêu cầu thanh toán</translation>
+    </message>
+    <message>
+        <source>&amp;Command-line options</source>
+        <translation>7Tùy chọn dòng lệnh</translation>
+    </message>
+    <message>
+        <source>%1 behind</source>
+        <translation>%1 chậm trễ</translation>
+    </message>
+    <message>
+        <source>Last received block was generated %1 ago.</source>
+        <translation>Khối (block) cuối cùng nhận được cách đây %1</translation>
+    </message>
+    <message>
+        <source>Transactions after this will not yet be visible.</source>
+        <translation>Những giao dịch sau đó sẽ không hiện thị.</translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation>Lỗi</translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation>Chú ý</translation>
+    </message>
+    <message>
+        <source>Information</source>
+        <translation>Thông tin</translation>
+    </message>
+    <message>
+        <source>Up to date</source>
+        <translation>Đã cập nhật</translation>
+    </message>
+    <message>
+        <source>Catching up...</source>
+        <translation>Bắt kịp...</translation>
+    </message>
+    <message>
+        <source>Date: %1
+</source>
+        <translation>Ngày: %1
+</translation>
+    </message>
+    <message>
+        <source>Amount: %1
+</source>
+        <translation>Số lượng: %1
+</translation>
+    </message>
+    <message>
+        <source>Type: %1
+</source>
+        <translation>Loại: %1
+</translation>
+    </message>
+    <message>
+        <source>Label: %1
+</source>
+        <translation>Nhãn hiệu: %1
+</translation>
+    </message>
+    <message>
+        <source>Address: %1
+</source>
+        <translation>Địa chỉ: %1
+</translation>
+    </message>
+    <message>
+        <source>Sent transaction</source>
+        <translation>Giao dịch đã gửi</translation>
+    </message>
+    <message>
+        <source>Incoming transaction</source>
+        <translation>Giao dịch đang tới</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
+        <translation>Ví tiền &lt;b&gt; đã được mã hóa&lt;/b&gt;và hiện &lt;b&gt;đang mở&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
+        <translation>Ví tiền &lt;b&gt; đã được mã hóa&lt;/b&gt;và hiện &lt;b&gt;đang khóa&lt;/b&gt;</translation>
     </message>
     </context>
 <context>
@@ -821,6 +811,15 @@
     </message>
     </context>
 <context>
+    <name>ReissueAssetDialog</name>
+    </context>
+<context>
+    <name>RestrictedAssetsDialog</name>
+    </context>
+<context>
+    <name>SendAssetsEntry</name>
+    </context>
+<context>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
@@ -887,20 +886,8 @@
         <translation>Ẩn</translation>
     </message>
     <message>
-        <source>total at least</source>
-        <translation>Tổng cộng ít nhất</translation>
-    </message>
-    <message>
         <source>(read the tooltip)</source>
         <translation>(Đọc hướng dẫn)</translation>
-    </message>
-    <message>
-        <source>normal</source>
-        <translation>Bình thường</translation>
-    </message>
-    <message>
-        <source>fast</source>
-        <translation>Nhanh</translation>
     </message>
     <message>
         <source>Send to multiple recipients at once</source>
@@ -1009,7 +996,7 @@
         <source>Send Coins</source>
         <translation>Gửi Coins</translation>
     </message>
-</context>
+    </context>
 <context>
     <name>WalletView</name>
     </context>
@@ -1040,10 +1027,6 @@
         <translation>Chú ý</translation>
     </message>
     <message>
-        <source>Loading addresses...</source>
-        <translation>Đang đọc các địa chỉ...</translation>
-    </message>
-    <message>
         <source>(default: %s)</source>
         <translation>(mặc định: %s)</translation>
     </message>
@@ -1064,16 +1047,8 @@
         <translation>Không downgrade được ví</translation>
     </message>
     <message>
-        <source>Cannot write default address</source>
-        <translation>Không ghi được địa chỉ mặc định</translation>
-    </message>
-    <message>
         <source>Rescanning...</source>
         <translation>Đang quét lại...</translation>
-    </message>
-    <message>
-        <source>Done loading</source>
-        <translation>Đã nạp xong</translation>
     </message>
     <message>
         <source>Error</source>
