@@ -270,7 +270,7 @@ RavenGUI::RavenGUI(const PlatformStyle *_platformStyle, const NetworkStyle *netw
     // Subscribe to notifications from core
     subscribeToCoreSignals();
 
-    connect(connectionsControl, SIGNAL(clicked(QPoint)), this, SLOT(toggleNetworkActive()));
+    connect(connectionsControl, SIGNAL(clicked(QPoint)), this, SLOT(showDebugWindowActivatePeers()));
 
     modalOverlay = new ModalOverlay(this->centralWidget());
 #ifdef ENABLE_WALLET
@@ -1144,6 +1144,12 @@ void RavenGUI::showDebugWindowActivateConsole()
     showDebugWindow();
 }
 
+void RavenGUI::showDebugWindowActivatePeers()
+{
+    rpcConsole->setTabFocus(RPCConsole::TAB_PEERS);
+    showDebugWindow();
+}
+
 void RavenGUI::showWalletRepair()
 {
     rpcConsole->setTabFocus(RPCConsole::TAB_REPAIR);
@@ -1242,7 +1248,7 @@ void RavenGUI::updateNetworkState()
     QString tooltip;
 
     if (clientModel->getNetworkActive()) {
-        tooltip = tr("%n active connection(s) to Raven network", "", count) + QString(".<br>") + tr("Click to disable network activity.");
+        tooltip = tr("%n active connection(s) to Raven network", "", count) + QString(".<br>") + tr("Click to show network activity.");
     } else {
         tooltip = tr("Network activity disabled.") + QString("<br>") + tr("Click to enable network activity again.");
         icon = ":/icons/network_disabled";

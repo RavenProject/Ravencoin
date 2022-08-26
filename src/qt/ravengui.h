@@ -286,6 +286,8 @@ private Q_SLOTS:
     void showDebugWindow();
     /** Show debug window and set focus to the console */
     void showDebugWindowActivateConsole();
+    /** Show debug window and set focus to the peers tab */
+    void showDebugWindowActivatePeers();
     /** Show debug window and set focus to the wallet repair tab */
     void showWalletRepair();
     /** Show help message dialog */
