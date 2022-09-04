@@ -6,7 +6,7 @@ https://www.shahepay.site
 ## SHAHEPAY - P2P Crypto Payment System
 
 ### Coin Specifications :
-* Algorithm : X16Rv2
+* Algorithm : KawPow
 * Block Time : 60 second
 * Block Reward : 500 SHAHE
 * Block Reward halving schedule : 210000 block
