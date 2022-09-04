@@ -798,7 +798,7 @@ void RavenGUI::createToolBars()
                             }
                             this->unitChanged = false;
                             labelCurrentPrice->setText(QString("%1").arg(QString().setNum(next, 'f', this->currentPriceDisplay->Decimals)));
-                            labelCurrentPrice->setToolTip(tr("Brought to you by binance.com"));
+                            labelCurrentPrice->setToolTip(tr("Brought to you by exbitron.com"));
                         }
                     }
                 }
@@ -1879,7 +1879,7 @@ void RavenGUI::onCurrencyChange(int newIndex)
 
 void RavenGUI::getPriceInfo()
 {
-    request->setUrl(QUrl(QString("https://api.binance.com/api/v1/ticker/price?symbol=%1").arg(this->currentPriceDisplay->Ticker)));
+    request->setUrl(QUrl(QString("https://www.exbitron.com/api/v2/peatio/public/markets/%1/tickers").arg(this->currentPriceDisplay->Ticker)));
     networkManager->get(*request);
 }
 
