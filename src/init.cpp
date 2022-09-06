@@ -45,6 +45,9 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validationinterface.h"
+
+#include "snapshot/snapshotdb.h"
+
 #include "assets/assets.h"
 #include "assets/assetdb.h"
 #include "assets/snapshotrequestdb.h"
@@ -262,6 +265,9 @@ void PrepareShutdown()
 
         delete pblocktree;
         pblocktree = nullptr;
+
+        delete pSnapshotDB;
+        pSnapshotDB = nullptr;
 
         /** RVN START */
         delete passets;
@@ -509,6 +515,7 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-proxy=<ip:port>", _("Connect through SOCKS5 proxy"));
     strUsage += HelpMessageOpt("-proxyrandomize", strprintf(_("Randomize credentials for every proxy connection. This enables Tor stream isolation (default: %u)"), DEFAULT_PROXYRANDOMIZE));
     strUsage += HelpMessageOpt("-seednode=<ip>", _("Connect to a node to retrieve peer addresses, and disconnect"));
+    strUsage += HelpMessageOpt("-snapshot=<time/height>", _("Take a snapshot of all addresses and values which have a non-zero balance. Use with invalidateblock/reconsiderblock for time/height in the past."));    
     strUsage += HelpMessageOpt("-timeout=<n>", strprintf(_("Specify connection timeout in milliseconds (minimum: 1, default: %d)"), DEFAULT_CONNECT_TIMEOUT));
     strUsage += HelpMessageOpt("-torcontrol=<ip>:<port>", strprintf(_("Tor control port to use if onion listening enabled (default: %s)"), DEFAULT_TOR_CONTROL));
     strUsage += HelpMessageOpt("-torpassword=<pass>", _("Tor control port password (default: empty)"));
@@ -1540,6 +1547,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 delete pcoinsdbview;
                 delete pcoinscatcher;
                 delete pblocktree;
+
+                delete pSnapshotDB;
+                pSnapshotDB = new CSnapshotDB(0, false, false);                
+
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReset, dbMaxFileSize);
 
                 /** RVN START */

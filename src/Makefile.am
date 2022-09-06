@@ -198,6 +198,7 @@ RAVEN_CORE_H = \
   script/standard.h \
   script/ismine.h \
   streams.h \
+  snapshot/snapshotdb.h \
   support/allocators/secure.h \
   support/allocators/zeroafterfree.h \
   support/cleanse.h \
@@ -289,6 +290,7 @@ libraven_server_a_SOURCES = \
   rpc/server.cpp \
   script/sigcache.cpp \
   script/ismine.cpp \
+  snapshot/snapshotdb.cpp \
   timedata.cpp \
   torcontrol.cpp \
   txdb.cpp \

@@ -80,6 +80,9 @@ public:
     uint256 GetBestBlock() const override;
     std::vector<uint256> GetHeadBlocks() const override;
     bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override;
+
+    bool GetAllBalances(std::map<std::string, CAmount>& mapBalances) const;
+
     CCoinsViewCursor *Cursor() const override;
 
     //! Attempt to update from an older database format. Returns whether an error occurred.
@@ -99,6 +102,8 @@ public:
 
     bool Valid() const override;
     void Next() override;
+
+    void Seek();
 
 private:
     CCoinsViewDBCursor(CDBIterator* pcursorIn, const uint256 &hashBlockIn):

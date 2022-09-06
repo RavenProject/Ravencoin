@@ -1,14 +1,14 @@
 name: Build Raven
 
 on:
-  push:
-    branches:
-      - release*
-  pull_request:
-    branches:
-      - master
-      - develop
-      - release*
+#  push:
+#    branches:
+#      - release*
+#  pull_request:
+#    branches:
+#      - master
+#      - develop
+#      - release*
 #    paths-ignore:
 #      - 'binaries/**'
 #      - 'community/**'
@@ -19,6 +19,14 @@ on:
 #      - 'static-builds/**'
 #      - 'whitepaper/**'
 #      - '*.md'
+  workflow_dispatch:
+    # This creates a "Run workflow" button on the github repo webpage when the "Build Ravencoin" 
+    #     workflow is selected on the "Actions" tab. But only if this workflow is in
+    #     the branch which is selected on github as the "default branch".
+    inputs:
+      target:
+        description: 'Target branch to run'
+        required: true
 
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
@@ -111,3 +119,4 @@ jobs:
       with:
         name: ${{ MATRIX.OS }}
         path: ${{ GITHUB.WORKSPACE }}/release
+

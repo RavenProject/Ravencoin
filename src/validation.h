@@ -41,6 +41,8 @@
 #include <assets/assetsnapshotdb.h>
 #include <assets/snapshotrequestdb.h>
 
+#include "snapshot/snapshotdb.h"
+
 class CBlockIndex;
 class CBlockTreeDB;
 class CChainParams;
@@ -502,6 +504,11 @@ extern CCoinsViewCache *pcoinsTip;
 
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern CBlockTreeDB *pblocktree;
+
+
+/** Global variable that points to the snapshot database (protected by cs_main) */
+extern CSnapshotDB* pSnapshotDB;
+
 
 /** RVN START */
 

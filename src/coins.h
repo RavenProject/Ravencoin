@@ -174,6 +174,8 @@ public:
     //! The passed mapCoins can be modified.
     virtual bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock);
 
+    virtual bool GetAllBalances(std::map<std::string, CAmount>& mapBalances) const;
+
     //! Get a cursor to iterate over the whole state
     virtual CCoinsViewCursor *Cursor() const;
 
@@ -199,6 +201,9 @@ public:
     std::vector<uint256> GetHeadBlocks() const override;
     void SetBackend(CCoinsView &viewIn);
     bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override;
+
+    bool GetAllBalances(std::map<std::string, CAmount> &mapBalances) const;
+
     CCoinsViewCursor *Cursor() const override;
     size_t EstimateSize() const override;
 };

@@ -11,6 +11,10 @@
 #include "random.h"
 #include "pow.h"
 #include "uint256.h"
+
+//#include "key_io.h"
+#include "base58.h"
+
 #include "util.h"
 #include "ui_interface.h"
 #include "init.h"
@@ -230,6 +234,20 @@ void CCoinsViewDBCursor::Next()
         keyTmp.first = entry.key;
     }
 }
+
+
+void CCoinsViewDBCursor::Seek() {
+    pcursor->Seek(DB_COIN);
+    // Cache key of first record
+    if (pcursor->Valid()) {
+        CoinEntry entry(&keyTmp.second);
+        pcursor->GetKey(entry);
+        keyTmp.first = entry.key;
+    } else {
+        keyTmp.first = 0; // Make sure Valid() and GetKey() return false
+    }
+}
+
 
 bool CBlockTreeDB::WriteBatchSync(const std::vector<std::pair<int, const CBlockFileInfo*> >& fileInfo, int nLastFile, const std::vector<const CBlockIndex*>& blockinfo) {
     CDBBatch batch(*this);
@@ -624,4 +642,45 @@ bool CCoinsViewDB::Upgrade() {
     uiInterface.ShowProgress("", 100, false);
     LogPrintf("[%s].\n", ShutdownRequested() ? "CANCELLED" : "DONE");
     return !ShutdownRequested();
+}
+
+
+
+bool CCoinsViewDB::GetAllBalances(std::map<std::string, CAmount>& mapBalances) const
+{
+    CCoinsViewDBCursor *pcursor = new CCoinsViewDBCursor(const_cast<CDBWrapper&>(db).NewIterator(), GetBestBlock());
+    pcursor->Seek();
+
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        COutPoint outpoint;
+        if (pcursor->GetKey(outpoint)) {
+            Coin coin;
+            if (pcursor->GetValue(coin)) {
+                CTxOut out = coin.out;
+                CTxDestination dest;
+                if (!out.IsNull()) {
+                    if (out.scriptPubKey.IsAssetScript()) {
+                        // Do nothing
+                    }
+                    else if (ExtractDestination(out.scriptPubKey, dest)) {
+                        mapBalances[EncodeDestination(dest)] += out.nValue;
+                        } else {
+                            error("Snapshot: Failed to extract destination from GetAllBalances call - snapshot could be invalid\n");
+                            LogPrintf("Snapshot: Address error at transaction:%s index:%u\n",outpoint.hash.ToString().c_str(),outpoint.n);
+                        }
+                }
+                pcursor->Next();
+            } else {
+                return error("Snapshot: Failed to extract value from GetAllBalances call - snapshot could be invalid\n");
+                LogPrintf("Snapshot: Value error at transaction:%s index:%u\n",outpoint.hash.ToString().c_str(),outpoint.n);
+                pcursor->Next();
+            }
+        } else {
+            break;
+        }
+    }
+    LogPrintStr("Snapshot: Completed extracting addresses and values\n");
+    
+    return true;
 }

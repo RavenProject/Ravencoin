@@ -423,6 +423,33 @@ UniValue verifymessage(const JSONRPCRequest& request)
     return (pubkey.GetID() == *keyID);
 }
 
+
+UniValue printsnapshot(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+                "printsnapshot \"time\" \n"
+                "\nPrints a snapshot listing all addresses with values which have a non-zero balance. The snapshot must\n"
+                "    have been previously generated using the -snapshot command-line startup option. Be patient and leave\n"
+                "    raven running while the the print completes. Ignore any RPC timeout error messages. The print will\n"
+                "    continue and raven will keep processing blocks in the background.\n"
+                "\nArguments:\n"
+                "1. \"timeorheight\"    (string, required) The timestamp or blockheight that the snapshot was created at\n"
+                "\nResult:\n"
+                "[\n"
+                "address : prefix+hash160+checksum, balance,\n"
+                "...\n"
+                "]\n"
+                "\nExamples:\n"
+                + HelpExampleCli("printsnapshot", "256884524")
+                + HelpExampleRpc("printsnapshot", "256884524")
+        );
+
+    int64_t nTime = request.params[0].get_int64();
+    return PrettyPrintSnapshot(nTime);
+}
+
+
 UniValue signmessagewithprivkey(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 2)
@@ -1330,6 +1357,8 @@ static const CRPCCommand commands[] =
     { "util",               "createmultisig",         &createmultisig,         {"nrequired","keys"} },
     { "util",               "verifymessage",          &verifymessage,          {"address","signature","message"} },
     { "util",               "signmessagewithprivkey", &signmessagewithprivkey, {"privkey","message"} },
+
+    { "util",               "printsnapshot",          &printsnapshot,          {"timeorheight"} },
 
     /* Address index */
     { "addressindex",       "getaddressmempool",      &getaddressmempool,      {"addresses","includeAssets"} },

@@ -47,6 +47,8 @@
 #include <atomic>
 #include <sstream>
 
+#include "snapshot/snapshotdb.h"
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/thread.hpp>
@@ -234,6 +236,8 @@ CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& loc
 CCoinsViewDB *pcoinsdbview = nullptr;
 CCoinsViewCache *pcoinsTip = nullptr;
 CBlockTreeDB *pblocktree = nullptr;
+
+CSnapshotDB* pSnapshotDB = nullptr;
 
 CAssetsDB *passetsdb = nullptr;
 CAssetsCache *passets = nullptr;
@@ -3541,6 +3545,8 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
         UpdateMempoolForReorg(disconnectpool, true);
     }
     mempool.check(pcoinsTip);
+
+    CheckForSnapshot(pcoinsTip);
 
     // Callbacks/notifications for a new best chain.
     if (fInvalidFound)
