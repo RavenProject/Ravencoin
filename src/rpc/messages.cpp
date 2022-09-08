@@ -308,12 +308,12 @@ UniValue clearmessages(const JSONRPCRequest& request) {
 UniValue sendmessage(const JSONRPCRequest& request) {
     if (request.fHelp || !AreMessagesDeployed() || request.params.size() < 2 || request.params.size() > 3)
         throw std::runtime_error(
-                "sendmessage \"channel_name\" \"ipfs_hash\" (expire_time)\n"
+                "sendmessage \"channel\" \"ipfs_hash\" (expire_time)\n"
                 + MessageActivationWarning() +
                 "\nCreates and broadcasts a message transaction to the network for a channel this wallet owns"
 
                 "\nArguments:\n"
-                "1. \"channel_name\"             (string, required) Name of the channel that you want to send a message with (message channel, administrator asset), if a non administrator asset name is given, the administrator '!' will be added to it\n"
+                "1. \"channel\"             (string, required) Name of the channel that you want to send a message with (message channel, administrator asset), if a non administrator asset name is given, the administrator '!' will be added to it\n"
                 "2. \"ipfs_hash\"                (string, required) The IPFS hash of the message\n"
                 "3. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
 
