@@ -1,0 +1,1427 @@
+diff --git a/depends/packages/libxcb.mk b/depends/packages/libxcb.mk
+index 28f2bd6f25..fa30e80f5c 100644
+--- a/depends/packages/libxcb.mk
++++ b/depends/packages/libxcb.mk
+@@ -1,25 +1,30 @@
+ package=libxcb
+-$(package)_version=1.10
+-$(package)_download_path=http://xcb.freedesktop.org/dist
+-$(package)_file_name=$(package)-$($(package)_version).tar.bz2
+-$(package)_sha256_hash=98d9ab05b636dd088603b64229dd1ab2d2cc02ab807892e107d674f9c3f2d5b5
+-$(package)_dependencies=xcb_proto libXau xproto
++$(package)_version=1.14
++$(package)_download_path=https://xcb.freedesktop.org/dist
++$(package)_file_name=$(package)-$($(package)_version).tar.xz
++$(package)_sha256_hash=a55ed6db98d43469801262d81dc2572ed124edc3db31059d4e9916eb9f844c34
++$(package)_dependencies=xcb_proto libXau
+ 
+ define $(package)_set_vars
+-$(package)_config_opts=--disable-static
++$(package)_config_opts=--disable-static --disable-devel-docs --without-doxygen --without-launchd
++$(package)_config_opts += --disable-dependency-tracking --enable-option-checking
++# Disable unneeded extensions.
++# More info is available from: https://doc.qt.io/qt-5.15/linux-requirements.html
++$(package)_config_opts += --disable-composite --disable-damage --disable-dpms
++$(package)_config_opts += --disable-dri2 --disable-dri3 --disable-glx
++$(package)_config_opts += --disable-present --disable-record --disable-resource
++$(package)_config_opts += --disable-screensaver --disable-xevie --disable-xfree86-dri
++$(package)_config_opts += --disable-xinput --disable-xprint --disable-selinux
++$(package)_config_opts += --disable-xtest --disable-xv --disable-xvmc
+ endef
+ 
+ define $(package)_preprocess_cmds
++  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub build-aux && \
+   sed "s/pthread-stubs//" -i configure
+ endef
+ 
+-# Don't install xcb headers to the default path in order to work around a qt
+-# build issue: https://bugreports.qt.io/browse/QTBUG-34748
+-# When using qt's internal libxcb, it may end up finding the real headers in
+-# depends staging. Use a non-default path to avoid that.
+-
+ define $(package)_config_cmds
+-  $($(package)_autoconf) --includedir=$(host_prefix)/include/xcb-shared
++  $($(package)_autoconf)
+ endef
+ 
+ define $(package)_build_cmds
+@@ -31,5 +36,5 @@ define $(package)_stage_cmds
+ endef
+ 
+ define $(package)_postprocess_cmds
+-  rm -rf share/man share/doc
++  rm -rf share lib/*.la
+ endef
+diff --git a/depends/packages/libxcb_util.mk b/depends/packages/libxcb_util.mk
+new file mode 100644
+index 0000000000..6f1b9cd7c6
+--- /dev/null
++++ b/depends/packages/libxcb_util.mk
+@@ -0,0 +1,32 @@
++package=libxcb_util
++$(package)_version=0.4.0
++$(package)_download_path=https://xcb.freedesktop.org/dist
++$(package)_file_name=xcb-util-$($(package)_version).tar.bz2
++$(package)_sha256_hash=46e49469cb3b594af1d33176cd7565def2be3fa8be4371d62271fabb5eae50e9
++$(package)_dependencies=libxcb
++
++define $(package)_set_vars
++$(package)_config_opts = --disable-shared --disable-devel-docs --without-doxygen
++$(package)_config_opts += --disable-dependency-tracking --enable-option-checking
++$(package)_config_opts += --with-pic
++endef
++
++define $(package)_preprocess_cmds
++  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub .
++endef
++
++define $(package)_config_cmds
++  $($(package)_autoconf)
++endef
++
++define $(package)_build_cmds
++  $(MAKE)
++endef
++
++define $(package)_stage_cmds
++  $(MAKE) DESTDIR=$($(package)_staging_dir) install
++endef
++
++define $(package)_postprocess_cmds
++  rm -rf share/man share/doc lib/*.la
++endef
+diff --git a/depends/packages/libxcb_util_image.mk b/depends/packages/libxcb_util_image.mk
+new file mode 100644
+index 0000000000..d12d67e8e8
+--- /dev/null
++++ b/depends/packages/libxcb_util_image.mk
+@@ -0,0 +1,31 @@
++package=libxcb_util_image
++$(package)_version=0.4.0
++$(package)_download_path=https://xcb.freedesktop.org/dist
++$(package)_file_name=xcb-util-image-$($(package)_version).tar.bz2
++$(package)_sha256_hash=2db96a37d78831d643538dd1b595d7d712e04bdccf8896a5e18ce0f398ea2ffc
++$(package)_dependencies=libxcb libxcb_util
++
++define $(package)_set_vars
++$(package)_config_opts=--disable-static --disable-devel-docs --without-doxygen
++$(package)_config_opts+= --disable-dependency-tracking --enable-option-checking
++endef
++
++define $(package)_preprocess_cmds
++  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub .
++endef
++
++define $(package)_config_cmds
++  $($(package)_autoconf)
++endef
++
++define $(package)_build_cmds
++  $(MAKE)
++endef
++
++define $(package)_stage_cmds
++  $(MAKE) DESTDIR=$($(package)_staging_dir) install
++endef
++
++define $(package)_postprocess_cmds
++  rm -rf share/man share/doc lib/*.la
++endef
+diff --git a/depends/packages/libxcb_util_keysyms.mk b/depends/packages/libxcb_util_keysyms.mk
+new file mode 100644
+index 0000000000..d4f72dedbe
+--- /dev/null
++++ b/depends/packages/libxcb_util_keysyms.mk
+@@ -0,0 +1,31 @@
++package=libxcb_util_keysyms
++$(package)_version=0.4.0
++$(package)_download_path=https://xcb.freedesktop.org/dist
++$(package)_file_name=xcb-util-keysyms-$($(package)_version).tar.bz2
++$(package)_sha256_hash=0ef8490ff1dede52b7de533158547f8b454b241aa3e4dcca369507f66f216dd9
++$(package)_dependencies=libxcb xproto
++
++define $(package)_set_vars
++$(package)_config_opts=--disable-static --disable-devel-docs --without-doxygen
++$(package)_config_opts += --disable-dependency-tracking --enable-option-checking
++endef
++
++define $(package)_preprocess_cmds
++  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub .
++endef
++
++define $(package)_config_cmds
++  $($(package)_autoconf)
++endef
++
++define $(package)_build_cmds
++  $(MAKE)
++endef
++
++define $(package)_stage_cmds
++  $(MAKE) DESTDIR=$($(package)_staging_dir) install
++endef
++
++define $(package)_postprocess_cmds
++  rm -rf share/man share/doc lib/*.la
++endef
+diff --git a/depends/packages/libxcb_util_render.mk b/depends/packages/libxcb_util_render.mk
+new file mode 100644
+index 0000000000..28f1fb073c
+--- /dev/null
++++ b/depends/packages/libxcb_util_render.mk
+@@ -0,0 +1,31 @@
++package=libxcb_util_render
++$(package)_version=0.3.9
++$(package)_download_path=https://xcb.freedesktop.org/dist
++$(package)_file_name=xcb-util-renderutil-$($(package)_version).tar.bz2
++$(package)_sha256_hash=c6e97e48fb1286d6394dddb1c1732f00227c70bd1bedb7d1acabefdd340bea5b
++$(package)_dependencies=libxcb
++
++define $(package)_set_vars
++$(package)_config_opts=--disable-static --disable-devel-docs --without-doxygen
++$(package)_config_opts += --disable-dependency-tracking --enable-option-checking
++endef
++
++define $(package)_preprocess_cmds
++  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub .
++endef
++
++define $(package)_config_cmds
++  $($(package)_autoconf)
++endef
++
++define $(package)_build_cmds
++  $(MAKE)
++endef
++
++define $(package)_stage_cmds
++  $(MAKE) DESTDIR=$($(package)_staging_dir) install
++endef
++
++define $(package)_postprocess_cmds
++  rm -rf share/man share/doc lib/*.la
++endef
+diff --git a/depends/packages/libxcb_util_wm.mk b/depends/packages/libxcb_util_wm.mk
+new file mode 100644
+index 0000000000..3b905ba4ec
+--- /dev/null
++++ b/depends/packages/libxcb_util_wm.mk
+@@ -0,0 +1,31 @@
++package=libxcb_util_wm
++$(package)_version=0.4.1
++$(package)_download_path=https://xcb.freedesktop.org/dist
++$(package)_file_name=xcb-util-wm-$($(package)_version).tar.bz2
++$(package)_sha256_hash=28bf8179640eaa89276d2b0f1ce4285103d136be6c98262b6151aaee1d3c2a3f
++$(package)_dependencies=libxcb
++
++define $(package)_set_vars
++$(package)_config_opts=--disable-static --disable-devel-docs --without-doxygen
++$(package)_config_opts += --disable-dependency-tracking --enable-option-checking
++endef
++
++define $(package)_preprocess_cmds
++  cp -f $(BASEDIR)/config.guess $(BASEDIR)/config.sub .
++endef
++
++define $(package)_config_cmds
++  $($(package)_autoconf)
++endef
++
++define $(package)_build_cmds
++  $(MAKE)
++endef
++
++define $(package)_stage_cmds
++  $(MAKE) DESTDIR=$($(package)_staging_dir) install
++endef
++
++define $(package)_postprocess_cmds
++  rm -rf share/man share/doc lib/*.la
++endef
+diff --git a/depends/packages/libxkbcommon.mk b/depends/packages/libxkbcommon.mk
+index 8c6c56545f..bcdcf671f7 100644
+--- a/depends/packages/libxkbcommon.mk
++++ b/depends/packages/libxkbcommon.mk
+@@ -5,9 +5,14 @@ $(package)_file_name=$(package)-$($(package)_version).tar.xz
+ $(package)_sha256_hash=60ddcff932b7fd352752d51a5c4f04f3d0403230a584df9a2e0d5ed87c486c8b
+ $(package)_dependencies=libxcb
+ 
++# This package explicitly enables -Werror=array-bounds, which causes build failures
++# with GCC 12.1+. Work around that by turning errors back into warnings.
++# This workaround would be dropped if the package was updated, as that would require
++# a different build system (Meson)
+ define $(package)_set_vars
+ $(package)_config_opts = --enable-option-checking --disable-dependency-tracking
+ $(package)_config_opts += --disable-static --disable-docs
++$(package)_cflags += -Wno-error=array-bounds
+ endef
+ 
+ define $(package)_preprocess_cmds
+diff --git a/depends/packages/packages.mk b/depends/packages/packages.mk
+index e4ad96e060..025bb245e9 100644
+--- a/depends/packages/packages.mk
++++ b/depends/packages/packages.mk
+@@ -4,7 +4,7 @@ native_packages := native_ccache native_b2
+ qt_native_packages = native_protobuf
+ qt_packages = qrencode protobuf
+ 
+-qt_x86_64_linux_packages:=qt expat dbus libxcb xcb_proto libXau xproto freetype fontconfig libxkbcommon
++qt_x86_64_linux_packages:=qt expat dbus libxcb xcb_proto libXau xproto freetype fontconfig libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
+ qt_i686_linux_packages:=$(qt_x86_64_linux_packages)
+ qt_arm_linux_packages:=$(qt_x86_64_linux_packages)
+ qt_aarch64_linux_packages:=$(qt_x86_64_linux_packages)
+diff --git a/depends/packages/qt.mk b/depends/packages/qt.mk
+index 31e60fcd6a..10e4349f45 100644
+--- a/depends/packages/qt.mk
++++ b/depends/packages/qt.mk
+@@ -1,23 +1,33 @@
+-PACKAGE=qt
+-$(package)_version=5.12.11
+-$(package)_download_path=https://download.qt.io/official_releases/qt/5.12/$($(package)_version)/submodules
+-$(package)_suffix=everywhere-src-$($(package)_version).tar.xz
++package=qt
++$(package)_version=5.15.3
++$(package)_download_path=https://download.qt.io/official_releases/qt/5.15/$($(package)_version)/submodules
++$(package)_suffix=everywhere-opensource-src-$($(package)_version).tar.xz
+ $(package)_file_name=qtbase-$($(package)_suffix)
+-$(package)_sha256_hash=1c1b4e33137ca77881074c140d54c3c9747e845a31338cfe8680f171f0bc3a39
++$(package)_sha256_hash=26394ec9375d52c1592bd7b689b1619c6b8dbe9b6f91fdd5c355589787f3a0b6
+ $(package)_dependencies=openssl
+-$(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon
++$(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
+ $(package)_qt_libs=corelib network widgets gui plugins testlib
+-$(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
+-$(package)_patches+= fix_android_qmake_conf.patch fix_android_jni_static.patch dont_hardcode_pwd.patch
+-$(package)_patches+= drop_lrelease_dependency.patch no_sdk_version_check.patch
+-$(package)_patches+= fix_lib_paths.patch fix_android_pch.patch
+-$(package)_patches+= qtbase-moc-ignore-gcc-macro.patch
++$(package)_linguist_tools = lrelease lupdate lconvert
++$(package)_patches = qt.pro
++$(package)_patches += qttools_src.pro
++$(package)_patches += mac-qmake.conf
++$(package)_patches += fix_qt_pkgconfig.patch
++$(package)_patches += no-xlib.patch
++$(package)_patches += dont_hardcode_x86_64.patch
++$(package)_patches += fix_montery_include.patch
++$(package)_patches += fix_android_jni_static.patch
++$(package)_patches += dont_hardcode_pwd.patch
++$(package)_patches += qtbase-moc-ignore-gcc-macro.patch
++$(package)_patches += fix_limits_header.patch
++$(package)_patches += use_android_ndk23.patch
++$(package)_patches += rcc_hardcode_timestamp.patch
++$(package)_patches += duplicate_lcqpafonts.patch
+ 
+ $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
+-$(package)_qttranslations_sha256_hash=577b0668a777eb2b451c61e8d026d79285371597ce9df06b6dee6c814164b7c3
++$(package)_qttranslations_sha256_hash=5d7869f670a135ad0986e266813b9dd5bbae2b09577338f9cdf8904d4af52db0
+ 
+ $(package)_qttools_file_name=qttools-$($(package)_suffix)
+-$(package)_qttools_sha256_hash=98b2aaca230458f65996f3534fd471d2ffd038dd58ac997c0589c06dc2385b4f
++$(package)_qttools_sha256_hash=463b2fe71a085e7ab4e39333ae360ab0ec857b966d7a08f752c427e5df55f90d
+ 
+ $(package)_extra_sources  = $($(package)_qttranslations_file_name)
+ $(package)_extra_sources += $($(package)_qttools_file_name)
+@@ -28,15 +38,14 @@ $(package)_config_opts_release += -silent
+ $(package)_config_opts_debug = -debug
+ $(package)_config_opts_debug += -optimized-tools
+ $(package)_config_opts += -bindir $(build_prefix)/bin
+-$(package)_config_opts += -c++std c++1z
++$(package)_config_opts += -c++std c++17
+ $(package)_config_opts += -confirm-license
+ $(package)_config_opts += -hostprefix $(build_prefix)
+-$(package)_config_opts += -no-pch
+ $(package)_config_opts += -no-compile-examples
+ $(package)_config_opts += -no-cups
+ $(package)_config_opts += -no-egl
+ $(package)_config_opts += -no-eglfs
+-$(package)_config_opts += -no-freetype
++$(package)_config_opts += -no-evdev
+ $(package)_config_opts += -no-gif
+ $(package)_config_opts += -no-glib
+ $(package)_config_opts += -no-icu
+@@ -44,12 +53,16 @@ $(package)_config_opts += -no-ico
+ $(package)_config_opts += -no-iconv
+ $(package)_config_opts += -no-kms
+ $(package)_config_opts += -no-linuxfb
++$(package)_config_opts += -no-libjpeg
++$(package)_config_opts += -no-libproxy
+ $(package)_config_opts += -no-libudev
+ $(package)_config_opts += -no-mtdev
+ $(package)_config_opts += -openssl-linked
+-$(package)_config_opts += -no-dtls
+ $(package)_config_opts += -no-openvg
+ $(package)_config_opts += -no-reduce-relocations
++$(package)_config_opts += -no-schannel
++$(package)_config_opts += -no-sctp
++$(package)_config_opts += -no-securetransport
+ $(package)_config_opts += -no-sql-db2
+ $(package)_config_opts += -no-sql-ibase
+ $(package)_config_opts += -no-sql-oci
+@@ -61,13 +74,14 @@ $(package)_config_opts += -no-sql-sqlite
+ $(package)_config_opts += -no-sql-sqlite2
+ $(package)_config_opts += -no-system-proxies
+ $(package)_config_opts += -no-use-gold-linker
++$(package)_config_opts += -no-zstd
+ $(package)_config_opts += -nomake examples
+ $(package)_config_opts += -nomake tests
++$(package)_config_opts += -nomake tools
+ $(package)_config_opts += -opensource
+ $(package)_config_opts += -pkg-config
+ $(package)_config_opts += -prefix $(host_prefix)
+ $(package)_config_opts += -qt-libpng
+-$(package)_config_opts += -qt-libjpeg
+ $(package)_config_opts += -qt-pcre
+ $(package)_config_opts += -qt-harfbuzz
+ $(package)_config_opts += -qt-zlib
+@@ -80,6 +94,7 @@ $(package)_config_opts += -no-feature-concurrent
+ $(package)_config_opts += -no-feature-dial
+ $(package)_config_opts += -no-feature-fontcombobox
+ $(package)_config_opts += -no-feature-ftp
++$(package)_config_opts += -no-feature-http
+ $(package)_config_opts += -no-feature-image_heuristic_mask
+ $(package)_config_opts += -no-feature-keysequenceedit
+ $(package)_config_opts += -no-feature-lcdnumber
+@@ -90,10 +105,12 @@ $(package)_config_opts += -no-feature-printer
+ $(package)_config_opts += -no-feature-printpreviewdialog
+ $(package)_config_opts += -no-feature-printpreviewwidget
+ $(package)_config_opts += -no-feature-sessionmanager
++$(package)_config_opts += -no-feature-socks5
+ $(package)_config_opts += -no-feature-sql
+ $(package)_config_opts += -no-feature-sqlmodel
+ $(package)_config_opts += -no-feature-statemachine
+ $(package)_config_opts += -no-feature-syntaxhighlighter
++$(package)_config_opts += -no-feature-textmarkdownwriter
+ $(package)_config_opts += -no-feature-textodfwriter
+ $(package)_config_opts += -no-feature-topleveldomain
+ $(package)_config_opts += -no-feature-udpsocket
+@@ -107,8 +124,10 @@ $(package)_config_opts += -no-feature-xml
+ 
+ $(package)_config_opts_darwin = -no-dbus
+ $(package)_config_opts_darwin += -no-opengl
++$(package)_config_opts_darwin += -pch
+ $(package)_config_opts_darwin += -no-feature-corewlan
+-$(package)_config_opts_darwin += -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
++$(package)_config_opts_darwin += -no-freetype
++$(package)_config_opts_darwin += QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
+ 
+ ifneq ($(build_os),darwin)
+ $(package)_config_opts_darwin = OPENSSL_LIBS="-lssl -lcrypto -pthread -ldl"
+@@ -116,15 +135,16 @@ $(package)_config_opts_darwin += -xplatform macx-clang-linux
+ $(package)_config_opts_darwin += -device-option MAC_SDK_PATH=$(OSX_SDK)
+ $(package)_config_opts_darwin += -device-option MAC_SDK_VERSION=$(OSX_SDK_VERSION)
+ $(package)_config_opts_darwin += -device-option CROSS_COMPILE="$(host)-"
+-$(package)_config_opts_darwin += -device-option MAC_MIN_VERSION=$(OSX_MIN_VERSION)
+ $(package)_config_opts_darwin += -device-option MAC_TARGET=$(host)
+ $(package)_config_opts_darwin += -device-option XCODE_VERSION=$(XCODE_VERSION)
+ endif
+ 
+-# for macOS on Apple Silicon (ARM) see https://bugreports.qt.io/browse/QTBUG-85279
+-$(package)_config_opts_arm_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=arm64
++ifneq ($(build_arch),$(host_arch))
++$(package)_config_opts_aarch64_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=arm64
++$(package)_config_opts_x86_64_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=x86_64
++endif
+ 
+-$(package)_config_opts_linux = -qt-xcb
++$(package)_config_opts_linux = -xcb
+ $(package)_config_opts_linux += -no-xcb-xlib
+ $(package)_config_opts_linux += -no-feature-xlib
+ $(package)_config_opts_linux += -system-freetype
+@@ -136,8 +156,12 @@ $(package)_config_opts_arm_linux = OPENSSL_LIBS="-lssl -lcrypto -pthread -ldl"
+ $(package)_config_opts_arm_linux += -platform linux-g++ -xplatform bitcoin-linux-g++
+ $(package)_config_opts_i686_linux  = -xplatform linux-g++-32
+ $(package)_config_opts_x86_64_linux = OPENSSL_LIBS="-lssl -lcrypto -pthread -ldl"
+-$(package)_config_opts_x86_64_linux += -xplatform linux-g++-64
+ $(package)_config_opts_aarch64_linux = OPENSSL_LIBS="-lssl -lcrypto -pthread -ldl"
++ifneq (,$(findstring -stdlib=libc++,$($(1)_cxx)))
++$(package)_config_opts_x86_64_linux += -xplatform linux-clang-libc++
++else
++$(package)_config_opts_x86_64_linux += -xplatform linux-g++-64
++endif
+ $(package)_config_opts_aarch64_linux += -xplatform linux-aarch64-gnu-g++
+ $(package)_config_opts_powerpc64_linux = -platform linux-g++ -xplatform bitcoin-linux-g++
+ $(package)_config_opts_powerpc64le_linux = -platform linux-g++ -xplatform bitcoin-linux-g++
+@@ -146,18 +170,21 @@ $(package)_config_opts_s390x_linux = -platform linux-g++ -xplatform bitcoin-linu
+ 
+ $(package)_config_opts_mingw32 = -no-opengl
+ $(package)_config_opts_mingw32 += -no-dbus
++$(package)_config_opts_mingw32 += -no-freetype
+ $(package)_config_opts_mingw32 += -xplatform win32-g++
++$(package)_config_opts_mingw32 += "QMAKE_CFLAGS = '$($(package)_cflags) $($(package)_cppflags)'"
++$(package)_config_opts_mingw32 += "QMAKE_CXX = '$($(package)_cxx)'"
++$(package)_config_opts_mingw32 += "QMAKE_CXXFLAGS = '$($(package)_cflags) $($(package)_cppflags)'"
++$(package)_config_opts_mingw32 += "QMAKE_LFLAGS = '$($(package)_ldflags)'"
+ $(package)_config_opts_mingw32 += -device-option CROSS_COMPILE="$(host)-"
+ $(package)_config_opts_mingw32 += OPENSSL_LIBS="-L/usr/x86_64-w64-mingw32/lib -lssl -lcrypto -lws2_32"
++$(package)_config_opts_mingw32 += -pch
+ 
+ $(package)_config_opts_android = -xplatform android-clang
+ $(package)_config_opts_android += -android-sdk $(ANDROID_SDK)
+ $(package)_config_opts_android += -android-ndk $(ANDROID_NDK)
+ $(package)_config_opts_android += -android-ndk-platform android-$(ANDROID_API_LEVEL)
+-$(package)_config_opts_android += -device-option CROSS_COMPILE="$(host)-"
+ $(package)_config_opts_android += -egl
+-$(package)_config_opts_android += -qpa xcb
+-$(package)_config_opts_android += -no-eglfs
+ $(package)_config_opts_android += -no-dbus
+ $(package)_config_opts_android += -opengl es2
+ $(package)_config_opts_android += -qt-freetype
+@@ -170,10 +197,6 @@ $(package)_config_opts_android += -no-feature-vulkan
+ $(package)_config_opts_aarch64_android += -android-arch arm64-v8a
+ $(package)_config_opts_armv7a_android += -android-arch armeabi-v7a
+ $(package)_config_opts_x86_64_android += -android-arch x86_64
+-$(package)_config_opts_i686_android += -android-arch i686
+-
+-$(package)_build_env  = QT_RCC_TEST=1
+-$(package)_build_env += QT_RCC_SOURCE_DATE_OVERRIDE=1
+ endef
+ 
+ define $(package)_fetch_cmds
+@@ -200,37 +223,35 @@ endef
+ #
+ # 1. Apply our patches to the extracted source. See each patch for more info.
+ #
+-# 2. Point to lrelease in qttools/bin/lrelease; otherwise Qt will look for it in
+-# $(host)/native/bin/lrelease and not find it.
+-#
+-# 3. Create a macOS-Clang-Linux mkspec using our mac-qmake.conf.
++# 2. Create a macOS-Clang-Linux mkspec using our mac-qmake.conf.
+ #
+-# 4. After making a copy of the mkspec for the linux-arm-gnueabi host, named
++# 3. After making a copy of the mkspec for the linux-arm-gnueabi host, named
+ # bitcoin-linux-g++, replace instances of linux-arm-gnueabi with $(host). This
+ # way we can generically support hosts like riscv64-linux-gnu, which Qt doesn't
+ # ship a mkspec for. See it's usage in config_opts_* above.
+ #
+-# 5. Put our C, CXX and LD FLAGS into gcc-base.conf. Only used for non-host builds.
++# 4. Put our C, CXX and LD FLAGS into gcc-base.conf. Only used for non-host builds.
+ #
+-# 6. Do similar for the win32-g++ mkspec.
++# 5. Do similar for the win32-g++ mkspec.
+ #
+-# 7. In clang.conf, swap out clang & clang++, for our compiler + flags. See #17466.
++# 6. In clang.conf, swap out clang & clang++, for our compiler + flags. See #17466.
+ #
+-# 8. Adjust a regex in toolchain.prf, to accommodate Guix's usage of
++# 7. Adjust a regex in toolchain.prf, to accommodate Guix's usage of
+ # CROSS_LIBRARY_PATH. See #15277.
+ define $(package)_preprocess_cmds
+-  patch -p1 -i $($(package)_patch_dir)/drop_lrelease_dependency.patch && \
++  cp $($(package)_patch_dir)/qt.pro qt.pro && \
++  cp $($(package)_patch_dir)/qttools_src.pro qttools/src/src.pro && \
+   patch -p1 -i $($(package)_patch_dir)/dont_hardcode_pwd.patch && \
+   patch -p1 -i $($(package)_patch_dir)/fix_qt_pkgconfig.patch && \
+-  patch -p1 -i $($(package)_patch_dir)/fix_no_printer.patch && \
+-  patch -p1 -i $($(package)_patch_dir)/fix_android_qmake_conf.patch && \
+   patch -p1 -i $($(package)_patch_dir)/fix_android_jni_static.patch && \
+-  patch -p1 -i $($(package)_patch_dir)/fix_android_pch.patch && \
+   patch -p1 -i $($(package)_patch_dir)/no-xlib.patch && \
+-  patch -p1 -i $($(package)_patch_dir)/no_sdk_version_check.patch && \
+-  patch -p1 -i $($(package)_patch_dir)/fix_lib_paths.patch && \
++  patch -p1 -i $($(package)_patch_dir)/dont_hardcode_x86_64.patch && \
+   patch -p1 -i $($(package)_patch_dir)/qtbase-moc-ignore-gcc-macro.patch && \
+-  sed -i.old "s|updateqm.commands = \$$$$\$$$$LRELEASE|updateqm.commands = $($(package)_extract_dir)/qttools/bin/lrelease|" qttranslations/translations/translations.pro && \
++  patch -p1 -i $($(package)_patch_dir)/fix_limits_header.patch && \
++  patch -p1 -i $($(package)_patch_dir)/fix_montery_include.patch && \
++  patch -p1 -i $($(package)_patch_dir)/use_android_ndk23.patch && \
++  patch -p1 -i $($(package)_patch_dir)/rcc_hardcode_timestamp.patch && \
++  patch -p1 -i $($(package)_patch_dir)/duplicate_lcqpafonts.patch && \
+   mkdir -p qtbase/mkspecs/macx-clang-linux &&\
+   cp -f qtbase/mkspecs/macx-clang/qplatformdefs.h qtbase/mkspecs/macx-clang-linux/ &&\
+   cp -f $($(package)_patch_dir)/mac-qmake.conf qtbase/mkspecs/macx-clang-linux/qmake.conf && \
+@@ -239,9 +260,6 @@ define $(package)_preprocess_cmds
+   echo "!host_build: QMAKE_CFLAGS     += $($(package)_cflags) $($(package)_cppflags)" >> qtbase/mkspecs/common/gcc-base.conf && \
+   echo "!host_build: QMAKE_CXXFLAGS   += $($(package)_cxxflags) $($(package)_cppflags)" >> qtbase/mkspecs/common/gcc-base.conf && \
+   echo "!host_build: QMAKE_LFLAGS     += $($(package)_ldflags)" >> qtbase/mkspecs/common/gcc-base.conf && \
+-  sed -i.old "s|QMAKE_CFLAGS           += |!host_build: QMAKE_CFLAGS            = $($(package)_cflags) $($(package)_cppflags) |" qtbase/mkspecs/win32-g++/qmake.conf && \
+-  sed -i.old "s|QMAKE_CXXFLAGS         += |!host_build: QMAKE_CXXFLAGS            = $($(package)_cxxflags) $($(package)_cppflags) |" qtbase/mkspecs/win32-g++/qmake.conf && \
+-  sed -i.old "0,/^QMAKE_LFLAGS_/s|^QMAKE_LFLAGS_|!host_build: QMAKE_LFLAGS            = $($(package)_ldflags)\n&|" qtbase/mkspecs/win32-g++/qmake.conf && \
+   sed -i.old "s|QMAKE_CC                = \$$$$\$$$${CROSS_COMPILE}clang|QMAKE_CC                = $($(package)_cc)|" qtbase/mkspecs/common/clang.conf && \
+   sed -i.old "s|QMAKE_CXX               = \$$$$\$$$${CROSS_COMPILE}clang++|QMAKE_CXX               = $($(package)_cxx)|" qtbase/mkspecs/common/clang.conf && \
+   sed -i.old "s/LIBRARY_PATH/(CROSS_)?\0/g" qtbase/mkspecs/features/toolchain.prf
+@@ -254,32 +272,22 @@ define $(package)_config_cmds
+   export OPENSSL_LIBS="-llibssl -llibcrypto -lpthread" && \
+   export PKG_CONFIG_SYSROOT_DIR=/ && \
+   export PKG_CONFIG_LIBDIR=$(host_prefix)/lib/pkgconfig && \
+-  export PKG_CONFIG_PATH=$(host_prefix)/share/pkgconfig  && \
++  export QT_MAC_SDK_NO_VERSION_CHECK=1 && \
+   cd qtbase && \
+-  ./configure $($(package)_config_opts) && \
+-  cd .. && \
+-  $(MAKE) -C qtbase sub-src-clean && \
+-  qtbase/bin/qmake -o qttranslations/Makefile qttranslations/qttranslations.pro && \
+-  qtbase/bin/qmake -o qttranslations/translations/Makefile qttranslations/translations/translations.pro && \
+-  qtbase/bin/qmake -o qttools/src/linguist/lrelease/Makefile qttools/src/linguist/lrelease/lrelease.pro && \
+-  qtbase/bin/qmake -o qttools/src/linguist/lupdate/Makefile qttools/src/linguist/lupdate/lupdate.pro
++  ./configure -top-level $($(package)_config_opts)
+ endef
+ 
+ define $(package)_build_cmds
+-  $(MAKE) -C qtbase/src $(addprefix sub-,$($(package)_qt_libs)) && \
+-  $(MAKE) -C qttools/src/linguist/lrelease && \
+-  $(MAKE) -C qttools/src/linguist/lupdate && \
+-  $(MAKE) -C qttranslations
++  $(MAKE)
+ endef
+ 
+ define $(package)_stage_cmds
+   $(MAKE) -C qtbase/src INSTALL_ROOT=$($(package)_staging_dir) $(addsuffix -install_subtargets,$(addprefix sub-,$($(package)_qt_libs))) && \
+-  $(MAKE) -C qttools/src/linguist/lrelease INSTALL_ROOT=$($(package)_staging_dir) install_target && \
+-  $(MAKE) -C qttools/src/linguist/lupdate INSTALL_ROOT=$($(package)_staging_dir) install_target && \
++  $(MAKE) -C qttools/src/linguist INSTALL_ROOT=$($(package)_staging_dir) $(addsuffix -install_subtargets,$(addprefix sub-,$($(package)_linguist_tools))) && \
+   $(MAKE) -C qttranslations INSTALL_ROOT=$($(package)_staging_dir) install_subtargets
+ endef
+ 
+ define $(package)_postprocess_cmds
+   rm -rf native/mkspecs/ native/lib/ lib/cmake/ && \
+-  rm -f lib/lib*.la lib/*.prl plugins/*/*.prl
++  rm -f lib/lib*.la
+ endef
+diff --git a/depends/packages/xcb_proto.mk b/depends/packages/xcb_proto.mk
+index 0c7c958d62..9be822506d 100644
+--- a/depends/packages/xcb_proto.mk
++++ b/depends/packages/xcb_proto.mk
+@@ -1,13 +1,8 @@
+ package=xcb_proto
+-$(package)_version=1.10
+-$(package)_download_path=http://xcb.freedesktop.org/dist
+-$(package)_file_name=xcb-proto-$($(package)_version).tar.bz2
+-$(package)_sha256_hash=7ef40ddd855b750bc597d2a435da21e55e502a0fefa85b274f2c922800baaf05
+-
+-define $(package)_set_vars
+-  $(package)_config_opts=--disable-shared
+-  $(package)_config_opts_linux=--with-pic
+-endef
++$(package)_version=1.14.1
++$(package)_download_path=https://xorg.freedesktop.org/archive/individual/proto
++$(package)_file_name=xcb-proto-$($(package)_version).tar.xz
++$(package)_sha256_hash=f04add9a972ac334ea11d9d7eb4fc7f8883835da3e4859c9afa971efdf57fcc3
+ 
+ define $(package)_config_cmds
+   $($(package)_autoconf)
+@@ -22,6 +17,5 @@ define $(package)_stage_cmds
+ endef
+ 
+ define $(package)_postprocess_cmds
+-  find -name "*.pyc" -delete && \
+-  find -name "*.pyo" -delete
++  rm -rf lib/python*/site-packages/xcbgen/__pycache__
+ endef
+diff --git a/depends/patches/qt/dont_hardcode_x86_64.patch b/depends/patches/qt/dont_hardcode_x86_64.patch
+new file mode 100644
+index 0000000000..5c1e030fa4
+--- /dev/null
++++ b/depends/patches/qt/dont_hardcode_x86_64.patch
+@@ -0,0 +1,119 @@
++macOS: Don't hard-code x86_64 as the architecture when using qmake
++
++Upstream commit:
++ - Qt 6.1: 9082cc8e8d5a6441dabe5e7a95bc0cd9085b95fe
++
++For other Qt branches see
++https://codereview.qt-project.org/q/I70db7e4c27f0d3da5d0af33cb491d72c312d3fa8
++
++
++--- old/qtbase/configure.json
+++++ new/qtbase/configure.json
++@@ -244,11 +244,18 @@
++ 
++     "testTypeDependencies": {
++         "linkerSupportsFlag": [ "use_bfd_linker", "use_gold_linker", "use_lld_linker" ],
++-        "verifySpec": [ "shared", "use_bfd_linker", "use_gold_linker", "use_lld_linker", "compiler-flags", "qmakeargs", "commit" ],
+++        "verifySpec": [
+++            "shared",
+++            "use_bfd_linker", "use_gold_linker", "use_lld_linker",
+++            "compiler-flags", "qmakeargs",
+++            "simulator_and_device",
+++            "thread",
+++            "commit" ],
++         "compile": [ "verifyspec" ],
++         "detectPkgConfig": [ "cross_compile", "machineTuple" ],
++         "library": [ "pkg-config", "compiler-flags" ],
++-        "getPkgConfigVariable": [ "pkg-config" ]
+++        "getPkgConfigVariable": [ "pkg-config" ],
+++        "architecture" : [ "verifyspec" ]
++     },
++ 
++     "testTypeAliases": {
++@@ -762,7 +769,7 @@
++         },
++         "architecture": {
++             "label": "Architecture",
++-            "output": [ "architecture" ]
+++            "output": [ "architecture", "commitConfig" ]
++         },
++         "pkg-config": {
++             "label": "Using pkg-config",
++diff --git a/configure.pri b/configure.pri
++index 49755f7abfd..8be9b10d7d4 100644
++--- old/qtbase/configure.pri
+++++ new/qtbase/configure.pri
++@@ -662,6 +662,13 @@ defineTest(qtConfOutput_commitOptions) {
++     write_file($$QT_BUILD_TREE/mkspecs/qdevice.pri, $${currentConfig}.output.devicePro)|error()
++ }
++ 
+++# Output is written after configuring each Qt module,
+++# but some tests within a module might depend on the
+++# configuration output of previous tests.
+++defineTest(qtConfOutput_commitConfig) {
+++    qtConfProcessOutput()
+++}
+++
++ # type (empty or 'host'), option name, default value
++ defineTest(processQtPath) {
++     out_var = config.rel_input.$${2}
++diff --git a/mkspecs/common/macx.conf b/mkspecs/common/macx.conf
++index d16b77acb8e..4ba0a8eaa36 100644
++--- old/qtbase/mkspecs/common/macx.conf
+++++ new/qtbase/mkspecs/common/macx.conf
++@@ -6,7 +6,6 @@ QMAKE_PLATFORM         += macos osx macx
++ QMAKE_MAC_SDK           = macosx
++ 
++ QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
++-QMAKE_APPLE_DEVICE_ARCHS = x86_64
++ 
++ # Should be 10.15, but as long as the CI builds with
++ # older SDKs we have to keep this.
++diff --git a/mkspecs/features/mac/default_post.prf b/mkspecs/features/mac/default_post.prf
++index 92a9112bca6..d888731ec8d 100644
++--- old/qtbase/mkspecs/features/mac/default_post.prf
+++++ new/qtbase/mkspecs/features/mac/default_post.prf
++@@ -90,6 +90,11 @@ app_extension_api_only {
++     QMAKE_LFLAGS              += $$QMAKE_CFLAGS_APPLICATION_EXTENSION
++ }
++ 
+++# Non-universal builds do not set QMAKE_APPLE_DEVICE_ARCHS,
+++# so we pick it up from what the arch test resolved instead.
+++isEmpty(QMAKE_APPLE_DEVICE_ARCHS): \
+++    QMAKE_APPLE_DEVICE_ARCHS = $$QT_ARCH
+++
++ macx-xcode {
++     qmake_pkginfo_typeinfo.name = QMAKE_PKGINFO_TYPEINFO
++     !isEmpty(QMAKE_PKGINFO_TYPEINFO): \
++@@ -145,9 +150,6 @@ macx-xcode {
++     simulator: VALID_SIMULATOR_ARCHS = $$QMAKE_APPLE_SIMULATOR_ARCHS
++     VALID_ARCHS = $$VALID_DEVICE_ARCHS $$VALID_SIMULATOR_ARCHS
++ 
++-    isEmpty(VALID_ARCHS): \
++-        error("QMAKE_APPLE_DEVICE_ARCHS or QMAKE_APPLE_SIMULATOR_ARCHS must contain at least one architecture")
++-
++     single_arch: VALID_ARCHS = $$first(VALID_ARCHS)
++ 
++     ACTIVE_ARCHS = $(filter $(EXPORT_VALID_ARCHS), $(ARCHS))
++diff --git a/mkspecs/features/toolchain.prf b/mkspecs/features/toolchain.prf
++index efbe7c1e55b..8add6dc8043 100644
++--- old/qtbase/mkspecs/features/toolchain.prf
+++++ new/qtbase/mkspecs/features/toolchain.prf
++@@ -182,9 +182,14 @@ isEmpty($${target_prefix}.INCDIRS) {
++         # UIKit simulator platforms will see the device SDK's sysroot in
++         # QMAKE_DEFAULT_*DIRS, because they're handled in a single build pass.
++         darwin {
++-            # Clang doesn't pick up the architecture from the sysroot, and will
++-            # default to the host architecture, so we need to manually set it.
++-            cxx_flags += -arch $$QMAKE_APPLE_DEVICE_ARCHS
+++            uikit {
+++                # Clang doesn't automatically pick up the architecture, just because
+++                # we're passing the iOS sysroot below, and we will end up building the
+++                # test for the host architecture, resulting in linker errors when
+++                # linking against the iOS libraries. We work around this by passing
+++                # the architecture explicitly.
+++                cxx_flags += -arch $$first(QMAKE_APPLE_DEVICE_ARCHS)
+++            }
++ 
++             uikit:macx-xcode: \
++                 cxx_flags += -isysroot $$sdk_path_device.value
+diff --git a/depends/patches/qt/drop_lrelease_dependency.patch b/depends/patches/qt/drop_lrelease_dependency.patch
+deleted file mode 100644
+index 9b918af77c..0000000000
+--- a/depends/patches/qt/drop_lrelease_dependency.patch
++++ /dev/null
+@@ -1,20 +0,0 @@
+-commit 67b3ed7406e1d0762188dbad2c44a06824ba0778
+-Author: fanquake <fanquake@gmail.com>
+-Date:   Tue Aug 18 15:24:01 2020 +0800
+-
+-    Drop dependency on lrelease
+-
+-    Qts buildsystem insists on using the installed lrelease, but gets
+-    confused about how to find it. Since we manually control the build
+-    order, just drop the dependency.
+-
+-    See #9469
+-
+-diff --git a/qttranslations/translations/translations.pro b/qttranslations/translations/translations.pro
+-index 694544c..eff339d 100644
+---- a/qttranslations/translations/translations.pro
+-+++ b/qttranslations/translations/translations.pro
+-@@ -107,3 +107,2 @@ updateqm.commands = $$LRELEASE ${QMAKE_FILE_IN} -qm ${QMAKE_FILE_OUT}
+- silent:updateqm.commands = @echo lrelease ${QMAKE_FILE_IN} && $$updateqm.commands
+--updateqm.depends = $$LRELEASE_EXE
+- updateqm.name = LRELEASE ${QMAKE_FILE_IN}
+diff --git a/depends/patches/qt/duplicate_lcqpafonts.patch b/depends/patches/qt/duplicate_lcqpafonts.patch
+new file mode 100644
+index 0000000000..c460b51dcf
+--- /dev/null
++++ b/depends/patches/qt/duplicate_lcqpafonts.patch
+@@ -0,0 +1,104 @@
++QtGui: Fix duplication of logging category lcQpaFonts
++
++Move it to qplatformfontdatabase.h.
++
++Upstream commit:
++ - Qt 6.0: ab01885e48873fb2ad71841a3f1627fe4d9cd835
++
++--- a/qtbase/src/gui/text/qplatformfontdatabase.cpp
+++++ b/qtbase/src/gui/text/qplatformfontdatabase.cpp
++@@ -52,6 +52,8 @@
++ 
++ QT_BEGIN_NAMESPACE
++ 
+++Q_LOGGING_CATEGORY(lcQpaFonts, "qt.qpa.fonts")
+++
++ void qt_registerFont(const QString &familyname, const QString &stylename,
++                      const QString &foundryname, int weight,
++                      QFont::Style style, int stretch, bool antialiased,
++
++--- a/qtbase/src/gui/text/qplatformfontdatabase.h
+++++ b/qtbase/src/gui/text/qplatformfontdatabase.h
++@@ -50,6 +50,7 @@
++ //
++ 
++ #include <QtGui/qtguiglobal.h>
+++#include <QtCore/qloggingcategory.h>
++ #include <QtCore/QString>
++ #include <QtCore/QStringList>
++ #include <QtCore/QList>
++@@ -62,6 +63,7 @@
++ 
++ QT_BEGIN_NAMESPACE
++ 
+++Q_DECLARE_LOGGING_CATEGORY(lcQpaFonts)
++ 
++ class QWritingSystemsPrivate;
++ 
++
++--- a/qtbase/src/platformsupport/fontdatabases/mac/qfontengine_coretext.mm
+++++ b/qtbase/src/platformsupport/fontdatabases/mac/qfontengine_coretext.mm
++@@ -86,8 +86,6 @@
++ 
++ QT_BEGIN_NAMESPACE
++ 
++-Q_LOGGING_CATEGORY(lcQpaFonts, "qt.qpa.fonts")
++-
++ static float SYNTHETIC_ITALIC_SKEW = std::tan(14.f * std::acos(0.f) / 90.f);
++ 
++ bool QCoreTextFontEngine::ct_getSfntTable(void *user_data, uint tag, uchar *buffer, uint *length)
++
++--- a/qtbase/src/platformsupport/fontdatabases/mac/qfontengine_coretext_p.h
+++++ b/qtbase/src/platformsupport/fontdatabases/mac/qfontengine_coretext_p.h
++@@ -64,8 +64,6 @@
++ 
++ QT_BEGIN_NAMESPACE
++ 
++-Q_DECLARE_LOGGING_CATEGORY(lcQpaFonts)
++-
++ class QCoreTextFontEngine : public QFontEngine
++ {
++     Q_GADGET
++
++--- a/qtbase/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase.cpp
+++++ b/qtbase/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase.cpp
++@@ -68,8 +68,6 @@
++ 
++ QT_BEGIN_NAMESPACE
++ 
++-Q_LOGGING_CATEGORY(lcQpaFonts, "qt.qpa.fonts")
++-
++ #ifndef QT_NO_DIRECTWRITE
++ // ### fixme: Consider direct linking of dwrite.dll once Windows Vista pre SP2 is dropped (QTBUG-49711)
++ 
++
++--- a/qtbase/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase_p.h
+++++ b/qtbase/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase_p.h
++@@ -63,8 +63,6 @@
++ 
++ QT_BEGIN_NAMESPACE
++ 
++-Q_DECLARE_LOGGING_CATEGORY(lcQpaFonts)
++-
++ class QWindowsFontEngineData
++ {
++     Q_DISABLE_COPY_MOVE(QWindowsFontEngineData)
++
++--- a/qtbase/src/platformsupport/themes/genericunix/qgenericunixthemes.cpp
+++++ b/qtbase/src/platformsupport/themes/genericunix/qgenericunixthemes.cpp
++@@ -40,6 +40,7 @@
++ #include "qgenericunixthemes_p.h"
++ 
++ #include "qpa/qplatformtheme_p.h"
+++#include "qpa/qplatformfontdatabase.h"
++ 
++ #include <QtGui/QPalette>
++ #include <QtGui/QFont>
++@@ -76,7 +77,6 @@
++ QT_BEGIN_NAMESPACE
++ 
++ Q_DECLARE_LOGGING_CATEGORY(qLcTray)
++-Q_LOGGING_CATEGORY(lcQpaFonts, "qt.qpa.fonts")
++ 
++ ResourceHelper::ResourceHelper()
++ {
+diff --git a/depends/patches/qt/fix_android_jni_static.patch b/depends/patches/qt/fix_android_jni_static.patch
+index a186aeb8f6..22a4d5ab0e 100644
+--- a/depends/patches/qt/fix_android_jni_static.patch
++++ b/depends/patches/qt/fix_android_jni_static.patch
+@@ -1,6 +1,6 @@
+ --- old/qtbase/src/plugins/platforms/android/androidjnimain.cpp
+ +++ new/qtbase/src/plugins/platforms/android/androidjnimain.cpp
+-@@ -898,6 +898,14 @@
++@@ -934,6 +934,14 @@ Q_DECL_EXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void */*reserved*/)
+          __android_log_print(ANDROID_LOG_FATAL, "Qt", "registerNatives failed");
+          return -1;
+      }
+diff --git a/depends/patches/qt/fix_android_pch.patch b/depends/patches/qt/fix_android_pch.patch
+deleted file mode 100644
+index bed6e4bb63..0000000000
+--- a/depends/patches/qt/fix_android_pch.patch
++++ /dev/null
+@@ -1,10 +0,0 @@
+---- old/qtbase/mkspecs/common/android-base-head.conf
+-+++ new/qtbase/mkspecs/common/android-base-head.conf
+-@@ -73,6 +73,6 @@ CROSS_COMPILE = $$NDK_TOOLCHAIN_PATH/bin/$$NDK_TOOLS_PREFIX-
+- QMAKE_PCH_OUTPUT_EXT    = .gch
+-
+- QMAKE_CFLAGS_PRECOMPILE       = -x c-header -c ${QMAKE_PCH_INPUT} -o ${QMAKE_PCH_OUTPUT}
+--QMAKE_CFLAGS_USE_PRECOMPILE   = -include ${QMAKE_PCH_OUTPUT_BASE}
+-+QMAKE_CFLAGS_USE_PRECOMPILE   = -include-pch ${QMAKE_PCH_OUTPUT}
+- QMAKE_CXXFLAGS_PRECOMPILE     = -x c++-header -c ${QMAKE_PCH_INPUT} -o ${QMAKE_PCH_OUTPUT}
+- QMAKE_CXXFLAGS_USE_PRECOMPILE = $$QMAKE_CFLAGS_USE_PRECOMPILE
+diff --git a/depends/patches/qt/fix_android_qmake_conf.patch b/depends/patches/qt/fix_android_qmake_conf.patch
+deleted file mode 100644
+index 3a8753fd1d..0000000000
+--- a/depends/patches/qt/fix_android_qmake_conf.patch
++++ /dev/null
+@@ -1,10 +0,0 @@
+---- old/qtbase/mkspecs/android-clang/qmake.conf
+-+++ new/qtbase/mkspecs/android-clang/qmake.conf
+-@@ -47,7 +47,7 @@ ANDROID_STDCPP_PATH = $$ANDROID_SOURCES_CXX_STL_LIBDIR/libc++_shared.so
+- ANDROID_USE_LLVM = true
+- 
+- exists($$ANDROID_SOURCES_CXX_STL_LIBDIR/libc++.so): \
+--    ANDROID_CXX_STL_LIBS = -lc++
+-+    ANDROID_CXX_STL_LIBS = -lc++_shared
+- else: \
+-     ANDROID_CXX_STL_LIBS = $$ANDROID_SOURCES_CXX_STL_LIBDIR/libc++.so.$$replace(ANDROID_PLATFORM, "android-", "")
+diff --git a/depends/patches/qt/fix_lib_paths.patch b/depends/patches/qt/fix_lib_paths.patch
+deleted file mode 100644
+index d1a15373f4..0000000000
+--- a/depends/patches/qt/fix_lib_paths.patch
++++ /dev/null
+@@ -1,193 +0,0 @@
+---- old/qtbase/mkspecs/common/mac.conf
+-+++ new/qtbase/mkspecs/common/mac.conf
+-@@ -14,7 +14,6 @@
+- 
+- QMAKE_RESOURCE          = /Developer/Tools/Rez
+- QMAKE_EXTENSION_SHLIB   = dylib
+--QMAKE_EXTENSIONS_AUX_SHLIB = tbd
+- QMAKE_LIBDIR            =
+- 
+- # sdk.prf will prefix the proper SDK sysroot
+-
+---- old/qtbase/mkspecs/features/qmake_use.prf
+-+++ new/qtbase/mkspecs/features/qmake_use.prf
+-@@ -22,6 +22,8 @@
+-         !defined(QMAKE_LIBS_$$nu, var): \
+-             error("Library '$$lower($$replace(nu, _, -))' is not defined.")
+- 
+-+        QMAKE_LIBDIR += $$eval(QMAKE_LIBDIR_$$nu)
+-+
+-         debug: \
+-             LIBS$${suffix} += $$eval(QMAKE_LIBS_$${nu}_DEBUG) $$eval(QMAKE_LIBS_$$nu)
+-         else: \
+-
+---- old/qtbase/mkspecs/features/qt_configure.prf
+-+++ new/qtbase/mkspecs/features/qt_configure.prf
+-@@ -526,98 +526,23 @@
+-     return($$sysrootified)
+- }
+- 
+--# libs-var, libs, in-paths, out-paths-var
+-+# libs-var, libs, in-paths
+- defineTest(qtConfResolveLibs) {
+--    ret = true
+--    paths = $$3
+--    out =
+--    copy = false
+--    for (l, 2) {
+--        $$copy {
+--            copy = false
+--            out += $$l
+--        } else: equals(l, "-s") {
+--            # em++ flag to link libraries from emscripten-ports; passed on literally.
+--            copy = true
+--            out += $$l
+--        } else: contains(l, "^-L.*") {
+--            lp = $$replace(l, "^-L", )
+--            gcc: lp = $$qtGccSysrootifiedPath($$lp)
+--            !exists($$lp/.) {
+--                qtLog("Library path $$val_escape(lp) is invalid.")
+--                ret = false
+--            } else {
+--                paths += $$lp
+--            }
+--        } else: contains(l, "^-l.*") {
+--            lib = $$replace(l, "^-l", )
+--            lcan =
+--            integrity:contains(lib, "^.*\\.a") {
+--                # INTEGRITY compiler searches for exact filename
+--                # if -l argument has .a suffix
+--                lcan += $${lib}
+--            } else: contains(lib, "^:.*") {
+--                # Use exact filename when -l:filename syntax is used.
+--                lib ~= s/^://
+--                lcan += $${lib}
+--            } else: unix {
+--                # Under UNIX, we look for actual shared libraries, in addition
+--                # to static ones.
+--                shexts = $$QMAKE_EXTENSION_SHLIB $$QMAKE_EXTENSIONS_AUX_SHLIB
+--                for (ext, shexts) {
+--                    lcan += $${QMAKE_PREFIX_SHLIB}$${lib}.$${ext}
+--                }
+--                lcan += \
+--                    $${QMAKE_PREFIX_STATICLIB}$${lib}.$${QMAKE_EXTENSION_STATICLIB}
+--            } else {
+--                # Under Windows, we look only for static libraries, as even for DLLs
+--                # one actually links against a static import library.
+--                mingw {
+--                    lcan += \
+--                        # MinGW supports UNIX-style library naming in addition to
+--                        # the MSVC style.
+--                        lib$${lib}.dll.a lib$${lib}.a \
+--                        # Fun fact: prefix-less libraries are also supported.
+--                        $${lib}.dll.a $${lib}.a
+--                }
+--                lcan += $${lib}.lib
+--            }
+--            l = $$qtConfFindInPathList($$lcan, $$paths $$EXTRA_LIBDIR $$QMAKE_DEFAULT_LIBDIRS)
+--            isEmpty(l) {
+--                qtLog("None of [$$val_escape(lcan)] found in [$$val_escape(paths)] and global paths.")
+--                ret = false
+--            } else {
+--                out += $$l
+--            }
+--        } else {
+--            out += $$l
+--        }
+--    }
+--    $$1 = $$out
+-+    for (path, 3): \
+-+        pre_lflags += -L$$path
+-+    $$1 = $$pre_lflags $$2
+-     export($$1)
+--    !isEmpty(4) {
+--        $$4 = $$paths
+--        export($$4)
+--    }
+--    return($$ret)
+--}
+--
+--# source-var
+--defineTest(qtConfResolveAllLibs) {
+--    ret = true
+--    !qtConfResolveLibs($${1}.libs, $$eval($${1}.libs), , $${1}.libdirs): \
+--        ret = false
+--    for (b, $${1}.builds._KEYS_): \
+--        !qtConfResolveLibs($${1}.builds.$${b}, $$eval($${1}.builds.$${b}), $$eval($${1}.libdirs), ): \
+--            ret = false
+--    return($$ret)
+-+    return(true)
+- }
+- 
+- # libs-var, in-paths, libs
+- defineTest(qtConfResolvePathLibs) {
+-     ret = true
+--    gcc: 2 = $$qtGccSysrootifiedPaths($$2)
+--    for (libdir, 2) {
+-+    gcc: \
+-+        local_paths = $$qtGccSysrootifiedPaths($$2)
+-+    else: \
+-+        local_paths = $$2
+-+    for (libdir, local_paths) {
+-         !exists($$libdir/.) {
+-             qtLog("Library path $$val_escape(libdir) is invalid.")
+-             ret = false
+-@@ -667,8 +592,11 @@
+- # includes-var, in-paths, test-object-var
+- defineTest(qtConfResolvePathIncs) {
+-     ret = true
+--    gcc: 2 = $$qtGccSysrootifiedPaths($$2)
+--    for (incdir, 2) {
+-+    gcc: \
+-+        local_paths = $$qtGccSysrootifiedPaths($$2)
+-+    else: \
+-+        local_paths = $$2
+-+    for (incdir, local_paths) {
+-         !exists($$incdir/.) {
+-             qtLog("Include path $$val_escape(incdir) is invalid.")
+-             ret = false
+-@@ -727,6 +655,7 @@
+-         vars += $$eval(config.commandline.rev_assignments.$${iv})
+-         defined(config.input.$${iv}, var) {
+-             eval($${1}.builds.$${b} = $$eval(config.input.$${iv}))
+-+            export($${1}.builds.$${b})
+-             $${1}.builds._KEYS_ *= $${b}
+-             any = true
+-         } else {
+-@@ -741,11 +670,14 @@
+-         export($${1}.builds._KEYS_)
+-         # we also reset the generic libs, to avoid surprises.
+-         $${1}.libs =
+-+        export($${1}.libs)
+-     }
+- 
+-     # direct libs. overwrites inline libs.
+--    defined(config.input.$${input}.libs, var): \
+-+    defined(config.input.$${input}.libs, var) {
+-         eval($${1}.libs = $$eval(config.input.$${input}.libs))
+-+        export($${1}.libs)
+-+    }
+- 
+-     includes = $$eval(config.input.$${input}.incdir)
+- 
+-@@ -754,6 +686,7 @@
+-     !isEmpty(prefix) {
+-         includes += $$prefix/include
+-         $${1}.libs = -L$$prefix/lib $$eval($${1}.libs)
+-+        export($${1}.libs)
+-     }
+- 
+-     libdir = $$eval(config.input.$${input}.libdir)
+-@@ -762,11 +695,9 @@
+-         for (ld, libdir): \
+-             libs += -L$$ld
+-         $${1}.libs = $$libs $$eval($${1}.libs)
+-+        export($${1}.libs)
+-     }
+- 
+--    !qtConfResolveAllLibs($$1): \
+--        return(false)
+--
+-     !qtConfResolvePathIncs($${1}.includedir, $$includes, $$2): \
+-         return(false)
+- 
+diff --git a/depends/patches/qt/fix_limits_header.patch b/depends/patches/qt/fix_limits_header.patch
+new file mode 100644
+index 0000000000..258128c0ca
+--- /dev/null
++++ b/depends/patches/qt/fix_limits_header.patch
+@@ -0,0 +1,33 @@
++Fix compiling with GCC 11
++
++Upstream:
++ - bug report: https://bugreports.qt.io/browse/QTBUG-89977
++ - fix in Qt 6.1: 813a928c7c3cf98670b6043149880ed5c955efb9
++
++--- old/qtbase/src/corelib/text/qbytearraymatcher.h
+++++ new/qtbase/src/corelib/text/qbytearraymatcher.h
++@@ -42,6 +42,8 @@
++ 
++ #include <QtCore/qbytearray.h>
++ 
+++#include <limits>
+++
++ QT_BEGIN_NAMESPACE
++ 
++ 
++
++Upstream fix and backports:
++ - Qt 6.1: 3eab20ad382569cb2c9e6ccec2322c3d08c0f716
++ - Qt 6.2: 380294a5971da85010a708dc23b0edec192cbf27
++ - Qt 6.3: 2b2b3155d9f6ba1e4f859741468fbc47db09292b
++
++--- old/qtbase/src/corelib/tools/qoffsetstringarray_p.h
+++++ new/qtbase/src/corelib/tools/qoffsetstringarray_p.h
++@@ -55,6 +55,7 @@
++ 
++ #include <tuple>
++ #include <array>
+++#include <limits>
++ 
++ QT_BEGIN_NAMESPACE
++ 
+diff --git a/depends/patches/qt/fix_montery_include.patch b/depends/patches/qt/fix_montery_include.patch
+new file mode 100644
+index 0000000000..38b700addf
+--- /dev/null
++++ b/depends/patches/qt/fix_montery_include.patch
+@@ -0,0 +1,21 @@
++From dece6f5840463ae2ddf927d65eb1b3680e34a547
++From: Øystein Heskestad <oystein.heskestad@qt.io>
++Date: Wed, 27 Oct 2021 13:07:46 +0200
++Subject: [PATCH] Add missing macOS header file that was indirectly included before
++
++See: https://bugreports.qt.io/browse/QTBUG-97855
++
++Upstream Commits:
++ - Qt 6.2: c884bf138a21dd7320e35cef34d24e22e74d7ce0
++
++diff --git a/qtbase/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h b/qtbase/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
++index e070ba97..07c75b04 100644
++--- a/qtbase/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
+++++ b/qtbase/src/plugins/platforms/cocoa/qiosurfacegraphicsbuffer.h
++@@ -40,6 +40,7 @@
++ #ifndef QIOSURFACEGRAPHICSBUFFER_H
++ #define QIOSURFACEGRAPHICSBUFFER_H
++
+++#include <CoreGraphics/CGColorSpace.h>
++ #include <qpa/qplatformgraphicsbuffer.h>
++ #include <private/qcore_mac_p.h>
+diff --git a/depends/patches/qt/fix_no_printer.patch b/depends/patches/qt/fix_no_printer.patch
+deleted file mode 100644
+index 1372356138..0000000000
+--- a/depends/patches/qt/fix_no_printer.patch
++++ /dev/null
+@@ -1,19 +0,0 @@
+---- x/qtbase/src/plugins/platforms/cocoa/qprintengine_mac_p.h
+-+++ y/qtbase/src/plugins/platforms/cocoa/qprintengine_mac_p.h
+-@@ -52,6 +52,7 @@
+- //
+-
+- #include <QtCore/qglobal.h>
+-+#include <qpa/qplatformprintdevice.h>
+-
+- #ifndef QT_NO_PRINTER
+-
+---- x/qtbase/src/plugins/plugins.pro
+-+++ y/qtbase/src/plugins/plugins.pro
+-@@ -9,6 +9,3 @@ qtHaveModule(gui) {
+-     !android:qtConfig(library): SUBDIRS *= generic
+- }
+- qtHaveModule(widgets): SUBDIRS += styles
+--
+--!winrt:qtHaveModule(printsupport): \
+--    SUBDIRS += printsupport
+diff --git a/depends/patches/qt/fix_qt_pkgconfig.patch b/depends/patches/qt/fix_qt_pkgconfig.patch
+index a5de2b4b9e..73f4d89f73 100644
+--- a/depends/patches/qt/fix_qt_pkgconfig.patch
++++ b/depends/patches/qt/fix_qt_pkgconfig.patch
+@@ -4,20 +4,8 @@
+  load(qt_targets)
+  
+  # this builds on top of qt_common
+--!internal_module:if(unix|mingw) {
++-!internal_module:if(unix|mingw):!if(darwin:debug_and_release:CONFIG(debug, debug|release)) {
+ +if(unix|mingw):!if(darwin:debug_and_release:CONFIG(debug, debug|release)) {
+      CONFIG += create_pc
+      QMAKE_PKGCONFIG_DESTDIR = pkgconfig
+      host_build: \
+-@@ -284,9 +284,9 @@ load(qt_targets)
+-         QMAKE_PKGCONFIG_CFLAGS = -D$$MODULE_DEFINE -I${includedir}/$$MODULE_INCNAME
+-     }
+-     QMAKE_PKGCONFIG_NAME = $$replace(TARGET, ^Qt, "Qt$$QT_MAJOR_VERSION ")
+--    QMAKE_PKGCONFIG_FILE = $$replace(TARGET, ^Qt, Qt$$QT_MAJOR_VERSION)
+-+    QMAKE_PKGCONFIG_FILE = $$replace(TARGET, ^Qt, Qt$$QT_MAJOR_VERSION)$$qtPlatformTargetSuffix()
+-     for(i, MODULE_DEPENDS): \
+--        QMAKE_PKGCONFIG_REQUIRES += $$replace(QT.$${i}.name, ^Qt, Qt$$section(QT.$${i}.VERSION, ., 0, 0))
+-+        QMAKE_PKGCONFIG_REQUIRES += $$replace(QT.$${i}.name, ^Qt, Qt$$section(QT.$${i}.VERSION, ., 0, 0))$$qtPlatformTargetSuffix()
+-     isEmpty(QMAKE_PKGCONFIG_DESCRIPTION): \
+-         QMAKE_PKGCONFIG_DESCRIPTION = $$replace(TARGET, ^Qt, "Qt ") module
+-     !isEmpty(lib_replace0.match) {
+diff --git a/depends/patches/qt/mac-qmake.conf b/depends/patches/qt/mac-qmake.conf
+index 0142667547..543407f853 100644
+--- a/depends/patches/qt/mac-qmake.conf
++++ b/depends/patches/qt/mac-qmake.conf
+@@ -8,19 +8,15 @@ include(../common/clang-mac.conf)
+ QMAKE_MAC_SDK_PATH=$${MAC_SDK_PATH}
+ QMAKE_XCODE_VERSION = $${XCODE_VERSION}
+ QMAKE_XCODE_DEVELOPER_PATH=/Developer
+-QMAKE_MACOSX_DEPLOYMENT_TARGET = $${MAC_MIN_VERSION}
+ QMAKE_MAC_SDK=macosx
+ QMAKE_MAC_SDK.macosx.Path = $${MAC_SDK_PATH}
+ QMAKE_MAC_SDK.macosx.platform_name = macosx
+ QMAKE_MAC_SDK.macosx.SDKVersion = $${MAC_SDK_VERSION}
+ QMAKE_MAC_SDK.macosx.PlatformPath = /phony
+-QMAKE_APPLE_DEVICE_ARCHS=x86_64
+ !host_build: QMAKE_CFLAGS += -target $${MAC_TARGET}
+ !host_build: QMAKE_OBJECTIVE_CFLAGS += $$QMAKE_CFLAGS
+ !host_build: QMAKE_CXXFLAGS += $$QMAKE_CFLAGS
+ !host_build: QMAKE_LFLAGS += -target $${MAC_TARGET}
+ QMAKE_AR = $${CROSS_COMPILE}ar cq
+ QMAKE_RANLIB=$${CROSS_COMPILE}ranlib
+-QMAKE_LIBTOOL=$${CROSS_COMPILE}libtool
+-QMAKE_INSTALL_NAME_TOOL=$${CROSS_COMPILE}install_name_tool
+ load(qt_config)
+diff --git a/depends/patches/qt/no-xlib.patch b/depends/patches/qt/no-xlib.patch
+index f4a6f09ee4..d6846aaca2 100644
+--- a/depends/patches/qt/no-xlib.patch
++++ b/depends/patches/qt/no-xlib.patch
+@@ -22,7 +22,7 @@ index 7c62c2e2b3..c05c6c0a07 100644
+  #include <xcb/xfixes.h>
+  #include <xcb/xcb_image.h>
+  
+-@@ -391,6 +393,7 @@ void QXcbCursor::changeCursor(QCursor *cursor, QWindow *window)
++@@ -391,6 +391,7 @@ void QXcbCursor::changeCursor(QCursor *cursor, QWindow *window)
+      xcb_flush(xcb_connection());
+  }
+  
+@@ -30,7 +30,7 @@ index 7c62c2e2b3..c05c6c0a07 100644
+  static int cursorIdForShape(int cshape)
+  {
+      int cursorId = 0;
+-@@ -444,6 +447,7 @@ static int cursorIdForShape(int cshape)
++@@ -444,6 +445,7 @@ static int cursorIdForShape(int cshape)
+      }
+      return cursorId;
+  }
+@@ -38,7 +38,7 @@ index 7c62c2e2b3..c05c6c0a07 100644
+  
+  xcb_cursor_t QXcbCursor::createNonStandardCursor(int cshape)
+  {
+-@@ -556,7 +560,9 @@ static xcb_cursor_t loadCursor(void *dpy, int cshape)
++@@ -556,7 +558,9 @@ static xcb_cursor_t loadCursor(void *dpy, int cshape)
+  xcb_cursor_t QXcbCursor::createFontCursor(int cshape)
+  {
+      xcb_connection_t *conn = xcb_connection();
+@@ -48,16 +48,15 @@ index 7c62c2e2b3..c05c6c0a07 100644
+      xcb_cursor_t cursor = XCB_NONE;
+  
+      // Try Xcursor first
+-@@ -585,7 +591,7 @@ xcb_cursor_t QXcbCursor::createFontCursor(int cshape)
+- 
++@@ -586,6 +590,7 @@ xcb_cursor_t QXcbCursor::createFontCursor(int cshape)
+      // Non-standard X11 cursors are created from bitmaps
+      cursor = createNonStandardCursor(cshape);
+--
++ 
+ +#if QT_CONFIG(xcb_xlib) && QT_CONFIG(library)
+      // Create a glpyh cursor if everything else failed
+      if (!cursor && cursorId) {
+          cursor = xcb_generate_id(conn);
+-@@ -593,6 +599,7 @@ xcb_cursor_t QXcbCursor::createFontCursor(int cshape)
++@@ -593,6 +598,7 @@ xcb_cursor_t QXcbCursor::createFontCursor(int cshape)
+                                  cursorId, cursorId + 1,
+                                  0xFFFF, 0xFFFF, 0xFFFF, 0, 0, 0);
+      }
+diff --git a/depends/patches/qt/no_sdk_version_check.patch b/depends/patches/qt/no_sdk_version_check.patch
+deleted file mode 100644
+index b16635b572..0000000000
+--- a/depends/patches/qt/no_sdk_version_check.patch
++++ /dev/null
+@@ -1,20 +0,0 @@
+-commit f5eb142cd04be2bc4ca610ed3b5b7e8ce3520ee3
+-Author: fanquake <fanquake@gmail.com>
+-Date:   Tue Jan 5 16:08:49 2021 +0800
+-
+-    Don't invoke macOS SDK version checking
+-    
+-    This tries to use xcrun which is not available when cross-compiling.
+-
+-diff --git a/qtbase/mkspecs/features/mac/default_post.prf b/qtbase/mkspecs/features/mac/default_post.prf
+-index 92a9112bca6..447e186eb26 100644
+---- a/qtbase/mkspecs/features/mac/default_post.prf
+-+++ b/qtbase/mkspecs/features/mac/default_post.prf
+-@@ -8,7 +8,6 @@ contains(TEMPLATE, .*app) {
+-     !macx-xcode:if(isEmpty(BUILDS)|build_pass) {
+-         # Detect changes to the platform SDK
+-         QMAKE_EXTRA_VARIABLES += QMAKE_MAC_SDK QMAKE_MAC_SDK_VERSION QMAKE_XCODE_DEVELOPER_PATH
+--        QMAKE_EXTRA_INCLUDES += $$shell_quote($$PWD/sdk.mk)
+-     }
+- 
+-     # Detect incompatible SDK versions
+diff --git a/depends/patches/qt/qt.pro b/depends/patches/qt/qt.pro
+new file mode 100644
+index 0000000000..8f2e900a84
+--- /dev/null
++++ b/depends/patches/qt/qt.pro
+@@ -0,0 +1,16 @@
++# Create the super cache so modules will add themselves to it.
++cache(, super)
++
++!QTDIR_build: cache(CONFIG, add, $$list(QTDIR_build))
++
++prl = no_install_prl
++CONFIG += $$prl
++cache(CONFIG, add stash, prl)
++
++TEMPLATE = subdirs
++SUBDIRS = qtbase qttools qttranslations
++
++qttools.depends = qtbase
++qttranslations.depends = qttools
++
++load(qt_configure)
+diff --git a/depends/patches/qt/qtbase-moc-ignore-gcc-macro.patch b/depends/patches/qt/qtbase-moc-ignore-gcc-macro.patch
+index 0358bea6e9..f0c14a9400 100644
+--- a/depends/patches/qt/qtbase-moc-ignore-gcc-macro.patch
++++ b/depends/patches/qt/qtbase-moc-ignore-gcc-macro.patch
+@@ -7,7 +7,7 @@ Upstream report: https://bugreports.qt.io/browse/QTBUG-83160
+ diff --git a/qtbase/src/tools/moc/main.cpp b/qtbase/src/tools/moc/main.cpp
+ --- a/qtbase/src/tools/moc/main.cpp
+ +++ b/qtbase/src/tools/moc/main.cpp
+-@@ -188,6 +188,7 @@ int runMoc(int argc, char **argv)
++@@ -238,6 +238,7 @@ int runMoc(int argc, char **argv)
+      dummyVariadicFunctionMacro.arguments += Symbol(0, PP_IDENTIFIER, "__VA_ARGS__");
+      pp.macros["__attribute__"] = dummyVariadicFunctionMacro;
+      pp.macros["__declspec"] = dummyVariadicFunctionMacro;
+diff --git a/depends/patches/qt/qttools_src.pro b/depends/patches/qt/qttools_src.pro
+new file mode 100644
+index 0000000000..6ef71a0942
+--- /dev/null
++++ b/depends/patches/qt/qttools_src.pro
+@@ -0,0 +1,6 @@
++TEMPLATE = subdirs
++SUBDIRS = linguist
++
++fb = force_bootstrap
++CONFIG += $$fb
++cache(CONFIG, add, fb)
+diff --git a/depends/patches/qt/rcc_hardcode_timestamp.patch b/depends/patches/qt/rcc_hardcode_timestamp.patch
+new file mode 100644
+index 0000000000..03f3897975
+--- /dev/null
++++ b/depends/patches/qt/rcc_hardcode_timestamp.patch
+@@ -0,0 +1,24 @@
++Hardcode last modified timestamp in Qt RCC
++
++This change allows the already built qt package to be reused even with
++the SOURCE_DATE_EPOCH variable set, e.g., for Guix builds.
++
++
++--- old/qtbase/src/tools/rcc/rcc.cpp
+++++ new/qtbase/src/tools/rcc/rcc.cpp
++@@ -227,14 +227,7 @@ void RCCFileInfo::writeDataInfo(RCCResourceLibrary &lib)
++ 
++     if (lib.formatVersion() >= 2) {
++         // last modified time stamp
++-        const QDateTime lastModified = m_fileInfo.lastModified();
++-        quint64 lastmod = quint64(lastModified.isValid() ? lastModified.toMSecsSinceEpoch() : 0);
++-        static const quint64 sourceDate = 1000 * qgetenv("QT_RCC_SOURCE_DATE_OVERRIDE").toULongLong();
++-        if (sourceDate != 0)
++-            lastmod = sourceDate;
++-        static const quint64 sourceDate2 = 1000 * qgetenv("SOURCE_DATE_EPOCH").toULongLong();
++-        if (sourceDate2 != 0)
++-            lastmod = sourceDate2;
+++        quint64 lastmod = quint64(1);
++         lib.writeNumber8(lastmod);
++         if (text || pass1)
++             lib.writeChar('\n');
+diff --git a/depends/patches/qt/use_android_ndk23.patch b/depends/patches/qt/use_android_ndk23.patch
+new file mode 100644
+index 0000000000..f22367d527
+--- /dev/null
++++ b/depends/patches/qt/use_android_ndk23.patch
+@@ -0,0 +1,13 @@
++Use Android NDK r23 LTS
++
++--- old/qtbase/mkspecs/features/android/default_pre.prf
+++++ new/qtbase/mkspecs/features/android/default_pre.prf
++@@ -76,7 +76,7 @@ else: equals(QT_ARCH, x86_64): CROSS_COMPILE = $$NDK_LLVM_PATH/bin/x86_64-linux-
++ else: equals(QT_ARCH, arm64-v8a): CROSS_COMPILE = $$NDK_LLVM_PATH/bin/aarch64-linux-android-
++ else: CROSS_COMPILE = $$NDK_LLVM_PATH/bin/arm-linux-androideabi-
++ 
++-QMAKE_RANLIB            = $${CROSS_COMPILE}ranlib
+++QMAKE_RANLIB            = $$NDK_LLVM_PATH/bin/llvm-ranlib
++ QMAKE_LINK_SHLIB        = $$QMAKE_LINK
++ QMAKE_LFLAGS            =
++ 
