@@ -4,6 +4,7 @@ $(package)_download_path=https://boostorg.jfrog.io/artifactory/main/release/$(su
 $(package)_file_name=boost_$($(package)_version).tar.bz2
 $(package)_sha256_hash=d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee
 $(package)_dependencies=native_b2
+$(package)_patches=commit-74fb0a2.patch
 
 define $(package)_set_vars
 $(package)_config_opts_release=variant=release
@@ -29,6 +30,7 @@ $(package)_cxxflags_android=-fPIC
 endef
 
 define $(package)_preprocess_cmds
+  patch -p2 -i $($(package)_patch_dir)/commit-74fb0a2.patch && \
   echo "using $($(package)_toolset_$(host_os)) : : $($(package)_cxx) : <cflags>\"$($(package)_cflags)\" <cxxflags>\"$($(package)_cxxflags)\" <compileflags>\"$($(package)_cppflags)\" <linkflags>\"$($(package)_ldflags)\" <archiver>\"$($(package)_ar)\" <striper>\"$(host_STRIP)\"  <ranlib>\"$(host_RANLIB)\" <rc>\"$(host_WINDRES)\" : ;" > user-config.jam
 endef
 
