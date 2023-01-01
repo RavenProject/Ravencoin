@@ -1,0 +1,57 @@
+name: 'build ravencoin (x86_64-w64-mingw32)'
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+        matrix:
+          os: [x86_64-w64-mingw32]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache apt depencenies
+        uses: actions/cache@v2
+        id: cache-apt
+        with:
+          path: "~/apt-cache"
+          key: apt-cache
+
+      - name: Cache depends
+        id: cache-dependencies
+        uses: actions/cache@v2
+        with:
+          path: depends/${{ matrix.os }}
+          key: ${{ matrix.os }}-${{ hashFiles('depends/packages/*.mk') }}
+
+      - name: Install dependencies
+        env:
+          CACHE_HIT: ${{steps.cache-apt.outputs.cache-hit}}
+          DEPS: build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache g++-mingw-w64-x86-64
+        run: |
+          if [[ "$CACHE_HIT" == 'true' ]]; then
+            sudo cp --force --recursive ~/apt-cache/* /
+          else
+            sudo apt-get update && sudo apt-get install -yq $DEPS
+            mkdir -p ~/apt-cache
+            for dep in $DEPS; do
+                dpkg -L $dep | while IFS= read -r f; do if test -f $f; then echo $f; fi; done | xargs cp --parents --target-directory ~/apt-cache/
+            done
+          fi
+          sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+
+      - name: Build depends
+        if: steps.cache-dependencies.outputs.cache-hit != 'true' && steps.cache-apt.outputs.cache-hit != 'true'
+        run: cd depends/ && make -j4 HOST=${{matrix.os}}
+
+      - name: Refresh automake configs
+        run: ./autogen.sh
+
+      - name: Configure automake
+        run: ./configure --prefix=`pwd`/depends/${{ matrix.os }}
+
+      - name: Build codebase
+        run: make -j4
+
