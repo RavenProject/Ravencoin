@@ -747,7 +747,7 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
         throw std::runtime_error(
             "listassetbalancesbyaddress \"address\" (onlytotal) (count) (start)\n"
             + AssetActivationWarning() +
-            "\nReturns a list of all asset balances for an address.\n"
+            "\nReturns a list of all asset balances for an address (requires assetindex to be enabled).\n"
 
             "\nArguments:\n"
             "1. \"address\"                  (string, required) a raven address\n"
@@ -1079,7 +1079,7 @@ UniValue listaddressesbyasset(const JSONRPCRequest &request)
         throw std::runtime_error(
                 "listaddressesbyasset \"asset_name\" (onlytotal) (count) (start)\n"
                 + AssetActivationWarning() +
-                "\nReturns a list of all address that own the given asset (with balances)"
+                "\nReturns a list of all address that own the given asset (with balances) (requires assetindex to be enabled)."
                 "\nOr returns the total size of how many address own the given asset"
 
                 "\nArguments:\n"
