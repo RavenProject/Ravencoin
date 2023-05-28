@@ -77,7 +77,7 @@ UniValue requestsnapshot(const JSONRPCRequest& request) {
 
                 "\nArguments:\n"
                 "1. \"asset_name\"              (string, required) The asset name for which the snapshot will be taken\n"
-                "2. \"block_height\"            (number, required) The block height at which the snapshot will be take\n"
+                "2. \"block_height\"            (number, required) The block height at which the snapshot will be taken\n"
 
                 "\nResult:\n"
                 "{\n"
