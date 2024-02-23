@@ -1,7 +1,7 @@
 Raven Core integration/staging tree
 =====================================
 
-https://yottaflux.org
+https://yottaflux.ai
 
 To see how to run Yottaflux, please read the respective files in [the doc folder](doc)
 

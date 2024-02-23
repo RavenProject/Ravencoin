@@ -11,7 +11,7 @@ Please report bugs using the issue tracker at GitHub:
 
 To receive security and update notifications, please subscribe to:
 
-  <https://yottaflux.org/en/list/announcements/join/>
+  <https://yottaflux.ai/en/list/announcements/join/>
 
 How to Upgrade
 ==============

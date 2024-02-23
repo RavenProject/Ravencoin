@@ -190,7 +190,7 @@ public:
 
         vSeeds.emplace_back("seed-raven.bitactivate.com", false);
         vSeeds.emplace_back("seed-raven.yottaflux.com", false);
-        vSeeds.emplace_back("seed-raven.yottaflux.org", false);
+        vSeeds.emplace_back("seed-raven.yottaflux.ai", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,60);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,122);
@@ -416,7 +416,7 @@ public:
 
         vSeeds.emplace_back("seed-testnet-raven.bitactivate.com", false);
         vSeeds.emplace_back("seed-testnet-raven.yottaflux.com", false);
-        vSeeds.emplace_back("seed-testnet-raven.yottaflux.org", false);
+        vSeeds.emplace_back("seed-testnet-raven.yottaflux.ai", false);
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);

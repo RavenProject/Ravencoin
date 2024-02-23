@@ -134,7 +134,7 @@ Yottaflux repo's [root README](https://github.com/yottaflux/Yottaflux/blob/maste
 ### Resources
 - Discuss on chat [Discord](https://discord.gg/jn6uhur), [Telegram](https://t.me/YottafluxDev) or [Reddit](https://www.reddit.com/r/Yottaflux/).
 - Find out more on the [Yottaflux Wiki](https://raven.wiki/wiki/Yottaflux_Wiki)
-- Visit the project home [Yottaflux.org](https://yottaflux.org)
+- Visit the project home [yottaflux.ai](https://yottaflux.ai)
 
 ### Miscellaneous
 - [Assets Attribution](https://github.com/yottaflux/Yottaflux/blob/master/doc/assets-attribution.md)
