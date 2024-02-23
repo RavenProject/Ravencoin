@@ -14,6 +14,8 @@ src/qt/test/test_yottaflux-qt
 .vscode
 output.txt
 
+scripts/yai_rebuild.sh
+
 # autoreconf
 Makefile.in
 aclocal.m4
