@@ -2405,8 +2405,8 @@
         <translation>Lommebok</translation>
     </message>
     <message>
-        <source>Ravencoin Market Price</source>
-        <translation>Ravencoin markedspris</translation>
+        <source>Yottaflux Market Price</source>
+        <translation>Yottaflux markedspris</translation>
     </message>
     <message>
         <source>Click to disable network activity.</source>

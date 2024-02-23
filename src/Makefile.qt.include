@@ -292,7 +292,7 @@ RES_ICONS = \
   qt/res/icons/asset_manage_selected.png \
   qt/res/icons/asset_transfer.png \
   qt/res/icons/asset_transfer_selected.png \
-  qt/res/icons/ravencointext.png \
+  qt/res/icons/yottafluxtext.png \
   qt/res/icons/raven.ico \
   qt/res/icons/raven_testnet.ico \
   qt/res/icons/raven.png \

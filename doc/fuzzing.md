@@ -1,4 +1,4 @@
-Fuzz-testing Ravencoin
+Fuzz-testing Yottaflux
 ==========================
 
 A special test harness `test_raven_fuzzy` is provided to provide an easy

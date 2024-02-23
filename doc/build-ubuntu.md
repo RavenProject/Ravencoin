@@ -1,4 +1,4 @@
-Build instructions for Ravencoin 
+Build instructions for Yottaflux 
 =================================
 
 This will install most of the dependencies from ubuntu.
@@ -130,12 +130,12 @@ protobuf-compiler
 
 Directory structure
 ------------------
-Ravencoin sources in `$HOME/src`
+Yottaflux sources in `$HOME/src`
 
 Berkeley DB will be installed to `$HOME/src/db4`
 
 
-Ravencoin
+Yottaflux
 ------------------
 
 Start in $HOME
@@ -146,11 +146,11 @@ Make the directory for sources and go into it.
 
 `cd src`
 
-__Download Ravencoin source.__
+__Download Yottaflux source.__
 
-`git clone https://github.com/RavenProject/Ravencoin`
+`git clone https://github.com/RavenProject/Yottaflux`
 
-`cd Ravencoin`
+`cd Yottaflux`
 
 `git checkout develop` # this checks out the develop branch.
 

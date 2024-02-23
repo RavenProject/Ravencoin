@@ -76,7 +76,7 @@ static const std::regex QUALIFIER_INDICATOR("^[#][A-Z0-9._]{3,}$"); // Starts wi
 static const std::regex SUB_QUALIFIER_INDICATOR("^#[A-Z0-9._]+\\/#[A-Z0-9._]+$"); // Starts with #
 static const std::regex RESTRICTED_INDICATOR("^[\\$][A-Z0-9._]{3,}$"); // Starts with $
 
-static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^#RVN$|^#RAVEN$|^#RAVENCOIN$");
+static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^YOTTAFLUX$|^#RVN$|^#RAVEN$|^#YOTTAFLUX$");
 
 bool IsRootNameValid(const std::string& name)
 {
@@ -677,7 +677,7 @@ bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetT
     if (AreTransferScriptsSizeDeployed()) {
         // Before kawpow activation we used the hardcoded 31 to find the data
         // This created a bug where large transfers scripts would fail to serialize.
-        // This fixes that issue (https://github.com/RavenProject/Ravencoin/issues/752)
+        // This fixes that issue (https://github.com/RavenProject/Yottaflux/issues/752)
         // TODO, after the kawpow fork goes active, we should be able to remove this if/else statement and just use this line.
         vchTransferAsset.insert(vchTransferAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
     } else {

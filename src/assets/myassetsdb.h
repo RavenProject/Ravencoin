@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVENCOIN_MYASSETSDB_H
-#define RAVENCOIN_MYASSETSDB_H
+#ifndef YOTTAFLUX_MYASSETSDB_H
+#define YOTTAFLUX_MYASSETSDB_H
 
 #include <dbwrapper.h>
 
@@ -79,4 +79,4 @@ public:
 };
 
 
-#endif //RAVENCOIN_MYASSETSDB_H
+#endif //YOTTAFLUX_MYASSETSDB_H

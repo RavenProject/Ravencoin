@@ -10,11 +10,11 @@ and performance improvements, as well as updated translations.
 
 Please report bugs using the issue tracker at GitHub:
 
-  <https://github.com/RavenProject/Ravencoin/issues>
+  <https://github.com/RavenProject/Yottaflux/issues>
 
 To receive security and update notifications, please subscribe to:
 
-  <https://ravencoin.org/en/list/announcements/join/>
+  <https://yottaflux.org/en/list/announcements/join/>
 
 How to Upgrade
 ==============

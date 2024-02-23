@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Script to issue assets on the Ravencoin platform
+# Script to issue assets on the Yottaflux platform
 # Reads from a csv file
 # Template Google Spreadsheet at:  
 #   https://docs.google.com/spreadsheets/d/1Ym88-ggbw8yiMgVxOtVYDsCXJGNGZqlpOfgdbVK8iYU

@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVENCOIN_NEWASSET_H
-#define RAVENCOIN_NEWASSET_H
+#ifndef YOTTAFLUX_NEWASSET_H
+#define YOTTAFLUX_NEWASSET_H
 
 #include <string>
 #include <sstream>
@@ -652,4 +652,4 @@ private:
     size_t maxSize;
 };
 
-#endif //RAVENCOIN_NEWASSET_H
+#endif //YOTTAFLUX_NEWASSET_H

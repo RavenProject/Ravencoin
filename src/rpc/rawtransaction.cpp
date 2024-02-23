@@ -444,7 +444,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "               \"reissuable\":[0-1],         (number, required) 1=reissuable asset\n"
             "               \"has_ipfs\":[0-1],           (number, required) 1=passing ipfs_hash\n"
             "               \"ipfs_hash\":\"hash\"          (string, optional) an ipfs hash for discovering asset metadata\n"
-            // TODO if we decide to remove the consensus check from issue 675 https://github.com/RavenProject/Ravencoin/issues/675
+            // TODO if we decide to remove the consensus check from issue 675 https://github.com/RavenProject/Yottaflux/issues/675
    //TODO"               \"custom_owner_address\": \"addr\" (string, optional) owner token will get sent to this address if set\n"
             "             }\n"
             "         }\n"
@@ -721,7 +721,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     const UniValue& has_ipfs = find_value(assetData, "has_ipfs");
                     if (!has_ipfs.isNum())
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, missing asset metadata for key: has_ipfs");
-// TODO, if we decide to remove the consensus check https://github.com/RavenProject/Ravencoin/issues/675, remove or add the code (requires consensus change)
+// TODO, if we decide to remove the consensus check https://github.com/RavenProject/Yottaflux/issues/675, remove or add the code (requires consensus change)
 //                    const UniValue& custom_owner_address = find_value(assetData, "custom_owner_address");
 //                    if (!custom_owner_address.isNull()) {
 //                        CTxDestination dest = DecodeDestination(custom_owner_address.get_str());
@@ -891,7 +891,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     if (fHasOwnerChange && !IsValidDestinationString(owner_change_address.get_str()))
-                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, owner_change_address is not a valid Ravencoin address");
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, owner_change_address is not a valid Yottaflux address");
 
                     if (IsAssetNameAnRestricted(asset_name.get_str()))
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, asset_name can't be a restricted asset name. Please use reissue_restricted with the correct parameters");
@@ -1058,7 +1058,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     if (fHasOwnerChange && !IsValidDestinationString(owner_change_address.get_str()))
-                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, owner_change_address is not a valid Ravencoin address");
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, owner_change_address is not a valid Yottaflux address");
 
                     UniValue ipfs_hash = "";
                     if (has_ipfs.get_int() == 1) {
@@ -1184,7 +1184,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
 
                     if (fHasOwnerChange && !IsValidDestinationString(owner_change_address.get_str()))
                         throw JSONRPCError(RPC_INVALID_PARAMETER,
-                                           "Invalid parameter, owner_change_address is not a valid Ravencoin address");
+                                           "Invalid parameter, owner_change_address is not a valid Yottaflux address");
 
                     std::string strAssetName = asset_name.get_str();
 
@@ -1295,7 +1295,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     }
 
                     if (fHasRootChange && !IsValidDestinationString(root_change_address.get_str()))
-                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, root_change_address is not a valid Ravencoin address");
+                        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, root_change_address is not a valid Yottaflux address");
 
                     CAmount nAmount = AmountFromValue(asset_quantity);
                     if (nAmount < QUALIFIER_ASSET_MIN_AMOUNT || nAmount > QUALIFIER_ASSET_MAX_AMOUNT)
@@ -1368,7 +1368,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, value for key address must be an array of size 1 to 10");
                     for (int i = 0; i < (int)addresses.size(); i++) {
                         if (!IsValidDestinationString(addresses[i].get_str()))
-                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, supplied address is not a valid Ravencoin address");
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, supplied address is not a valid Yottaflux address");
                     }
 
                     CAmount changeQty = COIN;
@@ -1413,7 +1413,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, value for key address must be an array of size 1 to 10");
                     for (int i = 0; i < (int)addresses.size(); i++) {
                         if (!IsValidDestinationString(addresses[i].get_str()))
-                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, supplied address is not a valid Ravencoin address");
+                            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter, supplied address is not a valid Yottaflux address");
                     }
 
                     // owner change

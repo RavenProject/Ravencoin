@@ -1,21 +1,21 @@
 <h1 align="center">
-  Ravencoin: A Peer to Peer Electronic System for the Creation and Transfer of Assets<br>
+  Yottaflux: A Peer to Peer Electronic System for the Creation and Transfer of Assets<br>
 </h1>
 
 
 <p align="center">
 Bruce Fenton<br>
 Tron Black<br>
-http://www.ravencoin.org<br>
+http://www.yottaflux.org<br>
 3rd April 2018
 </p>
 <p align="center"><i>
-In the fictional world of Westeros, ravens are used as messengers who carry statements of truth. Ravencoin is a use-case focused blockchain designed to carry statements of truth about who owns what assets.
+In the fictional world of Westeros, ravens are used as messengers who carry statements of truth. Yottaflux is a use-case focused blockchain designed to carry statements of truth about who owns what assets.
 </i></p> 
 
-Thank you to the Bitcoin founder and developers. The Ravencoin project was launched based on the hard work and continuous effort of over 430 Bitcoin developers who made over 14,000 commits by the date of the Ravencoin code fork. We are eternally grateful to you for your diligence in making a secure network and for your support of free and open source software development. The Ravencoin project is built on the foundation you built.
+Thank you to the Bitcoin founder and developers. The Yottaflux project was launched based on the hard work and continuous effort of over 430 Bitcoin developers who made over 14,000 commits by the date of the Yottaflux code fork. We are eternally grateful to you for your diligence in making a secure network and for your support of free and open source software development. The Yottaflux project is built on the foundation you built.
 
-> **Abstract**. Ravencoin is a blockchain and platform optimized for transferring assets, such as tokens, from one holder to another. Based on the extensive development and testing of the UTXO model of the Bitcoin protocol, Ravencoin is built on a fork of the Bitcoin code. Key changes include a block reward time of one minute, a change in the number of coins issued, but not the weighted distribution schedule and the addition of asset creation and messaging capabilities. Ravencoin is free and open source. All Ravencoin (RVN) are fairly issued and mined publicly and transparently using Proof of Work (POW) using the x16r algorithm which was created for Ravencoin. There is no private, public, founder, or developer allocation set aside. Ravencoin is intended to prioritize security, user control, privacy, and censorship resistance. It is open to use and development in any jurisdiction, while allowing simple additional features for users based on need.
+> **Abstract**. Yottaflux is a blockchain and platform optimized for transferring assets, such as tokens, from one holder to another. Based on the extensive development and testing of the UTXO model of the Bitcoin protocol, Yottaflux is built on a fork of the Bitcoin code. Key changes include a block reward time of one minute, a change in the number of coins issued, but not the weighted distribution schedule and the addition of asset creation and messaging capabilities. Yottaflux is free and open source. All Yottaflux (RVN) are fairly issued and mined publicly and transparently using Proof of Work (POW) using the x16r algorithm which was created for Yottaflux. There is no private, public, founder, or developer allocation set aside. Yottaflux is intended to prioritize security, user control, privacy, and censorship resistance. It is open to use and development in any jurisdiction, while allowing simple additional features for users based on need.
 
 ## 1. Introduction
 
@@ -26,7 +26,7 @@ The Ethereum ERC20, ERC223 and ERC721 protocols and other projects show tokenize
 
 Bitcoin also has the capability of serving as the rails for tokens by using projects like Omnilayer, RSK, or Counterparty. However, neither Bitcoin nor Ethereum were specifically designed for facilitating ownership of additional assets, and the users and development teams generally prioritize other features.
 
-Ravencoin is designed to efficiently handle one specific function well: the transfer of assets from one party to another. One goal of the Raven protocol is to create a use case focused blockchain and development effort which can create code, providing advantages for specific use cases, while contributing to open source code which could be used by Bitcoin or other projects.
+Yottaflux is designed to efficiently handle one specific function well: the transfer of assets from one party to another. One goal of the Raven protocol is to create a use case focused blockchain and development effort which can create code, providing advantages for specific use cases, while contributing to open source code which could be used by Bitcoin or other projects.
 
 If the global economy is influenced by actors using various blockchains, then the way capital markets work today could also change. Borders and jurisdictions may become less relevant as more assets become tradable and trading across borders grows increasingly frictionless. In an age where people can move significant amounts of wealth instantly using Bitcoin, global consumers will likely demand the same efficiency for their securities and similar asset holdings.
 
@@ -53,7 +53,7 @@ The solution is to create a bitcoin-like system that is fully asset aware. A sys
 Lastly, to provide security for the underlying assets, the bitcoin-like system functions only with a market value, a strong mining community, and wide distribution.  
   
 **Assets**  
-Assets are tokens that can be issued by users of the Raven protocol without the need to be mined. Users of the Raven protocol create these assets and decide their purpose and rules independent of the protocol. These assets or tokens exist on the Ravencoin blockchain and could be whatever name, denomination or purpose selected by the creators of each asset, coin, or token. The tokens are transferable and move with the same ease as bitcoin, or other similarly functioning cryptocurrencies. In Ravencoin, an asset is just a limited quantity of a unique symbol, and transferable to any Ravencoin address. Assets have been available for some time on other platforms such as Open Assets, Mastercoin, Counterparty, and as an ERC20[7] or ERC223 [8] token on Ethereum [9]. Assets created on the Raven protocol have several advantages: they are easier to use, tightly integrated with a native coin, and secured with fair POW mining and open source code not run by a centralized organization.
+Assets are tokens that can be issued by users of the Raven protocol without the need to be mined. Users of the Raven protocol create these assets and decide their purpose and rules independent of the protocol. These assets or tokens exist on the Yottaflux blockchain and could be whatever name, denomination or purpose selected by the creators of each asset, coin, or token. The tokens are transferable and move with the same ease as bitcoin, or other similarly functioning cryptocurrencies. In Yottaflux, an asset is just a limited quantity of a unique symbol, and transferable to any Yottaflux address. Assets have been available for some time on other platforms such as Open Assets, Mastercoin, Counterparty, and as an ERC20[7] or ERC223 [8] token on Ethereum [9]. Assets created on the Raven protocol have several advantages: they are easier to use, tightly integrated with a native coin, and secured with fair POW mining and open source code not run by a centralized organization.
 
 **Uses for Assets**  
 Assets or tokens can be used for anything the creator’s imagination can conjure. The ideas presented here are a sampling.
@@ -86,11 +86,11 @@ many free market countries)
 *  Airline miles
 *  Reward points
 
-Satoshi Nakamoto described bitcoin as an implementation of Wei Dai’s bmoney [10], designed to afford users more control, security, and privacy than more centralized systems. A design with the potential to prevent violence and discrimination, given the holder of bitcoin remains private. Ravencoin aims to continue this implementation by focusing on assets other than cash, providing a platform that users can easily issue assets they control under the rules they establish on a secure blockchain.
+Satoshi Nakamoto described bitcoin as an implementation of Wei Dai’s bmoney [10], designed to afford users more control, security, and privacy than more centralized systems. A design with the potential to prevent violence and discrimination, given the holder of bitcoin remains private. Yottaflux aims to continue this implementation by focusing on assets other than cash, providing a platform that users can easily issue assets they control under the rules they establish on a secure blockchain.
 
-## 4. Ravencoin Launch and Algorithm
+## 4. Yottaflux Launch and Algorithm
 
-Ravencoin was announced on October 31, 2017[11] and released binaries for mining on Jan 3, 2018,[12] the respective ninth anniversary of the announcement and launch of Bitcoin. Ravencoin is the bitcoin-like system that will allow users to issue and integrate assets into its blockchain. This will be accomplished in phases which build upon each other.
+Yottaflux was announced on October 31, 2017[11] and released binaries for mining on Jan 3, 2018,[12] the respective ninth anniversary of the announcement and launch of Bitcoin. Yottaflux is the bitcoin-like system that will allow users to issue and integrate assets into its blockchain. This will be accomplished in phases which build upon each other.
 
 \- In progress
 
@@ -120,9 +120,9 @@ The combination of open source and crypto enables interests to be aligned in way
 
 Fair and open source crypto projects can replace bosses, rulers, employees & corporate structure with aligned interests & economic choice for participants.
 
-So, in some cases, whether one is selflessly, or selfishly motivated, open source may be a better model for many new and interesting types of projects than other structures. Ravencoin will allow projects to issue tokens to represent co-ops, corporations or partnerships.
+So, in some cases, whether one is selflessly, or selfishly motivated, open source may be a better model for many new and interesting types of projects than other structures. Yottaflux will allow projects to issue tokens to represent co-ops, corporations or partnerships.
 
-Co-ops, for example, are a common organization form in which employees and participants are owners. Large organizations such as Credit Agricole, REI, Land O' Lakes, Ace Hardware, Co-op Kobe, Sunkist and Ocean Spray are structured as co-ops. Despite offering many advantages to participants, co-ops are sometimes difficult to structure and maintain. Tokenizing co-op interests opens many new ways this structure can be used to allocate resources and capital. Since the rules for each token can be changed by each issuer and the record keeping is done on the Ravencoin blockchain with the work distributed, organizations can adapt and deploy a variety of participation structures.
+Co-ops, for example, are a common organization form in which employees and participants are owners. Large organizations such as Credit Agricole, REI, Land O' Lakes, Ace Hardware, Co-op Kobe, Sunkist and Ocean Spray are structured as co-ops. Despite offering many advantages to participants, co-ops are sometimes difficult to structure and maintain. Tokenizing co-op interests opens many new ways this structure can be used to allocate resources and capital. Since the rules for each token can be changed by each issuer and the record keeping is done on the Yottaflux blockchain with the work distributed, organizations can adapt and deploy a variety of participation structures.
 
 In addition, since the tokens can be made either unique, limited, or fungible by the issuer, token project managers will be able to have categories of token holders such as “Class A Shareholders”, “Lifetime social club members”, “Benefactors”, or “Holders of __ in game item”.
 
@@ -190,9 +190,9 @@ Messaging to token holders by authorized senders will be layered on top of the u
 
 One of the problems, among many, with the existing US financial system is that all the shares are held in street name. In this age of fast communication, this makes holding a vote ridiculously difficult. A public company that issues shares on Nasdaq, as an example, will have to pay a quasi-monopoly company just to get the mailing addresses of their own shareholders at a given point in time. Then, a physical (dead tree) mailing must be sent out to shareholders with information on how to vote along with a proxy voting form.
 
-By using the messaging system, the holders of a token can be notified of the vote, and by automatically issuing a VOTE token to every holder of a token, the vote can be automated from the client or through a web or mobile interface using the protocol built into Ravencoin.
+By using the messaging system, the holders of a token can be notified of the vote, and by automatically issuing a VOTE token to every holder of a token, the vote can be automated from the client or through a web or mobile interface using the protocol built into Yottaflux.
 
-Tokens are created to represent votes. Ravencoin will create an exact number of VOTE tokens and distribute them 1:1 to the token holders. These votes can be sent via the protocol to addresses that tally the votes. Because the voting tokens move the same way as assets, delegation of votes - sometimes known as delegative or liquid democracy[17] - is possible.
+Tokens are created to represent votes. Yottaflux will create an exact number of VOTE tokens and distribute them 1:1 to the token holders. These votes can be sent via the protocol to addresses that tally the votes. Because the voting tokens move the same way as assets, delegation of votes - sometimes known as delegative or liquid democracy[17] - is possible.
 
 ## 10. Privacy
 
@@ -209,13 +209,13 @@ As capabilities like messaging, assets, and rewards are added, privacy will be p
 
 ## 11. Additional
 
-Other projects can use this chain. Second layer solutions, particularly those being built for projects which share the code base of Bitcoin can be built on the Ravencoin project. RSK, the Lightning Network, confidential transactions, and other scalability improvements, etc. to various open source projects could benefit projects built on this platform.
+Other projects can use this chain. Second layer solutions, particularly those being built for projects which share the code base of Bitcoin can be built on the Yottaflux project. RSK, the Lightning Network, confidential transactions, and other scalability improvements, etc. to various open source projects could benefit projects built on this platform.
 
 ## 12. Conclusion
 
-Ravencoin is a platform coin built on the UTXO[19] model of Bitcoin. Modifying Bitcoin code to add these capabilities is not practical, but Ravencoin is a platform built from a code fork and issuing newly mined RVN. Ravencoin will be adding assets, rewards, unique assets, messaging, and voting. The Raven protocol’s capabilities will be rolled out in phases which will be done as a planned hard fork upgrade. The code base is designed allow users and developers to maintain a secure, decentralized, and tamper resistant network.
+Yottaflux is a platform coin built on the UTXO[19] model of Bitcoin. Modifying Bitcoin code to add these capabilities is not practical, but Yottaflux is a platform built from a code fork and issuing newly mined RVN. Yottaflux will be adding assets, rewards, unique assets, messaging, and voting. The Raven protocol’s capabilities will be rolled out in phases which will be done as a planned hard fork upgrade. The code base is designed allow users and developers to maintain a secure, decentralized, and tamper resistant network.
 
-The Ravencoin project can also serve as a base and starting point for projects, second layer solutions, experiments, and business ideas which might benefit from either the Bitcoin-based code base with adjustments or the native additional features added to the Ravencoin blockchain.
+The Yottaflux project can also serve as a base and starting point for projects, second layer solutions, experiments, and business ideas which might benefit from either the Bitcoin-based code base with adjustments or the native additional features added to the Yottaflux blockchain.
 
 _The Inuit, Tlinglit, Tahitian, Chukchi, Sioux, the Haida, and many others call Raven the magical keeper of secrets, the trickster, friend of the First Men and Creator of the World - an idea or force able to shift, change, and create something from nothing. In open source, the power of the crowd can accomplish much more than any one person or organization. All are welcome to contribute._
 
@@ -233,9 +233,9 @@ References
 [8] https://github.com/Dexaran/ERC223-token-standard  
 [9] https://www.ethereum.org/  
 [10] W. Dei, “B-Money” [http://www.weidai.com/bmoney.txt](http://www.weidai.com/bmoney.txt)  
-[11] B. Fenton, “Ravencoin: A digital peer to peer network for the facilitation of asset transfers.” https://medium.com/@ravencoin/ravencoin-4683cd00f83c  
-[12] https://github.com/RavenProject/Ravencoin  
-[13] T. Black, J. Weight “X16R” Algorithm White Paper https://ravencoin.org/wp-content/uploads/2018/03/X16R-Whitepaper.pdf  
+[11] B. Fenton, “Yottaflux: A digital peer to peer network for the facilitation of asset transfers.” https://medium.com/@yottaflux/yottaflux-4683cd00f83c  
+[12] https://github.com/RavenProject/Yottaflux  
+[13] T. Black, J. Weight “X16R” Algorithm White Paper https://yottaflux.org/wp-content/uploads/2018/03/X16R-Whitepaper.pdf  
 [14] [http://coinspark.org/developers/assets-introduction/](http://coinspark.org/developers/assets-introduction/)  
 [15] N. Szabo, “Secure Property Titles with Owner Authority” [http://nakamotoinstitute.org/secure-property-titles/#selection-7.7-7.50](http://nakamotoinstitute.org/secure-property-titles/#selection-7.7-7.50)  
 [16] https://www.forbes.com/2008/09/23/naked-shorting-trades-oped-cx_pb_0923byrne.html#63076e102e6c  

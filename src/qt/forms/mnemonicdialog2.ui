@@ -208,7 +208,7 @@
       <item>
        <widget class="QLineEdit" name="passphraseEdit">
         <property name="toolTip">
-         <string>A 12 word seed phrase is a useful way of backing up a wallet, because it is a system for generating the keys to all Ravencoin and Assets. However, anyone who finds/learns your seed phrase will likewise have control of your wallet. For this reason, some users choose to add another level of security to these 12 words. Unlike your 12 word phrase, which is generated randomly, this 13th word (known as the Seed Extension Word) is something the user comes up with themselves and memorizes, or stores separately from their seed phrase.
+         <string>A 12 word seed phrase is a useful way of backing up a wallet, because it is a system for generating the keys to all Yottaflux and Assets. However, anyone who finds/learns your seed phrase will likewise have control of your wallet. For this reason, some users choose to add another level of security to these 12 words. Unlike your 12 word phrase, which is generated randomly, this 13th word (known as the Seed Extension Word) is something the user comes up with themselves and memorizes, or stores separately from their seed phrase.
                 
                 The Seed Extension Word is like adding a password to your randomly generated seed phrase. If someone finds your written 12 word seed phrase, but you’ve chosen to use a Seed Extension Word, they will not be able to access your wallet.</string>
         </property>

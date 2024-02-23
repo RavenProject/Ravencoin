@@ -46,8 +46,8 @@ from the root of the repository.
 
 1. Clone the Raven Core source code:
     ```shell
-    git clone https://github.com/RavenProject/Ravencoin
-    cd Ravencoin
+    git clone https://github.com/RavenProject/Yottaflux
+    cd Yottaflux
     ```
 
 2.  Build raven-core:

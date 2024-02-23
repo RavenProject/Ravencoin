@@ -1,15 +1,15 @@
-Ravencoin Core
+Yottaflux Core
 ==============
 
 Setup
 ---------------------
-Ravencoin Core is the original Ravencoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Ravencoin transactions; depending on the speed of your computer and network connection, the synchronization process is typically complete in under an hour.
+Yottaflux Core is the original Yottaflux client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Yottaflux transactions; depending on the speed of your computer and network connection, the synchronization process is typically complete in under an hour.
 
-To download compiled binaries of the Ravencoin Core and wallet, visit the [GitHub release page](https://github.com/RavenProject/Ravencoin/releases).
+To download compiled binaries of the Yottaflux Core and wallet, visit the [GitHub release page](https://github.com/RavenProject/Yottaflux/releases).
 
 Running
 ---------------------
-The following are some helpful notes on how to run Ravencoin on your native platform.
+The following are some helpful notes on how to run Yottaflux on your native platform.
 
 ### Linux
 
@@ -17,7 +17,7 @@ The following are some helpful notes on how to run Ravencoin on your native plat
 
 2) Install distribution-specific dependencies listed below.
 
-3) Run the GUI wallet or only the Ravencoin core deamon
+3) Run the GUI wallet or only the Yottaflux core deamon
 
    a. GUI wallet:
 
@@ -99,54 +99,54 @@ To resolve, you will need to copy libboost_system.dylib to libboost_system-mt.dy
 
 ### Need Help?
 
-- See the documentation at the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
+- See the documentation at the [Yottaflux Wiki](https://raven.wiki/wiki/Yottaflux_Wiki)
 for help and more information.
-- Ask for help on [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
+- Ask for help on [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/YottafluxDev) or [Reddit](https://www.reddit.com/r/Yottaflux/).
 
 Building from source
 ---------------------
-The following are developer notes on how to build the Ravencoin core software on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build the Yottaflux core software on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
-- [Dependencies](https://github.com/RavenProject/Ravencoin/tree/master/doc/dependencies.md)
-- [OS X Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-osx.md)
-- [Unix Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-unix.md)
-- [Windows Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-windows.md)
-- [OpenBSD Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-openbsd.md)
-- [Gitian Building Guide](https://github.com/RavenProject/Ravencoin/tree/master/doc/gitian-building.md)
+- [Dependencies](https://github.com/RavenProject/Yottaflux/tree/master/doc/dependencies.md)
+- [OS X Build Notes](https://github.com/RavenProject/Yottaflux/tree/master/doc/build-osx.md)
+- [Unix Build Notes](https://github.com/RavenProject/Yottaflux/tree/master/doc/build-unix.md)
+- [Windows Build Notes](https://github.com/RavenProject/Yottaflux/tree/master/doc/build-windows.md)
+- [OpenBSD Build Notes](https://github.com/RavenProject/Yottaflux/tree/master/doc/build-openbsd.md)
+- [Gitian Building Guide](https://github.com/RavenProject/Yottaflux/tree/master/doc/gitian-building.md)
 
 Development
 ---------------------
-Ravencoin repo's [root README](https://github.com/RavenProject/Ravencoin/blob/master/README.md) contains relevant information on the development process and automated testing.
+Yottaflux repo's [root README](https://github.com/RavenProject/Yottaflux/blob/master/README.md) contains relevant information on the development process and automated testing.
 
-- [Developer Notes](https://github.com/RavenProject/Ravencoin/blob/master/doc/developer-notes.md)
-- [Release Notes](https://github.com/RavenProject/Ravencoin/blob/master/doc/release-notes.md)
-- [Release Process](https://github.com/RavenProject/Ravencoin/blob/master/doc/release-process.md)
+- [Developer Notes](https://github.com/RavenProject/Yottaflux/blob/master/doc/developer-notes.md)
+- [Release Notes](https://github.com/RavenProject/Yottaflux/blob/master/doc/release-notes.md)
+- [Release Process](https://github.com/RavenProject/Yottaflux/blob/master/doc/release-process.md)
 - [Source Code Documentation (External Link)](https://dev.visucore.com/raven/doxygen/) -- 2018-05-11 -- Broken link
-- [Translation Process](https://github.com/RavenProject/Ravencoin/blob/master/doc/translation_process.md)
-- [Translation Strings Policy](https://github.com/RavenProject/Ravencoin/blob/master/doc/translation_strings_policy.md)
-- [Travis CI](https://github.com/RavenProject/Ravencoin/blob/master/doc/travis-ci.md)
-- [Unauthenticated REST Interface](https://github.com/RavenProject/Ravencoin/blob/master/doc/REST-interface.md)
-- [Shared Libraries](https://github.com/RavenProject/Ravencoin/blob/master/doc/shared-libraries.md)
-- [BIPS](https://github.com/RavenProject/Ravencoin/blob/master/doc/bips.md)
-- [Dnsseed Policy](https://github.com/RavenProject/Ravencoin/blob/master/doc/dnsseed-policy.md)
-- [Benchmarking](https://github.com/RavenProject/Ravencoin/blob/master/doc/benchmarking.md)
+- [Translation Process](https://github.com/RavenProject/Yottaflux/blob/master/doc/translation_process.md)
+- [Translation Strings Policy](https://github.com/RavenProject/Yottaflux/blob/master/doc/translation_strings_policy.md)
+- [Travis CI](https://github.com/RavenProject/Yottaflux/blob/master/doc/travis-ci.md)
+- [Unauthenticated REST Interface](https://github.com/RavenProject/Yottaflux/blob/master/doc/REST-interface.md)
+- [Shared Libraries](https://github.com/RavenProject/Yottaflux/blob/master/doc/shared-libraries.md)
+- [BIPS](https://github.com/RavenProject/Yottaflux/blob/master/doc/bips.md)
+- [Dnsseed Policy](https://github.com/RavenProject/Yottaflux/blob/master/doc/dnsseed-policy.md)
+- [Benchmarking](https://github.com/RavenProject/Yottaflux/blob/master/doc/benchmarking.md)
 
 ### Resources
-- Discuss on chat [Discord](https://discord.gg/jn6uhur), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
-- Find out more on the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
-- Visit the project home [Ravencoin.org](https://ravencoin.org)
+- Discuss on chat [Discord](https://discord.gg/jn6uhur), [Telegram](https://t.me/YottafluxDev) or [Reddit](https://www.reddit.com/r/Yottaflux/).
+- Find out more on the [Yottaflux Wiki](https://raven.wiki/wiki/Yottaflux_Wiki)
+- Visit the project home [Yottaflux.org](https://yottaflux.org)
 
 ### Miscellaneous
-- [Assets Attribution](https://github.com/RavenProject/Ravencoin/blob/master/doc/assets-attribution.md)
-- [Files](https://github.com/RavenProject/Ravencoin/blob/master/doc/files.md)
-- [Fuzz-testing](https://github.com/RavenProject/Ravencoin/blob/master/doc/fuzzing.md)
-- [Reduce Traffic](https://github.com/RavenProject/Ravencoin/blob/master/doc/reduce-traffic.md)
-- [Tor Support](https://github.com/RavenProject/Ravencoin/blob/master/doc/tor.md)
-- [Init Scripts (systemd/upstart/openrc)](https://github.com/RavenProject/Ravencoin/blob/master/doc/init.md)
-- [ZMQ](https://github.com/RavenProject/Ravencoin/blob/master/doc/zmq.md)
+- [Assets Attribution](https://github.com/RavenProject/Yottaflux/blob/master/doc/assets-attribution.md)
+- [Files](https://github.com/RavenProject/Yottaflux/blob/master/doc/files.md)
+- [Fuzz-testing](https://github.com/RavenProject/Yottaflux/blob/master/doc/fuzzing.md)
+- [Reduce Traffic](https://github.com/RavenProject/Yottaflux/blob/master/doc/reduce-traffic.md)
+- [Tor Support](https://github.com/RavenProject/Yottaflux/blob/master/doc/tor.md)
+- [Init Scripts (systemd/upstart/openrc)](https://github.com/RavenProject/Yottaflux/blob/master/doc/init.md)
+- [ZMQ](https://github.com/RavenProject/Yottaflux/blob/master/doc/zmq.md)
 
 License
 ---------------------
-Distributed under the [MIT software license](https://github.com/RavenProject/Ravencoin/blob/master/COPYING).
+Distributed under the [MIT software license](https://github.com/RavenProject/Yottaflux/blob/master/COPYING).
 This product includes software developed by the OpenSSL Project for use in the [OpenSSL Toolkit](https://www.openssl.org/). This product includes
 cryptographic software written by Eric Young ([eay@cryptsoft.com](mailto:eay@cryptsoft.com)), and UPnP software written by Thomas Bernard.

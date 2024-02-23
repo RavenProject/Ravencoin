@@ -12,7 +12,7 @@ if [ -z "${1}" ]; then
   echo "Usage: $0 <base-dir> [<extra-bdb-configure-flag> ...]"
   echo
   echo "Must specify a single argument: the directory in which db4 will be built."
-  echo "This is probably \`pwd\` if you're at the root of the Ravencoin repository."
+  echo "This is probably \`pwd\` if you're at the root of the Yottaflux repository."
   exit 1
 fi
 
@@ -244,7 +244,7 @@ echo
 echo "db4 build complete."
 echo
 # shellcheck disable=SC2016
-echo 'When compiling Ravencoin, run `./configure` in the following way:'
+echo 'When compiling Yottaflux, run `./configure` in the following way:'
 echo
 echo "  export BDB_PREFIX='${BDB_PREFIX}'"
 # shellcheck disable=SC2016

@@ -156,7 +156,7 @@ def audit(filter):
             print("Audit FAILED for " + asset)
             msg = "Audit FAILED for " + asset + " Issued="+str(total_issued)+ " Total="+str(total_for_asset)
             log_failure(msg)
-            send_notification(notification_emails, "Ravencoin Asset Audit Failed", msg)
+            send_notification(notification_emails, "Yottaflux Asset Audit Failed", msg)
             #exit(-1)
 
         if len(assets) == count:
@@ -164,7 +164,7 @@ def audit(filter):
             print("Stats:")
             print("  Max Distribed Asset: " + max_dist_asset_name + " with " + str(max_dist_address_count) + " addresses.")
             if (send_alerts_on_success and audits_failed == 0):
-              send_notification(notification_emails, "Ravencoin Asset Audit Success", "All " + str(len(assets)) + " assets audited.")
+              send_notification(notification_emails, "Yottaflux Asset Audit Success", "All " + str(len(assets)) + " assets audited.")
 
 if mode == "-regtest":  #If regtest then mine our own blocks
     import os

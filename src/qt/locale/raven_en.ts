@@ -3865,7 +3865,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+149"/>
-        <source>Ravencoin Market Price</source>
+        <source>Yottaflux Market Price</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

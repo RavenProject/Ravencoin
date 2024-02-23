@@ -63,11 +63,11 @@
     </message>
     <message>
         <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Ovo su vase Ravencoin adrese za slanje. Uvek proverite iznos i adresu primaoca pre slanja novcica.</translation>
+        <translation>Ovo su vase Yottaflux adrese za slanje. Uvek proverite iznos i adresu primaoca pre slanja novcica.</translation>
     </message>
     <message>
         <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Ovo su vase Ravencoin adrese za prijem.  Preporucljivo je da za svaki prijem novcica kreirate novu adresu za prijem.</translation>
+        <translation>Ovo su vase Yottaflux adrese za prijem.  Preporucljivo je da za svaki prijem novcica kreirate novu adresu za prijem.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>

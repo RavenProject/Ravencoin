@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVENCOIN_REWARDS_H
-#define RAVENCOIN_REWARDS_H
+#ifndef YOTTAFLUX_REWARDS_H
+#define YOTTAFLUX_REWARDS_H
 
 #include "amount.h"
 #include "tinyformat.h"
@@ -167,4 +167,4 @@ void CheckRewardDistributions(CWallet * p_wallet);
 
 
 
-#endif //RAVENCOIN_REWARDS_H
+#endif //YOTTAFLUX_REWARDS_H

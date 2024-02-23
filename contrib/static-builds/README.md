@@ -16,14 +16,14 @@ From an Ubuntu 18 bionic server(required)
 ```
 cd ~/
 sudo apt install git p7zip-full sleuthkit
-git clone https://github.com/ravenproject/ravencoin
+git clone https://github.com/ravenproject/yottaflux
 mkdir ~/dmg && cd ~/dmg
 ```
 Register for a developer account with Apple, then download the Xcode 7.3.1 dmg from:   https://developer.apple.com/devcenter/download.action?path=/Developer_Tools/Xcode_7.3.1/Xcode_7.3.1.dmg  
 Transfer Xcode_7.3.1.dmg to the target machine into ~/dmg 
 
 ```
-~/ravencoin/contrib/macdeploy/extract-osx-sdk.sh
+~/yottaflux/contrib/macdeploy/extract-osx-sdk.sh
 rm -rf 5.hfs MacOSX10.11.sdk Xcode_7.3.1.dmg
 ```
 

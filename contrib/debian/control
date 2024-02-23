@@ -26,9 +26,9 @@ Build-Depends: debhelper,
  python,
  libzmq3-dev
 Standards-Version: 3.9.2
-Homepage: https://ravencoin.org/
-Vcs-Git: git://github.com/RavenProject/Ravencoin.git
-Vcs-Browser: https://github.com/RavenProject/Ravencoin
+Homepage: https://yottaflux.org/
+Vcs-Git: git://github.com/RavenProject/Yottaflux.git
+Vcs-Browser: https://github.com/RavenProject/Yottaflux
 
 Package: ravend
 Architecture: any

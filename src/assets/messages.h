@@ -3,8 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 
-#ifndef RAVENCOIN_MESSAGES_H
-#define RAVENCOIN_MESSAGES_H
+#ifndef YOTTAFLUX_MESSAGES_H
+#define YOTTAFLUX_MESSAGES_H
 
 #include <uint256.h>
 #include <serialize.h>
@@ -140,4 +140,4 @@ public:
     std::string createJsonString();
 };
 
-#endif //RAVENCOIN_MESSAGES_H
+#endif //YOTTAFLUX_MESSAGES_H

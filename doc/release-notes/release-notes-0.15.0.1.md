@@ -4,17 +4,17 @@ Raven Core version *0.15.0.1* is now available from:
 
 and
 
-  <https://ravencoin.org/bin/raven-core-0.15.0.1/>
+  <https://yottaflux.org/bin/raven-core-0.15.0.1/>
 
 This is a minor bug fix for 0.15.0.
 
 Please report bugs using the issue tracker at GitHub:
 
-  <https://github.com/RavenProject/Ravencoin/issues>
+  <https://github.com/RavenProject/Yottaflux/issues>
 
 To receive security and update notifications, please subscribe to:
 
-  <https://ravencoin.org/en/list/announcements/join/>
+  <https://yottaflux.org/en/list/announcements/join/>
 
 How to Upgrade
 ==============

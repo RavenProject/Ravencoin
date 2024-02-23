@@ -25,7 +25,7 @@ import codecs
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
-print("Getting Ravencoin msgs")
+print("Getting Yottaflux msgs")
 socket.connect("tcp://localhost:28766")
 
 socket.setsockopt_string(zmq.SUBSCRIBE, "hashtx")

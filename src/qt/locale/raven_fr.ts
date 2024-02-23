@@ -680,7 +680,7 @@
     </message>
     <message>
         <source>%1 will download and store a copy of the Raven block chain.</source>
-        <translation>%1 va télécharger et stocker une copie de la blockchain de Ravencoin.</translation>
+        <translation>%1 va télécharger et stocker une copie de la blockchain de Yottaflux.</translation>
     </message>
     <message>
         <source>The wallet will also be stored in this directory.</source>
@@ -1703,8 +1703,8 @@
         <translation>Ouvrir une &amp;URI...</translation>
     </message>
     <message>
-        <source>Ravencoin Market Price</source>
-        <translation>Ravencoin Prix du Marché</translation>
+        <source>Yottaflux Market Price</source>
+        <translation>Yottaflux Prix du Marché</translation>
     </message>
     <message>
         <source>Click to disable network activity.</source>

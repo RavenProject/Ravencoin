@@ -161,7 +161,7 @@ From the [Gentoo Wiki entry](https://wiki.gentoo.org/wiki/Project:Quality_Assura
 
 ## Secondary dependencies:
 
-Secondary dependency packages relative to the ravencoin binaries/libraries (i.e.
+Secondary dependency packages relative to the yottaflux binaries/libraries (i.e.
 those not in `ALLOWED_LIBRARIES` in `contrib/devtools/symbol-check.py`) don't
 need to be shared and should be built statically whenever possible. This
 improves general build reliability as illustrated by the following example:

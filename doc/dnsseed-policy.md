@@ -44,11 +44,11 @@ related to the DNS seed operation.
 If these expectations cannot be satisfied the operator should
 discontinue providing services and contact the active Raven
 Core development team by sending an email to:
-[feedback@ravencoin.org](mailto:feedback@ravencoin.org).
+[feedback@yottaflux.org](mailto:feedback@yottaflux.org).
 
 Behavior outside of these expectations may be reasonable in some
 situations but should be discussed in public in advance.
 
 See also
 ----------
-- [ravencoin-seeder](https://github.com/RavenProject/ravencoin-seeder) is a reference implementation of a DNS seed.
+- [yottaflux-seeder](https://github.com/RavenProject/yottaflux-seeder) is a reference implementation of a DNS seed.

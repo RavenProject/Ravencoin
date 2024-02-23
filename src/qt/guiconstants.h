@@ -44,17 +44,17 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /** LIGHT MODE */
 /* Background color, very light gray */
 #define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
-/* Ravencoin dark orange */
+/* Yottaflux dark orange */
 #define COLOR_DARK_ORANGE QColor("#f05239")
-/* Ravencoin light orange */
+/* Yottaflux light orange */
 #define COLOR_LIGHT_ORANGE QColor("#f79433")
-/* Ravencoin dark blue */
+/* Yottaflux dark blue */
 #define COLOR_DARK_BLUE QColor("#384192")
-/* Ravencoin light blue */
+/* Yottaflux light blue */
 #define COLOR_LIGHT_BLUE QColor("#5874cf")
-/* Ravencoin asset text */
+/* Yottaflux asset text */
 #define COLOR_ASSET_TEXT QColor(255, 255, 255)
-/* Ravencoin shadow color - light mode */
+/* Yottaflux shadow color - light mode */
 #define COLOR_SHADOW_LIGHT QColor("#e1e6f3")
 /* Toolbar not selected text color */
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
@@ -67,19 +67,19 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /** DARK MODE */
 /* Widget background color, dark mode */
 #define COLOR_WIDGET_BACKGROUND_DARK QColor("#1c2535")
-/* Ravencoin shadow color - dark mode */
+/* Yottaflux shadow color - dark mode */
 #define COLOR_SHADOW_DARK QColor("#0c1b3d")
-/* Ravencoin Light blue - dark mode - dark mode */
+/* Yottaflux Light blue - dark mode - dark mode */
 #define COLOR_LIGHT_BLUE_DARK QColor("#1e2636")
-/* Ravencoin Dark blue - dark mode - dark mode */
+/* Yottaflux Dark blue - dark mode - dark mode */
 #define COLOR_DARK_BLUE_DARK QColor("#0b1018")
 /* Pricing widget background color */
 #define COLOR_PRICING_WIDGET QColor("#161e2d")
-/* Ravencoin dark mode administrator background color */
+/* Yottaflux dark mode administrator background color */
 #define COLOR_ADMIN_CARD_DARK COLOR_BLACK
-/* Ravencoin dark mode regular asset background color */
+/* Yottaflux dark mode regular asset background color */
 #define COLOR_REGULAR_CARD_DARK_BLUE_DARK_MODE QColor("#06132a")
-/* Ravencoin dark mode regular asset background color */
+/* Yottaflux dark mode regular asset background color */
 #define COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE QColor("#0e1b3b")
 /* Toolbar not selected text color */
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE QColor("#6c80c5")
@@ -89,7 +89,7 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_SENDENTRIES_BACKGROUND_DARK QColor("#1c2535")
 
 
-/* Ravencoin label color as a string */
+/* Yottaflux label color as a string */
 #define STRING_LABEL_COLOR "color: #4960ad"
 #define STRING_LABEL_COLOR_WARNING "color: #FF8080"
 
@@ -120,7 +120,7 @@ static const int MAX_URI_LENGTH = 255;
 #define QAPP_APP_NAME_TESTNET "Raven-Qt-testnet"
 
 /* Default third party browser urls */
-#define DEFAULT_THIRD_PARTY_BROWSERS "https://api.ravencoin.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.ravencoin.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s"
+#define DEFAULT_THIRD_PARTY_BROWSERS "https://api.yottaflux.org/tx/%s|https://rvn.cryptoscope.io/tx/?txid=%s|https://blockbook.yottaflux.org/tx/%s|https://explorer.mangofarmassets.com/tx/%s|https://www.assetsexplorer.com/tx/%s|https://explorer.ravenland.org/tx/%s"
 
 /* Default IPFS viewer */
 #define DEFAULT_IPFS_VIEWER "https://ipfs.io/ipfs/%s"

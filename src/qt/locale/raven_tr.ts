@@ -169,7 +169,7 @@
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR RAVENS&lt;/b&gt;!</source>
-        <translation>Uyarı: Eğer cüzdanınızı şifreler ve parolanızı kaybederseniz &lt;b&gt;TÜM RAVENCOINLERİNİZİ KAYBEDECEKSİNİZ&lt;/b&gt;!</translation>
+        <translation>Uyarı: Eğer cüzdanınızı şifreler ve parolanızı kaybederseniz &lt;b&gt;TÜM YOTTAFLUXLERİNİZİ KAYBEDECEKSİNİZ&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -2987,8 +2987,8 @@ They are not recoverable !!</translation>
         <translation>&amp;Wallet</translation>
     </message>
     <message>
-        <source>Ravencoin Market Price</source>
-        <translation>Ravencoin Market Price</translation>
+        <source>Yottaflux Market Price</source>
+        <translation>Yottaflux Market Price</translation>
     </message>
     <message>
         <source>Brought to you by binance.com</source>

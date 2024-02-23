@@ -5,15 +5,15 @@ For all cryptocurrencies and crypto-assets, the greatest difficulty is securing 
 There have been evolutions over the last ten years and it is about as close to the final solution as it can get provided that crypto owner holds the keys.
 
 A marvelous solution is to create a random seed from which all other keys can be generated.  For an overview of how this works read Seeds of Freedom:  
-(https://medium.com/@tronblack/ravencoin-seeds-of-freedom-a3a3ff0fa1)
+(https://medium.com/@tronblack/yottaflux-seeds-of-freedom-a3a3ff0fa1)
 
-In an effort to bring ease-of-use and interoperability between the core wallet and the mobile wallet, the Ravencoin Core wallet will default to generating a 12-word mnemonic seed.  A mnemonic seed is a 128 bit random number that is run through HMAC-512 hashing algorithm to produce a master key.  The main advantage of starting with a 12-word seed is the ease of backing up the wallet.
+In an effort to bring ease-of-use and interoperability between the core wallet and the mobile wallet, the Yottaflux Core wallet will default to generating a 12-word mnemonic seed.  A mnemonic seed is a 128 bit random number that is run through HMAC-512 hashing algorithm to produce a master key.  The main advantage of starting with a 12-word seed is the ease of backing up the wallet.
 
 The core wallet, by default, will generate a 12-word seed and calculated master key for  derivation.  When using the 12-word seed, the derivation path will use the BIP44 standard.
 
-A command-line option (-noseed) can be passed when starting ravend and/or raven-qt for the first time to create a wallet using the original key system that existed in Bitcoin and Ravencoin on Jan 3, 2019.
+A command-line option (-noseed) can be passed when starting ravend and/or raven-qt for the first time to create a wallet using the original key system that existed in Bitcoin and Yottaflux on Jan 3, 2019.
 
-When using the 12-word seed which will be the new default, the address derivation will change to be compatible with the BIP32/BIP39/BIP44 standards.  Since this is already implemented in the Ravencoin mobile wallet, the 12-words will be cross-compatible.  The derivation path is m/44'/175'/0'/0 for the first non-change address.
+When using the 12-word seed which will be the new default, the address derivation will change to be compatible with the BIP32/BIP39/BIP44 standards.  Since this is already implemented in the Yottaflux mobile wallet, the 12-words will be cross-compatible.  The derivation path is m/44'/175'/0'/0 for the first non-change address.
 
 The advantage to this method of key generation is that a 12-word seed can be written down, or stamped into stainless steel and safely stored offline without the risk of a thumb-drive or hard drive backup failure.
 
@@ -37,6 +37,6 @@ This change does not require a hard fork (upgrade), but it does require maintain
 Optional: In order to back up the master key and chaincode, it requires 48 words.
 
 ### Compatibility
-Other wallets like Jaxx and Coinomi use a 12-word seed.  For wallets that use BIP39/BIP32/BIP44 and the correct coinid of 175 for Ravencoin, the 12-words should be compatible with external wallets.
+Other wallets like Jaxx and Coinomi use a 12-word seed.  For wallets that use BIP39/BIP32/BIP44 and the correct coinid of 175 for Yottaflux, the 12-words should be compatible with external wallets.
 
-Because the amount of RVN in the asset UTXO is 0, and because the Ravencoin transaction will be invalid if the asset outputs don't match the asset inputs, this prevents external wallets from being able to lose assets even though the external wallets are completely unaware of assets.
+Because the amount of RVN in the asset UTXO is 0, and because the Yottaflux transaction will be invalid if the asset outputs don't match the asset inputs, this prevents external wallets from being able to lose assets even though the external wallets are completely unaware of assets.

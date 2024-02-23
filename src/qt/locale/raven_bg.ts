@@ -1601,8 +1601,8 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>&amp;Wallet</translation>
     </message>
     <message>
-        <source>Ravencoin Market Price</source>
-        <translation>Пазарна цена на Ravencoin</translation>
+        <source>Yottaflux Market Price</source>
+        <translation>Пазарна цена на Yottaflux</translation>
     </message>
     <message>
         <source>Brought to you by binance.com</source>

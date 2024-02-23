@@ -1903,8 +1903,8 @@
         <translation>&amp;Monedero</translation>
     </message>
     <message>
-        <source>Ravencoin Market Price</source>
-        <translation>Precio de mercado de Ravencoin</translation>
+        <source>Yottaflux Market Price</source>
+        <translation>Precio de mercado de Yottaflux</translation>
     </message>
     <message>
         <source>Brought to you by binance.com</source>

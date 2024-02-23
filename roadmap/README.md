@@ -1,8 +1,8 @@
-# Ravencoin Roadmap
+# Yottaflux Roadmap
 
 ### Phase 1 - (Complete)
 
-Ravencoin (RVN) is a Proof of Work coin built on the Bitcoin UTXO model. As with other Bitcoin derivatives, RVN coins are distributed to persons augmenting the Raven network by mining Raven.
+Yottaflux (RVN) is a Proof of Work coin built on the Bitcoin UTXO model. As with other Bitcoin derivatives, RVN coins are distributed to persons augmenting the Raven network by mining Raven.
 *  x1000 coin distribution (21 Billion Total)
 *  10x faster blocks (1 per minute)
 *  In app CPU verification, with GPU specific PoW decentralised mining
@@ -19,7 +19,7 @@ ASIC Resistance - A published commitment to continual attempts at ASIC resistanc
 
 #### Asset Support
 
-Ravencoin will be a hard fork that extends Raven to include the ability to issue and transfer assets. The expected release of asset capabilities will be approximately seven months after the release of RVN. Raven will be extended to allow issuing, reissuing, and transfer of assets. Assets can be reissuable or limited to a set supply at the point of issuance. The cost to create assets will be 500 RVN to create any qty of an asset. Each asset name must be unique. Asset names will be limited to A-Z and 0-9, '_' and '.' and must be at least three characters long. The '.' and the '_' cannot be the first, or the last character, or be consecutive.  
+Yottaflux will be a hard fork that extends Raven to include the ability to issue and transfer assets. The expected release of asset capabilities will be approximately seven months after the release of RVN. Raven will be extended to allow issuing, reissuing, and transfer of assets. Assets can be reissuable or limited to a set supply at the point of issuance. The cost to create assets will be 500 RVN to create any qty of an asset. Each asset name must be unique. Asset names will be limited to A-Z and 0-9, '_' and '.' and must be at least three characters long. The '.' and the '_' cannot be the first, or the last character, or be consecutive.  
 
 Examples of valid assets:  
 THE_GAME  
@@ -72,7 +72,7 @@ Some examples of unique assets:
 
 ### Phase 5 - Messaging (Complete - in consensus)
 
-Messaging to token holders by authorized senders will be layered on top of the Phase 4 unique assets. See [KAAAWWW Protocol](https://medium.com/@tronblack/ravencoin-kaaawww-2f72077aece) for additional information.
+Messaging to token holders by authorized senders will be layered on top of the Phase 4 unique assets. See [KAAAWWW Protocol](https://medium.com/@tronblack/yottaflux-kaaawww-2f72077aece) for additional information.
 
 [More on messaging...](./messaging/README.md)  
 [More on preventing message spam...](./messaging-antispam/README.md)  

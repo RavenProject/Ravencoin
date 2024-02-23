@@ -2777,8 +2777,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>&amp;Wallet</translation>
     </message>
     <message>
-        <source>Ravencoin Market Price</source>
-        <translation>Ravencoin Marktpreis</translation>
+        <source>Yottaflux Market Price</source>
+        <translation>Yottaflux Marktpreis</translation>
     </message>
     <message>
         <source>Brought to you by binance.com</source>

@@ -1,6 +1,6 @@
 # Messaging
 
-Messaging is described here in the [KAAAWWWW! protocol](https://medium.com/@tronblack/ravencoin-kaaawww-2f72077aece).
+Messaging is described here in the [KAAAWWWW! protocol](https://medium.com/@tronblack/yottaflux-kaaawww-2f72077aece).
 
 ### Messaging Components
 #### Protocol
@@ -9,7 +9,7 @@ This requires only the addition of an IPFS for each transaction.
 A message is "broadcast" if an owner token or channel token is sent in a transaction to the same address with the addition of an IPFS hash and an optional expiration date.  The message isn't really broadcast in the sense of being transmitted to nodes, but rather each node will independently detect the special transaction type and display the message.  Message display is subject to some heuristic anti-spam rules.
 
 #### Channels
-Channels are special Ravencoin unique asset tokens that are created by asset owners.  The channel tokens are similar to unique assets in that there is only one with a given name.  They can be uniquely identified by having a ~ (tilde) in the name.  They are limited to twelve characters, and can use uppercase, lowercase, and digits. Example: TRONCO~Alert
+Channels are special Yottaflux unique asset tokens that are created by asset owners.  The channel tokens are similar to unique assets in that there is only one with a given name.  They can be uniquely identified by having a ~ (tilde) in the name.  They are limited to twelve characters, and can use uppercase, lowercase, and digits. Example: TRONCO~Alert
 
 Sending these special channel tokens from one address to the same address will "broadcast" a message on the channel, which is named the same as the token.
 

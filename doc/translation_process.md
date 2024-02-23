@@ -1,15 +1,15 @@
 Translations
 ============
 
-The Ravencoin project has been designed to support multiple localisations. This makes adding new phrases, and completely new languages easily achievable. For managing all application translations, Ravencoin makes use of the Transifex online translation management tool.
+The Yottaflux project has been designed to support multiple localisations. This makes adding new phrases, and completely new languages easily achievable. For managing all application translations, Yottaflux makes use of the Transifex online translation management tool.
 
 ### Helping to translate (using Transifex)
 Currently updating strings in Transifex requires a manual upload of the updated src/qt/locale/raven_en.ts.
 This can easily be automated in the future.
 
-Multiple language support is critical in assisting Ravencoins global adoption, and growth. One of Ravencoins greatest strengths is cross-border money transfers, any help making that easier is greatly appreciated.
+Multiple language support is critical in assisting Yottafluxs global adoption, and growth. One of Yottafluxs greatest strengths is cross-border money transfers, any help making that easier is greatly appreciated.
 
-See the [Transifex Raven project](https://www.transifex.com/ravencoin) to assist in translations. You can also join the #translations in [Ravencoin Discord](https://discord.gg/jn6uhur).
+See the [Transifex Raven project](https://www.transifex.com/yottaflux) to assist in translations. You can also join the #translations in [Yottaflux Discord](https://discord.gg/jn6uhur).
 
 ### Writing code with translations
 We use automated scripts to help extract translations in both Qt, and non-Qt source files. It is rarely necessary to manually edit the files in `src/qt/locale/`. The translation source files must adhere to the following format:
@@ -39,7 +39,7 @@ When an updated source file is uploaded to Transifex the new strings will show u
 ### Creating a Transifex account
 Visit the [Transifex Signup](https://www.transifex.com/signup/) page to create an account. Take note of your username and password, as they will be required to configure the command-line tool.
 
-You can find the Raven translation project at [https://www.transifex.com/ravencoin](https://www.transifex.com/ravencoin).
+You can find the Raven translation project at [https://www.transifex.com/yottaflux](https://www.transifex.com/yottaflux).
 
 ### Installing the Transifex client command-line tool
 The client it used to fetch updated translations. If you are having problems, or need more details, see [http://docs.transifex.com/developer/client/setup](http://docs.transifex.com/developer/client/setup)
@@ -101,9 +101,9 @@ To create a new language template, you will need to edit the languages manifest 
 
 **Note:** that the language translation file **must end in `.qm`** (the compiled extension), and not `.ts`.
 
-This process can be automated by a [script](https://github.com/fdoving/ravencoin-maintainer-tools/blob/master/update-translations.py) in [ravencoin-maintainer-tools](https://github.com/fdoving/ravencoin-maintainer-tools/).
+This process can be automated by a [script](https://github.com/fdoving/yottaflux-maintainer-tools/blob/master/update-translations.py) in [yottaflux-maintainer-tools](https://github.com/fdoving/yottaflux-maintainer-tools/).
 
 ### Questions and general assistance
-The Ravencoin translation maintainers include *fdov and pocal*. You can find them, and others, in #translations in [Ravencoin Discord](https://discord.gg/jn6uhur).
+The Yottaflux translation maintainers include *fdov and pocal*. You can find them, and others, in #translations in [Yottaflux Discord](https://discord.gg/jn6uhur).
 
-Announcements will be posten in Discord and on the transifex.com [announcements page](https://www.transifex.com/ravencoin/qt-translation/announcements/).
+Announcements will be posten in Discord and on the transifex.com [announcements page](https://www.transifex.com/yottaflux/qt-translation/announcements/).
