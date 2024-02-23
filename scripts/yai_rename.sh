@@ -21,4 +21,5 @@ find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's
 
 
 find . -name "*ravencoin*" -exec rename 's/ravencoin/yottaflux/' '{}' \; 
+find . -name "*raven*" -exec rename 's/raven/yottaflux/' '{}' \; 
 
