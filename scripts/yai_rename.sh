@@ -18,3 +18,7 @@ find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/Yottaflux Core developers/Ravencoin Core developers/g' {} +
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/Ravencoin Core/Raven Core/g' {} +
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/Yottaflux Developers/Raven Developers/g' {} +
+
+
+find . -name "*ravencoin*" -exec rename 's/ravencoin/yottaflux/' '{}' \; 
+
