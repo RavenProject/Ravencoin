@@ -46,7 +46,7 @@ from the root of the repository.
 
 1. Clone the Raven Core source code:
     ```shell
-    git clone https://github.com/RavenProject/Yottaflux
+    git clone https://github.com/yottaflux/Yottaflux
     cd Yottaflux
     ```
 

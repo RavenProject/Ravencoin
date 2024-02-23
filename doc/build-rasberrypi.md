@@ -36,7 +36,7 @@ sudo make install
 # Build Yottaflux
 ```
 cd ~/build/
-git clone https://github.com/RavenProject/Yottaflux
+git clone https://github.com/yottaflux/Yottaflux
 cd Yottaflux/
 ./autogen.sh
 ./configure --disable-tests --with-gui=no CPPFLAGS="-I/usr/local/BerkeleyDB.4.8/include -O2" LDFLAGS="-L/usr/local/BerkeleyDB.4.8/lib"

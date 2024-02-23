@@ -43,7 +43,7 @@ Make the directory for sources and go into it.
 
 __Download Yottaflux source.__
 
-`git clone https://github.com/RavenProject/Yottaflux`
+`git clone https://github.com/yottaflux/Yottaflux`
 
 `cd Yottaflux`
 

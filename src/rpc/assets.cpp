@@ -66,7 +66,7 @@ void CheckRestrictedAssetTransferInputs(const CWalletTx& transaction, const std:
 
 std::string AssetActivationWarning()
 {
-    return AreAssetsDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/RavenProject/rips/blob/master/rip-0002.mediawiki\n";
+    return AreAssetsDeployed() ? "" : "\nTHIS COMMAND IS NOT YET ACTIVE!\nhttps://github.com/yottaflux/rips/blob/master/rip-0002.mediawiki\n";
 }
 
 std::string RestrictedActivationWarning()

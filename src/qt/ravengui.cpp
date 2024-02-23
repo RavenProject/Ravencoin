@@ -722,7 +722,7 @@ void RavenGUI::createToolBars()
         comboRvnUnit->setStyleSheet(STRING_LABEL_COLOR);
         comboRvnUnit->setFont(currentMarketFont);
 
-        labelVersionUpdate->setText("<a href=\"https://github.com/RavenProject/Yottaflux/releases\">New Wallet Version Available</a>");
+        labelVersionUpdate->setText("<a href=\"https://github.com/yottaflux/Yottaflux/releases\">New Wallet Version Available</a>");
         labelVersionUpdate->setTextFormat(Qt::RichText);
         labelVersionUpdate->setTextInteractionFlags(Qt::TextBrowserInteraction);
         labelVersionUpdate->setOpenExternalLinks(true);
@@ -896,7 +896,7 @@ void RavenGUI::createToolBars()
                                            "New Wallet Version Found",
                                            CClientUIInterface::MSG_VERSION | CClientUIInterface::BTN_NO);
                                    if (fRet) {
-                                       QString link = "https://github.com/RavenProject/Yottaflux/releases";
+                                       QString link = "https://github.com/yottaflux/Yottaflux/releases";
                                        QDesktopServices::openUrl(QUrl(link));
                                    }
                                }
@@ -1893,6 +1893,6 @@ void RavenGUI::mnemonic()
 
 void RavenGUI::getLatestVersion()
 {
-    versionRequest->setUrl(QUrl("https://api.github.com/repos/RavenProject/Yottaflux/releases"));
+    versionRequest->setUrl(QUrl("https://api.github.com/repos/yottaflux/Yottaflux/releases"));
     networkVersionManager->get(*versionRequest);
 }

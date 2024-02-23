@@ -677,7 +677,7 @@ bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetT
     if (AreTransferScriptsSizeDeployed()) {
         // Before kawpow activation we used the hardcoded 31 to find the data
         // This created a bug where large transfers scripts would fail to serialize.
-        // This fixes that issue (https://github.com/RavenProject/Yottaflux/issues/752)
+        // This fixes that issue (https://github.com/yottaflux/Yottaflux/issues/752)
         // TODO, after the kawpow fork goes active, we should be able to remove this if/else statement and just use this line.
         vchTransferAsset.insert(vchTransferAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
     } else {

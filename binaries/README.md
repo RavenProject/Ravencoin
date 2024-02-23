@@ -1,3 +1,3 @@
 Releases have been moved to:
 
-https://github.com/RavenProject/Yottaflux/releases/latest
+https://github.com/yottaflux/Yottaflux/releases/latest

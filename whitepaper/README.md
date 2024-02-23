@@ -234,7 +234,7 @@ References
 [9] https://www.ethereum.org/  
 [10] W. Dei, “B-Money” [http://www.weidai.com/bmoney.txt](http://www.weidai.com/bmoney.txt)  
 [11] B. Fenton, “Yottaflux: A digital peer to peer network for the facilitation of asset transfers.” https://medium.com/@yottaflux/yottaflux-4683cd00f83c  
-[12] https://github.com/RavenProject/Yottaflux  
+[12] https://github.com/yottaflux/Yottaflux  
 [13] T. Black, J. Weight “X16R” Algorithm White Paper https://yottaflux.org/wp-content/uploads/2018/03/X16R-Whitepaper.pdf  
 [14] [http://coinspark.org/developers/assets-introduction/](http://coinspark.org/developers/assets-introduction/)  
 [15] N. Szabo, “Secure Property Titles with Owner Authority” [http://nakamotoinstitute.org/secure-property-titles/#selection-7.7-7.50](http://nakamotoinstitute.org/secure-property-titles/#selection-7.7-7.50)  

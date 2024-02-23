@@ -27,8 +27,8 @@ Build-Depends: debhelper,
  libzmq3-dev
 Standards-Version: 3.9.2
 Homepage: https://yottaflux.org/
-Vcs-Git: git://github.com/RavenProject/Yottaflux.git
-Vcs-Browser: https://github.com/RavenProject/Yottaflux
+Vcs-Git: git://github.com/yottaflux/Yottaflux.git
+Vcs-Browser: https://github.com/yottaflux/Yottaflux
 
 Package: ravend
 Architecture: any

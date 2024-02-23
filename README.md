@@ -28,7 +28,7 @@ Development Process
 -------------------
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/RavenProject/Yottaflux/tags) are created
+completely stable. [Tags](https://github.com/yottaflux/Yottaflux/tags) are created
 regularly to indicate new official, stable release versions of Raven Core.
 
 Active development is done in the `develop` branch. 

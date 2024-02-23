@@ -1,7 +1,7 @@
 Raven Core version *2.4.0* is now available!!
 ==============
 
-  <https://github.com/RavenProject/Yottaflux/releases/tag/v2.4.0>
+  <https://github.com/yottaflux/Yottaflux/releases/tag/v2.4.0>
 
 
 This is a major release containing bug fixes and enhancements for all builds before it.  It is highly recommended that users 
@@ -9,7 +9,7 @@ upgrade to this version.
 
 Please report bugs using the issue tracker at GitHub:
 
-  <https://github.com/RavenProject/Yottaflux/issues>
+  <https://github.com/yottaflux/Yottaflux/issues>
 
 To receive security and update notifications, please subscribe to:
 
@@ -59,7 +59,7 @@ Notable changes
 2.4.0 Change log
 ==============
 
-Changelog available here: <https://github.com/RavenProject/Yottaflux/commits/release_2.4.0>
+Changelog available here: <https://github.com/yottaflux/Yottaflux/commits/release_2.4.0>
 
 Credits
 ==============
@@ -67,14 +67,14 @@ Credits
 Thanks to everyone who directly contributed to this release:
 
 - Most importantly - The Raven Community!
-- @blondfrogs (Jeremy Anderson) - [77f5a7838082669dbb7c21b4a93ce65e2a447963](https://github.com/RavenProject/Yottaflux/pull/608/commits/77f5a7838082669dbb7c21b4a93ce65e2a447963)
-- @blondfrogs (Jeremy Anderson) - [fbbc40d22646c31465fa04a8a55f4734c3f75a9c](https://github.com/RavenProject/Yottaflux/pull/608/commits/fbbc40d22646c31465fa04a8a55f4734c3f75a9c)
-- @practicalswift - [ba4d362a2b4ba814bba2aa2589231ba470f20e3f](https://github.com/RavenProject/Yottaflux/pull/608/commits/ba4d362a2b4ba814bba2aa2589231ba470f20e3f)
-- @sdaftuar - [3027dd58001624f388dc522ec9c73eb5fc9aee70](https://github.com/RavenProject/Yottaflux/pull/608/commits/3027dd58001624f388dc522ec9c73eb5fc9aee70)
-- @sdaftuar - [dc5cc1e5980b30a21427f75a7d4085f4755d4085](https://github.com/RavenProject/Yottaflux/pull/608/commits/dc5cc1e5980b30a21427f75a7d4085f4755d4085)
-- @sdaftuar - [a743e754fd90ce3299b237700082e12c8cbcf3b4](https://github.com/RavenProject/Yottaflux/pull/608/commits/a743e754fd90ce3299b237700082e12c8cbcf3b4)
-- @sdaftuar - [08efce585df53f86f13ec5d1dff689237c0ce4cc](https://github.com/RavenProject/Yottaflux/pull/608/commits/08efce585df53f86f13ec5d1dff689237c0ce4cc)
-- @sdaftuar - [2d4826beee72e1a3749c1eb090a37139f3099a22](https://github.com/RavenProject/Yottaflux/pull/608/commits/2d4826beee72e1a3749c1eb090a37139f3099a22)
-- @TheBlueMatt - [ffeb6ee6b27e778fdee188d12032b6ac7d2d1eb4](https://github.com/RavenProject/Yottaflux/pull/608/commits/ffeb6ee6b27e778fdee188d12032b6ac7d2d1eb4)
-- @TheBlueMatt - [c27081c79eb6dca48e457d8dd5b09090771a75b7](https://github.com/RavenProject/Yottaflux/pull/608/commits/c27081c79eb6dca48e457d8dd5b09090771a75b7)
+- @blondfrogs (Jeremy Anderson) - [77f5a7838082669dbb7c21b4a93ce65e2a447963](https://github.com/yottaflux/Yottaflux/pull/608/commits/77f5a7838082669dbb7c21b4a93ce65e2a447963)
+- @blondfrogs (Jeremy Anderson) - [fbbc40d22646c31465fa04a8a55f4734c3f75a9c](https://github.com/yottaflux/Yottaflux/pull/608/commits/fbbc40d22646c31465fa04a8a55f4734c3f75a9c)
+- @practicalswift - [ba4d362a2b4ba814bba2aa2589231ba470f20e3f](https://github.com/yottaflux/Yottaflux/pull/608/commits/ba4d362a2b4ba814bba2aa2589231ba470f20e3f)
+- @sdaftuar - [3027dd58001624f388dc522ec9c73eb5fc9aee70](https://github.com/yottaflux/Yottaflux/pull/608/commits/3027dd58001624f388dc522ec9c73eb5fc9aee70)
+- @sdaftuar - [dc5cc1e5980b30a21427f75a7d4085f4755d4085](https://github.com/yottaflux/Yottaflux/pull/608/commits/dc5cc1e5980b30a21427f75a7d4085f4755d4085)
+- @sdaftuar - [a743e754fd90ce3299b237700082e12c8cbcf3b4](https://github.com/yottaflux/Yottaflux/pull/608/commits/a743e754fd90ce3299b237700082e12c8cbcf3b4)
+- @sdaftuar - [08efce585df53f86f13ec5d1dff689237c0ce4cc](https://github.com/yottaflux/Yottaflux/pull/608/commits/08efce585df53f86f13ec5d1dff689237c0ce4cc)
+- @sdaftuar - [2d4826beee72e1a3749c1eb090a37139f3099a22](https://github.com/yottaflux/Yottaflux/pull/608/commits/2d4826beee72e1a3749c1eb090a37139f3099a22)
+- @TheBlueMatt - [ffeb6ee6b27e778fdee188d12032b6ac7d2d1eb4](https://github.com/yottaflux/Yottaflux/pull/608/commits/ffeb6ee6b27e778fdee188d12032b6ac7d2d1eb4)
+- @TheBlueMatt - [c27081c79eb6dca48e457d8dd5b09090771a75b7](https://github.com/yottaflux/Yottaflux/pull/608/commits/c27081c79eb6dca48e457d8dd5b09090771a75b7)
 

@@ -3,9 +3,9 @@ Release Process
 
 Before every release candidate:
 
-* Update translations see [translation_process.md](https://github.com/RavenProject/Yottaflux/blob/master/doc/translation_process.md#synchronising-translations).
+* Update translations see [translation_process.md](https://github.com/yottaflux/Yottaflux/blob/master/doc/translation_process.md#synchronising-translations).
 
-* Update manpages, see [gen-manpages.sh](https://github.com/RavenProject/Yottaflux/blob/master/contrib/devtools/README.md#gen-manpagessh).
+* Update manpages, see [gen-manpages.sh](https://github.com/yottaflux/Yottaflux/blob/master/contrib/devtools/README.md#gen-manpagessh).
 
 Before every minor and major release:
 
@@ -28,7 +28,7 @@ Before every major release:
 ### First time / New builders
 
 
-    git clone https://github.com/RavenProject/Yottaflux.git
+    git clone https://github.com/yottaflux/Yottaflux.git
 
 ### Raven maintainers/release engineers, suggestion for writing release notes
 
@@ -108,6 +108,6 @@ Note: check that SHA256SUMS itself doesn't end up in SHA256SUMS, which is a spur
 
   - Archive release notes for the new version to `doc/release-notes/` (branch `master` and branch of the release)
 
-  - Create a [new GitHub release](https://github.com/RavenProject/Yottaflux/releases/new) with a link to the archived release notes.
+  - Create a [new GitHub release](https://github.com/yottaflux/Yottaflux/releases/new) with a link to the archived release notes.
 
   - Celebrate

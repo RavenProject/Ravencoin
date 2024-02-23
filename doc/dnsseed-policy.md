@@ -51,4 +51,4 @@ situations but should be discussed in public in advance.
 
 See also
 ----------
-- [yottaflux-seeder](https://github.com/RavenProject/yottaflux-seeder) is a reference implementation of a DNS seed.
+- [yottaflux-seeder](https://github.com/yottaflux/yottaflux-seeder) is a reference implementation of a DNS seed.
