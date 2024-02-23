@@ -37,7 +37,7 @@ class RewardsTest(RavenTestFramework):
     # - retrieve the current chain height
     # - distribute an RVN reward amongst the shareholders
     # - verify that each one receives the expected amount of reward RVN
-    def basic_test_rvn(self):
+    def basic_test_yai(self):
         self.log.info("Running basic RVN reward test!")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
 
@@ -456,7 +456,7 @@ class RewardsTest(RavenTestFramework):
                                 "For security of the rewards payout, it is recommended to wait until chain is 60 blocks ahead of the snapshot height. You can modify this by using the -minrewardsheight.",
                                 n0.distributereward, "STOCK6", tgt_block_height, "RVN", 2000, owner_addr0)
 
-    # Attempts a payout using a custom rewards height of 15, and they have low rvn balance
+    # Attempts a payout using a custom rewards height of 15, and they have low yai balance
     def payout_custom_height_set_with_low_funds(self):
         self.log.info("Running payout before minimum rewards height is reached with custom min height value set!")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
@@ -510,7 +510,7 @@ class RewardsTest(RavenTestFramework):
 
         assert_equal(n2.getreceivedbyaddress(shareholder_addr0, 1), 2000)
 
-    # Attempts a payout using a custom rewards height of 15, and they have low rvn balance
+    # Attempts a payout using a custom rewards height of 15, and they have low yai balance
     def payout_with_insufficient_asset_amount(self):
         self.log.info("Running payout before minimum rewards height is reached with custom min height value set!")
         n0, n1, n2 = self.nodes[0], self.nodes[1], self.nodes[2]
@@ -642,11 +642,11 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Distributing shares")
         n0.transferfromaddress(asset_name="STOCK8", from_address=dist_addr0, qty=300, to_address=shareholder_addr0,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK8", from_address=dist_addr0, qty=300, to_address=shareholder_addr1,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK8", from_address=dist_addr0, qty=300, to_address=shareholder_addr2,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.generate(150)
         self.sync_all()
 
@@ -745,11 +745,11 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Distributing shares")
         n0.transferfromaddress(asset_name="STOCK9", from_address=dist_addr0, qty=300, to_address=shareholder_addr0,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK9", from_address=dist_addr0, qty=300, to_address=shareholder_addr1,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK9", from_address=dist_addr0, qty=400, to_address=shareholder_addr2,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.generate(150)
         self.sync_all()
 
@@ -848,11 +848,11 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Distributing shares")
         n0.transferfromaddress(asset_name="STOCK10", from_address=dist_addr0, qty=300, to_address=shareholder_addr0,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK10", from_address=dist_addr0, qty=300, to_address=shareholder_addr1,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK10", from_address=dist_addr0, qty=500, to_address=shareholder_addr2,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.generate(150)
         self.sync_all()
 
@@ -953,13 +953,13 @@ class RewardsTest(RavenTestFramework):
 
         self.log.info("Distributing shares")
         n0.transferfromaddress(asset_name="STOCK11", from_address=dist_addr0, qty=9, to_address=shareholder_addr0,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK11", from_address=dist_addr0, qty=3, to_address=shareholder_addr1,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK11", from_address=dist_addr0, qty=2, to_address=shareholder_addr2,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
         n0.transferfromaddress(asset_name="STOCK11", from_address=dist_addr0, qty=1, to_address=shareholder_addr3,
-                               message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                               message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
 
         n0.generate(150)
         self.sync_all()
@@ -1063,10 +1063,10 @@ class RewardsTest(RavenTestFramework):
         shareholder_addr3 = n2.getnewaddress()
 
         self.log.info("Distributing shares")
-        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=9, to_address=shareholder_addr0, message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
-        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=3, to_address=shareholder_addr1, message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
-        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=2, to_address=shareholder_addr2, message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
-        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=1, to_address=shareholder_addr3,  message="", expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=9, to_address=shareholder_addr0, message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=3, to_address=shareholder_addr1, message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=2, to_address=shareholder_addr2, message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
+        n0.transferfromaddress(asset_name="STOCK12", from_address=dist_addr0, qty=1, to_address=shareholder_addr3,  message="", expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
 
         n0.generate(150)
         self.sync_all()
@@ -1142,7 +1142,7 @@ class RewardsTest(RavenTestFramework):
         assert_equal(n0.listassetbalancesbyaddress(shareholder_addr2)["PAYOUT12"], Decimal(str(1.3)))
         assert_equal(n0.listassetbalancesbyaddress(shareholder_addr3)["PAYOUT12"], Decimal(str(0.6)))
 
-    def test_rvn_bulk(self):
+    def test_yai_bulk(self):
         self.log.info("Running basic RVN reward test!")
         n0, n1, n2, n3 = self.nodes[0], self.nodes[1], self.nodes[2], self.nodes[3]
 
@@ -1185,7 +1185,7 @@ class RewardsTest(RavenTestFramework):
         count = 0
         for address in address_list:
             n0.transferfromaddress(asset_name="BULK1", from_address=dist_addr0, qty=10, to_address=address, message="",
-                                   expire_time=0, rvn_change_address="", asset_change_address=dist_addr0)
+                                   expire_time=0, yai_change_address="", asset_change_address=dist_addr0)
             count += 1
             if count > 190:
                 n0.generate(1)
@@ -1249,7 +1249,7 @@ class RewardsTest(RavenTestFramework):
 
     def run_test(self):
         self.activate_assets()
-        self.basic_test_rvn()
+        self.basic_test_yai()
         self.basic_test_asset()
         self.payout_without_snapshot()
         self.payout_with_invalid_ownership_asset()

@@ -54,10 +54,10 @@ class AssetTransferTest(RavenTestFramework):
 
         n1_address = n1.getnewaddress()
 
-        n0_rvn_change = n0.getnewaddress()
+        n0_yai_change = n0.getnewaddress()
         n0_asset_change = n0.getnewaddress()
 
-        n0.transfer(asset_name="TRANSFER_TEST", qty=200, to_address=n1_address, message='', expire_time=0, change_address=n0_rvn_change, asset_change_address=n0_asset_change)
+        n0.transfer(asset_name="TRANSFER_TEST", qty=200, to_address=n1_address, message='', expire_time=0, change_address=n0_yai_change, asset_change_address=n0_asset_change)
 
         n0.generate(1)
         self.sync_all()
@@ -71,10 +71,10 @@ class AssetTransferTest(RavenTestFramework):
         n1_already_received_address = n1_address
 
         n1_address = n1.getnewaddress()
-        n0_rvn_change = n0.getnewaddress()
+        n0_yai_change = n0.getnewaddress()
         n0_asset_change = n0.getnewaddress()
 
-        n0.transferfromaddress(asset_name="TRANSFER_TEST", from_address=n0_from_address, qty=200, to_address=n1_address, message='', expire_time=0, rvn_change_address=n0_rvn_change, asset_change_address=n0_asset_change)
+        n0.transferfromaddress(asset_name="TRANSFER_TEST", from_address=n0_from_address, qty=200, to_address=n1_address, message='', expire_time=0, yai_change_address=n0_yai_change, asset_change_address=n0_asset_change)
 
         n0.generate(1)
         self.sync_all()
@@ -87,7 +87,7 @@ class AssetTransferTest(RavenTestFramework):
 
         # transfer some assets into another address node0 controls
         n0_new_address = n0.getnewaddress()
-        n0.transfer(asset_name="TRANSFER_TEST", qty=200, to_address=n0_new_address, message='', expire_time=0, change_address=n0_rvn_change, asset_change_address=n0_asset_change)
+        n0.transfer(asset_name="TRANSFER_TEST", qty=200, to_address=n0_new_address, message='', expire_time=0, change_address=n0_yai_change, asset_change_address=n0_asset_change)
 
         n0.generate(1)
         self.sync_all()
@@ -97,10 +97,10 @@ class AssetTransferTest(RavenTestFramework):
         n1_already_received_address_2 = n1_address
 
         n1_address = n1.getnewaddress()
-        n0_rvn_change = n0.getnewaddress()
+        n0_yai_change = n0.getnewaddress()
         n0_asset_change = n0.getnewaddress()
 
-        n0.transferfromaddresses(asset_name="TRANSFER_TEST", from_addresses=n0_from_addresses, qty=450, to_address=n1_address, message='', expire_time=0, rvn_change_address=n0_rvn_change, asset_change_address=n0_asset_change)
+        n0.transferfromaddresses(asset_name="TRANSFER_TEST", from_addresses=n0_from_addresses, qty=450, to_address=n1_address, message='', expire_time=0, yai_change_address=n0_yai_change, asset_change_address=n0_asset_change)
 
         n0.generate(1)
         self.sync_all()
@@ -115,7 +115,7 @@ class AssetTransferTest(RavenTestFramework):
         # Add the address the only contain 150 TRANSFER_TEST assets
         n0_from_addresses = [n0_asset_change]
 
-        assert_raises_rpc_error(-25, "Insufficient asset funds", n0.transferfromaddresses, "TRANSFER_TEST", n0_from_addresses, 450, n1_address, '', 0, n0_rvn_change, n0_asset_change)
+        assert_raises_rpc_error(-25, "Insufficient asset funds", n0.transferfromaddresses, "TRANSFER_TEST", n0_from_addresses, 450, n1_address, '', 0, n0_yai_change, n0_asset_change)
 
         # Verify that the failed transaction doesn't change the already mined address values on the wallet
         assert_equal(n0.listassetbalancesbyaddress(n1_already_received_address)["TRANSFER_TEST"], 200)

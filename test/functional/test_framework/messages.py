@@ -41,7 +41,7 @@ MY_RELAY = 1  # from version 70001 onwards, fRelay should be appended to version
 MAX_INV_SZ = 50000
 MAX_BLOCK_BASE_SIZE = 1000000
 
-COIN = 100000000  # 1 rvn in Corbies
+COIN = 100000000  # 1 yai in Corbies
 BIP125_SEQUENCE_NUMBER = 0xfffffffd  # Sequence number that is BIP 125 opt-in and BIP 68-opt-out
 
 NODE_NETWORK = (1 << 0)

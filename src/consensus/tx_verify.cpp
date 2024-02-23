@@ -537,7 +537,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
                 if (out.scriptPubKey.Find(OP_RVN_ASSET)) {
                     if (out.scriptPubKey[0] != OP_RVN_ASSET) {
                         return state.DoS(100, false, REJECT_INVALID,
-                                         "bad-txns-op-rvn-asset-not-in-right-script-location");
+                                         "bad-txns-op-yai-asset-not-in-right-script-location");
                     }
                 }
             }
@@ -838,7 +838,7 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
                         if (AreRestrictedAssetsDeployed()) {
                             if (out.scriptPubKey[0] != OP_RVN_ASSET) {
                                 return state.DoS(100, false, REJECT_INVALID,
-                                                 "bad-txns-op-rvn-asset-not-in-right-script-location", false, "", tx.GetHash());
+                                                 "bad-txns-op-yai-asset-not-in-right-script-location", false, "", tx.GetHash());
                             }
                         } else {
                             return state.DoS(100, false, REJECT_INVALID, "bad-txns-bad-asset-script", false, "", tx.GetHash());

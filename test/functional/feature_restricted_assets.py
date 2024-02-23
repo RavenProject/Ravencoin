@@ -295,13 +295,13 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address)
 
         # special case: make sure transfer fails if change address(es) are verified even though to address isn't
-        rvn_change_address = n0.getnewaddress()
+        yai_change_address = n0.getnewaddress()
         asset_change_address = n0.getnewaddress()
-        n0.addtagtoaddress(tag, rvn_change_address)
+        n0.addtagtoaddress(tag, yai_change_address)
         n0.addtagtoaddress(tag, asset_change_address)
         n0.generate(1)
-        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
-        n0.removetagfromaddress(tag, rvn_change_address)
+        assert_raises_rpc_error(-8, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, yai_change_address, asset_change_address)
+        n0.removetagfromaddress(tag, yai_change_address)
         n0.removetagfromaddress(tag, asset_change_address)
         n0.generate(1)
         ##
@@ -331,14 +331,14 @@ class RestrictedAssetsTest(RavenTestFramework):
             else:
                 assert_happening(t['Removed'])
 
-        # special case: make sure transfer fails if the asset change address isn't verified (even if the rvn change address is)
-        rvn_change_address = n0.getnewaddress()
+        # special case: make sure transfer fails if the asset change address isn't verified (even if the yai change address is)
+        yai_change_address = n0.getnewaddress()
         asset_change_address = n0.getnewaddress()
-        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
-        n0.addtagtoaddress(tag, rvn_change_address)
+        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, yai_change_address, asset_change_address)
+        n0.addtagtoaddress(tag, yai_change_address)
         n0.generate(1)
-        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, rvn_change_address, asset_change_address)
-        n0.removetagfromaddress(tag, rvn_change_address)
+        assert_raises_rpc_error(-20, "bad-txns-null-verifier-address-failed-verification", n0.transfer, asset_name, 100, address, "", 0, yai_change_address, asset_change_address)
+        n0.removetagfromaddress(tag, yai_change_address)
         n0.generate(1)
 
         # do the transfer already!
@@ -395,7 +395,7 @@ class RestrictedAssetsTest(RavenTestFramework):
         verifier = "true"
         address = n0.getnewaddress()
         safe_address = n0.getnewaddress()
-        rvn_change_address = n0.getnewaddress()
+        yai_change_address = n0.getnewaddress()
 
         n0.issue(base_asset_name)
         n0.generate(1)
@@ -432,10 +432,10 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven address", n0.freezeaddress, asset_name, "garbageaddress")
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezeaddress, asset_name, address, "garbagechangeaddress")
 
-        n0.freezeaddress(asset_name, address, rvn_change_address)
+        n0.freezeaddress(asset_name, address, yai_change_address)
         n0.generate(1)
 
-        assert_raises_rpc_error(-32600, "freeze-address-when-already-frozen", n0.freezeaddress, asset_name, address, rvn_change_address)
+        assert_raises_rpc_error(-32600, "freeze-address-when-already-frozen", n0.freezeaddress, asset_name, address, yai_change_address)
 
         # post-freezing verification
         assert_contains(asset_name, n0.listaddressrestrictions(address))
@@ -454,10 +454,10 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(None, "Invalid Raven address", n0.unfreezeaddress, asset_name, "garbageaddress")
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezeaddress, asset_name, address, "garbagechangeaddress")
 
-        n0.unfreezeaddress(asset_name, address, rvn_change_address)
+        n0.unfreezeaddress(asset_name, address, yai_change_address)
         n0.generate(1)
 
-        assert_raises_rpc_error(-32600, "unfreeze-address-when-not-frozen", n0.unfreezeaddress, asset_name, address, rvn_change_address)
+        assert_raises_rpc_error(-32600, "unfreeze-address-when-not-frozen", n0.unfreezeaddress, asset_name, address, yai_change_address)
 
         # post-unfreezing verification
         assert_does_not_contain(asset_name, n0.listaddressrestrictions(address))
@@ -488,7 +488,7 @@ class RestrictedAssetsTest(RavenTestFramework):
         qty = 10000
         verifier = "true"
         address = n0.getnewaddress()
-        rvn_change_address = n0.getnewaddress()
+        yai_change_address = n0.getnewaddress()
 
         n0.issue(base_asset_name)
         n0.generate(1)
@@ -510,10 +510,10 @@ class RestrictedAssetsTest(RavenTestFramework):
 
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.freezerestrictedasset, asset_name, "garbagechangeaddress")
 
-        n0.freezerestrictedasset(asset_name, rvn_change_address)  # Can only freeze once!
-        assert_raises_rpc_error(-26, "Freezing transaction already in mempool", n0.freezerestrictedasset, asset_name, rvn_change_address)
+        n0.freezerestrictedasset(asset_name, yai_change_address)  # Can only freeze once!
+        assert_raises_rpc_error(-26, "Freezing transaction already in mempool", n0.freezerestrictedasset, asset_name, yai_change_address)
         n0.generate(1)
-        assert_raises_rpc_error(None, "global-freeze-when-already-frozen", n0.freezerestrictedasset, asset_name, rvn_change_address)
+        assert_raises_rpc_error(None, "global-freeze-when-already-frozen", n0.freezerestrictedasset, asset_name, yai_change_address)
 
         # post-freeze validation
         assert_contains(asset_name, n0.listglobalrestrictions())
@@ -521,10 +521,10 @@ class RestrictedAssetsTest(RavenTestFramework):
         assert_raises_rpc_error(-8, "restricted asset has been globally frozen", n0.transferfromaddress, asset_name, address, 1000, n1.getnewaddress())
         assert_raises_rpc_error(None, "Invalid Raven change address", n0.unfreezerestrictedasset, asset_name, "garbagechangeaddress")
 
-        n0.unfreezerestrictedasset(asset_name, rvn_change_address)  # Can only un-freeze once!
-        assert_raises_rpc_error(-26, "Unfreezing transaction already in mempool", n0.unfreezerestrictedasset, asset_name, rvn_change_address)
+        n0.unfreezerestrictedasset(asset_name, yai_change_address)  # Can only un-freeze once!
+        assert_raises_rpc_error(-26, "Unfreezing transaction already in mempool", n0.unfreezerestrictedasset, asset_name, yai_change_address)
         n0.generate(1)
-        assert_raises_rpc_error(None, "global-unfreeze-when-not-frozen", n0.unfreezerestrictedasset, asset_name, rvn_change_address)
+        assert_raises_rpc_error(None, "global-unfreeze-when-not-frozen", n0.unfreezerestrictedasset, asset_name, yai_change_address)
 
         # post-unfreeze validation
         assert_does_not_contain(asset_name, n0.listglobalrestrictions())

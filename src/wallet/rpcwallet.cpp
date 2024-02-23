@@ -561,7 +561,7 @@ UniValue sendfromaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() < 3 || request.params.size() > 8)
         throw std::runtime_error(
             "sendfromaddress \"from_address\" \"to_address\" amount ( \"comment\" \"comment_to\" subtractfeefromamount replaceable conf_target \"estimate_mode\")\n"
-            "\nSend an amount from a specific address to a given address. All rvn change will get sent back to the from_address\n"
+            "\nSend an amount from a specific address to a given address. All yai change will get sent back to the from_address\n"
             + HelpRequiringPassphrase(pwallet) +
             "\nArguments:\n"
             "1. \"from_address\"       (string, required) The raven address to send from.\n"

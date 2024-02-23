@@ -9,7 +9,7 @@
 #include <QString>
 #include <array>
 
-/** Currency unit definitions. Stores basic title and symbol for a rvn swap asset,
+/** Currency unit definitions. Stores basic title and symbol for a yai swap asset,
  * as well as how many decimals to format the dispaly with.
 */
 struct CurrencyUnitDetails

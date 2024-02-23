@@ -597,7 +597,7 @@ void RavenGUI::createToolBars()
         labelToolbar->setAlignment(Qt::AlignLeft);
 
         if(IconsOnly) {
-            labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+            labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/yaitext")));
         }
         else {
             labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/yottafluxtext")));
@@ -915,7 +915,7 @@ void RavenGUI::createToolBars()
 void RavenGUI::updateIconsOnlyToolbar(bool IconsOnly)
 {
     if(IconsOnly) {
-        labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
+        labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/yaitext")));
         m_toolbar->setMaximumWidth(65);
         m_toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
     }
