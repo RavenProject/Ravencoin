@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """
 Test various net timeouts.
 
-- Create three ravend nodes:
+- Create three yottafluxd nodes:
 
     no_verack_node - we never send a verack in response to their version
     no_version_node - we never send a version (only a ping)
@@ -26,7 +26,7 @@ Test various net timeouts.
 
 from time import sleep
 from test_framework.mininode import NodeConn, NodeConnCB, NetworkThread, MsgPing
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import p2p_port
 
 class TestNode(NodeConnCB):
@@ -34,7 +34,7 @@ class TestNode(NodeConnCB):
         # Don't send a verack in response
         pass
 
-class TimeoutsTest(RavenTestFramework):
+class TimeoutsTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1

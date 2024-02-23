@@ -1,5 +1,5 @@
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,7 +7,7 @@
 #define RAVEN_NETADDRESS_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/yottaflux-config.h"
 #endif
 
 #include "compat.h"

@@ -141,7 +141,7 @@
     </message>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Quit application</source>
         <translation>Κλείσιμο εφαρμογής</translation>
@@ -235,7 +235,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Insufficient funds</source>
         <translation>Κεφάλαια μη επαρκή</translation>

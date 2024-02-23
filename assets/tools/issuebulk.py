@@ -4,7 +4,7 @@
 # Template Google Spreadsheet at:  
 #   https://docs.google.com/spreadsheets/d/1Ym88-ggbw8yiMgVxOtVYDsCXJGNGZqlpOfgdbVK8iYU
 # In Google Sheets: File->Download As->.csv
-# Prerequisite: ravend daemon to be running
+# Prerequisite: yottafluxd daemon to be running
 # In order to use metadata, you must install be running IPFS
 # Steps:
 #   1. Get IPFS - https://ipfs.io/
@@ -23,15 +23,15 @@ import json
 import hashlib
 
 
-#Set this to your raven-cli program
-cli = "raven-cli"
+#Set this to your yottaflux-cli program
+cli = "yottaflux-cli"
 
 mode =  "-testnet"
 rpc_port = 18766
 #mode =  "-regtest"
 #rpc_port = 18443
-csv_file = "Raven Assets - Sheet1.csv"
-#Set this information in your raven.conf file (in datadir, not testnet3)
+csv_file = "Yottaflux Assets - Sheet1.csv"
+#Set this information in your yottaflux.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
 

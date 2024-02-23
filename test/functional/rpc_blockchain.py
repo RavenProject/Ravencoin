@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -23,10 +23,10 @@ Tests correspond to code in rpc/blockchain.cpp.
 from decimal import Decimal
 import http.client
 import subprocess
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_equal, assert_greater_than, assert_greater_than_or_equal, assert_raises, assert_raises_rpc_error, assert_is_hex_string, assert_is_hash_string
 
-class BlockchainTest(RavenTestFramework):
+class BlockchainTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [['-stopatheight=207', '-prune=1']]

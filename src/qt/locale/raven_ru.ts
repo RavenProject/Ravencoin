@@ -62,12 +62,12 @@
         <translation>Адреса получения</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Это ваши адреса Raven для отправки платежей. Всегда проверяйте сумму и адрес получателя перед отправкой перевода.</translation>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Это ваши адреса Yottaflux для отправки платежей. Всегда проверяйте сумму и адрес получателя перед отправкой перевода.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Это ваши адреса Raven для приёма платежей. Рекомендуется использовать новый адрес получения для каждой транзакции.</translation>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Это ваши адреса Yottaflux для приёма платежей. Рекомендуется использовать новый адрес получения для каждой транзакции.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -180,8 +180,8 @@
         <translation>Бумажник зашифрован</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your ravens from being stolen by malware infecting your computer.</source>
-        <translation>Сейчас %1 закроется для завершения процесса шифрования. Помните, что шифрование вашего бумажника не может полностью защитить ваши ravens от кражи с помощью инфицирования вашего компьютера вредоносным ПО.</translation>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your yottafluxs from being stolen by malware infecting your computer.</source>
+        <translation>Сейчас %1 закроется для завершения процесса шифрования. Помните, что шифрование вашего бумажника не может полностью защитить ваши yottafluxs от кражи с помощью инфицирования вашего компьютера вредоносным ПО.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -436,8 +436,8 @@
         <translation>Изменить адрес отправки</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Raven address.</source>
-        <translation>Введённый адрес "%1" не является правильным Raven-адресом.</translation>
+        <source>The entered address "%1" is not a valid Yottaflux address.</source>
+        <translation>Введённый адрес "%1" не является правильным Yottaflux-адресом.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -586,12 +586,12 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the raven network, as detailed below.</source>
+        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the yottaflux network, as detailed below.</source>
         <translation>Недавние транзакции могут быть пока не видны, поэтому ваш баланс может отображаться некорректно. Эта информация станет корректной, как только ваш бумажник будет синхронизирован с сетью, см. подробности ниже.</translation>
     </message>
     <message>
-        <source>Attempting to spend ravens that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation>Попытка потратить ravens из ещё не отображённых транзакций будет отвергнута сетью.</translation>
+        <source>Attempting to spend yottafluxs that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <translation>Попытка потратить yottafluxs из ещё не отображённых транзакций будет отвергнута сетью.</translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -739,20 +739,20 @@
         <translation>&amp;Тратить неподтверждённую сдачу</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Автоматически открыть порт для Raven-клиента на роутере. Работает только если Ваш роутер поддерживает UPnP, и данная функция включена.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Автоматически открыть порт для Yottaflux-клиента на роутере. Работает только если Ваш роутер поддерживает UPnP, и данная функция включена.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Пробросить порт через &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
-        <translation>Подключаться к сети Raven через прокси SOCKS5</translation>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
+        <translation>Подключаться к сети Yottaflux через прокси SOCKS5</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
-        <translation>&amp;Подключаться к сети Raven через прокси SOCKS5 (прокси по умолчанию):</translation>
+        <translation>&amp;Подключаться к сети Yottaflux через прокси SOCKS5 (прокси по умолчанию):</translation>
     </message>
     <message>
         <source>Proxy &amp;IP:</source>
@@ -783,8 +783,8 @@
         <translation>Tor</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a separate SOCKS5 proxy for Tor hidden services.</source>
-        <translation>Подключаться к сети Raven через прокси SOCKS5 для скрытых сервисов Tor.</translation>
+        <source>Connect to the Yottaflux network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Подключаться к сети Yottaflux через прокси SOCKS5 для скрытых сервисов Tor.</translation>
     </message>
     <message>
         <source>&amp;Window</source>
@@ -870,8 +870,8 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>Отображаемая информация может быть устаревшей. Ваш бумажник автоматически синхронизируется с сетью Raven после подключения, но этот процесс пока не завершён.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>Отображаемая информация может быть устаревшей. Ваш бумажник автоматически синхронизируется с сетью Yottaflux после подключения, но этот процесс пока не завершён.</translation>
     </message>
     <message>
         <source>Watch-only:</source>
@@ -941,8 +941,8 @@
         <translation>Ошибка запроса платежа</translation>
     </message>
     <message>
-        <source>Cannot start raven: click-to-pay handler</source>
-        <translation>Не удаётся запустить raven: обработчик click-to-pay</translation>
+        <source>Cannot start yottaflux: click-to-pay handler</source>
+        <translation>Не удаётся запустить yottaflux: обработчик click-to-pay</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -957,8 +957,8 @@
         <translation>Неверный адрес платежа %1</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Raven address or malformed URI parameters.</source>
-        <translation>Не удалось обработать URI! Это может быть связано с неверным адресом Raven или неправильными параметрами URI.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid Yottaflux address or malformed URI parameters.</source>
+        <translation>Не удалось обработать URI! Это может быть связано с неверным адресом Yottaflux или неправильными параметрами URI.</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
@@ -1051,8 +1051,8 @@
         <translation>Сумма</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>Введите адрес Raven (например, %1)</translation>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
+        <translation>Введите адрес Yottaflux (например, %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1401,7 +1401,7 @@
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>&amp;Подписать сообщение...</translation>
@@ -1507,8 +1507,8 @@
         <translation>Идёт переиндексация блоков на диске...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Отправить монеты на указанный адрес Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Отправить монеты на указанный адрес Yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -1527,8 +1527,8 @@
         <translation>&amp;Проверить сообщение...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1555,12 +1555,12 @@
         <translation>Зашифровать приватные ключи, принадлежащие вашему бумажнику</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Подписать сообщения вашим адресом Raven, чтобы доказать, что вы им владеете</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Подписать сообщения вашим адресом Yottaflux, чтобы доказать, что вы им владеете</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Проверить сообщения, чтобы удостовериться, что они были подписаны определённым адресом Raven</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Проверить сообщения, чтобы удостовериться, что они были подписаны определённым адресом Yottaflux</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -1571,8 +1571,8 @@
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Запросить платежи (создаёт QR-коды и raven: ссылки)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Запросить платежи (создаёт QR-коды и yottaflux: ссылки)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -1583,8 +1583,8 @@
         <translation>Показать список использованных адресов и меток получения</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Открыть raven: URI или запрос платежа</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Открыть yottaflux: URI или запрос платежа</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1627,7 +1627,7 @@
         <translation>Синхронизировано</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <source>Show the %1 help message to get a list with possible Yottaflux command-line options</source>
         <translation>Показать помощь по %1, чтобы получить список доступных параметров командной строки</translation>
     </message>
     <message>
@@ -1697,8 +1697,8 @@
         <translation>Бумажник &lt;b&gt;зашифрован&lt;/b&gt; и в настоящее время &lt;b&gt;заблокирован&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>Произошла неисправимая ошибка. Raven не может безопасно продолжать работу и будет закрыт.</translation>
+        <source>A fatal error occurred. Yottaflux can no longer continue safely and will quit.</source>
+        <translation>Произошла неисправимая ошибка. Yottaflux не может безопасно продолжать работу и будет закрыт.</translation>
     </message>
 </context>
 <context>
@@ -1724,8 +1724,8 @@
         <translation>&amp;Повторно использовать существующий адрес получения (не рекомендуется)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Raven network.</source>
-        <translation>Необязательное сообщение для запроса платежа, которое будет показано при открытии запроса. Заметьте: сообщение не будет отправлено вместе с платежом через сеть Raven.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Yottaflux network.</source>
+        <translation>Необязательное сообщение для запроса платежа, которое будет показано при открытии запроса. Заметьте: сообщение не будет отправлено вместе с платежом через сеть Yottaflux.</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
@@ -1962,7 +1962,7 @@
         <translation>Скрыть</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation>Уплата минимальной комиссии — не проблема, пока объём транзакций меньше, чем свободное место в блоках. Учтите, однако, что такая транзакция может никогда не подтвердиться, если спрос на транзакции превышает возможности сети по их обработке.</translation>
     </message>
     <message>
@@ -2110,8 +2110,8 @@
         <translation>Заплатить только обязательную комиссию %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Raven address</source>
-        <translation>Внимание: неверный адрес Raven</translation>
+        <source>Warning: Invalid Yottaflux address</source>
+        <translation>Внимание: неверный адрес Yottaflux</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2149,8 +2149,8 @@
         <translation>Это нормальный платёж.</translation>
     </message>
     <message>
-        <source>The Raven address to send the payment to</source>
-        <translation>Адрес Raven, на который отправить платёж</translation>
+        <source>The Yottaflux address to send the payment to</source>
+        <translation>Адрес Yottaflux, на который отправить платёж</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2169,8 +2169,8 @@
         <translation>Удалить эту запись</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive less ravens than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>С отправляемой суммы будет удержана комиссия. Получателю придёт меньше ravens, чем вы вводите в поле количества. Если выбрано несколько получателей, комиссия распределяется поровну.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive less yottafluxs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>С отправляемой суммы будет удержана комиссия. Получателю придёт меньше yottafluxs, чем вы вводите в поле количества. Если выбрано несколько получателей, комиссия распределяется поровну.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -2193,8 +2193,8 @@
         <translation>Введите метку для этого адреса, чтобы добавить его в список использованных</translation>
     </message>
     <message>
-        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
-        <translation>К raven: URI было прикреплено сообщение, которое будет сохранено вместе с транзакцией для вашего сведения. Заметьте: сообщение не будет отправлено через сеть Raven.</translation>
+        <source>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</source>
+        <translation>К yottaflux: URI было прикреплено сообщение, которое будет сохранено вместе с транзакцией для вашего сведения. Заметьте: сообщение не будет отправлено через сеть Yottaflux.</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2234,12 +2234,12 @@
         <translation>&amp;Подписать сообщение</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive ravens sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Вы можете подписывать сообщения/соглашения своими адресами, чтобы доказать свою возможность получать ravens на них. Будьте осторожны, не подписывайте что-то неопределённое или случайное, так как фишинговые атаки могут обманным путём заставить вас подписать нежелательные сообщения. Подписывайте только те сообщения, с которыми вы согласны вплоть до мелочей.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive yottafluxs sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>Вы можете подписывать сообщения/соглашения своими адресами, чтобы доказать свою возможность получать yottafluxs на них. Будьте осторожны, не подписывайте что-то неопределённое или случайное, так как фишинговые атаки могут обманным путём заставить вас подписать нежелательные сообщения. Подписывайте только те сообщения, с которыми вы согласны вплоть до мелочей.</translation>
     </message>
     <message>
-        <source>The Raven address to sign the message with</source>
-        <translation>Адрес Raven, которым подписать сообщение</translation>
+        <source>The Yottaflux address to sign the message with</source>
+        <translation>Адрес Yottaflux, которым подписать сообщение</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2270,8 +2270,8 @@
         <translation>Скопировать текущую подпись в системный буфер обмена</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
-        <translation>Подписать сообщение, чтобы доказать владение адресом Raven</translation>
+        <source>Sign the message to prove you own this Yottaflux address</source>
+        <translation>Подписать сообщение, чтобы доказать владение адресом Yottaflux</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2294,12 +2294,12 @@
         <translation>Введите ниже адрес получателя, сообщение (убедитесь, что переводы строк, пробелы, табы и т.п. в точности скопированы) и подпись, чтобы проверить сообщение. Убедитесь, что не скопировали лишнего в подпись, по сравнению с самим подписываемым сообщением, чтобы не стать жертвой атаки "man-in-the-middle". Заметьте, что эта операция удостоверяет лишь авторство подписавшего, но не может удостоверить отправителя транзакции.</translation>
     </message>
     <message>
-        <source>The Raven address the message was signed with</source>
-        <translation>Адрес Raven, которым было подписано сообщение</translation>
+        <source>The Yottaflux address the message was signed with</source>
+        <translation>Адрес Yottaflux, которым было подписано сообщение</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
-        <translation>Проверить сообщение, чтобы убедиться, что оно было подписано указанным адресом Raven</translation>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
+        <translation>Проверить сообщение, чтобы убедиться, что оно было подписано указанным адресом Yottaflux</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2873,7 +2873,7 @@
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Параметры:</translation>
@@ -2935,8 +2935,8 @@
         <translation>Невозможно запустить HTTP сервер. Смотри debug лог для подробностей.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

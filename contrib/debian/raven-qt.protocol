@@ -1,6 +1,6 @@
 [Protocol]
-exec=raven-qt '%u'
-protocol=raven
+exec=yottaflux-qt '%u'
+protocol=yottaflux
 input=none
 output=none
 helper=true

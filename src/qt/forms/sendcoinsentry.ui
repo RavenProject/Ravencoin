@@ -39,12 +39,12 @@
     <item row="2" column="1">
      <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0,1">
       <item>
-       <widget class="RavenAmountField" name="payAmount"/>
+       <widget class="YottafluxAmountField" name="payAmount"/>
       </item>
       <item>
        <widget class="QCheckBox" name="checkboxSubtractFeeFromAmount">
         <property name="toolTip">
-         <string>The fee will be deducted from the amount being sent. The recipient will receive less ravens than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</string>
+         <string>The fee will be deducted from the amount being sent. The recipient will receive less yottafluxs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</string>
         </property>
         <property name="text">
          <string>S&amp;ubtract fee from amount</string>
@@ -56,7 +56,7 @@
     <item row="3" column="1">
      <widget class="QLabel" name="messageTextLabel">
       <property name="toolTip">
-       <string>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</string>
+       <string>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</string>
       </property>
       <property name="textFormat">
        <enum>Qt::PlainText</enum>
@@ -84,7 +84,7 @@
       <item>
        <widget class="QValidatedLineEdit" name="payTo">
         <property name="toolTip">
-         <string>The Raven address to send the payment to</string>
+         <string>The Yottaflux address to send the payment to</string>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../raven.qrc">
+         <iconset resource="../yottaflux.qrc">
           <normaloff>:/icons/address-book</normaloff>:/icons/address-book</iconset>
         </property>
         <property name="iconSize">
@@ -120,7 +120,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../raven.qrc">
+         <iconset resource="../yottaflux.qrc">
           <normaloff>:/icons/editpaste</normaloff>:/icons/editpaste</iconset>
         </property>
         <property name="iconSize">
@@ -143,7 +143,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../raven.qrc">
+         <iconset resource="../yottaflux.qrc">
           <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
         </property>
         <property name="iconSize">
@@ -657,7 +657,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../raven.qrc">
+         <iconset resource="../yottaflux.qrc">
           <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
         </property>
        </widget>
@@ -695,7 +695,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="RavenAmountField" name="payAmount_is">
+     <widget class="YottafluxAmountField" name="payAmount_is">
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
@@ -1190,7 +1190,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../raven.qrc">
+         <iconset resource="../yottaflux.qrc">
           <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
         </property>
        </widget>
@@ -1228,7 +1228,7 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="RavenAmountField" name="payAmount_s">
+     <widget class="YottafluxAmountField" name="payAmount_s">
       <property name="acceptDrops">
        <bool>false</bool>
       </property>
@@ -1244,9 +1244,9 @@
    <header>qvalidatedlineedit.h</header>
   </customwidget>
   <customwidget>
-   <class>RavenAmountField</class>
+   <class>YottafluxAmountField</class>
    <extends>QLineEdit</extends>
-   <header>ravenamountfield.h</header>
+   <header>yottafluxamountfield.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -1263,7 +1263,7 @@
   <tabstop>deleteButton_s</tabstop>
  </tabstops>
  <resources>
-  <include location="../raven.qrc"/>
+  <include location="../yottaflux.qrc"/>
  </resources>
  <connections/>
 </ui>

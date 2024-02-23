@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2021 The Raven Core developers
+# Copyright (c) 2017-2021 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """
     ZMQ example using python3's asyncio
 
-    Raven should be started with the command line arguments:
-        ravend -testnet -daemon \
+    Yottaflux should be started with the command line arguments:
+        yottafluxd -testnet -daemon \
                 -zmqpubhashblock=tcp://127.0.0.1:28766 \
                 -zmqpubrawtx=tcp://127.0.0.1:28766 \
                 -zmqpubhashtx=tcp://127.0.0.1:28766 \

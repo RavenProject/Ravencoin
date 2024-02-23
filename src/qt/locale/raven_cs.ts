@@ -62,12 +62,12 @@
         <translation>Přijímací adresy</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Tohle jsou tvé ravenové adresy pro posílání plateb. Před odesláním mincí si vždy zkontroluj částku a cílovou adresu.</translation>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Tohle jsou tvé yottafluxové adresy pro posílání plateb. Před odesláním mincí si vždy zkontroluj částku a cílovou adresu.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Tohle jsou tvé ravenové adresy pro příjem plateb. Nezapomeň si pro každou transakci vždy vygenerovat novou adresu.</translation>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Tohle jsou tvé yottafluxové adresy pro příjem plateb. Nezapomeň si pro každou transakci vždy vygenerovat novou adresu.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -180,8 +180,8 @@
         <translation>Peněženka je zašifrována</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your ravens from being stolen by malware infecting your computer.</source>
-        <translation>%1 se teď ukončí, aby dokončil zašifrování. Pamatuj však, že pouhé zašifrování peněženky nemůže zabránit krádeži tvých ravenů malwarem, kterým se může počítač nakazit.</translation>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your yottafluxs from being stolen by malware infecting your computer.</source>
+        <translation>%1 se teď ukončí, aby dokončil zašifrování. Pamatuj však, že pouhé zašifrování peněženky nemůže zabránit krádeži tvých yottafluxů malwarem, kterým se může počítač nakazit.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -436,8 +436,8 @@
         <translation>Uprav odesílací adresu</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Raven address.</source>
-        <translation>Zadaná adresa „%1“ není platná ravenová adresa.</translation>
+        <source>The entered address "%1" is not a valid Yottaflux address.</source>
+        <translation>Zadaná adresa „%1“ není platná yottafluxová adresa.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -586,12 +586,12 @@
         <translation>Formulář</translation>
     </message>
     <message>
-        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the raven network, as detailed below.</source>
-        <translation>Nedávné transakce ještě nemusí být vidět, takže stav tvého účtu nemusí být platný. Jakmile se však tvá peněženka dosynchronizuje s ravenovou sítí (viz informace níže), tak už bude stav správně.</translation>
+        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the yottaflux network, as detailed below.</source>
+        <translation>Nedávné transakce ještě nemusí být vidět, takže stav tvého účtu nemusí být platný. Jakmile se však tvá peněženka dosynchronizuje s yottafluxovou sítí (viz informace níže), tak už bude stav správně.</translation>
     </message>
     <message>
-        <source>Attempting to spend ravens that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation>Utrácení ravenů, které už utratily zatím nezobrazené transakce, nebude ravenovou sítí umožněno.</translation>
+        <source>Attempting to spend yottafluxs that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <translation>Utrácení yottafluxů, které už utratily zatím nezobrazené transakce, nebude yottafluxovou sítí umožněno.</translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -739,7 +739,7 @@
         <translation>&amp;Utrácet i ještě nepotvrzené drobné</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
         <translation>Automaticky otevře potřebný port na routeru. Tohle funguje jen za předpokladu, že tvůj router podporuje UPnP a že je UPnP povolené.</translation>
     </message>
     <message>
@@ -747,8 +747,8 @@
         <translation>Namapovat port přes &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
-        <translation>Připojí se do ravenové sítě přes SOCKS5 proxy.</translation>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
+        <translation>Připojí se do yottafluxové sítě přes SOCKS5 proxy.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -783,8 +783,8 @@
         <translation>Tor</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a separate SOCKS5 proxy for Tor hidden services.</source>
-        <translation>Připojí se do ravenové sítě přes SOCKS5 proxy vyhrazenou pro skryté služby v Tor síti.</translation>
+        <source>Connect to the Yottaflux network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Připojí se do yottafluxové sítě přes SOCKS5 proxy vyhrazenou pro skryté služby v Tor síti.</translation>
     </message>
     <message>
         <source>&amp;Window</source>
@@ -870,8 +870,8 @@
         <translation>Formulář</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>Zobrazené informace nemusí být aktuální. Tvá peněženka se automaticky sesynchronizuje s ravenovou sítí, jakmile se s ní spojí. Zatím ale ještě není synchronizace dokončena.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>Zobrazené informace nemusí být aktuální. Tvá peněženka se automaticky sesynchronizuje s yottafluxovou sítí, jakmile se s ní spojí. Zatím ale ještě není synchronizace dokončena.</translation>
     </message>
     <message>
         <source>Watch-only:</source>
@@ -941,8 +941,8 @@
         <translation>Chyba platebního požadavku</translation>
     </message>
     <message>
-        <source>Cannot start raven: click-to-pay handler</source>
-        <translation>Nemůžu spustit raven: obsluha click-to-pay</translation>
+        <source>Cannot start yottaflux: click-to-pay handler</source>
+        <translation>Nemůžu spustit yottaflux: obsluha click-to-pay</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -957,8 +957,8 @@
         <translation>Neplatná platební adresa %1</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Raven address or malformed URI parameters.</source>
-        <translation>Nepodařilo se analyzovat URI! Důvodem může být neplatná ravenová adresa nebo poškozené parametry URI.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid Yottaflux address or malformed URI parameters.</source>
+        <translation>Nepodařilo se analyzovat URI! Důvodem může být neplatná yottafluxová adresa nebo poškozené parametry URI.</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
@@ -1051,8 +1051,8 @@
         <translation>Částka</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>Zadej ravenovou adresu (např. %1)</translation>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
+        <translation>Zadej yottafluxovou adresu (např. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1401,7 +1401,7 @@
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Po&amp;depiš zprávu...</translation>
@@ -1507,8 +1507,8 @@
         <translation>Vytvářím nový index bloků na disku...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Pošli mince na ravenovou adresu</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Pošli mince na yottafluxovou adresu</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -1527,8 +1527,8 @@
         <translation>&amp;Ověř zprávu...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1555,12 +1555,12 @@
         <translation>Zašifruj soukromé klíče ve své peněžence</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Podepiš zprávy svými ravenovými adresami, čímž prokážeš, že jsi jejich vlastníkem</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Podepiš zprávy svými yottafluxovými adresami, čímž prokážeš, že jsi jejich vlastníkem</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Ověř zprávy, aby ses ujistil, že byly podepsány danými ravenovými adresami</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Ověř zprávy, aby ses ujistil, že byly podepsány danými yottafluxovými adresami</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -1571,8 +1571,8 @@
         <translation>Nápověd&amp;a</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Požaduj platby (generuje QR kódy a raven: URI)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Požaduj platby (generuje QR kódy a yottaflux: URI)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -1583,8 +1583,8 @@
         <translation>Ukaž seznam použitých přijímacích adres a jejich označení</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Načti raven: URI nebo platební požadavek</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Načti yottaflux: URI nebo platební požadavek</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1627,8 +1627,8 @@
         <translation>Aktuální</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>Seznam argumentů Ravenu pro příkazovou řádku získáš v nápovědě %1</translation>
+        <source>Show the %1 help message to get a list with possible Yottaflux command-line options</source>
+        <translation>Seznam argumentů Yottafluxu pro příkazovou řádku získáš v nápovědě %1</translation>
     </message>
     <message>
         <source>%1 client</source>
@@ -1697,8 +1697,8 @@
         <translation>Peněženka je &lt;b&gt;zašifrovaná&lt;/b&gt; a momentálně &lt;b&gt;zamčená&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>Stala se fatální chyba. Raven nemůže bezpečně pokračovat v činnosti, a proto skončí.</translation>
+        <source>A fatal error occurred. Yottaflux can no longer continue safely and will quit.</source>
+        <translation>Stala se fatální chyba. Yottaflux nemůže bezpečně pokračovat v činnosti, a proto skončí.</translation>
     </message>
 </context>
 <context>
@@ -1724,8 +1724,8 @@
         <translation>&amp;Recyklovat již existující adresy (nedoporučeno)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Raven network.</source>
-        <translation>Volitelná zpráva, která se připojí k platebnímu požadavku a která se zobrazí, když se požadavek otevře. Poznámka: tahle zpráva se neposílá s platbou po ravenové síti.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Yottaflux network.</source>
+        <translation>Volitelná zpráva, která se připojí k platebnímu požadavku a která se zobrazí, když se požadavek otevře. Poznámka: tahle zpráva se neposílá s platbou po yottafluxové síti.</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
@@ -1962,8 +1962,8 @@
         <translation>Skryj</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
-        <translation>Platit jen minimální poplatek je v pořádku, pokud je zrovna méně transakcí než místa v blocích. Ale počítej s tím, že to také může skončit transakcí, která nikdy nebude potvrzena, pokud je větší poptávka po ravenových transakcích, než síť zvládne zpracovat.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
+        <translation>Platit jen minimální poplatek je v pořádku, pokud je zrovna méně transakcí než místa v blocích. Ale počítej s tím, že to také může skončit transakcí, která nikdy nebude potvrzena, pokud je větší poptávka po yottafluxových transakcích, než síť zvládne zpracovat.</translation>
     </message>
     <message>
         <source>(read the tooltip)</source>
@@ -2110,8 +2110,8 @@
         <translation>Zaplatit pouze vyžadovaný poplatek %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Raven address</source>
-        <translation>Upozornění: Neplatná ravenová adresa</translation>
+        <source>Warning: Invalid Yottaflux address</source>
+        <translation>Upozornění: Neplatná yottafluxová adresa</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2149,8 +2149,8 @@
         <translation>Tohle je normální platba.</translation>
     </message>
     <message>
-        <source>The Raven address to send the payment to</source>
-        <translation>Ravenová adresa příjemce</translation>
+        <source>The Yottaflux address to send the payment to</source>
+        <translation>Yottafluxová adresa příjemce</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2169,8 +2169,8 @@
         <translation>Smaž tento záznam</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive less ravens than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>Poplatek se odečte od posílané částky. Příjemce tak dostane méně ravenů, než zadáš do pole Částka. Pokud vybereš více příjemců, tak se poplatek rovnoměrně rozloží.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive less yottafluxs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>Poplatek se odečte od posílané částky. Příjemce tak dostane méně yottafluxů, než zadáš do pole Částka. Pokud vybereš více příjemců, tak se poplatek rovnoměrně rozloží.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -2193,8 +2193,8 @@
         <translation>Zadej označení této adresy; obojí se ti pak uloží do adresáře</translation>
     </message>
     <message>
-        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
-        <translation>Zpráva, která byla připojena k raven: URI a která se ti pro přehled uloží k transakci. Poznámka: Tahle zpráva se neposílá s platbou po ravenové síti.</translation>
+        <source>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</source>
+        <translation>Zpráva, která byla připojena k yottaflux: URI a která se ti pro přehled uloží k transakci. Poznámka: Tahle zpráva se neposílá s platbou po yottafluxové síti.</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2234,12 +2234,12 @@
         <translation>&amp;Podepiš zprávu</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive ravens sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>Podepsáním zprávy/smlouvy svými adresami můžeš prokázat, že jsi na ně schopen přijmout raveny. Buď opatrný a nepodepisuj nic vágního nebo náhodného; například při phishingových útocích můžeš být lákán, abys něco takového podepsal. Podepisuj pouze naprosto úplná a detailní prohlášení, se kterými souhlasíš.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive yottafluxs sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>Podepsáním zprávy/smlouvy svými adresami můžeš prokázat, že jsi na ně schopen přijmout yottafluxy. Buď opatrný a nepodepisuj nic vágního nebo náhodného; například při phishingových útocích můžeš být lákán, abys něco takového podepsal. Podepisuj pouze naprosto úplná a detailní prohlášení, se kterými souhlasíš.</translation>
     </message>
     <message>
-        <source>The Raven address to sign the message with</source>
-        <translation>Ravenová adresa, kterou se zpráva podepíše</translation>
+        <source>The Yottaflux address to sign the message with</source>
+        <translation>Yottafluxová adresa, kterou se zpráva podepíše</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2270,8 +2270,8 @@
         <translation>Zkopíruj tento podpis do schránky</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
-        <translation>Podepiš zprávu, čímž prokážeš, že jsi vlastníkem této ravenové adresy</translation>
+        <source>Sign the message to prove you own this Yottaflux address</source>
+        <translation>Podepiš zprávu, čímž prokážeš, že jsi vlastníkem této yottafluxové adresy</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2294,12 +2294,12 @@
         <translation>K ověření podpisu zprávy zadej adresu příjemce, zprávu (ověř si, že správně kopíruješ zalomení řádků, mezery, tabulátory apod.) a podpis. Dávej pozor na to, abys nezkopíroval do podpisu víc, než co je v samotné podepsané zprávě, abys nebyl napálen man-in-the-middle útokem. Poznamenejme však, že takto lze pouze prokázat, že podepisující je schopný na dané adrese přijmout platbu, ale není možnéprokázat, že odeslal jakoukoli transakci!</translation>
     </message>
     <message>
-        <source>The Raven address the message was signed with</source>
-        <translation>Ravenová adresa, kterou je zpráva podepsána</translation>
+        <source>The Yottaflux address the message was signed with</source>
+        <translation>Yottafluxová adresa, kterou je zpráva podepsána</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
-        <translation>Ověř zprávu, aby ses ujistil, že byla podepsána danou ravenovou adresou</translation>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
+        <translation>Ověř zprávu, aby ses ujistil, že byla podepsána danou yottafluxovou adresou</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2873,7 +2873,7 @@
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Možnosti:</translation>
@@ -2935,8 +2935,8 @@
         <translation>Nemohu spustit HTTP server. Detaily viz v debug.log.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

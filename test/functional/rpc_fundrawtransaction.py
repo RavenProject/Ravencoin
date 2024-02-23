@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Test the fundrawtransaction RPC."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import connect_nodes_bi, assert_equal, Decimal, assert_raises_rpc_error, assert_greater_than, count_bytes, assert_fee_amount, assert_greater_than_or_equal
 
 def get_unspent(listunspent, amount):
@@ -15,7 +15,7 @@ def get_unspent(listunspent, amount):
             return utx
     raise AssertionError('Could not find unspent with amount={}'.format(amount))
 
-class RawTransactionsTest(RavenTestFramework):
+class RawTransactionsTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
         self.setup_clean_chain = True
@@ -198,7 +198,7 @@ class RawTransactionsTest(RavenTestFramework):
         dec_tx  = self.nodes[2].decoderawtransaction(rawtx)
         assert_equal(utx['txid'], dec_tx['vin'][0]['txid'])
 
-        assert_raises_rpc_error(-5, "changeAddress must be a valid raven address", self.nodes[2].fundrawtransaction, rawtx, {'changeAddress':'foobar'})
+        assert_raises_rpc_error(-5, "changeAddress must be a valid yottaflux address", self.nodes[2].fundrawtransaction, rawtx, {'changeAddress':'foobar'})
 
         ############################################################
         # test a fundrawtransaction with a provided change address #

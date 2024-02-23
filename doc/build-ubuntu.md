@@ -171,11 +171,11 @@ _Adjust to own needs. This will install the binaries to `/usr/local/bin`_
 
 `make -j8`  # 8 for 8 build threads, adjust to fit your setup.
 
-You can now start raven-qt from the build directory.
+You can now start yottaflux-qt from the build directory.
 
-`src/qt/raven-qt`
+`src/qt/yottaflux-qt`
 
-ravend and raven-cli are in `src/`
+yottafluxd and yottaflux-cli are in `src/`
 
 
 __Optional:__

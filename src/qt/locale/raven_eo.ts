@@ -62,11 +62,11 @@
         <translation>Ricevaj adresoj</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation>Jen viaj Bitmon-adresoj por sendi pagojn. Zorge kontrolu la sumon kaj la alsendan adreson antaŭ ol sendi.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
         <translation>Jen viaj bitmonaj adresoj por ricevi pagojn. Estas konsilinde uzi apartan ricevan adreson por ĉiu transakcio.</translation>
     </message>
     <message>
@@ -399,7 +399,7 @@
         <translation>Fakulo</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
         <translation>Aŭtomate malfermi la kursilan pordon por Bitmono. Tio funkcias nur se via kursilo havas la UPnP-funkcion, kaj se tiu ĉi estas ŝaltita.</translation>
     </message>
     <message>
@@ -494,7 +494,7 @@
         <translation>Formularo</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
         <translation>Eblas, ke la informoj videblaj ĉi tie estas eksdataj. Via monujo aŭtomate sinkoniĝas kun la bitmona reto kiam ili konektiĝas, sed tiu procezo ankoraŭ ne finfariĝis.</translation>
     </message>
     <message>
@@ -689,7 +689,7 @@
     </message>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Subskribi &amp;mesaĝon...</translation>
@@ -767,7 +767,7 @@
         <translation>Reindeksado de blokoj sur disko...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
+        <source>Send coins to a Yottaflux address</source>
         <translation>Sendi monon al Bitmon-adreso</translation>
     </message>
     <message>
@@ -787,7 +787,7 @@
         <translation>&amp;Kontroli mesaĝon...</translation>
     </message>
     <message>
-        <source>Raven</source>
+        <source>Yottaflux</source>
         <translation>Bitmono</translation>
     </message>
     <message>
@@ -815,11 +815,11 @@
         <translation>Ĉifri la privatajn ŝlosilojn de via monujo</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
         <translation>Subskribi mesaĝojn per via Bitmon-adresoj por pravigi, ke vi estas la posedanto</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
         <translation>Kontroli mesaĝojn por kontroli ĉu ili estas subskribitaj per specifaj Bitmon-adresoj</translation>
     </message>
     <message>
@@ -831,8 +831,8 @@
         <translation>&amp;Helpo</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Peti pagon (kreas QR-kodojn kaj URI-ojn kun prefikso raven:)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Peti pagon (kreas QR-kodojn kaj URI-ojn kun prefikso yottaflux:)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -843,8 +843,8 @@
         <translation>Vidigi la liston de uzitaj ricevaj adresoj kaj etikedoj</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Malfermi raven:-URI-on aŭ pagpeton</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Malfermi yottaflux:-URI-on aŭ pagpeton</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1198,7 +1198,7 @@
         <translation>Kopii la aktualan subskribon al la tondejo</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
+        <source>Sign the message to prove you own this Yottaflux address</source>
         <translation>Subskribi la mesaĝon por pravigi, ke vi estas la posedanto de tiu Bitmon-adreso</translation>
     </message>
     <message>
@@ -1218,7 +1218,7 @@
         <translation>&amp;Kontroli Mesaĝon</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
         <translation>Kontroli la mesaĝon por pravigi, ke ĝi ja estas subskribita per la specifa Bitmon-adreso</translation>
     </message>
     <message>
@@ -1297,7 +1297,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Agordoj:</translation>
@@ -1323,7 +1323,7 @@
         <translation>Ruli fone kiel demono kaj akcepti komandojn</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Yottaflux Core</source>
         <translation>Kerno de Bitmono</translation>
     </message>
     <message>

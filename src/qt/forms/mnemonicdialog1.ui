@@ -52,7 +52,7 @@
    <item>
     <widget class="QLabel" name="wallettypeLabel">
      <property name="text">
-      <string>Since no wallet.dat file was found in the Raven block chain data directory, a wallet file will be created.</string>
+      <string>Since no wallet.dat file was found in the Yottaflux block chain data directory, a wallet file will be created.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

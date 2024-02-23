@@ -305,7 +305,7 @@
     </message>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Потпиши &amp;порака...</translation>
@@ -379,7 +379,7 @@
         <translation>Повторно индексирање на блокови од дискот...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
+        <source>Send coins to a Yottaflux address</source>
         <translation>Испрати биткоини на Биткоин адреса</translation>
     </message>
     <message>
@@ -387,7 +387,7 @@
         <translation>&amp;Потврди порака...</translation>
     </message>
     <message>
-        <source>Raven</source>
+        <source>Yottaflux</source>
         <translation>Биткоин</translation>
     </message>
     <message>
@@ -593,13 +593,13 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Опции:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Yottaflux Core</source>
         <translation>Биткоин Core</translation>
     </message>
     <message>

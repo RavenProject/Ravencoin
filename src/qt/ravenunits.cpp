@@ -1,30 +1,30 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "ravenunits.h"
+#include "yottafluxunits.h"
 
 #include "primitives/transaction.h"
 
 #include <QStringList>
 
-RavenUnits::RavenUnits(QObject *parent):
+YottafluxUnits::YottafluxUnits(QObject *parent):
         QAbstractListModel(parent),
         unitlist(availableUnits())
 {
 }
 
-QList<RavenUnits::Unit> RavenUnits::availableUnits()
+QList<YottafluxUnits::Unit> YottafluxUnits::availableUnits()
 {
-    QList<RavenUnits::Unit> unitlist;
+    QList<YottafluxUnits::Unit> unitlist;
     unitlist.append(YAI);
     unitlist.append(mYAI);
     unitlist.append(uYAI);
     return unitlist;
 }
 
-bool RavenUnits::valid(int unit)
+bool YottafluxUnits::valid(int unit)
 {
     switch(unit)
     {
@@ -37,7 +37,7 @@ bool RavenUnits::valid(int unit)
     }
 }
 
-QString RavenUnits::name(int unit)
+QString YottafluxUnits::name(int unit)
 {
     switch(unit)
     {
@@ -48,18 +48,18 @@ QString RavenUnits::name(int unit)
     }
 }
 
-QString RavenUnits::description(int unit)
+QString YottafluxUnits::description(int unit)
 {
     switch(unit)
     {
-    case YAI: return QString("Ravens");
-    case mYAI: return QString("Milli-Ravens (1 / 1" THIN_SP_UTF8 "000)");
-    case uYAI: return QString("Micro-Ravens (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case YAI: return QString("Yottafluxs");
+    case mYAI: return QString("Milli-Yottafluxs (1 / 1" THIN_SP_UTF8 "000)");
+    case uYAI: return QString("Micro-Yottafluxs (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
 }
 
-qint64 RavenUnits::factor(int unit)
+qint64 YottafluxUnits::factor(int unit)
 {
     switch(unit)
     {
@@ -70,7 +70,7 @@ qint64 RavenUnits::factor(int unit)
     }
 }
 
-qint64 RavenUnits::factorAsset(int unit)
+qint64 YottafluxUnits::factorAsset(int unit)
 {
     switch(unit)
     {
@@ -87,7 +87,7 @@ qint64 RavenUnits::factorAsset(int unit)
     }
 }
 
-int RavenUnits::decimals(int unit)
+int YottafluxUnits::decimals(int unit)
 {
     switch(unit)
     {
@@ -98,7 +98,7 @@ int RavenUnits::decimals(int unit)
     }
 }
 
-QString RavenUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorStyle separators, const int nAssetUnit)
+QString YottafluxUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorStyle separators, const int nAssetUnit)
 {
     // Note: not using straight sprintf here because we do NOT want
     // localized number formatting.
@@ -143,17 +143,17 @@ QString RavenUnits::format(int unit, const CAmount& nIn, bool fPlus, SeparatorSt
 // Please take care to use formatHtmlWithUnit instead, when
 // appropriate.
 
-QString RavenUnits::formatWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
+QString YottafluxUnits::formatWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     return format(unit, amount, plussign, separators) + QString(" ") + name(unit);
 }
 
-QString RavenUnits::formatWithCustomName(QString customName, const CAmount& amount, int unit, bool plussign, SeparatorStyle separators)
+QString YottafluxUnits::formatWithCustomName(QString customName, const CAmount& amount, int unit, bool plussign, SeparatorStyle separators)
 {
     return format(YAI, amount / factorAsset(MAX_ASSET_UNITS - unit), plussign, separators, unit) + QString(" ") + customName;
 }
 
-QString RavenUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
+QString YottafluxUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)
 {
     QString str(formatWithUnit(unit, amount, plussign, separators));
     str.replace(QChar(THIN_SP_CP), QString(THIN_SP_HTML));
@@ -161,7 +161,7 @@ QString RavenUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plu
 }
 
 
-bool RavenUnits::parse(int unit, const QString &value, CAmount *val_out)
+bool YottafluxUnits::parse(int unit, const QString &value, CAmount *val_out)
 {
     if(!valid(unit) || value.isEmpty())
         return false; // Refuse to parse invalid unit or empty string
@@ -200,7 +200,7 @@ bool RavenUnits::parse(int unit, const QString &value, CAmount *val_out)
     return ok;
 }
 
-bool RavenUnits::assetParse(int assetUnit, const QString &value, CAmount *val_out)
+bool YottafluxUnits::assetParse(int assetUnit, const QString &value, CAmount *val_out)
 {
     if(!(assetUnit >= 0 && assetUnit <= 8) || value.isEmpty())
         return false; // Refuse to parse invalid unit or empty string
@@ -239,23 +239,23 @@ bool RavenUnits::assetParse(int assetUnit, const QString &value, CAmount *val_ou
     return ok;
 }
 
-QString RavenUnits::getAmountColumnTitle(int unit)
+QString YottafluxUnits::getAmountColumnTitle(int unit)
 {
     QString amountTitle = QObject::tr("Amount");
-    if (RavenUnits::valid(unit))
+    if (YottafluxUnits::valid(unit))
     {
-        amountTitle += " ("+RavenUnits::name(unit) + ")";
+        amountTitle += " ("+YottafluxUnits::name(unit) + ")";
     }
     return amountTitle;
 }
 
-int RavenUnits::rowCount(const QModelIndex &parent) const
+int YottafluxUnits::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return unitlist.size();
 }
 
-QVariant RavenUnits::data(const QModelIndex &index, int role) const
+QVariant YottafluxUnits::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
     if(row >= 0 && row < unitlist.size())
@@ -275,7 +275,7 @@ QVariant RavenUnits::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-CAmount RavenUnits::maxMoney()
+CAmount YottafluxUnits::maxMoney()
 {
     return MAX_MONEY;
 }

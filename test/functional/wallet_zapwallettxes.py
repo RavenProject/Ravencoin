@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """
 Test the zapwallettxes functionality.
 
-- start two ravend nodes
+- start two yottafluxd nodes
 - create two transactions on node 0 - one is confirmed and one is unconfirmed.
 - restart node 0 and verify that both the confirmed and the unconfirmed
   transactions are still available.
@@ -18,10 +18,10 @@ Test the zapwallettxes functionality.
   been zapped.
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_equal, assert_raises_rpc_error, wait_until
 
-class ZapWalletTXesTest (RavenTestFramework):
+class ZapWalletTXesTest (YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2

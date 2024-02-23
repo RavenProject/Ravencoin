@@ -37,9 +37,9 @@ jobs:
     - name: Tar Up the Dependencies
       run: |
           if [[ ! -e ${{ GITHUB.WORKSPACE }}/depends_temp ]]; then mkdir -p ${{ GITHUB.WORKSPACE }}/depends_temp; fi
-          cd ${{ GITHUB.WORKSPACE }}/depends && tar zcf ${{ GITHUB.WORKSPACE }}/depends_temp/raven-windows-dependencies.tar.gz .
+          cd ${{ GITHUB.WORKSPACE }}/depends && tar zcf ${{ GITHUB.WORKSPACE }}/depends_temp/yottaflux-windows-dependencies.tar.gz .
           cd ${{ GITHUB.WORKSPACE }}/depends_temp
-          if [[ -e raven-windows-dependencies.tar.gz ]]; then sha256sum raven-windows-dependencies.tar.gz > SHASUM; else echo "no dependency tar file found"; fi
+          if [[ -e yottaflux-windows-dependencies.tar.gz ]]; then sha256sum yottaflux-windows-dependencies.tar.gz > SHASUM; else echo "no dependency tar file found"; fi
 
     - name: Sync the Dependencies to S3
       uses: jakejarvis/s3-sync-action@master
@@ -49,6 +49,6 @@ jobs:
         SOURCE_DIR: "${{ GITHUB.WORKSPACE }}/depends_temp/"
         DEST_DIR: 'windows'
         AWS_REGION: 'us-east-1'
-        AWS_S3_BUCKET: "raven-build-resources"
+        AWS_S3_BUCKET: "yottaflux-build-resources"
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

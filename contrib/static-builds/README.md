@@ -16,7 +16,7 @@ From an Ubuntu 18 bionic server(required)
 ```
 cd ~/
 sudo apt install git p7zip-full sleuthkit
-git clone https://github.com/ravenproject/yottaflux
+git clone https://github.com/yottafluxproject/yottaflux
 mkdir ~/dmg && cd ~/dmg
 ```
 Register for a developer account with Apple, then download the Xcode 7.3.1 dmg from:   https://developer.apple.com/devcenter/download.action?path=/Developer_Tools/Xcode_7.3.1/Xcode_7.3.1.dmg  
@@ -70,7 +70,7 @@ This process requires core to have a pvk file (kept secret)and a cert in PEM for
 
 ```
 cd ~/
-DISTNAME=raven-2.0.1
+DISTNAME=yottaflux-2.0.1
 sudo apt install build-essential libtool autotools-dev automake pkg-config bsdmainutils libcurl4-openssl-dev curl libssl-dev autoconf
 wget https://bitcoincore.org/cfields/osslsigncode-Backports-to-1.7.1.patch
 wget http://downloads.sourceforge.net/project/osslsigncode/osslsigncode/osslsigncode-1.7.1.tar.gz
@@ -83,7 +83,7 @@ sudo make install
 cd ~/
 mkdir win64 && cd win64/
 ```
-Transfer raven-*-win*-unsigned.tar.gz to ~/win64/ from the Ubuntu 18 build machine's ~/sign directory  
+Transfer yottaflux-*-win*-unsigned.tar.gz to ~/win64/ from the Ubuntu 18 build machine's ~/sign directory  
 ```
 tar xf $DISTNAME-win*-unsigned.tar.gz
 rm $DISTNAME-win*-unsigned.tar.gz
@@ -94,7 +94,7 @@ Enter the passphrase for the key when prompted
 tar xf signature-win.tar.gz 
 osslsigncode attach-signature -in "unsigned/$DISTNAME-win64-setup-unsigned.exe" -out "$DISTNAME-win64-setup.exe" -sigin "win/$DISTNAME-win64-setup-unsigned.exe.pem"
 ```
-Transfer raven-*-win*-setup.exe back to the Ubuntu18 build machine to the folder ~/release (to shasum with the rest of the releases)
+Transfer yottaflux-*-win*-setup.exe back to the Ubuntu18 build machine to the folder ~/release (to shasum with the rest of the releases)
 
 
 
@@ -105,7 +105,7 @@ This process requires core to have a pvk file (kept secret)and a cert in PEM for
 
 ```
 cd ~/
-DISTNAME=raven-2.0.1
+DISTNAME=yottaflux-2.0.1
 sudo apt install build-essential libtool autotools-dev automake pkg-config bsdmainutils libcurl4-openssl-dev curl libssl-dev autoconf
 wget https://bitcoincore.org/cfields/osslsigncode-Backports-to-1.7.1.patch
 wget http://downloads.sourceforge.net/project/osslsigncode/osslsigncode/osslsigncode-1.7.1.tar.gz
@@ -118,7 +118,7 @@ sudo make install
 cd ~/
 mkdir win32 && cd win32/
 ```
-Transfer raven-*-win*-unsigned.tar.gz to ~/win32/ from the Ubuntu 18 build machine's ~/sign directory  
+Transfer yottaflux-*-win*-unsigned.tar.gz to ~/win32/ from the Ubuntu 18 build machine's ~/sign directory  
 ```
 tar xf $DISTNAME-win*-unsigned.tar.gz
 rm $DISTNAME-win*-unsigned.tar.gz
@@ -129,7 +129,7 @@ Enter the passphrase for the key when prompted
 tar xf signature-win.tar.gz 
 osslsigncode attach-signature -in "unsigned/$DISTNAME-win32-setup-unsigned.exe" -out "$DISTNAME-win32-setup.exe" -sigin "win/$DISTNAME-win32-setup-unsigned.exe.pem"
 ```
-Transfer raven-*-win*-setup.exe back to the Ubuntu18 build machine to the folder ~/release (to shasum with the rest of the releases)
+Transfer yottaflux-*-win*-setup.exe back to the Ubuntu18 build machine to the folder ~/release (to shasum with the rest of the releases)
 
 
 
@@ -138,12 +138,12 @@ Transfer raven-*-win*-setup.exe back to the Ubuntu18 build machine to the folder
 From a Apple MacOS device: open terminal
 
 ```
-DISTNAME=raven-2.0.1
+DISTNAME=yottaflux-2.0.1
 xcode-select --install
 cd ~/desktop
 mkdir OSX
 ```
-Transfer raven-*-osx-unsigned.tar.gz to ~/desktop/OSX from the Ubuntu 18 build machine's ~/sign directory 
+Transfer yottaflux-*-osx-unsigned.tar.gz to ~/desktop/OSX from the Ubuntu 18 build machine's ~/sign directory 
 ```
 cd OSX
 tar xf $DISTNAME-osx-unsigned.tar.gz
@@ -160,7 +160,7 @@ Copy signature-osx.tar.gz back to the ubuntu 18 build machine
 
 From the ubuntu 18 bionic server(required) build machine
 ```
-DISTNAME=raven-2.0.1
+DISTNAME=yottaflux-2.0.1
 cd ~/sign
 mkdir OSX/
 cp $DISTNAME-osx-unsigned.tar.gz OSX
@@ -184,7 +184,7 @@ Checksum all the binaries
 
 From the ubuntu 18 bionic server(required) build machine
 ```
-DISTNAME=raven-2.0.1
+DISTNAME=yottaflux-2.0.1
 ```
 Transfer your *-secret-gpg.key and *-ownertrust-gpg.txt to ~/  
 Import your PGP keys

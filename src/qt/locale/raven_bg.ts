@@ -62,11 +62,11 @@
         <translation>Адреси за получаване</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation>Това са адресите на получателите на плащания. Винаги проверявайте размера на сумата и адреса на получателя, преди да изпратите монети.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
         <translation>Това са Вашите Биткойн адреси,благодарение на които ще получавате плащания.Препоръчително е да използвате нови адреси за получаване на всяка транзакция.</translation>
     </message>
     <message>
@@ -405,7 +405,7 @@
         <translation>Избери...</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation>Плащане на минимална такса би било достатъчно при слаб трафик и обем на транзакциите по-малък от големината на блока. Бъдете внимателни, транзакцията може да не бъде потвърдена и изпълнена ако заявените Рейвън транзакции са повече от възможността на мрежата да обработи</translation>
     </message>
     <message>
@@ -429,7 +429,7 @@
         <translation>Заплати само изискуемата такса от %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Raven address</source>
+        <source>Warning: Invalid Yottaflux address</source>
         <translation>Внимание! Невалиден Рейвън адрес</translation>
     </message>
     <message>
@@ -676,7 +676,7 @@
         <translation>Редактиране на адрес за изпращане</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Raven address.</source>
+        <source>The entered address "%1" is not a valid Yottaflux address.</source>
         <translation>"%1" не е валиден Биткоин адрес.</translation>
     </message>
     <message>
@@ -829,8 +829,8 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Използване на директория ръчно</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Error</source>
@@ -1005,15 +1005,15 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>&amp;Похарчете непотвърденото ресто</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Автоматично отваряне на входящия Raven порт. Работи само с рутери поддържащи UPnP.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Автоматично отваряне на входящия Yottaflux порт. Работи само с рутери поддържащи UPnP.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Отваряне на входящия порт чрез &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
         <translation>Свързване с Биткойн мрежата чрез SOCKS5  прокси.</translation>
     </message>
     <message>
@@ -1116,7 +1116,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Формуляр</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
         <translation>Текущата информация на екрана може да не е актуална. Вашият портфейл ще се синхронизира автоматично с мрежата на Биткоин, щом поне една връзката с нея се установи; този процес все още не е приключил.</translation>
     </message>
     <message>
@@ -1167,7 +1167,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Възникна грешка по време назаявката за плащане</translation>
     </message>
     <message>
-        <source>Cannot start raven: click-to-pay handler</source>
+        <source>Cannot start yottaflux: click-to-pay handler</source>
         <translation>Биткойн не можe да се стартира: click-to-pay handler</translation>
     </message>
     <message>
@@ -1257,7 +1257,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Сума</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
         <translation>Въведете Биткойн адрес (например: %1)</translation>
     </message>
     <message>
@@ -1507,7 +1507,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Подписване на &amp;съобщение...</translation>
@@ -1629,7 +1629,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Повторно индексиране на блоковете на диска...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
+        <source>Send coins to a Yottaflux address</source>
         <translation>Изпращане към Биткоин адрес</translation>
     </message>
     <message>
@@ -1649,7 +1649,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>&amp;Проверка на съобщение...</translation>
     </message>
     <message>
-        <source>Raven</source>
+        <source>Yottaflux</source>
         <translation>Биткоин</translation>
     </message>
     <message>
@@ -1677,11 +1677,11 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Шифроване на личните ключове,които принадлежат на портфейла Ви.</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
         <translation>Пишете съобщения със своя Биткойн адрес за да докажете,че е ваш.</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
         <translation>Потвърждаване на съобщения  за да се знае,че са написани с дадените Биткойн адреси.</translation>
     </message>
     <message>
@@ -1693,7 +1693,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>&amp;Помощ</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
         <translation>Изискване на плащания(генерира QR кодове и биткойн: URIs)</translation>
     </message>
     <message>
@@ -1705,7 +1705,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Покажи списък с използваните адреси и имена.</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
+        <source>Open a yottaflux: URI or payment request</source>
         <translation>Отворете биткойн: URI  или заявка за плащане</translation>
     </message>
     <message>
@@ -1749,7 +1749,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Синхронизиран</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <source>Show the %1 help message to get a list with possible Yottaflux command-line options</source>
         <translation>Покажи %1 помощно съобщение за да получиш лист с възможни Биткойн команди</translation>
     </message>
     <message>
@@ -2224,7 +2224,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Заявката за плащане е изтекла.</translation>
     </message>
     <message>
-        <source>Warning: Invalid Raven address</source>
+        <source>Warning: Invalid Yottaflux address</source>
         <translation>Внимание: Невалиден Биткойн адрес</translation>
     </message>
     <message>
@@ -2340,7 +2340,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Копиране на текущия подпис</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
+        <source>Sign the message to prove you own this Yottaflux address</source>
         <translation>Подпишете съобщение като доказателство, че притежавате определен адрес</translation>
     </message>
     <message>
@@ -2356,7 +2356,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>&amp;Провери</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
         <translation>Проверете съобщение, за да сте сигурни че е подписано с определен Биткоин адрес</translation>
     </message>
     <message>
@@ -2887,7 +2887,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Опции:</translation>
@@ -2909,7 +2909,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>Pruning blockstore...</translation>
     </message>
     <message>
-        <source>Raven Core</source>
+        <source>Yottaflux Core</source>
         <translation>Биткойн ядро</translation>
     </message>
     <message>

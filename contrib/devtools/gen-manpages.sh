@@ -4,10 +4,10 @@ TOPDIR=${TOPDIR:-$(git rev-parse --show-toplevel)}
 SRCDIR=${SRCDIR:-$TOPDIR/src}
 MANDIR=${MANDIR:-$TOPDIR/doc/man}
 
-RAVEND=${RAVEND:-$SRCDIR/ravend}
-RAVENCLI=${RAVENCLI:-$SRCDIR/raven-cli}
-RAVENTX=${RAVENTX:-$SRCDIR/raven-tx}
-RAVENQT=${RAVENQT:-$SRCDIR/qt/raven-qt}
+RAVEND=${RAVEND:-$SRCDIR/yottafluxd}
+RAVENCLI=${RAVENCLI:-$SRCDIR/yottaflux-cli}
+RAVENTX=${RAVENTX:-$SRCDIR/yottaflux-tx}
+RAVENQT=${RAVENQT:-$SRCDIR/qt/yottaflux-qt}
 
 [ ! -x $RAVEND ] && echo "$RAVEND not found or not executable." && exit 1
 
@@ -15,8 +15,8 @@ RAVENQT=${RAVENQT:-$SRCDIR/qt/raven-qt}
 YAIVER=($($RAVENCLI --version | head -n1 | awk -F'[ -]' '{ print $6, $7 }'))
 
 # Create a footer file with copyright content.
-# This gets autodetected fine for ravend if --version-string is not set,
-# but has different outcomes for raven-qt and raven-cli.
+# This gets autodetected fine for yottafluxd if --version-string is not set,
+# but has different outcomes for yottaflux-qt and yottaflux-cli.
 echo "[COPYRIGHT]" > footer.h2m
 $RAVEND --version | sed -n '1!p' >> footer.h2m
 

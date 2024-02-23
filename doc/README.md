@@ -21,11 +21,11 @@ The following are some helpful notes on how to run Yottaflux on your native plat
 
    a. GUI wallet:
 
-   `./raven-qt`
+   `./yottaflux-qt`
 
    b. Core deamon:
 
-   `./ravend -deamon`
+   `./yottafluxd -deamon`
 
 #### Ubuntu 16.04, 17.04/17.10 and 18.04
 
@@ -70,15 +70,15 @@ The GUI wallet requires the QR Code encoding library and Google's data interchan
 
 ### OS X
 
-1) Download Raven-Qt.dmg.
+1) Download Yottaflux-Qt.dmg.
 
 2) Double click the DMG to mount it.
 
-3) Drag Raven Core icon to the Applications Folder
+3) Drag Yottaflux Core icon to the Applications Folder
 
 ![alt tag](https://i.imgur.com/GLhBFUV.png)
 
-4) Open the Applications folder and Launch Raven Core. The client will begin synchronizing with the network.
+4) Open the Applications folder and Launch Yottaflux Core. The client will begin synchronizing with the network.
 
 ![alt tag](https://i.imgur.com/v3962qo.png)
 
@@ -86,20 +86,20 @@ Note: You may get the follow error on first launch:
 ```
 Dyld Error Message:
   Library not loaded: @loader_path/libboost_system-mt.dylib
-  Referenced from: /Applications/Raven-Qt.app/Contents/Frameworks/libboost_thread-mt.dylib
+  Referenced from: /Applications/Yottaflux-Qt.app/Contents/Frameworks/libboost_thread-mt.dylib
   Reason: image not found
 ```
-To resolve, you will need to copy libboost_system.dylib to libboost_system-mt.dylib in the /Applications/Raven-Qt.app/Contents/Frameworks folder
+To resolve, you will need to copy libboost_system.dylib to libboost_system-mt.dylib in the /Applications/Yottaflux-Qt.app/Contents/Frameworks folder
 
 ### Windows
 
 1) Download windows-x86_64.zip and unpack executables to desired folder.
 
-2) Double click the raven-qt.exe to launch it.
+2) Double click the yottaflux-qt.exe to launch it.
 
 ### Need Help?
 
-- See the documentation at the [Yottaflux Wiki](https://raven.wiki/wiki/Yottaflux_Wiki)
+- See the documentation at the [Yottaflux Wiki](https://yottaflux.wiki/wiki/Yottaflux_Wiki)
 for help and more information.
 - Ask for help on [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/YottafluxDev) or [Reddit](https://www.reddit.com/r/Yottaflux/).
 
@@ -121,7 +121,7 @@ Yottaflux repo's [root README](https://github.com/yottaflux/Yottaflux/blob/maste
 - [Developer Notes](https://github.com/yottaflux/Yottaflux/blob/master/doc/developer-notes.md)
 - [Release Notes](https://github.com/yottaflux/Yottaflux/blob/master/doc/release-notes.md)
 - [Release Process](https://github.com/yottaflux/Yottaflux/blob/master/doc/release-process.md)
-- [Source Code Documentation (External Link)](https://dev.visucore.com/raven/doxygen/) -- 2018-05-11 -- Broken link
+- [Source Code Documentation (External Link)](https://dev.visucore.com/yottaflux/doxygen/) -- 2018-05-11 -- Broken link
 - [Translation Process](https://github.com/yottaflux/Yottaflux/blob/master/doc/translation_process.md)
 - [Translation Strings Policy](https://github.com/yottaflux/Yottaflux/blob/master/doc/translation_strings_policy.md)
 - [Travis CI](https://github.com/yottaflux/Yottaflux/blob/master/doc/travis-ci.md)
@@ -133,7 +133,7 @@ Yottaflux repo's [root README](https://github.com/yottaflux/Yottaflux/blob/maste
 
 ### Resources
 - Discuss on chat [Discord](https://discord.gg/jn6uhur), [Telegram](https://t.me/YottafluxDev) or [Reddit](https://www.reddit.com/r/Yottaflux/).
-- Find out more on the [Yottaflux Wiki](https://raven.wiki/wiki/Yottaflux_Wiki)
+- Find out more on the [Yottaflux Wiki](https://yottaflux.wiki/wiki/Yottaflux_Wiki)
 - Visit the project home [yottaflux.ai](https://yottaflux.ai)
 
 ### Miscellaneous

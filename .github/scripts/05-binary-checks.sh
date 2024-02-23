@@ -28,7 +28,7 @@ elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     echo "----------------------------------------"
     echo "Running functional tests for ${OS}"
     echo "----------------------------------------"
-    ${GITHUB_WORKSPACE}/src/test/test_raven
+    ${GITHUB_WORKSPACE}/src/test/test_yottaflux
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" || ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
     echo "----------------------------------------"
     echo "No binary checks available for ${OS}"

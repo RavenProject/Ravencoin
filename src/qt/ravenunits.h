@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -47,17 +47,17 @@
 #define THIN_SP_UTF8 REAL_THIN_SP_UTF8
 #define THIN_SP_HTML HTML_HACK_SP
 
-/** Raven unit definitions. Encapsulates parsing and formatting
+/** Yottaflux unit definitions. Encapsulates parsing and formatting
    and serves as list model for drop-down selection boxes.
 */
-class RavenUnits: public QAbstractListModel
+class YottafluxUnits: public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit RavenUnits(QObject *parent);
+    explicit YottafluxUnits(QObject *parent);
 
-    /** Raven units.
+    /** Yottaflux units.
       @note Source: https://en.bitcoin.it/wiki/Units . Please add only sensible ones
      */
     enum Unit
@@ -132,8 +132,8 @@ public:
     static CAmount maxMoney();
 
 private:
-    QList<RavenUnits::Unit> unitlist;
+    QList<YottafluxUnits::Unit> unitlist;
 };
-typedef RavenUnits::Unit RavenUnit;
+typedef YottafluxUnits::Unit YottafluxUnit;
 
 #endif // RAVEN_QT_RAVENUNITS_H

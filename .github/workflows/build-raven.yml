@@ -1,4 +1,4 @@
-name: Build Raven
+name: Build Yottaflux
 
 on:
   push:
@@ -94,7 +94,7 @@ jobs:
       run: ${SCRIPTS}/04-configure-build.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Build Raven
+      name: Build Yottaflux
       run: make -j2
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}

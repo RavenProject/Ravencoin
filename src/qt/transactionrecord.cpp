@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2020 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,7 +10,7 @@
 #include "base58.h"
 #include "consensus/consensus.h"
 #include "validation.h"
-#include "ravenunits.h"
+#include "yottafluxunits.h"
 #include "timedata.h"
 #include "wallet/wallet.h"
 #include "core_io.h"
@@ -70,7 +70,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
                 if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*wallet, address))
                 {
-                    // Received by Raven Address
+                    // Received by Yottaflux Address
                     sub.type = TransactionRecord::RecvWithAddress;
                     sub.address = EncodeDestination(address);
                 }
@@ -153,7 +153,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 CTxDestination address;
                 if (ExtractDestination(txout.scriptPubKey, address))
                 {
-                    // Sent to Raven Address
+                    // Sent to Yottaflux Address
                     sub.type = TransactionRecord::SendToAddress;
                     sub.address = EncodeDestination(address);
                 }
@@ -420,19 +420,19 @@ bool TransactionRecord::isSwapTransaction(const CWallet *wallet, const CWalletTx
                 //Trade!
                 //Amount represents the asset we sent, no matter the perspective
                 sub.credit = recvAmount;
-                std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
+                std::string asset_qty_format = YottafluxUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
                 sub.assetName = strprintf("%s (%s %s)", TransactionView::tr("Traded Away").toUtf8().constData(), recvType, asset_qty_format);
             } else if (fSentAssets) {
                 //Sell!
                 //Total price paid, need to use net calculation when we executed
                 sub.credit = mine ? myReceievedOutput.nValue : nNet;
-                std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
+                std::string asset_qty_format = YottafluxUnits::formatWithCustomName(QString::fromStdString(sentType), sentAmount, 2).toUtf8().constData();
                 sub.assetName = strprintf("YAI (%s %s)", TransactionView::tr("Sold").toUtf8().constData(), asset_qty_format);
             } else if (fRecvAssets) {
                 //Buy!
                 //Total price paid, need to use net calculation when we executed
                 sub.credit = (mine ? -myProvidedInput.nValue : nNet);
-                std::string asset_qty_format = RavenUnits::formatWithCustomName(QString::fromStdString(recvType), recvAmount, 2).toUtf8().constData();
+                std::string asset_qty_format = YottafluxUnits::formatWithCustomName(QString::fromStdString(recvType), recvAmount, 2).toUtf8().constData();
                 sub.assetName = strprintf("YAI (%s %s)", TransactionView::tr("Bought").toUtf8().constData(), asset_qty_format);
             } else {
                 LogPrintf("\tFell Through!\n");

@@ -1,4 +1,4 @@
-Raven Core version *2.2.2* is now available!!
+Yottaflux Core version *2.2.2* is now available!!
 ==============
 
   <https://github.com/yottaflux/Yottaflux/releases/tag/v2.2.2>
@@ -20,8 +20,8 @@ How to Upgrade
 
 If you are running an older version, shut it down. Wait until it has completely
 shut down (which might take a few minutes for older versions), then run the 
-installer (on Windows) or just copy over `/Applications/Raven-Qt` (on Mac)
-or `ravend`/`raven-qt` (on Linux).
+installer (on Windows) or just copy over `/Applications/Yottaflux-Qt` (on Mac)
+or `yottafluxd`/`yottaflux-qt` (on Linux).
 
 The first time you run version 2.1.0 or higher, your chainstate database may
 be converted to a new format, which will take anywhere from a few minutes to
@@ -49,14 +49,14 @@ will not fork the chain.
 Compatibility
 ==============
 
-Raven Core is extensively tested on multiple operating systems using
+Yottaflux Core is extensively tested on multiple operating systems using
 the Linux kernel, macOS 10.8+, and Windows 10(x64) and later. 32-bit versions of Windows,
 and Windows XP are not supported.
 
-Raven Core should also work on most other Unix-like systems but is not
+Yottaflux Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
-Raven Core has been tested with macOS 10.14 Mojave, but it is recommended that *developers*
+Yottaflux Core has been tested with macOS 10.14 Mojave, but it is recommended that *developers*
 do not update to Mojave.  There is an incompatibility with Berkeley-db 4.8.30 that causes
 the binaries to seg-fault.  There is a workaround, but as of this release users should
 not update to Mojave (see build-OSX.md for current status of this issue).  There are no
@@ -86,7 +86,7 @@ Credits
 
 Thanks to everyone who directly contributed to this release:
 
-- Most importantly - The Raven Community!
+- Most importantly - The Yottaflux Community!
 - Tron Black
 - Jesse Empey
 - Jeremy Anderson

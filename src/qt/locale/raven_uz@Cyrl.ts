@@ -398,8 +398,8 @@
         <translation>Шакл</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>Кўрсатилган маълумот эскирган бўлиши мумкин. Ҳамёнингиз алоқа ўрнатилгандан сўнг Raven тармоқ билан автоматик тарзда синхронланади, аммо жараён ҳалигача тугалланмади.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>Кўрсатилган маълумот эскирган бўлиши мумкин. Ҳамёнингиз алоқа ўрнатилгандан сўнг Yottaflux тармоқ билан автоматик тарзда синхронланади, аммо жараён ҳалигача тугалланмади.</translation>
     </message>
     <message>
         <source>Watch-only:</source>
@@ -475,8 +475,8 @@
         <translation>Миқдори</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>Raven манзилини киритинг (масалан.  %1)</translation>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
+        <translation>Yottaflux манзилини киритинг (масалан.  %1)</translation>
     </message>
     <message>
         <source>%1 m</source>
@@ -661,7 +661,7 @@
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>&amp;Хабар ёзиш...</translation>
@@ -739,8 +739,8 @@
         <translation>Дискдаги блоклар қайта индексланмоқда...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Тангаларни Raven манзилига жўнатиш</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Тангаларни Yottaflux манзилига жўнатиш</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -759,8 +759,8 @@
         <translation>Хабарни &amp;тасдиқлаш...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -787,12 +787,12 @@
         <translation>Ҳамёнингизга тегишли махфий калитларни кодлаш</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Raven манзилидан унинг эгаси эканлигингизни исботлаш учун хабарлар ёзинг</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Yottaflux манзилидан унинг эгаси эканлигингизни исботлаш учун хабарлар ёзинг</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Хабарларни махсус Raven манзилларингиз билан ёзилганлигига ишонч ҳосил қилиш учун уларни тасдиқланг</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Хабарларни махсус Yottaflux манзилларингиз билан ёзилганлигига ишонч ҳосил қилиш учун уларни тасдиқланг</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -803,8 +803,8 @@
         <translation>&amp;Ёрдам</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Тўловлар (QR кодлари ва raven ёрдамида яратишлар: URI’лар) сўраш</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Тўловлар (QR кодлари ва yottaflux ёрдамида яратишлар: URI’лар) сўраш</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -815,8 +815,8 @@
         <translation>Фойдаланилган қабул қилинган манзиллар ва ёрлиқлар рўйхатини кўрсатиш</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Raven’ни очиш: URI ёки тўлов сўрови</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Yottaflux’ни очиш: URI ёки тўлов сўрови</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1163,7 +1163,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Танламалар:</translation>
@@ -1181,8 +1181,8 @@
         <translation>Демон сифатида орқа фонда ишга туширинг ва буйруқларга рози бўлинг</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>Connection options:</source>

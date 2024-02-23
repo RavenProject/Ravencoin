@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -52,7 +52,7 @@ private Q_SLOTS:
     void on_resetButton_clicked();
     void on_ipfsUrlReset_clicked();
     void on_thirdPartyTxUrlsReset_clicked();
-    void on_openRavenConfButton_clicked();
+    void on_openYottafluxConfButton_clicked();
     void on_okButton_clicked();
     void on_cancelButton_clicked();
     

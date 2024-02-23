@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Testing unique asset use cases"""
 
 import random
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_contains, assert_does_not_contain_key, assert_equal, assert_raises_rpc_error
 
 
@@ -30,7 +30,7 @@ def gen_unique_asset_name(root):
     return name
 
 
-class UniqueAssetTest(RavenTestFramework):
+class UniqueAssetTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3

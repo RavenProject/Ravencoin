@@ -24,7 +24,7 @@ Loops through blocks and transactions and prints out tx information.
 * ```python txfacts.py```
 
 ### IPFS Pinner
-Loops through blocks and transactions and pins asset issuance meta-data and then monitors ravend transactions for new ipfs metadata via zmq.
+Loops through blocks and transactions and pins asset issuance meta-data and then monitors yottafluxd transactions for new ipfs metadata via zmq.
 * Requires ipfs daemon to be running ```ipfs daemon```
 
 * Install pip3 (if not there) ```sudo apt-get install python3-pip```
@@ -35,7 +35,7 @@ Loops through blocks and transactions and pins asset issuance meta-data and then
 
 * Install ipfsapi with ```pip3 install ipfsapi```
 
-* Run ravend or raven-qt with parameter to use zmq: ```-zmqpubrawtx=tcp://127.0.0.1:28766```
+* Run yottafluxd or yottaflux-qt with parameter to use zmq: ```-zmqpubrawtx=tcp://127.0.0.1:28766```
 
 Optional Arguments
 ```  

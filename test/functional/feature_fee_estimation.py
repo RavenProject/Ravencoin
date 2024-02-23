@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Test fee estimation code."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import satoshi_round, Decimal, connect_nodes, random, sync_mempools, sync_blocks
 from test_framework.script import CScript, OP_1, OP_DROP, OP_2, OP_HASH160, OP_EQUAL, hash160, OP_TRUE
 from test_framework.mininode import CTransaction, CTxIn, CTxOut, COutPoint, to_hex, COIN
@@ -143,7 +143,7 @@ def check_estimates(node, fees_seen, max_invalid, print_estimates = True):
     return all_estimates
 
 
-class EstimateFeeTest(RavenTestFramework):
+class EstimateFeeTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 3
 

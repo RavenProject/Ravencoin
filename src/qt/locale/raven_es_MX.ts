@@ -261,7 +261,7 @@
     </message>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Firmar &amp;mensaje</translation>
@@ -339,8 +339,8 @@
         <translation>Reindexando bloques en el disco...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Enviar monedas a una dirección Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Enviar monedas a una dirección Yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -359,8 +359,8 @@
         <translation>&amp;Verificar mensaje...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -442,8 +442,8 @@
         <translation>Mensaje:</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Raven network.</source>
-        <translation>Mensaje opcional para agregar a la solicitud de pago, el cual será mostrado cuando la solicitud este abierta. Nota: El mensaje no se manda con el pago a travéz de la red de Raven.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Yottaflux network.</source>
+        <translation>Mensaje opcional para agregar a la solicitud de pago, el cual será mostrado cuando la solicitud este abierta. Nota: El mensaje no se manda con el pago a travéz de la red de Yottaflux.</translation>
     </message>
     <message>
         <source>Use this form to request payments. All fields are &lt;b&gt;optional&lt;/b&gt;.</source>
@@ -623,14 +623,14 @@
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Opciones:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>nucleo Raven</translation>
+        <source>Yottaflux Core</source>
+        <translation>nucleo Yottaflux</translation>
     </message>
     <message>
         <source>&lt;category&gt; can be:</source>

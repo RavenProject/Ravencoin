@@ -216,8 +216,8 @@
         <translation>experto</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Abre automáticamente el puerto del cliente Raven en el router. Esto funciona solo cuando tu router es compatible con UPnP y está habilitado.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Abre automáticamente el puerto del cliente Yottaflux en el router. Esto funciona solo cuando tu router es compatible con UPnP y está habilitado.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -384,7 +384,7 @@
     </message>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Firmar &amp;Mensaje...</translation>
@@ -462,8 +462,8 @@
         <translation>Cargando el index de bloques...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Enviar monedas a una dirección raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Enviar monedas a una dirección yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -482,8 +482,8 @@
         <translation>Verificar mensaje....</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -502,7 +502,7 @@
         <translation>&amp;Mostrar/Ocultar</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
         <translation>Firmar un mensaje para provar que usted es dueño de esta dirección</translation>
     </message>
     <message>
@@ -514,8 +514,8 @@
         <translation>&amp;Ayuda</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Pide pagos (genera codigos QR and raven: URls)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Pide pagos (genera codigos QR and yottaflux: URls)</translation>
     </message>
     <message>
         <source>Error</source>
@@ -704,7 +704,7 @@
         <translation>Firma</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
+        <source>Sign the message to prove you own this Yottaflux address</source>
         <translation>Firmar un mensjage para probar que usted es dueño de esta dirección</translation>
     </message>
     <message>
@@ -767,7 +767,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Opciones:
@@ -789,8 +789,8 @@
 </translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>raven core</translation>
+        <source>Yottaflux Core</source>
+        <translation>yottaflux core</translation>
     </message>
     <message>
         <source>Error loading block database</source>

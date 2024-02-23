@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -62,7 +62,7 @@ UniValue viewallmessages(const JSONRPCRequest& request) {
 
     if (!fMessaging) {
         UniValue ret(UniValue::VSTR);
-        ret.push_back("Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+        ret.push_back("Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your yottaflux.conf");
         return ret;
     }
 
@@ -137,7 +137,7 @@ UniValue viewallmessagechannels(const JSONRPCRequest& request) {
 
     if (!fMessaging) {
         UniValue ret(UniValue::VSTR);
-        ret.push_back("Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+        ret.push_back("Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your yottaflux.conf");
         return ret;
     }
 
@@ -188,7 +188,7 @@ UniValue subscribetochannel(const JSONRPCRequest& request) {
         );
 
     if (!fMessaging) {
-        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your yottaflux.conf");
     }
 
     if (!pMessageSubscribedChannelsCache || !pmessagechanneldb) {
@@ -238,7 +238,7 @@ UniValue unsubscribefromchannel(const JSONRPCRequest& request) {
         );
 
     if (!fMessaging) {
-        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your yottaflux.conf");
     }
 
     if (!pMessageSubscribedChannelsCache || !pmessagechanneldb) {
@@ -285,7 +285,7 @@ UniValue clearmessages(const JSONRPCRequest& request) {
         );
 
     if (!fMessaging) {
-        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your raven.conf");
+        throw JSONRPCError(RPC_DATABASE_ERROR, "Messaging is disabled. To enable messaging, run the wallet without -disablemessaging or remove disablemessaging from your yottaflux.conf");
     }
 
     if (!pMessagesCache || !pmessagedb) {

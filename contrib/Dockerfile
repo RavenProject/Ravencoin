@@ -31,33 +31,33 @@ RUN apt-get update && \
 	apt-get clean
 
 #Copy source dir
-COPY . /home/raven/build/Yottaflux/
-WORKDIR /home/raven/build/Yottaflux
+COPY . /home/yottaflux/build/Yottaflux/
+WORKDIR /home/yottaflux/build/Yottaflux
 
 #build db4 from source
-WORKDIR /home/raven/build/Yottaflux/contrib
+WORKDIR /home/yottaflux/build/Yottaflux/contrib
 RUN ./install_db4.sh ../../
 
-# build Ravencore
-WORKDIR /home/raven/build/Yottaflux
-RUN ./autogen.sh && ./configure --disable-tests BDB_LIBS="-L/home/raven/build/db4/lib -ldb_cxx-4.8" BDB_CFLAGS="-I/home/raven/build/db4/include" --with-gui=no  && make -j4
+# build Yottafluxcore
+WORKDIR /home/yottaflux/build/Yottaflux
+RUN ./autogen.sh && ./configure --disable-tests BDB_LIBS="-L/home/yottaflux/build/db4/lib -ldb_cxx-4.8" BDB_CFLAGS="-I/home/yottaflux/build/db4/include" --with-gui=no  && make -j4
 
 FROM base AS final
 
 #Add our service account user
-RUN useradd -ms /bin/bash raven && \
-	mkdir /var/lib/raven && \
-	chown raven:raven /var/lib/raven && \
-	ln -s /var/lib/raven /home/raven/.raven && \
-	chown -h raven:raven /home/raven/.raven
+RUN useradd -ms /bin/bash yottaflux && \
+	mkdir /var/lib/yottaflux && \
+	chown yottaflux:yottaflux /var/lib/yottaflux && \
+	ln -s /var/lib/yottaflux /home/yottaflux/.yottaflux && \
+	chown -h yottaflux:yottaflux /home/yottaflux/.yottaflux
 
-VOLUME /var/lib/raven
+VOLUME /var/lib/yottaflux
 
 #Copy the compiled binaries from the build
-COPY --from=build /home/raven/build/Yottaflux/src/ravend /usr/local/bin/ravend
-COPY --from=build /home/raven/build/Yottaflux/src/raven-cli /usr/local/bin/raven-cli
+COPY --from=build /home/yottaflux/build/Yottaflux/src/yottafluxd /usr/local/bin/yottafluxd
+COPY --from=build /home/yottaflux/build/Yottaflux/src/yottaflux-cli /usr/local/bin/yottaflux-cli
 
-WORKDIR /home/raven
-USER raven
+WORKDIR /home/yottaflux
+USER yottaflux
 
-CMD /usr/local/bin/ravend -datadir=/var/lib/raven -printtoconsole -onlynet=ipv4
+CMD /usr/local/bin/yottafluxd -datadir=/var/lib/yottaflux -printtoconsole -onlynet=ipv4

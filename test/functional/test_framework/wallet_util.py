@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2018 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -181,7 +181,7 @@ bip39_english = [
     "punch","pupil","puppy","purchase","purity","purpose","purse","push","put","puzzle",
     "pyramid","quality","quantum","quarter","question","quick","quit","quiz","quote","rabbit",
     "raccoon","race","rack","radar","radio","rail","rain","raise","rally","ramp",
-    "ranch","random","range","rapid","rare","rate","rather","raven","raw","razor",
+    "ranch","random","range","rapid","rare","rate","rather","yottaflux","raw","razor",
     "ready","real","reason","rebel","rebuild","recall","receive","recipe","record","recycle",
     "reduce","reflect","reform","refuse","region","regret","regular","reject","relax","release",
     "relief","rely","remain","remember","remind","remove","render","renew","rent","reopen",

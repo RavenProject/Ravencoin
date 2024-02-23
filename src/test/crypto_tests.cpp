@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,7 +13,7 @@
 #include "crypto/hmac_sha512.h"
 #include "random.h"
 #include "utilstrencodings.h"
-#include "test/test_raven.h"
+#include "test/test_yottaflux.h"
 
 #include <vector>
 
@@ -327,7 +327,7 @@ BOOST_FIXTURE_TEST_SUITE(crypto_tests, BasicTestingSetup)
                    "f08a78cbbaee082b052ae0708f32fa1e50c5c421aa772ba5dbb406a2ea6be342");
         TestSHA256("This is exactly 64 bytes long, not counting the terminating byte",
                    "ab64eff7e88e2e46165e29f2bce41826bd4c7b3552f6b382a9e7d3af47c245f8");
-        TestSHA256("As Raven relies on 80 byte header hashes, we want to have an example for that.",
+        TestSHA256("As Yottaflux relies on 80 byte header hashes, we want to have an example for that.",
                    "4890d7540fe4604653a5108c012bb0d4ec15580dcfda37d85755830ec1037f26");
         TestSHA256(std::string(1000000, 'a'),
                    "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0");

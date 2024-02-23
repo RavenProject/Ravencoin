@@ -62,11 +62,11 @@
         <translation>Адрес за получаване</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation>Тези са вашите Биткойн адреси за изпращане на монети. Винаги проверявайте количеството и получаващия адрес преди изпращане. </translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
         <translation>Това са вашите Биткойн адреси за получаване на монети. Препоръчително е да ползвате нов адрес на всяка транзакция.</translation>
     </message>
     <message>
@@ -257,7 +257,7 @@
     <name>RPCConsole</name>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Подпиши съобщение...</translation>
@@ -463,9 +463,9 @@
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
-        <source>Raven Core</source>
+        <source>Yottaflux Core</source>
         <translation>Биткойн ядро</translation>
     </message>
     </context>

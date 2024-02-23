@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,7 +14,7 @@ This test takes 30 mins or more (up to 2 hours)
 
 import time
 import os
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import connect_nodes, sync_blocks, mine_large_block, assert_equal, assert_raises_rpc_error, assert_greater_than
 
 MIN_BLOCKS_TO_KEEP = 288
@@ -28,7 +28,7 @@ TIMESTAMP_WINDOW = 2 * 60 * 60
 def calc_usage(blockdir):
     return sum(os.path.getsize(blockdir+f) for f in os.listdir(blockdir) if os.path.isfile(blockdir+f)) / (1024. * 1024.)
 
-class PruneTest(RavenTestFramework):
+class PruneTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 6

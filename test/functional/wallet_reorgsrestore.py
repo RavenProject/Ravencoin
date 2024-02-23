@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2019 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,10 +17,10 @@ disconnected.
 from decimal import Decimal
 import os
 import shutil
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_equal, connect_nodes, disconnect_nodes, sync_blocks
 
-class ReorgsRestoreTest(RavenTestFramework):
+class ReorgsRestoreTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 3
 

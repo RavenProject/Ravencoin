@@ -1,9 +1,9 @@
 (note: this is a temporary file, to be added-to by anybody, and moved to
 release-notes at release time)
 
-Raven Core version *version* is now available from:
+Yottaflux Core version *version* is now available from:
 
-  <https://raven.org/bin/raven-core-*version*/>
+  <https://yottaflux.ai/bin/yottaflux-core-*version*/>
 
 This is a new major version release, including new features, various bugfixes
 and performance improvements, as well as updated translations.
@@ -21,8 +21,8 @@ How to Upgrade
 
 If you are running an older version, shut it down. Wait until it has completely
 shut down (which might take a few minutes for older versions), then run the
-installer (on Windows) or just copy over `/Applications/Raven-Qt` (on Mac)
-or `ravend`/`raven-qt` (on Linux).
+installer (on Windows) or just copy over `/Applications/Yottaflux-Qt` (on Mac)
+or `yottafluxd`/`yottaflux-qt` (on Linux).
 
 The first time you run version 0.15.0, your chainstate database will be converted to a
 new format, which will take anywhere from a few minutes to half an hour,
@@ -47,10 +47,10 @@ processing the entire blockchain.
 Compatibility
 ==============
 
-Raven Core is extensively tested on multiple operating systems using
+Yottaflux Core is extensively tested on multiple operating systems using
 the Linux kernel, macOS 10.8+, and Windows Vista and later. Windows XP is not supported.
 
-Raven Core should also work on most other Unix-like systems but is not
+Yottaflux Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
 Notable changes
@@ -92,4 +92,4 @@ Credits
 Thanks to everyone who directly contributed to this release:
 
 
-As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/raven/).
+As well as everyone that helped translating on [Transifex](https://www.transifex.com/projects/p/yottaflux/).

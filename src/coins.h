@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -288,7 +288,7 @@ public:
     size_t DynamicMemoryUsage() const;
 
     /** 
-     * Amount of ravens coming in to a transaction
+     * Amount of yottafluxs coming in to a transaction
      * Note that lightweight clients may not know anything besides the hash of previous transactions,
      * so may not be able to calculate this.
      *

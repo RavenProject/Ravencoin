@@ -3,7 +3,7 @@
 # linearize-data.py: Construct a linear, no-fork version of the chain.
 #
 # Copyright (c) 2013-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
@@ -50,7 +50,7 @@ def wordreverse(in_buf):
 	return b''.join(out_words)
 
 def calc_hash_str(blk_hdr):
-	x16r_hash_cmd = os.path.dirname(os.path.realpath(__file__)) + "/../../src/test/test_raven_hash"
+	x16r_hash_cmd = os.path.dirname(os.path.realpath(__file__)) + "/../../src/test/test_yottaflux_hash"
 	cmd = [x16r_hash_cmd, hexlify(blk_hdr).decode('utf-8'), "2"]
 	blk_hash = subprocess.run(cmd, stdout=subprocess.PIPE, check=True).stdout.decode('ascii')
 	return blk_hash

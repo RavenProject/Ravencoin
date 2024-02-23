@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -25,7 +25,7 @@ happened previously.
 import collections
 import enum
 import itertools
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_raises_rpc_error, connect_nodes, sync_blocks, assert_equal, set_node_times
 
 # noinspection PyArgumentList
@@ -120,7 +120,7 @@ IMPORT_NODES = [ImportNode(*fields) for fields in itertools.product((False, True
 TIMESTAMP_WINDOW = 2 * 60 * 60
 
 
-class ImportRescanTest(RavenTestFramework):
+class ImportRescanTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 2 + len(IMPORT_NODES)
 

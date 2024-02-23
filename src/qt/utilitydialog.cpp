@@ -1,17 +1,17 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/yottaflux-config.h"
 #endif
 
 #include "utilitydialog.h"
 
 #include "ui_helpmessagedialog.h"
 
-#include "ravengui.h"
+#include "yottafluxgui.h"
 #include "clientmodel.h"
 #include "guiconstants.h"
 #include "intro.h"
@@ -71,7 +71,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, bool about) :
     } else {
         setWindowTitle(tr("Command-line options"));
         QString header = tr("Usage:") + "\n" +
-            "  raven-qt [" + tr("command-line options") + "]                     " + "\n";
+            "  yottaflux-qt [" + tr("command-line options") + "]                     " + "\n";
         QTextCursor cursor(ui->helpMessage->document());
         cursor.insertText(version);
         cursor.insertBlock();
@@ -91,7 +91,7 @@ HelpMessageDialog::HelpMessageDialog(QWidget *parent, bool about) :
         strUsage += HelpMessageOpt("-splash", strprintf(tr("Show splash screen on startup (default: %u)").toStdString(), DEFAULT_SPLASHSCREEN));
         strUsage += HelpMessageOpt("-resetguisettings", tr("Reset all settings changed in the GUI").toStdString());
         if (showDebug) {
-            strUsage += HelpMessageOpt("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", RavenGUI::DEFAULT_UIPLATFORM));
+            strUsage += HelpMessageOpt("-uiplatform", strprintf("Select platform to customize UI for (one of windows, macosx, other; default: %s)", YottafluxGUI::DEFAULT_UIPLATFORM));
         }
         QString coreOptions = QString::fromStdString(strUsage);
         text = version + "\n" + header + "\n" + coreOptions;
@@ -174,7 +174,7 @@ ShutdownWindow::ShutdownWindow(QWidget *parent, Qt::WindowFlags f):
     setLayout(layout);
 }
 
-QWidget *ShutdownWindow::showShutdownWindow(RavenGUI *window)
+QWidget *ShutdownWindow::showShutdownWindow(YottafluxGUI *window)
 {
     if (!window)
         return nullptr;

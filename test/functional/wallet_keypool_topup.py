@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,10 +15,10 @@ Two nodes. Node1 is under test. Node0 is providing transactions and generating b
 - connect node1 to node0. Verify that they sync and node1 receives its funds."""
 
 import shutil
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_equal, connect_nodes_bi, sync_blocks
 
-class KeypoolRestoreTest(RavenTestFramework):
+class KeypoolRestoreTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2

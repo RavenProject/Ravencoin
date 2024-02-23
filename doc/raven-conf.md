@@ -1,6 +1,6 @@
-# `raven.conf` Configuration File
+# `yottaflux.conf` Configuration File
 
-The configuration file is used by `ravend`, `raven-qt` and `raven-cli`.
+The configuration file is used by `yottafluxd`, `yottaflux-qt` and `yottaflux-cli`.
 
 All command-line options (except for `-?`, `-help`, `-version` and `-conf`) may be specified in a configuration file, and all configuration file options (except for `includeconf`) may also be specified on the command line. Command-line options override values set in the configuration file and configuration file options override values set in the GUI.
 
@@ -46,16 +46,16 @@ rpcport=4000
 
 ## Configuration File Path
 
-The configuration file is not automatically created; you can create it using your favorite text editor. By default, the configuration file name is `raven.conf` and it is located in the Raven data directory, but both the Raven data directory and the configuration file path may be changed using the `-datadir` and `-conf` command-line options.
+The configuration file is not automatically created; you can create it using your favorite text editor. By default, the configuration file name is `yottaflux.conf` and it is located in the Yottaflux data directory, but both the Yottaflux data directory and the configuration file path may be changed using the `-datadir` and `-conf` command-line options.
 
-The `includeconf=<file>` option in the `raven.conf` file can be used to include additional configuration files.
+The `includeconf=<file>` option in the `yottaflux.conf` file can be used to include additional configuration files.
 
 ### Default configuration file locations
 
 Operating System | Data Directory | Example Path
 -- | -- | --
-Windows | `%APPDATA%\Raven\` | `C:\Users\username\AppData\Roaming\Raven\raven.conf`
-Linux | `$HOME/.raven/` | `/home/username/.raven/raven.conf`
-macOS | `$HOME/Library/Application Support/Rave /` | `/Users/username/Library/Application Support/Raven/raven.conf`
+Windows | `%APPDATA%\Yottaflux\` | `C:\Users\username\AppData\Roaming\Yottaflux\yottaflux.conf`
+Linux | `$HOME/.yottaflux/` | `/home/username/.yottaflux/yottaflux.conf`
+macOS | `$HOME/Library/Application Support/Rave /` | `/Users/username/Library/Application Support/Yottaflux/yottaflux.conf`
 
-You can find an example raven.conf file in [share/examples/raven.conf](../share/examples/raven.conf).
+You can find an example yottaflux.conf file in [share/examples/yottaflux.conf](../share/examples/yottaflux.conf).

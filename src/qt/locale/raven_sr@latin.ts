@@ -249,7 +249,7 @@
     <name>RPCConsole</name>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Synchronizing with network...</source>
         <translation>Usklađivanje sa mrežom...</translation>
@@ -283,16 +283,16 @@
         <translation>Otvori &amp;URI...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Pošalji novčiće na Raven adresu</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Pošalji novčiće na Yottaflux adresu</translation>
     </message>
     <message>
         <source>&amp;Verify message...</source>
         <translation>&amp;Proveri poruku...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -445,10 +445,10 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>Information</source>

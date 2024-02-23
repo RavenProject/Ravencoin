@@ -1,4 +1,4 @@
-Raven Core version *2.0.4.0* is now available!!
+Yottaflux Core version *2.0.4.0* is now available!!
 ==============
 
   <https://github.com/yottaflux/Yottaflux/releases/tag/v2.0.4>
@@ -20,8 +20,8 @@ How to Upgrade
 
 If you are running an older version, shut it down. Wait until it has completely
 shut down (which might take a few minutes for older versions), then run the 
-installer (on Windows) or just copy over `/Applications/Raven-Qt` (on Mac)
-or `ravend`/`raven-qt` (on Linux).
+installer (on Windows) or just copy over `/Applications/Yottaflux-Qt` (on Mac)
+or `yottafluxd`/`yottaflux-qt` (on Linux).
 
 The first time you run version 2.0.4 or higher, your chainstate database may
 be converted to a new format, which will take anywhere from a few minutes to
@@ -46,11 +46,11 @@ will not be valid.
 Compatibility
 ==============
 
-Raven Core is extensively tested on multiple operating systems using
+Yottaflux Core is extensively tested on multiple operating systems using
 the Linux kernel, macOS 10.8+, and Windows Vista and later. 32-bit versions of Windows,
 and Windows XP are not supported.
 
-Raven Core should also work on most other Unix-like systems but is not
+Yottaflux Core should also work on most other Unix-like systems but is not
 frequently tested on them.
 
 Notable changes
@@ -75,7 +75,7 @@ Credits
 
 Thanks to everyone who directly contributed to this release:
 
-- Most importantly - The Raven Community!
+- Most importantly - The Yottaflux Community!
 - Tron Black
 - Jesse Empey
 - Jeremy Anderson

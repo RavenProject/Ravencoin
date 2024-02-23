@@ -1,7 +1,7 @@
 WINDOWS BUILD NOTES
 ====================
 
-Below are some notes on how to build Raven Core for Windows.
+Below are some notes on how to build Yottaflux Core for Windows.
 
 Most developers use cross-compilation from Ubuntu to build executables for
 Windows. Cross-compilation is also used to build the release binaries.
@@ -114,6 +114,6 @@ Installation
 After building using the Windows subsystem it can be useful to copy the compiled
 executables to a directory on the windows drive in the same directory structure
 as they appear in the release `.zip` archive. This can be done in the following
-way. This will install to `c:\workspace\raven`, for example:
+way. This will install to `c:\workspace\yottaflux`, for example:
 
-    make install DESTDIR=/mnt/c/workspace/raven
+    make install DESTDIR=/mnt/c/workspace/yottaflux

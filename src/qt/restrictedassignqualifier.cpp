@@ -1,11 +1,11 @@
-// Copyright (c) 2019 The Raven Core developers
+// Copyright (c) 2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "restrictedassignqualifier.h"
 #include "ui_restrictedassignqualifier.h"
 
-#include "ravenunits.h"
+#include "yottafluxunits.h"
 #include "clientmodel.h"
 #include "guiconstants.h"
 #include "guiutil.h"

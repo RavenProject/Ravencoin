@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,10 +9,10 @@ Test the -alertnotify, -blocknotify and -walletnotify options.
 """
 
 import os
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_equal, wait_until, connect_nodes_bi
 
-class NotificationsTest(RavenTestFramework):
+class NotificationsTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.setup_clean_chain = True
@@ -70,7 +70,7 @@ class NotificationsTest(RavenTestFramework):
         self.nodes[1].generate(41)
         self.sync_all()
 
-        # Give ravend 10 seconds to write the alert notification
+        # Give yottafluxd 10 seconds to write the alert notification
         wait_until(lambda: os.path.isfile(self.alert_filename) and os.path.getsize(self.alert_filename), err_msg="Wait for FileSize", timeout=10)
 
         with open(self.alert_filename, 'r', encoding='utf8') as f:

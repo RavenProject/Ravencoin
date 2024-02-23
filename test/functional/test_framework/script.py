@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """
 Functionality to build scripts, as well as signature_hash().
 
-This file is modified from python-ravenlib.
+This file is modified from python-yottafluxlib.
 """
 
 from .mininode import CTransaction, CTxOut, sha256, hash256, uint256_from_str, ser_uint256, ser_string

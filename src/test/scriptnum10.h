@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -25,7 +25,7 @@ public:
 class CScriptNum10
 {
 /**
- * The ScriptNum implementation from Raven Core 0.10.0, for cross-comparison.
+ * The ScriptNum implementation from Yottaflux Core 0.10.0, for cross-comparison.
  */
 public:
 

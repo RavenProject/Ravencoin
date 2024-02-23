@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -15,11 +15,11 @@ Test the following RPCs:
    - getrawtransaction
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import connect_nodes_bi, assert_raises_rpc_error, assert_equal, Decimal
 
 # Create one-input, one-output, no-fee transaction:
-class RawTransactionsTest(RavenTestFramework):
+class RawTransactionsTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3

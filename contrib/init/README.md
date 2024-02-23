@@ -1,11 +1,11 @@
 Sample configuration files for:
 ```
-SystemD: ravend.service
-Upstart: ravend.conf
-OpenRC:  ravend.openrc
-         ravend.openrcconf
-CentOS:  ravend.init
-OS X:    org.raven.ravend.plist
+SystemD: yottafluxd.service
+Upstart: yottafluxd.conf
+OpenRC:  yottafluxd.openrc
+         yottafluxd.openrcconf
+CentOS:  yottafluxd.init
+OS X:    org.yottaflux.yottafluxd.plist
 ```
 have been made available to assist packagers in creating node packages here.
 

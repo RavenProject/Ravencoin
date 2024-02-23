@@ -9,7 +9,7 @@ _Andy has some apples.  Barb has some bananas.  Andy agrees to give Barb two app
 
 ## The Inputs
 
-We'll need to find 3 UTXOs to use as inputs.  Andy's apples, Barb's bananas and some Raven to pay the network fee (Andy will pay).
+We'll need to find 3 UTXOs to use as inputs.  Andy's apples, Barb's bananas and some Yottaflux to pay the network fee (Andy will pay).
 
 Andy uses `listunspent` to find a suitable `txid` and `vout`:
 
@@ -74,7 +74,7 @@ Extracting the txids and vouts gives us our raw inputs:
 
 We'll be using 5 new Yottaflux addresses:
 
-Andy's Raven change address:
+Andy's Yottaflux change address:
 `mvGfeg4uZA8XvjVDUywdgYE6TAyz77o5gB`
 
 Andy's banana receive address:
@@ -89,7 +89,7 @@ Barb's apple receive address:
 Andy's apple change address:
 `mzct8GQ5zdaCvbrnRDrR8T87ZuZxkRYNwL`
 
-All asset transfers have to be balanced.  Since we have 1000 APPLES coming in, we have to have 1000 going out.  So Andy will send 2 to Barb's receive address and the rest (998) to his change address.  The Raven will pay 0.0001 for the network fee as normal.
+All asset transfers have to be balanced.  Since we have 1000 APPLES coming in, we have to have 1000 going out.  So Andy will send 2 to Barb's receive address and the rest (998) to his change address.  The Yottaflux will pay 0.0001 for the network fee as normal.
 
 `'{"mvGfeg4uZA8XvjVDUywdgYE6TAyz77o5gB":4.8827125, \
   "msXQpCK8UexfgtMbUGwnKjDfE6vqJ4JUPF":{"transfer":{"BANANAS":1}}, \

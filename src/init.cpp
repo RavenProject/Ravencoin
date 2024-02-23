@@ -1,11 +1,11 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/yottaflux-config.h"
 #endif
 
 #include "init.h"
@@ -144,7 +144,7 @@ bool ShutdownRequested()
 /**
  * This is a minimally invasive approach to shutdown on LevelDB read errors from the
  * chainstate, while keeping user interface out of the common library, which is shared
- * between ravend, and raven-qt and non-server tools.
+ * between yottafluxd, and yottaflux-qt and non-server tools.
 */
 class CCoinsViewErrorCatcher final : public CCoinsViewBacked
 {
@@ -194,7 +194,7 @@ void PrepareShutdown()
     /// for example if the data directory was found to be locked.
     /// Be sure that anything that writes files or flushes caches only does this if the respective
     /// module was initialized.
-    RenameThread("raven-shutoff");
+    RenameThread("yottaflux-shutoff");
     mempool.AddTransactionsUpdated(1);
 
     StopHTTPRPC();
@@ -204,7 +204,7 @@ void PrepareShutdown()
 #ifdef ENABLE_WALLET
     FlushWallets();
 #endif
-    GenerateRavens(false, 0, GetParams());
+    GenerateYottafluxs(false, 0, GetParams());
 
     MapPort(false);
 
@@ -733,7 +733,7 @@ void CleanupBlockRevFiles()
 void ThreadImport(std::vector<fs::path> vImportFiles)
 {
     const CChainParams& chainparams = GetParams();
-    RenameThread("raven-loadblk");
+    RenameThread("yottaflux-loadblk");
 
     {
     CImportingNow imp;
@@ -803,7 +803,7 @@ void ThreadImport(std::vector<fs::path> vImportFiles)
 }
 
 /** Sanity checks
- *  Ensure that Raven is running in a usable environment with all
+ *  Ensure that Yottaflux is running in a usable environment with all
  *  necessary library support.
  */
 bool InitSanityCheck(void)
@@ -927,7 +927,7 @@ void InitLogging()
     fLogIPs = gArgs.GetBoolArg("-logips", DEFAULT_LOGIPS);
 
     LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    LogPrintf("Raven version %s\n", FormatFullVersion());
+    LogPrintf("Yottaflux version %s\n", FormatFullVersion());
 }
 
 namespace { // Variables internal to initialization process only
@@ -1270,7 +1270,7 @@ static bool LockDataDirectory(bool probeOnly)
 {
     std::string strDataDir = GetDataDir().string();
 
-    // Make sure only a single Raven process is using the data directory.
+    // Make sure only a single Yottaflux process is using the data directory.
     fs::path pathLockFile = GetDataDir() / ".lock";
     FILE* file = fsbridge::fopen(pathLockFile, "a"); // empty lock file; created if it doesn't exist.
     if (file) fclose(file);
@@ -1382,7 +1382,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     bool fGenerate = gArgs.GetBoolArg("-regtest", false) ? false : DEFAULT_GENERATE;
     // Generate coins in the background
-    GenerateRavens(fGenerate, gArgs.GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams);
+    GenerateYottafluxs(fGenerate, gArgs.GetArg("-genproclimit", DEFAULT_GENERATE_THREADS), chainparams);
 
     // ********************************************************* Step 6: network initialization
     // Note that we absolutely cannot open any actual connections

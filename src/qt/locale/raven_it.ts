@@ -43,11 +43,11 @@
     </message>
     <message>
         <source>Choose the address to send coins to</source>
-        <translation>Scegli l'indirizzo a cui inviare raven</translation>
+        <translation>Scegli l'indirizzo a cui inviare yottaflux</translation>
     </message>
     <message>
         <source>Choose the address to receive coins with</source>
-        <translation>Scegli l'indirizzo con cui ricevere raven</translation>
+        <translation>Scegli l'indirizzo con cui ricevere yottaflux</translation>
     </message>
     <message>
         <source>C&amp;hoose</source>
@@ -62,12 +62,12 @@
         <translation>Indirizzi di ricezione</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Questo è un elenco di indirizzi Raven a cui puoi inviare pagamenti. Controlla sempre l'importo e l'indirizzo del beneficiario prima di inviare raven.</translation>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Questo è un elenco di indirizzi Yottaflux a cui puoi inviare pagamenti. Controlla sempre l'importo e l'indirizzo del beneficiario prima di inviare yottaflux.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Questi sono i tuoi indirizzi Raven che puoi usare per ricevere pagamenti. Si raccomanda di generare un nuovo indirizzo per ogni transazione.</translation>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Questi sono i tuoi indirizzi Yottaflux che puoi usare per ricevere pagamenti. Si raccomanda di generare un nuovo indirizzo per ogni transazione.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -432,8 +432,8 @@
         <translation>Modifica indirizzo d'invio</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Raven address.</source>
-        <translation>L'indirizzo inserito "%1" non è un indirizzo raven valido.</translation>
+        <source>The entered address "%1" is not a valid Yottaflux address.</source>
+        <translation>L'indirizzo inserito "%1" non è un indirizzo yottaflux valido.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -728,16 +728,16 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>&amp;Spendi resti non confermati</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Apri automaticamente la porta del client Raven sul router. Il protocollo UPnP deve essere supportato da parte del router ed attivo.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Apri automaticamente la porta del client Yottaflux sul router. Il protocollo UPnP deve essere supportato da parte del router ed attivo.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Mappa le porte tramite &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
-        <translation>Connessione alla rete Raven attraverso un proxy SOCKS5.</translation>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
+        <translation>Connessione alla rete Yottaflux attraverso un proxy SOCKS5.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -772,8 +772,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Tor</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a separate SOCKS5 proxy for Tor hidden services.</source>
-        <translation>Connette alla rete Raven attraverso un proxy SOCKS5 separato per Tor.</translation>
+        <source>Connect to the Yottaflux network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <translation>Connette alla rete Yottaflux attraverso un proxy SOCKS5 separato per Tor.</translation>
     </message>
     <message>
         <source>&amp;Window</source>
@@ -809,7 +809,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
     </message>
     <message>
         <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>Scegli l'unità di suddivisione predefinita da utilizzare per l'interfaccia e per l'invio di raven.</translation>
+        <translation>Scegli l'unità di suddivisione predefinita da utilizzare per l'interfaccia e per l'invio di yottaflux.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -859,8 +859,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Modulo</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>Le informazioni visualizzate potrebbero non essere aggiornate. Il portamonete si sincronizza automaticamente con la rete Raven una volta stabilita una connessione, ma questo processo non è ancora stato completato.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>Le informazioni visualizzate potrebbero non essere aggiornate. Il portamonete si sincronizza automaticamente con la rete Yottaflux una volta stabilita una connessione, ma questo processo non è ancora stato completato.</translation>
     </message>
     <message>
         <source>Watch-only:</source>
@@ -930,8 +930,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Errore di richiesta di pagamento</translation>
     </message>
     <message>
-        <source>Cannot start raven: click-to-pay handler</source>
-        <translation>Impossibile avviare raven: gestore click-to-pay</translation>
+        <source>Cannot start yottaflux: click-to-pay handler</source>
+        <translation>Impossibile avviare yottaflux: gestore click-to-pay</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -946,8 +946,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Indirizzo di pagamento non valido %1</translation>
     </message>
     <message>
-        <source>URI cannot be parsed! This can be caused by an invalid Raven address or malformed URI parameters.</source>
-        <translation>Impossibile interpretare l'URI! I parametri dell'URI o l'indirizzo Raven potrebbero non essere corretti.</translation>
+        <source>URI cannot be parsed! This can be caused by an invalid Yottaflux address or malformed URI parameters.</source>
+        <translation>Impossibile interpretare l'URI! I parametri dell'URI o l'indirizzo Yottaflux potrebbero non essere corretti.</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
@@ -1036,8 +1036,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Importo</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>Inserisci un indirizzo Raven (ad es. %1)</translation>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
+        <translation>Inserisci un indirizzo Yottaflux (ad es. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1378,7 +1378,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Firma &amp;messaggio...</translation>
@@ -1484,8 +1484,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Re-indicizzazione blocchi su disco...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Invia fondi ad un indirizzo Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Invia fondi ad un indirizzo Yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -1504,8 +1504,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>&amp;Verifica messaggio...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1532,12 +1532,12 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Cifra le chiavi private che appartengono al tuo portamonete</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Firma messaggi con i tuoi indirizzi Raven per dimostrarne il possesso</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Firma messaggi con i tuoi indirizzi Yottaflux per dimostrarne il possesso</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verifica che i messaggi siano stati firmati con gli indirizzi Raven specificati</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Verifica che i messaggi siano stati firmati con gli indirizzi Yottaflux specificati</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -1548,8 +1548,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>&amp;Aiuto</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Richiedi pagamenti (genera codici QR e raven: URI)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Richiedi pagamenti (genera codici QR e yottaflux: URI)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -1560,8 +1560,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Mostra la lista degli indirizzi di ricezione utilizzati</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Apri un raven: URI o una richiesta di pagamento</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Apri un yottaflux: URI o una richiesta di pagamento</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1604,8 +1604,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Aggiornato</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>Mostra il messaggio di aiuto di %1 per ottenere una lista di opzioni di comando per Raven </translation>
+        <source>Show the %1 help message to get a list with possible Yottaflux command-line options</source>
+        <translation>Mostra il messaggio di aiuto di %1 per ottenere una lista di opzioni di comando per Yottaflux </translation>
     </message>
     <message>
         <source>%1 client</source>
@@ -1674,8 +1674,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Il portamonete è &lt;b&gt;cifrato&lt;/b&gt; ed attualmente &lt;b&gt;bloccato&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>Si è verificato un errore critico. Raven non può più funzionare in maniera sicura e verrà chiuso.</translation>
+        <source>A fatal error occurred. Yottaflux can no longer continue safely and will quit.</source>
+        <translation>Si è verificato un errore critico. Yottaflux non può più funzionare in maniera sicura e verrà chiuso.</translation>
     </message>
 </context>
 <context>
@@ -1701,8 +1701,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>R&amp;iusa un indirizzo di ricezione (non raccomandato)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Raven network.</source>
-        <translation>Un messaggio opzionale da allegare e mostrare all'apertura della richiesta di pagamento. Nota: Il messaggio non sarà inviato con il pagamento sulla rete Raven.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Yottaflux network.</source>
+        <translation>Un messaggio opzionale da allegare e mostrare all'apertura della richiesta di pagamento. Nota: Il messaggio non sarà inviato con il pagamento sulla rete Yottaflux.</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
@@ -1864,7 +1864,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
     <name>SendCoinsDialog</name>
     <message>
         <source>Send Coins</source>
-        <translation>Invia Raven</translation>
+        <translation>Invia Yottaflux</translation>
     </message>
     <message>
         <source>Coin Control Features</source>
@@ -1939,7 +1939,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Nascondi</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation>Non vi è alcuna controindicazione a pagare la commissione minima, a patto che il volume delle transazioni sia inferiore allo spazio disponibile nei blocchi. Occorre comunque essere consapevoli che ciò potrebbe impedire la conferma delle transazioni nel caso in cui la rete risultasse satura.</translation>
     </message>
     <message>
@@ -2083,8 +2083,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation> Paga solamente la commissione richiesta di %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Raven address</source>
-        <translation>Attenzione: Indirizzo Raven non valido</translation>
+        <source>Warning: Invalid Yottaflux address</source>
+        <translation>Attenzione: Indirizzo Yottaflux non valido</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2114,8 +2114,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Questo è un normale pagamento.</translation>
     </message>
     <message>
-        <source>The Raven address to send the payment to</source>
-        <translation>L'indirizzo Raven a cui vuoi inviare il pagamento</translation>
+        <source>The Yottaflux address to send the payment to</source>
+        <translation>L'indirizzo Yottaflux a cui vuoi inviare il pagamento</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -2134,8 +2134,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Rimuovi questa voce</translation>
     </message>
     <message>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive less ravens than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation>La commissione sarà sottratta dall'importo che si sta inviando. Il beneficiario riceverà un totale di raven inferiore al valore digitato. Nel caso in cui siano stati selezionati più beneficiari la commissione sarà suddivisa in parti uguali.</translation>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive less yottafluxs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <translation>La commissione sarà sottratta dall'importo che si sta inviando. Il beneficiario riceverà un totale di yottaflux inferiore al valore digitato. Nel caso in cui siano stati selezionati più beneficiari la commissione sarà suddivisa in parti uguali.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -2158,8 +2158,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Inserisci un'etichetta per questo indirizzo per aggiungerlo alla lista degli indirizzi utilizzati</translation>
     </message>
     <message>
-        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
-        <translation>Messaggio incluso nel raven URI e che sarà memorizzato con la transazione per vostro riferimento. Nota: Questo messaggio non sarà inviato attraverso la rete Raven.</translation>
+        <source>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</source>
+        <translation>Messaggio incluso nel yottaflux URI e che sarà memorizzato con la transazione per vostro riferimento. Nota: Questo messaggio non sarà inviato attraverso la rete Yottaflux.</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2195,12 +2195,12 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>&amp;Firma Messaggio</translation>
     </message>
     <message>
-        <source>You can sign messages/agreements with your addresses to prove you can receive ravens sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation>È possibile firmare messaggi/accordi con i propri indirizzi in modo da dimostrare di poter ricevere raven attraverso di essi. Si consiglia di prestare attenzione a non firmare dichiarazioni vaghe o casuali, attacchi di phishing potrebbero cercare di indurre ad apporre la firma su di esse. Si raccomanda di firmare esclusivamente dichiarazioni completamente dettagliate e delle quali si condivide in pieno il contenuto.</translation>
+        <source>You can sign messages/agreements with your addresses to prove you can receive yottafluxs sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <translation>È possibile firmare messaggi/accordi con i propri indirizzi in modo da dimostrare di poter ricevere yottaflux attraverso di essi. Si consiglia di prestare attenzione a non firmare dichiarazioni vaghe o casuali, attacchi di phishing potrebbero cercare di indurre ad apporre la firma su di esse. Si raccomanda di firmare esclusivamente dichiarazioni completamente dettagliate e delle quali si condivide in pieno il contenuto.</translation>
     </message>
     <message>
-        <source>The Raven address to sign the message with</source>
-        <translation>L'indirizzo Raven da utilizzare per firmare il messaggio</translation>
+        <source>The Yottaflux address to sign the message with</source>
+        <translation>L'indirizzo Yottaflux da utilizzare per firmare il messaggio</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -2231,8 +2231,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Copia la firma corrente nella clipboard</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
-        <translation>Firma un messaggio per dimostrare di possedere questo indirizzo Raven</translation>
+        <source>Sign the message to prove you own this Yottaflux address</source>
+        <translation>Firma un messaggio per dimostrare di possedere questo indirizzo Yottaflux</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2255,11 +2255,11 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Per verificare il messaggio inserire l'indirizzo del firmatario, il messaggio e la firma nei campi sottostanti, assicurandosi di copiare esattamente anche ritorni a capo, spazi, tabulazioni, etc.. Si raccomanda di non lasciarsi fuorviare dalla firma a leggere più di quanto non sia riportato nel testo del messaggio stesso, in modo da evitare di cadere vittima di attacchi di tipo man-in-the-middle. Si ricorda che la verifica della firma dimostra soltanto che il firmatario può ricevere pagamenti con l'indirizzo corrispondente, non prova l'invio di alcuna transazione.</translation>
     </message>
     <message>
-        <source>The Raven address the message was signed with</source>
-        <translation>L'indirizzo Raven con cui è stato contrassegnato il messaggio</translation>
+        <source>The Yottaflux address the message was signed with</source>
+        <translation>L'indirizzo Yottaflux con cui è stato contrassegnato il messaggio</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
         <translation>Verifica il messaggio per accertare che sia stato firmato con l'indirizzo specificato</translation>
     </message>
     <message>
@@ -2284,7 +2284,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
     </message>
     <message>
         <source>The entered address does not refer to a key.</source>
-        <translation>L'indirizzo raven inserito non è associato a nessuna chiave.</translation>
+        <translation>L'indirizzo yottaflux inserito non è associato a nessuna chiave.</translation>
     </message>
     <message>
         <source>Wallet unlock was cancelled.</source>
@@ -2731,7 +2731,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
     <name>WalletModel</name>
     <message>
         <source>Send Coins</source>
-        <translation>Invia Raven</translation>
+        <translation>Invia Yottaflux</translation>
     </message>
     </context>
 <context>
@@ -2770,7 +2770,7 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Opzioni:</translation>
@@ -2828,8 +2828,8 @@ Per specificare più URL separarli con una barra verticale "|".</translation>
         <translation>Impossibile avviare il server HTTP. Dettagli nel log di debug.</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>The %s developers</source>

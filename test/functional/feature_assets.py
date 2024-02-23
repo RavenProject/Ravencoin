@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Testing asset use cases"""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import assert_equal, assert_is_hash_string, assert_does_not_contain_key, assert_raises_rpc_error, JSONRPCException, Decimal
 
 import string
 
 
-class AssetTest(RavenTestFramework):
+class AssetTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
@@ -161,10 +161,10 @@ class AssetTest(RavenTestFramework):
         assert_equal(assetdata["has_ipfs"], 1)
         assert_equal(assetdata["ipfs_hash"], ipfs_hash)
 
-        raven_assets = n0.listassets(asset="RAVEN*", verbose=False, count=2, start=-2)
-        assert_equal(len(raven_assets), 2)
-        assert_equal(raven_assets[0], "RAVEN2")
-        assert_equal(raven_assets[1], "RAVEN3")
+        yottaflux_assets = n0.listassets(asset="RAVEN*", verbose=False, count=2, start=-2)
+        assert_equal(len(yottaflux_assets), 2)
+        assert_equal(yottaflux_assets[0], "RAVEN2")
+        assert_equal(yottaflux_assets[1], "RAVEN3")
         self.sync_all()
 
     def issue_param_checks(self):

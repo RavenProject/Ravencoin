@@ -1,10 +1,10 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "ravenconsensus.h"
+#include "yottafluxconsensus.h"
 
 #include "primitives/transaction.h"
 #include "pubkey.h"
@@ -56,7 +56,7 @@ private:
     size_t m_remaining;
 };
 
-inline int set_error(ravenconsensus_error* ret, ravenconsensus_error serror)
+inline int set_error(yottafluxconsensus_error* ret, yottafluxconsensus_error serror)
 {
     if (ret)
         *ret = serror;
@@ -74,56 +74,56 @@ ECCryptoClosure instance_of_eccryptoclosure;
 /** Check that all specified flags are part of the libconsensus interface. */
 static bool verify_flags(unsigned int flags)
 {
-    return (flags & ~(ravenconsensus_SCRIPT_FLAGS_VERIFY_ALL)) == 0;
+    return (flags & ~(yottafluxconsensus_SCRIPT_FLAGS_VERIFY_ALL)) == 0;
 }
 
 static int verify_script(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen, CAmount amount,
                                     const unsigned char *txTo        , unsigned int txToLen,
-                                    unsigned int nIn, unsigned int flags, ravenconsensus_error* err)
+                                    unsigned int nIn, unsigned int flags, yottafluxconsensus_error* err)
 {
     if (!verify_flags(flags)) {
-        return ravenconsensus_ERR_INVALID_FLAGS;
+        return yottafluxconsensus_ERR_INVALID_FLAGS;
     }
     try {
         TxInputStream stream(SER_NETWORK, PROTOCOL_VERSION, txTo, txToLen);
         CTransaction tx(deserialize, stream);
         if (nIn >= tx.vin.size())
-            return set_error(err, ravenconsensus_ERR_TX_INDEX);
+            return set_error(err, yottafluxconsensus_ERR_TX_INDEX);
         if (GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION) != txToLen)
-            return set_error(err, ravenconsensus_ERR_TX_SIZE_MISMATCH);
+            return set_error(err, yottafluxconsensus_ERR_TX_SIZE_MISMATCH);
 
         // Regardless of the verification result, the tx did not error.
-        set_error(err, ravenconsensus_ERR_OK);
+        set_error(err, yottafluxconsensus_ERR_OK);
 
         PrecomputedTransactionData txdata(tx);
         return VerifyScript(tx.vin[nIn].scriptSig, CScript(scriptPubKey, scriptPubKey + scriptPubKeyLen), &tx.vin[nIn].scriptWitness, flags, TransactionSignatureChecker(&tx, nIn, amount, txdata), nullptr);
     } catch (const std::exception&) {
-        return set_error(err, ravenconsensus_ERR_TX_DESERIALIZE); // Error deserializing
+        return set_error(err, yottafluxconsensus_ERR_TX_DESERIALIZE); // Error deserializing
     }
 }
 
-int ravenconsensus_verify_script_with_amount(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen, int64_t amount,
+int yottafluxconsensus_verify_script_with_amount(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen, int64_t amount,
                                     const unsigned char *txTo        , unsigned int txToLen,
-                                    unsigned int nIn, unsigned int flags, ravenconsensus_error* err)
+                                    unsigned int nIn, unsigned int flags, yottafluxconsensus_error* err)
 {
     CAmount am(amount);
     return ::verify_script(scriptPubKey, scriptPubKeyLen, am, txTo, txToLen, nIn, flags, err);
 }
 
 
-int ravenconsensus_verify_script(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen,
+int yottafluxconsensus_verify_script(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen,
                                    const unsigned char *txTo        , unsigned int txToLen,
-                                   unsigned int nIn, unsigned int flags, ravenconsensus_error* err)
+                                   unsigned int nIn, unsigned int flags, yottafluxconsensus_error* err)
 {
-    if (flags & ravenconsensus_SCRIPT_FLAGS_VERIFY_WITNESS) {
-        return set_error(err, ravenconsensus_ERR_AMOUNT_REQUIRED);
+    if (flags & yottafluxconsensus_SCRIPT_FLAGS_VERIFY_WITNESS) {
+        return set_error(err, yottafluxconsensus_ERR_AMOUNT_REQUIRED);
     }
 
     CAmount am(0);
     return ::verify_script(scriptPubKey, scriptPubKeyLen, am, txTo, txToLen, nIn, flags, err);
 }
 
-unsigned int ravenconsensus_version()
+unsigned int yottafluxconsensus_version()
 {
     // Just use the API version for now
     return RAVENCONSENSUS_API_VER;

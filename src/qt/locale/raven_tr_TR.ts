@@ -141,7 +141,7 @@
     <name>RPCConsole</name>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>&amp;Receiving addresses...</source>
         <translation>Alış adresleri</translation>
@@ -215,6 +215,6 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     </context>
 </TS>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,10 +14,10 @@ Test the abandontransaction RPC.
  no effect on transactions which are already conflicted or abandoned.
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import sync_blocks, Decimal, sync_mempools, disconnect_nodes, assert_equal, connect_nodes
 
-class AbandonConflictTest(RavenTestFramework):
+class AbandonConflictTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.extra_args = [["-minrelaytxfee=0.00001"], []]

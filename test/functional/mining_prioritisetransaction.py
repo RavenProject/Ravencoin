@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Test the prioritisetransaction mining RPC."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import gen_return_txouts, create_confirmed_utxos, create_lots_of_big_transactions, assert_raises_rpc_error, assert_equal, time
 from test_framework.mininode import COIN, MAX_BLOCK_BASE_SIZE
 
-class PrioritiseTransactionTest(RavenTestFramework):
+class PrioritiseTransactionTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2

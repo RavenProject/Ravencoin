@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -152,7 +152,7 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     std::string address = request.params[1].get_str();
     CTxDestination destination = DecodeDestination(address);
     if (!IsValidDestination(destination)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + address);
     }
 
     // Get the optional change address
@@ -162,7 +162,7 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
         if (!change_address.empty()) {
            CTxDestination change_dest = DecodeDestination(change_address);
            if (!IsValidDestination(change_dest)) {
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux change address: ") + change_address);
            }
         }
     }
@@ -252,7 +252,7 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     std::string address = request.params[1].get_str();
     CTxDestination destination = DecodeDestination(address);
     if (!IsValidDestination(destination)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + address);
     }
 
     // Get the optional change address
@@ -262,7 +262,7 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
         if (!change_address.empty()) {
            CTxDestination change_dest = DecodeDestination(change_address);
            if (!IsValidDestination(change_dest)) {
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux change address: ") + change_address);
            }
         }
     }
@@ -359,7 +359,7 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
         if (!change_address.empty()) {
            CTxDestination change_dest = DecodeDestination(change_address);
            if (!IsValidDestination(change_dest)) {
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
+               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux change address: ") + change_address);
            }
         }
     }
@@ -494,7 +494,7 @@ UniValue issue(const JSONRPCRequest& request)
     if (!address.empty()) {
         CTxDestination destination = DecodeDestination(address);
         if (!IsValidDestination(destination)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + address);
         }
     } else {
         // Create a new address
@@ -523,7 +523,7 @@ UniValue issue(const JSONRPCRequest& request)
             CTxDestination destination = DecodeDestination(change_address);
             if (!IsValidDestination(destination)) {
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                                   std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+                                   std::string("Invalid Change Address: Invalid Yottaflux address: ") + change_address);
             }
         }
     }
@@ -656,7 +656,7 @@ UniValue issueunique(const JSONRPCRequest& request)
     if (!address.empty()) {
         CTxDestination destination = DecodeDestination(address);
         if (!IsValidDestination(destination)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + address);
         }
     } else {
         // Create a new address
@@ -685,7 +685,7 @@ UniValue issueunique(const JSONRPCRequest& request)
         CTxDestination destination = DecodeDestination(changeAddress);
         if (!IsValidDestination(destination)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + changeAddress);
+                               std::string("Invalid Change Address: Invalid Yottaflux address: ") + changeAddress);
         }
     }
 
@@ -750,7 +750,7 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
             "\nReturns a list of all asset balances for an address.\n"
 
             "\nArguments:\n"
-            "1. \"address\"                  (string, required) a raven address\n"
+            "1. \"address\"                  (string, required) a yottaflux address\n"
             "2. \"onlytotal\"                (boolean, optional, default=false) when false result is just a list of assets balances -- when true the result is just a single number representing the number of assets\n"
             "3. \"count\"                    (integer, optional, default=50000, MAX=50000) truncates results to include only the first _count_ assets found\n"
             "4. \"start\"                    (integer, optional, default=0) results skip over the first _start_ assets found (if negative it skips back from the end)\n"
@@ -773,7 +773,7 @@ UniValue listassetbalancesbyaddress(const JSONRPCRequest& request)
     std::string address = request.params[0].get_str();
     CTxDestination destination = DecodeDestination(address);
     if (!IsValidDestination(destination)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + address);
     }
 
     bool fOnlyTotal = false;
@@ -1191,7 +1191,7 @@ UniValue transfer(const JSONRPCRequest& request)
     std::string to_address = request.params[2].get_str();
     CTxDestination to_dest = DecodeDestination(to_address);
     if (!IsValidDestination(to_dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + to_address);
     }
 
     bool fMessageCheck = false;
@@ -2402,7 +2402,7 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
     if (!address.empty()) {
         CTxDestination destination = DecodeDestination(address);
         if (!IsValidDestination(destination)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + address);
         }
     } else {
         // Create a new address
@@ -2431,7 +2431,7 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
             CTxDestination destination = DecodeDestination(change_address);
             if (!IsValidDestination(destination)) {
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                                   std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+                                   std::string("Invalid Change Address: Invalid Yottaflux address: ") + change_address);
             }
         }
     }
@@ -2553,7 +2553,7 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
     // Validate the address
     CTxDestination destination = DecodeDestination(to_address);
     if (!IsValidDestination(destination)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + to_address);
     }
 
 
@@ -2572,7 +2572,7 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
         CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+                               std::string("Invalid Change Address: Invalid Yottaflux address: ") + change_address);
         }
     }
 
@@ -2697,7 +2697,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
 
     CTxDestination to_dest = DecodeDestination(to_address);
     if (!IsValidDestination(to_dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + to_address);
     }
 
     bool fChangeVerifier = false;
@@ -2714,7 +2714,7 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
         CTxDestination change_dest = DecodeDestination(change_address);
         if (!IsValidDestination(change_dest)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
-                               std::string("Invalid Change Address: Invalid Raven address: ") + change_address);
+                               std::string("Invalid Change Address: Invalid Yottaflux address: ") + change_address);
         }
     }
 
@@ -2821,7 +2821,7 @@ UniValue transferqualifier(const JSONRPCRequest& request)
     std::string to_address = request.params[2].get_str();
     CTxDestination to_dest = DecodeDestination(to_address);
     if (!IsValidDestination(to_dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + to_address);
     }
 
     std::string change_address = "";
@@ -2830,7 +2830,7 @@ UniValue transferqualifier(const JSONRPCRequest& request)
 
         CTxDestination change_dest = DecodeDestination(change_address);
         if (!IsValidDestination(change_dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + change_address);
         }
     }
 

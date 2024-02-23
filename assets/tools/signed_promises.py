@@ -23,7 +23,7 @@ import json
 import hashlib
 
 
-cli = "raven-cli"
+cli = "yottaflux-cli"
 mode =  "-testnet"
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'

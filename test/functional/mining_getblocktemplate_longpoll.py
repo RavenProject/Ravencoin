@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Test longpolling with getblocktemplate."""
 
 import threading
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import get_rpc_proxy, random_transaction, Decimal
 
 class LongpollThread(threading.Thread):
@@ -23,7 +23,7 @@ class LongpollThread(threading.Thread):
     def run(self):
         self.node.getblocktemplate({'longpollid':self.longpollid})
 
-class GetBlockTemplateLPTest(RavenTestFramework):
+class GetBlockTemplateLPTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
 

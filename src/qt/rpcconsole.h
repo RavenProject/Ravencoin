@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -29,7 +29,7 @@ class QMenu;
 class QItemSelection;
 QT_END_NAMESPACE
 
-/** Local Raven RPC console. */
+/** Local Yottaflux RPC console. */
 class RPCConsole: public QWidget
 {
     Q_OBJECT

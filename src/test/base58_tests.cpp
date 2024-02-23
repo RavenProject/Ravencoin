@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,7 @@
 
 #include "key.h"
 #include "script/script.h"
-#include "test/test_raven.h"
+#include "test/test_yottaflux.h"
 #include "uint256.h"
 #include "util.h"
 #include "utilstrencodings.h"
@@ -138,7 +138,7 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
         BOOST_TEST_MESSAGE("Running Base58 Keys Valid Parse Test");
 
         UniValue tests = read_json(std::string(json_tests::base58_keys_valid, json_tests::base58_keys_valid + sizeof(json_tests::base58_keys_valid)));
-        CRavenSecret secret;
+        CYottafluxSecret secret;
         CTxDestination destination;
         SelectParams(CBaseChainParams::MAIN);
 
@@ -220,7 +220,7 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
                 CKey key;
                 key.Set(exp_payload.begin(), exp_payload.end(), isCompressed);
                 assert(key.IsValid());
-                CRavenSecret secret;
+                CYottafluxSecret secret;
                 secret.SetKey(key);
                 BOOST_CHECK_MESSAGE(secret.ToString() == exp_base58string, "result mismatch: " + strTest);
             } else
@@ -255,7 +255,7 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
         BOOST_TEST_MESSAGE("Running Base58 Keys Invalid Test");
 
         UniValue tests = read_json(std::string(json_tests::base58_keys_invalid, json_tests::base58_keys_invalid + sizeof(json_tests::base58_keys_invalid))); // Negative testcases
-        CRavenSecret secret;
+        CYottafluxSecret secret;
         CTxDestination destination;
 
         for (unsigned int idx = 0; idx < tests.size(); idx++)

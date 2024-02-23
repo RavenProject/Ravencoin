@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2017 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -35,11 +35,11 @@ import random
 import time
 from test_framework.mininode import CTxIn, COutPoint, COIN, to_hex
 from test_framework.script import CTransaction, CTxOut
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import create_confirmed_utxos, hex_str_to_bytes, assert_equal
 
 
-class ChainstateWriteCrashTest(RavenTestFramework):
+class ChainstateWriteCrashTest(YottafluxTestFramework):
 
     def set_test_params(self):
         self.num_nodes = 4
@@ -83,15 +83,15 @@ class ChainstateWriteCrashTest(RavenTestFramework):
                 return utxo_hash
             except:
                 # An exception here should mean the node is about to crash.
-                # If ravend exits, then try again.  wait_for_node_exit()
-                # should raise an exception if ravend doesn't exit.
+                # If yottafluxd exits, then try again.  wait_for_node_exit()
+                # should raise an exception if yottafluxd doesn't exit.
                 self.log.debug("Wait for node exit ~~ during restart, node: %s", node_index)
                 self.wait_for_node_exit(node_index, timeout=10)
             self.crashed_on_restart += 1
             time.sleep(1)
 
-        # If we got here, ravend isn't coming back up on restart.  Could be a
-        # bug in ravend, or we've gotten unlucky with our dbcrash ratio --
+        # If we got here, yottafluxd isn't coming back up on restart.  Could be a
+        # bug in yottafluxd, or we've gotten unlucky with our dbcrash ratio --
         # perhaps we generated a test case that blew up our cache?
         # TODO: If this happens a lot, we should try to restart without -dbcrashratio
         # and make sure that recovery happens.

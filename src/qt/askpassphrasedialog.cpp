@@ -1,10 +1,10 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/yottaflux-config.h"
 #endif
 
 #include "askpassphrasedialog.h"
@@ -125,7 +125,7 @@ void AskPassphraseDialog::accept()
                                          "<qt>" +
                                          tr("%1 will close now to finish the encryption process. "
                                          "Remember that encrypting your wallet cannot fully protect "
-                                         "your ravens from being stolen by malware infecting your computer.").arg(tr(PACKAGE_NAME)) +
+                                         "your yottafluxs from being stolen by malware infecting your computer.").arg(tr(PACKAGE_NAME)) +
                                          "<br><br><b>" +
                                          tr("IMPORTANT: Any previous backups you have made of your wallet file "
                                          "should be replaced with the newly generated, encrypted wallet file. "

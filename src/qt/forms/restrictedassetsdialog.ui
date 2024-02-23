@@ -293,7 +293,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../raven.qrc"/>
+  <include location="../yottaflux.qrc"/>
  </resources>
  <connections/>
 </ui>

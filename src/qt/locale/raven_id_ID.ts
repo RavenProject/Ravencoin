@@ -62,12 +62,12 @@
         <translation>Alamat-alamat penerima</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Ini adalah alamat- alamat Raven Anda untuk mengirimkan pembayaran. Selalu periksa jumlah dan alamat penerima sebelum mengirimkan koin.</translation>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Ini adalah alamat- alamat Yottaflux Anda untuk mengirimkan pembayaran. Selalu periksa jumlah dan alamat penerima sebelum mengirimkan koin.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Ini adalah alamat- alamat Raven Anda untuk menerima pembayaran. Dianjurkan untuk menggunakan alamat penerima yang baru setiap melakukan transaksi.</translation>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Ini adalah alamat- alamat Yottaflux Anda untuk menerima pembayaran. Dianjurkan untuk menggunakan alamat penerima yang baru setiap melakukan transaksi.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -176,7 +176,7 @@
         <translation>Dompet terenkripsi</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your ravens from being stolen by malware infecting your computer.</source>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your yottafluxs from being stolen by malware infecting your computer.</source>
         <translation>%1 sekarang akan ditutup untuk menyelesaikan proses enkripsi. Ingatlah bahwa mengenkripsi dompet Anda tidak dapat sepenuhnya melindungi komputer Anda dari pencurian malware yang menginfeksi komputer Anda.</translation>
     </message>
     <message>
@@ -512,8 +512,8 @@
         <translation>Ubah alamat pengirim</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Raven address.</source>
-        <translation>Alamat yang dimasukkan "%1" bukanlah alamat Raven yang valid.</translation>
+        <source>The entered address "%1" is not a valid Yottaflux address.</source>
+        <translation>Alamat yang dimasukkan "%1" bukanlah alamat Yottaflux yang valid.</translation>
     </message>
     <message>
         <source>The entered address "%1" is already in the address book.</source>
@@ -787,16 +787,16 @@
         <translation>&amp;Perubahan saldo untuk transaksi yang belum dikonfirmasi</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Otomatis membuka port client Raven di router. Hanya berjalan apabila router anda mendukung UPnP dan di-enable.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Otomatis membuka port client Yottaflux di router. Hanya berjalan apabila router anda mendukung UPnP dan di-enable.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Petakan port dengan &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
-        <translation>Hubungkan ke jaringan Raven melalui SOCKS5 proxy.</translation>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
+        <translation>Hubungkan ke jaringan Yottaflux melalui SOCKS5 proxy.</translation>
     </message>
     <message>
         <source>Proxy &amp;IP:</source>
@@ -902,8 +902,8 @@
         <translation>Formulir</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>Informasi terlampir mungkin sudah kedaluwarsa. Dompet Anda secara otomatis mensinkronisasi dengan jaringan Raven ketika sebuah hubungan terbentuk, namun proses ini belum selesai.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>Informasi terlampir mungkin sudah kedaluwarsa. Dompet Anda secara otomatis mensinkronisasi dengan jaringan Yottaflux ketika sebuah hubungan terbentuk, namun proses ini belum selesai.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -959,8 +959,8 @@
         <translation>Nilai</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>Masukkan alamat Raven (contoh %1)</translation>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
+        <translation>Masukkan alamat Yottaflux (contoh %1)</translation>
     </message>
     <message>
         <source>%1 h</source>
@@ -1135,7 +1135,7 @@
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Pesan &amp;penanda...</translation>
@@ -1249,8 +1249,8 @@
         <translation>Mengindex ulang blok di dalam disk...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Kirim koin ke alamat Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Kirim koin ke alamat Yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -1269,8 +1269,8 @@
         <translation>&amp;Verifikasi pesan...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1297,12 +1297,12 @@
         <translation>Enkripsi private key yang dimiliki dompet Anda</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Tanda tangani sebuah pesan menggunakan alamat Raven Anda untuk membuktikan bahwa Anda adalah pemilik alamat tersebut</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Tanda tangani sebuah pesan menggunakan alamat Yottaflux Anda untuk membuktikan bahwa Anda adalah pemilik alamat tersebut</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verifikasi pesan untuk memastikan bahwa pesan tersebut ditanda tangani oleh suatu alamat Raven tertentu</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Verifikasi pesan untuk memastikan bahwa pesan tersebut ditanda tangani oleh suatu alamat Yottaflux tertentu</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -1313,8 +1313,8 @@
         <translation>&amp;Bantuan</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Permintaan pembayaran (membuat kode QR dan raven: URIs)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Permintaan pembayaran (membuat kode QR dan yottaflux: URIs)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -1325,8 +1325,8 @@
         <translation>Tampilkan daftar alamat dan label yang diterima</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Buka URI raven: atau permintaan pembayaran</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Buka URI yottaflux: atau permintaan pembayaran</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1369,8 +1369,8 @@
         <translation>Terbaru</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
-        <translation>Tampilkan %1 pesan bantuan untuk mendapatkan daftar opsi baris perintah Raven yang memungkinkan</translation>
+        <source>Show the %1 help message to get a list with possible Yottaflux command-line options</source>
+        <translation>Tampilkan %1 pesan bantuan untuk mendapatkan daftar opsi baris perintah Yottaflux yang memungkinkan</translation>
     </message>
     <message>
         <source>%1 client</source>
@@ -1443,8 +1443,8 @@
         <translation>Dompet saat ini &lt;b&gt;terenkripsi&lt;/b&gt; dan &lt;b&gt;terkunci&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
-        <translation>Terjadi Kesalahan Fatal. Raven Tidak Dapat Melanjutkan Dengan Aman Dan Akan Keluar</translation>
+        <source>A fatal error occurred. Yottaflux can no longer continue safely and will quit.</source>
+        <translation>Terjadi Kesalahan Fatal. Yottaflux Tidak Dapat Melanjutkan Dengan Aman Dan Akan Keluar</translation>
     </message>
 </context>
 <context>
@@ -1856,8 +1856,8 @@
         <translation>Salin tanda tangan terpilih ke sistem klipboard</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
-        <translation>Tandai pesan untuk menyetujui kamu pemiliki alamat Raven ini</translation>
+        <source>Sign the message to prove you own this Yottaflux address</source>
+        <translation>Tandai pesan untuk menyetujui kamu pemiliki alamat Yottaflux ini</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -1971,7 +1971,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Pilihan:</translation>
@@ -1997,8 +1997,8 @@
         <translation>Berjalan dibelakang sebagai daemin dan menerima perintah</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)</source>

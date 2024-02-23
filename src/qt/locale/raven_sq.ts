@@ -46,12 +46,12 @@
         <translation>Duke marr adresen</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Këto janë Raven adresat e juaja për të dërguar pagesa. Gjithmon kontrolloni shumën dhe adresën pranuese para se të dërgoni monedha.</translation>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Këto janë Yottaflux adresat e juaja për të dërguar pagesa. Gjithmon kontrolloni shumën dhe adresën pranuese para se të dërgoni monedha.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Këto janë Raven adresat e juaja për të pranuar pagesa. Rekomandohet që gjithmon të përdorni një adresë të re për çdo transaksion.</translation>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Këto janë Yottaflux adresat e juaja për të pranuar pagesa. Rekomandohet që gjithmon të përdorni një adresë të re për çdo transaksion.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -385,7 +385,7 @@
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Synchronizing with network...</source>
         <translation>Duke u sinkronizuar me rrjetin...</translation>
@@ -423,8 +423,8 @@
         <translation>Ndrysho frazkalimin e përdorur per enkriptimin e portofolit</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -803,14 +803,14 @@
     </message>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Opsionet:</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Berthama Raven</translation>
+        <source>Yottaflux Core</source>
+        <translation>Berthama Yottaflux</translation>
     </message>
     <message>
         <source>Information</source>

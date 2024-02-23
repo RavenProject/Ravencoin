@@ -1,2 +1,2 @@
-usr/local/bin/ravend usr/bin
-usr/local/bin/raven-cli usr/bin
+usr/local/bin/yottafluxd usr/bin
+usr/local/bin/yottaflux-cli usr/bin

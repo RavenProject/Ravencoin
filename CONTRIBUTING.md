@@ -1,7 +1,7 @@
-Contributing to Raven Core
+Contributing to Yottaflux Core
 ============================
 
-The Raven Core project operates an open contributor model where anyone is
+The Yottaflux Core project operates an open contributor model where anyone is
 welcome to contribute towards development in the form of peer review, testing
 and patches. This document explains the practical process and guidelines for
 contributing.
@@ -60,12 +60,12 @@ the pull request affects. Valid areas as:
   - *Consensus* for changes to consensus critical code
   - *Depends* for changes to depends
   - *Docs* for changes to the documentation
-  - *GUI* for changes to raven-qt
+  - *GUI* for changes to yottaflux-qt
   - *Mining* for changes to the mining code
   - *Net* or *P2P* for changes to the peer-to-peer network code
   - *RPC/REST/ZMQ* for changes to the RPC, REST or ZMQ APIs
   - *Scripts and tools* for changes to the scripts and tools
-  - *Tests* for changes to the raven unit tests or QA tests
+  - *Tests* for changes to the yottaflux unit tests or QA tests
   - *Trivial* should **only** be used for PRs that do not change generated
     executable code. Notably, refactors (change of function arguments and code
     reorganization) and changes in behavior should **not** be marked as trivial.
@@ -275,7 +275,7 @@ about:
 Release Policy
 --------------
 
-The RavenQT-SIG selects a release manager for each Yottaflux release.
+The YottafluxQT-SIG selects a release manager for each Yottaflux release.
 
 Copyright
 ---------

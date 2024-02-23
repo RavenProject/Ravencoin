@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <algorithm>
 
-class CRavenLevelDBLogger : public leveldb::Logger {
+class CYottafluxLevelDBLogger : public leveldb::Logger {
 public:
     // This code is adapted from posix_logger.h, which is why it is using vsprintf.
     // Please do not do this in normal code
@@ -43,7 +43,7 @@ public:
                 if (p < limit) {
                     va_list backup_ap;
                     va_copy(backup_ap, ap);
-                    // Do not use vsnprintf elsewhere in raven source code, see above.
+                    // Do not use vsnprintf elsewhere in yottaflux source code, see above.
                     p += vsnprintf(p, limit - p, format, backup_ap);
                     va_end(backup_ap);
                 }
@@ -106,7 +106,7 @@ static leveldb::Options GetOptions(size_t nCacheSize, size_t maxFileSize)
     options.write_buffer_size = nCacheSize / 4; // up to two write buffers may be held in memory simultaneously
     options.filter_policy = leveldb::NewBloomFilterPolicy(10);
     options.compression = leveldb::kNoCompression;
-    options.info_log = new CRavenLevelDBLogger();
+    options.info_log = new CYottafluxLevelDBLogger();
     options.max_file_size = maxFileSize;
     if (leveldb::kMajorVersion > 1 || (leveldb::kMajorVersion == 1 && leveldb::kMinorVersion >= 16)) {
         // LevelDB versions before 1.16 consider short writes to be corruption. Only trigger error

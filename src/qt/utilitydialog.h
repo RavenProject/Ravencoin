@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,7 +9,7 @@
 #include <QDialog>
 #include <QObject>
 
-class RavenGUI;
+class YottafluxGUI;
 
 namespace Ui {
     class HelpMessageDialog;
@@ -43,7 +43,7 @@ class ShutdownWindow : public QWidget
 
 public:
     explicit ShutdownWindow(QWidget *parent=nullptr, Qt::WindowFlags f=Qt::Widget);
-    static QWidget *showShutdownWindow(RavenGUI *window);
+    static QWidget *showShutdownWindow(YottafluxGUI *window);
 
 protected:
     void closeEvent(QCloseEvent *event);

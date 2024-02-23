@@ -1,5 +1,5 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,7 +13,7 @@
 
 #include "consensus/validation.h"
 #include "rpc/server.h"
-#include "test/test_raven.h"
+#include "test/test_yottaflux.h"
 #include "validation.h"
 #include "wallet/coincontrol.h"
 #include "wallet/test/wallet_test_fixture.h"
@@ -451,7 +451,7 @@ BOOST_FIXTURE_TEST_SUITE(wallet_tests, WalletTestingSetup)
                                         "timestamp %d. There was an error reading a block from time %d, which is after or within %d "
                                         "seconds of key creation, and could contain transactions pertaining to the key. As a result, "
                                         "transactions and coins using this key may not appear in the wallet. This error could be caused "
-                                        "by pruning or data corruption (see ravend log for details) and could be dealt with by "
+                                        "by pruning or data corruption (see yottafluxd log for details) and could be dealt with by "
                                         "downloading and rescanning the relevant blocks (see -reindex and -rescan "
                                         "options).\"}},{\"success\":true}]",
                                         0, oldTip->GetBlockTimeMax(), TIMESTAMP_WINDOW));

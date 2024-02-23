@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -64,7 +64,7 @@ public:
 };
 
 /**
- * Raven protocol message types. When adding new message types, don't forget
+ * Yottaflux protocol message types. When adding new message types, don't forget
  * to update allNetMessageTypes in protocol.cpp.
  */
 namespace NetMsgType {
@@ -272,15 +272,15 @@ enum ServiceFlags : uint64_t {
     // Nothing
     NODE_NONE = 0,
     // NODE_NETWORK means that the node is capable of serving the block chain. It is currently
-    // set by all Raven Core nodes, and is unset by SPV clients or other peers that just want
+    // set by all Yottaflux Core nodes, and is unset by SPV clients or other peers that just want
     // network services but don't provide them.
     NODE_NETWORK = (1 << 0),
     // NODE_GETUTXO means the node is capable of responding to the getutxo protocol request.
-    // Raven Core does not support this but a patch set called Raven XT does.
+    // Yottaflux Core does not support this but a patch set called Yottaflux XT does.
     // See BIP 64 for details on how this is implemented.
     NODE_GETUTXO = (1 << 1),
     // NODE_BLOOM means the node is capable and willing to handle bloom-filtered connections.
-    // Raven Core nodes used to support this by default, without advertising this bit,
+    // Yottaflux Core nodes used to support this by default, without advertising this bit,
     // but no longer do as of protocol version 70011 (= NO_BLOOM_VERSION)
     NODE_BLOOM = (1 << 2),
     // NODE_WITNESS indicates that a node can be asked for blocks and transactions including
@@ -292,7 +292,7 @@ enum ServiceFlags : uint64_t {
 
     // Bits 24-31 are reserved for temporary experiments. Just pick a bit that
     // isn't getting used, or one not being used much, and notify the
-    // raven-development mailing list. Remember that service bits are just
+    // yottaflux-development mailing list. Remember that service bits are just
     // unauthenticated advertisements, so your code must be robust against
     // collisions and other cases where nodes may be advertising a service they
     // do not actually support. Other service bits should be allocated via the

@@ -1,7 +1,7 @@
 Description
 ------------
 
-This directory contains data-driven tests for various aspects of Raven.
+This directory contains data-driven tests for various aspects of Yottaflux.
 
 License
 --------

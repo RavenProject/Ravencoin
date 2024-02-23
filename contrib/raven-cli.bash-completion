@@ -1,11 +1,11 @@
-# bash programmable completion for raven-cli(1)
+# bash programmable completion for yottaflux-cli(1)
 # Copyright (c) 2012-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2019 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-# call $raven-cli for RPC
-_raven_rpc() {
+# call $yottaflux-cli for RPC
+_yottaflux_rpc() {
     # determine already specified args necessary for RPC
     local rpcargs=()
     for i in ${COMP_LINE}; do
@@ -15,23 +15,23 @@ _raven_rpc() {
                 ;;
         esac
     done
-    $raven_cli "${rpcargs[@]}" "$@"
+    $yottaflux_cli "${rpcargs[@]}" "$@"
 }
 
 # Add wallet accounts to COMPREPLY
-_raven_accounts() {
+_yottaflux_accounts() {
     local accounts
-    accounts=$(_raven_rpc listaccounts | awk -F '"' '{ print $2 }')
+    accounts=$(_yottaflux_rpc listaccounts | awk -F '"' '{ print $2 }')
     COMPREPLY=( "${COMPREPLY[@]}" $( compgen -W "$accounts" -- "$cur" ) )
 }
 
-_raven_cli() {
+_yottaflux_cli() {
     local cur prev words=() cword
-    local raven_cli
+    local yottaflux_cli
 
-    # save and use original argument to invoke raven-cli for -help, help and RPC
-    # as raven-cli might not be in $PATH
-    raven_cli="$1"
+    # save and use original argument to invoke yottaflux-cli for -help, help and RPC
+    # as yottaflux-cli might not be in $PATH
+    yottaflux_cli="$1"
 
     COMPREPLY=()
     _get_comp_words_by_ref -n = cur prev words cword
@@ -61,7 +61,7 @@ _raven_cli() {
     if ((cword > 3)); then
         case ${words[cword-3]} in
             addmultisigaddress)
-                _raven_accounts
+                _yottaflux_accounts
                 return 0
                 ;;
             getbalance|gettxout|importaddress|importpubkey|importprivkey|listreceivedbyaccount|listreceivedbyaddress|listsinceblock)
@@ -86,7 +86,7 @@ _raven_cli() {
                 return 0
                 ;;
             move|setaccount)
-                _raven_accounts
+                _yottaflux_accounts
                 return 0
                 ;;
         esac
@@ -102,7 +102,7 @@ _raven_cli() {
             return 0
             ;;
         getaccountaddress|getaddressesbyaccount|getbalance|getnewaddress|getreceivedbyaccount|listtransactions|move|sendfrom|sendmany)
-            _raven_accounts
+            _yottaflux_accounts
             return 0
             ;;
     esac
@@ -126,12 +126,12 @@ _raven_cli() {
 
             # only parse -help if senseful
             if [[ -z "$cur" || "$cur" =~ ^- ]]; then
-                helpopts=$($raven_cli -help 2>&1 | awk '$1 ~ /^-/ { sub(/=.*/, "="); print $1 }' )
+                helpopts=$($yottaflux_cli -help 2>&1 | awk '$1 ~ /^-/ { sub(/=.*/, "="); print $1 }' )
             fi
 
             # only parse help if senseful
             if [[ -z "$cur" || "$cur" =~ ^[a-z] ]]; then
-                commands=$(_raven_rpc help 2>/dev/null | awk '$1 ~ /^[a-z]/ { print $1; }')
+                commands=$(_yottaflux_rpc help 2>/dev/null | awk '$1 ~ /^[a-z]/ { print $1; }')
             fi
 
             COMPREPLY=( $( compgen -W "$helpopts $commands" -- "$cur" ) )
@@ -144,7 +144,7 @@ _raven_cli() {
             ;;
     esac
 } &&
-complete -F _raven_cli raven-cli
+complete -F _yottaflux_cli yottaflux-cli
 
 # Local variables:
 # mode: shell-script

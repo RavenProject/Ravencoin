@@ -10,7 +10,7 @@ http://www.yottaflux.ai<br>
 3rd April 2018
 </p>
 <p align="center"><i>
-In the fictional world of Westeros, ravens are used as messengers who carry statements of truth. Yottaflux is a use-case focused blockchain designed to carry statements of truth about who owns what assets.
+In the fictional world of Westeros, yottafluxs are used as messengers who carry statements of truth. Yottaflux is a use-case focused blockchain designed to carry statements of truth about who owns what assets.
 </i></p> 
 
 Thank you to the Bitcoin founder and developers. The Yottaflux project was launched based on the hard work and continuous effort of over 430 Bitcoin developers who made over 14,000 commits by the date of the Yottaflux code fork. We are eternally grateful to you for your diligence in making a secure network and for your support of free and open source software development. The Yottaflux project is built on the foundation you built.
@@ -26,7 +26,7 @@ The Ethereum ERC20, ERC223 and ERC721 protocols and other projects show tokenize
 
 Bitcoin also has the capability of serving as the rails for tokens by using projects like Omnilayer, RSK, or Counterparty. However, neither Bitcoin nor Ethereum were specifically designed for facilitating ownership of additional assets, and the users and development teams generally prioritize other features.
 
-Yottaflux is designed to efficiently handle one specific function well: the transfer of assets from one party to another. One goal of the Raven protocol is to create a use case focused blockchain and development effort which can create code, providing advantages for specific use cases, while contributing to open source code which could be used by Bitcoin or other projects.
+Yottaflux is designed to efficiently handle one specific function well: the transfer of assets from one party to another. One goal of the Yottaflux protocol is to create a use case focused blockchain and development effort which can create code, providing advantages for specific use cases, while contributing to open source code which could be used by Bitcoin or other projects.
 
 If the global economy is influenced by actors using various blockchains, then the way capital markets work today could also change. Borders and jurisdictions may become less relevant as more assets become tradable and trading across borders grows increasingly frictionless. In an age where people can move significant amounts of wealth instantly using Bitcoin, global consumers will likely demand the same efficiency for their securities and similar asset holdings.
 
@@ -46,14 +46,14 @@ names is the contract hash.
 ## 3. Full Asset Aware Protocol Level System
 
 <p align="center"><i>
-Who will not change a raven for a dove? The will of man is by his reason swayed.  
+Who will not change a yottaflux for a dove? The will of man is by his reason swayed.  
 – William Shakespeare
 </i></p>
 The solution is to create a bitcoin-like system that is fully asset aware. A system being asset aware provides two major advantages. First, it allows the client and RPC commands to protect the asset from being destroyed accidentally. Second, it allows a single native client to issue, track, and transfer the assets.
 Lastly, to provide security for the underlying assets, the bitcoin-like system functions only with a market value, a strong mining community, and wide distribution.  
   
 **Assets**  
-Assets are tokens that can be issued by users of the Raven protocol without the need to be mined. Users of the Raven protocol create these assets and decide their purpose and rules independent of the protocol. These assets or tokens exist on the Yottaflux blockchain and could be whatever name, denomination or purpose selected by the creators of each asset, coin, or token. The tokens are transferable and move with the same ease as bitcoin, or other similarly functioning cryptocurrencies. In Yottaflux, an asset is just a limited quantity of a unique symbol, and transferable to any Yottaflux address. Assets have been available for some time on other platforms such as Open Assets, Mastercoin, Counterparty, and as an ERC20[7] or ERC223 [8] token on Ethereum [9]. Assets created on the Raven protocol have several advantages: they are easier to use, tightly integrated with a native coin, and secured with fair POW mining and open source code not run by a centralized organization.
+Assets are tokens that can be issued by users of the Yottaflux protocol without the need to be mined. Users of the Yottaflux protocol create these assets and decide their purpose and rules independent of the protocol. These assets or tokens exist on the Yottaflux blockchain and could be whatever name, denomination or purpose selected by the creators of each asset, coin, or token. The tokens are transferable and move with the same ease as bitcoin, or other similarly functioning cryptocurrencies. In Yottaflux, an asset is just a limited quantity of a unique symbol, and transferable to any Yottaflux address. Assets have been available for some time on other platforms such as Open Assets, Mastercoin, Counterparty, and as an ERC20[7] or ERC223 [8] token on Ethereum [9]. Assets created on the Yottaflux protocol have several advantages: they are easier to use, tightly integrated with a native coin, and secured with fair POW mining and open source code not run by a centralized organization.
 
 **Uses for Assets**  
 Assets or tokens can be used for anything the creator’s imagination can conjure. The ideas presented here are a sampling.
@@ -76,7 +76,7 @@ many free market countries)
 *  A token which represents a crowd-funded item with the ability to transfer or resell the item
 
 **Representing virtual goods**
-*  Tickets to an event such as a Baltimore Ravens game with the ability to resell
+*  Tickets to an event such as a Baltimore Yottafluxs game with the ability to resell
 *  A license to allow an activity
 *  An access token to use a service
 *  In-game currency and items, transferable outside of the game platform
@@ -106,7 +106,7 @@ Utilize proof of work mining, not because it burns a scarce resource of electric
 
 <p align="center"><i>
 Deep into that darkness peering, long I stood there wondering, fearing, Doubting, dreaming dreams no mortal ever dared to dream before; But the silence was unbroken, and the stillness gave no token.  
-\- Edgar Allan Poe, The Raven
+\- Edgar Allan Poe, The Yottaflux
 </i></p>
 Token names are guaranteed unique. The first to issue a token with a given name is the owner of that token project.
 
@@ -174,7 +174,7 @@ Some use cases for unique assets include:
 ## 8. Messaging Stakeholders
 
 <p align="center"><i>
-"If the Tower of London ravens are lost or fly away, the Crown will fall and Britain with it." -
+"If the Tower of London yottafluxs are lost or fly away, the Crown will fall and Britain with it." -
 Unknown
 </i></p>
 A common problem with tokens/assets is that the token issuer cannot communicate with the token holders. This must be handled very carefully because the token holders do not always wish to be identified. The communication should allow the token holder to opt-out at any time. The message system should only allow select parties to use the message channel so that it is not a spam conduit.
@@ -213,18 +213,18 @@ Other projects can use this chain. Second layer solutions, particularly those be
 
 ## 12. Conclusion
 
-Yottaflux is a platform coin built on the UTXO[19] model of Bitcoin. Modifying Bitcoin code to add these capabilities is not practical, but Yottaflux is a platform built from a code fork and issuing newly mined YAI. Yottaflux will be adding assets, rewards, unique assets, messaging, and voting. The Raven protocol’s capabilities will be rolled out in phases which will be done as a planned hard fork upgrade. The code base is designed allow users and developers to maintain a secure, decentralized, and tamper resistant network.
+Yottaflux is a platform coin built on the UTXO[19] model of Bitcoin. Modifying Bitcoin code to add these capabilities is not practical, but Yottaflux is a platform built from a code fork and issuing newly mined YAI. Yottaflux will be adding assets, rewards, unique assets, messaging, and voting. The Yottaflux protocol’s capabilities will be rolled out in phases which will be done as a planned hard fork upgrade. The code base is designed allow users and developers to maintain a secure, decentralized, and tamper resistant network.
 
 The Yottaflux project can also serve as a base and starting point for projects, second layer solutions, experiments, and business ideas which might benefit from either the Bitcoin-based code base with adjustments or the native additional features added to the Yottaflux blockchain.
 
-_The Inuit, Tlinglit, Tahitian, Chukchi, Sioux, the Haida, and many others call Raven the magical keeper of secrets, the trickster, friend of the First Men and Creator of the World - an idea or force able to shift, change, and create something from nothing. In open source, the power of the crowd can accomplish much more than any one person or organization. All are welcome to contribute._
+_The Inuit, Tlinglit, Tahitian, Chukchi, Sioux, the Haida, and many others call Yottaflux the magical keeper of secrets, the trickster, friend of the First Men and Creator of the World - an idea or force able to shift, change, and create something from nothing. In open source, the power of the crowd can accomplish much more than any one person or organization. All are welcome to contribute._
 
 ---
 
 References
 
 [1] S. Nakamoto, “Bitcoin: A Peer-to-Peer Electronic Cash System https://bitcoin.org/bitcoin.pdf  
-[2] https://bravenewcoin.com/assets/Whitepapers/2ndBitcoinWhitepaper.pdf  
+[2] https://byottafluxewcoin.com/assets/Whitepapers/2ndBitcoinWhitepaper.pdf  
 [3] https://counterparty.io/  
 [4] https://en.bitcoin.it/wiki/Colored_Coins  
 [5] https://en.bitcoin.it/wiki/OP_RETURN  

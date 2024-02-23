@@ -1,11 +1,11 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "recentrequeststablemodel.h"
 
-#include "ravenunits.h"
+#include "yottafluxunits.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
 
@@ -84,9 +84,9 @@ QVariant RecentRequestsTableModel::data(const QModelIndex &index, int role) cons
             if (rec->recipient.amount == 0 && role == Qt::DisplayRole)
                 return tr("(no amount requested)");
             else if (role == Qt::EditRole)
-                return RavenUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount, false, RavenUnits::separatorNever);
+                return YottafluxUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount, false, YottafluxUnits::separatorNever);
             else
-                return RavenUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount);
+                return YottafluxUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), rec->recipient.amount);
         }
     }
     else if (role == Qt::TextAlignmentRole)
@@ -124,7 +124,7 @@ void RecentRequestsTableModel::updateAmountColumnTitle()
 /** Gets title for amount column including current display unit if optionsModel reference available. */
 QString RecentRequestsTableModel::getAmountTitle()
 {
-    return (this->walletModel->getOptionsModel() != nullptr) ? tr("Requested") + " ("+RavenUnits::name(this->walletModel->getOptionsModel()->getDisplayUnit()) + ")" : "";
+    return (this->walletModel->getOptionsModel() != nullptr) ? tr("Requested") + " ("+YottafluxUnits::name(this->walletModel->getOptionsModel()->getDisplayUnit()) + ")" : "";
 }
 
 QModelIndex RecentRequestsTableModel::index(int row, int column, const QModelIndex &parent) const

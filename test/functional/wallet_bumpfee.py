@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,7 +19,7 @@ make assumptions about execution order.
 
 import io
 from feature_segwit import send_to_witness
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.blocktools import create_block, create_coinbase
 from test_framework.mininode import CTransaction
 from test_framework.util import connect_nodes_bi, assert_equal, Decimal, sync_mempools, assert_raises_rpc_error, assert_greater_than, bytes_to_hex_str, hex_str_to_bytes
@@ -31,7 +31,7 @@ WALLET_PASSPHRASE = "test"
 WALLET_PASSPHRASE_TIMEOUT = 3600
 
 
-class BumpFeeTest(RavenTestFramework):
+class BumpFeeTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.setup_clean_chain = True

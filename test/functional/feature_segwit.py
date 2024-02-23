@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Test the SegWit changeover logic."""
 
 from io import BytesIO
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import hex_str_to_bytes, connect_nodes, Decimal, assert_equal, sync_blocks, assert_raises_rpc_error, try_rpc
 from test_framework.mininode import sha256, CTransaction, CTxIn, COutPoint, CTxOut, COIN, to_hex, from_hex
 from test_framework.address import script_to_p2sh, key_to_p2pkh
@@ -79,7 +79,7 @@ def find_unspent(node, min_value):
             return utxo
 
 
-class SegWitTest(RavenTestFramework):
+class SegWitTest(YottafluxTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3

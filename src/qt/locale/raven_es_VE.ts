@@ -357,7 +357,7 @@
     </message>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Firmar &amp;mensaje...</translation>
@@ -403,8 +403,8 @@
         <translation>Reindexando bloques en el disco...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Enviar monedas a una dirección Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Enviar monedas a una dirección Yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -419,8 +419,8 @@
         <translation>Abre la consola de depuración y diágnostico</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -447,12 +447,12 @@
         <translation>Encriptar las llaves privadas que pertenecen a tu billetera</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Firma mensajes con tus direcciones Raven para probar que eres dueño de ellas</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Firma mensajes con tus direcciones Yottaflux para probar que eres dueño de ellas</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verificar mensajes para asegurar que estaban firmados con direcciones Raven especificas</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Verificar mensajes para asegurar que estaban firmados con direcciones Yottaflux especificas</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -623,7 +623,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Opciones:</translation>
@@ -649,8 +649,8 @@
         <translation>Correr en segundo plano como daemon y aceptar comandos</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>

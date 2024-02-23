@@ -1,11 +1,11 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "qvalidatedlineedit.h"
 
-#include "ravenaddressvalidator.h"
+#include "yottafluxaddressvalidator.h"
 #include "guiconstants.h"
 #include "platformstyle.h"
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,7 @@ Test that the DERSIG soft-fork activates at (regtest) height 1251.
 """
 
 from io import BytesIO
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import p2p_port, assert_equal, hex_str_to_bytes
 from test_framework.mininode import CTransaction, NodeConnCB, NodeConn, NetworkThread, MsgBlock, wait_until, mininode_lock, MsgTx
 from test_framework.blocktools import create_coinbase, create_block
@@ -50,7 +50,7 @@ def create_transaction(node, coinbase, to_address, amount):
     tx.deserialize(BytesIO(hex_str_to_bytes(signresult['hex'])))
     return tx
 
-class BIP66Test(RavenTestFramework):
+class BIP66Test(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [['-promiscuousmempoolflags=1', '-whitelist=127.0.0.1']]
@@ -129,9 +129,9 @@ class BIP66Test(RavenTestFramework):
         wait_until(lambda: "reject" in node0.last_message.keys(), lock=mininode_lock, err_msg="last_message")
         with mininode_lock:
             # We can receive different reject messages depending on whether
-            # ravend is running with multiple script check threads. If script
+            # yottafluxd is running with multiple script check threads. If script
             # check threads are not in use, then transaction script validation
-            # happens sequentially, and ravend produces more specific reject
+            # happens sequentially, and yottafluxd produces more specific reject
             # reasons.
             assert node0.last_message["reject"].code in [REJECT_INVALID, REJECT_NONSTANDARD]
             assert_equal(node0.last_message["reject"].data, block.sha256)

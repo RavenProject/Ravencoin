@@ -1,36 +1,36 @@
 #!/bin/bash
 #
-#  ravend The raven core server.
+#  yottafluxd The yottaflux core server.
 #
 #
 # chkconfig: 345 80 20
-# description: ravend
-# processname: ravend
+# description: yottafluxd
+# processname: yottafluxd
 #
 
 # Source function library.
 . /etc/init.d/functions
 
-# you can override defaults in /etc/sysconfig/ravend, see below
-if [ -f /etc/sysconfig/ravend ]; then
-        . /etc/sysconfig/ravend
+# you can override defaults in /etc/sysconfig/yottafluxd, see below
+if [ -f /etc/sysconfig/yottafluxd ]; then
+        . /etc/sysconfig/yottafluxd
 fi
 
 RETVAL=0
 
-prog=ravend
-# you can override the lockfile via RAVEND_LOCKFILE in /etc/sysconfig/ravend
-lockfile=${RAVEND_LOCKFILE-/var/lock/subsys/ravend}
+prog=yottafluxd
+# you can override the lockfile via RAVEND_LOCKFILE in /etc/sysconfig/yottafluxd
+lockfile=${RAVEND_LOCKFILE-/var/lock/subsys/yottafluxd}
 
-# ravend defaults to /usr/bin/ravend, override with RAVEND_BIN
-ravend=${RAVEND_BIN-/usr/bin/ravend}
+# yottafluxd defaults to /usr/bin/yottafluxd, override with RAVEND_BIN
+yottafluxd=${RAVEND_BIN-/usr/bin/yottafluxd}
 
-# ravend opts default to -disablewallet, override with RAVEND_OPTS
-ravend_opts=${RAVEND_OPTS--disablewallet}
+# yottafluxd opts default to -disablewallet, override with RAVEND_OPTS
+yottafluxd_opts=${RAVEND_OPTS--disablewallet}
 
 start() {
     echo -n $"Starting $prog: "
-    daemon $DAEMONOPTS $ravend $ravend_opts
+    daemon $DAEMONOPTS $yottafluxd $yottafluxd_opts
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch $lockfile

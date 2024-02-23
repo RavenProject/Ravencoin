@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "sendassetsentry.h"
@@ -50,9 +50,9 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
     ui->addAsLabel->setPlaceholderText(tr("Enter a label for this address to add it to your address book"));
 #endif
 
-    // normal raven address field
+    // normal yottaflux address field
     GUIUtil::setupAddressWidget(ui->payTo, this);
-    // just a label for displaying raven address(es)
+    // just a label for displaying yottaflux address(es)
     ui->payTo_is->setFont(GUIUtil::fixedPitchFont());
 
     // Connect signals

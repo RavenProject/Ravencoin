@@ -4,21 +4,21 @@ dnl Distributed under the MIT software license, see the accompanying
 dnl file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 dnl Helper for cases where a qt dependency is not met.
-dnl Output: If qt version is auto, set raven_enable_qt to false. Else, exit.
+dnl Output: If qt version is auto, set yottaflux_enable_qt to false. Else, exit.
 AC_DEFUN([RAVEN_QT_FAIL],[
-  if test "x$raven_qt_want_version" = xauto && test "x$raven_qt_force" != xyes; then
-    if test "x$raven_enable_qt" != xno; then
-      AC_MSG_WARN([$1; raven-qt frontend will not be built])
+  if test "x$yottaflux_qt_want_version" = xauto && test "x$yottaflux_qt_force" != xyes; then
+    if test "x$yottaflux_enable_qt" != xno; then
+      AC_MSG_WARN([$1; yottaflux-qt frontend will not be built])
     fi
-    raven_enable_qt=no
-    raven_enable_qt_test=no
+    yottaflux_enable_qt=no
+    yottaflux_enable_qt_test=no
   else
     AC_MSG_ERROR([$1])
   fi
 ])
 
 AC_DEFUN([RAVEN_QT_CHECK],[
-  if test "x$raven_enable_qt" != xno && test "x$raven_qt_want_version" != xno; then
+  if test "x$yottaflux_enable_qt" != xno && test "x$yottaflux_qt_want_version" != xno; then
     true
     $1
   else
@@ -55,21 +55,21 @@ AC_DEFUN([RAVEN_QT_INIT],[
   dnl enable qt support
   AC_ARG_WITH([gui],
     [AS_HELP_STRING([--with-gui@<:@=no|qt5|auto@:>@],
-    [build raven-qt GUI (default=auto)])],
+    [build yottaflux-qt GUI (default=auto)])],
     [
-     raven_qt_want_version=$withval
-     if test "x$raven_qt_want_version" = xyes; then
-       raven_qt_force=yes
-       raven_qt_want_version=auto
+     yottaflux_qt_want_version=$withval
+     if test "x$yottaflux_qt_want_version" = xyes; then
+       yottaflux_qt_force=yes
+       yottaflux_qt_want_version=auto
      fi
     ],
-    [raven_qt_want_version=auto])
+    [yottaflux_qt_want_version=auto])
 
   AS_IF([test "x$with_gui" = xqt5_debug],
         [AS_CASE([$host],
                  [*darwin*], [qt_lib_suffix=_debug],
                  [*mingw*], [qt_lib_suffix=d],
-                 [qt_lib_suffix= ]); raven_qt_want_version=qt5],
+                 [qt_lib_suffix= ]); yottaflux_qt_want_version=qt5],
         [qt_lib_suffix= ])
 
   AC_ARG_WITH([qt-incdir],[AS_HELP_STRING([--with-qt-incdir=INC_DIR],[specify qt include path (overridden by pkgconfig)])], [qt_include_path=$withval], [])
@@ -102,7 +102,7 @@ dnl   RAVEN_QT_CONFIGURE([MINIMUM-VERSION])
 dnl
 dnl Outputs: See _RAVEN_QT_FIND_LIBS
 dnl Outputs: Sets variables for all qt-related tools.
-dnl Outputs: raven_enable_qt, raven_enable_qt_dbus, raven_enable_qt_test
+dnl Outputs: yottaflux_enable_qt, yottaflux_enable_qt_dbus, yottaflux_enable_qt_test
 AC_DEFUN([RAVEN_QT_CONFIGURE],[
   qt_version=">= $1"
   qt_lib_prefix="Qt5"
@@ -120,7 +120,7 @@ AC_DEFUN([RAVEN_QT_CONFIGURE],[
   CPPFLAGS="$QT_INCLUDES $CPPFLAGS"
   CXXFLAGS="$PIC_FLAGS $CXXFLAGS"
   _RAVEN_QT_IS_STATIC
-  if test "x$raven_cv_static_qt" = xyes; then
+  if test "x$yottaflux_cv_static_qt" = xyes; then
     _RAVEN_QT_CHECK_STATIC_LIBS
 
     if test "x$qt_plugin_path" != x; then
@@ -247,14 +247,14 @@ AC_DEFUN([RAVEN_QT_CONFIGURE],[
   dnl enable qt support
   AC_MSG_CHECKING([whether to build ]AC_PACKAGE_NAME[ GUI])
   RAVEN_QT_CHECK([
-    raven_enable_qt=yes
-    raven_enable_qt_test=yes
+    yottaflux_enable_qt=yes
+    yottaflux_enable_qt_test=yes
     if test "x$have_qt_test" = xno; then
-      raven_enable_qt_test=no
+      yottaflux_enable_qt_test=no
     fi
-    raven_enable_qt_dbus=no
+    yottaflux_enable_qt_dbus=no
     if test "x$use_dbus" != xno && test "x$have_qt_dbus" = xyes; then
-      raven_enable_qt_dbus=yes
+      yottaflux_enable_qt_dbus=yes
     fi
     if test "x$use_dbus" = xyes && test "x$have_qt_dbus" = xno; then
       AC_MSG_ERROR([libQtDBus not found. Install libQtDBus or remove --with-qtdbus.])
@@ -263,12 +263,12 @@ AC_DEFUN([RAVEN_QT_CONFIGURE],[
       AC_MSG_WARN([lupdate is required to update qt translations])
     fi
   ],[
-    raven_enable_qt=no
+    yottaflux_enable_qt=no
   ])
-  if test x$raven_enable_qt = xyes; then
-    AC_MSG_RESULT([$raven_enable_qt ($qt_lib_prefix)])
+  if test x$yottaflux_enable_qt = xyes; then
+    AC_MSG_RESULT([$yottaflux_enable_qt ($qt_lib_prefix)])
   else
-    AC_MSG_RESULT([$raven_enable_qt])
+    AC_MSG_RESULT([$yottaflux_enable_qt])
   fi
 
   AC_SUBST(QT_PIE_FLAGS)
@@ -290,9 +290,9 @@ dnl ----
 dnl Internal. Check if the linked version of Qt was built as static libs.
 dnl Requires: Qt5.
 dnl Requires: INCLUDES and LIBS must be populated as necessary.
-dnl Output: raven_cv_static_qt=yes|no
+dnl Output: yottaflux_cv_static_qt=yes|no
 AC_DEFUN([_RAVEN_QT_IS_STATIC],[
-  AC_CACHE_CHECK(for static Qt, raven_cv_static_qt,[
+  AC_CACHE_CHECK(for static Qt, yottaflux_cv_static_qt,[
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
         #include <QtCore/qconfig.h>
         #ifndef QT_VERSION
@@ -304,8 +304,8 @@ AC_DEFUN([_RAVEN_QT_IS_STATIC],[
         choke
         #endif
       ]])],
-      [raven_cv_static_qt=yes],
-      [raven_cv_static_qt=no])
+      [yottaflux_cv_static_qt=yes],
+      [yottaflux_cv_static_qt=no])
     ])
 ])
 

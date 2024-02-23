@@ -1,14 +1,14 @@
 # Copyright (c) 2013-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2019 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-TESTS += test/test_raven
-bin_PROGRAMS += test/test_raven
-noinst_PROGRAMS += test/test_raven_fuzzy
-noinst_PROGRAMS += test/test_raven_hash
+TESTS += test/test_yottaflux
+bin_PROGRAMS += test/test_yottaflux
+noinst_PROGRAMS += test/test_yottaflux_fuzzy
+noinst_PROGRAMS += test/test_yottaflux_hash
 TEST_SRCDIR = test
-TEST_BINARY=test/test_raven$(EXEEXT)
+TEST_BINARY=test/test_yottaflux$(EXEEXT)
 
 JSON_TEST_FILES = \
   test/data/script_tests.json \
@@ -23,7 +23,7 @@ RAW_TEST_FILES =
 
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
-# test_raven binary #
+# test_yottaflux binary #
 RAVEN_TESTS =\
   test/assets/asset_tests.cpp \
   test/assets/serialization_tests.cpp \
@@ -89,9 +89,9 @@ RAVEN_TESTS =\
   test/sigopcount_tests.cpp \
   test/skiplist_tests.cpp \
   test/streams_tests.cpp \
-  test/test_raven.cpp \
-  test/test_raven.h \
-  test/test_raven_main.cpp \
+  test/test_yottaflux.cpp \
+  test/test_yottaflux.h \
+  test/test_yottaflux_main.cpp \
   test/timedata_tests.cpp \
   test/torcontrol_tests.cpp \
   test/transaction_tests.cpp \
@@ -110,31 +110,31 @@ RAVEN_TESTS += \
   wallet/test/crypto_tests.cpp
 endif
 
-test_test_raven_SOURCES = $(RAVEN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
-test_test_raven_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
-test_test_raven_LDADD =
+test_test_yottaflux_SOURCES = $(RAVEN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
+test_test_yottaflux_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
+test_test_yottaflux_LDADD =
 if ENABLE_WALLET
-test_test_raven_LDADD += $(LIBRAVEN_WALLET)
+test_test_yottaflux_LDADD += $(LIBRAVEN_WALLET)
 endif
-test_test_raven_LDADD += $(LIBRAVEN_SERVER) $(LIBRAVEN_CLI) $(LIBRAVEN_COMMON) $(LIBRAVEN_UTIL) $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(LIBUNIVALUE) \
+test_test_yottaflux_LDADD += $(LIBRAVEN_SERVER) $(LIBRAVEN_CLI) $(LIBRAVEN_COMMON) $(LIBRAVEN_UTIL) $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(LIBUNIVALUE) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
-test_test_raven_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_yottaflux_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_raven_LDADD += $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
-test_test_raven_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+test_test_yottaflux_LDADD += $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+test_test_yottaflux_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-test_test_raven_LDADD += $(ZMQ_LIBS)
+test_test_yottaflux_LDADD += $(ZMQ_LIBS)
 endif
 #
 
-# test_raven_fuzzy binary #
-test_test_raven_fuzzy_SOURCES = test/test_raven_fuzzy.cpp
-test_test_raven_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-test_test_raven_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-test_test_raven_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# test_yottaflux_fuzzy binary #
+test_test_yottaflux_fuzzy_SOURCES = test/test_yottaflux_fuzzy.cpp
+test_test_yottaflux_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+test_test_yottaflux_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_yottaflux_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
-test_test_raven_fuzzy_LDADD = \
+test_test_yottaflux_fuzzy_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBRAVEN_SERVER) \
   $(LIBRAVEN_COMMON) \
@@ -143,26 +143,26 @@ test_test_raven_fuzzy_LDADD = \
   $(LIBRAVEN_CRYPTO) \
   $(LIBSECP256K1)
 
-test_test_raven_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+test_test_yottaflux_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
-# test_raven_hash binary #
-test_test_raven_hash_SOURCES = test/test_raven_hash.cpp
-test_test_raven_hash_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-test_test_raven_hash_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-test_test_raven_hash_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_AP_LDFLAGS)
+# test_yottaflux_hash binary #
+test_test_yottaflux_hash_SOURCES = test/test_yottaflux_hash.cpp
+test_test_yottaflux_hash_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+test_test_yottaflux_hash_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_yottaflux_hash_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_AP_LDFLAGS)
 
-test_test_raven_hash_LDADD = \
+test_test_yottaflux_hash_LDADD = \
   $(LIBUNIVALUE) \
   $(LIBRAVEN_COMMON) \
   $(LIBRAVEN_UTIL) \
   $(LIBRAVEN_CONSENSUS) \
   $(LIBRAVEN_CRYPTO)
 
-test_test_raven_hash_LDADD += $(CRYPTO_LIBS)
+test_test_yottaflux_hash_LDADD += $(CRYPTO_LIBS)
 #
 
-nodist_test_test_raven_SOURCES = $(GENERATED_TEST_FILES)
+nodist_test_test_yottaflux_SOURCES = $(GENERATED_TEST_FILES)
 
 $(RAVEN_TESTS): $(GENERATED_TEST_FILES)
 
@@ -170,17 +170,17 @@ CLEAN_RAVEN_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
 
 CLEANFILES += $(CLEAN_RAVEN_TEST)
 
-raven_test: $(TEST_BINARY)
+yottaflux_test: $(TEST_BINARY)
 
-raven_test_check: $(TEST_BINARY) FORCE
+yottaflux_test_check: $(TEST_BINARY) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
-raven_test_clean : FORCE
-	rm -f $(CLEAN_RAVEN_TEST) $(test_test_raven_OBJECTS) $(TEST_BINARY)
+yottaflux_test_clean : FORCE
+	rm -f $(CLEAN_RAVEN_TEST) $(test_test_yottaflux_OBJECTS) $(TEST_BINARY)
 
 check-local:
-	@echo "Running test/util/raven-util-test.py..."
-	$(PYTHON) $(top_builddir)/test/util/raven-util-test.py
+	@echo "Running test/util/yottaflux-util-test.py..."
+	$(PYTHON) $(top_builddir)/test/util/yottaflux-util-test.py
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 check
 if EMBEDDED_UNIVALUE
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C univalue check

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """Test gettxoutproof and verifytxoutproof RPCs."""
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import YottafluxTestFramework
 from test_framework.util import connect_nodes, assert_equal, assert_raises_rpc_error
 
-class MerkleBlockTest(RavenTestFramework):
+class MerkleBlockTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 4
         self.setup_clean_chain = True

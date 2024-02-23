@@ -20,8 +20,8 @@ import json
 import logging
 
 
-#Set this to your raven-cli program
-cli = "raven-cli"
+#Set this to your yottaflux-cli program
+cli = "yottaflux-cli"
 
 mode = "-main"
 rpc_port = 8766
@@ -31,7 +31,7 @@ rpc_port = 8766
 #mode =  "-regtest"
 #rpc_port = 18444
 
-#Set this information in your raven.conf file (in datadir, not testnet6)
+#Set this information in your yottaflux.conf file (in datadir, not testnet6)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
 

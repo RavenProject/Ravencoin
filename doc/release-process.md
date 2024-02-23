@@ -30,7 +30,7 @@ Before every major release:
 
     git clone https://github.com/yottaflux/Yottaflux.git
 
-### Raven maintainers/release engineers, suggestion for writing release notes
+### Yottaflux maintainers/release engineers, suggestion for writing release notes
 
 Write release notes. git shortlog helps a lot, for example:
 
@@ -56,15 +56,15 @@ Codesigner only: Create Windows/OS X detached signatures:
 
 Codesigner only: Sign the osx binary:
 
-    transfer raven-osx-unsigned.tar.gz to osx for signing
-    tar xf raven-osx-unsigned.tar.gz
+    transfer yottaflux-osx-unsigned.tar.gz to osx for signing
+    tar xf yottaflux-osx-unsigned.tar.gz
     ./detached-sig-create.sh -s "Key ID"
     Enter the keychain password and authorize the signature
     Move signature-osx.tar.gz back to the gitian host
 
 Codesigner only: Sign the windows binaries:
 
-    tar xf raven-win-unsigned.tar.gz
+    tar xf yottaflux-win-unsigned.tar.gz
     ./detached-sig-create.sh -key /path/to/codesign.key
     Enter the passphrase for the key when prompted
     signature-win.tar.gz will be created
@@ -79,14 +79,14 @@ sha256sum * > SHA256SUMS
 
 The list of files should be:
 ```
-raven-${VERSION}-aarch64-linux-gnu.tar.gz
-raven-${VERSION}-arm-linux-gnueabihf.tar.gz
-raven-${VERSION}-x86_64-linux-gnu.tar.gz
-raven-${VERSION}-osx64.tar.gz
-raven-${VERSION}-osx.dmg
-raven-${VERSION}.tar.gz
-raven-${VERSION}-win64-setup.exe
-raven-${VERSION}-win64.zip
+yottaflux-${VERSION}-aarch64-linux-gnu.tar.gz
+yottaflux-${VERSION}-arm-linux-gnueabihf.tar.gz
+yottaflux-${VERSION}-x86_64-linux-gnu.tar.gz
+yottaflux-${VERSION}-osx64.tar.gz
+yottaflux-${VERSION}-osx.dmg
+yottaflux-${VERSION}.tar.gz
+yottaflux-${VERSION}-win64-setup.exe
+yottaflux-${VERSION}-win64.zip
 
 - GPG-sign it, delete the unsigned file:
 ```
@@ -102,7 +102,7 @@ Note: check that SHA256SUMS itself doesn't end up in SHA256SUMS, which is a spur
 
 - Announce the release:
 
-  - ravencore.org blog post
+  - yottafluxcore.org blog post
 
   - Optionally twitter, reddit /r/Yottaflux, ... but this will usually sort out itself
 

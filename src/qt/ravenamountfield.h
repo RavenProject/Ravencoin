@@ -1,5 +1,5 @@
 // Copyright (c) 2011-2015 The Bitcoin Core developers
-// Copyright (c) 2017-2021 The Raven Core developers
+// Copyright (c) 2017-2021 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -16,9 +16,9 @@ QT_BEGIN_NAMESPACE
 class QValueComboBox;
 QT_END_NAMESPACE
 
-/** Widget for entering raven amounts.
+/** Widget for entering yottaflux amounts.
   */
-class RavenAmountField: public QWidget
+class YottafluxAmountField: public QWidget
 {
     Q_OBJECT
 
@@ -27,7 +27,7 @@ class RavenAmountField: public QWidget
     Q_PROPERTY(qint64 value READ value WRITE setValue NOTIFY valueChanged USER true)
 
 public:
-    explicit RavenAmountField(QWidget *parent = 0);
+    explicit YottafluxAmountField(QWidget *parent = 0);
 
     CAmount value(bool *value=0) const;
     void setValue(const CAmount& value);

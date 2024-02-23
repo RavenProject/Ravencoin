@@ -6,20 +6,20 @@ The Yottaflux asset platform could have an uphill climb getting adoption because
 Direct use of the RPC transfer call for moving assets has been possible from the day that assets launched on Yottaflux - November 5, 2018.  But expecting each and every exchange to modify their infrastructure to handle assets with different RPC calls might slow down Yottaflux asset adoption.
 
 ## The solution - Compatibility Mode - Emulation
-The solution is to speed up adoption is to run ravend in compatibility mode that emulates the RPC capabilities of ravend, for an asset instead of YAI.  Exchanges that have already added YAI, can add asset exchange quickly an easily using emulation for every asset they'd like to add.
+The solution is to speed up adoption is to run yottafluxd in compatibility mode that emulates the RPC capabilities of yottafluxd, for an asset instead of YAI.  Exchanges that have already added YAI, can add asset exchange quickly an easily using emulation for every asset they'd like to add.
 
 As an example, normally the rpc call for transferring YAI is   
 ```sendfrom "fromaccount" "toaddress" amount ( minconf "comment" "comment_to" )```   
-Ordinarily this call to ravend (port 8766) will transfer YAI
+Ordinarily this call to yottafluxd (port 8766) will transfer YAI
 
 Configuring a different port for sending the TRONCO token will allow the same RPC call to transfer TRONCO instead of YAI.  The advantage is that the only change needed for compatibility with a system that can already handle BTC and YAI is to use the port configured for TRONCO, or whatever asset you'd like.
 
 ### Configuration
 Every Bitcoin-type, or Yottaflux-type coin uses a different RPC port.  For example, the standard RPC port for Bitcoin is 8332, and the standard RPC port for Yottaflux is 8766.
 
-An exchange can configure multiple Yottaflux assets by selecting a different port for each asset.  Once configured, ravend will emulate a ravend daemon with RPC calls that send the specified asset, instead of YAI.
+An exchange can configure multiple Yottaflux assets by selecting a different port for each asset.  Once configured, yottafluxd will emulate a yottafluxd daemon with RPC calls that send the specified asset, instead of YAI.
 
-Configuration is done in ```raven.conf```  
+Configuration is done in ```yottaflux.conf```  
 ```emulate=TRONCO:8888,FREE_HUGS:8889,MAIN/SUB:8890```
 
 Each emulated asset must have its own port that is available on the machine.

@@ -80,12 +80,12 @@
     </message>
     <message>
         <location line="+7"/>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+4"/>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -227,7 +227,7 @@
     </message>
     <message>
         <location line="-56"/>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your ravens from being stolen by malware infecting your computer.</source>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your yottafluxs from being stolen by malware infecting your computer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -617,7 +617,7 @@
     <message>
         <location line="+27"/>
         <location line="+13"/>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -813,7 +813,7 @@
     </message>
     <message>
         <location line="+107"/>
-        <source>Warning: Invalid Raven address</source>
+        <source>Warning: Invalid Yottaflux address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1334,7 +1334,7 @@
     <message>
         <location line="+27"/>
         <location line="+13"/>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1491,7 +1491,7 @@
         <location line="+43"/>
         <location line="+22"/>
         <location line="+645"/>
-        <source>Warning: Invalid Raven address</source>
+        <source>Warning: Invalid Yottaflux address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1648,7 +1648,7 @@
     </message>
     <message>
         <location line="+71"/>
-        <source>The entered address &quot;%1&quot; is not a valid Raven address.</source>
+        <source>The entered address &quot;%1&quot; is not a valid Yottaflux address.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1932,8 +1932,8 @@ Recommended action: Fully sync your wallet before sending a transaction.
     </message>
     <message>
         <location filename="../intro.cpp" line="+20"/>
-        <source>Raven</source>
-        <translation type="unfinished">Raven</translation>
+        <source>Yottaflux</source>
+        <translation type="unfinished">Yottaflux</translation>
     </message>
     <message>
         <location line="+6"/>
@@ -1947,7 +1947,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
     </message>
     <message>
         <location line="+8"/>
-        <source>%1 will download and store a copy of the Raven block chain.</source>
+        <source>%1 will download and store a copy of the Yottaflux block chain.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2004,7 +2004,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
     </message>
     <message>
         <location line="+26"/>
-        <source>Since no wallet.dat file was found in the Raven block chain data directory, a wallet file will be created.</source>
+        <source>Since no wallet.dat file was found in the Yottaflux block chain data directory, a wallet file will be created.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2171,12 +2171,12 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+119"/>
-        <source>Recent transactions may not yet be visible, and therefore your wallet&apos;s balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the raven network, as detailed below.</source>
+        <source>Recent transactions may not yet be visible, and therefore your wallet&apos;s balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the yottaflux network, as detailed below.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+19"/>
-        <source>Attempting to spend ravens that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <source>Attempting to spend yottafluxs that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2487,8 +2487,8 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+30"/>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2507,7 +2507,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+7"/>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2555,7 +2555,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+25"/>
-        <source>Connect to the Raven network through a separate SOCKS5 proxy for Tor hidden services.</source>
+        <source>Connect to the Yottaflux network through a separate SOCKS5 proxy for Tor hidden services.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2723,8 +2723,8 @@ They are not recoverable !!</source>
         <location line="+99"/>
         <location line="+407"/>
         <location line="+180"/>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</translation>
     </message>
     <message>
         <location line="-373"/>
@@ -2882,7 +2882,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-401"/>
-        <source>Cannot start raven: click-to-pay handler</source>
+        <source>Cannot start yottaflux: click-to-pay handler</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2904,7 +2904,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+8"/>
-        <source>URI cannot be parsed! This can be caused by an invalid Raven address or malformed URI parameters.</source>
+        <source>URI cannot be parsed! This can be caused by an invalid Yottaflux address or malformed URI parameters.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3030,13 +3030,13 @@ They are not recoverable !!</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../ravenunits.cpp" line="+244"/>
+        <location filename="../yottafluxunits.cpp" line="+244"/>
         <source>Amount</source>
         <translation type="unfinished">Amount</translation>
     </message>
     <message>
         <location filename="../guiutil.cpp" line="-349"/>
-        <source>Enter a Raven address (e.g. %1)</source>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3150,7 +3150,7 @@ They are not recoverable !!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../raven.cpp" line="+763"/>
+        <location filename="../yottaflux.cpp" line="+763"/>
         <source>%1 didn&apos;t yet exit safely...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3163,7 +3163,7 @@ They are not recoverable !!</source>
 <context>
     <name>QObject::QObject</name>
     <message>
-        <location filename="../raven.cpp" line="-93"/>
+        <location filename="../yottaflux.cpp" line="-93"/>
         <source>Error: Specified data directory &quot;%1&quot; does not exist.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3668,9 +3668,9 @@ They are not recoverable !!</source>
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
-        <location filename="../ravengui.cpp" line="+476"/>
+        <location filename="../yottafluxgui.cpp" line="+476"/>
         <source>Sign &amp;message...</source>
         <translation>Sign &amp;message...</translation>
     </message>
@@ -3900,8 +3900,8 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-974"/>
-        <source>Send coins to a Raven address</source>
-        <translation>Send coins to a Raven address</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Send coins to a Yottaflux address</translation>
     </message>
     <message>
         <location line="+131"/>
@@ -3925,8 +3925,8 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+912"/>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <location line="-1252"/>
@@ -3960,13 +3960,13 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+11"/>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Sign messages with your Raven addresses to prove you own them</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Sign messages with your Yottaflux addresses to prove you own them</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verify messages to ensure they were signed with specified Raven addresses</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Verify messages to ensure they were signed with specified Yottaflux addresses</translation>
     </message>
     <message>
         <location line="+65"/>
@@ -3980,7 +3980,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-218"/>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3995,7 +3995,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+3"/>
-        <source>Open a raven: URI or payment request</source>
+        <source>Open a yottaflux: URI or payment request</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4005,10 +4005,10 @@ They are not recoverable !!</source>
     </message>
     <message numerus="yes">
         <location line="+748"/>
-        <source>%n active connection(s) to Raven network</source>
+        <source>%n active connection(s) to Yottaflux network</source>
         <translation>
-            <numerusform>%n active connection to Raven network</numerusform>
-            <numerusform>%n active connections to Raven network</numerusform>
+            <numerusform>%n active connection to Yottaflux network</numerusform>
+            <numerusform>%n active connections to Yottaflux network</numerusform>
         </translation>
     </message>
     <message>
@@ -4066,7 +4066,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-833"/>
-        <source>Show the %1 help message to get a list with possible Raven command-line options</source>
+        <source>Show the %1 help message to get a list with possible Yottaflux command-line options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4157,8 +4157,8 @@ They are not recoverable !!</source>
         <translation>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../raven.cpp" line="-114"/>
-        <source>A fatal error occurred. Raven can no longer continue safely and will quit.</source>
+        <location filename="../yottaflux.cpp" line="-114"/>
+        <source>A fatal error occurred. Yottaflux can no longer continue safely and will quit.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4192,7 +4192,7 @@ They are not recoverable !!</source>
     <message>
         <location line="+14"/>
         <location line="+23"/>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Raven network.</source>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Yottaflux network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4581,7 +4581,7 @@ They are not recoverable !!</source>
     <message>
         <location line="+27"/>
         <location line="+13"/>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4701,7 +4701,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+8"/>
-        <source>Invalid Raven Destination Address</source>
+        <source>Invalid Yottaflux Destination Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4712,7 +4712,7 @@ They are not recoverable !!</source>
     <message>
         <location line="+6"/>
         <location line="+659"/>
-        <source>Warning: Invalid Raven address</source>
+        <source>Warning: Invalid Yottaflux address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5022,7 +5022,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+21"/>
-        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
+        <source>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5054,7 +5054,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+22"/>
-        <source>The Raven address to send the payment to</source>
+        <source>The Yottaflux address to send the payment to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5299,7 +5299,7 @@ They are not recoverable !!</source>
     <message>
         <location line="+78"/>
         <location line="+13"/>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5510,7 +5510,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+101"/>
-        <source>Warning: Invalid Raven address</source>
+        <source>Warning: Invalid Yottaflux address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5560,7 +5560,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+66"/>
-        <source>The Raven address to send the payment to</source>
+        <source>The Yottaflux address to send the payment to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5587,7 +5587,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-1140"/>
-        <source>The fee will be deducted from the amount being sent. The recipient will receive less ravens than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
+        <source>The fee will be deducted from the amount being sent. The recipient will receive less yottafluxs than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5628,7 +5628,7 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-116"/>
-        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
+        <source>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5679,12 +5679,12 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+6"/>
-        <source>You can sign messages/agreements with your addresses to prove you can receive ravens sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
+        <source>You can sign messages/agreements with your addresses to prove you can receive yottafluxs sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+18"/>
-        <source>The Raven address to sign the message with</source>
+        <source>The Yottaflux address to sign the message with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5726,8 +5726,8 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+21"/>
-        <source>Sign the message to prove you own this Raven address</source>
-        <translation>Sign the message to prove you own this Raven address</translation>
+        <source>Sign the message to prove you own this Yottaflux address</source>
+        <translation>Sign the message to prove you own this Yottaflux address</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -5757,13 +5757,13 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="+21"/>
-        <source>The Raven address the message was signed with</source>
+        <source>The Yottaflux address the message was signed with</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+37"/>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
-        <translation>Verify the message to ensure it was signed with the specified Raven address</translation>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
+        <translation>Verify the message to ensure it was signed with the specified Yottaflux address</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -6564,7 +6564,7 @@ They are not recoverable !!</source>
 <context>
     <name>UnitDisplayStatusBarControl</name>
     <message>
-        <location filename="../ravengui.cpp" line="+151"/>
+        <location filename="../yottafluxgui.cpp" line="+151"/>
         <source>Unit to show amounts in. Click to select another unit.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6664,9 +6664,9 @@ They are not recoverable !!</source>
     </message>
 </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
-        <location filename="../ravenstrings.cpp" line="+469"/>
+        <location filename="../yottafluxstrings.cpp" line="+469"/>
         <source>Options:</source>
         <translation>Options:</translation>
     </message>
@@ -6742,8 +6742,8 @@ They are not recoverable !!</source>
     </message>
     <message>
         <location line="-525"/>
-        <source>Raven Core</source>
-        <translation type="unfinished">Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation type="unfinished">Yottaflux Core</translation>
     </message>
     <message>
         <location line="+1"/>

@@ -1,4 +1,4 @@
-Raven Core integration/staging tree
+Yottaflux Core integration/staging tree
 =====================================
 
 https://yottaflux.ai
@@ -21,7 +21,7 @@ out collectively by the network.
 License
 -------
 
-Raven Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+Yottaflux Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see https://opensource.org/licenses/MIT.
 
 Development Process
@@ -29,7 +29,7 @@ Development Process
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
 completely stable. [Tags](https://github.com/yottaflux/Yottaflux/tags) are created
-regularly to indicate new official, stable release versions of Raven Core.
+regularly to indicate new official, stable release versions of Yottaflux Core.
 
 Active development is done in the `develop` branch. 
 
@@ -73,7 +73,7 @@ A digital peer to peer network for the facilitation of asset transfer.
 
 
 
-In the fictional world of Westeros, ravens are used as messengers who carry statements of truth. Yottaflux is a use case specific blockchain designed to carry statements of truth about who owns what assets. 
+In the fictional world of Westeros, yottafluxs are used as messengers who carry statements of truth. Yottaflux is a use case specific blockchain designed to carry statements of truth about who owns what assets. 
 
 
 

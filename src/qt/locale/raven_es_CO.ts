@@ -153,7 +153,7 @@
     <name>RPCConsole</name>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Synchronizing with network...</source>
         <translation>Sincronizando con la red...</translation>
@@ -215,8 +215,8 @@
         <translation>Abrir &amp;URL...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Enviando monedas a una dirección de Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Enviando monedas a una dirección de Yottaflux</translation>
     </message>
     <message>
         <source>Change the passphrase used for wallet encryption</source>
@@ -231,8 +231,8 @@
         <translation>&amp;Verificar Mensaje...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -331,10 +331,10 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
-        <source>Raven Core</source>
-        <translation>Raven Core</translation>
+        <source>Yottaflux Core</source>
+        <translation>Yottaflux Core</translation>
     </message>
     <message>
         <source>Insufficient funds</source>

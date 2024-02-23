@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2020 The Raven Core developers
+# Copyright (c) 2017-2020 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,7 +10,7 @@
 import configparser
 import os
 import struct
-from test_framework.test_framework import RavenTestFramework, SkipTest
+from test_framework.test_framework import YottafluxTestFramework, SkipTest
 from test_framework.util import assert_equal, hash256, x16_hash_block
 
 
@@ -35,7 +35,7 @@ class ZMQSubscriber:
 
 
 # noinspection PyUnresolvedReferences
-class ZMQTest(RavenTestFramework):
+class ZMQTest(YottafluxTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
 
@@ -46,14 +46,14 @@ class ZMQTest(RavenTestFramework):
         except ImportError:
             raise SkipTest("python3-zmq module not available.")
 
-        # Check that raven has been built with ZMQ enabled.
+        # Check that yottaflux has been built with ZMQ enabled.
         config = configparser.ConfigParser()
         if not self.options.configfile:
             self.options.configfile = os.path.abspath(os.path.join(os.path.dirname(__file__), "../config.ini"))
         config.read_file(open(self.options.configfile))
 
         if not config["components"].getboolean("ENABLE_ZMQ"):
-            raise SkipTest("ravend has not been built with zmq enabled.")
+            raise SkipTest("yottafluxd has not been built with zmq enabled.")
 
         # Initialize ZMQ context and socket.
         # All messages are received in the same socket which means

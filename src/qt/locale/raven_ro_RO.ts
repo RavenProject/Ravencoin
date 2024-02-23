@@ -62,12 +62,12 @@
         <translation>Adrese de primire</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Acestea sunt adresele tale Raven pentru a trimite plăţi.Întotdeauna verificaţi cantitatea şi adresa înainte de a trimite monezi.</translation>
+        <source>These are your Yottaflux addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Acestea sunt adresele tale Yottaflux pentru a trimite plăţi.Întotdeauna verificaţi cantitatea şi adresa înainte de a trimite monezi.</translation>
     </message>
     <message>
-        <source>These are your Raven addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Acestea sunt adresele tale Raven pentru a primi plăţi.Este recomandat să folosiţi o nouă adresă pentru fiecare tranzacţie.</translation>
+        <source>These are your Yottaflux addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Acestea sunt adresele tale Yottaflux pentru a primi plăţi.Este recomandat să folosiţi o nouă adresă pentru fiecare tranzacţie.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -180,8 +180,8 @@
         <translation>Portofel criptat</translation>
     </message>
     <message>
-        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your ravens from being stolen by malware infecting your computer.</source>
-        <translation>%1 o să se inchidă acum pentru a finaliza procesul de criptare.Vă reamintim că criptarea portofelului nu poate să protejeze pe deplin monedele Raven de a fi furate de către malware care vă infectează calculatorul.</translation>
+        <source>%1 will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your yottafluxs from being stolen by malware infecting your computer.</source>
+        <translation>%1 o să se inchidă acum pentru a finaliza procesul de criptare.Vă reamintim că criptarea portofelului nu poate să protejeze pe deplin monedele Yottaflux de a fi furate de către malware care vă infectează calculatorul.</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -481,8 +481,8 @@
         <translation>per kilooctet</translation>
     </message>
     <message>
-        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for raven transactions than the network can process.</source>
-        <translation>Este în regulă să plăteşti taxa minimă atât timp cât există mai puţin volum în tranzacţii decât spaţiu în blocks.Trebuie să reţineţi că acest lucru poate duce la o tranzacţie care nu se va ma iconfirma odată ce există mai mare cerere pentru tranzacţii Raven decât poate procesa reţeaua.</translation>
+        <source>Paying only the minimum fee is just fine as long as there is less transaction volume than space in the blocks. But be aware that this can end up in a never confirming transaction once there is more demand for yottaflux transactions than the network can process.</source>
+        <translation>Este în regulă să plăteşti taxa minimă atât timp cât există mai puţin volum în tranzacţii decât spaţiu în blocks.Trebuie să reţineţi că acest lucru poate duce la o tranzacţie care nu se va ma iconfirma odată ce există mai mare cerere pentru tranzacţii Yottaflux decât poate procesa reţeaua.</translation>
     </message>
     <message>
         <source>(read the tooltip)</source>
@@ -625,8 +625,8 @@
         <translation>Plăteşte doar minima taxă de %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid Raven address</source>
-        <translation>Atenţie: Adresă Raven invalidă.</translation>
+        <source>Warning: Invalid Yottaflux address</source>
+        <translation>Atenţie: Adresă Yottaflux invalidă.</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -1007,16 +1007,16 @@
         <translation>Cheltuire rest neconfirmat</translation>
     </message>
     <message>
-        <source>Automatically open the Raven client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Deschide automat în router portul aferent clientului Raven. Funcţionează doar dacă routerul duportă UPnP şi e activat.</translation>
+        <source>Automatically open the Yottaflux client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Deschide automat în router portul aferent clientului Yottaflux. Funcţionează doar dacă routerul duportă UPnP şi e activat.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
         <translation>Mapare port folosind &amp;UPnP</translation>
     </message>
     <message>
-        <source>Connect to the Raven network through a SOCKS5 proxy.</source>
-        <translation>Conectare la reţeaua Raven printr-un proxy SOCKS.</translation>
+        <source>Connect to the Yottaflux network through a SOCKS5 proxy.</source>
+        <translation>Conectare la reţeaua Yottaflux printr-un proxy SOCKS.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -1076,7 +1076,7 @@
     </message>
     <message>
         <source>Choose the default subdivision unit to show in the interface and when sending coins.</source>
-        <translation>Alegeţi subdiviziunea folosită la afişarea interfeţei şi la trimiterea de raven.</translation>
+        <translation>Alegeţi subdiviziunea folosită la afişarea interfeţei şi la trimiterea de yottaflux.</translation>
     </message>
     <message>
         <source>Whether to show coin control features or not.</source>
@@ -1116,7 +1116,7 @@
     </message>
     <message>
         <source>The supplied proxy address is invalid.</source>
-        <translation>Adresa raven pe care aţi specificat-o nu este validă.</translation>
+        <translation>Adresa yottaflux pe care aţi specificat-o nu este validă.</translation>
     </message>
 </context>
 <context>
@@ -1126,8 +1126,8 @@
         <translation>Form</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Raven network after a connection is established, but this process has not completed yet.</source>
-        <translation>Informaţiile afişate pot fi neactualizate. Portofelul dvs. se sincronizează automat cu reţeaua Raven după ce o conexiune este stabilită, dar acest proces nu a fost finalizat încă.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Yottaflux network after a connection is established, but this process has not completed yet.</source>
+        <translation>Informaţiile afişate pot fi neactualizate. Portofelul dvs. se sincronizează automat cu reţeaua Yottaflux după ce o conexiune este stabilită, dar acest proces nu a fost finalizat încă.</translation>
     </message>
     <message>
         <source>Watch-only:</source>
@@ -1211,8 +1211,8 @@
         <translation>Cantitate</translation>
     </message>
     <message>
-        <source>Enter a Raven address (e.g. %1)</source>
-        <translation>Introduceţi o adresă Raven (de exemplu %1)</translation>
+        <source>Enter a Yottaflux address (e.g. %1)</source>
+        <translation>Introduceţi o adresă Yottaflux (de exemplu %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1465,7 +1465,7 @@
     </message>
 </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     <message>
         <source>Sign &amp;message...</source>
         <translation>Semnează &amp;mesaj...</translation>
@@ -1543,8 +1543,8 @@
         <translation>Se reindexează blocurile pe disc...</translation>
     </message>
     <message>
-        <source>Send coins to a Raven address</source>
-        <translation>Trimite monede către o adresă Raven</translation>
+        <source>Send coins to a Yottaflux address</source>
+        <translation>Trimite monede către o adresă Yottaflux</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -1563,8 +1563,8 @@
         <translation>&amp;Verifică mesaj...</translation>
     </message>
     <message>
-        <source>Raven</source>
-        <translation>Raven</translation>
+        <source>Yottaflux</source>
+        <translation>Yottaflux</translation>
     </message>
     <message>
         <source>Wallet</source>
@@ -1591,12 +1591,12 @@
         <translation>Criptează cheile private ale portofelului dvs.</translation>
     </message>
     <message>
-        <source>Sign messages with your Raven addresses to prove you own them</source>
-        <translation>Semnaţi mesaje cu adresa dvs. Raven pentru a dovedi că vă aparţin</translation>
+        <source>Sign messages with your Yottaflux addresses to prove you own them</source>
+        <translation>Semnaţi mesaje cu adresa dvs. Yottaflux pentru a dovedi că vă aparţin</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Raven addresses</source>
-        <translation>Verificaţi mesaje pentru a vă asigura că au fost semnate cu adresa Raven specificată</translation>
+        <source>Verify messages to ensure they were signed with specified Yottaflux addresses</source>
+        <translation>Verificaţi mesaje pentru a vă asigura că au fost semnate cu adresa Yottaflux specificată</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -1607,8 +1607,8 @@
         <translation>A&amp;jutor</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and raven: URIs)</source>
-        <translation>Cereţi plăţi (generează coduri QR şi raven-uri: URls)</translation>
+        <source>Request payments (generates QR codes and yottaflux: URIs)</source>
+        <translation>Cereţi plăţi (generează coduri QR şi yottaflux-uri: URls)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -1619,8 +1619,8 @@
         <translation>Arată lista de adrese pentru primire şi etichetele</translation>
     </message>
     <message>
-        <source>Open a raven: URI or payment request</source>
-        <translation>Deschidere raven: o adresa URI sau o cerere de plată</translation>
+        <source>Open a yottaflux: URI or payment request</source>
+        <translation>Deschidere yottaflux: o adresa URI sau o cerere de plată</translation>
     </message>
     <message>
         <source>&amp;Command-line options</source>
@@ -1728,8 +1728,8 @@
         <translation>R&amp;efoloseşte o adresă de primire (nu este recomandat)</translation>
     </message>
     <message>
-        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Raven network.</source>
-        <translation>Un mesaj opţional de ataşat la cererea de plată, care va fi afişat cînd cererea este deschisă. Notă: Acest mesaj nu va fi trimis cu plata către reţeaua Raven.</translation>
+        <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Yottaflux network.</source>
+        <translation>Un mesaj opţional de ataşat la cererea de plată, care va fi afişat cînd cererea este deschisă. Notă: Acest mesaj nu va fi trimis cu plata către reţeaua Yottaflux.</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
@@ -1941,8 +1941,8 @@
         <translation>Aceasta este o tranzacţie normală.</translation>
     </message>
     <message>
-        <source>The Raven address to send the payment to</source>
-        <translation>Adresa raven către care se face plata</translation>
+        <source>The Yottaflux address to send the payment to</source>
+        <translation>Adresa yottaflux către care se face plata</translation>
     </message>
     <message>
         <source>Alt+A</source>
@@ -1969,8 +1969,8 @@
         <translation>Introduceţi eticheta pentru ca această adresa să fie introdusă în lista de adrese folosite</translation>
     </message>
     <message>
-        <source>A message that was attached to the raven: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Raven network.</source>
-        <translation>un mesaj a fost ataşat la raven: URI care va fi stocat cu tranzacţia pentru referinţa dvs. Notă: Acest mesaj nu va fi trimis către reţeaua raven.</translation>
+        <source>A message that was attached to the yottaflux: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Yottaflux network.</source>
+        <translation>un mesaj a fost ataşat la yottaflux: URI care va fi stocat cu tranzacţia pentru referinţa dvs. Notă: Acest mesaj nu va fi trimis către reţeaua yottaflux.</translation>
     </message>
     <message>
         <source>Memo:</source>
@@ -2002,7 +2002,7 @@
         <translation>&amp;Semnează mesaj</translation>
     </message>
     <message>
-        <source>The Raven address to sign the message with</source>
+        <source>The Yottaflux address to sign the message with</source>
         <translation>Adresa cu care semnaţi mesajul</translation>
     </message>
     <message>
@@ -2034,8 +2034,8 @@
         <translation>Copiază semnatura curentă în clipboard-ul sistemului</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Raven address</source>
-        <translation>Semnează mesajul pentru a dovedi ca deţineţi acestă adresă Raven</translation>
+        <source>Sign the message to prove you own this Yottaflux address</source>
+        <translation>Semnează mesajul pentru a dovedi ca deţineţi acestă adresă Yottaflux</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -2054,12 +2054,12 @@
         <translation>&amp;Verifică mesaj</translation>
     </message>
     <message>
-        <source>The Raven address the message was signed with</source>
-        <translation>Introduceţi o adresă Raven</translation>
+        <source>The Yottaflux address the message was signed with</source>
+        <translation>Introduceţi o adresă Yottaflux</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Raven address</source>
-        <translation>Verificaţi mesajul pentru a vă asigura că a fost semnat cu adresa Raven specificată</translation>
+        <source>Verify the message to ensure it was signed with the specified Yottaflux address</source>
+        <translation>Verificaţi mesajul pentru a vă asigura că a fost semnat cu adresa Yottaflux specificată</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>
@@ -2121,7 +2121,7 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     <message>
         <source>Options:</source>
         <translation>Opţiuni:</translation>
@@ -2147,8 +2147,8 @@
         <translation>Rulează în fundal ca un demon şi acceptă comenzi</translation>
     </message>
     <message>
-        <source>Raven Core</source>
-        <translation>Nucleul Raven</translation>
+        <source>Yottaflux Core</source>
+        <translation>Nucleul Yottaflux</translation>
     </message>
     <message>
         <source>Bind to given address and always listen on it. Use [host]:port notation for IPv6</source>

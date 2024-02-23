@@ -1,15 +1,15 @@
 [Unit]
-Description=Raven's distributed currency daemon
+Description=Yottaflux's distributed currency daemon
 After=network.target
 
 [Service]
-User=raven
-Group=raven
+User=yottaflux
+Group=yottaflux
 
 Type=forking
-PIDFile=/var/lib/ravend/ravend.pid
-ExecStart=/usr/bin/ravend -daemon -pid=/var/lib/ravend/ravend.pid \
--conf=/etc/raven/raven.conf -datadir=/var/lib/ravend -disablewallet
+PIDFile=/var/lib/yottafluxd/yottafluxd.pid
+ExecStart=/usr/bin/yottafluxd -daemon -pid=/var/lib/yottafluxd/yottafluxd.pid \
+-conf=/etc/yottaflux/yottaflux.conf -datadir=/var/lib/yottafluxd -disablewallet
 
 Restart=always
 PrivateTmp=true

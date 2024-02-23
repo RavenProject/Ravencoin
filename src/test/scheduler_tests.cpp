@@ -1,12 +1,12 @@
 // Copyright (c) 2012-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2020 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "random.h"
 #include "scheduler.h"
 
-#include "test/test_raven.h"
+#include "test/test_yottaflux.h"
 
 // Fixing Boost 1.73 compile errors
 #include <boost/bind/bind.hpp>

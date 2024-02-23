@@ -68,11 +68,11 @@ _Adjust to own needs. `--prefix=/usr/local` will install the binaries to `/usr/l
 
 `gmake -j8`  # 8 for 8 build threads, adjust to fit your setup.
 
-You can now start raven-qt from the build directory.
+You can now start yottaflux-qt from the build directory.
 
-`src/qt/raven-qt`
+`src/qt/yottaflux-qt`
 
-ravend and raven-cli are in `src/`
+yottafluxd and yottaflux-cli are in `src/`
 
 
 __Optional:__

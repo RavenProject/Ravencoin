@@ -16,14 +16,14 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "Raven"
-            VALUE "FileDescription",    "raven-tx (CLI Raven transaction editor utility)"
+            VALUE "CompanyName",        "Yottaflux"
+            VALUE "FileDescription",    "yottaflux-tx (CLI Yottaflux transaction editor utility)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       "raven-tx"
+            VALUE "InternalName",       "yottaflux-tx"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "raven-tx.exe"
-            VALUE "ProductName",        "raven-tx"
+            VALUE "OriginalFilename",   "yottaflux-tx.exe"
+            VALUE "ProductName",        "yottaflux-tx"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

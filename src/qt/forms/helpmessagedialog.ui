@@ -52,7 +52,7 @@
         </size>
        </property>
        <property name="pixmap">
-        <pixmap resource="../raven.qrc">:/icons/raven</pixmap>
+        <pixmap resource="../yottaflux.qrc">:/icons/yottaflux</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -150,7 +150,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../raven.qrc"/>
+  <include location="../yottaflux.qrc"/>
  </resources>
  <connections>
   <connection>

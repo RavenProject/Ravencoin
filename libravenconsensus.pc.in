@@ -4,8 +4,8 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: @PACKAGE_NAME@ consensus library
-Description: Library for the Raven consensus protocol.
+Description: Library for the Yottaflux consensus protocol.
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lravenconsensus
+Libs: -L${libdir} -lyottafluxconsensus
 Cflags: -I${includedir}
 Requires.private: libcrypto

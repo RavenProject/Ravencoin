@@ -1,6 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2020 The Raven Core developers
+// Copyright (c) 2017-2020 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -187,13 +187,13 @@ UniValue getnewaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() > 1)
         throw std::runtime_error(
             "getnewaddress ( \"account\" )\n"
-            "\nReturns a new Raven address for receiving payments.\n"
+            "\nReturns a new Yottaflux address for receiving payments.\n"
             "If 'account' is specified (DEPRECATED), it is added to the address book \n"
             "so payments received with the address will be credited to 'account'.\n"
             "\nArguments:\n"
             "1. \"account\"        (string, optional) DEPRECATED. The account name for the address to be linked to. If not provided, the default account \"\" is used. It can also be set to the empty string \"\" to represent the default account. The account does not need to exist, it will be created if there is no account by the given name.\n"
             "\nResult:\n"
-            "\"address\"    (string) The new raven address\n"
+            "\"address\"    (string) The new yottaflux address\n"
             "\nExamples:\n"
             + HelpExampleCli("getnewaddress", "")
             + HelpExampleRpc("getnewaddress", "")
@@ -243,11 +243,11 @@ UniValue getaccountaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() != 1)
         throw std::runtime_error(
             "getaccountaddress \"account\"\n"
-            "\nDEPRECATED. Returns the current Raven address for receiving payments to this account.\n"
+            "\nDEPRECATED. Returns the current Yottaflux address for receiving payments to this account.\n"
             "\nArguments:\n"
             "1. \"account\"       (string, required) The account name for the address. It can also be set to the empty string \"\" to represent the default account. The account does not need to exist, it will be created and a new address created  if there is no account by the given name.\n"
             "\nResult:\n"
-            "\"address\"          (string) The account raven address\n"
+            "\"address\"          (string) The account yottaflux address\n"
             "\nExamples:\n"
             + HelpExampleCli("getaccountaddress", "")
             + HelpExampleCli("getaccountaddress", "\"\"")
@@ -277,7 +277,7 @@ UniValue getrawchangeaddress(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() > 0)
         throw std::runtime_error(
             "getrawchangeaddress\n"
-            "\nReturns a new Raven address, for receiving change.\n"
+            "\nReturns a new Yottaflux address, for receiving change.\n"
             "This is for use with raw transactions, NOT normal use.\n"
             "\nResult:\n"
             "\"address\"    (string) The address\n"
@@ -317,7 +317,7 @@ UniValue setaccount(const JSONRPCRequest& request)
             "setaccount \"address\" \"account\"\n"
             "\nDEPRECATED. Sets the account associated with the given address.\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The raven address to be associated with an account.\n"
+            "1. \"address\"         (string, required) The yottaflux address to be associated with an account.\n"
             "2. \"account\"         (string, required) The account to assign the address to.\n"
             "\nExamples:\n"
             + HelpExampleCli("setaccount", "\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XX\" \"tabby\"")
@@ -328,7 +328,7 @@ UniValue setaccount(const JSONRPCRequest& request)
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Yottaflux address");
     }
 
     std::string strAccount;
@@ -365,7 +365,7 @@ UniValue getaccount(const JSONRPCRequest& request)
             "getaccount \"address\"\n"
             "\nDEPRECATED. Returns the account associated with the given address.\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The raven address for account lookup.\n"
+            "1. \"address\"         (string, required) The yottaflux address for account lookup.\n"
             "\nResult:\n"
             "\"accountname\"        (string) the account address\n"
             "\nExamples:\n"
@@ -377,7 +377,7 @@ UniValue getaccount(const JSONRPCRequest& request)
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Yottaflux address");
     }
 
     std::string strAccount;
@@ -404,7 +404,7 @@ UniValue getaddressesbyaccount(const JSONRPCRequest& request)
             "1. \"account\"        (string, required) The account name.\n"
             "\nResult:\n"
             "[                     (json array of string)\n"
-            "  \"address\"         (string) a raven address associated with the given account\n"
+            "  \"address\"         (string) a yottaflux address associated with the given account\n"
             "  ,...\n"
             "]\n"
             "\nExamples:\n"
@@ -443,7 +443,7 @@ static void SendMoney(CWallet * const pwallet, const CTxDestination &address, CA
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
     }
 
-    // Parse Raven address
+    // Parse Yottaflux address
     CScript scriptPubKey = GetScriptForDestination(address);
 
     // Create and send the transaction
@@ -479,7 +479,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
             "\nSend an amount to a given address.\n"
             + HelpRequiringPassphrase(pwallet) +
             "\nArguments:\n"
-            "1. \"address\"            (string, required) The raven address to send to.\n"
+            "1. \"address\"            (string, required) The yottaflux address to send to.\n"
             "2. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to send. eg 0.1\n"
             "3. \"comment\"            (string, optional) A comment used to store what the transaction is for. \n"
             "                             This is not part of the transaction, just kept in your wallet.\n"
@@ -487,7 +487,7 @@ UniValue sendtoaddress(const JSONRPCRequest& request)
             "                             to which you're sending the transaction. This is not part of the \n"
             "                             transaction, just kept in your wallet.\n"
             "5. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
-            "                             The recipient will receive less ravens than you enter in the amount field.\n"
+            "                             The recipient will receive less yottafluxs than you enter in the amount field.\n"
 //            "6. replaceable            (boolean, optional) Allow this transaction to be replaced by a transaction with higher fees via BIP 125\n"
             "6. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
             "7. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
@@ -564,8 +564,8 @@ UniValue sendfromaddress(const JSONRPCRequest& request)
             "\nSend an amount from a specific address to a given address. All yai change will get sent back to the from_address\n"
             + HelpRequiringPassphrase(pwallet) +
             "\nArguments:\n"
-            "1. \"from_address\"       (string, required) The raven address to send from.\n"
-            "2. \"to_address\"            (string, required) The raven address to send to.\n"
+            "1. \"from_address\"       (string, required) The yottaflux address to send from.\n"
+            "2. \"to_address\"            (string, required) The yottaflux address to send to.\n"
             "3. \"amount\"             (numeric or string, required) The amount in " + CURRENCY_UNIT + " to send. eg 0.1\n"
             "4. \"comment\"            (string, optional) A comment used to store what the transaction is for. \n"
             "                             This is not part of the transaction, just kept in your wallet.\n"
@@ -573,7 +573,7 @@ UniValue sendfromaddress(const JSONRPCRequest& request)
             "                             to which you're sending the transaction. This is not part of the \n"
             "                             transaction, just kept in your wallet.\n"
             "6. subtractfeefromamount  (boolean, optional, default=false) The fee will be deducted from the amount being sent.\n"
-            "                             The recipient will receive less ravens than you enter in the amount field.\n"
+            "                             The recipient will receive less yottafluxs than you enter in the amount field.\n"
             "7. conf_target            (numeric, optional) Confirmation target (in blocks)\n"
             "8. \"estimate_mode\"      (string, optional, default=UNSET) The fee estimate mode, must be one of:\n"
             "       \"UNSET\"\n"
@@ -685,7 +685,7 @@ UniValue listaddressgroupings(const JSONRPCRequest& request)
             "[\n"
             "  [\n"
             "    [\n"
-            "      \"address\",            (string) The raven address\n"
+            "      \"address\",            (string) The yottaflux address\n"
             "      amount,                 (numeric) The amount in " + CURRENCY_UNIT + "\n"
             "      \"account\"             (string, optional) DEPRECATED. The account\n"
             "    ]\n"
@@ -735,7 +735,7 @@ UniValue signmessage(const JSONRPCRequest& request)
             "\nSign a message with the private key of an address"
             + HelpRequiringPassphrase(pwallet) + "\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The raven address to use for the private key.\n"
+            "1. \"address\"         (string, required) The yottaflux address to use for the private key.\n"
             "2. \"message\"         (string, required) The message to create a signature of.\n"
             "\nResult:\n"
             "\"signature\"          (string) The signature of the message encoded in base 64\n"
@@ -795,7 +795,7 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
             "getreceivedbyaddress \"address\" ( minconf )\n"
             "\nReturns the total amount received by the given address in transactions with at least minconf confirmations.\n"
             "\nArguments:\n"
-            "1. \"address\"         (string, required) The raven address for transactions.\n"
+            "1. \"address\"         (string, required) The yottaflux address for transactions.\n"
             "2. minconf             (numeric, optional, default=1) Only include transactions confirmed at least this many times.\n"
             "\nResult:\n"
             "amount   (numeric) The total amount in " + CURRENCY_UNIT + " received at this address.\n"
@@ -813,10 +813,10 @@ UniValue getreceivedbyaddress(const JSONRPCRequest& request)
     ObserveSafeMode();
     LOCK2(cs_main, pwallet->cs_wallet);
 
-    // Raven address
+    // Yottaflux address
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Yottaflux address");
     }
     CScript scriptPubKey = GetScriptForDestination(dest);
     if (!IsMine(*pwallet, scriptPubKey)) {
@@ -1058,14 +1058,14 @@ UniValue sendfrom(const JSONRPCRequest& request)
     if (request.fHelp || request.params.size() < 3 || request.params.size() > 6)
         throw std::runtime_error(
             "sendfrom \"fromaccount\" \"toaddress\" amount ( minconf \"comment\" \"comment_to\" )\n"
-            "\nDEPRECATED (use sendtoaddress). Sent an amount from an account to a raven address."
+            "\nDEPRECATED (use sendtoaddress). Sent an amount from an account to a yottaflux address."
             + HelpRequiringPassphrase(pwallet) + "\n"
             "\nArguments:\n"
             "1. \"fromaccount\"       (string, required) The name of the account to send funds from. May be the default account using \"\".\n"
             "                       Specifying an account does not influence coin selection, but it does associate the newly created\n"
             "                       transaction with the account, so the account's balance computation and transaction history can reflect\n"
             "                       the spend.\n"
-            "2. \"toaddress\"         (string, required) The raven address to send funds to.\n"
+            "2. \"toaddress\"         (string, required) The yottaflux address to send funds to.\n"
             "3. amount                (numeric or string, required) The amount in " + CURRENCY_UNIT + " (transaction fee is added on top).\n"
             "4. minconf               (numeric, optional, default=1) Only use funds with at least this many confirmations.\n"
             "5. \"comment\"           (string, optional) A comment used to store what the transaction is for. \n"
@@ -1090,7 +1090,7 @@ UniValue sendfrom(const JSONRPCRequest& request)
     std::string strAccount = AccountFromValue(request.params[0]);
     CTxDestination dest = DecodeDestination(request.params[1].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Yottaflux address");
     }
     CAmount nAmount = AmountFromValue(request.params[2]);
     if (nAmount <= 0)
@@ -1136,14 +1136,14 @@ UniValue sendmany(const JSONRPCRequest& request)
             "1. \"fromaccount\"         (string, required) DEPRECATED. The account to send the funds from. Should be \"\" for the default account\n"
             "2. \"amounts\"             (string, required) A json object with addresses and amounts\n"
             "    {\n"
-            "      \"address\":amount   (numeric or string) The raven address is the key, the numeric amount (can be string) in " + CURRENCY_UNIT + " is the value\n"
+            "      \"address\":amount   (numeric or string) The yottaflux address is the key, the numeric amount (can be string) in " + CURRENCY_UNIT + " is the value\n"
             "      ,...\n"
             "    }\n"
             "3. minconf                 (numeric, optional, default=1) Only use the balance confirmed at least this many times.\n"
             "4. \"comment\"             (string, optional) A comment\n"
             "5. subtractfeefrom         (array, optional) A json array with addresses.\n"
             "                           The fee will be equally deducted from the amount of each selected address.\n"
-            "                           Those recipients will receive less ravens than you enter in their corresponding amount field.\n"
+            "                           Those recipients will receive less yottafluxs than you enter in their corresponding amount field.\n"
             "                           If no addresses are specified here, the sender pays the fee.\n"
             "    [\n"
             "      \"address\"          (string) Subtract fee from this address\n"
@@ -1214,7 +1214,7 @@ UniValue sendmany(const JSONRPCRequest& request)
     for (const std::string& name_ : keys) {
         CTxDestination dest = DecodeDestination(name_);
         if (!IsValidDestination(dest)) {
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + name_);
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + name_);
         }
 
         if (destinations.count(dest)) {
@@ -1277,20 +1277,20 @@ UniValue addmultisigaddress(const JSONRPCRequest& request)
     {
         std::string msg = "addmultisigaddress nrequired [\"key\",...] ( \"account\" )\n"
             "\nAdd a nrequired-to-sign multisignature address to the wallet.\n"
-            "Each key is a Raven address or hex-encoded public key.\n"
+            "Each key is a Yottaflux address or hex-encoded public key.\n"
             "If 'account' is specified (DEPRECATED), assign address to that account.\n"
 
             "\nArguments:\n"
             "1. nrequired        (numeric, required) The number of required signatures out of the n keys or addresses.\n"
-            "2. \"keys\"         (string, required) A json array of raven addresses or hex-encoded public keys\n"
+            "2. \"keys\"         (string, required) A json array of yottaflux addresses or hex-encoded public keys\n"
             "     [\n"
-            "       \"address\"  (string) raven address or hex-encoded public key\n"
+            "       \"address\"  (string) yottaflux address or hex-encoded public key\n"
             "       ...,\n"
             "     ]\n"
             "3. \"account\"      (string, optional) DEPRECATED. An account to assign the addresses to.\n"
 
             "\nResult:\n"
-            "\"address\"         (string) A raven address associated with the keys.\n"
+            "\"address\"         (string) A yottaflux address associated with the keys.\n"
 
             "\nExamples:\n"
             "\nAdd a multisig address from 2 addresses\n"
@@ -1403,7 +1403,7 @@ UniValue addwitnessaddress(const JSONRPCRequest& request)
 
     CTxDestination dest = DecodeDestination(request.params[0].get_str());
     if (!IsValidDestination(dest)) {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Yottaflux address");
     }
 
     Witnessifier w(pwallet);
@@ -1832,7 +1832,7 @@ UniValue listtransactions(const JSONRPCRequest& request)
             "  {\n"
             "    \"account\":\"accountname\",       (string) DEPRECATED. The account name associated with the transaction. \n"
             "                                                It will be \"\" for the default account.\n"
-            "    \"address\":\"address\",    (string) The raven address of the transaction. Not present for \n"
+            "    \"address\":\"address\",    (string) The yottaflux address of the transaction. Not present for \n"
             "                                                move transactions (category = move).\n"
             "    \"category\":\"send|receive|move\", (string) The transaction category. 'move' is a local (off blockchain)\n"
             "                                                transaction between accounts, and not associated with an address,\n"
@@ -2048,7 +2048,7 @@ UniValue listsinceblock(const JSONRPCRequest& request)
             "{\n"
             "  \"transactions\": [\n"
             "    \"account\":\"accountname\",       (string) DEPRECATED. The account name associated with the transaction. Will be \"\" for the default account.\n"
-            "    \"address\":\"address\",    (string) The raven address of the transaction. Not present for move transactions (category = move).\n"
+            "    \"address\":\"address\",    (string) The yottaflux address of the transaction. Not present for move transactions (category = move).\n"
             "    \"category\":\"send|receive\",     (string) The transaction category. 'send' has negative amounts, 'receive' has positive amounts.\n"
             "    \"amount\": x.xxx,          (numeric) The amount in " + CURRENCY_UNIT + ". This is negative for the 'send' category, and for the 'move' category for moves \n"
             "                                          outbound. It is positive for the 'receive' category, and for the 'move' category for inbound funds.\n"
@@ -2198,7 +2198,7 @@ UniValue gettransaction(const JSONRPCRequest& request)
             "  \"details\" : [\n"
             "    {\n"
             "      \"account\" : \"accountname\",      (string) DEPRECATED. The account name involved in the transaction, can be \"\" for the default account.\n"
-            "      \"address\" : \"address\",          (string) The raven address involved in the transaction\n"
+            "      \"address\" : \"address\",          (string) The yottaflux address involved in the transaction\n"
             "      \"category\" : \"send|receive\",    (string) The category, either 'send' or 'receive'\n"
             "      \"amount\" : x.xxx,                 (numeric) The amount in " + CURRENCY_UNIT + "\n"
             "      \"label\" : \"label\",              (string) A comment for the address/transaction, if any\n"
@@ -2215,7 +2215,7 @@ UniValue gettransaction(const JSONRPCRequest& request)
             "      \"asset_type\" : \"new_asset|transfer_asset|reissue_asset\", (string) The type of asset transaction\n"
             "      \"asset_name\" : \"asset_name\",          (string) The name of the asset\n"
             "      \"amount\" : x.xxx,                 (numeric) The amount in " + CURRENCY_UNIT + "\n"
-            "      \"address\" : \"address\",          (string) The raven address involved in the transaction\n"
+            "      \"address\" : \"address\",          (string) The yottaflux address involved in the transaction\n"
             "      \"vout\" : n,                       (numeric) the vout value\n"
             "      \"category\" : \"send|receive\",    (string) The category, either 'send' or 'receive'\n"
             "    }\n"
@@ -2399,7 +2399,7 @@ UniValue walletpassphrase(const JSONRPCRequest& request)
         throw std::runtime_error(
             "walletpassphrase \"passphrase\" timeout\n"
             "\nStores the wallet decryption key in memory for 'timeout' seconds.\n"
-            "This is needed prior to performing transactions related to private keys such as sending ravens\n"
+            "This is needed prior to performing transactions related to private keys such as sending yottafluxs\n"
             "\nArguments:\n"
             "1. \"passphrase\"     (string, required) The wallet passphrase\n"
             "2. timeout            (numeric, required) The time to keep the decryption key in seconds.\n"
@@ -2564,7 +2564,7 @@ UniValue encryptwallet(const JSONRPCRequest& request)
             "\nExamples:\n"
             "\nEncrypt your wallet\n"
             + HelpExampleCli("encryptwallet", "\"my pass phrase\"") +
-            "\nNow set the passphrase to use the wallet, such as for signing or sending raven\n"
+            "\nNow set the passphrase to use the wallet, such as for signing or sending yottaflux\n"
             + HelpExampleCli("walletpassphrase", "\"my pass phrase\"") +
             "\nNow we can do something like sign\n"
             + HelpExampleCli("signmessage", "\"address\" \"test message\"") +
@@ -2602,7 +2602,7 @@ UniValue encryptwallet(const JSONRPCRequest& request)
     // slack space in .dat files; that is bad if the old data is
     // unencrypted private keys. So:
     StartShutdown();
-    return "wallet encrypted; Raven server stopping, restart to run with encrypted wallet. The keypool has been flushed and a new HD seed was generated (if you are using HD). You need to make a new backup.";
+    return "wallet encrypted; Yottaflux server stopping, restart to run with encrypted wallet. The keypool has been flushed and a new HD seed was generated (if you are using HD). You need to make a new backup.";
 }
 
 UniValue lockunspent(const JSONRPCRequest& request)
@@ -2618,7 +2618,7 @@ UniValue lockunspent(const JSONRPCRequest& request)
             "\nUpdates list of temporarily unspendable outputs.\n"
             "Temporarily lock (unlock=false) or unlock (unlock=true) specified transaction outputs.\n"
             "If no transaction outputs are specified when unlocking then all current locked transaction outputs are unlocked.\n"
-            "A locked transaction output will not be chosen by automatic coin selection, when spending ravens.\n"
+            "A locked transaction output will not be chosen by automatic coin selection, when spending yottafluxs.\n"
             "Locks are stored in memory only. Nodes start with zero locked outputs, and the locked output list\n"
             "is always cleared (by virtue of process exit) when a node stops or fails.\n"
             "Also see the listunspent call\n"
@@ -2921,9 +2921,9 @@ UniValue listunspent(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. minconf          (numeric, optional, default=1) The minimum confirmations to filter\n"
             "2. maxconf          (numeric, optional, default=9999999) The maximum confirmations to filter\n"
-            "3. \"addresses\"      (string) A json array of raven addresses to filter\n"
+            "3. \"addresses\"      (string) A json array of yottaflux addresses to filter\n"
             "    [\n"
-            "      \"address\"     (string) raven address\n"
+            "      \"address\"     (string) yottaflux address\n"
             "      ,...\n"
             "    ]\n"
             "4. include_unsafe (bool, optional, default=true) Include outputs that are not safe to spend\n"
@@ -2940,7 +2940,7 @@ UniValue listunspent(const JSONRPCRequest& request)
             "  {\n"
             "    \"txid\" : \"txid\",          (string) the transaction id \n"
             "    \"vout\" : n,               (numeric) the vout value\n"
-            "    \"address\" : \"address\",    (string) the raven address\n"
+            "    \"address\" : \"address\",    (string) the yottaflux address\n"
             "    \"account\" : \"account\",    (string) DEPRECATED. The associated account, or \"\" for the default account\n"
             "    \"scriptPubKey\" : \"key\",   (string) the script key\n"
             "    \"amount\" : x.xxx,         (numeric) the transaction output amount in " + CURRENCY_UNIT + "\n"
@@ -2985,7 +2985,7 @@ UniValue listunspent(const JSONRPCRequest& request)
             const UniValue& input = inputs[idx];
             CTxDestination dest = DecodeDestination(input.get_str());
             if (!IsValidDestination(dest)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + input.get_str());
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Yottaflux address: ") + input.get_str());
             }
             if (!destinations.insert(dest).second) {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, duplicated address: ") + input.get_str());
@@ -3090,7 +3090,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
                             "1. \"hexstring\"           (string, required) The hex string of the raw transaction\n"
                             "2. options                 (object, optional)\n"
                             "   {\n"
-                            "     \"changeAddress\"          (string, optional, default pool address) The raven address to receive the change\n"
+                            "     \"changeAddress\"          (string, optional, default pool address) The yottaflux address to receive the change\n"
                             "     \"changePosition\"         (numeric, optional, default random) The index of the change output\n"
                             "     \"includeWatching\"        (boolean, optional, default false) Also select inputs which are watch only\n"
                             "     \"lockUnspents\"           (boolean, optional, default false) Lock selected unspent outputs\n"
@@ -3098,7 +3098,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
                             "     \"subtractFeeFromOutputs\" (array, optional) A json array of integers.\n"
                             "                              The fee will be equally deducted from the amount of each specified output.\n"
                             "                              The outputs are specified by their zero-based index, before any change output is added.\n"
-                            "                              Those recipients will receive less ravens than you enter in their corresponding amount field.\n"
+                            "                              Those recipients will receive less yottafluxs than you enter in their corresponding amount field.\n"
                             "                              If no outputs are specified here, the sender pays the fee.\n"
                             "                                  [vout_index,...]\n"
 //                            "     \"replaceable\"            (boolean, optional) Marks this transaction as BIP125 replaceable.\n"
@@ -3165,7 +3165,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
             CTxDestination dest = DecodeDestination(options["changeAddress"].get_str());
 
             if (!IsValidDestination(dest)) {
-                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "changeAddress must be a valid raven address");
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "changeAddress must be a valid yottaflux address");
             }
 
             coinControl.destChange = dest;

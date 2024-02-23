@@ -149,7 +149,7 @@
     <name>RPCConsole</name>
     </context>
 <context>
-    <name>RavenGUI</name>
+    <name>YottafluxGUI</name>
     </context>
 <context>
     <name>ReceiveCoinsDialog</name>
@@ -215,6 +215,6 @@
     <name>WalletView</name>
     </context>
 <context>
-    <name>raven-core</name>
+    <name>yottaflux-core</name>
     </context>
 </TS>

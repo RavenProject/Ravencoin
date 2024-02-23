@@ -1,12 +1,12 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
-// Copyright (c) 2017-2019 The Raven Core developers
+// Copyright (c) 2017-2019 The Ravencoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "restrictedassetsdialog.h"
 #include "ui_restrictedassetsdialog.h"
 
-#include "ravenunits.h"
+#include "yottafluxunits.h"
 #include "clientmodel.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
@@ -172,7 +172,7 @@ void RestrictedAssetsDialog::setBalance(const CAmount& balance, const CAmount& u
 
     if(model && model->getOptionsModel())
     {
-        ui->labelBalance->setText(RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), balance));
+        ui->labelBalance->setText(YottafluxUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), balance));
     }
 }
 
@@ -290,7 +290,7 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     {
         // append fee string if a fee is required
         questionString.append("<hr /><span style='color:#e82121;'>");
-        questionString.append(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nRequiredFee));
+        questionString.append(YottafluxUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nRequiredFee));
         questionString.append("</span> ");
         questionString.append(tr("added as transaction fee"));
 
@@ -302,13 +302,13 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     questionString.append("<hr />");
     CAmount totalAmount =  nRequiredFee;
     QStringList alternativeUnits;
-    for (RavenUnits::Unit u : RavenUnits::availableUnits())
+    for (YottafluxUnits::Unit u : YottafluxUnits::availableUnits())
     {
         if(u != model->getOptionsModel()->getDisplayUnit())
-            alternativeUnits.append(RavenUnits::formatHtmlWithUnit(u, totalAmount));
+            alternativeUnits.append(YottafluxUnits::formatHtmlWithUnit(u, totalAmount));
     }
     questionString.append(tr("Total Amount %1")
-                                  .arg(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
+                                  .arg(YottafluxUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
     questionString.append(QString("<span style='font-size:10pt;font-weight:normal;'><br />(=%2)</span>")
                                   .arg(alternativeUnits.join(" " + tr("or") + "<br />")));
 
@@ -409,7 +409,7 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     {
         // append fee string if a fee is required
         questionString.append("<hr /><span style='color:#e82121;'>");
-        questionString.append(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nRequiredFee));
+        questionString.append(YottafluxUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nRequiredFee));
         questionString.append("</span> ");
         questionString.append(tr("added as transaction fee"));
 
@@ -421,13 +421,13 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     questionString.append("<hr />");
     CAmount totalAmount =  nRequiredFee;
     QStringList alternativeUnits;
-    for (RavenUnits::Unit u : RavenUnits::availableUnits())
+    for (YottafluxUnits::Unit u : YottafluxUnits::availableUnits())
     {
         if(u != model->getOptionsModel()->getDisplayUnit())
-            alternativeUnits.append(RavenUnits::formatHtmlWithUnit(u, totalAmount));
+            alternativeUnits.append(YottafluxUnits::formatHtmlWithUnit(u, totalAmount));
     }
     questionString.append(tr("Total Amount %1")
-                                  .arg(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
+                                  .arg(YottafluxUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
     questionString.append(QString("<span style='font-size:10pt;font-weight:normal;'><br />(=%2)</span>")
                                   .arg(alternativeUnits.join(" " + tr("or") + "<br />")));
 

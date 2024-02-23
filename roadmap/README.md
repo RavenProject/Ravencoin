@@ -2,7 +2,7 @@
 
 ### Phase 1 - (Complete)
 
-Yottaflux (YAI) is a Proof of Work coin built on the Bitcoin UTXO model. As with other Bitcoin derivatives, YAI coins are distributed to persons augmenting the Raven network by mining Raven.
+Yottaflux (YAI) is a Proof of Work coin built on the Bitcoin UTXO model. As with other Bitcoin derivatives, YAI coins are distributed to persons augmenting the Yottaflux network by mining Yottaflux.
 *  x1000 coin distribution (21 Billion Total)
 *  10x faster blocks (1 per minute)
 *  In app CPU verification, with GPU specific PoW decentralised mining
@@ -15,11 +15,11 @@ Yottaflux (YAI) is a Proof of Work coin built on the Bitcoin UTXO model. As with
 
 #### ASIC Resistance
 
-ASIC Resistance - A published commitment to continual attempts at ASIC resistance. If ASICs are created for x16r, then we will, at a specific block number, modify one of the algorithms to add some varients of Equihash or similar efforts to increase the resistance to ASIC miners for Raven. ASIC's have been developed for X16R (and X16RV2) and the community has forked to KAWPOW (a variant of ethash and progpow) to maximise the ASIC resistance by reducing the potential efficiency increase of ASICs by requiring the feature set and capabilities within over the counter consumer graphics cards. We are not anticipating future forks to change the algorithm as the current algorithm allows a fair distribution of YAI via PoW to the community.
+ASIC Resistance - A published commitment to continual attempts at ASIC resistance. If ASICs are created for x16r, then we will, at a specific block number, modify one of the algorithms to add some varients of Equihash or similar efforts to increase the resistance to ASIC miners for Yottaflux. ASIC's have been developed for X16R (and X16RV2) and the community has forked to KAWPOW (a variant of ethash and progpow) to maximise the ASIC resistance by reducing the potential efficiency increase of ASICs by requiring the feature set and capabilities within over the counter consumer graphics cards. We are not anticipating future forks to change the algorithm as the current algorithm allows a fair distribution of YAI via PoW to the community.
 
 #### Asset Support
 
-Yottaflux will be a hard fork that extends Raven to include the ability to issue and transfer assets. The expected release of asset capabilities will be approximately seven months after the release of YAI. Raven will be extended to allow issuing, reissuing, and transfer of assets. Assets can be reissuable or limited to a set supply at the point of issuance. The cost to create assets will be 500 YAI to create any qty of an asset. Each asset name must be unique. Asset names will be limited to A-Z and 0-9, '_' and '.' and must be at least three characters long. The '.' and the '_' cannot be the first, or the last character, or be consecutive.  
+Yottaflux will be a hard fork that extends Yottaflux to include the ability to issue and transfer assets. The expected release of asset capabilities will be approximately seven months after the release of YAI. Yottaflux will be extended to allow issuing, reissuing, and transfer of assets. Assets can be reissuable or limited to a set supply at the point of issuance. The cost to create assets will be 500 YAI to create any qty of an asset. Each asset name must be unique. Asset names will be limited to A-Z and 0-9, '_' and '.' and must be at least three characters long. The '.' and the '_' cannot be the first, or the last character, or be consecutive.  
 
 Examples of valid assets:  
 THE_GAME  
@@ -51,7 +51,7 @@ Example: A small software company issues an asset GAMECO that represents a share
 
 #### Block Size
 
-Raven may increase the blocksize from 2 MB to X MB to allow for more on-chain transactions.
+Yottaflux may increase the blocksize from 2 MB to X MB to allow for more on-chain transactions.
 
 ### Phase 3 - Rewards (Complete)
 

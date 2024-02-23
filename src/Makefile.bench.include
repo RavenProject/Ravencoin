@@ -1,19 +1,19 @@
 # Copyright (c) 2015-2016 The Bitcoin Core developers
-# Copyright (c) 2017-2019 The Raven Core developers
+# Copyright (c) 2017-2019 The Ravencoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-bin_PROGRAMS += bench/bench_raven
+bin_PROGRAMS += bench/bench_yottaflux
 BENCH_SRCDIR = bench
-BENCH_BINARY = bench/bench_raven$(EXEEXT)
+BENCH_BINARY = bench/bench_yottaflux$(EXEEXT)
 
 RAW_BENCH_FILES = \
   bench/data/block566553.raw
 GENERATED_BENCH_FILES = $(RAW_BENCH_FILES:.raw=.raw.h)
 
-bench_bench_raven_SOURCES = \
+bench_bench_yottaflux_SOURCES = \
   $(RAW_BENCH_FILES) \
-  bench/bench_raven.cpp \
+  bench/bench_yottaflux.cpp \
   bench/bench.cpp \
   bench/bench.h \
   bench/checkblock.cpp \
@@ -30,11 +30,11 @@ bench_bench_raven_SOURCES = \
   bench/perf.h \
   bench/prevector_destructor.cpp
 
-nodist_bench_bench_raven_SOURCES = $(GENERATED_BENCH_FILES)
+nodist_bench_bench_yottaflux_SOURCES = $(GENERATED_BENCH_FILES)
 
-bench_bench_raven_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
-bench_bench_raven_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-bench_bench_raven_LDADD = \
+bench_bench_yottaflux_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
+bench_bench_yottaflux_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bench_bench_yottaflux_LDADD = \
   $(LIBRAVEN_SERVER) \
   $(LIBRAVEN_COMMON) \
   $(LIBRAVEN_UTIL) \
@@ -47,16 +47,16 @@ bench_bench_raven_LDADD = \
   $(LIBUNIVALUE)
 
 if ENABLE_ZMQ
-bench_bench_raven_LDADD += $(LIBRAVEN_ZMQ) $(ZMQ_LIBS)
+bench_bench_yottaflux_LDADD += $(LIBRAVEN_ZMQ) $(ZMQ_LIBS)
 endif
 
 if ENABLE_WALLET
-bench_bench_raven_SOURCES += bench/coin_selection.cpp
-bench_bench_raven_LDADD += $(LIBRAVEN_WALLET) $(LIBRAVEN_CRYPTO)
+bench_bench_yottaflux_SOURCES += bench/coin_selection.cpp
+bench_bench_yottaflux_LDADD += $(LIBRAVEN_WALLET) $(LIBRAVEN_CRYPTO)
 endif
 
-bench_bench_raven_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-bench_bench_raven_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+bench_bench_yottaflux_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+bench_bench_yottaflux_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 CLEAN_RAVEN_BENCH = bench/*.gcda bench/*.gcno $(GENERATED_BENCH_FILES)
 
@@ -64,13 +64,13 @@ CLEANFILES += $(CLEAN_RAVEN_BENCH)
 
 bench/checkblock.cpp: bench/data/block566553.raw.h
 
-raven_bench: $(BENCH_BINARY)
+yottaflux_bench: $(BENCH_BINARY)
 
 bench: $(BENCH_BINARY) FORCE
 	$(BENCH_BINARY)
 
-raven_bench_clean : FORCE
-	rm -f $(CLEAN_RAVEN_BENCH) $(bench_bench_raven_OBJECTS) $(BENCH_BINARY)
+yottaflux_bench_clean : FORCE
+	rm -f $(CLEAN_RAVEN_BENCH) $(bench_bench_yottaflux_OBJECTS) $(BENCH_BINARY)
 
 %.raw.h: %.raw
 	@$(MKDIR_P) $(@D)
