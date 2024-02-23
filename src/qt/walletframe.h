@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_WALLETFRAME_H
-#define RAVEN_QT_WALLETFRAME_H
+#ifndef YOTTAFLUX_QT_WALLETFRAME_H
+#define YOTTAFLUX_QT_WALLETFRAME_H
 
 #include <QFrame>
 #include <QMap>
@@ -106,4 +106,4 @@ public Q_SLOTS:
     /** YAI END */
 };
 
-#endif // RAVEN_QT_WALLETFRAME_H
+#endif // YOTTAFLUX_QT_WALLETFRAME_H

@@ -19,28 +19,28 @@ else
 LIBUNIVALUE = $(UNIVALUE_LIBS)
 endif
 
-RAVEN_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+YOTTAFLUX_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
-RAVEN_INCLUDES += -I$(srcdir)/secp256k1/include
-RAVEN_INCLUDES += $(UNIVALUE_CFLAGS)
+YOTTAFLUX_INCLUDES += -I$(srcdir)/secp256k1/include
+YOTTAFLUX_INCLUDES += $(UNIVALUE_CFLAGS)
 
-LIBRAVEN_SERVER=libyottaflux_server.a
-LIBRAVEN_COMMON=libyottaflux_common.a
-LIBRAVEN_CONSENSUS=libyottaflux_consensus.a
-LIBRAVEN_CLI=libyottaflux_cli.a
-LIBRAVEN_UTIL=libyottaflux_util.a
-LIBRAVEN_CRYPTO=crypto/libyottaflux_crypto.a
-LIBRAVENQT=qt/libyottafluxqt.a
+LIBYOTTAFLUX_SERVER=libyottaflux_server.a
+LIBYOTTAFLUX_COMMON=libyottaflux_common.a
+LIBYOTTAFLUX_CONSENSUS=libyottaflux_consensus.a
+LIBYOTTAFLUX_CLI=libyottaflux_cli.a
+LIBYOTTAFLUX_UTIL=libyottaflux_util.a
+LIBYOTTAFLUX_CRYPTO=crypto/libyottaflux_crypto.a
+LIBYOTTAFLUXQT=qt/libyottafluxqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
 if ENABLE_ZMQ
-LIBRAVEN_ZMQ=libyottaflux_zmq.a
+LIBYOTTAFLUX_ZMQ=libyottaflux_zmq.a
 endif
-if BUILD_RAVEN_LIBS
-LIBRAVENCONSENSUS=libyottafluxconsensus.la
+if BUILD_YOTTAFLUX_LIBS
+LIBYOTTAFLUXCONSENSUS=libyottafluxconsensus.la
 endif
 if ENABLE_WALLET
-LIBRAVEN_WALLET=libyottaflux_wallet.a
+LIBYOTTAFLUX_WALLET=libyottaflux_wallet.a
 endif
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
@@ -49,37 +49,37 @@ $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
 EXTRA_LIBRARIES += \
-  $(LIBRAVEN_CRYPTO) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_CLI) \
-  $(LIBRAVEN_WALLET) \
-  $(LIBRAVEN_ZMQ)
+  $(LIBYOTTAFLUX_CRYPTO) \
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_COMMON) \
+  $(LIBYOTTAFLUX_CONSENSUS) \
+  $(LIBYOTTAFLUX_SERVER) \
+  $(LIBYOTTAFLUX_CLI) \
+  $(LIBYOTTAFLUX_WALLET) \
+  $(LIBYOTTAFLUX_ZMQ)
 
-lib_LTLIBRARIES = $(LIBRAVENCONSENSUS)
+lib_LTLIBRARIES = $(LIBYOTTAFLUXCONSENSUS)
 
 bin_PROGRAMS =
 noinst_PROGRAMS =
 TESTS =
 BENCHMARKS =
 
-if BUILD_RAVEND
+if BUILD_YOTTAFLUXD
   bin_PROGRAMS += yottafluxd
 endif
 
-if BUILD_RAVEN_CLI
+if BUILD_YOTTAFLUX_CLI
   bin_PROGRAMS += yottaflux-cli
 endif
 
-if BUILD_RAVEN_TX
+if BUILD_YOTTAFLUX_TX
   bin_PROGRAMS += yottaflux-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
 # yottaflux core #
-RAVEN_CORE_H = \
+YOTTAFLUX_CORE_H = \
   addrdb.h \
   addressindex.h \
   algo/sph_groestl.h \
@@ -243,7 +243,7 @@ obj/build.h: FORCE
 libyottaflux_util_a-clientversion.$(OBJEXT): obj/build.h
 
 # server: shared between yottafluxd and yottaflux-qt
-libyottaflux_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
+libyottaflux_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libyottaflux_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_server_a_SOURCES = \
   addrdb.cpp \
@@ -297,10 +297,10 @@ libyottaflux_server_a_SOURCES = \
   validation.cpp \
   validationinterface.cpp \
   versionbits.cpp \
-  $(RAVEN_CORE_H)
+  $(YOTTAFLUX_CORE_H)
 
 if ENABLE_ZMQ
-libyottaflux_zmq_a_CPPFLAGS = $(RAVEN_INCLUDES) $(ZMQ_CFLAGS)
+libyottaflux_zmq_a_CPPFLAGS = $(YOTTAFLUX_INCLUDES) $(ZMQ_CFLAGS)
 libyottaflux_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_zmq_a_SOURCES = \
   zmq/zmqabstractnotifier.cpp \
@@ -311,7 +311,7 @@ endif
 
 # wallet: shared between yottafluxd and yottaflux-qt, but only linked
 # when wallet enabled
-libyottaflux_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+libyottaflux_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 libyottaflux_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_wallet_a_SOURCES = \
   wallet/crypter.cpp \
@@ -324,7 +324,7 @@ libyottaflux_wallet_a_SOURCES = \
   wallet/wallet.cpp \
   wallet/walletdb.cpp \
   wallet/bip39.cpp \
-  $(RAVEN_CORE_H)
+  $(YOTTAFLUX_CORE_H)
 
 # crypto primitives library
 crypto_libyottaflux_crypto_a_CPPFLAGS = $(AM_CPPFLAGS)
@@ -376,7 +376,7 @@ crypto_libyottaflux_crypto_a_SOURCES += crypto/sha256_sse4.cpp
 endif
 
 # consensus: shared between all executables that validate any consensus rules.
-libyottaflux_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+libyottaflux_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 libyottaflux_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_consensus_a_SOURCES = \
   amount.h \
@@ -413,10 +413,10 @@ libyottaflux_consensus_a_SOURCES = \
   version.h \
   LibBoolEE.cpp \
   LibBoolEE.h \
-  $(RAVEN_CORE_H)
+  $(YOTTAFLUX_CORE_H)
 
 # common: shared between yottafluxd, and yottaflux-qt and non-server tools
-libyottaflux_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+libyottaflux_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 libyottaflux_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_common_a_SOURCES = \
   base58.cpp \
@@ -435,12 +435,12 @@ libyottaflux_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   warnings.cpp \
-  $(RAVEN_CORE_H)
+  $(YOTTAFLUX_CORE_H)
 
 # util: shared between all executables.
 # This library *must* be included to make sure that the glibc
 # backward-compatibility objects and their sanity checks are linked.
-libyottaflux_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+libyottaflux_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 libyottaflux_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_util_a_SOURCES = \
   support/lockedpool.cpp \
@@ -458,7 +458,7 @@ libyottaflux_util_a_SOURCES = \
   utilmoneystr.cpp \
   utilstrencodings.cpp \
   utiltime.cpp \
-  $(RAVEN_CORE_H)
+  $(YOTTAFLUX_CORE_H)
 
 if GLIBC_BACK_COMPAT
 libyottaflux_util_a_SOURCES += compat/glibc_compat.cpp
@@ -466,18 +466,18 @@ AM_LDFLAGS += $(COMPAT_LDFLAGS)
 endif
 
 # cli: shared between yottaflux-cli and yottaflux-qt
-libyottaflux_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+libyottaflux_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 libyottaflux_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libyottaflux_cli_a_SOURCES = \
   rpc/client.cpp \
-  $(RAVEN_CORE_H)
+  $(YOTTAFLUX_CORE_H)
 
 nodist_libyottaflux_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
 # yottafluxd binary #
 yottafluxd_SOURCES = yottafluxd.cpp
-yottafluxd_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+yottafluxd_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 yottafluxd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 yottafluxd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
@@ -486,14 +486,14 @@ yottafluxd_SOURCES += yottafluxd-res.rc
 endif
 
 yottafluxd_LDADD = \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_COMMON) \
+  $(LIBYOTTAFLUX_SERVER) \
+  $(LIBYOTTAFLUX_COMMON) \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_WALLET) \
-  $(LIBRAVEN_ZMQ) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_WALLET) \
+  $(LIBYOTTAFLUX_ZMQ) \
+  $(LIBYOTTAFLUX_CONSENSUS) \
+  $(LIBYOTTAFLUX_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
@@ -503,7 +503,7 @@ yottafluxd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIU
 
 # yottaflux-cli binary #
 yottaflux_cli_SOURCES = yottaflux-cli.cpp
-yottaflux_cli_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(EVENT_CFLAGS)
+yottaflux_cli_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES) $(EVENT_CFLAGS)
 yottaflux_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 yottaflux_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
@@ -512,17 +512,17 @@ yottaflux_cli_SOURCES += yottaflux-cli-res.rc
 endif
 
 yottaflux_cli_LDADD = \
-  $(LIBRAVEN_CLI) \
+  $(LIBYOTTAFLUX_CLI) \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CRYPTO)
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_CRYPTO)
 
 yottaflux_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
 # yottaflux-tx binary #
 yottaflux_tx_SOURCES = yottaflux-tx.cpp
-yottaflux_tx_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+yottaflux_tx_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 yottaflux_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 yottaflux_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
@@ -532,17 +532,17 @@ endif
 
 yottaflux_tx_LDADD = \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBYOTTAFLUX_COMMON) \
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_CONSENSUS) \
+  $(LIBYOTTAFLUX_CRYPTO) \
   $(LIBSECP256K1)
 
 yottaflux_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
 # yottafluxconsensus library #
-if BUILD_RAVEN_LIBS
+if BUILD_YOTTAFLUX_LIBS
 include_HEADERS = script/yottafluxconsensus.h
 libyottafluxconsensus_la_SOURCES = $(crypto_libyottaflux_crypto_a_SOURCES) $(libyottaflux_consensus_a_SOURCES)
 
@@ -552,7 +552,7 @@ endif
 
 libyottafluxconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
 libyottafluxconsensus_la_LIBADD = $(LIBSECP256K1) $(BOOST_LIBS)
-libyottafluxconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_RAVEN_INTERNAL
+libyottafluxconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_YOTTAFLUX_INTERNAL
 libyottafluxconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CHAINPARAMSBASE_H
-#define RAVEN_CHAINPARAMSBASE_H
+#ifndef YOTTAFLUX_CHAINPARAMSBASE_H
+#define YOTTAFLUX_CHAINPARAMSBASE_H
 
 #include <memory>
 #include <string>
@@ -61,4 +61,4 @@ void SelectBaseParams(const std::string& chain);
  */
 std::string ChainNameFromCommandLine();
 
-#endif // RAVEN_CHAINPARAMSBASE_H
+#endif // YOTTAFLUX_CHAINPARAMSBASE_H

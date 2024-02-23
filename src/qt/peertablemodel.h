@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_PEERTABLEMODEL_H
-#define RAVEN_QT_PEERTABLEMODEL_H
+#ifndef YOTTAFLUX_QT_PEERTABLEMODEL_H
+#define YOTTAFLUX_QT_PEERTABLEMODEL_H
 
 #include "net_processing.h" // For CNodeStateStats
 #include "net.h"
@@ -83,4 +83,4 @@ private:
     QTimer *timer;
 };
 
-#endif // RAVEN_QT_PEERTABLEMODEL_H
+#endif // YOTTAFLUX_QT_PEERTABLEMODEL_H

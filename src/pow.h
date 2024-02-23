@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_POW_H
-#define RAVEN_POW_H
+#ifndef YOTTAFLUX_POW_H
+#define YOTTAFLUX_POW_H
 
 #include "consensus/params.h"
 
@@ -21,4 +21,4 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
 /** Check whether a block hash satisfies the proof-of-work requirement specified by nBits */
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&);
 
-#endif // RAVEN_POW_H
+#endif // YOTTAFLUX_POW_H

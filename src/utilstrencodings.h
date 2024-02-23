@@ -7,8 +7,8 @@
 /**
  * Utilities for converting data from/to strings.
  */
-#ifndef RAVEN_UTILSTRENCODINGS_H
-#define RAVEN_UTILSTRENCODINGS_H
+#ifndef YOTTAFLUX_UTILSTRENCODINGS_H
+#define YOTTAFLUX_UTILSTRENCODINGS_H
 
 #include <stdint.h>
 #include <string>
@@ -157,4 +157,4 @@ bool TimingResistantEqual(const T& a, const T& b)
  */
 bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out);
 
-#endif // RAVEN_UTILSTRENCODINGS_H
+#endif // YOTTAFLUX_UTILSTRENCODINGS_H

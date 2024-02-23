@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CLIENTVERSION_H
-#define RAVEN_CLIENTVERSION_H
+#ifndef YOTTAFLUX_CLIENTVERSION_H
+#define YOTTAFLUX_CLIENTVERSION_H
 
 #if defined(HAVE_CONFIG_H)
 #include "config/yottaflux-config.h"
@@ -51,4 +51,4 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
 
 #endif // WINDRES_PREPROC
 
-#endif // RAVEN_CLIENTVERSION_H
+#endif // YOTTAFLUX_CLIENTVERSION_H

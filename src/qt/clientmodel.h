@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_CLIENTMODEL_H
-#define RAVEN_QT_CLIENTMODEL_H
+#ifndef YOTTAFLUX_QT_CLIENTMODEL_H
+#define YOTTAFLUX_QT_CLIENTMODEL_H
 
 #include <QObject>
 #include <QDateTime>
@@ -117,4 +117,4 @@ public Q_SLOTS:
     void updateBanlist();
 };
 
-#endif // RAVEN_QT_CLIENTMODEL_H
+#endif // YOTTAFLUX_QT_CLIENTMODEL_H

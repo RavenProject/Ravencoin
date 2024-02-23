@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_INIT_H
-#define RAVEN_WALLET_INIT_H
+#ifndef YOTTAFLUX_WALLET_INIT_H
+#define YOTTAFLUX_WALLET_INIT_H
 
 #include <string>
 
@@ -41,4 +41,4 @@ void StopWallets();
 //! Close all wallets.
 void CloseWallets();
 
-#endif // RAVEN_WALLET_INIT_H
+#endif // YOTTAFLUX_WALLET_INIT_H

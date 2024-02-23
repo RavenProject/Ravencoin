@@ -46,8 +46,8 @@
 #include <QUrlQuery>
 #endif
 
-const int RAVEN_IPC_CONNECT_TIMEOUT = 1000; // milliseconds
-const QString RAVEN_IPC_PREFIX("yottaflux:");
+const int YOTTAFLUX_IPC_CONNECT_TIMEOUT = 1000; // milliseconds
+const QString YOTTAFLUX_IPC_PREFIX("yottaflux:");
 // BIP70 payment protocol messages
 const char* BIP70_MESSAGE_PAYMENTACK = "PaymentACK";
 const char* BIP70_MESSAGE_PAYMENTREQUEST = "PaymentRequest";
@@ -212,7 +212,7 @@ void PaymentServer::ipcParseCommandLine(int argc, char* argv[])
         // network as that would require fetching and parsing the payment request.
         // That means clicking such an URI which contains a testnet payment request
         // will start a mainnet instance and throw a "wrong network" error.
-        if (arg.startsWith(RAVEN_IPC_PREFIX, Qt::CaseInsensitive)) // yottaflux: URI
+        if (arg.startsWith(YOTTAFLUX_IPC_PREFIX, Qt::CaseInsensitive)) // yottaflux: URI
         {
             savedPaymentRequests.append(arg);
 
@@ -270,7 +270,7 @@ bool PaymentServer::ipcSendCommandLine()
     {
         QLocalSocket* socket = new QLocalSocket();
         socket->connectToServer(ipcServerName(), QIODevice::WriteOnly);
-        if (!socket->waitForConnected(RAVEN_IPC_CONNECT_TIMEOUT))
+        if (!socket->waitForConnected(YOTTAFLUX_IPC_CONNECT_TIMEOUT))
         {
             delete socket;
             socket = nullptr;
@@ -285,7 +285,7 @@ bool PaymentServer::ipcSendCommandLine()
 
         socket->write(block);
         socket->flush();
-        socket->waitForBytesWritten(RAVEN_IPC_CONNECT_TIMEOUT);
+        socket->waitForBytesWritten(YOTTAFLUX_IPC_CONNECT_TIMEOUT);
         socket->disconnectFromServer();
 
         delete socket;
@@ -406,7 +406,7 @@ void PaymentServer::handleURIOrFile(const QString& s)
         return;
     }
 
-    if (s.startsWith(RAVEN_IPC_PREFIX, Qt::CaseInsensitive)) // yottaflux: URI
+    if (s.startsWith(YOTTAFLUX_IPC_PREFIX, Qt::CaseInsensitive)) // yottaflux: URI
     {
         QUrlQuery uri((QUrl(s)));
         if (uri.hasQueryItem("r")) // payment request URI

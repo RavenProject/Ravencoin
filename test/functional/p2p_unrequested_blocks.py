@@ -69,7 +69,7 @@ from test_framework.blocktools import create_block, create_coinbase
 class AcceptBlockTest(YottafluxTestFramework):
     def add_options(self, parser):
         parser.add_option("--testbinary", dest="testbinary",
-                          default=os.getenv("RAVEND", "yottafluxd"),
+                          default=os.getenv("YOTTAFLUXD", "yottafluxd"),
                           help="yottafluxd binary to test")
 
     def set_test_params(self):

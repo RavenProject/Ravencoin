@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_UNDO_H
-#define RAVEN_UNDO_H
+#ifndef YOTTAFLUX_UNDO_H
+#define YOTTAFLUX_UNDO_H
 
 #include "compressor.h" 
 #include "consensus/consensus.h"
@@ -120,4 +120,4 @@ public:
     }
 };
 
-#endif // RAVEN_UNDO_H
+#endif // YOTTAFLUX_UNDO_H

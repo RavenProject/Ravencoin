@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_UTILTIME_H
-#define RAVEN_UTILTIME_H
+#ifndef YOTTAFLUX_UTILTIME_H
+#define YOTTAFLUX_UTILTIME_H
 
 #include <stdint.h>
 #include <string>
@@ -30,4 +30,4 @@ void MilliSleep(int64_t n);
 
 std::string DateTimeStrFormat(const char* pszFormat, int64_t nTime);
 
-#endif // RAVEN_UTILTIME_H
+#endif // YOTTAFLUX_UTILTIME_H

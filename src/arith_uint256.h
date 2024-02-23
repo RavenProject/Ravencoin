@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ARITH_UINT256_H
-#define RAVEN_ARITH_UINT256_H
+#ifndef YOTTAFLUX_ARITH_UINT256_H
+#define YOTTAFLUX_ARITH_UINT256_H
 
 #include <assert.h>
 #include <cstring>
@@ -294,4 +294,4 @@ public:
 uint256 ArithToUint256(const arith_uint256 &);
 arith_uint256 UintToArith256(const uint256 &);
 
-#endif // RAVEN_ARITH_UINT256_H
+#endif // YOTTAFLUX_ARITH_UINT256_H

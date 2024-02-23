@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_ADDRESSTABLEMODEL_H
-#define RAVEN_QT_ADDRESSTABLEMODEL_H
+#ifndef YOTTAFLUX_QT_ADDRESSTABLEMODEL_H
+#define YOTTAFLUX_QT_ADDRESSTABLEMODEL_H
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -93,4 +93,4 @@ public Q_SLOTS:
     friend class AddressTablePriv;
 };
 
-#endif // RAVEN_QT_ADDRESSTABLEMODEL_H
+#endif // YOTTAFLUX_QT_ADDRESSTABLEMODEL_H

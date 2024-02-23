@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_PRIMITIVES_TRANSACTION_H
-#define RAVEN_PRIMITIVES_TRANSACTION_H
+#ifndef YOTTAFLUX_PRIMITIVES_TRANSACTION_H
+#define YOTTAFLUX_PRIMITIVES_TRANSACTION_H
 
 #include <stdint.h>
 #include "amount.h"
@@ -437,4 +437,4 @@ typedef std::shared_ptr<const CTransaction> CTransactionRef;
 static inline CTransactionRef MakeTransactionRef() { return std::make_shared<const CTransaction>(); }
 template <typename Tx> static inline CTransactionRef MakeTransactionRef(Tx&& txIn) { return std::make_shared<const CTransaction>(std::forward<Tx>(txIn)); }
 
-#endif // RAVEN_PRIMITIVES_TRANSACTION_H
+#endif // YOTTAFLUX_PRIMITIVES_TRANSACTION_H

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_BLOOM_H
-#define RAVEN_BLOOM_H
+#ifndef YOTTAFLUX_BLOOM_H
+#define YOTTAFLUX_BLOOM_H
 
 #include "serialize.h"
 
@@ -141,4 +141,4 @@ private:
     int nHashFuncs;
 };
 
-#endif // RAVEN_BLOOM_H
+#endif // YOTTAFLUX_BLOOM_H

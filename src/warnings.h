@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WARNINGS_H
-#define RAVEN_WARNINGS_H
+#ifndef YOTTAFLUX_WARNINGS_H
+#define YOTTAFLUX_WARNINGS_H
 
 #include <stdlib.h>
 #include <string>
@@ -25,4 +25,4 @@ std::string GetWarnings(const std::string& strFor);
 
 static const bool DEFAULT_TESTSAFEMODE = false;
 
-#endif //  RAVEN_WARNINGS_H
+#endif //  YOTTAFLUX_WARNINGS_H

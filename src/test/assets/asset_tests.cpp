@@ -49,17 +49,17 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
 
         //- Versions of YOTTAFLUX NOT allowed
         BOOST_CHECK(!IsAssetNameValid("YAI", type));
-        BOOST_CHECK(!IsAssetNameValid("RAVEN", type));
+        BOOST_CHECK(!IsAssetNameValid("YOTTAFLUX", type));
         BOOST_CHECK(!IsAssetNameValid("YOTTAFLUX", type));
 
         //- Versions of YOTTAFLUX ALLOWED
-        BOOST_CHECK(IsAssetNameValid("RAVEN.COIN", type));
-        BOOST_CHECK(IsAssetNameValid("RAVEN_COIN", type));
+        BOOST_CHECK(IsAssetNameValid("YOTTAFLUX.COIN", type));
+        BOOST_CHECK(IsAssetNameValid("YOTTAFLUX_COIN", type));
         BOOST_CHECK(IsAssetNameValid("YAISPYDER", type));
         BOOST_CHECK(IsAssetNameValid("SPYDERYAI", type));
-        BOOST_CHECK(IsAssetNameValid("RAVENSPYDER", type));
-        BOOST_CHECK(IsAssetNameValid("SPYDERAVEN", type));
-        BOOST_CHECK(IsAssetNameValid("BLACK_RAVENS", type));
+        BOOST_CHECK(IsAssetNameValid("YOTTAFLUXSPYDER", type));
+        BOOST_CHECK(IsAssetNameValid("SPYDEYOTTAFLUX", type));
+        BOOST_CHECK(IsAssetNameValid("BLACK_YOTTAFLUXS", type));
         BOOST_CHECK(IsAssetNameValid("SEYAIOT", type));
 
         // subs
@@ -227,7 +227,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKey
-        CAssetTransfer asset("RAVEN", 1000);
+        CAssetTransfer asset("YOTTAFLUX", 1000);
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 
@@ -248,7 +248,7 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         SelectParams(CBaseChainParams::MAIN);
 
         // Create the asset scriptPubKey
-        CNewAsset asset("RAVEN", 1000, 8, 1, 0, "");
+        CNewAsset asset("YOTTAFLUX", 1000, 8, 1, 0, "");
         CScript scriptPubKey = GetScriptForDestination(DecodeDestination(GetParams().GlobalBurnAddress()));
         asset.ConstructTransaction(scriptPubKey);
 

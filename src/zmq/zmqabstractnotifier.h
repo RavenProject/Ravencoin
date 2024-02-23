@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ZMQ_ZMQABSTRACTNOTIFIER_H
-#define RAVEN_ZMQ_ZMQABSTRACTNOTIFIER_H
+#ifndef YOTTAFLUX_ZMQ_ZMQABSTRACTNOTIFIER_H
+#define YOTTAFLUX_ZMQ_ZMQABSTRACTNOTIFIER_H
 
 #include "zmqconfig.h"
 
@@ -44,4 +44,4 @@ protected:
     std::string address;
 };
 
-#endif // RAVEN_ZMQ_ZMQABSTRACTNOTIFIER_H
+#endif // YOTTAFLUX_ZMQ_ZMQABSTRACTNOTIFIER_H

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_DBWRAPPER_H
-#define RAVEN_DBWRAPPER_H
+#ifndef YOTTAFLUX_DBWRAPPER_H
+#define YOTTAFLUX_DBWRAPPER_H
 
 #include "clientversion.h"
 #include "fs.h"
@@ -341,4 +341,4 @@ public:
 
 };
 
-#endif // RAVEN_DBWRAPPER_H
+#endif // YOTTAFLUX_DBWRAPPER_H

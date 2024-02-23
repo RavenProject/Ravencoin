@@ -13,16 +13,16 @@ endif
 override GZIP_ENV = "-9n"
 export PYTHONPATH
 
-if BUILD_RAVEN_LIBS
+if BUILD_YOTTAFLUX_LIBS
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libyottafluxconsensus.pc
 endif
 
-RAVEND_BIN=$(top_builddir)/src/$(RAVEN_DAEMON_NAME)$(EXEEXT)
-RAVEN_QT_BIN=$(top_builddir)/src/qt/$(RAVEN_GUI_NAME)$(EXEEXT)
-RAVEN_CLI_BIN=$(top_builddir)/src/$(RAVEN_CLI_NAME)$(EXEEXT)
-RAVEN_WIN_INSTALLER=$(PACKAGE)-$(PACKAGE_VERSION)-win$(WINDOWS_BITS)-setup$(EXEEXT)
-RAVEN_CLI_INSTALL=$(top_builddir)/contrib/install_cli.sh
+YOTTAFLUXD_BIN=$(top_builddir)/src/$(YOTTAFLUX_DAEMON_NAME)$(EXEEXT)
+YOTTAFLUX_QT_BIN=$(top_builddir)/src/qt/$(YOTTAFLUX_GUI_NAME)$(EXEEXT)
+YOTTAFLUX_CLI_BIN=$(top_builddir)/src/$(YOTTAFLUX_CLI_NAME)$(EXEEXT)
+YOTTAFLUX_WIN_INSTALLER=$(PACKAGE)-$(PACKAGE_VERSION)-win$(WINDOWS_BITS)-setup$(EXEEXT)
+YOTTAFLUX_CLI_INSTALL=$(top_builddir)/contrib/install_cli.sh
 
 empty :=
 space := $(empty) $(empty)
@@ -72,11 +72,11 @@ COVERAGE_INFO = baseline.info \
 dist-hook:
 	-$(GIT) archive --format=tar HEAD -- src/clientversion.cpp | $(AMTAR) -C $(top_distdir) -xf -
 
-$(RAVEN_WIN_INSTALLER): all-recursive
+$(YOTTAFLUX_WIN_INSTALLER): all-recursive
 	$(MKDIR_P) $(top_builddir)/release
-	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(RAVEND_BIN) $(top_builddir)/release
-	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(RAVEN_QT_BIN) $(top_builddir)/release
-	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(RAVEN_CLI_BIN) $(top_builddir)/release
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(YOTTAFLUXD_BIN) $(top_builddir)/release
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(YOTTAFLUX_QT_BIN) $(top_builddir)/release
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(YOTTAFLUX_CLI_BIN) $(top_builddir)/release
 	@test -f $(MAKENSIS) && $(MAKENSIS) -V2 $(top_builddir)/share/setup.nsi || \
 	  echo error: could not build $@
 	@echo built $@
@@ -97,19 +97,19 @@ $(OSX_APP)/Contents/Resources/yottaflux.icns: $(OSX_INSTALLER_ICONS)
 	$(MKDIR_P) $(@D)
 	$(INSTALL_DATA) $< $@
 
-$(OSX_APP)/Contents/MacOS/install_cli.sh: $(RAVEN_CLI_INSTALL)
+$(OSX_APP)/Contents/MacOS/install_cli.sh: $(YOTTAFLUX_CLI_INSTALL)
 	$(MKDIR_P) $(@D)
 	$(INSTALL_DATA) $< $@
 
-$(OSX_APP)/Contents/MacOS/Yottaflux-Qt: $(RAVEN_QT_BIN)
+$(OSX_APP)/Contents/MacOS/Yottaflux-Qt: $(YOTTAFLUX_QT_BIN)
 	$(MKDIR_P) $(@D)
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM)  $< $@
 
-$(OSX_APP)/Contents/MacOS/yottafluxd: $(RAVEND_BIN)
+$(OSX_APP)/Contents/MacOS/yottafluxd: $(YOTTAFLUXD_BIN)
 	$(MKDIR_P) $(@D)
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM)  $< $@
 
-$(OSX_APP)/Contents/MacOS/yottaflux-cli: $(RAVEN_CLI_BIN)
+$(OSX_APP)/Contents/MacOS/yottaflux-cli: $(YOTTAFLUX_CLI_BIN)
 	$(MKDIR_P) $(@D)
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM)  $< $@
 
@@ -171,16 +171,16 @@ appbundle: $(OSX_APP_BUILT)
 deploy: $(OSX_DMG)
 endif
 if TARGET_WINDOWS
-deploy: $(RAVEN_WIN_INSTALLER)
+deploy: $(YOTTAFLUX_WIN_INSTALLER)
 endif
 
-$(RAVEN_QT_BIN): FORCE
+$(YOTTAFLUX_QT_BIN): FORCE
 	$(MAKE) -C src qt/$(@F)
 
-$(RAVEND_BIN): FORCE
+$(YOTTAFLUXD_BIN): FORCE
 	$(MAKE) -C src $(@F)
 
-$(RAVEN_CLI_BIN): FORCE
+$(YOTTAFLUX_CLI_BIN): FORCE
 	$(MAKE) -C src $(@F)
 
 if USE_LCOV
@@ -286,7 +286,7 @@ EXTRA_DIST += \
     test/util/data/txcreatesignv1.json \
     test/util/data/txcreatesignv2.hex
 
-CLEANFILES = $(OSX_DMG) $(RAVEN_WIN_INSTALLER)
+CLEANFILES = $(OSX_DMG) $(YOTTAFLUX_WIN_INSTALLER)
 
 .INTERMEDIATE: $(COVERAGE_INFO)
 

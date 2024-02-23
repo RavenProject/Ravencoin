@@ -502,7 +502,7 @@ void openDebugLogfile()
 
 bool openYottafluxConf()
 {
-    boost::filesystem::path pathConfig = GetConfigFile(RAVEN_CONF_FILENAME);
+    boost::filesystem::path pathConfig = GetConfigFile(YOTTAFLUX_CONF_FILENAME);
 
     /* Create the file */
     boost::filesystem::ofstream configFile(pathConfig, std::ios_base::app);

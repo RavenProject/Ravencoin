@@ -19,7 +19,7 @@ import time
 from .util import assert_equal, get_rpc_proxy, rpc_url, wait_until
 from .authproxy import JSONRPCException, AuthServiceProxy
 
-RAVEND_PROC_WAIT_TIMEOUT = 60
+YOTTAFLUXD_PROC_WAIT_TIMEOUT = 60
 
 
 class TestNode:
@@ -44,7 +44,7 @@ class TestNode:
             # Wait for up to 60 seconds for the RPC server to respond
             self.rpc_timeout = 60
         if binary is None:
-            self.binary = os.getenv("RAVEND", "yottafluxd")
+            self.binary = os.getenv("YOTTAFLUXD", "yottafluxd")
         else:
             self.binary = binary
         self.stderr = stderr
@@ -53,7 +53,7 @@ class TestNode:
         self.extra_args = extra_args
         self.args = [self.binary, "-datadir=" + self.datadir, "-server", "-keypool=2", "-discover=0", "-rest", "-logtimemicros", "-debug", "-debugexclude=libevent", "-debugexclude=leveldb", "-bip44=1", "-mocktime=" + str(mocktime), "-uacomment=testnode%d" % i]
 
-        self.cli = TestNodeCLI(os.getenv("RAVENCLI", "yottaflux-cli"), self.datadir)
+        self.cli = TestNodeCLI(os.getenv("YOTTAFLUXCLI", "yottaflux-cli"), self.datadir)
 
         self.running = False
         AuthServiceProxy.running = False
@@ -154,7 +154,7 @@ class TestNode:
         self.log.debug("Node stopped")
         return True
 
-    def wait_until_stopped(self, timeout=RAVEND_PROC_WAIT_TIMEOUT):
+    def wait_until_stopped(self, timeout=YOTTAFLUXD_PROC_WAIT_TIMEOUT):
         wait_until(self.is_node_stopped, err_msg="Wait until Stopped", timeout=timeout)
 
     def assert_debug_log(self, expected_msgs, timeout=2):

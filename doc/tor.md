@@ -1,4 +1,4 @@
-TOR SUPPORT IN RAVEN
+TOR SUPPORT IN YOTTAFLUX
 ======================
 
 It is possible to run Yottaflux as a Tor hidden service, and connect to such services.

@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SCRIPT_ISMINE_H
-#define RAVEN_SCRIPT_ISMINE_H
+#ifndef YOTTAFLUX_SCRIPT_ISMINE_H
+#define YOTTAFLUX_SCRIPT_ISMINE_H
 
 #include "script/standard.h"
 
@@ -39,4 +39,4 @@ isminetype IsMine(const CKeyStore& keystore, const CScript& scriptPubKey, SigVer
 isminetype IsMine(const CKeyStore& keystore, const CTxDestination& dest, bool& isInvalid, SigVersion = SIGVERSION_BASE);
 isminetype IsMine(const CKeyStore& keystore, const CTxDestination& dest, SigVersion = SIGVERSION_BASE);
 
-#endif // RAVEN_SCRIPT_ISMINE_H
+#endif // YOTTAFLUX_SCRIPT_ISMINE_H

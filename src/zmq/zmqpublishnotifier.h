@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
-#define RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
+#ifndef YOTTAFLUX_ZMQ_ZMQPUBLISHNOTIFIER_H
+#define YOTTAFLUX_ZMQ_ZMQPUBLISHNOTIFIER_H
 
 #include "zmqabstractnotifier.h"
 
@@ -60,4 +60,4 @@ public:
     bool NotifyMessage(const CMessage& message) override;
 };
 
-#endif // RAVEN_ZMQ_ZMQPUBLISHNOTIFIER_H
+#endif // YOTTAFLUX_ZMQ_ZMQPUBLISHNOTIFIER_H

@@ -8,8 +8,8 @@
  * Server/client environment: argument handling, config file parsing,
  * logging, thread wrappers, startup time
  */
-#ifndef RAVEN_UTIL_H
-#define RAVEN_UTIL_H
+#ifndef YOTTAFLUX_UTIL_H
+#define YOTTAFLUX_UTIL_H
 
 #if defined(HAVE_CONFIG_H)
 #include "config/yottaflux-config.h"
@@ -54,8 +54,8 @@ extern bool fLogIPs;
 extern std::atomic<bool> fReopenDebugLog;
 extern CTranslationInterface translationInterface;
 
-extern const char *const RAVEN_CONF_FILENAME;
-extern const char *const RAVEN_PID_FILENAME;
+extern const char *const YOTTAFLUX_CONF_FILENAME;
+extern const char *const YOTTAFLUX_PID_FILENAME;
 
 extern std::atomic<uint32_t> logCategories;
 
@@ -362,4 +362,4 @@ std::string CopyrightHolders(const std::string &strPrefix);
 
 void SetThreadPriority(int nPriority);
 
-#endif // RAVEN_UTIL_H
+#endif // YOTTAFLUX_UTIL_H

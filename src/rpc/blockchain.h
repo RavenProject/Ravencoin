@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_RPC_BLOCKCHAIN_H
-#define RAVEN_RPC_BLOCKCHAIN_H
+#ifndef YOTTAFLUX_RPC_BLOCKCHAIN_H
+#define YOTTAFLUX_RPC_BLOCKCHAIN_H
 #include <map>
 #include <string>
 

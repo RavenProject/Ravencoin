@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_GUIUTIL_H
-#define RAVEN_QT_GUIUTIL_H
+#ifndef YOTTAFLUX_QT_GUIUTIL_H
+#define YOTTAFLUX_QT_GUIUTIL_H
 
 #include "amount.h"
 #include "fs.h"
@@ -270,4 +270,4 @@ namespace GUIUtil
 
 } // namespace GUIUtil
 
-#endif // RAVEN_QT_GUIUTIL_H
+#endif // YOTTAFLUX_QT_GUIUTIL_H

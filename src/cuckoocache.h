@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CUCKOOCACHE_H
-#define RAVEN_CUCKOOCACHE_H
+#ifndef YOTTAFLUX_CUCKOOCACHE_H
+#define YOTTAFLUX_CUCKOOCACHE_H
 
 #include <array>
 #include <algorithm>
@@ -478,4 +478,4 @@ public:
 };
 } // namespace CuckooCache
 
-#endif // RAVEN_CUCKOOCACHE_H
+#endif // YOTTAFLUX_CUCKOOCACHE_H

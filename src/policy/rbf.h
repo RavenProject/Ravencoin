@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_POLICY_RBF_H
-#define RAVEN_POLICY_RBF_H
+#ifndef YOTTAFLUX_POLICY_RBF_H
+#define YOTTAFLUX_POLICY_RBF_H
 
 #include "txmempool.h"
 
@@ -26,4 +26,4 @@ bool SignalsOptInRBF(const CTransaction &tx);
 // as the sequence numbers of all in-mempool ancestors.
 RBFTransactionState IsRBFOptIn(const CTransaction &tx, CTxMemPool &pool);
 
-#endif // RAVEN_POLICY_RBF_H
+#endif // YOTTAFLUX_POLICY_RBF_H

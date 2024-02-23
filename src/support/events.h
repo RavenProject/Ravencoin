@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SUPPORT_EVENTS_H
-#define RAVEN_SUPPORT_EVENTS_H
+#ifndef YOTTAFLUX_SUPPORT_EVENTS_H
+#define YOTTAFLUX_SUPPORT_EVENTS_H
 
 #include <ios>
 #include <memory>
@@ -54,4 +54,4 @@ inline raii_evhttp_connection obtain_evhttp_connection_base(struct event_base* b
     return result;
 }
 
-#endif // RAVEN_SUPPORT_EVENTS_H
+#endif // YOTTAFLUX_SUPPORT_EVENTS_H

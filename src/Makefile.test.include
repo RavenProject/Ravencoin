@@ -24,7 +24,7 @@ RAW_TEST_FILES =
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
 # test_yottaflux binary #
-RAVEN_TESTS =\
+YOTTAFLUX_TESTS =\
   test/assets/asset_tests.cpp \
   test/assets/serialization_tests.cpp \
   test/assets/asset_tx_tests.cpp \
@@ -102,7 +102,7 @@ RAVEN_TESTS =\
   test/util_tests.cpp
 
 if ENABLE_WALLET
-RAVEN_TESTS += \
+YOTTAFLUX_TESTS += \
   wallet/test/wallet_test_fixture.cpp \
   wallet/test/wallet_test_fixture.h \
   wallet/test/accounting_tests.cpp \
@@ -110,17 +110,17 @@ RAVEN_TESTS += \
   wallet/test/crypto_tests.cpp
 endif
 
-test_test_yottaflux_SOURCES = $(RAVEN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
-test_test_yottaflux_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
+test_test_yottaflux_SOURCES = $(YOTTAFLUX_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
+test_test_yottaflux_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
 test_test_yottaflux_LDADD =
 if ENABLE_WALLET
-test_test_yottaflux_LDADD += $(LIBRAVEN_WALLET)
+test_test_yottaflux_LDADD += $(LIBYOTTAFLUX_WALLET)
 endif
-test_test_yottaflux_LDADD += $(LIBRAVEN_SERVER) $(LIBRAVEN_CLI) $(LIBRAVEN_COMMON) $(LIBRAVEN_UTIL) $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(LIBUNIVALUE) \
+test_test_yottaflux_LDADD += $(LIBYOTTAFLUX_SERVER) $(LIBYOTTAFLUX_CLI) $(LIBYOTTAFLUX_COMMON) $(LIBYOTTAFLUX_UTIL) $(LIBYOTTAFLUX_CONSENSUS) $(LIBYOTTAFLUX_CRYPTO) $(LIBUNIVALUE) \
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
 test_test_yottaflux_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_yottaflux_LDADD += $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+test_test_yottaflux_LDADD += $(LIBYOTTAFLUX_CONSENSUS) $(LIBYOTTAFLUX_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
 test_test_yottaflux_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
@@ -130,17 +130,17 @@ endif
 
 # test_yottaflux_fuzzy binary #
 test_test_yottaflux_fuzzy_SOURCES = test/test_yottaflux_fuzzy.cpp
-test_test_yottaflux_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+test_test_yottaflux_fuzzy_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 test_test_yottaflux_fuzzy_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 test_test_yottaflux_fuzzy_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 test_test_yottaflux_fuzzy_LDADD = \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBYOTTAFLUX_SERVER) \
+  $(LIBYOTTAFLUX_COMMON) \
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_CONSENSUS) \
+  $(LIBYOTTAFLUX_CRYPTO) \
   $(LIBSECP256K1)
 
 test_test_yottaflux_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
@@ -148,27 +148,27 @@ test_test_yottaflux_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 
 # test_yottaflux_hash binary #
 test_test_yottaflux_hash_SOURCES = test/test_yottaflux_hash.cpp
-test_test_yottaflux_hash_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
+test_test_yottaflux_hash_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES)
 test_test_yottaflux_hash_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 test_test_yottaflux_hash_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_AP_LDFLAGS)
 
 test_test_yottaflux_hash_LDADD = \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO)
+  $(LIBYOTTAFLUX_COMMON) \
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_CONSENSUS) \
+  $(LIBYOTTAFLUX_CRYPTO)
 
 test_test_yottaflux_hash_LDADD += $(CRYPTO_LIBS)
 #
 
 nodist_test_test_yottaflux_SOURCES = $(GENERATED_TEST_FILES)
 
-$(RAVEN_TESTS): $(GENERATED_TEST_FILES)
+$(YOTTAFLUX_TESTS): $(GENERATED_TEST_FILES)
 
-CLEAN_RAVEN_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
+CLEAN_YOTTAFLUX_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
 
-CLEANFILES += $(CLEAN_RAVEN_TEST)
+CLEANFILES += $(CLEAN_YOTTAFLUX_TEST)
 
 yottaflux_test: $(TEST_BINARY)
 
@@ -176,7 +176,7 @@ yottaflux_test_check: $(TEST_BINARY) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
 yottaflux_test_clean : FORCE
-	rm -f $(CLEAN_RAVEN_TEST) $(test_test_yottaflux_OBJECTS) $(TEST_BINARY)
+	rm -f $(CLEAN_YOTTAFLUX_TEST) $(test_test_yottaflux_OBJECTS) $(TEST_BINARY)
 
 check-local:
 	@echo "Running test/util/yottaflux-util-test.py..."

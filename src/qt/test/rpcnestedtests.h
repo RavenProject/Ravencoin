@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_TEST_RPC_NESTED_TESTS_H
-#define RAVEN_QT_TEST_RPC_NESTED_TESTS_H
+#ifndef YOTTAFLUX_QT_TEST_RPC_NESTED_TESTS_H
+#define YOTTAFLUX_QT_TEST_RPC_NESTED_TESTS_H
 
 #include <QObject>
 #include <QTest>
@@ -23,4 +23,4 @@ private:
     CCoinsViewDB *pcoinsdbview;
 };
 
-#endif // RAVEN_QT_TEST_RPC_NESTED_TESTS_H
+#endif // YOTTAFLUX_QT_TEST_RPC_NESTED_TESTS_H

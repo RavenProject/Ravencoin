@@ -159,23 +159,23 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
 
         fUnitTest = true;
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000}"));
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"issue\":{\"asset_name\":\"RAVEN_ASSET\",\"asset_quantity\":20000,\"units\":0,\"reissuable\":1,\"has_ipfs\":0}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"YOTTAFLUX_ASSET\":20000}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"issue\":{\"asset_name\":\"YOTTAFLUX_ASSET\",\"asset_quantity\":20000,\"units\":0,\"reissuable\":1,\"has_ipfs\":0}}}"));
 
         // one address multiple asset outs
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000,\"RAVEN_ASSET_2\":20000}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"YOTTAFLUX_ASSET\":20000,\"YOTTAFLUX_ASSET_2\":20000}}}"));
 
         // multiple coin outs
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":20000}"));
 
         // coin and asset out
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transfer\":{\"YOTTAFLUX_ASSET\":20000}}}"));
 
         // coin and asset out with message
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transferwithmessage\":{\"RAVEN_ASSET\":20000,\"message\":\"QmTqu3Lk3gmTsQVZZZZZZEAW4xZZZZNmbuEAp2Mjr4AV7E\",\"expire_time\":0}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transferwithmessage\":{\"YOTTAFLUX_ASSET\":20000,\"message\":\"QmTqu3Lk3gmTsQVZZZZZZEAW4xZZZZNmbuEAp2Mjr4AV7E\",\"expire_time\":0}}}"));
 
         // bad command
-        BOOST_CHECK_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"badcommand\":{\"RAVEN_ASSET\":20000}}}"), std::runtime_error);
+        BOOST_CHECK_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"badcommand\":{\"YOTTAFLUX_ASSET\":20000}}}"), std::runtime_error);
     }
 
     BOOST_AUTO_TEST_CASE(rpc_format_monetary_values_test)

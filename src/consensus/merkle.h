@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_MERKLE
-#define RAVEN_MERKLE
+#ifndef YOTTAFLUX_MERKLE
+#define YOTTAFLUX_MERKLE
 
 #include <stdint.h>
 #include <vector>

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ADDRESSINDEX_H
-#define RAVEN_ADDRESSINDEX_H
+#ifndef YOTTAFLUX_ADDRESSINDEX_H
+#define YOTTAFLUX_ADDRESSINDEX_H
 
 #include "uint256.h"
 #include "amount.h"
@@ -406,4 +406,4 @@ struct CMempoolAddressDeltaKeyCompare
     }
 };
 
-#endif // RAVEN_ADDRESSINDEX_H
+#endif // YOTTAFLUX_ADDRESSINDEX_H

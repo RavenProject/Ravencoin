@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_SIGNVERIFYMESSAGEDIALOG_H
-#define RAVEN_QT_SIGNVERIFYMESSAGEDIALOG_H
+#ifndef YOTTAFLUX_QT_SIGNVERIFYMESSAGEDIALOG_H
+#define YOTTAFLUX_QT_SIGNVERIFYMESSAGEDIALOG_H
 
 #include <QDialog>
 
@@ -51,4 +51,4 @@ private Q_SLOTS:
     void on_clearButton_VM_clicked();
 };
 
-#endif // RAVEN_QT_SIGNVERIFYMESSAGEDIALOG_H
+#endif // YOTTAFLUX_QT_SIGNVERIFYMESSAGEDIALOG_H

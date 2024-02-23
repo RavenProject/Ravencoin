@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SCRIPT_SCRIPT_H
-#define RAVEN_SCRIPT_SCRIPT_H
+#ifndef YOTTAFLUX_SCRIPT_SCRIPT_H
+#define YOTTAFLUX_SCRIPT_SCRIPT_H
 
 #include "crypto/common.h"
 #include "prevector.h"
@@ -739,4 +739,4 @@ bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
-#endif // RAVEN_SCRIPT_SCRIPT_H
+#endif // YOTTAFLUX_SCRIPT_SCRIPT_H

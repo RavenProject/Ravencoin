@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_KEY_H
-#define RAVEN_KEY_H
+#ifndef YOTTAFLUX_KEY_H
+#define YOTTAFLUX_KEY_H
 
 #include "pubkey.h"
 #include "serialize.h"
@@ -184,4 +184,4 @@ void ECC_Stop(void);
 /** Check that required EC support is available at runtime. */
 bool ECC_InitSanityCheck(void);
 
-#endif // RAVEN_KEY_H
+#endif // YOTTAFLUX_KEY_H

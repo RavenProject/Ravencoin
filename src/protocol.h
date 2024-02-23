@@ -8,8 +8,8 @@
 #error This header can only be compiled as C++.
 #endif
 
-#ifndef RAVEN_PROTOCOL_H
-#define RAVEN_PROTOCOL_H
+#ifndef YOTTAFLUX_PROTOCOL_H
+#define YOTTAFLUX_PROTOCOL_H
 
 #include "netaddress.h"
 #include "serialize.h"
@@ -443,4 +443,4 @@ public:
     std::string name; // block height that asset data should come from
 };
 
-#endif // RAVEN_PROTOCOL_H
+#endif // YOTTAFLUX_PROTOCOL_H

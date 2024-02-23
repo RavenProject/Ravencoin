@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_RECENTREQUESTSTABLEMODEL_H
-#define RAVEN_QT_RECENTREQUESTSTABLEMODEL_H
+#ifndef YOTTAFLUX_QT_RECENTREQUESTSTABLEMODEL_H
+#define YOTTAFLUX_QT_RECENTREQUESTSTABLEMODEL_H
 
 #include "walletmodel.h"
 
@@ -105,4 +105,4 @@ private:
     QString getAmountTitle();
 };
 
-#endif // RAVEN_QT_RECENTREQUESTSTABLEMODEL_H
+#endif // YOTTAFLUX_QT_RECENTREQUESTSTABLEMODEL_H

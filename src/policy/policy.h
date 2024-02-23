@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_POLICY_POLICY_H
-#define RAVEN_POLICY_POLICY_H
+#ifndef YOTTAFLUX_POLICY_POLICY_H
+#define YOTTAFLUX_POLICY_POLICY_H
 
 #include "consensus/consensus.h"
 #include "feerate.h"
@@ -105,4 +105,4 @@ extern unsigned int nBytesPerSigOp;
 int64_t GetVirtualTransactionSize(int64_t nWeight, int64_t nSigOpCost);
 int64_t GetVirtualTransactionSize(const CTransaction& tx, int64_t nSigOpCost = 0);
 
-#endif // RAVEN_POLICY_POLICY_H
+#endif // YOTTAFLUX_POLICY_POLICY_H

@@ -136,13 +136,13 @@ class AssetTest(YottafluxTestFramework):
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET"], 2000)
 
         self.log.info("Checking listassets()...")
-        n0.issue("RAVEN1", 1000)
-        n0.issue("RAVEN2", 1000)
-        n0.issue("RAVEN3", 1000)
+        n0.issue("YOTTAFLUX1", 1000)
+        n0.issue("YOTTAFLUX2", 1000)
+        n0.issue("YOTTAFLUX3", 1000)
         n0.generate(1)
         self.sync_all()
 
-        n0.listassets(asset="RAVEN*", verbose=False, count=2, start=-2)
+        n0.listassets(asset="YOTTAFLUX*", verbose=False, count=2, start=-2)
 
         self.log.info("Creating some sub-assets...")
         n0.issue(asset_name="MY_ASSET/SUB1", qty=1000, to_address=address0, change_address=address0, units=4, reissuable=True, has_ipfs=True, ipfs_hash=ipfs_hash)
@@ -161,10 +161,10 @@ class AssetTest(YottafluxTestFramework):
         assert_equal(assetdata["has_ipfs"], 1)
         assert_equal(assetdata["ipfs_hash"], ipfs_hash)
 
-        yottaflux_assets = n0.listassets(asset="RAVEN*", verbose=False, count=2, start=-2)
+        yottaflux_assets = n0.listassets(asset="YOTTAFLUX*", verbose=False, count=2, start=-2)
         assert_equal(len(yottaflux_assets), 2)
-        assert_equal(yottaflux_assets[0], "RAVEN2")
-        assert_equal(yottaflux_assets[1], "RAVEN3")
+        assert_equal(yottaflux_assets[0], "YOTTAFLUX2")
+        assert_equal(yottaflux_assets[1], "YOTTAFLUX3")
         self.sync_all()
 
     def issue_param_checks(self):

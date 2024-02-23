@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_TXMEMPOOL_H
-#define RAVEN_TXMEMPOOL_H
+#ifndef YOTTAFLUX_TXMEMPOOL_H
+#define YOTTAFLUX_TXMEMPOOL_H
 
 #include <memory>
 #include <set>
@@ -847,4 +847,4 @@ struct ConnectedBlockAssetData
     std::set<CAssetCacheQualifierAddress> newQualifiersToAdd;
 };
 
-#endif // RAVEN_TXMEMPOOL_H
+#endif // YOTTAFLUX_TXMEMPOOL_H

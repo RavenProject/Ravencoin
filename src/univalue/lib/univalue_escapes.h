@@ -1,6 +1,6 @@
 // Automatically generated file. Do not modify.
-#ifndef RAVEN_UNIVALUE_UNIVALUE_ESCAPES_H
-#define RAVEN_UNIVALUE_UNIVALUE_ESCAPES_H
+#ifndef YOTTAFLUX_UNIVALUE_UNIVALUE_ESCAPES_H
+#define YOTTAFLUX_UNIVALUE_UNIVALUE_ESCAPES_H
 static const char *escapes[256] = {
 	"\\u0000",
 	"\\u0001",
@@ -259,4 +259,4 @@ static const char *escapes[256] = {
 	NULL,
 	NULL,
 };
-#endif // RAVEN_UNIVALUE_UNIVALUE_ESCAPES_H
+#endif // YOTTAFLUX_UNIVALUE_UNIVALUE_ESCAPES_H

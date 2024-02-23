@@ -12,6 +12,7 @@ find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i '
 
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i 's/Raven/Yottaflux/g' {} +
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i 's/raven/yottaflux/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i 's/RAVEN/YOTTAFLUX/g' {} +
 
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/yottaflux\/rips/RavenProject\/rips/g' {} +
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/yottaflux\.org/yottaflux\.ai/ig' {} +

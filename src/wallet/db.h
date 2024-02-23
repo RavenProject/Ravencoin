@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_DB_H
-#define RAVEN_WALLET_DB_H
+#ifndef YOTTAFLUX_WALLET_DB_H
+#define YOTTAFLUX_WALLET_DB_H
 
 #include "clientversion.h"
 #include "fs.h"
@@ -369,4 +369,4 @@ public:
     bool static Rewrite(CWalletDBWrapper& dbw, const char* pszSkip = nullptr);
 };
 
-#endif // RAVEN_WALLET_DB_H
+#endif // YOTTAFLUX_WALLET_DB_H

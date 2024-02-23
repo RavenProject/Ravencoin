@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_RESTRICTEDASSETSDIALOG_H
-#define RAVEN_QT_RESTRICTEDASSETSDIALOG_H
+#ifndef YOTTAFLUX_QT_RESTRICTEDASSETSDIALOG_H
+#define YOTTAFLUX_QT_RESTRICTEDASSETSDIALOG_H
 
 #include "walletmodel.h"
 
@@ -73,4 +73,4 @@ private Q_SLOTS:
             void message(const QString &title, const QString &message, unsigned int style);
 };
 
-#endif // RAVEN_QT_RESTRICTEDASSETSSDIALOG_H
+#endif // YOTTAFLUX_QT_RESTRICTEDASSETSSDIALOG_H

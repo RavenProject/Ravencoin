@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_TRANSACTIONTABLEMODEL_H
-#define RAVEN_QT_TRANSACTIONTABLEMODEL_H
+#ifndef YOTTAFLUX_QT_TRANSACTIONTABLEMODEL_H
+#define YOTTAFLUX_QT_TRANSACTIONTABLEMODEL_H
 
 #include "yottafluxunits.h"
 
@@ -121,4 +121,4 @@ public Q_SLOTS:
     friend class TransactionTablePriv;
 };
 
-#endif // RAVEN_QT_TRANSACTIONTABLEMODEL_H
+#endif // YOTTAFLUX_QT_TRANSACTIONTABLEMODEL_H

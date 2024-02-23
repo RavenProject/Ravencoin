@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_PAYMENTREQUESTPLUS_H
-#define RAVEN_QT_PAYMENTREQUESTPLUS_H
+#ifndef YOTTAFLUX_QT_PAYMENTREQUESTPLUS_H
+#define YOTTAFLUX_QT_PAYMENTREQUESTPLUS_H
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
@@ -49,4 +49,4 @@ private:
     payments::PaymentDetails details;
 };
 
-#endif // RAVEN_QT_PAYMENTREQUESTPLUS_H
+#endif // YOTTAFLUX_QT_PAYMENTREQUESTPLUS_H

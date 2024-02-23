@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_TEST_FIXTURE_H
-#define RAVEN_WALLET_TEST_FIXTURE_H
+#ifndef YOTTAFLUX_WALLET_TEST_FIXTURE_H
+#define YOTTAFLUX_WALLET_TEST_FIXTURE_H
 
 #include "test/test_yottaflux.h"
 

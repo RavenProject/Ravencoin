@@ -78,7 +78,7 @@ files out-of-the-box. This is because the command line options specified in the
 init files take precedence over the configurations in
 `/etc/yottaflux/yottaflux.conf`. However, some init systems have their own
 configuration mechanisms that would allow for overriding the command line
-options specified in the init files (e.g. setting `RAVEND_DATADIR` for
+options specified in the init files (e.g. setting `YOTTAFLUXD_DATADIR` for
 OpenRC).
 
 ### macOS
@@ -120,7 +120,7 @@ use old versions of Upstart and do not supply the start-stop-daemon utility.
 Copy yottafluxd.init to /etc/init.d/yottafluxd. Test by running `service yottafluxd start`.
 
 Using this script, you can adjust the path and flags to the yottafluxd program by
-setting the RAVEND and FLAGS environment variables in the file
+setting the YOTTAFLUXD and FLAGS environment variables in the file
 /etc/sysconfig/yottafluxd. You can also use the DAEMONOPTS environment variable here.
 
 ### Mac OS X

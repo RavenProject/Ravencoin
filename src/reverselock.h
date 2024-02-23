@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_REVERSELOCK_H
-#define RAVEN_REVERSELOCK_H
+#ifndef YOTTAFLUX_REVERSELOCK_H
+#define YOTTAFLUX_REVERSELOCK_H
 
 /**
  * An RAII-style reverse lock. Unlocks on construction and locks on destruction.
@@ -32,4 +32,4 @@ private:
     Lock templock;
 };
 
-#endif // RAVEN_REVERSELOCK_H
+#endif // YOTTAFLUX_REVERSELOCK_H

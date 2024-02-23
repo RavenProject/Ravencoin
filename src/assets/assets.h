@@ -463,10 +463,10 @@ bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type);
 bool CheckReissueBurnTx(const CTxOut& txOut);
 
 //! issue asset scripts to make sure script meets the standards
-bool CheckIssueDataTx(const CTxOut& txOut); // OP_RAVEN_ASSET YAIQ (That is a Q as in Que not an O)
-bool CheckOwnerDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET YAIO
-bool CheckReissueDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET YAIR
-bool CheckTransferOwnerTx(const CTxOut& txOut);// OP_RAVEN_ASSET YAIT
+bool CheckIssueDataTx(const CTxOut& txOut); // OP_YOTTAFLUX_ASSET YAIQ (That is a Q as in Que not an O)
+bool CheckOwnerDataTx(const CTxOut& txOut);// OP_YOTTAFLUX_ASSET YAIO
+bool CheckReissueDataTx(const CTxOut& txOut);// OP_YOTTAFLUX_ASSET YAIR
+bool CheckTransferOwnerTx(const CTxOut& txOut);// OP_YOTTAFLUX_ASSET YAIT
 
 //! Check the Encoded hash and make sure it is either an IPFS hash or a OIP hash
 bool CheckEncoded(const std::string& hash, std::string& strError);

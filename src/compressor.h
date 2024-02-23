@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_COMPRESSOR_H
-#define RAVEN_COMPRESSOR_H
+#ifndef YOTTAFLUX_COMPRESSOR_H
+#define YOTTAFLUX_COMPRESSOR_H
 
 #include "primitives/transaction.h"
 #include "script/script.h"
@@ -119,4 +119,4 @@ public:
     }
 };
 
-#endif // RAVEN_COMPRESSOR_H
+#endif // YOTTAFLUX_COMPRESSOR_H

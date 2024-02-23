@@ -267,7 +267,7 @@ def main():
     # Check that the build was configured with wallet, utils, and yottafluxd
     enable_wallet = config["components"].getboolean("ENABLE_WALLET")
     enable_cli = config["components"].getboolean("ENABLE_UTILS")
-    enable_yottafluxd = config["components"].getboolean("ENABLE_RAVEND")
+    enable_yottafluxd = config["components"].getboolean("ENABLE_YOTTAFLUXD")
     if not (enable_wallet and enable_cli and enable_yottafluxd):
         print("No functional tests to run. Wallet, utils, and yottafluxd must all be enabled")
         print("Rerun `configure` with --enable-wallet, --with-cli and --with-daemon and rerun make")
@@ -376,9 +376,9 @@ def run_tests(test_list, src_dir, build_dir, exeext, tmpdir, use_term_control, j
         print("%sWARNING!%s There is a cache directory here: %s. If tests fail unexpectedly, try deleting the cache directory." % (BOLD[1], BOLD[0], cache_dir))
 
     #Set env vars
-    if "RAVEND" not in os.environ:
-        os.environ["RAVEND"] = build_dir + '/src/yottafluxd' + exeext
-        os.environ["RAVENCLI"] = build_dir + '/src/yottaflux-cli' + exeext
+    if "YOTTAFLUXD" not in os.environ:
+        os.environ["YOTTAFLUXD"] = build_dir + '/src/yottafluxd' + exeext
+        os.environ["YOTTAFLUXCLI"] = build_dir + '/src/yottaflux-cli' + exeext
 
     tests_dir = src_dir + '/test/functional/'
 

@@ -32,14 +32,14 @@ bench_bench_yottaflux_SOURCES = \
 
 nodist_bench_bench_yottaflux_SOURCES = $(GENERATED_BENCH_FILES)
 
-bench_bench_yottaflux_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
+bench_bench_yottaflux_CPPFLAGS = $(AM_CPPFLAGS) $(YOTTAFLUX_INCLUDES) $(EVENT_CLFAGS) $(EVENT_PTHREADS_CFLAGS) -I$(builddir)/bench/
 bench_bench_yottaflux_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 bench_bench_yottaflux_LDADD = \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBYOTTAFLUX_SERVER) \
+  $(LIBYOTTAFLUX_COMMON) \
+  $(LIBYOTTAFLUX_UTIL) \
+  $(LIBYOTTAFLUX_CONSENSUS) \
+  $(LIBYOTTAFLUX_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
@@ -47,20 +47,20 @@ bench_bench_yottaflux_LDADD = \
   $(LIBUNIVALUE)
 
 if ENABLE_ZMQ
-bench_bench_yottaflux_LDADD += $(LIBRAVEN_ZMQ) $(ZMQ_LIBS)
+bench_bench_yottaflux_LDADD += $(LIBYOTTAFLUX_ZMQ) $(ZMQ_LIBS)
 endif
 
 if ENABLE_WALLET
 bench_bench_yottaflux_SOURCES += bench/coin_selection.cpp
-bench_bench_yottaflux_LDADD += $(LIBRAVEN_WALLET) $(LIBRAVEN_CRYPTO)
+bench_bench_yottaflux_LDADD += $(LIBYOTTAFLUX_WALLET) $(LIBYOTTAFLUX_CRYPTO)
 endif
 
 bench_bench_yottaflux_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
 bench_bench_yottaflux_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
-CLEAN_RAVEN_BENCH = bench/*.gcda bench/*.gcno $(GENERATED_BENCH_FILES)
+CLEAN_YOTTAFLUX_BENCH = bench/*.gcda bench/*.gcno $(GENERATED_BENCH_FILES)
 
-CLEANFILES += $(CLEAN_RAVEN_BENCH)
+CLEANFILES += $(CLEAN_YOTTAFLUX_BENCH)
 
 bench/checkblock.cpp: bench/data/block566553.raw.h
 
@@ -70,7 +70,7 @@ bench: $(BENCH_BINARY) FORCE
 	$(BENCH_BINARY)
 
 yottaflux_bench_clean : FORCE
-	rm -f $(CLEAN_RAVEN_BENCH) $(bench_bench_yottaflux_OBJECTS) $(BENCH_BINARY)
+	rm -f $(CLEAN_YOTTAFLUX_BENCH) $(bench_bench_yottaflux_OBJECTS) $(BENCH_BINARY)
 
 %.raw.h: %.raw
 	@$(MKDIR_P) $(@D)

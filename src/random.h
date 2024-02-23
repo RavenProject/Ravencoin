@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_RANDOM_H
-#define RAVEN_RANDOM_H
+#ifndef YOTTAFLUX_RANDOM_H
+#define YOTTAFLUX_RANDOM_H
 
 #include "crypto/chacha20.h"
 #include "crypto/common.h"
@@ -167,4 +167,4 @@ bool Random_SanityCheck();
 /** Initialize the RNG. */
 void RandomInit();
 
-#endif // RAVEN_RANDOM_H
+#endif // YOTTAFLUX_RANDOM_H

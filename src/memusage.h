@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_MEMUSAGE_H
-#define RAVEN_MEMUSAGE_H
+#ifndef YOTTAFLUX_MEMUSAGE_H
+#define YOTTAFLUX_MEMUSAGE_H
 
 #include "indirectmap.h"
 
@@ -167,4 +167,4 @@ static inline size_t DynamicUsage(const std::unordered_map<X, Y, Z>& m)
 
 }
 
-#endif // RAVEN_MEMUSAGE_H
+#endif // YOTTAFLUX_MEMUSAGE_H

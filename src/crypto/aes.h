@@ -5,8 +5,8 @@
 //
 // C++ wrapper around ctaes, a constant-time AES implementation
 
-#ifndef RAVEN_CRYPTO_AES_H
-#define RAVEN_CRYPTO_AES_H
+#ifndef YOTTAFLUX_CRYPTO_AES_H
+#define YOTTAFLUX_CRYPTO_AES_H
 
 extern "C" {
 #include "crypto/ctaes/ctaes.h"
@@ -116,4 +116,4 @@ private:
     unsigned char iv[AES_BLOCKSIZE];
 };
 
-#endif // RAVEN_CRYPTO_AES_H
+#endif // YOTTAFLUX_CRYPTO_AES_H

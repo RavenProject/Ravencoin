@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CHECKPOINTS_H
-#define RAVEN_CHECKPOINTS_H
+#ifndef YOTTAFLUX_CHECKPOINTS_H
+#define YOTTAFLUX_CHECKPOINTS_H
 
 #include "uint256.h"
 
@@ -25,4 +25,4 @@ CBlockIndex* GetLastCheckpoint(const CCheckpointData& data);
 
 } //namespace Checkpoints
 
-#endif // RAVEN_CHECKPOINTS_H
+#endif // YOTTAFLUX_CHECKPOINTS_H

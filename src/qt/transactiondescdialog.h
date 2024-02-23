@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_TRANSACTIONDESCDIALOG_H
-#define RAVEN_QT_TRANSACTIONDESCDIALOG_H
+#ifndef YOTTAFLUX_QT_TRANSACTIONDESCDIALOG_H
+#define YOTTAFLUX_QT_TRANSACTIONDESCDIALOG_H
 
 #include <QDialog>
 
@@ -29,4 +29,4 @@ private:
     Ui::TransactionDescDialog *ui;
 };
 
-#endif // RAVEN_QT_TRANSACTIONDESCDIALOG_H
+#endif // YOTTAFLUX_QT_TRANSACTIONDESCDIALOG_H

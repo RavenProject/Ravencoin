@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_RPCSERVER_H
-#define RAVEN_RPCSERVER_H
+#ifndef YOTTAFLUX_RPCSERVER_H
+#define YOTTAFLUX_RPCSERVER_H
 
 #include "amount.h"
 #include "rpc/protocol.h"
@@ -200,4 +200,4 @@ std::string JSONRPCExecBatch(const JSONRPCRequest& jreq, const UniValue& vReq);
 // Retrieves any serialization flags requested in command line argument
 int RPCSerializationFlags();
 
-#endif // RAVEN_RPCSERVER_H
+#endif // YOTTAFLUX_RPCSERVER_H

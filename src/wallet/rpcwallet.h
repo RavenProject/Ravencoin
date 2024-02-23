@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_RPCWALLET_H
-#define RAVEN_WALLET_RPCWALLET_H
+#ifndef YOTTAFLUX_WALLET_RPCWALLET_H
+#define YOTTAFLUX_WALLET_RPCWALLET_H
 
 #include <string>
 
@@ -26,4 +26,4 @@ std::string HelpRequiringPassphrase(CWallet *);
 void EnsureWalletIsUnlocked(CWallet *);
 bool EnsureWalletIsAvailable(CWallet *, bool avoidException);
 
-#endif //RAVEN_WALLET_RPCWALLET_H
+#endif //YOTTAFLUX_WALLET_RPCWALLET_H

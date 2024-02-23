@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_VALIDATION_H
-#define RAVEN_VALIDATION_H
+#ifndef YOTTAFLUX_VALIDATION_H
+#define YOTTAFLUX_VALIDATION_H
 
 #if defined(HAVE_CONFIG_H)
 #include "config/yottaflux-config.h"
@@ -615,4 +615,4 @@ bool IsRestrictedActive(unsigned int nBlockNumber);
 CAssetsCache* GetCurrentAssetCache();
 /** YAI END */
 
-#endif // RAVEN_VALIDATION_H
+#endif // YOTTAFLUX_VALIDATION_H

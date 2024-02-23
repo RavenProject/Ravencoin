@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_FEES_H
-#define RAVEN_WALLET_FEES_H
+#ifndef YOTTAFLUX_WALLET_FEES_H
+#define YOTTAFLUX_WALLET_FEES_H
 
 #include "amount.h"
 
@@ -32,4 +32,4 @@ CAmount GetMinimumFee(unsigned int nTxBytes, const CCoinControl& coin_control, c
  */
 CFeeRate GetDiscardRate(const CBlockPolicyEstimator& estimator);
 
-#endif // RAVEN_WALLET_FEES_H
+#endif // YOTTAFLUX_WALLET_FEES_H

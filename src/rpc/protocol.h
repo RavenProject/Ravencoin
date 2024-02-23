@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_RPCPROTOCOL_H
-#define RAVEN_RPCPROTOCOL_H
+#ifndef YOTTAFLUX_RPCPROTOCOL_H
+#define YOTTAFLUX_RPCPROTOCOL_H
 
 #include "fs.h"
 
@@ -102,4 +102,4 @@ void DeleteAuthCookie();
 /** Parse JSON-RPC batch reply into a vector */
 std::vector<UniValue> JSONRPCProcessBatchReply(const UniValue &in, size_t num);
 
-#endif // RAVEN_RPCPROTOCOL_H
+#endif // YOTTAFLUX_RPCPROTOCOL_H

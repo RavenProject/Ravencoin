@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_BENCH_BENCH_H
-#define RAVEN_BENCH_BENCH_H
+#ifndef YOTTAFLUX_BENCH_BENCH_H
+#define YOTTAFLUX_BENCH_BENCH_H
 
 #include <functional>
 #include <limits>
@@ -78,4 +78,4 @@ namespace benchmark {
 #define BENCHMARK(n) \
     benchmark::BenchRunner BOOST_PP_CAT(bench_, BOOST_PP_CAT(__LINE__, n))(BOOST_PP_STRINGIZE(n), n);
 
-#endif // RAVEN_BENCH_BENCH_H
+#endif // YOTTAFLUX_BENCH_BENCH_H

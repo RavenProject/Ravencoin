@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_HTTPSERVER_H
-#define RAVEN_HTTPSERVER_H
+#ifndef YOTTAFLUX_HTTPSERVER_H
+#define YOTTAFLUX_HTTPSERVER_H
 
 #include <string>
 #include <stdint.h>
@@ -151,4 +151,4 @@ private:
 
 std::string urlDecode(const std::string &urlEncoded);
 
-#endif // RAVEN_HTTPSERVER_H
+#endif // YOTTAFLUX_HTTPSERVER_H
