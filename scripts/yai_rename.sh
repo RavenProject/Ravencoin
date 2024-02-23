@@ -1,12 +1,14 @@
 #!/bin/bash
 
-find -type f -not -path "./.git/*" -exec sed -i 's/yottaflux/yottaflux/g' {} +
-find -type f -not -path "./.git/*" -exec sed -i 's/Yottaflux/Yottaflux/g' {} +
-find -type f -not -path "./.git/*" -exec sed -i 's/YOTTAFLUX/YOTTAFLUX/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i 's/ravencoin/yottaflux/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/Ravencoin/Yottaflux/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/RAVENCOIN/YOTTAFLUX/g' {} +
 
-find -type f -not -path "./.git/*" -exec sed -i 's/yottaflux/yottaflux/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/RavenProject/yottaflux/g' {} +
 
-find -type f -not -path "./.git/*" -exec sed -i 's/Ravencoin Core developers/Ravencoin Core developers/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/yottaflux\/rips/RavenProject\/rips/g' {} +
+
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's/Yottaflux Core developers/Ravencoin Core developers/g' {} +
 
 
 
