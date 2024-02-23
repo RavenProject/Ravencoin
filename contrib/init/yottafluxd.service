@@ -1,0 +1,22 @@
+[Unit]
+Description=Yottaflux's distributed currency daemon
+After=network.target
+
+[Service]
+User=yottaflux
+Group=yottaflux
+
+Type=forking
+PIDFile=/var/lib/yottafluxd/yottafluxd.pid
+ExecStart=/usr/bin/yottafluxd -daemon -pid=/var/lib/yottafluxd/yottafluxd.pid \
+-conf=/etc/yottaflux/yottaflux.conf -datadir=/var/lib/yottafluxd -disablewallet
+
+Restart=always
+PrivateTmp=true
+TimeoutStopSec=60s
+TimeoutStartSec=2s
+StartLimitInterval=120s
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target

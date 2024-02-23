@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/yottaflux/.yottaflux" ]; then
+	YOTTAFLUXD_DEFAULT_DATADIR="/var/lib/yottaflux/.yottaflux"
+else
+	YOTTAFLUXD_DEFAULT_DATADIR="/var/lib/yottafluxd"
+fi
+
+YOTTAFLUXD_CONFIGFILE=${YOTTAFLUXD_CONFIGFILE:-/etc/yottaflux/yottaflux.conf}
+YOTTAFLUXD_PIDDIR=${YOTTAFLUXD_PIDDIR:-/var/run/yottafluxd}
+YOTTAFLUXD_PIDFILE=${YOTTAFLUXD_PIDFILE:-${YOTTAFLUXD_PIDDIR}/yottafluxd.pid}
+YOTTAFLUXD_DATADIR=${YOTTAFLUXD_DATADIR:-${YOTTAFLUXD_DEFAULT_DATADIR}}
+YOTTAFLUXD_USER=${YOTTAFLUXD_USER:-${YOTTAFLUX_USER:-yottaflux}}
+YOTTAFLUXD_GROUP=${YOTTAFLUXD_GROUP:-yottaflux}
+YOTTAFLUXD_BIN=${YOTTAFLUXD_BIN:-/usr/bin/yottafluxd}
+YOTTAFLUXD_NICE=${YOTTAFLUXD_NICE:-${NICELEVEL:-0}}
+YOTTAFLUXD_OPTS="${YOTTAFLUXD_OPTS:-${YOTTAFLUX_OPTS}}"
+
+name="Yottaflux Daemon"
+description="Yottaflux cryptocurrency P2P network daemon"
+
+command="/usr/bin/yottafluxd"
+command_args="-pid=\"${YOTTAFLUXD_PIDFILE}\" \
+		-conf=\"${YOTTAFLUXD_CONFIGFILE}\" \
+		-datadir=\"${YOTTAFLUXD_DATADIR}\" \
+		-daemon \
+		${YOTTAFLUXD_OPTS}"
+
+required_files="${YOTTAFLUXD_CONFIGFILE}"
+start_stop_daemon_args="-u ${YOTTAFLUXD_USER} \
+			-N ${YOTTAFLUXD_NICE} -w 2000"
+pidfile="${YOTTAFLUXD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${YOTTAFLUXD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${YOTTAFLUXD_USER}:${YOTTAFLUXD_GROUP}" \
+	"${YOTTAFLUXD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${YOTTAFLUXD_USER}:${YOTTAFLUXD_GROUP}" \
+	"${YOTTAFLUXD_PIDDIR}"
+
+	checkpath -f \
+	-o ${YOTTAFLUXD_USER}:${YOTTAFLUXD_GROUP} \
+	-m 0660 \
+	${YOTTAFLUXD_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${YOTTAFLUXD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run yottafluxd."
+		eerror "The setting must appear in ${YOTTAFLUXD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Yottaflux Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

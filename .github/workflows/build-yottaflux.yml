@@ -1,0 +1,113 @@
+name: Build Yottaflux
+
+on:
+  push:
+    branches:
+      - release*
+  pull_request:
+    branches:
+      - master
+      - develop
+      - release*
+#    paths-ignore:
+#      - 'binaries/**'
+#      - 'community/**'
+#      - 'contrib/**'
+#      - 'doc/**'
+#      - 'roadmap/**'
+#      - 'share/**'
+#      - 'static-builds/**'
+#      - 'whitepaper/**'
+#      - '*.md'
+
+env:
+  SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
+
+jobs:
+  check-jobs:
+      # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-18.04
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          # All of these options are optional, so you can remove them if you are happy with the defaults
+          concurrent_skipping: 'never'
+          skip_after_successful_duplicate: 'true'
+          paths_ignore: '[
+                          "binaries/**",
+                          "community/**",
+                          "contrib/**",
+                          "doc/**",
+                          "roadmap/**",
+                          "share/**",
+                          "static-builds/**",
+                          "whitepaper/**",
+                          "**/*.md"
+                          ]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+
+  build:
+    needs: check-jobs
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet', 'aarch64', 'aarch64-disable-wallet' ]
+#       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'osx', 'arm32v7', 'arm32v7-disable-wallet' ]
+
+    steps:
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Checkout the Code
+      uses: actions/checkout@v1
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Install Build Tools
+      run: sudo ${SCRIPTS}/00-install-deps.sh ${{ MATRIX.OS }}
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Cache dependencies.
+      uses: actions/cache@v2
+      with:
+       path: |
+        ${{ GITHUB.WORKSPACE }}/depends/built
+        ${{ GITHUB.WORKSPACE }}/depends/sources
+        ${{ GITHUB.WORKSPACE }}/depends/work
+       key: ${{ MATRIX.OS }}
+      
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Build dependencies.
+      run: ${SCRIPTS}/02-copy-build-dependencies.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Add Dependencies to the System PATH
+      run: ${SCRIPTS}/03-export-path.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Build Config
+      run: cd ${{ GITHUB.WORKSPACE }} && ./autogen.sh
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Configure Build
+      run: ${SCRIPTS}/04-configure-build.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Build Yottaflux
+      run: make -j2
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Check Binary Security
+      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Package Up the Build
+      run: ${SCRIPTS}/06-package.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
+    
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Upload Artifacts to Job
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ MATRIX.OS }}
+        path: ${{ GITHUB.WORKSPACE }}/release

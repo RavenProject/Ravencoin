@@ -1,0 +1,6 @@
+usr/local/bin/yottaflux-qt usr/bin
+share/pixmaps/yottaflux32.xpm usr/share/pixmaps
+share/pixmaps/yottaflux16.xpm usr/share/pixmaps
+share/pixmaps/yottaflux128.png usr/share/pixmaps
+debian/yottaflux-qt.desktop usr/share/applications
+debian/yottaflux-qt.protocol usr/share/kde4/services/

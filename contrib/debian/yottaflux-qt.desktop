@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Yottaflux
+Comment=Connect to the Yottaflux P2P Network
+Comment[de]=Verbinde mit dem Yottaflux peer-to-peer Netzwerk
+Comment[fr]=Yottaflux, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=Yottaflux, eşten eşe kriptografik sanal para birimi
+Exec=yottaflux-qt %u
+Terminal=false
+Type=Application
+Icon=yottaflux128
+MimeType=x-scheme-handler/yottaflux;
+Categories=Office;Finance;

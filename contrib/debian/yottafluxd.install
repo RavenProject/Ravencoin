@@ -1,0 +1,2 @@
+usr/local/bin/yottafluxd usr/bin
+usr/local/bin/yottaflux-cli usr/bin

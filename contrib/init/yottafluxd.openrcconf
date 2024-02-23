@@ -1,0 +1,33 @@
+# /etc/conf.d/yottafluxd: config file for /etc/init.d/yottafluxd
+
+# Config file location
+#YOTTAFLUXD_CONFIGFILE="/etc/yottaflux/yottaflux.conf"
+
+# What directory to write pidfile to?  (created and owned by $YOTTAFLUXD_USER)
+#YOTTAFLUXD_PIDDIR="/var/run/yottafluxd"
+
+# What filename to give the pidfile
+#YOTTAFLUXD_PIDFILE="${YOTTAFLUXD_PIDDIR}/yottafluxd.pid"
+
+# Where to write yottafluxd data (be mindful that the blockchain is large)
+#YOTTAFLUXD_DATADIR="/var/lib/yottafluxd"
+
+# User and group to own yottafluxd process
+#YOTTAFLUXD_USER="yottaflux"
+#YOTTAFLUXD_GROUP="yottaflux"
+
+# Path to yottafluxd executable
+#YOTTAFLUXD_BIN="/usr/bin/yottafluxd"
+
+# Nice value to run yottafluxd under
+#YOTTAFLUXD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#YOTTAFLUXD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for yottafluxd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+YOTTAFLUXD_SIGTERM_TIMEOUT=60

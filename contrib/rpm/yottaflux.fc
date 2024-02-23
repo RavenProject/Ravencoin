@@ -1,0 +1,8 @@
+/usr/bin/yottaflux-cli		--	gen_context(system_u:object_r:yottaflux_exec_t,s0)
+/usr/sbin/yottafluxd		--	gen_context(system_u:object_r:yottaflux_exec_t,s0)
+/usr/lib(64)?/yottaflux/yottafluxd		--	gen_context(system_u:object_r:yottaflux_exec_t,s0)
+
+/etc/yottaflux(/.*)?		gen_context(system_u:object_r:yottaflux_conf_t,s0)
+/var/lib/yottaflux(/.*)?		gen_context(system_u:object_r:yottaflux_var_lib_t,s0)
+
+(/var)?/run/yottafluxd(/.*)?   gen_context(system_u:object_r:yottaflux_var_run_t,s0)
