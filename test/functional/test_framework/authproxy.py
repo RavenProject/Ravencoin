@@ -1,7 +1,7 @@
 # Copyright (c) 2011 Jeff Garzik
 # Previous copyright, from python-jsonrpc/jsonrpc/proxy.py:
 # Copyright (c) 2007 Jan-Klaas Kollhof
-# Copyright (c) 2017-2020 The Ravencoin Core developers
+# Copyright (c) 2017-2020 The Raven Core developers
 #
 # This file is part of jsonrpc.
 #
