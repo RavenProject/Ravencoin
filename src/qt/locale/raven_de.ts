@@ -945,8 +945,8 @@
         <translation>Adresse:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>Die RVN-Adresse, die dieses Asset halten wird (Sie müssen diese Adresse besitzen). Das Feld Leer lassen, um eine neue Adresse zu erstellen.</translation>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>Die YAI-Adresse, die dieses Asset halten wird (Sie müssen diese Adresse besitzen). Das Feld Leer lassen, um eine neue Adresse zu erstellen.</translation>
     </message>
     <message>
         <source>Verifier String:</source>
@@ -1081,8 +1081,8 @@
         <translation>Kontostand:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>
@@ -1727,8 +1727,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>Benutzerdefinierte Absicht bzw. Verwendungszweck der Transaktion</translation>
     </message>
     <message>
-        <source>The asset (or RVN) removed or added to balance.</source>
-        <translation>Das Asset (oder RVN), das entfernt oder zum Bestand hinzugefügt wurde.</translation>
+        <source>The asset (or YAI) removed or added to balance.</source>
+        <translation>Das Asset (oder YAI), das entfernt oder zum Bestand hinzugefügt wurde.</translation>
     </message>
 </context>
 <context>
@@ -1805,8 +1805,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>&amp;Währungseinheit:</translation>
     </message>
     <message>
-        <source>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</source>
-        <translation>Wählen Sie, in welcher Währung der Echtzeitwert von RVN angezeigt wird (z.B.: BTC/RVN).</translation>
+        <source>Choose which currency to display the realtime value of YAI in (ie: BTC/YAI).</source>
+        <translation>Wählen Sie, in welcher Währung der Echtzeitwert von YAI angezeigt wird (z.B.: BTC/YAI).</translation>
     </message>
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
@@ -2048,8 +2048,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>Aktueller Gesamtbetrag aus obigen Kategorien</translation>
     </message>
     <message>
-        <source>RVN Balances</source>
-        <translation>RVN Kontostände</translation>
+        <source>YAI Balances</source>
+        <translation>YAI Kontostände</translation>
     </message>
     <message>
         <source>Your current balance in watch-only addresses</source>
@@ -2693,8 +2693,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>&amp;Assets verschicken</translation>
     </message>
     <message>
-        <source>Transfer assets to RVN addresses</source>
-        <translation>Assets an RVN Adressen verschicken</translation>
+        <source>Transfer assets to YAI addresses</source>
+        <translation>Assets an YAI Adressen verschicken</translation>
     </message>
     <message>
         <source>&amp;Manage Assets</source>
@@ -3251,8 +3251,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>Adresse:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>Die RVN-Adresse, die dieses Asset halten wird (Sie müssen diese Adresse besitzen). Das Feld leer lassen, um eine neue Adresse zu erstellen.</translation>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>Die YAI-Adresse, die dieses Asset halten wird (Sie müssen diese Adresse besitzen). Das Feld leer lassen, um eine neue Adresse zu erstellen.</translation>
     </message>
     <message>
         <source>Verifier String:</source>
@@ -3359,8 +3359,8 @@ Sie sind nicht wiederherstellbar!</translation>
         <translation>Kontostand:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123,456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123,456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>

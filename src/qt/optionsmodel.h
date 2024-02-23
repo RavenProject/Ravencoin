@@ -96,10 +96,10 @@ private:
     QString strThirdPartyTxUrls;
     QString strIpfsUrl;
     bool fCoinControlFeatures;
-    /** RVN START*/
+    /** YAI START*/
     bool fCustomFeeFeatures;
     bool fDarkModeEnabled;
-    /** RVN END*/
+    /** YAI END*/
     /* settings that were overridden by command-line */
     QString strOverriddenByCommandLine;
 

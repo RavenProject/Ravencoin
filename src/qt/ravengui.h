@@ -127,7 +127,7 @@ private:
     QAction *openAction = nullptr;
     QAction *showHelpMessageAction = nullptr;
 
-    /** RVN START */
+    /** YAI START */
     QAction *transferAssetAction = nullptr;
     QAction *createAssetAction = nullptr;
     QAction *manageAssetAction = nullptr;
@@ -148,7 +148,7 @@ private:
     QLabel *labelToolbar = nullptr;
     QToolBar *m_toolbar = nullptr;
 
-    /** RVN END */
+    /** YAI END */
 
     QSystemTrayIcon *trayIcon = nullptr;
     QMenu *trayIconMenu = nullptr;
@@ -269,13 +269,13 @@ private Q_SLOTS:
     /** Show open dialog */
     void openClicked();
 
-    /** RVN START */
+    /** YAI START */
     /** Switch to assets page */
     void gotoAssetsPage();
     void gotoCreateAssetsPage();
     void gotoManageAssetsPage();
     void gotoRestrictedAssetsPage();
-    /** RVN END */
+    /** YAI END */
 
 #endif // ENABLE_WALLET
     /** Show configuration dialog */

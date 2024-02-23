@@ -341,7 +341,7 @@
                     <enum>Qt::ActionsContextMenu</enum>
                    </property>
                    <property name="text">
-                    <string notr="true">0.00 RVN</string>
+                    <string notr="true">0.00 YAI</string>
                    </property>
                    <property name="textInteractionFlags">
                     <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -421,7 +421,7 @@
                     <enum>Qt::ActionsContextMenu</enum>
                    </property>
                    <property name="text">
-                    <string notr="true">0.00 RVN</string>
+                    <string notr="true">0.00 YAI</string>
                    </property>
                    <property name="textInteractionFlags">
                     <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -472,7 +472,7 @@
                     <enum>Qt::ActionsContextMenu</enum>
                    </property>
                    <property name="text">
-                    <string notr="true">0.00 RVN</string>
+                    <string notr="true">0.00 YAI</string>
                    </property>
                    <property name="textInteractionFlags">
                     <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -501,7 +501,7 @@
                     <enum>Qt::ActionsContextMenu</enum>
                    </property>
                    <property name="text">
-                    <string notr="true">0.00 RVN</string>
+                    <string notr="true">0.00 YAI</string>
                    </property>
                    <property name="textInteractionFlags">
                     <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
@@ -1267,7 +1267,7 @@
             <cursorShape>IBeamCursor</cursorShape>
            </property>
            <property name="text">
-            <string notr="true">123.456 RVN</string>
+            <string notr="true">123.456 YAI</string>
            </property>
            <property name="textInteractionFlags">
             <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>

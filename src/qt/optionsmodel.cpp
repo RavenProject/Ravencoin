@@ -76,7 +76,7 @@ void OptionsModel::Init(bool resetSettings)
 
     // Display
     if (!settings.contains("nDisplayUnit"))
-        settings.setValue("nDisplayUnit", RavenUnits::RVN);
+        settings.setValue("nDisplayUnit", RavenUnits::YAI);
     nDisplayUnit = settings.value("nDisplayUnit").toInt();
     
     if (!settings.contains("nDisplayCurrencyIndex"))

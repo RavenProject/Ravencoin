@@ -600,7 +600,7 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         case Amount:
             return formatTxAmount(rec, true, RavenUnits::separatorAlways);
         case AssetName:
-            if (rec->assetName != "RVN")
+            if (rec->assetName != "YAI")
                return QString::fromStdString(rec->assetName);
             else
                return QString(RavenUnits::name(walletModel->getOptionsModel()->getDisplayUnit()));
@@ -650,7 +650,7 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
         }
         if(index.column() == AssetName)
         {
-            if (rec->assetName != "RVN")
+            if (rec->assetName != "YAI")
                return platformStyle->AssetTxColor();
         }
         break;
@@ -712,7 +712,7 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
     case AssetNameRole:
         {
             QString assetName;
-            if (rec->assetName != "RVN")
+            if (rec->assetName != "YAI")
                assetName.append(QString::fromStdString(rec->assetName));
             else
                assetName.append(QString(RavenUnits::name(walletModel->getOptionsModel()->getDisplayUnit())));
@@ -752,7 +752,7 @@ QVariant TransactionTableModel::headerData(int section, Qt::Orientation orientat
             case Amount:
                 return tr("Amount removed from or added to balance.");
             case AssetName:
-                return tr("The asset (or RVN) removed or added to balance.");
+                return tr("The asset (or YAI) removed or added to balance.");
             }
         }
     }

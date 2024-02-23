@@ -637,7 +637,7 @@
          <item>
           <widget class="QValueComboBox" name="currencyUnitIndex">
            <property name="toolTip">
-            <string>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</string>
+            <string>Choose which currency to display the realtime value of YAI in (ie: BTC/YAI).</string>
            </property>
           </widget>
          </item>

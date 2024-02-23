@@ -37,10 +37,10 @@ public:
     //! Fee estimation mode to control arguments to estimateSmartFee
     FeeEstimateMode m_fee_mode;
 
-    /** RVN START */
+    /** YAI START */
     //! Name of the asset that is selected, used when sending assets with coincontrol
     std::string strAssetSelected;
-    /** RVN END */
+    /** YAI END */
 
     CCoinControl()
     {

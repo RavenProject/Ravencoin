@@ -944,8 +944,8 @@
         <translation>Adres:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>Adres RVN, na którym będzie przechowywane to aktywo.
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>Adres YAI, na którym będzie przechowywane to aktywo.
 (Musisz być jego właścicielem). Zostaw puste miejsce jeśli chcesz utworzyć nowy adres. </translation>
     </message>
     <message>
@@ -1069,8 +1069,8 @@
         <translation>Saldo:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>
@@ -1668,8 +1668,8 @@ Zalecane działanie: Zsynchronizuj całkowicie portfel zanim wyślesz transakcj�
         <translation>Zdefiniowany przez użytkownika cel transakcji.</translation>
     </message>
     <message>
-        <source>The asset (or RVN) removed or added to balance.</source>
-        <translation>Aktywo (lub RVN) usunięte lub dodane do salda.</translation>
+        <source>The asset (or YAI) removed or added to balance.</source>
+        <translation>Aktywo (lub YAI) usunięte lub dodane do salda.</translation>
     </message>
 </context>
 <context>
@@ -1969,8 +1969,8 @@ Zalecane działanie: Zsynchronizuj całkowicie portfel zanim wyślesz transakcj�
         <translation>Twoje obecne saldo</translation>
     </message>
     <message>
-        <source>RVN Balances</source>
-        <translation>Salda RVN</translation>
+        <source>YAI Balances</source>
+        <translation>Salda YAI</translation>
     </message>
     <message>
         <source>Your current balance in watch-only addresses</source>
@@ -3056,8 +3056,8 @@ Zalecane działanie: Zsynchronizuj całkowicie portfel zanim wyślesz transakcj�
         <translation>Saldo:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>

@@ -231,7 +231,7 @@ public:
             5.7       // * estimated number of transactions per second after that timestamp
         };
 
-        /** RVN Start **/
+        /** YAI Start **/
         // Burn Amounts
         nIssueAssetBurnAmount = 500 * COIN;
         nReissueAssetBurnAmount = 100 * COIN;
@@ -270,7 +270,7 @@ public:
 
         nKAAAWWWPOWActivationTime = 1588788000; // UTC: Wed May 06 2020 18:00:00
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
-        /** RVN End **/
+        /** YAI End **/
     }
 };
 
@@ -452,7 +452,7 @@ public:
             0.02        // * estimated number of transactions per second after that timestamp
         };
 
-        /** RVN Start **/
+        /** YAI Start **/
         // Burn Amounts
         nIssueAssetBurnAmount = 500 * COIN;
         nReissueAssetBurnAmount = 100 * COIN;
@@ -491,7 +491,7 @@ public:
 
         nKAAAWWWPOWActivationTime = 1585159200; //Wed Mar 25 2020 18:00:00 UTC
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
-        /** RVN End **/
+        /** YAI End **/
     }
 };
 
@@ -654,7 +654,7 @@ public:
         // Raven BIP44 cointype in regtest
         nExtCoinType = 1;
 
-        /** RVN Start **/
+        /** YAI Start **/
         // Burn Amounts
         nIssueAssetBurnAmount = 500 * COIN;
         nReissueAssetBurnAmount = 100 * COIN;
@@ -696,7 +696,7 @@ public:
         // If you are looking to test the kawpow hashing function in regtest. You will need to change this number
         nKAAAWWWPOWActivationTime = 3582830167;
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
-        /** RVN End **/
+        /** YAI End **/
     }
 };
 

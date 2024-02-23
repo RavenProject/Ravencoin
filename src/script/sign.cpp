@@ -83,7 +83,7 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
         return false;
     case TX_RESTRICTED_ASSET_DATA:
         return false;
-    /** RVN START */
+    /** YAI START */
     case TX_NEW_ASSET:
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
@@ -118,7 +118,7 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
             ret.push_back(ToByteVector(vch));
         }
         return true;
-    /** RVN END */
+    /** YAI END */
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
         return Sign1(keyID, creator, scriptPubKey, ret, sigversion);

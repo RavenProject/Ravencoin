@@ -599,7 +599,7 @@ UniValue issueunique(const JSONRPCRequest& request)
                 "root_name must be an asset you own.\n"
                 "An asset will be created for each element of asset_tags.\n"
                 "If provided ipfs_hashes must be the same length as asset_tags.\n"
-                "Five (5) RVN will be burned for each asset created.\n"
+                "Five (5) YAI will be burned for each asset created.\n"
 
                 "\nArguments:\n"
                 "1. \"root_name\"             (string, required) name of the asset the unique asset(s) are being issued under\n"
@@ -1157,7 +1157,7 @@ UniValue transfer(const JSONRPCRequest& request)
                 "3. \"to_address\"               (string, required) address to send the asset to\n"
                 "4. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "5. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
-                "6. \"change_address\"       (string, optional, default = \"\") the transactions RVN change will be sent to this address\n"
+                "6. \"change_address\"       (string, optional, default = \"\") the transactions YAI change will be sent to this address\n"
                 "7. \"asset_change_address\"     (string, optional, default = \"\") the transactions Asset change will be sent to this address\n"
 
                 "\nResult:\n"
@@ -1230,7 +1230,7 @@ UniValue transfer(const JSONRPCRequest& request)
 
     CTxDestination yai_change_dest = DecodeDestination(yai_change_address);
     if (!yai_change_address.empty() && !IsValidDestination(yai_change_dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + yai_change_address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("YAI change address must be a valid address. Invalid address: ") + yai_change_address);
 
     CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
     if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
@@ -1283,7 +1283,7 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
             "4. \"to_address\"               (string, required) address to send the asset to\n"
             "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
             "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
-            "7. \"yai_change_address\"       (string, optional, default = \"\") the transactions RVN change will be sent to this address\n"
+            "7. \"yai_change_address\"       (string, optional, default = \"\") the transactions YAI change will be sent to this address\n"
             "8. \"asset_change_address\"     (string, optional, default = \"\") the transactions Asset change will be sent to this address\n"
 
             "\nResult:\n"
@@ -1361,7 +1361,7 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
     CTxDestination yai_change_dest = DecodeDestination(yai_change_address);
     if (!yai_change_address.empty() && !IsValidDestination(yai_change_dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + yai_change_address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("YAI change address must be a valid address. Invalid address: ") + yai_change_address);
 
     CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
     if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
@@ -1436,7 +1436,7 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
                 "4. \"to_address\"               (string, required) address to send the asset to\n"
                 "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
-                "7. \"yai_change_address\"       (string, optional, default = \"\") the transaction RVN change will be sent to this address\n"
+                "7. \"yai_change_address\"       (string, optional, default = \"\") the transaction YAI change will be sent to this address\n"
                 "8. \"asset_change_address\"     (string, optional, default = \"\") the transaction Asset change will be sent to this address\n"
 
                 "\nResult:\n"
@@ -1505,7 +1505,7 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
 
     CTxDestination yai_change_dest = DecodeDestination(yai_change_address);
     if (!yai_change_address.empty() && !IsValidDestination(yai_change_dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + yai_change_address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("YAI change address must be a valid address. Invalid address: ") + yai_change_address);
 
     CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
     if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
@@ -2028,7 +2028,7 @@ UniValue listtagsforaddress(const JSONRPCRequest &request)
     // Check to make sure the given from address is valid
     CTxDestination dest = DecodeDestination(address);
     if (!IsValidDestination(dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid RVN address: ") + address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid YAI address: ") + address);
 
     std::vector<std::string> qualifiers;
 
@@ -2121,7 +2121,7 @@ UniValue listaddressrestrictions(const JSONRPCRequest& request)
     // Check to make sure the given from address is valid
     CTxDestination dest = DecodeDestination(address);
     if (!IsValidDestination(dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid RVN address: ") + address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid YAI address: ") + address);
 
     std::vector<std::string> restrictions;
 
@@ -2218,7 +2218,7 @@ UniValue checkaddresstag(const JSONRPCRequest& request)
                 "\nChecks to see if an address has the given tag\n"
 
                 "\nArguments:\n"
-                "1. \"address\"          (string, required) the RVN address to search\n"
+                "1. \"address\"          (string, required) the YAI address to search\n"
                 "1. \"tag_name\"         (string, required) the tag to search\n"
 
                 "\nResult:\n"
@@ -2245,7 +2245,7 @@ UniValue checkaddresstag(const JSONRPCRequest& request)
     // Check to make sure the given from address is valid
     CTxDestination dest = DecodeDestination(address);
     if (!IsValidDestination(dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid RVN address: ") + address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid YAI address: ") + address);
 
     return passets->CheckForAddressQualifier(qualifier_name, address);
 }
@@ -2259,7 +2259,7 @@ UniValue checkaddressrestriction(const JSONRPCRequest& request)
                 "\nChecks to see if an address has been frozen by the given restricted asset\n"
 
                 "\nArguments:\n"
-                "1. \"address\"          (string, required) the RVN address to search\n"
+                "1. \"address\"          (string, required) the YAI address to search\n"
                 "1. \"restricted_name\"   (string, required) the restricted asset to search\n"
 
                 "\nResult:\n"
@@ -2285,7 +2285,7 @@ UniValue checkaddressrestriction(const JSONRPCRequest& request)
     // Check to make sure the given from address is valid
     CTxDestination dest = DecodeDestination(address);
     if (!IsValidDestination(dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid RVN address: ") + address);
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Not valid YAI address: ") + address);
 
     return passets->CheckForAddressRestriction(restricted_name, address);
 }

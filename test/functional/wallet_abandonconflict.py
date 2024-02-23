@@ -134,13 +134,13 @@ class AbandonConflictTest(RavenTestFramework):
         connect_nodes(self.nodes[0], 1)
         sync_blocks(self.nodes)
 
-        # Verify that B and C's 10 RVN outputs are available for spending again because AB1 is now conflicted
+        # Verify that B and C's 10 YAI outputs are available for spending again because AB1 is now conflicted
         new_balance = self.nodes[0].getbalance()
         assert_equal(new_balance, balance + Decimal("20"))
         balance = new_balance
 
         # There is currently a minor bug around this and so this test doesn't work.  See Issue #7315
-        # Invalidate the block with the double spend and B's 10 RVN output should no longer be available
+        # Invalidate the block with the double spend and B's 10 YAI output should no longer be available
         # Don't think C's should either
         self.nodes[0].invalidateblock(self.nodes[0].getbestblockhash())
         new_balance = self.nodes[0].getbalance()

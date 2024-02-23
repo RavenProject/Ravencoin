@@ -16,12 +16,12 @@
 #include <unordered_map>
 #include <list>
 
-#define RVN_R 114
-#define RVN_V 118
-#define RVN_N 110
-#define RVN_Q 113
-#define RVN_T 116
-#define RVN_O 111
+#define YAI_R 114
+#define YAI_V 118
+#define YAI_N 110
+#define YAI_Q 113
+#define YAI_T 116
+#define YAI_O 111
 
 #define DEFAULT_UNITS 0
 #define DEFAULT_REISSUABLE 1
@@ -463,10 +463,10 @@ bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type);
 bool CheckReissueBurnTx(const CTxOut& txOut);
 
 //! issue asset scripts to make sure script meets the standards
-bool CheckIssueDataTx(const CTxOut& txOut); // OP_RAVEN_ASSET RVNQ (That is a Q as in Que not an O)
-bool CheckOwnerDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNO
-bool CheckReissueDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNR
-bool CheckTransferOwnerTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNT
+bool CheckIssueDataTx(const CTxOut& txOut); // OP_RAVEN_ASSET YAIQ (That is a Q as in Que not an O)
+bool CheckOwnerDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET YAIO
+bool CheckReissueDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET YAIR
+bool CheckTransferOwnerTx(const CTxOut& txOut);// OP_RAVEN_ASSET YAIT
 
 //! Check the Encoded hash and make sure it is either an IPFS hash or a OIP hash
 bool CheckEncoded(const std::string& hash, std::string& strError);

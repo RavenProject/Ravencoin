@@ -18,9 +18,9 @@ RavenUnits::RavenUnits(QObject *parent):
 QList<RavenUnits::Unit> RavenUnits::availableUnits()
 {
     QList<RavenUnits::Unit> unitlist;
-    unitlist.append(RVN);
-    unitlist.append(mRVN);
-    unitlist.append(uRVN);
+    unitlist.append(YAI);
+    unitlist.append(mYAI);
+    unitlist.append(uYAI);
     return unitlist;
 }
 
@@ -28,9 +28,9 @@ bool RavenUnits::valid(int unit)
 {
     switch(unit)
     {
-    case RVN:
-    case mRVN:
-    case uRVN:
+    case YAI:
+    case mYAI:
+    case uYAI:
         return true;
     default:
         return false;
@@ -41,9 +41,9 @@ QString RavenUnits::name(int unit)
 {
     switch(unit)
     {
-    case RVN: return QString("RVN");
-    case mRVN: return QString("mRVN");
-    case uRVN: return QString::fromUtf8("μRVN");
+    case YAI: return QString("YAI");
+    case mYAI: return QString("mYAI");
+    case uYAI: return QString::fromUtf8("μYAI");
     default: return QString("???");
     }
 }
@@ -52,9 +52,9 @@ QString RavenUnits::description(int unit)
 {
     switch(unit)
     {
-    case RVN: return QString("Ravens");
-    case mRVN: return QString("Milli-Ravens (1 / 1" THIN_SP_UTF8 "000)");
-    case uRVN: return QString("Micro-Ravens (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case YAI: return QString("Ravens");
+    case mYAI: return QString("Milli-Ravens (1 / 1" THIN_SP_UTF8 "000)");
+    case uYAI: return QString("Micro-Ravens (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }
 }
@@ -63,9 +63,9 @@ qint64 RavenUnits::factor(int unit)
 {
     switch(unit)
     {
-    case RVN:  return 100000000;
-    case mRVN: return 100000;
-    case uRVN: return 100;
+    case YAI:  return 100000000;
+    case mYAI: return 100000;
+    case uYAI: return 100;
     default:   return 100000000;
     }
 }
@@ -91,9 +91,9 @@ int RavenUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case RVN: return 8;
-    case mRVN: return 5;
-    case uRVN: return 2;
+    case YAI: return 8;
+    case mYAI: return 5;
+    case uYAI: return 2;
     default: return 0;
     }
 }
@@ -150,7 +150,7 @@ QString RavenUnits::formatWithUnit(int unit, const CAmount& amount, bool plussig
 
 QString RavenUnits::formatWithCustomName(QString customName, const CAmount& amount, int unit, bool plussign, SeparatorStyle separators)
 {
-    return format(RVN, amount / factorAsset(MAX_ASSET_UNITS - unit), plussign, separators, unit) + QString(" ") + customName;
+    return format(YAI, amount / factorAsset(MAX_ASSET_UNITS - unit), plussign, separators, unit) + QString(" ") + customName;
 }
 
 QString RavenUnits::formatHtmlWithUnit(int unit, const CAmount& amount, bool plussign, SeparatorStyle separators)

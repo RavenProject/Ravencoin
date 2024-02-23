@@ -37,7 +37,7 @@ class UniqueAssetTest(RavenTestFramework):
         self.extra_args = [['-assetindex'], ['-assetindex'], ['-assetindex']]
 
     def activate_assets(self):
-        self.log.info("Generating RVN for node[0] and activating assets...")
+        self.log.info("Generating YAI for node[0] and activating assets...")
         n0 = self.nodes[0]
         n0.generate(432)
         self.sync_all()

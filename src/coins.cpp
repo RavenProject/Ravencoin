@@ -98,7 +98,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
     bool fCoinbase = tx.IsCoinBase();
     const uint256& txid = tx.GetHash();
 
-    /** RVN START */
+    /** YAI START */
     if (AreAssetsDeployed()) {
         if (assetsCache) {
             if (tx.IsNewAsset()) { // This works are all new root assets, sub asset, and restricted assets
@@ -251,7 +251,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
             }
         }
     }
-    /** RVN END */
+    /** YAI END */
 
     for (size_t i = 0; i < tx.vout.size(); ++i) {
         bool overwrite = check ? cache.HaveCoin(COutPoint(txid, i)) : fCoinbase;
@@ -259,7 +259,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
         // deal with the pre-BIP30 occurrences of duplicate coinbase transactions.
         cache.AddCoin(COutPoint(txid, i), Coin(tx.vout[i], nHeight, fCoinbase), overwrite);
 
-        /** RVN START */
+        /** YAI START */
         if (AreAssetsDeployed()) {
             if (assetsCache) {
                 CAssetOutputEntry assetData;
@@ -352,7 +352,7 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
                 }
             }
         }
-        /** RVN END */
+        /** YAI END */
     }
 }
 
@@ -363,9 +363,9 @@ bool CCoinsViewCache::SpendCoin(const COutPoint &outpoint, Coin* moveout, CAsset
         return false;
     cachedCoinsUsage -= it->second.coin.DynamicMemoryUsage();
 
-    /** RVN START */
+    /** YAI START */
     Coin tempCoin = it->second.coin;
-    /** RVN END */
+    /** YAI END */
 
     if (moveout) {
         *moveout = std::move(it->second.coin);
@@ -377,7 +377,7 @@ bool CCoinsViewCache::SpendCoin(const COutPoint &outpoint, Coin* moveout, CAsset
         it->second.coin.Clear();
     }
 
-    /** RVN START */
+    /** YAI START */
     if (AreAssetsDeployed()) {
         if (assetsCache) {
             if (!assetsCache->TrySpendCoin(outpoint, tempCoin.out)) {
@@ -385,7 +385,7 @@ bool CCoinsViewCache::SpendCoin(const COutPoint &outpoint, Coin* moveout, CAsset
             }
         }
     }
-    /** RVN END */
+    /** YAI END */
 
     return true;
 }

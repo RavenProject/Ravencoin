@@ -13,4 +13,5 @@ find -type f -not -path "./.git/*" -and -not -path "./scripts/*" -exec sed -i 's
 
 
 find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i 's/rvn/yai/g' {} +
+find -type f -not -path "./.git/*" -and -not -path "./scripts/*"  -exec sed -i 's/RVN/YAI/g' {} +
 

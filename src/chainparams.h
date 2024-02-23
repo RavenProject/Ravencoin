@@ -90,7 +90,7 @@ public:
     bool BIP66();
     bool CSVEnabled() const;
 
-    /** RVN Start **/
+    /** YAI Start **/
     const CAmount& IssueAssetBurnAmount() const { return nIssueAssetBurnAmount; }
     const CAmount& ReissueAssetBurnAmount() const { return nReissueAssetBurnAmount; }
     const CAmount& IssueSubAssetBurnAmount() const { return nIssueSubAssetBurnAmount; }
@@ -142,7 +142,7 @@ public:
     int MinReorganizationAge() const { return nMinReorganizationAge; }
 
     int GetAssetActivationHeight() const { return nAssetActivationHeight; }
-    /** RVN End **/
+    /** YAI End **/
 
 protected:
     CChainParams() {}
@@ -164,7 +164,7 @@ protected:
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
 
-    /** RVN Start **/
+    /** YAI Start **/
     // Burn Amounts
     CAmount nIssueAssetBurnAmount;
     CAmount nReissueAssetBurnAmount;
@@ -201,7 +201,7 @@ protected:
     int nAssetActivationHeight;
 
     uint32_t nKAAAWWWPOWActivationTime;
-    /** RVN End **/
+    /** YAI End **/
 };
 
 /**

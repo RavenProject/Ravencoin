@@ -873,7 +873,7 @@
         <translation>주소:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
         <translation>자산을 보유할 레이븐 주소( 당신이 이 주소를 소유 해야만 합니다.) 새 주소를 만들기 위해 비워 두세요.</translation>
     </message>
     <message>
@@ -1001,8 +1001,8 @@
         <translation>잔액:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>
@@ -1467,7 +1467,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>(라벨 없음)</translation>
     </message>
     <message>
-        <source>The asset (or RVN) removed or added to balance.</source>
+        <source>The asset (or YAI) removed or added to balance.</source>
         <translation>잔액에 추가되거나 제거된 자산(또는 레이븐코인)</translation>
     </message>
 </context>
@@ -1756,7 +1756,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>현재 총 잔액</translation>
     </message>
     <message>
-        <source>RVN Balances</source>
+        <source>YAI Balances</source>
         <translation>레이븐코인 잔액</translation>
     </message>
     <message>
@@ -2333,8 +2333,8 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>자산 &amp;전송</translation>
     </message>
     <message>
-        <source>Transfer assets to RVN addresses</source>
-        <translation>RVN 주소로 자산 전송</translation>
+        <source>Transfer assets to YAI addresses</source>
+        <translation>YAI 주소로 자산 전송</translation>
     </message>
     <message>
         <source>&amp;Manage Assets</source>
@@ -3753,7 +3753,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>신규 채굴된 코인이 사용되기 위해서는 %1 개의 블록이 경과되어야 합니다. 블록을 생성할 때 블록체인에 추가되도록 네트워크에 전파되는 과정을 거치는데, 블록체인에 포함되지 못하고 실패한다면 해당 블록의 상태는 '미승인'으로 표현되고 비트코인 또한 사용될 수 없습니다. 이 현상은 다른 노드가 비슷한 시간대에 동시에 블록을 생성할 때 종종 발생할 수 있습니다. </translation>
     </message>
     <message>
-        <source>Net RVN amount</source>
+        <source>Net YAI amount</source>
         <translation>총 레이븐코인 거래액</translation>
     </message>
     <message>
@@ -3927,7 +3927,7 @@ Recommended action: Fully sync your wallet before sending a transaction.
         <translation>잔액에 추가되거나 제거된 금액</translation>
     </message>
     <message>
-        <source>The asset (or RVN) removed or added to balance.</source>
+        <source>The asset (or YAI) removed or added to balance.</source>
         <translation>잔액에 추가되거나 제거된 자산(또는 레이븐코인)</translation>
     </message>
 </context>

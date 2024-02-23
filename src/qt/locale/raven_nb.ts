@@ -905,8 +905,8 @@
         <translation>Adresse:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>RVN adressen som skal eie aktivumet. (Du må eie denne adressen). La stå tom for å lage ny adresse.</translation>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>YAI adressen som skal eie aktivumet. (Du må eie denne adressen). La stå tom for å lage ny adresse.</translation>
     </message>
     <message>
         <source>Warning:</source>
@@ -1009,8 +1009,8 @@
         <translation>Saldo:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>
@@ -1858,8 +1858,8 @@
         <translation>Din nåværende saldo</translation>
     </message>
     <message>
-        <source>RVN Balances</source>
-        <translation>RVN Oversikt</translation>
+        <source>YAI Balances</source>
+        <translation>YAI Oversikt</translation>
     </message>
     <message>
         <source>Your current balance in watch-only addresses</source>

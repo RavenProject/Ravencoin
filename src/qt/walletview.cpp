@@ -76,12 +76,12 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
 
-    /** RVN START */
+    /** YAI START */
     addWidget(assetsPage);
     addWidget(createAssetsPage);
     addWidget(manageAssetsPage);
     addWidget(restrictedAssetsPage);
-    /** RVN END */
+    /** YAI END */
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
@@ -98,7 +98,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     // Pass through messages from transactionView
     connect(transactionView, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
 
-    /** RVN START */
+    /** YAI START */
     connect(assetsPage, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
     connect(createAssetsPage, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
     connect(manageAssetsPage, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
@@ -170,7 +170,7 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     usedReceivingAddressesPage->setModel(_walletModel ? _walletModel->getAddressTableModel() : nullptr);
     usedSendingAddressesPage->setModel(_walletModel ? _walletModel->getAddressTableModel() : nullptr);
 
-    /** RVN START */
+    /** YAI START */
     assetsPage->setModel(_walletModel);
     createAssetsPage->setModel(_walletModel);
     manageAssetsPage->setModel(_walletModel);
@@ -210,7 +210,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
     if (!ttm || ttm->processingQueuedTransactions())
         return;
 
-    /** RVN START */
+    /** YAI START */
     // With the addition of asset transactions, there can be multiple transaction that need notifications
     // so we need to loop through all new transaction that were added to the transaction table and display
     // notifications for each individual transaction
@@ -227,7 +227,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
         Q_EMIT incomingTransaction(date, walletModel->getOptionsModel()->getDisplayUnit(), amount, type, address, label,
                                    assetName);
     }
-    /** RVN END */
+    /** YAI END */
 
     /** Everytime we get an new transaction. We should check to see if assets are enabled or not */
     overviewPage->showAssets();
@@ -426,7 +426,7 @@ void WalletView::requestedSyncWarningInfo()
 }
 
 bool fFirstVisit = true;
-/** RVN START */
+/** YAI START */
 void WalletView::gotoAssetsPage()
 {
     if (fFirstVisit){
@@ -451,4 +451,4 @@ void WalletView::gotoRestrictedAssetsPage()
 {
     setCurrentWidget(restrictedAssetsPage);
 }
-/** RVN END */
+/** YAI END */

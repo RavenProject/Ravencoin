@@ -455,7 +455,7 @@ QVariant MyRestrictedAssetsTableModel::headerData(int section, Qt::Orientation o
                 case ToAddress:
                     return tr("User-defined intent/purpose of the transaction.");
                 case AssetName:
-                    return tr("The asset (or RVN) removed or added to balance.");
+                    return tr("The asset (or YAI) removed or added to balance.");
             }
         }
     }

@@ -213,7 +213,7 @@ void WalletFrame::outOfSyncWarningClicked()
     Q_EMIT requestedSyncWarningInfo();
 }
 
-/** RVN START */
+/** YAI START */
 void WalletFrame::gotoAssetsPage()
 {
     QMap<QString, WalletView*>::const_iterator i;

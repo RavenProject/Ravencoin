@@ -18,7 +18,7 @@ class MessagingTest(RavenTestFramework):
         self.extra_args = [['-assetindex'], ['-assetindex'], ['-assetindex']]
 
     def activate_messaging(self):
-        self.log.info("Generating RVN for node[0] and activating messaging...")
+        self.log.info("Generating YAI for node[0] and activating messaging...")
         n0 = self.nodes[0]
 
         n0.generate(1)

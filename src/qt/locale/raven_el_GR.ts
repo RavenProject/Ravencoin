@@ -337,8 +337,8 @@
         <translation>Διεύθυνση:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>H διεύθυνση RVN που θα κρατά αυτό το περιουσιακό στοιχείο (Πρέπει να σου ανήκει αυτή η διεύθυνση). Άφηστε το κενό για δημιουργία νέας διεύθυνσης.</translation>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>H διεύθυνση YAI που θα κρατά αυτό το περιουσιακό στοιχείο (Πρέπει να σου ανήκει αυτή η διεύθυνση). Άφηστε το κενό για δημιουργία νέας διεύθυνσης.</translation>
     </message>
     <message>
         <source>Balance:</source>

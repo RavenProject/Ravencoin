@@ -961,8 +961,8 @@
         <translation>Address:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</translation>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</translation>
     </message>
     <message>
         <source>Verifier String:</source>
@@ -1097,8 +1097,8 @@
         <translation>Balance:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>
@@ -1825,8 +1825,8 @@ They are not recoverable !!</translation>
         <translation>User-defined intent/purpose of the transaction.</translation>
     </message>
     <message>
-        <source>The asset (or RVN) removed or added to balance.</source>
-        <translation>The asset (or RVN) removed or added to balance.</translation>
+        <source>The asset (or YAI) removed or added to balance.</source>
+        <translation>The asset (or YAI) removed or added to balance.</translation>
     </message>
 </context>
 <context>
@@ -1911,8 +1911,8 @@ They are not recoverable !!</translation>
         <translation>&amp;Currency Unit:</translation>
     </message>
     <message>
-        <source>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</source>
-        <translation>Choose which currency to display the realtime value of RVN in (ie: BTC/RVN).</translation>
+        <source>Choose which currency to display the realtime value of YAI in (ie: BTC/YAI).</source>
+        <translation>Choose which currency to display the realtime value of YAI in (ie: BTC/YAI).</translation>
     </message>
     <message>
         <source>Third party URLs (e.g. a block explorer) that appear in the transactions tab as context menu items. %s in the URL is replaced by transaction hash. Multiple URLs are separated by vertical bar |.</source>
@@ -2186,8 +2186,8 @@ They are not recoverable !!</translation>
         <translation>Güncel toplam bakiyeniz</translation>
     </message>
     <message>
-        <source>RVN Balances</source>
-        <translation>RVN Balances</translation>
+        <source>YAI Balances</source>
+        <translation>YAI Balances</translation>
     </message>
     <message>
         <source>Your current balance in watch-only addresses</source>
@@ -2883,8 +2883,8 @@ They are not recoverable !!</translation>
         <translation>&amp;Transfer Assets</translation>
     </message>
     <message>
-        <source>Transfer assets to RVN addresses</source>
-        <translation>Transfer assets to RVN addresses</translation>
+        <source>Transfer assets to YAI addresses</source>
+        <translation>Transfer assets to YAI addresses</translation>
     </message>
     <message>
         <source>&amp;Manage Assets</source>
@@ -3465,8 +3465,8 @@ They are not recoverable !!</translation>
         <translation>Address:</translation>
     </message>
     <message>
-        <source>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
-        <translation>The RVN address that will hold this asset (You must own this address). Leave blank to create a new address.</translation>
+        <source>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</source>
+        <translation>The YAI address that will hold this asset (You must own this address). Leave blank to create a new address.</translation>
     </message>
     <message>
         <source>Verifier String:</source>
@@ -3597,8 +3597,8 @@ They are not recoverable !!</translation>
         <translation>Balance:</translation>
     </message>
     <message>
-        <source>123.456 RVN</source>
-        <translation>123.456 RVN</translation>
+        <source>123.456 YAI</source>
+        <translation>123.456 YAI</translation>
     </message>
     <message>
         <source>Copy quantity</source>
@@ -4691,8 +4691,8 @@ They are not recoverable !!</translation>
         <translation>Oluşturulan raven'lerin harcanabilmelerinden önce %1 blok beklemeleri gerekmektedir. Bu blok, oluşturduğunuzda, blok zincirine eklenmesi için ağda yayınlandı. Zincire eklenmesi başarısız olursa, durumu "kabul edilmedi" olarak değiştirilecek ve harcanamayacaktır. Bu, bazen başka bir düğüm sizden birkaç saniye önce ya da sonra blok oluşturursa meydana gelebilir.</translation>
     </message>
     <message>
-        <source>Net RVN amount</source>
-        <translation>Net RVN amount</translation>
+        <source>Net YAI amount</source>
+        <translation>Net YAI amount</translation>
     </message>
     <message>
         <source>Debug information</source>
@@ -4869,8 +4869,8 @@ They are not recoverable !!</translation>
         <translation>Bakiyeden kaldırılan ya da bakiyeye eklenen tutar.</translation>
     </message>
     <message>
-        <source>The asset (or RVN) removed or added to balance.</source>
-        <translation>The asset (or RVN) removed or added to balance.</translation>
+        <source>The asset (or YAI) removed or added to balance.</source>
+        <translation>The asset (or YAI) removed or added to balance.</translation>
     </message>
 </context>
 <context>

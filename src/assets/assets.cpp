@@ -76,7 +76,7 @@ static const std::regex QUALIFIER_INDICATOR("^[#][A-Z0-9._]{3,}$"); // Starts wi
 static const std::regex SUB_QUALIFIER_INDICATOR("^#[A-Z0-9._]+\\/#[A-Z0-9._]+$"); // Starts with #
 static const std::regex RESTRICTED_INDICATOR("^[\\$][A-Z0-9._]{3,}$"); // Starts with $
 
-static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^YOTTAFLUX$|^#RVN$|^#RAVEN$|^#YOTTAFLUX$");
+static const std::regex RAVEN_NAMES("^YAI$|^RAVEN$|^YOTTAFLUX$|^#YAI$|^#RAVEN$|^#YOTTAFLUX$");
 
 bool IsRootNameValid(const std::string& name)
 {
@@ -523,13 +523,13 @@ void CNewAsset::ConstructTransaction(CScript& script) const
     ssAsset << *this;
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_Q); // q
+    vchMessage.push_back(YAI_R); // r
+    vchMessage.push_back(YAI_V); // v
+    vchMessage.push_back(YAI_N); // n
+    vchMessage.push_back(YAI_Q); // q
 
     vchMessage.insert(vchMessage.end(), ssAsset.begin(), ssAsset.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_YAI_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 void CNewAsset::ConstructOwnerTransaction(CScript& script) const
@@ -538,13 +538,13 @@ void CNewAsset::ConstructOwnerTransaction(CScript& script) const
     ssOwner << std::string(this->strName + OWNER_TAG);
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_O); // o
+    vchMessage.push_back(YAI_R); // r
+    vchMessage.push_back(YAI_V); // v
+    vchMessage.push_back(YAI_N); // n
+    vchMessage.push_back(YAI_O); // o
 
     vchMessage.insert(vchMessage.end(), ssOwner.begin(), ssOwner.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_YAI_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
@@ -917,7 +917,7 @@ bool CTransaction::IsNewAsset() const
     // New Asset transaction will always have at least three outputs.
     // 1. Owner Token output
     // 2. Issue Asset output
-    // 3. RVN Burn Fee
+    // 3. YAI Burn Fee
     if (vout.size() < 3) {
         return false;
     }
@@ -954,7 +954,7 @@ bool CTransaction::IsNewUniqueAsset() const
 //! Call this function after IsNewUniqueAsset
 bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
 {
-    // Must contain at least 3 outpoints (RVN burn, owner change and one or more new unique assets that share a root (should be in trailing position))
+    // Must contain at least 3 outpoints (YAI burn, owner change and one or more new unique assets that share a root (should be in trailing position))
     if (vout.size() < 3) {
         strError  = "bad-txns-unique-vout-size-to-small";
         return false;
@@ -1620,13 +1620,13 @@ void CAssetTransfer::ConstructTransaction(CScript& script) const
     ssTransfer << *this;
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_T); // t
+    vchMessage.push_back(YAI_R); // r
+    vchMessage.push_back(YAI_V); // v
+    vchMessage.push_back(YAI_N); // n
+    vchMessage.push_back(YAI_T); // t
 
     vchMessage.insert(vchMessage.end(), ssTransfer.begin(), ssTransfer.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_YAI_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 CReissueAsset::CReissueAsset(const std::string &strAssetName, const CAmount &nAmount, const int &nUnits, const int &nReissuable,
@@ -1646,13 +1646,13 @@ void CReissueAsset::ConstructTransaction(CScript& script) const
     ssReissue << *this;
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_R); // r
+    vchMessage.push_back(YAI_R); // r
+    vchMessage.push_back(YAI_V); // v
+    vchMessage.push_back(YAI_N); // n
+    vchMessage.push_back(YAI_R); // r
 
     vchMessage.insert(vchMessage.end(), ssReissue.begin(), ssReissue.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_YAI_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 bool CReissueAsset::IsNull() const
@@ -3107,7 +3107,7 @@ bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type)
 
 bool CheckReissueBurnTx(const CTxOut& txOut)
 {
-    // Check the first transaction and verify that the correct RVN Amount
+    // Check the first transaction and verify that the correct YAI Amount
     if (txOut.nValue != GetReissueAssetBurnAmount())
         return false;
 
@@ -3914,7 +3914,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 
     CAmount curBalance = pwallet->GetBalance();
 
-    // Check to make sure the wallet has the RVN required by the burnAmount
+    // Check to make sure the wallet has the YAI required by the burnAmount
     if (curBalance < burnAmount) {
         error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
         return false;
@@ -4117,7 +4117,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     // Get the current burn amount for issuing an asset
     CAmount burnAmount = GetReissueAssetBurnAmount();
 
-    // Check to make sure the wallet has the RVN required by the burnAmount
+    // Check to make sure the wallet has the YAI required by the burnAmount
     if (curBalance < burnAmount) {
         error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
         return false;
@@ -4217,7 +4217,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
     // Check for a balance before processing transfers
     CAmount curBalance = pwallet->GetBalance();
     if (curBalance == 0) {
-        error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, std::string("This wallet doesn't contain any RVN, transfering an asset requires a network fee"));
+        error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, std::string("This wallet doesn't contain any YAI, transfering an asset requires a network fee"));
         return false;
     }
 
@@ -4299,7 +4299,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         vecSend.push_back(recipient);
     }
 
-    // If assetTxData is not nullptr, the user wants to add some OP_RVN_ASSET data transactions into the transaction
+    // If assetTxData is not nullptr, the user wants to add some OP_YAI_ASSET data transactions into the transaction
     if (nullAssetTxData) {
         std::string strError = "";
         int nAddTagCount = 0;
@@ -4334,7 +4334,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         }
     }
 
-    // nullGlobalRestiotionData, the user wants to add OP_RVN_ASSET OP_RVN_ASSET OP_RVN_ASSETS data transaction to the transaction
+    // nullGlobalRestiotionData, the user wants to add OP_YAI_ASSET OP_YAI_ASSET OP_YAI_ASSETS data transaction to the transaction
     if (nullGlobalRestrictionData) {
         std::string strError = "";
         for (auto dataObject : *nullGlobalRestrictionData) {
@@ -4548,7 +4548,7 @@ void CNullAssetTxData::ConstructGlobalRestrictionTransaction(CScript &script) co
 
     std::vector<unsigned char> vchMessage;
     vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
-    script << OP_RVN_ASSET << OP_RESERVED << OP_RESERVED << ToByteVector(vchMessage);
+    script << OP_YAI_ASSET << OP_RESERVED << OP_RESERVED << ToByteVector(vchMessage);
 }
 
 CNullAssetTxVerifierString::CNullAssetTxVerifierString(const std::string &verifier)
@@ -4564,7 +4564,7 @@ void CNullAssetTxVerifierString::ConstructTransaction(CScript &script) const
 
     std::vector<unsigned char> vchMessage;
     vchMessage.insert(vchMessage.end(), ssAssetTxData.begin(), ssAssetTxData.end());
-    script << OP_RVN_ASSET << OP_RESERVED << ToByteVector(vchMessage);
+    script << OP_YAI_ASSET << OP_RESERVED << ToByteVector(vchMessage);
 }
 
 bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifierString, bool fSkipTempCache)

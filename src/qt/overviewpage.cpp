@@ -46,7 +46,7 @@ class TxViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 public:
     explicit TxViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
-        QAbstractItemDelegate(parent), unit(RavenUnits::RVN),
+        QAbstractItemDelegate(parent), unit(RavenUnits::YAI),
         platformStyle(_platformStyle)
     {
 
@@ -155,7 +155,7 @@ class AssetViewDelegate : public QAbstractItemDelegate
 Q_OBJECT
 public:
     explicit AssetViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
-            QAbstractItemDelegate(parent), unit(RavenUnits::RVN),
+            QAbstractItemDelegate(parent), unit(RavenUnits::YAI),
             platformStyle(_platformStyle)
     {
 
@@ -644,7 +644,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
         connect(model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyLabels(bool)));
     }
 
-    // update the display unit, to not use the default ("RVN")
+    // update the display unit, to not use the default ("YAI")
     updateDisplayUnit();
 }
 
@@ -693,7 +693,7 @@ void OverviewPage::showAssets()
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
 
-        // This keeps the RVN balance grid from expanding and looking terrible when asset balance is hidden
+        // This keeps the YAI balance grid from expanding and looking terrible when asset balance is hidden
         ui->assetVerticalSpaceWidget->show();
         ui->assetVerticalSpaceWidget2->show();
     }

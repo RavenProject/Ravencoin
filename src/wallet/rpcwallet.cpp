@@ -1734,7 +1734,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
         }
     }
 
-    /** RVN START */
+    /** YAI START */
     if (AreAssetsDeployed()) {
         if (listAssetsReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth) {
             for (const CAssetOutputEntry &data : listAssetsReceived){
@@ -1784,7 +1784,7 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
             }
         }
     }
-    /** RVN END */
+    /** YAI END */
 }
 
 void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::string& strAccount, int nMinDepth, bool fLong, UniValue& ret, const isminefilter& filter)
@@ -3248,7 +3248,7 @@ UniValue fundrawtransaction(const JSONRPCRequest& request)
 
 UniValue bumpfee(const JSONRPCRequest& request)
 {
-    throw std::runtime_error("bumpfee has been deprecated on the RVN Wallet.");
+    throw std::runtime_error("bumpfee has been deprecated on the YAI Wallet.");
 
 //    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
 //

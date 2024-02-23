@@ -39,4 +39,4 @@ Optional: In order to back up the master key and chaincode, it requires 48 words
 ### Compatibility
 Other wallets like Jaxx and Coinomi use a 12-word seed.  For wallets that use BIP39/BIP32/BIP44 and the correct coinid of 175 for Yottaflux, the 12-words should be compatible with external wallets.
 
-Because the amount of RVN in the asset UTXO is 0, and because the Yottaflux transaction will be invalid if the asset outputs don't match the asset inputs, this prevents external wallets from being able to lose assets even though the external wallets are completely unaware of assets.
+Because the amount of YAI in the asset UTXO is 0, and because the Yottaflux transaction will be invalid if the asset outputs don't match the asset inputs, this prevents external wallets from being able to lose assets even though the external wallets are completely unaware of assets.

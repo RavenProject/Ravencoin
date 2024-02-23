@@ -58,8 +58,8 @@ while True:
 		while(pos != -1):
 			pos = astr.find('72766e', start)
 			if (pos > -1):
-				print("FOUND RVN issuance at " + str(pos))
-				print("After RVN: " + astr[pos+6:pos+8])
+				print("FOUND YAI issuance at " + str(pos))
+				print("After YAI: " + astr[pos+6:pos+8])
 				sizestr = astr[pos+8:pos+10]
 				print("sizestr: " + sizestr)
 				#print(str(astr[pos+8:pos+10]))
@@ -68,7 +68,7 @@ while True:
 				print("Name: " + bytes.fromhex(astr[pos+10:pos+10+size*2]).decode('utf-8'))
 			pos = astr.find('72766e', start)
 			if (pos > -1):
-				print("FOUND RVN something at " + str(pos))
+				print("FOUND YAI something at " + str(pos))
 			start += pos+8
 			print(astr)
 

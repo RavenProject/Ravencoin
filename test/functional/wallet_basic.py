@@ -68,7 +68,7 @@ class WalletTest(RavenTestFramework):
         txout = self.nodes[0].gettxout(txid=confirmed_txid, n=confirmed_index, include_mempool=True)
         assert_equal(txout['value'], 5000)
         
-        # Send 21 RVN from 0 to 2 using sendtoaddress call.
+        # Send 21 YAI from 0 to 2 using sendtoaddress call.
         # Locked memory should use at least 32 bytes to sign each transaction
         self.log.info("test getmemoryinfo")
         memory_before = self.nodes[0].getmemoryinfo()
@@ -147,7 +147,7 @@ class WalletTest(RavenTestFramework):
         assert_equal(self.nodes[2].getbalance(), 9994)
         assert_equal(self.nodes[2].getbalance("from1"), 9994-21)
 
-        # Send 10 RVN normal
+        # Send 10 YAI normal
         address = self.nodes[0].getnewaddress("test")
         fee_per_byte = Decimal('0.001') / 1000
         self.nodes[2].settxfee(fee_per_byte * 1000)
@@ -157,7 +157,7 @@ class WalletTest(RavenTestFramework):
         node_2_bal = self.check_fee_amount(self.nodes[2].getbalance(), Decimal('9984'), fee_per_byte, count_bytes(self.nodes[2].getrawtransaction(txid)))
         assert_equal(self.nodes[0].getbalance(), Decimal('10'))
 
-        # Send 10 RVN with subtract fee from amount
+        # Send 10 YAI with subtract fee from amount
         txid = self.nodes[2].sendtoaddress(address, 10, "", "", True)
         self.nodes[2].generate(1)
         self.sync_all([self.nodes[0:3]])
@@ -165,7 +165,7 @@ class WalletTest(RavenTestFramework):
         assert_equal(self.nodes[2].getbalance(), node_2_bal)
         node_0_bal = self.check_fee_amount(self.nodes[0].getbalance(), Decimal('20'), fee_per_byte, count_bytes(self.nodes[2].getrawtransaction(txid)))
 
-        # Sendmany 10 RVN
+        # Sendmany 10 YAI
         txid = self.nodes[2].sendmany('from1', {address: 10}, 0, "", [])
         self.nodes[2].generate(1)
         self.sync_all([self.nodes[0:3]])
@@ -173,7 +173,7 @@ class WalletTest(RavenTestFramework):
         node_2_bal = self.check_fee_amount(self.nodes[2].getbalance(), node_2_bal - Decimal('10'), fee_per_byte, count_bytes(self.nodes[2].getrawtransaction(txid)))
         assert_equal(self.nodes[0].getbalance(), node_0_bal)
 
-        # Sendmany 10 RVN with subtract fee from amount
+        # Sendmany 10 YAI with subtract fee from amount
         txid = self.nodes[2].sendmany('from1', {address: 10}, 0, "", [address])
         self.nodes[2].generate(1)
         self.sync_all([self.nodes[0:3]])

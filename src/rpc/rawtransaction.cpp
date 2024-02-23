@@ -350,13 +350,13 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":(amount or object),\"data\":\"hex\",...}\n"
             "                     ( locktime ) ( replaceable )\n"
             "\nCreate a transaction spending the given inputs and creating new outputs.\n"
-            "Outputs are addresses (paired with a RVN amount, data or object specifying an asset operation) or data.\n"
+            "Outputs are addresses (paired with a YAI amount, data or object specifying an asset operation) or data.\n"
             "Returns hex-encoded raw transaction.\n"
             "Note that the transaction's inputs are not signed, and\n"
             "it is not stored in the wallet or transmitted to the network.\n"
 
             "\nPaying for Asset Operations:\n"
-            "  Some operations require an amount of RVN to be sent to a burn address:\n"
+            "  Some operations require an amount of YAI to be sent to a burn address:\n"
             "\n"
             "    Operation          Amount + Burn Address\n"
             "    transfer                 0\n"
@@ -414,7 +414,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "     {\n"
             "       \"address\":                          (string, required) The destination raven address.\n"
             "                                               Each output must have a different address.\n"
-            "         x.xxx                             (number or string, required) The RVN amount\n"
+            "         x.xxx                             (number or string, required) The YAI amount\n"
             "           or\n"
             "         {                                 (object) A json object of assets to send\n"
             "           \"transfer\":\n"
@@ -688,7 +688,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                 CTxOut out(nAmount, scriptPubKey);
                 rawTx.vout.push_back(out);
             }
-            /** RVN COIN START **/
+            /** YAI COIN START **/
             else if (sendTo[name_].type() == UniValue::VOBJ) {
                 auto asset_ = sendTo[name_].get_obj();
                 auto assetKey_ = asset_.getKeys()[0];
@@ -1465,7 +1465,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             } else {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, Output must be of the type object"));
             }
-            /** RVN COIN STOP **/
+            /** YAI COIN STOP **/
         }
     }
 
@@ -1609,7 +1609,7 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("p2sh", EncodeDestination(CScriptID(script))));
     }
 
-    /** RVN START */
+    /** YAI START */
     if (type.isStr() && type.get_str() == ASSET_TRANSFER_STRING) {
         if (!AreAssetsDeployed())
             throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Assets are not active");
@@ -1681,7 +1681,7 @@ UniValue decodescript(const JSONRPCRequest& request)
     } else {
 
     }
-    /** RVN END */
+    /** YAI END */
 
     return r;
 }

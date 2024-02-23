@@ -264,7 +264,7 @@ class RawRestrictedAssetsTest(RavenTestFramework):
         self.extra_args = [['-assetindex'], ['-assetindex']]
 
     def activate_restricted_assets(self):
-        self.log.info("Generating RVN and activating restricted assets...")
+        self.log.info("Generating YAI and activating restricted assets...")
         n0 = self.nodes[0]
         n0.generate(432)
         self.sync_all()

@@ -46,7 +46,7 @@ class BIP68Test(RavenTestFramework):
     def test_disable_flag(self):
         # Create some unconfirmed inputs
         new_addr = self.nodes[0].getnewaddress()
-        self.nodes[0].sendtoaddress(new_addr, 2)  # send 2 RVN
+        self.nodes[0].sendtoaddress(new_addr, 2)  # send 2 YAI
 
         utxos = self.nodes[0].listunspent(0, 0)
         assert (len(utxos) > 0)

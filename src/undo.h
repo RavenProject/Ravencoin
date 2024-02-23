@@ -62,11 +62,11 @@ public:
 };
 
 static const size_t MIN_TRANSACTION_INPUT_WEIGHT = WITNESS_SCALE_FACTOR * ::GetSerializeSize(CTxIn(), SER_NETWORK, PROTOCOL_VERSION);
-/** RVN START */
+/** YAI START */
 // Deprecated for RIP2 implementation
 //static const size_t MAX_INPUTS_PER_BLOCK = /*fAssetsIsActive ? MAX_BLOCK_WEIGHT_RIP2 / MIN_TRANSACTION_INPUT_WEIGHT :*/ MAX_BLOCK_WEIGHT / MIN_TRANSACTION_INPUT_WEIGHT;
 
-/** RVN END */
+/** YAI END */
 
 /** Undo information for a CTransaction */
 class CTxUndo
