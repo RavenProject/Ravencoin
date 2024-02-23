@@ -5,7 +5,7 @@ connections, inter-process communication, and shared-memory,
 providing various message-oriented semantics such as publish/subscribe,
 request/reply, and push/pull.
 
-The Yottaflux Core daemon can be configured to act as a trusted "border
+The Yottaflux daemon can be configured to act as a trusted "border
 router", implementing the yottaflux wire protocol and relay, making
 consensus decisions, maintaining the local blockchain database,
 broadcasting locally generated transactions into the network, and
@@ -33,7 +33,7 @@ buffering or reassembly.
 
 ## Prerequisites
 
-The ZeroMQ feature in Yottaflux Core requires the ZeroMQ API >= 4.0.0
+The ZeroMQ feature in Yottaflux requires the ZeroMQ API >= 4.0.0
 [libzmq](https://github.com/zeromq/libzmq/releases).
 For version information, see [dependencies.md](dependencies.md).
 Typically, it is packaged by distributions as something like
@@ -70,7 +70,7 @@ The same notification can be specified more than once.
 
 For instance:
 
-    $ yottafluxd -zmqpubhashtx=tcp://127.0.0.1:28766 \
+    $ yottafluxd -zmqpubhashtx=tcp://127.0.0.1:28558 \
                -zmqpubrawtx=ipc:///tmp/yottafluxd.tx.raw
 
 Each PUB notification has a topic and body, where the header

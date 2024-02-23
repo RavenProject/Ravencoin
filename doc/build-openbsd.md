@@ -53,7 +53,7 @@ Do not use `pkg_add boost`! The boost version installed thus is compiled using t
     ...
     Segmentation fault (core dumped)
 
-This makes it necessary to build boost, or at least the parts used by Yottaflux Core, manually:
+This makes it necessary to build boost, or at least the parts used by Yottaflux, manually:
 
 ```
 # Pick some path to install boost to, here we create a directory within the yottaflux directory
@@ -122,7 +122,7 @@ The change will only affect the current shell and processes spawned by it. To
 make the change system-wide, change `datasize-cur` and `datasize-max` in
 `/etc/login.conf`, and reboot.
 
-### Building Yottaflux Core
+### Building Yottaflux
 
 **Important**: use `gmake`, not `make`. The non-GNU `make` will exit with a horrible error.
 

@@ -1,7 +1,7 @@
 Translation Strings Policy
 ===========================
 
-This document provides guidelines for internationalization of the Yottaflux Core software.
+This document provides guidelines for internationalization of the Yottaflux software.
 
 How to translate?
 ------------------

@@ -26,10 +26,10 @@ Contains files used to package yottafluxd/yottaflux-qt
 for Debian-based Linux systems. If you compile yottafluxd/yottaflux-qt yourself, there are some useful files here.
 
 ### [Gitian-descriptors](/contrib/gitian-descriptors) ###
-Files used during the gitian build process. For more information about gitian, see the [the Yottaflux Core documentation repository](https://github.com/yottaflux-core/docs).
+Files used during the gitian build process. For more information about gitian, see the [the Yottaflux documentation repository](https://github.com/yottaflux-core/docs).
 
 ### [Gitian-keys](/contrib/gitian-keys)
-PGP keys used for signing Yottaflux Core [Gitian release](/doc/release-process.md) results.
+PGP keys used for signing Yottaflux [Gitian release](/doc/release-process.md) results.
 
 ### [MacDeploy](/contrib/macdeploy) ###
 Scripts and notes for Mac builds. 

@@ -86,7 +86,7 @@ EXPECTED_HOLDER_NAMES = [
     "Satoshi Nakamoto\n",
     "The Raven Core developers\n",
     "The Raven Core developers \n",
-    "Yottaflux Core Developers\n",
+    "Yottaflux Developers\n",
     "the Raven Core developers\n",
     "The Yottaflux developers\n",
     "The LevelDB Authors\. All rights reserved\.\n",

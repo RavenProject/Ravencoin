@@ -1,4 +1,4 @@
-Yottaflux Core integration/staging tree
+Yottaflux integration/staging tree
 =====================================
 
 https://yottaflux.ai
@@ -21,7 +21,7 @@ out collectively by the network.
 License
 -------
 
-Yottaflux Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+Yottaflux is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see https://opensource.org/licenses/MIT.
 
 Development Process
@@ -29,7 +29,7 @@ Development Process
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
 completely stable. [Tags](https://github.com/yottaflux/Yottaflux/tags) are created
-regularly to indicate new official, stable release versions of Yottaflux Core.
+regularly to indicate new official, stable release versions of Yottaflux.
 
 Active development is done in the `develop` branch. 
 

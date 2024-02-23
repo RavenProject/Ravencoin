@@ -127,10 +127,10 @@ def main():
     g.write(' * IPv4 as well as onion addresses are wrapped inside a IPv6 address accordingly.\n')
     g.write(' */\n')
     with open(os.path.join(indir,'nodes_main.txt'), 'r', encoding="utf8") as f:
-        process_nodes(g, f, 'pnSeed6_main', 8767)
+        process_nodes(g, f, 'pnSeed6_main', 8559)
     g.write('\n')
     with open(os.path.join(indir,'nodes_test.txt'), 'r', encoding="utf8") as f:
-        process_nodes(g, f, 'pnSeed6_test', 18767)
+        process_nodes(g, f, 'pnSeed6_test', 18559)
     g.write('#endif // YOTTAFLUX_CHAINPARAMSSEEDS_H\n')
             
 if __name__ == '__main__':

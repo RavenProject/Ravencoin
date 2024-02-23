@@ -4,7 +4,7 @@ Source: https://github.com/yottaflux/Yottaflux
 
 Files: *
 Copyright: 2009-2017, Bitcoin Core Developers
-           2017-2020, Yottaflux Core Developers
+           2017-2020, Yottaflux Developers
 License: Expat
 Comment: The Bitcoin Core Developers encompasses the current developers listed on bitcoin.org,
          as well as the numerous contributors to the project.
@@ -80,7 +80,7 @@ Files: src/qt/res/icons/about.png
        src/qt/res/icons/yottaflux.*
        share/pixmaps/yottaflux*
        src/qt/res/src/yottaflux.svg
-Copyright: The Yottaflux Core Developers
+Copyright: The Yottaflux Developers
 License: public-domain
 
 

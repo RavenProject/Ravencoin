@@ -1,11 +1,11 @@
-Yottaflux Core
+Yottaflux
 ==============
 
 Setup
 ---------------------
-Yottaflux Core is the original Yottaflux client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Yottaflux transactions; depending on the speed of your computer and network connection, the synchronization process is typically complete in under an hour.
+Yottaflux is the original Yottaflux client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Yottaflux transactions; depending on the speed of your computer and network connection, the synchronization process is typically complete in under an hour.
 
-To download compiled binaries of the Yottaflux Core and wallet, visit the [GitHub release page](https://github.com/yottaflux/Yottaflux/releases).
+To download compiled binaries of the Yottaflux and wallet, visit the [GitHub release page](https://github.com/yottaflux/Yottaflux/releases).
 
 Running
 ---------------------
@@ -74,11 +74,11 @@ The GUI wallet requires the QR Code encoding library and Google's data interchan
 
 2) Double click the DMG to mount it.
 
-3) Drag Yottaflux Core icon to the Applications Folder
+3) Drag Yottaflux icon to the Applications Folder
 
 ![alt tag](https://i.imgur.com/GLhBFUV.png)
 
-4) Open the Applications folder and Launch Yottaflux Core. The client will begin synchronizing with the network.
+4) Open the Applications folder and Launch Yottaflux. The client will begin synchronizing with the network.
 
 ![alt tag](https://i.imgur.com/v3962qo.png)
 

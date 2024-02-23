@@ -1,7 +1,7 @@
 Dependencies
 ============
 
-These are the dependencies currently used by Yottaflux Core. You can find instructions for installing them in the `build-*.md` file for your platform.
+These are the dependencies currently used by Yottaflux. You can find instructions for installing them in the `build-*.md` file for your platform.
 
 | Dependency | Version used | Minimum required | CVEs | Shared | [Bundled Qt library](https://doc.qt.io/qt-5/configure-options.html) |
 | --- | --- | --- | --- | --- | --- |

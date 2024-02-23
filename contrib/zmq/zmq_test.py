@@ -9,10 +9,10 @@
 
     Yottaflux should be started with the command line arguments:
         yottafluxd -testnet -daemon \
-                -zmqpubhashblock=tcp://127.0.0.1:28766 \
-                -zmqpubrawtx=tcp://127.0.0.1:28766 \
-                -zmqpubhashtx=tcp://127.0.0.1:28766 \
-                -zmqpubhashblock=tcp://127.0.0.1:28766
+                -zmqpubhashblock=tcp://127.0.0.1:28558 \
+                -zmqpubrawtx=tcp://127.0.0.1:28558 \
+                -zmqpubhashtx=tcp://127.0.0.1:28558 \
+                -zmqpubhashblock=tcp://127.0.0.1:28558
 """
 
 import sys
@@ -26,7 +26,7 @@ context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
 print("Getting Yottaflux msgs")
-socket.connect("tcp://localhost:28766")
+socket.connect("tcp://localhost:28558")
 
 socket.setsockopt_string(zmq.SUBSCRIBE, "hashtx")
 socket.setsockopt_string(zmq.SUBSCRIBE, "hashblock")

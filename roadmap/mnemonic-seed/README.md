@@ -7,7 +7,7 @@ There have been evolutions over the last ten years and it is about as close to t
 A marvelous solution is to create a random seed from which all other keys can be generated.  For an overview of how this works read Seeds of Freedom:  
 (https://medium.com/@tronblack/yottaflux-seeds-of-freedom-a3a3ff0fa1)
 
-In an effort to bring ease-of-use and interoperability between the core wallet and the mobile wallet, the Yottaflux Core wallet will default to generating a 12-word mnemonic seed.  A mnemonic seed is a 128 bit random number that is run through HMAC-512 hashing algorithm to produce a master key.  The main advantage of starting with a 12-word seed is the ease of backing up the wallet.
+In an effort to bring ease-of-use and interoperability between the core wallet and the mobile wallet, the Yottaflux wallet will default to generating a 12-word mnemonic seed.  A mnemonic seed is a 128 bit random number that is run through HMAC-512 hashing algorithm to produce a master key.  The main advantage of starting with a 12-word seed is the ease of backing up the wallet.
 
 The core wallet, by default, will generate a 12-word seed and calculated master key for  derivation.  When using the 12-word seed, the derivation path will use the BIP44 standard.
 

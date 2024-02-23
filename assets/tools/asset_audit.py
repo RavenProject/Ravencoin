@@ -24,12 +24,12 @@ import logging
 cli = "yottaflux-cli"
 
 mode = "-main"
-rpc_port = 8766
+rpc_port = 8558
 
 #mode = "-testnet"
 #rpc_port = 18770
 #mode =  "-regtest"
-#rpc_port = 18444
+#rpc_port = 18560
 
 #Set this information in your yottaflux.conf file (in datadir, not testnet6)
 rpc_user = 'rpcuser'

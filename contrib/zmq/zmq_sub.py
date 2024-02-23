@@ -9,10 +9,10 @@
 
     Yottaflux should be started with the command line arguments:
         yottafluxd -testnet -daemon \
-                -zmqpubhashblock=tcp://127.0.0.1:28766 \
-                -zmqpubrawtx=tcp://127.0.0.1:28766 \
-                -zmqpubhashtx=tcp://127.0.0.1:28766 \
-                -zmqpubhashblock=tcp://127.0.0.1:28766
+                -zmqpubhashblock=tcp://127.0.0.1:28558 \
+                -zmqpubrawtx=tcp://127.0.0.1:28558 \
+                -zmqpubhashtx=tcp://127.0.0.1:28558 \
+                -zmqpubhashblock=tcp://127.0.0.1:28558
 
     We use the asyncio library here.  `self.handle()` installs itself as a
     future at the end of the function.  Since it never returns with the event
@@ -35,7 +35,7 @@ if not (sys.version_info.major >= 3 and sys.version_info.minor >= 5):
     print("This example only works with Python 3.5 and greater")
     sys.exit(1)
 
-port = 28766
+port = 28558
 
 class ZMQHandler():
     def __init__(self):

@@ -36,7 +36,7 @@ def rpc_call(params):
 
 def get_rpc_connection():
     from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
-    rpc_connection = AuthServiceProxy("http://%s:%s@127.0.0.1:18766"%(rpc_user, rpc_pass))
+    rpc_connection = AuthServiceProxy("http://%s:%s@127.0.0.1:18558"%(rpc_user, rpc_pass))
     return(rpc_connection)
 
 

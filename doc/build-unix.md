@@ -1,6 +1,6 @@
 UNIX/LINUX BUILD NOTES
 ====================
-Some notes on how to build Yottaflux Core in *nix.
+Some notes on how to build Yottaflux in *nix.
 
 
 Note
@@ -213,7 +213,7 @@ Note:
 Enabling wallet support requires either compiling against a Berkeley DB newer than 4.8 (package `db`) using `--with-incompatible-bdb`,
 or building and depending on a local version of Berkeley DB 4.8. The readily available Arch Linux packages are currently built using
 `--with-incompatible-bdb` according to the [PKGBUILD](https://projects.archlinux.org/svntogit/community.git/tree/yottaflux/trunk/PKGBUILD).
-As mentioned above, when maintaining portability of the wallet between the standard Yottaflux Core distributions and independently built
+As mentioned above, when maintaining portability of the wallet between the standard Yottaflux distributions and independently built
 node software is desired, Berkeley DB 4.8 must be used.
 
 

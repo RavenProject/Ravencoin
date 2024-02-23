@@ -231,8 +231,8 @@ UniValue addnode(const JSONRPCRequest& request)
             "1. \"node\"     (string, required) The node (see getpeerinfo for nodes)\n"
             "2. \"command\"  (string, required) 'add' to add a node to the list, 'remove' to remove a node from the list, 'onetry' to try a connection to the node once\n"
             "\nExamples:\n"
-            + HelpExampleCli("addnode", "\"192.168.0.6:8767\" \"onetry\"")
-            + HelpExampleRpc("addnode", "\"192.168.0.6:8767\", \"onetry\"")
+            + HelpExampleCli("addnode", "\"192.168.0.6:8559\" \"onetry\"")
+            + HelpExampleRpc("addnode", "\"192.168.0.6:8559\", \"onetry\"")
         );
 
     if(!g_connman)
@@ -273,9 +273,9 @@ UniValue disconnectnode(const JSONRPCRequest& request)
             "1. \"address\"     (string, optional) The IP address/port of the node\n"
             "2. \"nodeid\"      (number, optional) The node ID (see getpeerinfo for node IDs)\n"
             "\nExamples:\n"
-            + HelpExampleCli("disconnectnode", "\"192.168.0.6:8767\"")
+            + HelpExampleCli("disconnectnode", "\"192.168.0.6:8559\"")
             + HelpExampleCli("disconnectnode", "\"\" 1")
-            + HelpExampleRpc("disconnectnode", "\"192.168.0.6:8767\"")
+            + HelpExampleRpc("disconnectnode", "\"192.168.0.6:8559\"")
             + HelpExampleRpc("disconnectnode", "\"\", 1")
         );
 
@@ -320,7 +320,7 @@ UniValue getaddednodeinfo(const JSONRPCRequest& request)
             "    \"connected\" : true|false,          (boolean) If connected\n"
             "    \"addresses\" : [                    (list of objects) Only when connected = true\n"
             "       {\n"
-            "         \"address\" : \"192.168.0.201:8767\",  (string) The yottaflux server IP and port we're connected to\n"
+            "         \"address\" : \"192.168.0.201:8559\",  (string) The yottaflux server IP and port we're connected to\n"
             "         \"connected\" : \"outbound\"           (string) connection, inbound or outbound\n"
             "       }\n"
             "     ]\n"

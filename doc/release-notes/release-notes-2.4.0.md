@@ -1,4 +1,4 @@
-Yottaflux Core version *2.4.0* is now available!!
+Yottaflux version *2.4.0* is now available!!
 ==============
 
   <https://github.com/yottaflux/Yottaflux/releases/tag/v2.4.0>
@@ -34,20 +34,20 @@ will not fork the chain.
 Compatibility
 ==============
 
-Yottaflux Core is extensively tested on multiple operating systems using
+Yottaflux is extensively tested on multiple operating systems using
 the Linux kernel, macOS 10.8+, and Windows 10(x64) and later. 32-bit versions of Windows,
 and Windows XP are not supported.
 
-Yottaflux Core should also work on most other Unix-like systems but is not
+Yottaflux should also work on most other Unix-like systems but is not
 frequently tested on them.
 
-Yottaflux Core has been tested with macOS 10.14 Mojave, but it is recommended that *developers*
+Yottaflux has been tested with macOS 10.14 Mojave, but it is recommended that *developers*
 do not update to Mojave.  There is an incompatibility with Berkeley-db 4.8.30 that causes
 the binaries to seg-fault.  There is a workaround, but as of this release users should
 not update to Mojave (see build-OSX.md for current status of this issue).  There are no
 known issues running the release binaries on Mojave.
 
-Yottaflux Core has not been tested with macOS Catalina(beta). Please use at your own risk.
+Yottaflux has not been tested with macOS Catalina(beta). Please use at your own risk.
 
 Notable changes
 ==============

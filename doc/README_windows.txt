@@ -1,4 +1,4 @@
-Yottaflux Core
+Yottaflux
 =============
 
 Intro
@@ -13,7 +13,7 @@ Setup
 -----
 Unpack the files into a directory and run yottaflux-qt.exe.
 
-Yottaflux Core is the original Yottaflux client and it builds the backbone of the network.
+Yottaflux is the original Yottaflux client and it builds the backbone of the network.
 However, it downloads and stores the entire history of Yottaflux transactions;
 depending on the speed of your computer and network connection, the synchronization
 process can take anywhere from a few hours to a day or more.

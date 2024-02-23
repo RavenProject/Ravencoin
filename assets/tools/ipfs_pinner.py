@@ -32,7 +32,7 @@ cli = "yottaflux-cli"
 
 #mode = "-testnet"
 mode = ""
-rpc_port = 8766
+rpc_port = 8558
 #Set this information in your yottaflux.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
@@ -364,7 +364,7 @@ def monitor_zmq():
 	socket = context.socket(zmq.SUB)
 
 	print("Getting Yottaflux msgs")
-	socket.connect("tcp://localhost:28766")
+	socket.connect("tcp://localhost:28558")
 
 	#socket.setsockopt_string(zmq.SUBSCRIBE, u'hashtx')
 	#socket.setsockopt_string(zmq.SUBSCRIBE, u'hashblock')

@@ -1040,7 +1040,7 @@ TINYFORMAT_FOREACH_ARGNUM(TINYFORMAT_MAKE_FORMAT_FUNCS)
 
 #endif
 
-// Added for Yottaflux Core
+// Added for Yottaflux
 template<typename... Args>
 std::string format(const std::string &fmt, const Args&... args)
 {

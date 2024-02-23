@@ -42,11 +42,11 @@ reachable from the Tor network. Add these lines to your /etc/tor/torrc (or equiv
 config file):
 
 	HiddenServiceDir /var/lib/tor/yottaflux-service/
-	HiddenServicePort 8767 127.0.0.1:8767
-	HiddenServicePort 18767 127.0.0.1:18767
+	HiddenServicePort 8559 127.0.0.1:8559
+	HiddenServicePort 18559 127.0.0.1:18559
 
 The directory can be different of course, but (both) port numbers should be equal to
-your yottafluxd's P2P listen port (8767 by default).
+your yottafluxd's P2P listen port (8559 by default).
 
 	-externalip=X   You can tell yottaflux about its publicly reachable address using
 	                this option, and this can be a .onion address. Given the above
@@ -81,7 +81,7 @@ as well, use `discover` instead:
 
 	./yottafluxd ... -discover
 
-and open port 8767 on your firewall (or use -upnp).
+and open port 8559 on your firewall (or use -upnp).
 
 If you only want to use Tor to reach onion addresses, but not use it as a proxy
 for normal IPv4/IPv6 communication, use:
@@ -93,13 +93,13 @@ for normal IPv4/IPv6 communication, use:
 
 Starting with Tor version 0.2.7.1 it is possible, through Tor's control socket
 API, to create and destroy 'ephemeral' hidden services programmatically.
-Yottaflux Core has been updated to make use of this.
+Yottaflux has been updated to make use of this.
 
 This means that if Tor is running (and proper authentication has been configured),
-Yottaflux Core automatically creates a hidden service to listen on. This will positively 
+Yottaflux automatically creates a hidden service to listen on. This will positively 
 affect the number of available .onion nodes.
 
-This new feature is enabled by default if Yottaflux Core is listening (`-listen`), and
+This new feature is enabled by default if Yottaflux is listening (`-listen`), and
 requires a Tor connection to work. It can be explicitly disabled with `-listenonion=0`
 and, if not disabled, configured using the `-torcontrol` and `-torpassword` settings.
 To show verbose debugging information, pass `-debug=tor`.

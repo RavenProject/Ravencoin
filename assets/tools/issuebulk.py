@@ -27,9 +27,9 @@ import hashlib
 cli = "yottaflux-cli"
 
 mode =  "-testnet"
-rpc_port = 18766
+rpc_port = 18558
 #mode =  "-regtest"
-#rpc_port = 18443
+#rpc_port = 18561
 csv_file = "Yottaflux Assets - Sheet1.csv"
 #Set this information in your yottaflux.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'

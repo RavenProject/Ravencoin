@@ -1,7 +1,7 @@
 (note: this is a temporary file, to be added-to by anybody, and moved to
 release-notes at release time)
 
-Yottaflux Core version *version* is now available from:
+Yottaflux version *version* is now available from:
 
   <https://yottaflux.ai/bin/yottaflux-core-*version*/>
 
@@ -47,10 +47,10 @@ processing the entire blockchain.
 Compatibility
 ==============
 
-Yottaflux Core is extensively tested on multiple operating systems using
+Yottaflux is extensively tested on multiple operating systems using
 the Linux kernel, macOS 10.8+, and Windows Vista and later. Windows XP is not supported.
 
-Yottaflux Core should also work on most other Unix-like systems but is not
+Yottaflux should also work on most other Unix-like systems but is not
 frequently tested on them.
 
 Notable changes

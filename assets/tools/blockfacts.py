@@ -11,7 +11,7 @@ cli = "yottaflux-cli"
 
 #mode = "-testnet"
 mode = ""
-rpc_port = 8766
+rpc_port = 8558
 #Set this information in your yottaflux.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
