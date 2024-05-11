@@ -917,7 +917,7 @@ void AssetsDialog::assetControlChangeEdited(const QString& text)
 
         if (text.isEmpty()) // Nothing entered
         {
-            ui->labelAssetControlChangeLabel->setText("");
+            ui->labelAssetControlChangeLabel->setText(tr("Warning: You must provide a valid entry"));
         }
         else if (!IsValidDestination(dest)) // Invalid address
         {
