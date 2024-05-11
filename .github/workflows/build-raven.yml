@@ -26,7 +26,7 @@ env:
 jobs:
   check-jobs:
       # continue-on-error: true # Uncomment once integration is finished
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     # Map a step output to a job output
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -52,11 +52,10 @@ jobs:
 
   build:
     needs: check-jobs
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
        OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet', 'aarch64', 'aarch64-disable-wallet' ]
-#       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'osx', 'arm32v7', 'arm32v7-disable-wallet' ]
 
     steps:
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
@@ -69,7 +68,7 @@ jobs:
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Cache dependencies.
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
        path: |
         ${{ GITHUB.WORKSPACE }}/depends/built
