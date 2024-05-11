@@ -19,12 +19,17 @@ Then install [Homebrew](https://brew.sh).
 Dependencies
 ----------------------
 
-    brew install automake berkeley-db4 libtool boost miniupnpc openssl@1.1 pkg-config protobuf python qt libevent qrencode
+Running this command will install all the dependencies needed to build this project:
+
+```shell
+brew install automake berkeley-db4 libtool boost miniupnpc openssl@1.1 pkg-config protobuf python qt@5 libevent qrencode
+```
 
 If you run into issues, check [Homebrew's troubleshooting page](https://docs.brew.sh/Troubleshooting).
 See [dependencies.md](dependencies.md) for a complete overview.
 
 If you want to build the disk image with `make deploy` (.dmg / optional), you need RSVG:
+
 ```shell
 brew install librsvg
 ```
@@ -35,7 +40,7 @@ you can use [this](/contrib/install_db4.sh) script to install it
 like so:
 
 ```shell
-./contrib/install_db4.sh .
+CFLAGS="-Wno-error=implicit-function-declaration" ./contrib/install_db4.sh .
 ```
 
 from the root of the repository.
@@ -60,6 +65,18 @@ from the root of the repository.
     ./configure
     make
     ```
+    
+    If you opted to build Berkeley DB 4.8 above, then this is how you'll build it instead:
+    ```shell
+    export BDB_PREFIX=`pwd`'/db4'
+    ./autogen.sh
+    ./configure BDB_LIBS="-L${BDB_PREFIX}/lib -ldb_cxx-4.8" BDB_CFLAGS="-I${BDB_PREFIX}/include" --with-boost=/opt/homebrew/Cellar/boost/1.80.0
+    ```
+
+    If the build process complains about not being able to find openssl, run this then try again:
+    ```shell
+    brew link openssl@1.1 --force
+    ```    
 
 3.  It is recommended to build and run the unit tests:
     ```shell
