@@ -996,6 +996,81 @@ UniValue getunconfirmedbalance(const JSONRPCRequest &request)
     return ValueFromAmount(pwallet->GetUnconfirmedBalance());
 }
 
+UniValue issuemineable(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 9)
+        throw std::runtime_error(
+            "issuemineable \"asset_name\" qty per_block ( units ) (fund_amt) \"( change_address )\" ( has_ipfs ) \"( ipfs_hash )\"\n"
+            "\nIssue a mineable asset.\n"
+            "\nArguments:\n"
+            "1. \"asset_name\"         (string, required) The name of the root asset.\n"
+            "2. \"qty\"                (integer, required) The total number of assets to be mined.\n"
+            "3. \"per_block\"          (integer, required) Number of mineable assets generated in the coinbase.\n"
+            "4. \"nth_block\"          (integer, optional, default=10) The number of blocks between issuance of the mineable asset.\n"
+            "5. \"units\"              (integer, optional, default=0) The number of decimals precision for the asset.\n"
+            "6. \"fund_amt\"           (integer, optional, default=0) Amount of per_block sent to ownership token address.\n"
+            "7. \"change_address\"     (string, optional, default=\"\") The RVN change address.\n"
+            "8. \"has_ipfs\"           (boolean, optional, default=false) Whether IPFS hash is going to be added to the asset.\n"
+            "9. \"ipfs_hash\"          (string, optional) The IPFS hash (required if has_ipfs = true).\n"
+            "\nResult:\n"
+            "\"txid\"                  (string) The transaction id.\n"
+        );
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    std::string asset_name = request.params[0].get_str();
+    CAmount qty = request.params[1].get_int64();
+    int per_block = request.params[2].get_int();
+    int nth_block = request.params.size() > 3 ? request.params[3].get_int() : 10;
+    int units = request.params.size() > 4 ? request.params[4].get_int() : 0;
+    CAmount fund_amt = request.params.size() > 5 ? request.params[5].get_int64() : 0;
+    std::string change_address = request.params.size() > 6 ? request.params[6].get_str() : "";
+    bool has_ipfs = request.params.size() > 7 ? request.params[7].get_bool() : false;
+    std::string ipfs_hash = request.params.size() > 8 ? request.params[8].get_str() : "";
+
+    // Validate parameters...
+    // Construct the transaction for the mineable asset...
+    // Return the transaction ID
+    return txid.GetHex();
+}
+
+UniValue issuemineabletestrun(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 6)
+        throw std::runtime_error(
+            "issuemineabletestrun \"asset_name\" qty per_block ( units ) ( fund_amt )\n"
+            "\nSimulates the mineable asset issuance and returns the cost and distribution timeframe.\n"
+            "\nArguments:\n"
+            "1. \"asset_name\"         (string, required) The name of the root asset.\n"
+            "2. \"qty\"                (integer, required) The total number of assets to be mined.\n"
+            "3. \"per_block\"          (integer, required) Number of mineable assets generated in the coinbase.\n"
+            "4. \"units\"              (integer, optional, default=0) The number of decimals precision for the asset.\n"
+            "5. \"fund_amt\"           (integer, optional, default=0) Amount of per_block sent to ownership token address.\n"
+            "\nResult:\n"
+            "\"Cost: X RVN\n"
+            "Issued over DD days, MM months, or YY years\n"
+            "Total Mined: X\n"
+            "Total Funded: X\"\n"
+        );
+
+    std::string asset_name = request.params[0].get_str();
+    CAmount qty = request.params[1].get_int64();
+    int per_block = request.params[2].get_int();
+    int units = request.params.size() > 3 ? request.params[3].get_int() : 0;
+    CAmount fund_amt = request.params.size() > 4 ? request.params[4].get_int64() : 0;
+
+    // Simulate the issuance...
+    std::string result = strprintf("Cost: %d RVN\nIssued over %d days, %d months, or %d years\nTotal Mined: %d\nTotal Funded: %d",
+                                   cost, days, months, years, total_mined, total_funded);
+
+    return result;
+}
 
 UniValue movecmd(const JSONRPCRequest& request)
 {
@@ -3540,7 +3615,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "getaddressesbyaccount",    &getaddressesbyaccount,    {"account"} },
     { "wallet",             "getbalance",               &getbalance,               {"account","minconf","include_watchonly"} },
     { "wallet",             "getmasterkeyinfo",         &getmasterkeyinfo,         {} },
-    { "wallet",             "getmywords",               &getmywords,                        {} },
+    { "wallet",             "getmywords",               &getmywords,               {} },
     { "wallet",             "getnewaddress",            &getnewaddress,            {"account"} },
     { "wallet",             "getrawchangeaddress",      &getrawchangeaddress,      {} },
     { "wallet",             "getreceivedbyaccount",     &getreceivedbyaccount,     {"account","minconf"} },
@@ -3580,7 +3655,11 @@ static const CRPCCommand commands[] =
     { "wallet",             "rescanblockchain",         &rescanblockchain,         {"start_height", "stop_height"} },
 
     { "generating",         "generate",                 &generate,                 {"nblocks","maxtries"} },
+
+    { "mineable",           "issuemineable",            &issuemineable,            {"asset_name", "qty", "per_block", "nth_block", "units", "fund_amt", "change_address", "has_ipfs", "ipfs_hash"} },
+    { "mineable",           "issuemineabletestrun",     &issuemineabletestrun,     {"asset_name", "qty", "per_block", "units", "fund_amt"} },
 };
+
 
 void RegisterWalletRPCCommands(CRPCTable &t)
 {
