@@ -1034,10 +1034,39 @@ UniValue issuemineable(const JSONRPCRequest& request)
     bool has_ipfs = request.params.size() > 7 ? request.params[7].get_bool() : false;
     std::string ipfs_hash = request.params.size() > 8 ? request.params[8].get_str() : "";
 
-    // Validate parameters...
-    // Construct the transaction for the mineable asset...
+    // Validate parameters
+    if (qty <= 0 || qty > MAX_MONEY)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid quantity for mineable asset.");
+    if (per_block <= 0 || per_block > qty)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid per_block value.");
+    if (fund_amt < 0 || fund_amt >= per_block)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid fund_amt value.");
+    if (has_ipfs && ipfs_hash.empty())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "IPFS hash must be provided if has_ipfs is true.");
+
+    // Construct the transaction for the mineable asset
+    CWalletTx wtx;
+    CReserveKey reservekey(pwallet);
+    CAmount nFeeRequired;
+    std::string strFailReason;
+    int nChangePosRet = -1;
+    CRecipient recipient = {GetScriptForDestination(DecodeDestination(change_address)), qty, false};
+
+    std::vector<CRecipient> vecSend;
+    vecSend.push_back(recipient);
+
+    CCoinControl coinControl;
+    if (!pwallet->CreateTransaction(vecSend, wtx, reservekey, nFeeRequired, nChangePosRet, strFailReason, coinControl)) {
+        throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
+    }
+
+    if (!pwallet->CommitTransaction(wtx, reservekey, g_connman.get(), state)) {
+        strFailReason = strprintf("Transaction commit failed:: %s", state.GetRejectReason());
+        throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
+    }
+
     // Return the transaction ID
-    return txid.GetHex();
+    return wtx.GetHash().GetHex();
 }
 
 UniValue issuemineabletestrun(const JSONRPCRequest& request)
