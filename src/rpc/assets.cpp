@@ -39,7 +39,7 @@
 void CheckRestrictedAssetTransferInputs(const CWalletTx& transaction, const std::string& asset_name) {
     // Do a validity check before commiting the transaction
     if (IsAssetNameAnRestricted(asset_name)) {
-        if (pcoinsTip && passets) {
+        if (pcoinsTip.get() && passets) {
             for (auto input : transaction.tx->vin) {
                 const COutPoint &prevout = input.prevout;
                 const Coin &coin = pcoinsTip->AccessCoin(prevout);
@@ -1802,7 +1802,7 @@ UniValue getcacheinfo(const JSONRPCRequest& request)
     if (!currentActiveAssetCache)
         throw JSONRPCError(RPC_VERIFY_ERROR, "asset cache is null");
 
-    if (!pcoinsTip)
+    if (!pcoinsTip.get())
         throw JSONRPCError(RPC_VERIFY_ERROR, "coins tip cache is null");
 
     if (!passetsCache)

@@ -68,7 +68,6 @@ class PeerLogicValidation;
 
 struct TestingSetup : public BasicTestingSetup
 {
-    CCoinsViewDB *pcoinsdbview;
     fs::path pathTemp;
     boost::thread_group threadGroup;
     CConnman *connman;
