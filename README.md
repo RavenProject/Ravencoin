@@ -17,12 +17,17 @@ with no central authority: managing transactions and issuing money are carried
 out collectively by the network. 
 
 
-
 License
 -------
 
 Raven Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see https://opensource.org/licenses/MIT.
+
+
+Optimizing Your Node for Maximum Performance and Efficiency
+-------------------
+[Config Readme found here.](https://github.com/RavenProject/Ravencoin/blob/master/Config-README.md)
+
 
 Development Process
 -------------------
@@ -36,6 +41,7 @@ Active development is done in the `develop` branch.
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Developer IRC is inactive please join us on discord in #development. https://discord.gg/fndp4NBGct
+
 
 Testing
 -------
