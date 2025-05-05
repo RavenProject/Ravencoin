@@ -1,0 +1,15 @@
+diff --git a/qtbase/src/corelib/global/qendian.cpp b/qtbase/src/corelib/global/qendian.cpp
+index 123456..789012 100644
+--- a/qtbase/src/corelib/global/qendian.cpp
++++ b/qtbase/src/corelib/global/qendian.cpp
+@@ -41,6 +41,10 @@
+ #include "qendian.h"
+ #include "qfloat16.h"
+ 
++// Avoid conflicts with std::min/std::max
++#undef min
++#undef max
++
+ QT_BEGIN_NAMESPACE
+ 
+ /*!
