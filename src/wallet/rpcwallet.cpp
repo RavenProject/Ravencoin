@@ -1792,6 +1792,11 @@ void ListTransactions(CWallet* const pwallet, const CWalletTx& wtx, const std::s
     UniValue assetDetails(UniValue::VARR);
 
     ListTransactions(pwallet, wtx, strAccount, nMinDepth, fLong, ret, assetDetails, filter);
+
+    // Include asset transactions in the result
+    for (size_t i = 0; i < assetDetails.size(); i++) {
+        ret.push_back(assetDetails[i]);
+    }
 }
 
 void AcentryToJSON(const CAccountingEntry& acentry, const std::string& strAccount, UniValue& ret)
@@ -1929,6 +1934,140 @@ UniValue listtransactions(const JSONRPCRequest& request)
     std::advance(first, nFrom);
     std::vector<UniValue>::iterator last = arrTmp.begin();
     std::advance(last, nFrom+nCount);
+
+    if (last != arrTmp.end()) arrTmp.erase(last, arrTmp.end());
+    if (first != arrTmp.begin()) arrTmp.erase(arrTmp.begin(), first);
+
+    std::reverse(arrTmp.begin(), arrTmp.end()); // Return oldest to newest
+
+    ret.clear();
+    ret.setArray();
+    ret.push_backV(arrTmp);
+
+    return ret;
+}
+
+UniValue listassettransactions(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() > 4)
+        throw std::runtime_error(
+            "listassettransactions ( \"asset\" count skip include_watchonly )\n"
+            "\nReturns asset transfer transactions from the wallet.\n"
+            "Unlike listtransactions, this returns ONLY asset movements (no RVN-only transactions).\n"
+            "\nArguments:\n"
+            "1. \"asset\"             (string, optional, default=\"*\") Filter by asset name. Use \"*\" for all assets.\n"
+            "2. count                (numeric, optional, default=20) The number of transactions to return\n"
+            "3. skip                 (numeric, optional, default=0) The number of transactions to skip\n"
+            "4. include_watchonly    (bool, optional, default=false) Include watch-only addresses\n"
+            "\nResult:\n"
+            "[\n"
+            "  {\n"
+            "    \"asset_name\": \"name\",       (string) The asset name\n"
+            "    \"asset_type\": \"type\",       (string) The transaction type (e.g. transfer_asset, new_asset, reissue_asset)\n"
+            "    \"amount\": x.xxx,             (numeric) The amount transferred\n"
+            "    \"address\": \"address\",       (string) The destination address\n"
+            "    \"category\": \"send|receive\", (string) Whether this was a send or receive from the wallet's perspective\n"
+            "    \"vout\": n,                   (numeric) The output index\n"
+            "    \"confirmations\": n,          (numeric) The number of confirmations\n"
+            "    \"blockhash\": \"hash\",        (string) The block hash\n"
+            "    \"blockindex\": n,             (numeric) The block index\n"
+            "    \"blocktime\": n,              (numeric) The block time\n"
+            "    \"txid\": \"txid\",             (string) The transaction id\n"
+            "    \"time\": n,                   (numeric) The transaction time\n"
+            "    \"timereceived\": n,           (numeric) The time received\n"
+            "    \"message\": \"msg\",           (string) The IPFS message if any\n"
+            "  }\n"
+            "]\n"
+            "\nExamples:\n"
+            "\nList all asset transactions\n"
+            + HelpExampleCli("listassettransactions", "") +
+            "\nList transactions for a specific asset\n"
+            + HelpExampleCli("listassettransactions", "\"MYASSET\"") +
+            "\nList 50 transactions, skipping the first 10\n"
+            + HelpExampleCli("listassettransactions", "\"*\" 50 10")
+        );
+
+    ObserveSafeMode();
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    std::string assetFilter = "*";
+    if (request.params.size() > 0 && !request.params[0].isNull())
+        assetFilter = request.params[0].get_str();
+    int nCount = 20;
+    if (request.params.size() > 1 && !request.params[1].isNull()) {
+        if (request.params[1].isNum())
+            nCount = request.params[1].get_int();
+        else
+            nCount = atoi(request.params[1].get_str().c_str());
+    }
+    int nFrom = 0;
+    if (request.params.size() > 2 && !request.params[2].isNull()) {
+        if (request.params[2].isNum())
+            nFrom = request.params[2].get_int();
+        else
+            nFrom = atoi(request.params[2].get_str().c_str());
+    }
+    isminefilter filter = ISMINE_SPENDABLE;
+    if (request.params.size() > 3 && !request.params[3].isNull())
+        if (request.params[3].get_bool())
+            filter = filter | ISMINE_WATCH_ONLY;
+
+    if (nCount < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Negative count");
+    if (nFrom < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Negative from");
+
+    UniValue ret(UniValue::VARR);
+
+    const CWallet::TxItems & txOrdered = pwallet->wtxOrdered;
+
+    // Iterate backwards through all wallet transactions
+    for (CWallet::TxItems::const_reverse_iterator it = txOrdered.rbegin(); it != txOrdered.rend(); ++it)
+    {
+        CWalletTx *const pwtx = (*it).second.first;
+        if (pwtx == nullptr)
+            continue;
+
+        // Get asset entries using the asset-aware overload
+        UniValue rvnEntries(UniValue::VARR);
+        UniValue assetEntries(UniValue::VARR);
+        ListTransactions(pwallet, *pwtx, "*", 0, true, rvnEntries, assetEntries, filter);
+
+        // Add matching asset entries to result
+        for (size_t i = 0; i < assetEntries.size(); i++) {
+            const UniValue& entry = assetEntries[i];
+
+            // Apply asset name filter
+            if (assetFilter != "*") {
+                std::string entryAssetName = entry["asset_name"].get_str();
+                if (entryAssetName != assetFilter)
+                    continue;
+            }
+
+            ret.push_back(entry);
+        }
+
+        if ((int)ret.size() >= (nCount + nFrom))
+            break;
+    }
+
+    // Apply skip and count
+    if (nFrom > (int)ret.size())
+        nFrom = ret.size();
+    if ((nFrom + nCount) > (int)ret.size())
+        nCount = ret.size() - nFrom;
+
+    std::vector<UniValue> arrTmp = ret.getValues();
+
+    std::vector<UniValue>::iterator first = arrTmp.begin();
+    std::advance(first, nFrom);
+    std::vector<UniValue>::iterator last = arrTmp.begin();
+    std::advance(last, nFrom + nCount);
 
     if (last != arrTmp.end()) arrTmp.erase(last, arrTmp.end());
     if (first != arrTmp.begin()) arrTmp.erase(arrTmp.begin(), first);
@@ -2870,6 +3009,156 @@ UniValue listwallets(const JSONRPCRequest& request)
     return obj;
 }
 
+extern CScheduler* pScheduler; // defined in init.cpp
+
+UniValue createwallet(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 1 || request.params.size() > 1)
+        throw std::runtime_error(
+            "createwallet \"wallet_name\"\n"
+            "\nCreates and loads a new wallet.\n"
+            "\nArguments:\n"
+            "1. \"wallet_name\"    (string, required) The name for the new wallet.\n"
+            "                     The wallet is created in the data directory.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"name\": \"wallet_name\",  (string) The wallet name\n"
+            "  \"warning\": \"...\",       (string) Any warnings\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("createwallet", "\"mywallet\"")
+            + HelpExampleRpc("createwallet", "\"mywallet\"")
+        );
+
+    std::string walletName = request.params[0].get_str();
+
+    // Check if wallet name is valid
+    if (walletName.empty())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Wallet name cannot be empty");
+
+    // Check for path separators
+    if (walletName.find('/') != std::string::npos || walletName.find('\\') != std::string::npos)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Wallet name cannot contain path separators");
+
+    // Check if already loaded
+    for (CWalletRef pwallet : vpwallets) {
+        if (pwallet->GetName() == walletName) {
+            throw JSONRPCError(RPC_WALLET_ERROR, "Wallet \"" + walletName + "\" is already loaded");
+        }
+    }
+
+    // Create the wallet
+    CWallet* pwallet = CWallet::CreateWalletFromFile(walletName);
+    if (!pwallet) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Failed to create wallet \"" + walletName + "\"");
+    }
+
+    vpwallets.push_back(pwallet);
+
+    // Run post-init if scheduler is available
+    if (pScheduler) {
+        pwallet->postInitProcess(*pScheduler);
+    }
+
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("name", pwallet->GetName()));
+    obj.push_back(Pair("warning", ""));
+    return obj;
+}
+
+UniValue loadwallet(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "loadwallet \"filename\"\n"
+            "\nLoads a wallet from a wallet file.\n"
+            "Note that all wallet command-line options used when starting ravend\n"
+            "will be applied to the new wallet.\n"
+            "\nArguments:\n"
+            "1. \"filename\"    (string, required) The wallet file name (in the data directory)\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"name\": \"wallet_name\",  (string) The wallet name\n"
+            "  \"warning\": \"...\",       (string) Any warnings\n"
+            "}\n"
+            "\nExamples:\n"
+            + HelpExampleCli("loadwallet", "\"wallet2.dat\"")
+            + HelpExampleRpc("loadwallet", "\"wallet2.dat\"")
+        );
+
+    std::string walletFile = request.params[0].get_str();
+
+    if (walletFile.empty())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Wallet filename cannot be empty");
+
+    // Check if already loaded
+    for (CWalletRef pw : vpwallets) {
+        if (pw->GetName() == walletFile) {
+            throw JSONRPCError(RPC_WALLET_ERROR, "Wallet \"" + walletFile + "\" is already loaded");
+        }
+    }
+
+    // Load the wallet
+    CWallet* pwallet = CWallet::CreateWalletFromFile(walletFile);
+    if (!pwallet) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Failed to load wallet \"" + walletFile + "\"");
+    }
+
+    vpwallets.push_back(pwallet);
+
+    if (pScheduler) {
+        pwallet->postInitProcess(*pScheduler);
+    }
+
+    UniValue obj(UniValue::VOBJ);
+    obj.push_back(Pair("name", pwallet->GetName()));
+    obj.push_back(Pair("warning", ""));
+    return obj;
+}
+
+UniValue unloadwallet(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "unloadwallet \"wallet_name\"\n"
+            "\nUnloads a wallet.\n"
+            "The wallet must be currently loaded. The default wallet cannot be unloaded.\n"
+            "\nArguments:\n"
+            "1. \"wallet_name\"    (string, required) The name of the wallet to unload\n"
+            "\nExamples:\n"
+            + HelpExampleCli("unloadwallet", "\"mywallet\"")
+            + HelpExampleRpc("unloadwallet", "\"mywallet\"")
+        );
+
+    std::string walletName = request.params[0].get_str();
+
+    // Don't allow unloading the last wallet
+    if (vpwallets.size() <= 1)
+        throw JSONRPCError(RPC_WALLET_ERROR, "Cannot unload the only loaded wallet");
+
+    // Find and remove the wallet
+    CWallet* target = nullptr;
+    auto it = vpwallets.begin();
+    for (; it != vpwallets.end(); ++it) {
+        if ((*it)->GetName() == walletName) {
+            target = *it;
+            break;
+        }
+    }
+
+    if (!target)
+        throw JSONRPCError(RPC_WALLET_NOT_FOUND, "Wallet \"" + walletName + "\" not found");
+
+    // Flush and close
+    target->Flush(true);
+    UnregisterValidationInterface(target);
+    vpwallets.erase(it);
+    delete target;
+
+    UniValue obj(UniValue::VOBJ);
+    return obj;
+}
+
 UniValue resendwallettransactions(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -3562,8 +3851,12 @@ static const CRPCCommand commands[] =
     { "wallet",             "listreceivedbyaddress",    &listreceivedbyaddress,    {"minconf","include_empty","include_watchonly"} },
     { "wallet",             "listsinceblock",           &listsinceblock,           {"blockhash","target_confirmations","include_watchonly","include_removed"} },
     { "wallet",             "listtransactions",         &listtransactions,         {"account","count","skip","include_watchonly"} },
+    { "wallet",             "listassettransactions",    &listassettransactions,    {"asset","count","skip","include_watchonly"} },
     { "wallet",             "listunspent",              &listunspent,              {"minconf","maxconf","addresses","include_unsafe","query_options"} },
     { "wallet",             "listwallets",              &listwallets,              {} },
+    { "wallet",             "createwallet",             &createwallet,             {"wallet_name"} },
+    { "wallet",             "loadwallet",               &loadwallet,               {"filename"} },
+    { "wallet",             "unloadwallet",             &unloadwallet,             {"wallet_name"} },
     { "wallet",             "lockunspent",              &lockunspent,              {"unlock","transactions"} },
     { "wallet",             "move",                     &movecmd,                  {"fromaccount","toaccount","amount","minconf","comment"} },
     { "wallet",             "sendfrom",                 &sendfrom,                 {"fromaccount","toaddress","amount","minconf","comment","comment_to"} },

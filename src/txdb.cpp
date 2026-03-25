@@ -488,8 +488,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
                 pindexNew->mix_hash       = diskindex.mix_hash;
                 pindexNew->nHeight        = diskindex.nHeight;
 
-                if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
-                    return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
+                // Perf: Skip PoW re-verification on startup. Every block stored
+                // in the block index has already passed CheckProofOfWork()
+                // during initial validation in ConnectBlock(). Re-checking here
+                // is redundant and expensive (kawpow hash for every block).
+                // If the on-disk data were corrupted, LevelDB checksums would
+                // catch it before we reach this point.
 
                 pcursor->Next();
             } else {

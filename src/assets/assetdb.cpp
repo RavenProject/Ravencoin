@@ -83,6 +83,45 @@ bool CAssetsDB::EraseAddressAssetQuantity(const std::string &address, const std:
 
 bool EraseAddressAssetQuantity(const std::string &address, const std::string &assetName);
 
+// Perf: Batch write/erase methods — these add operations to an existing
+// CDBBatch without flushing. Call FlushBatch() once after accumulating
+// all operations to commit them in a single LevelDB write.
+void CAssetsDB::WriteAssetDataBatch(CDBBatch& batch, const CNewAsset &asset, const int nHeight, const uint256& blockHash)
+{
+    CDatabasedAssetData data(asset, nHeight, blockHash);
+    batch.Write(std::make_pair(ASSET_FLAG, asset.strName), data);
+}
+
+void CAssetsDB::WriteAssetAddressQuantityBatch(CDBBatch& batch, const std::string &assetName, const std::string &address, const CAmount &quantity)
+{
+    batch.Write(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, address)), quantity);
+}
+
+void CAssetsDB::WriteAddressAssetQuantityBatch(CDBBatch& batch, const std::string &address, const std::string &assetName, const CAmount& quantity)
+{
+    batch.Write(std::make_pair(ADDRESS_ASSET_QUANTITY_FLAG, std::make_pair(address, assetName)), quantity);
+}
+
+void CAssetsDB::EraseAssetDataBatch(CDBBatch& batch, const std::string& assetName)
+{
+    batch.Erase(std::make_pair(ASSET_FLAG, assetName));
+}
+
+void CAssetsDB::EraseAssetAddressQuantityBatch(CDBBatch& batch, const std::string &assetName, const std::string &address)
+{
+    batch.Erase(std::make_pair(ASSET_ADDRESS_QUANTITY_FLAG, std::make_pair(assetName, address)));
+}
+
+void CAssetsDB::EraseAddressAssetQuantityBatch(CDBBatch& batch, const std::string &address, const std::string &assetName)
+{
+    batch.Erase(std::make_pair(ADDRESS_ASSET_QUANTITY_FLAG, std::make_pair(address, assetName)));
+}
+
+bool CAssetsDB::FlushBatch(CDBBatch& batch)
+{
+    return WriteBatch(batch, true);
+}
+
 bool CAssetsDB::WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData)
 {
     return Write(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), assetUndoData);
@@ -90,11 +129,14 @@ bool CAssetsDB::WriteBlockUndoAssetData(const uint256& blockhash, const std::vec
 
 bool CAssetsDB::ReadBlockUndoAssetData(const uint256 &blockhash, std::vector<std::pair<std::string, CBlockAssetUndo> > &assetUndoData)
 {
-    // If it exists, return the read value.
-    if (Exists(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash)))
-           return Read(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), assetUndoData);
+    // Perf: Read() already returns false on not-found, so the previous
+    // Exists() + Read() pattern caused two LevelDB lookups for the same key.
+    // We just call Read() directly; if the key doesn't exist we return true
+    // because absence of undo data is not an error.
+    if (Read(std::make_pair(BLOCK_ASSET_UNDO_DATA, blockhash), assetUndoData))
+        return true;
 
-    // If it doesn't exist, we just return true because we don't want to fail just because it didn't exist in the db
+    // Key not found — not an error, just no undo data for this block
     return true;
 }
 
@@ -110,7 +152,7 @@ bool CAssetsDB::ReadReissuedMempoolState()
     // If it exists, return the read value.
     bool rv = Read(MEMPOOL_REISSUED_TX, mapReissuedAssets);
     if (rv) {
-        for (auto pair : mapReissuedAssets)
+        for (const auto& pair : mapReissuedAssets)
             mapReissuedTx.insert(std::make_pair(pair.second, pair.first));
     }
     return rv;

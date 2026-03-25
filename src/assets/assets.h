@@ -528,6 +528,7 @@ std::string EncodeIPFS(std::string decoded);
 #ifdef ENABLE_WALLET
 
 bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations = 0, const std::string& prefix = "");
+bool GetAllMyAssetBalances(CWallet* pwallet, std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations = 0, const std::string& prefix = "");
 bool GetMyAssetBalance(const std::string& name, CAmount& balance, const int& confirmations);
 
 //! Creates new asset issuance transaction

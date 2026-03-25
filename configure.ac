@@ -449,7 +449,7 @@ case $host in
        esac
      fi
 
-     AX_CHECK_LINK_FLAG([[-lboost_system -Wl,-headerpad_max_install_names]], [LDFLAGS="$LDFLAGS -lboost_system -Wl,-headerpad_max_install_names"])
+     AX_CHECK_LINK_FLAG([[-Wl,-headerpad_max_install_names]], [LDFLAGS="$LDFLAGS -Wl,-headerpad_max_install_names"])
      CPPFLAGS="$CPPFLAGS -DMAC_OSX"
      OBJCXXFLAGS="$CXXFLAGS"
      ;;
@@ -773,7 +773,9 @@ define(MINIMUM_REQUIRED_BOOST, 1.47.0)
 
 dnl Check for boost libs
 AX_BOOST_BASE([MINIMUM_REQUIRED_BOOST])
-AX_BOOST_SYSTEM
+dnl Boost.System is header-only since Boost 1.69; skip library check
+dnl AX_BOOST_SYSTEM
+BOOST_SYSTEM_LIB=""
 AX_BOOST_FILESYSTEM
 AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_THREAD

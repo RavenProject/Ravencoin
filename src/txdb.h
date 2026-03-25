@@ -34,13 +34,17 @@ static const int64_t nMaxDbCache = sizeof(void*) > 4 ? 16384 : 1024;
 //! min. -dbcache (MiB)
 static const int64_t nMinDbCache = 4;
 //! Max memory allocated to block tree DB specific cache, if no -txindex (MiB)
-static const int64_t nMaxBlockDBCache = 2;
+//! Perf: bumped from 2 to 32 MiB — allows LevelDB to cache more block index
+//! entries in memory, reducing disk I/O during validation and startup.
+static const int64_t nMaxBlockDBCache = 32;
 //! Max memory allocated to block tree DB specific cache, if -txindex (MiB)
 // Unlike for the UTXO database, for the txindex scenario the leveldb cache make
 // a meaningful difference: https://github.com/bitcoin/bitcoin/pull/8273#issuecomment-229601991
 static const int64_t nMaxBlockDBAndTxIndexCache = 1024;
 //! Max memory allocated to coin DB specific cache (MiB)
-static const int64_t nMaxCoinsDBCache = 8;
+//! Perf: bumped from 8 to 64 MiB — reduces disk reads for UTXO lookups
+//! during block validation, especially beneficial during IBD.
+static const int64_t nMaxCoinsDBCache = 64;
 
 struct CDiskTxPos : public CDiskBlockPos
 {

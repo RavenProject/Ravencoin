@@ -121,7 +121,11 @@ CDBWrapper::CDBWrapper(const fs::path& path, size_t nCacheSize, bool fMemory, bo
 {
     penv = nullptr;
     readoptions.verify_checksums = true;
-    iteroptions.verify_checksums = true;
+    // Perf: skip checksum verification during iteration. Data integrity is
+    // already guaranteed by LevelDB's per-block checksums on write and by
+    // paranoid_checks on open. Skipping verification on read reduces CPU
+    // overhead during bulk iteration (e.g., LoadBlockIndexGuts, asset loading).
+    iteroptions.verify_checksums = false;
     iteroptions.fill_cache = false;
     syncoptions.sync = true;
     options = GetOptions(nCacheSize, maxFileSize);

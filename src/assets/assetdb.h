@@ -72,6 +72,17 @@ public:
     bool WriteBlockUndoAssetData(const uint256& blockhash, const std::vector<std::pair<std::string, CBlockAssetUndo> >& assetUndoData);
     bool WriteReissuedMempoolState();
 
+    // Perf: Batch write methods — accumulate writes into an external CDBBatch
+    // instead of creating individual batches per call. Call FlushBatch() once
+    // after all writes are queued to commit them in a single LevelDB write.
+    void WriteAssetDataBatch(CDBBatch& batch, const CNewAsset& asset, const int nHeight, const uint256& blockHash);
+    void WriteAssetAddressQuantityBatch(CDBBatch& batch, const std::string& assetName, const std::string& address, const CAmount& quantity);
+    void WriteAddressAssetQuantityBatch(CDBBatch& batch, const std::string& address, const std::string& assetName, const CAmount& quantity);
+    void EraseAssetDataBatch(CDBBatch& batch, const std::string& assetName);
+    void EraseAssetAddressQuantityBatch(CDBBatch& batch, const std::string& assetName, const std::string& address);
+    void EraseAddressAssetQuantityBatch(CDBBatch& batch, const std::string& address, const std::string& assetName);
+    bool FlushBatch(CDBBatch& batch);
+
     // Read from database functions
     bool ReadAssetData(const std::string& strName, CNewAsset& asset, int& nHeight, uint256& blockHash);
     bool ReadAssetAddressQuantity(const std::string& assetName, const std::string& address, CAmount& quantity);

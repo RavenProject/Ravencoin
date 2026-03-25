@@ -394,14 +394,16 @@ static void registerSignalHandler(int signal, void(*handler)(int))
 }
 #endif
 
+static boost::signals2::connection rpcBlockChangeConn;
+
 void OnRPCStarted()
 {
-    uiInterface.NotifyBlockTip.connect(&RPCNotifyBlockChange);
+    rpcBlockChangeConn = uiInterface.NotifyBlockTip.connect(&RPCNotifyBlockChange);
 }
 
 void OnRPCStopped()
 {
-    uiInterface.NotifyBlockTip.disconnect(&RPCNotifyBlockChange);
+    rpcBlockChangeConn.disconnect();
     RPCNotifyBlockChange(false, nullptr);
     cvBlockChange.notify_all();
     LogPrint(BCLog::RPC, "RPC stopped.\n");
@@ -1322,8 +1324,11 @@ bool AppInitLockDataDirectory()
     return true;
 }
 
+CScheduler* pScheduler = nullptr;
+
 bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 {
+    pScheduler = &scheduler;
     const CChainParams& chainparams = GetParams();
     // ********************************************************* Step 4a: application initialization
 #ifndef WIN32
@@ -1835,8 +1840,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // Either install a handler to notify us when genesis activates, or set fHaveGenesis directly.
     // No locking, as this happens before any background thread is started.
+    boost::signals2::connection genesisWaitConn;
     if (chainActive.Tip() == nullptr) {
-        uiInterface.NotifyBlockTip.connect(BlockNotifyGenesisWait);
+        genesisWaitConn = uiInterface.NotifyBlockTip.connect(BlockNotifyGenesisWait);
     } else {
         fHaveGenesis = true;
     }
@@ -1857,7 +1863,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         while (!fHaveGenesis) {
             condvar_GenesisWait.wait(lock);
         }
-        uiInterface.NotifyBlockTip.disconnect(BlockNotifyGenesisWait);
+        genesisWaitConn.disconnect();
     }
 
     // ********************************************************* Step 11: start node
