@@ -138,6 +138,7 @@ protected:
 
     bool Unlock(const CKeyingMaterial& vMasterKeyIn);
     CryptedKeyMap mapCryptedKeys;
+    CryptedPQKeyMap mapCryptedPQKeys;
 
     std::vector<unsigned char> vchCryptedBip39Words;
     std::vector<unsigned char> vchCryptedBip39Passphrase;
@@ -168,10 +169,25 @@ public:
     bool Lock();
 
     virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    virtual bool AddCryptedPQKey(const CPQPubKey &pqPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     virtual bool AddCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords);
     virtual bool AddCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase);
     virtual bool AddCryptedVchSeed(const std::vector<unsigned char> &vchCryptedVchSeed);
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;
+    bool AddPQKeyPubKey(const CPQKey &key, const CPQPubKey &pubkey) override;
+    bool HavePQKey(const uint256 &witnessProgram) const override
+    {
+        {
+            LOCK(cs_KeyStore);
+            if (!IsCrypted()) {
+                return CBasicKeyStore::HavePQKey(witnessProgram);
+            }
+            return mapCryptedPQKeys.count(witnessProgram) > 0;
+        }
+        return false;
+    }
+    bool GetPQKey(const uint256 &witnessProgram, CPQKey &keyOut) const override;
+    bool GetPQPubKey(const uint256 &witnessProgram, CPQPubKey &pubkeyOut) const override;
     bool HaveKey(const CKeyID &address) const override
     {
         {

@@ -3,6 +3,74 @@ Raven Core integration/staging tree
 
 https://ravencoin.org
 
+---
+
+## RIP-25: Post-Quantum Signatures (This Fork)
+
+This fork implements [RIP-25](doc/RIP-0025-PQ-Signatures.md) ([GitHub Issue #1280](https://github.com/RavenProject/Ravencoin/issues/1280)), a proposal to add **quantum-resistant transaction signing** to Ravencoin using ML-DSA-44 (FIPS 204).
+
+### What it does
+
+New **witness v2** addresses use ML-DSA-44 (a NIST-standardized post-quantum signature algorithm) exclusively. Existing ECDSA addresses (witness v0) continue working unchanged. Users gradually migrate funds from ECDSA to ML-DSA-44 addresses, making the system quantum-resistant before quantum computers can break ECDSA.
+
+- **Old addresses (witness v0):** ECDSA/secp256k1, unchanged
+- **New addresses (witness v2):** ML-DSA-44 only, quantum-resistant
+- **Migration:** Users send funds from old to new addresses at their own pace
+
+### Key changes
+
+| Area | Change |
+|------|--------|
+| **Consensus** | BIP9 soft-fork deployment (bit 11, 85% threshold), phased block weight increase (8 → 12 → 16 MWU) |
+| **Script** | Witness version 2 validation: 2-element witness stack [mldsa_sig, mldsa_pk], SHA256(pk) == program |
+| **Policy** | `TX_WITNESS_V2_PQ_KEYHASH` standard type, PQ witness discount (8x), PQ-aware dust threshold |
+| **Addresses** | Bech32m encoding for witness v2 (HRP: `rvn` mainnet, `trvn` testnet, `rcrt` regtest) |
+| **Network** | `NODE_PQ_HYBRID` service flag (bit 5), 16 MB protocol message limit |
+| **Crypto** | `src/crypto/mldsa.h/cpp` — ML-DSA-44 via [liboqs](https://github.com/open-quantum-safe/liboqs) (FIPS 204 compliant) |
+| **Keys** | `src/pqkey.h/cpp` — `CPQKey` / `CPQPubKey` for ML-DSA-44 key management |
+| **Wallet** | `getnewpqaddress` RPC, PQ keystore integration, `IsMine` for witness v2 |
+| **Signing** | ML-DSA-44 signing in `sign.cpp` via `TransactionSignatureCreator` |
+| **Build** | liboqs added as dependency (`depends/packages/liboqs.mk`, `configure.ac --with-liboqs`) |
+| **Tests** | `src/test/pqkey_tests.cpp` — unit tests for ML-DSA-44 keygen, sign/verify, witness programs |
+
+### Branch
+
+All work is on [`feature/rip25-pq-hybrid`](https://github.com/ALENOC/Ravencoin/tree/feature/rip25-pq-hybrid).
+
+### Building with liboqs
+
+```bash
+# Install liboqs (Ubuntu/Debian)
+sudo apt install cmake ninja-build
+git clone https://github.com/open-quantum-safe/liboqs.git
+cd liboqs && mkdir build && cd build
+cmake -DOQS_MINIMAL_BUILD="SIG_ml_dsa_44" -DBUILD_SHARED_LIBS=ON ..
+make -j$(nproc) && sudo make install
+sudo ldconfig
+
+# Build Ravencoin with PQ support
+cd /path/to/Ravencoin
+./autogen.sh
+./configure --with-liboqs
+make -j$(nproc)
+```
+
+Or using the depends system:
+```bash
+cd depends && make
+cd .. && ./autogen.sh
+./configure --prefix=$(pwd)/depends/x86_64-pc-linux-gnu
+make -j$(nproc)
+```
+
+### Status
+
+**Complete implementation** — All consensus rules, script validation, policy, network, wallet, signing, address encoding, and ML-DSA-44 cryptographic integration via liboqs are implemented. The build system detects liboqs automatically via pkg-config or `--with-liboqs`.
+
+For the full specification see [`doc/RIP-0025-PQ-Signatures.md`](doc/RIP-0025-PQ-Signatures.md).
+
+---
+
 To see how to run Ravencoin, please read the respective files in [the doc folder](doc)
 
 

@@ -176,6 +176,7 @@ RAVEN_CORE_H = \
   netbase.h \
   netmessagemaker.h \
   noui.h \
+  pqkey.h \
   policy/feerate.h \
   policy/fees.h \
   policy/policy.h \
@@ -327,11 +328,13 @@ libraven_wallet_a_SOURCES = \
   $(RAVEN_CORE_H)
 
 # crypto primitives library
-crypto_libraven_crypto_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libraven_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(LIBOQS_CFLAGS)
 crypto_libraven_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libraven_crypto_a_SOURCES = \
   crypto/aes.cpp \
   crypto/aes.h \
+  crypto/mldsa.cpp \
+  crypto/mldsa.h \
   crypto/chacha20.h \
   crypto/chacha20.cpp \
   crypto/common.h \
@@ -420,7 +423,9 @@ libraven_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
 libraven_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libraven_common_a_SOURCES = \
   base58.cpp \
+  bech32.cpp \
   chainparams.cpp \
+  pqkey.cpp \
   coins.cpp \
   compressor.cpp \
   core_read.cpp \
@@ -499,7 +504,7 @@ ravend_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-ravend_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+ravend_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(LIBOQS_LIBS)
 
 # raven-cli binary #
 raven_cli_SOURCES = raven-cli.cpp
@@ -517,7 +522,7 @@ raven_cli_LDADD = \
   $(LIBRAVEN_UTIL) \
   $(LIBRAVEN_CRYPTO)
 
-raven_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+raven_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(LIBOQS_LIBS)
 #
 
 # raven-tx binary #
@@ -538,7 +543,7 @@ raven_tx_LDADD = \
   $(LIBRAVEN_CRYPTO) \
   $(LIBSECP256K1)
 
-raven_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+raven_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(LIBOQS_LIBS)
 #
 
 # ravenconsensus library #

@@ -613,6 +613,9 @@ bool IsMessagingActive(unsigned int nBlockNumber);
 bool IsRestrictedActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
+
+/** RIP-25: Check if Post-Quantum Hybrid Signatures are deployed */
+bool IsPQHybridDeployed();
 /** RVN END */
 
 #endif // RAVEN_VALIDATION_H

@@ -103,6 +103,11 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
         {
             return (exp_addrType == "none");
         }
+
+        bool operator()(const WitnessV2PQDestination &dest) const
+        {
+            return (exp_addrType == "witness_v2_pq_keyhash");
+        }
     };
 
     // Visitor to check address payload
@@ -129,6 +134,11 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
         bool operator()(const CNoDestination &no) const
         {
             return exp_payload.size() == 0;
+        }
+
+        bool operator()(const WitnessV2PQDestination &dest) const
+        {
+            return false;
         }
     };
 

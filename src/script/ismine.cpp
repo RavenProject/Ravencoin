@@ -125,6 +125,17 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
             break;
         }
 
+        case TX_WITNESS_V2_PQ_KEYHASH: {
+            // RIP-25: PQ witness v2 — check if we have the ML-DSA key for this witness program
+            if (vSolutions[0].size() == 32) {
+                uint256 wp;
+                memcpy(wp.begin(), vSolutions[0].data(), 32);
+                if (keystore.HavePQKey(wp))
+                    return ISMINE_SPENDABLE;
+            }
+            break;
+        }
+
         case TX_MULTISIG: {
             // Only consider transactions "mine" if we own ALL the
             // keys involved. Multi-signature transactions that are

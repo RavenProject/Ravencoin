@@ -289,6 +289,9 @@ enum ServiceFlags : uint64_t {
     // NODE_XTHIN means the node supports Xtreme Thinblocks
     // If this is turned off then the node will not service nor make xthin requests
     NODE_XTHIN = (1 << 4),
+    // RIP-25: NODE_PQ_HYBRID indicates that a node supports post-quantum hybrid
+    // signatures (witness v2, ECDSA + ML-DSA-44)
+    NODE_PQ_HYBRID = (1 << 5),
 
     // Bits 24-31 are reserved for temporary experiments. Just pick a bit that
     // isn't getting used, or one not being used much, and notify the

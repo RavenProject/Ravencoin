@@ -195,6 +195,23 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
             if (fDecryptionThoroughlyChecked)
                 break;
         }
+        if (!keyPass && !keyFail) {
+            CryptedPQKeyMap::const_iterator pqi = mapCryptedPQKeys.begin();
+            for (; pqi != mapCryptedPQKeys.end(); ++pqi)
+            {
+                const CPQPubKey &pqPubKey = (*pqi).second.first;
+                const std::vector<unsigned char> &vchCryptedSecret = (*pqi).second.second;
+                CKeyingMaterial vchSecret;
+                if (!DecryptSecret(vMasterKeyIn, vchCryptedSecret, pqPubKey.GetWitnessProgram(), vchSecret))
+                {
+                    keyFail = true;
+                    break;
+                }
+                keyPass = true;
+                if (fDecryptionThoroughlyChecked)
+                    break;
+            }
+        }
         if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size() || vchCryptedBip39VchSeed.size()) {
             if (!DecryptBip39(vMasterKeyIn)) {
                 LogPrintf("Failed to decrypt bip 39 data");
@@ -247,6 +264,80 @@ bool CCryptoKeyStore::AddCryptedKey(const CPubKey &vchPubKey, const std::vector<
         mapCryptedKeys[vchPubKey.GetID()] = make_pair(vchPubKey, vchCryptedSecret);
     }
     return true;
+}
+
+bool CCryptoKeyStore::AddPQKeyPubKey(const CPQKey &key, const CPQPubKey &pubkey)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted())
+            return CBasicKeyStore::AddPQKeyPubKey(key, pubkey);
+
+        if (IsLocked())
+            return false;
+
+        std::vector<unsigned char> vchCryptedSecret;
+        CKeyingMaterial vchSecret(key.GetKeyData().begin(), key.GetKeyData().end());
+        uint256 witnessProgram = pubkey.GetWitnessProgram();
+        if (!EncryptSecret(vMasterKey, vchSecret, witnessProgram, vchCryptedSecret))
+            return false;
+
+        if (!AddCryptedPQKey(pubkey, vchCryptedSecret))
+            return false;
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::AddCryptedPQKey(const CPQPubKey &pqPubKey, const std::vector<unsigned char> &vchCryptedSecret)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!SetCrypted())
+            return false;
+
+        mapCryptedPQKeys[pqPubKey.GetWitnessProgram()] = make_pair(pqPubKey, vchCryptedSecret);
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::GetPQKey(const uint256 &witnessProgram, CPQKey &keyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted()) {
+            return CBasicKeyStore::GetPQKey(witnessProgram, keyOut);
+        }
+
+        CryptedPQKeyMap::const_iterator mi = mapCryptedPQKeys.find(witnessProgram);
+        if (mi != mapCryptedPQKeys.end())
+        {
+            const CPQPubKey &pqPubKey = (*mi).second.first;
+            const std::vector<unsigned char> &vchCryptedSecret = (*mi).second.second;
+            CKeyingMaterial vchSecret;
+            if (!DecryptSecret(vMasterKey, vchCryptedSecret, pqPubKey.GetWitnessProgram(), vchSecret))
+                return false;
+            std::vector<unsigned char> keyData(vchSecret.begin(), vchSecret.end());
+            return keyOut.SetKeyData(keyData);
+        }
+    }
+    return false;
+}
+
+bool CCryptoKeyStore::GetPQPubKey(const uint256 &witnessProgram, CPQPubKey &pubkeyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted())
+            return CBasicKeyStore::GetPQPubKey(witnessProgram, pubkeyOut);
+
+        CryptedPQKeyMap::const_iterator mi = mapCryptedPQKeys.find(witnessProgram);
+        if (mi != mapCryptedPQKeys.end())
+        {
+            pubkeyOut = (*mi).second.first;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CCryptoKeyStore::GetKey(const CKeyID &address, CKey& keyOut) const
@@ -308,6 +399,19 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial& vMasterKeyIn)
                 return false;
         }
         mapKeys.clear();
+
+        for (PQKeyMap::value_type& mKey : mapPQKeys)
+        {
+            const CPQKey &key = mKey.second;
+            CPQPubKey pqPubKey = key.GetPubKey();
+            CKeyingMaterial vchSecret(key.GetKeyData().begin(), key.GetKeyData().end());
+            std::vector<unsigned char> vchCryptedSecret;
+            if (!EncryptSecret(vMasterKeyIn, vchSecret, pqPubKey.GetWitnessProgram(), vchCryptedSecret))
+                return false;
+            if (!AddCryptedPQKey(pqPubKey, vchCryptedSecret))
+                return false;
+        }
+        mapPQKeys.clear();
     }
     return true;
 }

@@ -90,6 +90,14 @@ const char* ScriptErrorString(const ScriptError serror)
             return "Witness provided for non-witness script";
         case SCRIPT_ERR_WITNESS_PUBKEYTYPE:
             return "Using non-compressed keys in segwit";
+        case SCRIPT_ERR_PQ_PUBKEY_SIZE:
+            return "PQ public key has incorrect size (expected 1312 bytes)";
+        case SCRIPT_ERR_PQ_SIGNATURE_SIZE:
+            return "PQ signature has incorrect size (expected 2420 bytes)";
+        case SCRIPT_ERR_PQ_SIGNATURE_VERIFY_FAILED:
+            return "PQ ML-DSA-44 signature verification failed";
+        case SCRIPT_ERR_PQ_WITNESS_PROGRAM_MISMATCH:
+            return "PQ witness program does not match SHA256(mldsa_pubkey)";
         case SCRIPT_ERR_UNKNOWN_ERROR:
         case SCRIPT_ERR_ERROR_COUNT:
         default: break;

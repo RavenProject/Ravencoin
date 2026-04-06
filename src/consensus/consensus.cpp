@@ -7,22 +7,20 @@
 
 unsigned int GetMaxBlockWeight()
 {
-    // Now that Assets have gone live, we should make checks against the new larger block size only
-    // This is necessary because when the chain loads, it can fail certain blocks(that are valid) when
-    // The asset active state isn't set like during a reindex
-    return MAX_BLOCK_WEIGHT_RIP2;
+    // RIP-25: Phase 1 PQ block weight increase
+    if (fPQHybridIsActive)
+        return MAX_BLOCK_WEIGHT_RIP25_PHASE1;
 
-    // Old block weight for when assets weren't activated
-//    return MAX_BLOCK_WEIGHT;
+    // RIP-2: Asset block weight
+    return MAX_BLOCK_WEIGHT_RIP2;
 }
 
 unsigned int GetMaxBlockSerializedSize()
 {
-    // Now that Assets have gone live, we should make checks against the new larger block size only
-    // This is necessary because when the chain loads, it can fail certain blocks(that are valid) when
-    // The asset active state isn't set like during a reindex
-    return MAX_BLOCK_SERIALIZED_SIZE_RIP2;
+    // RIP-25: Phase 1 PQ block serialized size increase
+    if (fPQHybridIsActive)
+        return MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE1;
 
-    // Old block serialized size for when assets weren't activated
-//    return MAX_BLOCK_SERIALIZED_SIZE;
+    // RIP-2: Asset block serialized size
+    return MAX_BLOCK_SERIALIZED_SIZE_RIP2;
 }

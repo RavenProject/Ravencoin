@@ -34,6 +34,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_RESTRICTED_ASSET_DATA: return "nullassetdata";
     case TX_WITNESS_V0_KEYHASH: return "witness_v0_keyhash";
     case TX_WITNESS_V0_SCRIPTHASH: return "witness_v0_scripthash";
+    case TX_WITNESS_V2_PQ_KEYHASH: return "witness_v2_pq_keyhash";
 
     /** RVN START */
     case TX_NEW_ASSET: return ASSET_NEW_STRING;
@@ -92,6 +93,12 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
         }
         if (witnessversion == 0 && witnessprogram.size() == 32) {
             typeRet = TX_WITNESS_V0_SCRIPTHASH;
+            vSolutionsRet.push_back(witnessprogram);
+            return true;
+        }
+        // RIP-25: Witness v2 programs are 32-byte hashes of hybrid PQ keys
+        if (witnessversion == 2 && witnessprogram.size() == 32) {
+            typeRet = TX_WITNESS_V2_PQ_KEYHASH;
             vSolutionsRet.push_back(witnessprogram);
             return true;
         }
@@ -242,6 +249,12 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
             addressRet = CKeyID(uint160(vSolutions[0]));
             return true;
         }
+    } else if (whichType == TX_WITNESS_V2_PQ_KEYHASH) {
+        // RIP-25: witness v2 PQ destination
+        uint256 wp;
+        memcpy(wp.begin(), vSolutions[0].data(), 32);
+        addressRet = WitnessV2PQDestination(wp);
+        return true;
     }
      /** RVN END */
     // Multisig txns have more than one address...
@@ -313,6 +326,12 @@ public:
         *script << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
         return true;
     }
+
+    bool operator()(const WitnessV2PQDestination &dest) const {
+        script->clear();
+        *script << OP_2 << ToByteVector(dest.witnessProgram);
+        return true;
+    }
 };
 } // namespace
 
@@ -340,6 +359,11 @@ namespace
             script->clear();
             *script << OP_RVN_ASSET << ToByteVector(scriptID);
             return true;
+        }
+
+        bool operator()(const WitnessV2PQDestination &) const {
+            script->clear();
+            return false; // PQ destinations don't support null asset data
         }
     };
 } // namespace
@@ -396,6 +420,13 @@ CScript GetScriptForWitness(const CScript& redeemscript)
     uint256 hash;
     CSHA256().Write(&redeemscript[0], redeemscript.size()).Finalize(hash.begin());
     ret << OP_0 << ToByteVector(hash);
+    return ret;
+}
+
+CScript GetScriptForWitnessV2PQ(const uint256& witnessProgram)
+{
+    CScript ret;
+    ret << OP_2 << ToByteVector(witnessProgram);
     return ret;
 }
 

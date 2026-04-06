@@ -21,12 +21,27 @@ static const unsigned int MAX_BLOCK_WEIGHT_RIP2 = 8000000;
 /** The maximum allowed size for a serialized block, in bytes after RIP 2(only for buffer size limits) */
 static const unsigned int MAX_BLOCK_SERIALIZED_SIZE_RIP2 = 8000000;
 
+/** RIP-25: Phase 1 PQ block weight limit (12 MWU) */
+static const unsigned int MAX_BLOCK_WEIGHT_RIP25_PHASE1 = 12000000;
+/** RIP-25: Phase 1 PQ block serialized size limit */
+static const unsigned int MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE1 = 12000000;
+/** RIP-25: Phase 2 PQ block weight limit (16 MWU) */
+static const unsigned int MAX_BLOCK_WEIGHT_RIP25_PHASE2 = 16000000;
+/** RIP-25: Phase 2 PQ block serialized size limit */
+static const unsigned int MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE2 = 16000000;
+
 /** The maximum allowed number of signature check operations in a block (network rule) */
 static const int64_t MAX_BLOCK_SIGOPS_COST = 80000;
 /** Coinbase transaction outputs can only be spent after this number of new blocks (network rule) */
 static const int COINBASE_MATURITY = 100;
 
 static const int WITNESS_SCALE_FACTOR = 4;
+
+/** RIP-25: PQ witness discount scale factor (8x base, PQ witness at 1/8 weight) */
+static const int PQ_WITNESS_SCALE_FACTOR = 8;
+
+/** RIP-25: Maximum witness stack element size for PQ (witness v2) programs */
+static const unsigned int MAX_PQ_WITNESS_ELEMENT_SIZE = 4096;
 
 static const size_t MIN_TRANSACTION_WEIGHT = WITNESS_SCALE_FACTOR * 60; // 60 is the lower bound for the size of a valid serialized CTransaction
 static const size_t MIN_SERIALIZABLE_TRANSACTION_WEIGHT = WITNESS_SCALE_FACTOR * 10; // 10 is the lower bound for the size of a serialized CTransaction
@@ -39,6 +54,7 @@ UNUSED_VAR static bool fRip5IsActive = false;
 UNUSED_VAR static bool fTransferScriptIsActive = false;
 UNUSED_VAR static bool fEnforcedValuesIsActive = false;
 UNUSED_VAR static bool fCheckCoinbaseAssetsIsActive = false;
+UNUSED_VAR static bool fPQHybridIsActive = false;
 
 unsigned int GetMaxBlockWeight();
 unsigned int GetMaxBlockSerializedSize();

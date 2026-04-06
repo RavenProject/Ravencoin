@@ -110,6 +110,14 @@ enum
     // Public keys in segregated witness scripts must be compressed
     //
             SCRIPT_VERIFY_WITNESS_PUBKEYTYPE = (1U << 15),
+
+    // RIP-25: Verify post-quantum hybrid signatures (witness v2)
+    //
+            SCRIPT_VERIFY_PQ_HYBRID = (1U << 16),
+
+    // RIP-25: Making v2+ witness programs non-standard (without PQ activation)
+    //
+            SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_WITNESS_V2 = (1U << 17),
 };
 
 bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned int flags, ScriptError *serror);
@@ -126,6 +134,7 @@ enum SigVersion
 {
     SIGVERSION_BASE = 0,
     SIGVERSION_WITNESS_V0 = 1,
+    SIGVERSION_WITNESS_V2_PQ = 2, // RIP-25: Post-quantum hybrid signatures
 };
 
 uint256 SignatureHash(const CScript &scriptCode, const CTransaction &txTo, unsigned int nIn, int nHashType, const CAmount &amount, SigVersion sigversion, const PrecomputedTransactionData *cache = nullptr);

@@ -43,6 +43,12 @@ public:
     TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, const CAmount& amountIn, int nHashTypeIn=SIGHASH_ALL);
     const BaseSignatureChecker& Checker() const override { return checker; }
     bool CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& keyid, const CScript& scriptCode, SigVersion sigversion) const override;
+
+    // RIP-25: Accessors for PQ signing
+    const CTransaction* GetTransaction() const { return txTo; }
+    unsigned int GetInput() const { return nIn; }
+    int GetHashType() const { return nHashType; }
+    CAmount GetAmount() const { return amount; }
 };
 
 class MutableTransactionSignatureCreator : public TransactionSignatureCreator {
