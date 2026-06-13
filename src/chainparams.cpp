@@ -161,6 +161,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nTimeout = 1628877600; // UTC: Fri Aug 13 2021 18:00:00
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideMinerConfirmationWindow = 2016;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].bit = 11;  // Asset transfer overflow check
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nStartTime = 1781222401; // UTC: Fri June 12 2026 12:00:01
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nTimeout = 1812844799; // UTC: Sat June 12 2027 23:59:59
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideMinerConfirmationWindow = 2016;
 
 
         // The best chain should have at least this much work
@@ -326,6 +331,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nTimeout = 1628877600; // UTC: Fri Aug 13 2021 18:00:00
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideMinerConfirmationWindow = 2016;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].bit = 11;  // Asset transfer overflow check
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nStartTime = 1781222401; // UTC: Fri June 12 2026 12:00:01
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nTimeout = 1812844799; // UTC: Sat June 12 2027 23:59:59
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideMinerConfirmationWindow = 2016;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000168050db560b4");
@@ -546,6 +556,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nTimeout = 999999999999ULL;
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideRuleChangeActivationThreshold = 400;
         consensus.vDeployments[Consensus::DEPLOYMENT_COINBASE_ASSETS].nOverrideMinerConfirmationWindow = 500;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].bit = 11;  // Asset transfer overflow check
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nTimeout = 999999999999ULL;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideRuleChangeActivationThreshold = 400;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideMinerConfirmationWindow = 500;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");

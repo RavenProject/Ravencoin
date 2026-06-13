@@ -627,11 +627,31 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             if (!GetAssetData(coin.out.scriptPubKey, data))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-failed-to-get-asset-from-script", false, "", tx.GetHash());
 
+            if (IsTransferOverflowCheckDeployed()) {
+                if (data.nAmount < 0)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-input-asset-amount-negative", false, "", tx.GetHash());
+                if (data.nAmount > MAX_MONEY)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-input-asset-amount-toolarge", false, "", tx.GetHash());
+            } else {
+                if (data.nAmount < 0)
+                    LogPrintf("Input Overflow Check- input-asset-amount-negative: %s\n", tx.GetHash().ToString());
+                if (data.nAmount > MAX_MONEY)
+                    LogPrintf("Input Overflow Check- input-asset-amount-toolarge: %s\n", tx.GetHash().ToString());
+            }
+
             // Add to the total value of assets in the inputs
             if (totalInputs.count(data.assetName))
                 totalInputs.at(data.assetName) += data.nAmount;
             else
                 totalInputs.insert(make_pair(data.assetName, data.nAmount));
+
+            if (IsTransferOverflowCheckDeployed()) {
+                if (!MoneyRange(totalInputs.at(data.assetName)))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-input-asset-totalInputs-toolarge", false, "", tx.GetHash());
+            } else {
+                if (!MoneyRange(totalInputs.at(data.assetName)))
+                    LogPrintf("Input Overflow Check- input-asset-totalInputs-toolarge: %s\n", tx.GetHash().ToString());
+            }
 
             if (AreMessagesDeployed()) {
                 mapAddresses.insert(make_pair(data.assetName,EncodeDestination(data.destination)));
@@ -692,11 +712,31 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             if (!ContextualCheckTransferAsset(assetCache, transfer, address, strError))
                 return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
 
+            if (IsTransferOverflowCheckDeployed()) {
+                if (transfer.nAmount < 0)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-amount-negative", false, "", tx.GetHash());
+                if (transfer.nAmount > MAX_MONEY)
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-amount-toolarge", false, "", tx.GetHash());
+            } else {
+                if (transfer.nAmount < 0)
+                    LogPrintf("Transfer Overflow Check- transfer-asset-amount-negative: %s\n", tx.GetHash().ToString());
+                if (transfer.nAmount > MAX_MONEY)
+                    LogPrintf("Transfer Overflow Check- transfer-asset-amount-toolarge: %s\n", tx.GetHash().ToString());
+            }
+
             // Add to the total value of assets in the outputs
             if (totalOutputs.count(transfer.strName))
                 totalOutputs.at(transfer.strName) += transfer.nAmount;
             else
                 totalOutputs.insert(make_pair(transfer.strName, transfer.nAmount));
+
+            if (IsTransferOverflowCheckDeployed()) {
+                if (!MoneyRange(totalOutputs.at(transfer.strName)))
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-transfer-asset-totalOutputs-toolarge", false, "", tx.GetHash());
+            } else {
+                if (!MoneyRange(totalOutputs.at(transfer.strName)))
+                    LogPrintf("Transfer Overflow Check- transfer-asset-totalOutputs-toolarge: %s\n", tx.GetHash().ToString());
+            }
 
             if (!fRunningUnitTests) {
                 if (IsAssetNameAnOwner(transfer.strName)) {
