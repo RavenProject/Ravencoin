@@ -25,8 +25,13 @@ cd depends
 if [[ ${OS} == "windows" ]]; then
     make HOST=x86_64-w64-mingw32 -j2
 elif [[ ${OS} == "osx" ]]; then
-    echo "OSX building is not currently enabled"
-    exit 1
+    mkdir SDKs
+    cd SDKs
+    curl -O https://bitcoincore.org/depends-sources/sdks/Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz
+    tar -zxf Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz
+    rm -rf Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz
+    cd ..
+    make HOST=x86_64-apple-darwin14 -j2
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then
     make HOST=x86_64-linux-gnu -j2
 elif [[ ${OS} == "arm32v7" || ${OS} == "arm32v7-disable-wallet" ]]; then

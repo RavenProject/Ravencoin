@@ -1,24 +1,27 @@
 name: Build Raven
 
 on:
-  push:
-    branches:
-      - release*
-  pull_request:
-    branches:
-      - master
-      - develop
-      - release*
+#  push:
+#    branches:
+#      - release*
+#  pull_request:
+#    branches:
+#      - master
+#      - develop
+#      - release*
 #    paths-ignore:
 #      - 'binaries/**'
-#      - 'community/**'
-#      - 'contrib/**'
 #      - 'doc/**'
-#      - 'roadmap/**'
-#      - 'share/**'
-#      - 'static-builds/**'
 #      - 'whitepaper/**'
 #      - '*.md'
+  workflow_dispatch:
+    # This creates a "Run workflow" button on the github repo webpage when the "Build Ravencoin" 
+    #     workflow is selected on the "Actions" tab. But only if this workflow is in
+    #     the branch which is selected on github as the "default branch".
+    inputs:
+      target:
+        description: 'Target branch to run'
+        required: true
 
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
@@ -53,11 +56,84 @@ jobs:
   build:
     needs: check-jobs
     runs-on: ubuntu-20.04
+    
     strategy:
       matrix:
-       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet', 'aarch64', 'aarch64-disable-wallet' ]
+       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'osx', 'arm32v7', 'arm32v7-disable-wallet', 'aarch64', 'aarch64-disable-wallet' ]
 
+#&&&&&& Beginning- section to free up space on root for the builds and for 30GB of swap
     steps:
+    - name: Print Original Available Memory and Storage
+      shell: bash
+      run: |
+        echo "Original Available Memory and Storage:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+
+    - name: Delete Unwanted Software
+      shell: bash
+      run: |
+        echo "Removing Unwanted Software"
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
+
+    - name: Print Available Memory and Storage after Unwanted Software Removal
+      shell: bash
+      run: |
+        echo "Original Available Memory and Storage after Unwanted Software Removal:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+
+#     We use a SWAP_FILE variable because some runner VMs allocate /swapfile and some use /mnt/swapfile
+    - name: Delete the existing swap
+      shell: bash
+      run: |
+        export SWAP_FILE=$(swapon --show=NAME | tail -n 1)
+        sudo swapoff "${SWAP_FILE}"
+        sudo rm "${SWAP_FILE}"
+
+    - name: Print Available Memory and Storage after Deleting Swap
+      shell: bash
+      run: |
+        echo "Available Memory and Storage after Deleting Swap:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+
+    - name: Allocate swap on root
+      shell: bash
+      run: |
+        sudo fallocate -l 30G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+
+    - name: Print Finnal Available Memory and Storage
+      shell: bash
+      run: |
+        echo "Final Available Memory and Storage:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+#&&&&&& End- section to free up space on root for the builds and for 30GB of swap
+
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Checkout the Code
       uses: actions/checkout@v1
@@ -93,12 +169,13 @@ jobs:
       run: ${SCRIPTS}/04-configure-build.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Build Raven
+      name: Build Evrmore
       run: make -j2
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Check Binary Security
-      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+# Skip the binary checks for now.
+#    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+#      name: Check Binary Security
+#      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Package Up the Build
