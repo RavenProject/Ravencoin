@@ -271,7 +271,7 @@ UniValue gettxoutproof(const JSONRPCRequest& request)
     } else {
         // Loop through txids and try to find which block they're in. Exit loop once a block is found.
         for (const auto& tx : setTxids) {
-            const Coin& coin = AccessByTxid(*pcoinsTip, tx);
+            const Coin& coin = AccessByTxid(pcoinsTip.get(), tx);
             if (!coin.IsSpent()) {
                 pblockindex = chainActive[coin.nHeight];
                 break;
@@ -1751,7 +1751,7 @@ UniValue combinerawtransaction(const JSONRPCRequest& request)
     {
         LOCK(cs_main);
         LOCK(mempool.cs);
-        CCoinsViewCache &viewChain = *pcoinsTip;
+        CCoinsViewCache viewChain(pcoinsTip.get());
         CCoinsViewMemPool viewMempool(&viewChain, mempool);
         view.SetBackend(viewMempool); // temporarily switch cache backend to db+mempool view
 
@@ -1872,7 +1872,7 @@ UniValue signrawtransaction(const JSONRPCRequest& request)
     CCoinsViewCache view(&viewDummy);
     {
         LOCK(mempool.cs);
-        CCoinsViewCache &viewChain = *pcoinsTip;
+        CCoinsViewCache viewChain(pcoinsTip.get());
         CCoinsViewMemPool viewMempool(&viewChain, mempool);
         view.SetBackend(viewMempool); // temporarily switch cache backend to db+mempool view
 
@@ -2081,7 +2081,7 @@ UniValue sendrawtransaction(const JSONRPCRequest& request)
     if (!request.params[1].isNull() && request.params[1].get_bool())
         nMaxRawTxFee = 0;
 
-    CCoinsViewCache &view = *pcoinsTip;
+    CCoinsViewCache view(pcoinsTip.get());
     bool fHaveChain = false;
     for (size_t o = 0; !fHaveChain && o < tx->vout.size(); o++) {
         const Coin& existingCoin = view.AccessCoin(COutPoint(hashTx, o));
