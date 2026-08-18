@@ -77,7 +77,7 @@ UniValue requestsnapshot(const JSONRPCRequest& request) {
 
                 "\nArguments:\n"
                 "1. \"asset_name\"              (string, required) The asset name for which the snapshot will be taken\n"
-                "2. \"block_height\"            (number, required) The block height at which the snapshot will be take\n"
+                "2. \"block_height\"            (number, required) The block height at which the snapshot will be taken\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -103,7 +103,7 @@ UniValue requestsnapshot(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: Please use a valid asset name"));
 
     if (ownershipAssetType == AssetType::UNIQUE || ownershipAssetType == AssetType::OWNER || ownershipAssetType == AssetType::MSGCHANNEL)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNIQUE, MSGCHANNEL assets are not allowed for this call"));
 
     auto currentActiveAssetCache = GetCurrentAssetCache();
     if (!currentActiveAssetCache)
@@ -246,7 +246,7 @@ UniValue cancelsnapshotrequest(const JSONRPCRequest& request) {
 
                 "\nArguments:\n"
                 "1. \"asset_name\"              (string, required) The asset name for which the snapshot will be taken\n"
-                "2. \"block_height\"            (number, required) The block height at which the snapshot will be take\n"
+                "2. \"block_height\"            (number, required) The block height at which the snapshot will be taken\n"
 
                 "\nResult:\n"
                 "{\n"
@@ -367,7 +367,7 @@ UniValue distributereward(const JSONRPCRequest& request) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: Please use a valid asset name"));
 
     if (ownershipAssetType == AssetType::UNIQUE || ownershipAssetType == AssetType::OWNER || ownershipAssetType == AssetType::MSGCHANNEL)
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNIQUE, MSGCHANNEL assets are not allowed for this call"));
 
     if (snapshot_height > chainActive.Height()) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid snapshot_height: block height should be less than or equal to the current active chain height"));
@@ -378,7 +378,7 @@ UniValue distributereward(const JSONRPCRequest& request) {
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid distribution_asset_name: Please use a valid asset name"));
 
         if (distributionAssetType == AssetType::UNIQUE || distributionAssetType == AssetType::OWNER || distributionAssetType == AssetType::MSGCHANNEL)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid distribution_asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
+            throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid distribution_asset_name: OWNER, UNIQUE, MSGCHANNEL assets are not allowed for this call"));
 
         std::pair<int, std::string> errorPair;
         if (!VerifyWalletHasAsset(distribution_asset_name + OWNER_TAG, errorPair))
