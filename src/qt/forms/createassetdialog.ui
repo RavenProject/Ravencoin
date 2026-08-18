@@ -618,10 +618,24 @@
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="assetType"/>
+             <widget class="QComboBox" name="assetType">
+              <property name="minimumSize">
+               <size>
+                <width>250</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="assetList"/>
+             <widget class="QComboBox" name="assetList">
+              <property name="minimumSize">
+               <size>
+                <width>250</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="horizontalSpacer_4">

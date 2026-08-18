@@ -1053,12 +1053,16 @@ void CreateAssetDialog::updatePresentedAssetName(QString name)
 
 QString CreateAssetDialog::GetSpecialCharacter()
 {
-    if (type == IntFromAssetType(AssetType::SUB) || type == IntFromAssetType(AssetType::SUB_QUALIFIER))
+    if (type == IntFromAssetType(AssetType::SUB))
         return "/";
     else if (type == IntFromAssetType(AssetType::UNIQUE))
         return "#";
     else if (type == IntFromAssetType(AssetType::MSGCHANNEL))
         return "~";
+    else if (type == IntFromAssetType(AssetType::SUB_QUALIFIER))
+        return "/#";
+    else if (type == IntFromAssetType(AssetType::QUALIFIER))
+        return "#";
 
     return "";
 }
@@ -1076,9 +1080,9 @@ QString CreateAssetDialog::GetAssetName()
     else if (type == IntFromAssetType(AssetType::RESTRICTED))
         return ui->nameText->text();
     else if (type == IntFromAssetType(AssetType::QUALIFIER))
-        return ui->nameText->text();
+        return ui->assetList->currentText() + "#" + ui->nameText->text();
     else if (type == IntFromAssetType(AssetType::SUB_QUALIFIER))
-        return ui->assetList->currentText() + "/" + ui->nameText->text();
+        return ui->assetList->currentText() + "/#" + ui->nameText->text();
     return "";
 }
 
