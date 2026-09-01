@@ -670,6 +670,8 @@ public:
     bool IsNewAsset() const;
     bool IsOwnerAsset() const;
     bool IsReissueAsset() const;
+    bool IsIssueMineableAsset() const;
+    bool IsReissueMineableAsset() const;
     bool IsTransferAsset() const;
     bool IsAsset() const;
     bool IsNullAsset() const; // Checks all three of the NULL Asset Tx types

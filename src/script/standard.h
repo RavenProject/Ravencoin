@@ -70,6 +70,8 @@ enum txnouttype
     TX_REISSUE_ASSET = 9,
     TX_TRANSFER_ASSET = 10,
     TX_RESTRICTED_ASSET_DATA = 11, //!< unspendable OP_RAVEN_ASSET script that carries data
+    TX_ISSUE_MINEABLE = 12,
+    TX_REISSUE_MINEABLE = 13,
     /** RVN END */
 };
 

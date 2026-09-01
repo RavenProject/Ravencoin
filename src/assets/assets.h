@@ -22,6 +22,8 @@
 #define RVN_Q 113
 #define RVN_T 116
 #define RVN_O 111
+#define RVN_M 77
+#define RVN_E 69
 
 #define DEFAULT_UNITS 0
 #define DEFAULT_REISSUABLE 1
@@ -466,6 +468,8 @@ bool CheckReissueBurnTx(const CTxOut& txOut);
 bool CheckIssueDataTx(const CTxOut& txOut); // OP_RAVEN_ASSET RVNQ (That is a Q as in Que not an O)
 bool CheckOwnerDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNO
 bool CheckReissueDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNR
+bool CheckIssueMineableDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNM
+bool CheckReissueMineableDataTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNE
 bool CheckTransferOwnerTx(const CTxOut& txOut);// OP_RAVEN_ASSET RVNT
 
 //! Check the Encoded hash and make sure it is either an IPFS hash or a OIP hash
@@ -489,6 +493,8 @@ bool IsScriptOwnerAsset(const CScript& scriptPubKey, int& nStartingIndex);
 //! Check script and see if it matches the reissue template
 bool IsScriptReissueAsset(const CScript& scriptPubKey);
 bool IsScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
+bool IsScriptIssueMineableAsset(const CScript& scriptPubKey);
+bool IsScriptReissueMineableAsset(const CScript& scriptPubKey);
 
 //! Check script and see if it matches the transfer asset template
 bool IsScriptTransferAsset(const CScript& scriptPubKey);

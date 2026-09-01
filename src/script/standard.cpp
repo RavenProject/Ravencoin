@@ -39,6 +39,8 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_NEW_ASSET: return ASSET_NEW_STRING;
     case TX_TRANSFER_ASSET: return ASSET_TRANSFER_STRING;
     case TX_REISSUE_ASSET: return ASSET_REISSUE_STRING;
+    case TX_ISSUE_MINEABLE: return "issuemineable";
+    case TX_REISSUE_MINEABLE: return "reissuemineable";
     /** RVN END */
     }
     return nullptr;
@@ -234,7 +236,8 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
         addressRet = CScriptID(uint160(vSolutions[0]));
         return true;
     /** RVN START */
-    } else if (whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_TRANSFER_ASSET) {
+    } else if (whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_TRANSFER_ASSET
+               || whichType == TX_ISSUE_MINEABLE || whichType == TX_REISSUE_MINEABLE) {
         addressRet = CKeyID(uint160(vSolutions[0]));
         return true;
     } else if (whichType == TX_RESTRICTED_ASSET_DATA) {

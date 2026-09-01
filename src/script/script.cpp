@@ -274,6 +274,12 @@ bool CScript::IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) con
                 } else if ((*this)[index] == RVN_R) {
                     nType = TX_REISSUE_ASSET;
                     return true;
+                } else if ((*this)[index] == RVN_M) {
+                    nType = TX_ISSUE_MINEABLE;
+                    return true;
+                } else if ((*this)[index] == RVN_E) {
+                    nType = TX_REISSUE_MINEABLE;
+                    return true;
                 }
             }
         }
@@ -309,6 +315,26 @@ bool CScript::IsReissueAsset() const
     bool fIsOwner = false;
     if (IsAssetScript(nType, fIsOwner))
         return nType == TX_REISSUE_ASSET;
+
+    return false;
+}
+
+bool CScript::IsIssueMineableAsset() const
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (IsAssetScript(nType, fIsOwner))
+        return nType == TX_ISSUE_MINEABLE;
+
+    return false;
+}
+
+bool CScript::IsReissueMineableAsset() const
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    if (IsAssetScript(nType, fIsOwner))
+        return nType == TX_REISSUE_MINEABLE;
 
     return false;
 }

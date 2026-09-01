@@ -11,6 +11,10 @@
 #include "fs.h"
 #include "key.h"
 #include "validation.h"
+#include "assets/mineabledb.h"
+#include "assets/assets.h"
+#include "assets/assetdb.h"
+#include "assets/restricteddb.h"
 #include "miner.h"
 #include "net_processing.h"
 #include "pubkey.h"
@@ -22,7 +26,9 @@
 #include "rpc/server.h"
 #include "rpc/register.h"
 #include "script/sigcache.h"
+#include "assets/mineable.h"
 
+#include <map>
 #include <memory>
 
 uint256 insecure_rand_seed = GetRandHash();
@@ -79,6 +85,9 @@ TestingSetup::TestingSetup(const std::string &chainName) : BasicTestingSetup(cha
     }
 
     passets = new CAssetsCache();
+    pmineabledb = new CMineableAssetsDB(1 << 20, true, true);
+    passetsdb = new CAssetsDB(1 << 20, true, true);
+    prestricteddb = new CRestrictedDB(1 << 20, true, true);
     {
         CValidationState state;
         if (!ActivateBestChain(state, chainparams))
@@ -107,6 +116,12 @@ TestingSetup::~TestingSetup()
     delete pcoinsdbview;
     delete pblocktree;
     delete passets;
+    delete pmineabledb;
+    pmineabledb = nullptr;
+    delete passetsdb;
+    passetsdb = nullptr;
+    delete prestricteddb;
+    prestricteddb = nullptr;
     fs::remove_all(pathTemp);
 }
 
@@ -151,6 +166,41 @@ TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction> 
 
     CBlock result = block;
     return result;
+}
+
+CBlock
+TestChain100Setup::CreateAndProcessBlockWithMineableClaims(const std::vector<CMutableTransaction> &txns,
+                                                           const CScript &scriptPubKey,
+                                                           const std::map<std::string, CAmount> &mineableClaims)
+{
+    const CChainParams &chainparams = GetParams();
+    std::unique_ptr<CBlockTemplate> pblocktemplate = BlockAssembler(chainparams).CreateNewBlock(scriptPubKey);
+    CBlock &block = pblocktemplate->block;
+
+    block.vtx.resize(1);
+    for (const CMutableTransaction &tx : txns)
+        block.vtx.push_back(MakeTransactionRef(tx));
+
+    CMutableTransaction coinbase = *block.vtx[0];
+    for (const auto& claim : mineableClaims) {
+        CAssetTransfer transfer(claim.first, claim.second);
+        CScript claimScript = scriptPubKey;
+        transfer.ConstructTransaction(claimScript);
+        coinbase.vout.emplace_back(0, claimScript);
+    }
+    block.vtx[0] = MakeTransactionRef(coinbase);
+
+    unsigned int extraNonce = 0;
+    IncrementExtraNonce(&block, chainActive.Tip(), extraNonce);
+
+    uint256 mix_hash;
+    while (!CheckProofOfWork(block.GetHashFull(mix_hash), block.nBits, chainparams.GetConsensus())) { ++block.nNonce64; ++block.nNonce;};
+    block.mix_hash = mix_hash;
+
+    std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(block);
+    ProcessNewBlock(chainparams, shared_pblock, true, nullptr);
+
+    return block;
 }
 
 TestChain100Setup::~TestChain100Setup()

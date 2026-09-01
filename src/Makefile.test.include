@@ -35,6 +35,8 @@ RAVEN_TESTS =\
   test/assets/restricted_tests.cpp \
   test/assets/qualifier_tests.cpp \
   test/assets/unique_tests.cpp \
+  test/assets/mineable_tests.cpp \
+  test/assets/asset_regression_stress_tests.cpp \
   test/assets/verifier_string_tests.cpp \
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \

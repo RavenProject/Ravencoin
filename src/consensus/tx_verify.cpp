@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <assets/assets.h>
+#include <assets/mineable.h>
 #include <script/standard.h>
 #include <util.h>
 #include <validation.h>
@@ -382,6 +383,12 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
         if (AreCoinbaseCheckAssetsDeployed()) {
             for (auto vout : tx.vout) {
                 if (vout.scriptPubKey.IsAssetScript() || vout.scriptPubKey.IsNullAsset()) {
+                    if (IsMineableAssetsDeployed()) {
+                        CAssetTransfer transfer;
+                        std::string address;
+                        if (IsMineableCoinbaseAssetOutput(vout, transfer, address))
+                            continue;
+                    }
                     return state.DoS(0, error("%s: coinbase contains asset transaction", __func__),
                                      REJECT_INVALID, "bad-txns-coinbase-contains-asset-txes");
                 }
@@ -449,6 +456,38 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state, bool fChe
 
             fContainsRestrictedAssetReissue = true;
         }
+
+    } else if (tx.IsIssueMineableAsset()) {
+        if (!IsMineableAssetsDeployed())
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-not-active");
+
+        std::string strError;
+        if (!tx.VerifyIssueMineable(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        CIssueMineable issue;
+        std::string strAddress;
+        if (!IssueMineableFromTransaction(tx, issue, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-from-transaction");
+
+        if (!CheckIssueMineable(issue, strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+    } else if (tx.IsReissueMineableAsset()) {
+        if (!IsMineableAssetsDeployed())
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-not-active");
+
+        std::string strError;
+        if (!tx.VerifyReissueMineable(strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
+
+        CReissueMineableSchedule reissue;
+        std::string strAddress;
+        if (!ReissueMineableFromTransaction(tx, reissue, strAddress))
+            return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-reissue-from-transaction");
+
+        if (!CheckReissueMineableSchedule(reissue, strError))
+            return state.DoS(100, false, REJECT_INVALID, strError);
 
     } else if (tx.IsNewUniqueAsset()) {
 
@@ -816,6 +855,28 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
             }
             if (!ContextualCheckReissueAsset(assetCache, reissue_asset, strError, tx))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-reissue-contextual-" + strError, false, "", tx.GetHash());
+        } else if (tx.IsIssueMineableAsset()) {
+            if (!IsMineableAssetsDeployed())
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-not-active", false, "", tx.GetHash());
+
+            CIssueMineable issue;
+            std::string address;
+            if (!IssueMineableFromTransaction(tx, issue, address)) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-serialization-failed", false, "", tx.GetHash());
+            }
+            if (!ContextualCheckIssueMineable(assetCache, issue, address, 0, strError))
+                return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
+        } else if (tx.IsReissueMineableAsset()) {
+            if (!IsMineableAssetsDeployed())
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-not-active", false, "", tx.GetHash());
+
+            CReissueMineableSchedule reissue;
+            std::string address;
+            if (!ReissueMineableFromTransaction(tx, reissue, address)) {
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-mineable-reissue-serialization-failed", false, "", tx.GetHash());
+            }
+            if (!pmineabledb || !ContextualCheckReissueMineableSchedule(assetCache, *pmineabledb, reissue, address, strError))
+                return state.DoS(100, false, REJECT_INVALID, strError, false, "", tx.GetHash());
         } else if (tx.IsNewUniqueAsset()) {
             if (!ContextualCheckUniqueAssetTx(assetCache, strError, tx))
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-issue-unique-contextual-" + strError, false, "", tx.GetHash());

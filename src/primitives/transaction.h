@@ -335,6 +335,10 @@ public:
     bool IsNewUniqueAsset() const;
     bool VerifyNewUniqueAsset(std::string& strError) const;
     bool IsReissueAsset() const;
+    bool IsIssueMineableAsset() const;
+    bool IsReissueMineableAsset() const;
+    bool VerifyIssueMineable(std::string& strError) const;
+    bool VerifyReissueMineable(std::string& strError) const;
     bool VerifyReissueAsset(std::string& strError) const;
     bool IsNewMsgChannelAsset() const;
     bool VerifyNewMsgChannelAsset(std::string& strError) const;

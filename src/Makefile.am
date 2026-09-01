@@ -134,6 +134,8 @@ RAVEN_CORE_H = \
   assets/messages.h \
   assets/myassetsdb.h \
   assets/restricteddb.h \
+  assets/mineable.h \
+  assets/mineabledb.h \
   assets/snapshotrequestdb.h \
   assets/assetsnapshotdb.h \
   assets/rewards.h \
@@ -269,6 +271,8 @@ libraven_server_a_SOURCES = \
   assets/messages.cpp \
   assets/myassetsdb.cpp \
   assets/restricteddb.cpp \
+  assets/mineable.cpp \
+  assets/mineabledb.cpp \
   assets/snapshotrequestdb.cpp \
   assets/assetsnapshotdb.cpp \
   assets/rewards.cpp \

@@ -55,6 +55,7 @@ class CTxUndo;
 struct ChainTxData;
 
 class CAssetsDB;
+class CMineableAssetsDB;
 class CAssets;
 class CSnapshotRequestDB;
 
@@ -534,6 +535,9 @@ extern CMyRestrictedDB *pmyrestricteddb;
 
 /** Global variable that points to the active restricted asset database (protected by cs_main) */
 extern CRestrictedDB *prestricteddb;
+extern CMineableAssetsDB *pmineabledb;
+
+bool IsMineableAssetsDeployed();
 
 /** Global variable that points to the asset verifier LRU Cache (protected by cs_main) */
 extern CLRUCache<std::string, CNullAssetTxVerifierString> *passetsVerifierCache;
@@ -605,6 +609,10 @@ bool IsTransferOverflowCheckDeployed();
 void SetEnforcedValues(bool value);
 void SetEnforcedCoinbase(bool value);
 void SetTransferOverflow(bool value);
+void SetTransferScriptsSizeActive(bool value);
+void SetMineableAssetsActive(bool value);
+void SetAssetsActive(bool value);
+void SetRip5AssetsActive(bool value);
 
 bool IsRip5Active();
 

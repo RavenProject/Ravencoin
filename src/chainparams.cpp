@@ -167,6 +167,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nTimeout = 1812844799; // UTC: Sat June 12 2027 23:59:59
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideMinerConfirmationWindow = 2016;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].bit = 12;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nStartTime = 1830316801; // UTC: Sat Jan 1 2028 00:00:01
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nTimeout = 1861852799; // UTC: Sun Jan 1 2029 23:59:59
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nOverrideRuleChangeActivationThreshold = 1411;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nOverrideMinerConfirmationWindow = 2016;
 
 
         // The best chain should have at least this much work
@@ -339,6 +344,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nTimeout = 1812844799; // UTC: Sat June 12 2027 23:59:59
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideRuleChangeActivationThreshold = 1411; // Approx 70% of 2016
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideMinerConfirmationWindow = 2016;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].bit = 12;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nStartTime = 1830316801;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nTimeout = 1861852799;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nOverrideRuleChangeActivationThreshold = 1411;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nOverrideMinerConfirmationWindow = 2016;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000168050db560b4");
@@ -565,6 +575,11 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nTimeout = 999999999999ULL;
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideRuleChangeActivationThreshold = 400;
         consensus.vDeployments[Consensus::DEPLOYMENT_TRANSFER_OVERFLOW].nOverrideMinerConfirmationWindow = 500;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].bit = 12;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nStartTime = 0;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nTimeout = 999999999999ULL;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nOverrideRuleChangeActivationThreshold = 400;
+        consensus.vDeployments[Consensus::DEPLOYMENT_MINEABLE_ASSETS].nOverrideMinerConfirmationWindow = 500;
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");

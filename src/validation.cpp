@@ -4,6 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "assets/mineable.h"
+#include "assets/mineabledb.h"
 #include "validation.h"
 
 #include "arith_uint256.h"
@@ -253,6 +255,9 @@ CLRUCache<std::string, int8_t> *passetsQualifierCache = nullptr;
 CLRUCache<std::string, int8_t> *passetsRestrictionCache = nullptr;
 CLRUCache<std::string, int8_t> *passetsGlobalRestrictionCache = nullptr;
 CRestrictedDB *prestricteddb = nullptr;
+CMineableAssetsDB *pmineabledb = nullptr;
+
+static bool fMineableAssetsIsActive = false;
 
 enum FlushStateMode {
     FLUSH_STATE_NONE,
@@ -2514,10 +2519,25 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
     std::set<CMessage> setMessages;
     std::vector<std::pair<std::string, CNullAssetTxData>> myNullAssetData;
+
+    if (IsMineableAssetsDeployed() && pmineabledb) {
+        if (!ProcessMineableMaturityAtHeight(pindex->nHeight, *pmineabledb)) {
+            return state.DoS(100, error("%s: failed to process mineable maturity", __func__),
+                             REJECT_INVALID, "bad-mineable-maturity");
+        }
+    }
+
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
         const CTransaction &tx = *(block.vtx[i]);
         const uint256 txhash = tx.GetHash();
+
+        if (i == 0 && IsMineableAssetsDeployed() && pmineabledb && assetsCache) {
+            if (!ValidateMineableCoinbaseClaims(tx, pindex->nHeight, assetsCache, *pmineabledb, state)) {
+                return state.DoS(100, error("%s: invalid mineable coinbase claims", __func__),
+                                 REJECT_INVALID, "bad-mineable-coinbase");
+            }
+        }
 
         nInputs += tx.vin.size();
 
@@ -2725,6 +2745,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         /** RVN END */
 
         UpdateCoins(tx, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight, block.GetHash(), assetsCache, undoAssetData);
+
+        if (i == 0 && IsMineableAssetsDeployed() && pmineabledb && assetsCache) {
+            if (!ApplyMineableCoinbaseClaims(tx, pindex->nHeight, assetsCache, *pmineabledb)) {
+                return state.DoS(100, error("%s: failed to apply mineable coinbase claims", __func__),
+                                 REJECT_INVALID, "bad-mineable-apply");
+            }
+        }
 
         /** RVN START */
         if (!undoAssetData->first.empty()) {
@@ -5801,6 +5828,26 @@ void SetTransferOverflow(bool value) {
     fCheckTransferOverflowIsActive = value;
 }
 
+void SetTransferScriptsSizeActive(bool value)
+{
+    fTransferScriptIsActive = value;
+}
+
+void SetMineableAssetsActive(bool value)
+{
+    fMineableAssetsIsActive = value;
+}
+
+void SetAssetsActive(bool value)
+{
+    fAssetsIsActive = value;
+}
+
+void SetRip5AssetsActive(bool value)
+{
+    fRip5IsActive = value;
+}
+
 bool AreEnforcedValuesDeployed()
 {
     if (fEnforcedValuesIsActive)
@@ -5903,6 +5950,18 @@ bool IsTransferOverflowCheckDeployed()
         fCheckTransferOverflowIsActive = true;
 
     return fCheckTransferOverflowIsActive;
+}
+
+bool IsMineableAssetsDeployed()
+{
+    if (fMineableAssetsIsActive)
+        return true;
+
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_MINEABLE_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
+        fMineableAssetsIsActive = true;
+
+    return fMineableAssetsIsActive;
 }
 
 CAssetsCache* GetCurrentAssetCache()

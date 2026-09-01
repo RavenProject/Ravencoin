@@ -38,6 +38,10 @@ const struct VBDeploymentInfo VersionBitsDeploymentInfo[Consensus::MAX_VERSION_B
     {
         /*.name =*/ "transfer_overflow",
         /*.gbt_force =*/ true,
+     },
+    {
+        /*.name =*/ "mineable_assets",
+        /*.gbt_force =*/ true,
      }
 };
 

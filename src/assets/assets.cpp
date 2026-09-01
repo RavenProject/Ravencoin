@@ -23,6 +23,8 @@
 #include "assets.h"
 #include "assetdb.h"
 #include "assettypes.h"
+#include "mineable.h"
+#include "mineabledb.h"
 #include "protocol.h"
 #include "wallet/coincontrol.h"
 #include "utilmoneystr.h"
@@ -75,6 +77,7 @@ static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 static const std::regex QUALIFIER_INDICATOR("^[#][A-Z0-9._]{3,}$"); // Starts with #
 static const std::regex SUB_QUALIFIER_INDICATOR("^#[A-Z0-9._]+\\/#[A-Z0-9._]+$"); // Starts with #
 static const std::regex RESTRICTED_INDICATOR("^[\\$][A-Z0-9._]{3,}$"); // Starts with $
+static const std::regex MINEABLE_INDICATOR("^[&][A-Z0-9._]{3,}$"); // Starts with &
 
 static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$|^#RVN$|^#RAVEN$|^#RAVENCOIN$");
 
@@ -272,6 +275,14 @@ bool IsAssetNameValid(const std::string& name, AssetType& assetType, std::string
 
         return ret;
     }
+    else if (std::regex_match(name, MINEABLE_INDICATOR))
+    {
+        bool ret = IsTypeCheckNameValid(AssetType::MINEABLE, name, error);
+        if (ret)
+            assetType = AssetType::MINEABLE;
+
+        return ret;
+    }
     else
     {
         auto type = IsAssetNameASubasset(name) ? AssetType::SUB : AssetType::ROOT;
@@ -365,6 +376,13 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
         if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
         bool valid = IsRestrictedNameValid(name);
         if (!valid) { error = "Restricted name contains invalid characters (Valid characters are: A-Z 0-9 _ .) ($ must be the first character, _ . special characters can't be the first or last characters)";  return false; }
+        return true;
+    } else if (type == AssetType::MINEABLE) {
+        if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
+        if (name.size() < 4) { error = "Mineable name must contain at least 3 characters after &"; return false; }
+        std::string body = name.substr(1);
+        bool valid = IsRootNameValid(body);
+        if (!valid) { error = "Mineable name contains invalid characters"; return false; }
         return true;
     } else {
         if (name.size() > MAX_NAME_LENGTH - 1) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH - 1); return false; }  //Assets and sub-assets need to leave one extra char for OWNER indicator
@@ -1448,6 +1466,159 @@ bool CTransaction::IsReissueAsset() const
     // Check for the reissue asset data CTxOut. This will always be the last output in the transaction
     if (!CheckReissueDataTx(vout[vout.size() - 1]))
         return false;
+
+    return true;
+}
+
+bool CTransaction::IsIssueMineableAsset() const
+{
+    for (const auto& out : vout) {
+        if (CheckIssueMineableDataTx(out))
+            return true;
+    }
+    return false;
+}
+
+bool CTransaction::VerifyIssueMineable(std::string& strError) const
+{
+    if (vout.size() < 2) {
+        strError = "bad-txns-mineable-vout-size";
+        return false;
+    }
+
+    const CTxOut* mineableOut = nullptr;
+    for (const auto& out : vout) {
+        if (CheckIssueMineableDataTx(out)) {
+            mineableOut = &out;
+            break;
+        }
+    }
+    if (!mineableOut) {
+        strError = "bad-txns-mineable-data-not-found";
+        return false;
+    }
+
+    CIssueMineable issue;
+    std::string address;
+    if (!IssueMineableFromTransaction(*this, issue, address)) {
+        strError = "bad-txns-mineable-serialization-failed";
+        return false;
+    }
+    if (!CheckIssueMineable(issue, strError))
+        return false;
+
+    const CAmount expectedBurn = CalculateMineableIssuanceCost(issue);
+    bool foundBurn = false;
+    for (const auto& out : vout) {
+        if (out.scriptPubKey == GetScriptForDestination(DecodeDestination(GetParams().IssueAssetBurnAddress()))) {
+            if (out.nValue == expectedBurn)
+                foundBurn = true;
+        }
+    }
+    if (!foundBurn) {
+        strError = "bad-txns-mineable-burn";
+        return false;
+    }
+    return true;
+}
+
+bool CTransaction::IsReissueMineableAsset() const
+{
+    for (const auto& out : vout) {
+        if (CheckReissueMineableDataTx(out))
+            return true;
+    }
+    return false;
+}
+
+bool CTransaction::VerifyReissueMineable(std::string& strError) const
+{
+    if (vout.size() < 2) {
+        strError = "bad-txns-mineable-reissue-vout-size";
+        return false;
+    }
+
+    const CTxOut* reissueOut = nullptr;
+    for (const auto& out : vout) {
+        if (CheckReissueMineableDataTx(out)) {
+            reissueOut = &out;
+            break;
+        }
+    }
+    if (!reissueOut) {
+        strError = "bad-txns-mineable-reissue-data-not-found";
+        return false;
+    }
+
+    CReissueMineableSchedule reissue;
+    std::string address;
+    if (!ReissueMineableFromTransaction(*this, reissue, address)) {
+        strError = "bad-txns-mineable-reissue-serialization-failed";
+        return false;
+    }
+    if (!CheckReissueMineableSchedule(reissue, strError))
+        return false;
+
+    if (!pmineabledb) {
+        strError = "bad-txns-mineable-reissue-no-db";
+        return false;
+    }
+
+    CMineableSchedule schedule;
+    if (!pmineabledb->ReadSchedule(reissue.strMineableAsset, schedule) || !schedule.fActive) {
+        strError = "bad-txns-mineable-reissue-unknown";
+        return false;
+    }
+
+    const CAmount expectedBurn = CalculateMineableExtensionCost(schedule, reissue.nAddQty, reissue.nNewNthBlock);
+    if (expectedBurn > 0) {
+        bool foundBurn = false;
+        for (const auto& out : vout) {
+            if (out.scriptPubKey == GetScriptForDestination(DecodeDestination(GetParams().IssueAssetBurnAddress()))) {
+                if (out.nValue == expectedBurn)
+                    foundBurn = true;
+            }
+        }
+        if (!foundBurn) {
+            strError = "bad-txns-mineable-reissue-burn";
+            return false;
+        }
+    }
+
+    bool fOwnerOutFound = false;
+    for (const auto& out : vout) {
+        CAssetTransfer transfer;
+        std::string transferAddress;
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (schedule.strRootAsset + OWNER_TAG == transfer.strName) {
+                fOwnerOutFound = true;
+                break;
+            }
+        }
+    }
+    if (!fOwnerOutFound) {
+        strError = "bad-txns-mineable-reissue-owner-outpoint-not-found";
+        return false;
+    }
+
+    int nMineableReissues = 0;
+    int nTransfers = 0;
+    for (const auto& out : vout) {
+        if (IsScriptReissueMineableAsset(out.scriptPubKey))
+            nMineableReissues++;
+        int nType = 0;
+        bool fIsOwner = false;
+        if (out.scriptPubKey.IsAssetScript(nType, fIsOwner) && nType == TX_TRANSFER_ASSET)
+            nTransfers++;
+    }
+    if (nMineableReissues != 1) {
+        strError = "bad-txns-mineable-reissue-format";
+        return false;
+    }
+    if (nTransfers < 1) {
+        strError = "bad-txns-mineable-reissue-owner-transfer-missing";
+        return false;
+    }
 
     return true;
 }
@@ -3144,6 +3315,16 @@ bool CheckReissueDataTx(const CTxOut& txOut)
     return IsScriptReissueAsset(scriptPubKey);
 }
 
+bool CheckIssueMineableDataTx(const CTxOut& txOut)
+{
+    return IsScriptIssueMineableAsset(txOut.scriptPubKey);
+}
+
+bool CheckReissueMineableDataTx(const CTxOut& txOut)
+{
+    return IsScriptReissueMineableAsset(txOut.scriptPubKey);
+}
+
 bool CheckOwnerDataTx(const CTxOut& txOut)
 {
     // Verify 'rvnq' is in the transaction
@@ -3258,6 +3439,26 @@ bool IsScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex)
         return nType == TX_REISSUE_ASSET;
     }
 
+    return false;
+}
+
+bool IsScriptIssueMineableAsset(const CScript& scriptPubKey)
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    int nStartingIndex = 0;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+        return nType == TX_ISSUE_MINEABLE;
+    return false;
+}
+
+bool IsScriptReissueMineableAsset(const CScript& scriptPubKey)
+{
+    int nType = 0;
+    bool fIsOwner = false;
+    int nStartingIndex = 0;
+    if (scriptPubKey.IsAssetScript(nType, fIsOwner, nStartingIndex))
+        return nType == TX_REISSUE_MINEABLE;
     return false;
 }
 

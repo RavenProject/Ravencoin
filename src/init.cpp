@@ -22,6 +22,7 @@
 #include "httprpc.h"
 #include "key.h"
 #include "validation.h"
+#include "assets/mineabledb.h"
 #include "miner.h"
 #include "netbase.h"
 #include "net.h"
@@ -305,6 +306,9 @@ void PrepareShutdown()
 
         delete prestricteddb;
         prestricteddb = nullptr;
+
+        delete pmineabledb;
+        pmineabledb = nullptr;
 
         delete pmessagechanneldb;
         pmessagechanneldb = nullptr;
@@ -1566,6 +1570,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     delete passetsQualifierCache;
                     delete passetsRestrictionCache;
                     delete passetsGlobalRestrictionCache;
+                    delete pmineabledb;
 
                     //  Rewards
                     delete pSnapshotRequestDb;
@@ -1589,6 +1594,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
                     // Restricted assets
                     prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset || fReindexChainState);
+                    pmineabledb = new CMineableAssetsDB(nBlockTreeDBCache, false, fReset || fReindexChainState);
                     passetsVerifierCache = new CLRUCache<std::string, CNullAssetTxVerifierString>(
                             MAX_CACHE_ASSETS_SIZE);
                     passetsQualifierCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);

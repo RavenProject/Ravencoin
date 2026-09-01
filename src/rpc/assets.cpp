@@ -5,6 +5,8 @@
 //#include <amount.h>
 //#include <base58.h>
 #include "assets/assets.h"
+#include "assets/mineable.h"
+#include "assets/mineabledb.h"
 #include "assets/assetdb.h"
 #include <map>
 #include "tinyformat.h"
@@ -3032,6 +3034,73 @@ UniValue purgesnapshot(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+UniValue getmineableaccrual(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "getmineableaccrual \"asset_name\"\n"
+            "\nReturns mineable accrual state for a & asset.\n");
+
+    if (!IsMineableAssetsDeployed())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "mineable_assets soft fork is not active");
+
+    std::string asset_name = request.params[0].get_str();
+    if (!IsMineableAssetName(asset_name))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "asset must use & prefix");
+
+    if (!pmineabledb)
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "mineable database unavailable");
+
+    LOCK(cs_main);
+    const int height = chainActive.Height();
+
+    CMineableAccrualInfo info;
+    if (!GetMineableAccrualForAsset(asset_name, height, *pmineabledb, info))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "no active mineable schedule for asset");
+
+    UniValue ret(UniValue::VOBJ);
+    ret.push_back(Pair("matured_periods", info.matured_periods));
+    ret.push_back(Pair("claimed_periods", info.claimed_periods));
+    ret.push_back(Pair("delta_periods", info.delta_periods));
+    ret.push_back(Pair("accrued_amount", ValueFromAmount(info.accrued_amount)));
+    ret.push_back(Pair("accrued_miner", ValueFromAmount(info.accrued_miner)));
+    ret.push_back(Pair("accrued_fund", ValueFromAmount(info.accrued_fund)));
+    return ret;
+}
+
+UniValue issuemineabletestrun(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() < 3 || request.params.size() > 6)
+        throw std::runtime_error(
+            "issuemineabletestrun \"root_asset\" qty per_block ( nth_block fund_amt units )\n"
+            "\nEstimate mineable issuance cost and duration.\n");
+
+    CIssueMineable issue;
+    issue.strRootAsset = request.params[0].get_str();
+    issue.strMineableAsset = MineableAssetNameFromRoot(issue.strRootAsset);
+    issue.nTotalQty = AmountFromValue(request.params[1]);
+    issue.nPerBlock = AmountFromValue(request.params[2]);
+    issue.nNthBlock = request.params.size() > 3 ? request.params[3].get_int() : 10;
+    issue.nFundAmt = request.params.size() > 4 ? AmountFromValue(request.params[4]) : 0;
+    issue.nUnits = request.params.size() > 5 ? request.params[5].get_int() : 0;
+
+    std::string strError;
+    if (!CheckIssueMineable(issue, strError))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
+
+    CAmount cost = 0;
+    int days = 0;
+    int months = 0;
+    GetMineableIssuanceEstimate(issue, cost, days, months);
+
+    UniValue ret(UniValue::VOBJ);
+    ret.push_back(Pair("cost", ValueFromAmount(cost)));
+    ret.push_back(Pair("days", days));
+    ret.push_back(Pair("months", months));
+    ret.push_back(Pair("mineable_asset", issue.strMineableAsset));
+    return ret;
+}
+
 static const CRPCCommand commands[] =
 { //  category    name                          actor (function)             argNames
   //  ----------- ------------------------      -----------------------      ----------
@@ -3076,6 +3145,8 @@ static const CRPCCommand commands[] =
 
     { "assets",   "getsnapshot",                &getsnapshot,                {"asset_name", "block_height"}},
     { "assets",   "purgesnapshot",              &purgesnapshot,              {"asset_name", "block_height"}},
+    { "assets",   "getmineableaccrual",         &getmineableaccrual,         {"asset_name"}},
+    { "assets",   "issuemineabletestrun",       &issuemineabletestrun,       {"root_asset", "qty", "per_block", "nth_block", "fund_amt", "units"}},
 };
 
 void RegisterAssetRPCCommands(CRPCTable &t)

@@ -15,6 +15,7 @@
 #include "txdb.h"
 #include "txmempool.h"
 
+#include <map>
 #include <boost/thread.hpp>
 
 extern uint256 insecure_rand_seed;
@@ -98,6 +99,11 @@ struct TestChain100Setup : public TestingSetup
     // scriptPubKey, and try to add it to the current chain.
     CBlock CreateAndProcessBlock(const std::vector<CMutableTransaction> &txns,
                                  const CScript &scriptPubKey);
+
+    /** Same as CreateAndProcessBlock but appends mineable asset claim outputs to coinbase. */
+    CBlock CreateAndProcessBlockWithMineableClaims(const std::vector<CMutableTransaction> &txns,
+                                                   const CScript &scriptPubKey,
+                                                   const std::map<std::string, CAmount> &mineableClaims);
 
     ~TestChain100Setup();
 

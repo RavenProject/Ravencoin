@@ -15,6 +15,7 @@
 
 #include <assert.h>
 #include <assets/assets.h>
+#include <assets/mineable.h>
 #include <wallet/wallet.h>
 
 bool CCoinsView::GetCoin(const COutPoint &outpoint, Coin &coin) const { return false; }
@@ -247,6 +248,16 @@ void AddCoins(CCoinsViewCache& cache, const CTransaction &tx, int nHeight, uint2
 
                         break;
                     }
+                }
+            } else if (tx.IsIssueMineableAsset()) {
+                if (IsMineableAssetsDeployed() && pmineabledb && assetsCache) {
+                    if (!RegisterMineableScheduleFromTx(tx, nHeight, blockHash, *pmineabledb, assetsCache))
+                        error("%s: Failed to register mineable schedule", __func__);
+                }
+            } else if (tx.IsReissueMineableAsset()) {
+                if (IsMineableAssetsDeployed() && pmineabledb) {
+                    if (!ExtendMineableScheduleFromTx(tx, nHeight, *pmineabledb))
+                        error("%s: Failed to extend mineable schedule", __func__);
                 }
             }
         }

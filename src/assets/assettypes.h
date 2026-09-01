@@ -31,7 +31,8 @@ enum class AssetType
     REISSUE = 8,
     OWNER = 9,
     NULL_ADD_QUALIFIER = 10,
-    INVALID = 11
+    MINEABLE = 11,
+    INVALID = 12
 };
 
 enum class QualifierType
