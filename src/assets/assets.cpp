@@ -853,12 +853,17 @@ bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& asse
     }
 
     CTxDestination destination;
-    ExtractDestination(scriptPubKey, destination);
+    if (!NullAssetDataDestinationFromScript(scriptPubKey, destination))
+        return false;
 
     strAddress = EncodeDestination(destination);
 
+    const size_t nOffset = NullAssetTxDataPayloadOffset(scriptPubKey);
+    if (nOffset == 0)
+        return false;
+
     std::vector<unsigned char> vchAssetData;
-    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + OFFSET_TWENTY_THREE, scriptPubKey.end());
+    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + nOffset, scriptPubKey.end());
     CDataStream ssData(vchAssetData, SER_NETWORK, PROTOCOL_VERSION);
 
     try {
@@ -4689,15 +4694,6 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address: " + pair.second);
                 return false;
             }
-            if (dataDest.type() == typeid(CAssetAuthID)) {
-                // The legacy null-data tag format stores only 20 address bytes
-                // with no destination type, and its parser reconstructs a plain
-                // key identity. A tag/freeze for a P2AH address would therefore
-                // be recorded under - and enforced against - the wrong address.
-                error = std::make_pair(RPC_INVALID_PARAMETER,
-                    "P2AH (asset-auth) addresses cannot be used for qualifier tags or per-address restrictions");
-                return false;
-            }
             dataScript = GetScriptForNullAssetDataDestination(dataDest);
             pair.first.ConstructTransaction(dataScript);
 
@@ -5453,6 +5449,11 @@ bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache
     std::string address;
     if (!AssetNullDataFromScript(txout.scriptPubKey, data, address)) {
         strError = "bad-txns-null-asset-data-serialization";
+        return false;
+    }
+
+    if (NullAssetDataScriptUsesTypedDestination(txout.scriptPubKey) && !AreAssetAuthDeployed()) {
+        strError = "bad-txns-null-asset-data-p2ah-before-assetauth-active";
         return false;
     }
 

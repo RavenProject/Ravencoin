@@ -1393,9 +1393,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     // tagging
                     for (int i = 0; i < (int)addresses.size(); i++) {
                         CTxDestination tag_dest = DecodeDestination(addresses[i].get_str());
-                        if (tag_dest.type() == typeid(CAssetAuthID))
-                            throw JSONRPCError(RPC_INVALID_PARAMETER,
-                                "P2AH (asset-auth) addresses cannot be used for qualifier tags or per-address restrictions");
                         CScript tag_string_script = GetScriptForNullAssetDataDestination(tag_dest);
                         CNullAssetTxData tagString(strQualifier, tag_op);
                         tagString.ConstructTransaction(tag_string_script);
@@ -1434,9 +1431,6 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                     // freezing
                     for (int i = 0; i < (int)addresses.size(); i++) {
                         CTxDestination freeze_dest = DecodeDestination(addresses[i].get_str());
-                        if (freeze_dest.type() == typeid(CAssetAuthID))
-                            throw JSONRPCError(RPC_INVALID_PARAMETER,
-                                "P2AH (asset-auth) addresses cannot be used for qualifier tags or per-address restrictions");
                         CScript freeze_string_script = GetScriptForNullAssetDataDestination(freeze_dest);
                         CNullAssetTxData freezeString(strAssetName, freeze_op);
                         freezeString.ConstructTransaction(freeze_string_script);

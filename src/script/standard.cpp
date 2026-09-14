@@ -127,8 +127,13 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
         typeRet = TX_RESTRICTED_ASSET_DATA;
 
         if (scriptPubKey.size() >= 23 && scriptPubKey[1] != OP_RESERVED) {
-            std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
-            vSolutionsRet.push_back(hashBytes);
+            if (scriptPubKey[1] == 0x14) {
+                std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
+                vSolutionsRet.push_back(hashBytes);
+            } else if (scriptPubKey[1] == 0x15 && scriptPubKey.size() >= 24) {
+                std::vector<unsigned char> typedBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 23);
+                vSolutionsRet.push_back(typedBytes);
+            }
         }
         return true;
     }
@@ -258,10 +263,7 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
             addressRet = CKeyID(uint160(vSolutions[0]));
         return true;
     } else if (whichType == TX_RESTRICTED_ASSET_DATA) {
-        if (vSolutions.size()) {
-            addressRet = CKeyID(uint160(vSolutions[0]));
-            return true;
-        }
+        return NullAssetDataDestinationFromScript(scriptPubKey, addressRet);
     }
      /** RVN END */
     // Multisig txns have more than one address...
@@ -372,11 +374,64 @@ namespace
 
         bool operator()(const CAssetAuthID &assetAuthID) const {
             script->clear();
-            *script << OP_RVN_ASSET << ToByteVector(assetAuthID);
+            // Typed null-data format: push21(type || hash160) so restricted tags/freeze
+            // round-trip as P2AH instead of being misread as P2PKH.
+            std::vector<unsigned char> payload;
+            payload.push_back(static_cast<unsigned char>(NullAssetDataDestType::P2AH));
+            payload.insert(payload.end(), assetAuthID.begin(), assetAuthID.end());
+            *script << OP_RVN_ASSET << ToByteVector(payload);
             return true;
         }
     };
 } // namespace
+
+bool NullAssetDataScriptUsesTypedDestination(const CScript& scriptPubKey)
+{
+    return scriptPubKey.IsNullAssetTxDataScript() && scriptPubKey.size() > 1 && scriptPubKey[1] == 0x15;
+}
+
+size_t NullAssetTxDataPayloadOffset(const CScript& scriptPubKey)
+{
+    if (!scriptPubKey.IsNullAssetTxDataScript())
+        return 0;
+    if (scriptPubKey[1] == 0x14)
+        return NULL_ASSET_DATA_PAYLOAD_OFFSET_LEGACY;
+    if (scriptPubKey[1] == 0x15)
+        return NULL_ASSET_DATA_PAYLOAD_OFFSET_TYPED;
+    return 0;
+}
+
+bool NullAssetDataDestinationFromScript(const CScript& scriptPubKey, CTxDestination& dest)
+{
+    if (!scriptPubKey.IsNullAssetTxDataScript())
+        return false;
+
+    if (scriptPubKey[1] == 0x14) {
+        if (scriptPubKey.size() < 22)
+            return false;
+        dest = CKeyID(uint160(std::vector<unsigned char>(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22)));
+        return true;
+    }
+
+    if (scriptPubKey[1] != 0x15 || scriptPubKey.size() < 23)
+        return false;
+
+    const uint8_t nType = scriptPubKey[2];
+    const uint160 hash(std::vector<unsigned char>(scriptPubKey.begin() + 3, scriptPubKey.begin() + 23));
+    switch (static_cast<NullAssetDataDestType>(nType)) {
+        case NullAssetDataDestType::P2PKH:
+            dest = CKeyID(hash);
+            return true;
+        case NullAssetDataDestType::P2SH:
+            dest = CScriptID(hash);
+            return true;
+        case NullAssetDataDestType::P2AH:
+            dest = CAssetAuthID(hash);
+            return true;
+        default:
+            return false;
+    }
+}
 
 CScript GetScriptForDestination(const CTxDestination& dest)
 {

@@ -2,7 +2,7 @@
 # Regression tests for the P2AH review fixes:
 #   T1 cycle-safe spendassetauth resolution (no node crash)
 #   T2 third-party inbound transfers reach the watching wallet and are spendable
-#   T3 P2AH addresses rejected for qualifier tags / address restrictions
+#   T3 typed null-data tags/freeze on P2AH addresses (restricted integration)
 #   T4 address-index type 3 (direct + asset-carrying P2AH), incl. reorg symmetry
 from test_framework.test_framework import RavenTestFramework
 from test_framework.util import assert_equal, assert_raises_rpc_error
@@ -96,19 +96,26 @@ class AssetAuthFixesTest(RavenTestFramework):
         assert tx['confirmations'] >= 1
         print("T2 inbound tracking + spend: OK")
 
-    def t_tag_rejection(self):
+    def t_tag_p2ah_typed(self):
         n0 = self.nodes[0]
         n0.issuequalifierasset("#QTFX", 5)
+        n0.issue("QTFW", 100)
         n0.generate(1)
         self.sync_all()
 
         p2ah = n0.addassetauthaddress(1, ["QTFW!"])['address']
-        assert_raises_rpc_error(-8, "P2AH (asset-auth) addresses cannot be used",
-                                n0.addtagtoaddress, "#QTFX", p2ah)
+        n0.transfer("QTFW!", 1, p2ah)
+        n0.generate(1)
+        self.sync_all()
+
+        # P2AH addresses use typed null-data; tagging must succeed after assetauth is active
+        n0.addtagtoaddress("#QTFX", p2ah)
+        n0.generate(1)
+        self.sync_all()
 
         # sanity: tagging a normal address still works
         n0.addtagtoaddress("#QTFX", n0.getnewaddress())
-        print("T3 tag/freeze rejection: OK")
+        print("T3 P2AH typed tag: OK")
 
     def t_address_index_type3(self):
         n0, n2 = self.nodes[0], self.nodes[2]
@@ -160,7 +167,7 @@ class AssetAuthFixesTest(RavenTestFramework):
     def run_test(self):
         self.activate()
         self.t_cycle_safety()
-        self.t_tag_rejection()
+        self.t_tag_p2ah_typed()
         self.t_inbound_tracking_and_spend()
         self.t_address_index_type3()
 

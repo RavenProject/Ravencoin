@@ -153,6 +153,25 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
 /** Generate a script that contains an address used for qualifier, and restricted assets data transactions */
 CScript GetScriptForNullAssetDataDestination(const CTxDestination &dest);
 
+/** Destination-type byte in typed null-asset-data scripts (21-byte push after OP_RVN_ASSET). */
+enum class NullAssetDataDestType : uint8_t {
+    P2PKH = 1,
+    P2SH = 2,
+    P2AH = 3,
+};
+
+static const size_t NULL_ASSET_DATA_PAYLOAD_OFFSET_LEGACY = 23;
+static const size_t NULL_ASSET_DATA_PAYLOAD_OFFSET_TYPED = 24;
+
+/** True when script uses the typed (push-21) null-asset-data address format. */
+bool NullAssetDataScriptUsesTypedDestination(const CScript& scriptPubKey);
+
+/** Byte offset of the serialized CNullAssetTxData push in a null-asset-data script. */
+size_t NullAssetTxDataPayloadOffset(const CScript& scriptPubKey);
+
+/** Decode the tagged address from a null-asset-data script (legacy or typed). */
+bool NullAssetDataDestinationFromScript(const CScript& scriptPubKey, CTxDestination& dest);
+
 /**
  * Generate a pay-to-witness script for the given redeem script. If the redeem
  * script is P2PK or P2PKH, this returns a P2WPKH script, otherwise it returns a

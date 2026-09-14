@@ -330,9 +330,13 @@ bool CScript::IsNullAsset() const
 
 bool CScript::IsNullAssetTxDataScript() const
 {
-    return (this->size() > 23 &&
-            (*this)[0] == OP_RVN_ASSET &&
-            (*this)[1] == 0x14);
+    if (this->size() <= 23 || (*this)[0] != OP_RVN_ASSET || (*this)[1] == OP_RESERVED)
+        return false;
+    // Legacy P2PKH/P2SH: OP_RVN_ASSET push20(hash)
+    if ((*this)[1] == 0x14)
+        return true;
+    // Typed null-data: push21(type || hash)
+    return (*this)[1] == 0x15 && this->size() > 22;
 }
 
 bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
