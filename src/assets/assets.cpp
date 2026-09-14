@@ -853,12 +853,17 @@ bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& asse
     }
 
     CTxDestination destination;
-    ExtractDestination(scriptPubKey, destination);
+    if (!NullAssetDataDestinationFromScript(scriptPubKey, destination))
+        return false;
 
     strAddress = EncodeDestination(destination);
 
+    const size_t nOffset = NullAssetTxDataPayloadOffset(scriptPubKey);
+    if (nOffset == 0)
+        return false;
+
     std::vector<unsigned char> vchAssetData;
-    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + OFFSET_TWENTY_THREE, scriptPubKey.end());
+    vchAssetData.insert(vchAssetData.end(), scriptPubKey.begin() + nOffset, scriptPubKey.end());
     CDataStream ssData(vchAssetData, SER_NETWORK, PROTOCOL_VERSION);
 
     try {
@@ -1627,6 +1632,370 @@ void CAssetTransfer::ConstructTransaction(CScript& script) const
 
     vchMessage.insert(vchMessage.end(), ssTransfer.begin(), ssTransfer.end());
     script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+}
+
+CAssetAuthPreimage::CAssetAuthPreimage(const uint8_t& nRequired, const std::vector<std::string>& vOwnerAssetNames)
+{
+    SetNull();
+    this->nRequired = nRequired;
+    this->vOwnerAssetNames = vOwnerAssetNames;
+}
+
+bool CAssetAuthPreimage::IsValid(std::string& strError) const
+{
+    strError = "";
+
+    if (nRequired < 1) {
+        strError = "Invalid parameter: required number of owner assets must be at least 1";
+        return false;
+    }
+
+    if (vOwnerAssetNames.empty()) {
+        strError = "Invalid parameter: list of owner asset names can't be empty";
+        return false;
+    }
+
+    if (vOwnerAssetNames.size() > MAX_ASSET_AUTH_NAMES) {
+        strError = strprintf("Invalid parameter: list of owner asset names can't contain more than %d names", MAX_ASSET_AUTH_NAMES);
+        return false;
+    }
+
+    if (nRequired > vOwnerAssetNames.size()) {
+        strError = "Invalid parameter: required number of owner assets can't be larger than the number of owner asset names";
+        return false;
+    }
+
+    // Names must be valid owner asset names, sorted ascending and unique so that
+    // a given set of names always serializes to the same preimage and hash
+    for (size_t i = 0; i < vOwnerAssetNames.size(); i++) {
+        if (!IsAssetNameAnOwner(vOwnerAssetNames[i])) {
+            strError = strprintf("Invalid parameter: %s is not a valid owner asset name", vOwnerAssetNames[i]);
+            return false;
+        }
+
+        if (i > 0) {
+            if (vOwnerAssetNames[i] == vOwnerAssetNames[i - 1]) {
+                strError = strprintf("Invalid parameter: duplicate owner asset name %s", vOwnerAssetNames[i]);
+                return false;
+            }
+            if (vOwnerAssetNames[i] < vOwnerAssetNames[i - 1]) {
+                strError = "Invalid parameter: owner asset names must be sorted in ascending order";
+                return false;
+            }
+        }
+    }
+
+    // The preimage must fit in a single scriptSig push
+    CDataStream ssPreimage(SER_NETWORK, PROTOCOL_VERSION);
+    ssPreimage << *this;
+    if (ssPreimage.size() > MAX_SCRIPT_ELEMENT_SIZE) {
+        strError = strprintf("Invalid parameter: serialized preimage is larger than the max script element size of %d bytes", MAX_SCRIPT_ELEMENT_SIZE);
+        return false;
+    }
+
+    return true;
+}
+
+uint160 CAssetAuthPreimage::GetHash() const
+{
+    CDataStream ssPreimage(SER_NETWORK, PROTOCOL_VERSION);
+    ssPreimage << *this;
+    return Hash160(ssPreimage.begin(), ssPreimage.end());
+}
+
+void CAssetAuthPreimage::ConstructTransaction(CScript& script) const
+{
+    script.clear();
+    uint160 hash = GetHash();
+    script << OP_DUP << OP_HASH160 << ToByteVector(hash) << OP_EQUAL << OP_NIP;
+}
+
+/**
+ * Structural pre-scan of a serialized preimage payload.
+ *
+ * Walks the compactsize framing (threshold byte, name count, per-name lengths)
+ * without constructing any strings so that hostile length prefixes cannot cause
+ * large allocations before the payload is known to be consistent. Enforces:
+ *  - total size <= MAX_SCRIPT_ELEMENT_SIZE (a legal script push),
+ *  - declared lengths fit within the remaining bytes,
+ *  - exact consumption (no trailing data).
+ * Acceptance is a superset-free mirror of what CDataStream would decode; any
+ * payload accepted here decodes with strictly bounded allocations.
+ */
+bool AssetAuthPreimageFramingValid(const std::vector<unsigned char>& vchPreimage, std::string& strError)
+{
+    auto fail = [&strError](const std::string& msg) { strError = msg; return false; };
+
+    if (vchPreimage.empty())
+        return fail("preimage payload is empty");
+    if (vchPreimage.size() > MAX_SCRIPT_ELEMENT_SIZE)
+        return fail(strprintf("preimage payload too large (%d > %d bytes)", vchPreimage.size(), MAX_SCRIPT_ELEMENT_SIZE));
+
+    size_t i = 1; // skip the threshold byte; its range is checked by IsValid
+    auto readCompactSize = [&](uint64_t& nSizeRet) -> bool {
+        if (i >= vchPreimage.size())
+            return false;
+        uint64_t nSize = vchPreimage[i++];
+        if (nSize == 253) {
+            if (vchPreimage.size() - i < 2)
+                return false;
+            nSize = (uint64_t)vchPreimage[i] | ((uint64_t)vchPreimage[i + 1] << 8);
+            i += 2;
+        } else if (nSize == 254) {
+            if (vchPreimage.size() - i < 4)
+                return false;
+            nSize = (uint64_t)vchPreimage[i] | ((uint64_t)vchPreimage[i + 1] << 8) |
+                    ((uint64_t)vchPreimage[i + 2] << 16) | ((uint64_t)vchPreimage[i + 3] << 24);
+            i += 4;
+        } else if (nSize == 255) {
+            if (vchPreimage.size() - i < 8)
+                return false;
+            nSize = (uint64_t)vchPreimage[i] | ((uint64_t)vchPreimage[i + 1] << 8) |
+                    ((uint64_t)vchPreimage[i + 2] << 16) | ((uint64_t)vchPreimage[i + 3] << 24) |
+                    ((uint64_t)vchPreimage[i + 4] << 32) | ((uint64_t)vchPreimage[i + 5] << 40) |
+                    ((uint64_t)vchPreimage[i + 6] << 48) | ((uint64_t)vchPreimage[i + 7] << 56);
+            i += 8;
+        }
+        nSizeRet = nSize;
+        return true;
+    };
+
+    uint64_t nCount = 0;
+    if (!readCompactSize(nCount))
+        return fail("truncated preimage: missing owner asset name count");
+    if (nCount > MAX_ASSET_AUTH_NAMES)
+        return fail(strprintf("preimage declares too many owner assets (%d > %d)", nCount, MAX_ASSET_AUTH_NAMES));
+
+    for (uint64_t k = 0; k < nCount; k++) {
+        uint64_t nLen = 0;
+        if (!readCompactSize(nLen))
+            return fail("truncated preimage: missing owner asset name length");
+        if (nLen > vchPreimage.size() - i)
+            return fail("truncated preimage: declared name length exceeds payload");
+        i += (size_t)nLen;
+    }
+
+    if (i != vchPreimage.size())
+        return fail("preimage payload has trailing data");
+
+    return true;
+}
+
+bool AssetAuthPreimageStrictFromRaw(const std::vector<unsigned char>& vchPreimage, CAssetAuthPreimage& preimage, std::string& strError)
+{
+    // F-07: single strict ingress used by every RPC/wallet/resolver path so
+    // decoding semantics match the consensus parser exactly.
+    if (!AssetAuthPreimageFramingValid(vchPreimage, strError))
+        return false;
+
+    CDataStream ssPreimage(vchPreimage, SER_NETWORK, PROTOCOL_VERSION);
+    try {
+        ssPreimage >> preimage;
+    } catch (const std::exception& e) {
+        // Preserves specifics such as non-canonical CompactSize rejections.
+        strError = std::string("preimage failed to deserialize: ") + e.what();
+        return false;
+    }
+
+    std::string strValidError;
+    if (!preimage.IsValid(strValidError)) {
+        strError = strValidError;
+        return false;
+    }
+
+    // Canonical form check: reject payloads that only decode with trailing or
+    // non-canonical encodings by requiring byte-identical re-serialization.
+    CDataStream ssCanon(SER_NETWORK, PROTOCOL_VERSION);
+    ssCanon << preimage;
+    if (std::vector<unsigned char>(ssCanon.begin(), ssCanon.end()) != vchPreimage) {
+        strError = "preimage payload is not in canonical serialized form";
+        return false;
+    }
+    return true;
+}
+
+bool AssetAuthPreimageFromScriptSig(const CScript& scriptSig, CAssetAuthPreimage& preimage)
+{
+    // The scriptSig of a P2AH input must be a single push of the serialized preimage
+    opcodetype opcode;
+    std::vector<unsigned char> vchPreimage;
+    CScript::const_iterator pc = scriptSig.begin();
+    if (!scriptSig.GetOp(pc, opcode, vchPreimage))
+        return false;
+
+    if (opcode > OP_PUSHDATA4 || vchPreimage.empty())
+        return false;
+
+    if (pc != scriptSig.end()) // Must be exactly one push
+        return false;
+
+    // F-09: no logging inside this boolean speculative parser; callers decide
+    // what (if anything) to report. F-07: identical strict framing/decoding
+    // rules as every other ingress path.
+    std::string strStrictError;
+    if (!AssetAuthPreimageStrictFromRaw(vchPreimage, preimage, strStrictError))
+        return false;
+
+    return true;
+}
+
+bool AssetAuthHashFromScript(const CScript& scriptPubKey, uint160& hashRet)
+{
+    if (!scriptPubKey.IsAssetAuthScript())
+        return false;
+
+    std::vector<unsigned char> vchHash(scriptPubKey.begin() + 3, scriptPubKey.begin() + 23);
+    hashRet = uint160(vchHash);
+    return true;
+}
+
+bool CheckTxAssetAuthInputs(const CTransaction& tx, const CCoinsViewCache& inputs, std::string& strError, std::vector<CAssetAuthInputInfo>* vInfoRet)
+{
+    strError = "";
+
+    // Pass 1: classify the inputs.
+    // - P2AH inputs: parse and verify the revealed preimage, add to the pending list
+    // - Non-P2AH inputs that hold owner assets: these are authorization roots. They are
+    //   protected by their own scripts (signatures), and the asset input/output balance
+    //   rules guarantee that any owner asset present in the inputs also appears in the
+    //   outputs (it "moves" through the transaction)
+    struct PendingInput {
+        size_t nIndex;
+        CAssetAuthPreimage preimage;
+        std::string strOwnerAssetHeld; // owner asset held at this P2AH output, if any
+        bool fAuthorized;
+    };
+
+    std::vector<PendingInput> vPending;
+    std::set<std::string> setValidAuthorizers;
+
+    for (size_t i = 0; i < tx.vin.size(); i++) {
+        const COutPoint& prevout = tx.vin[i].prevout;
+        const Coin& coin = inputs.AccessCoin(prevout);
+        if (coin.IsSpent()) {
+            strError = "bad-txns-assetauth-inputs-missing-or-spent";
+            return false;
+        }
+
+        // Get the owner asset held at this input, if any
+        std::string strAssetHeld = "";
+        if (coin.IsAsset()) {
+            std::string strName;
+            CAmount nAmount;
+            if (GetAssetInfoFromScript(coin.out.scriptPubKey, strName, nAmount)) {
+                if (IsAssetNameAnOwner(strName))
+                    strAssetHeld = strName;
+            }
+        }
+
+        if (coin.out.scriptPubKey.IsAssetAuthScript()) {
+            PendingInput pending;
+            pending.nIndex = i;
+            pending.fAuthorized = false;
+            pending.strOwnerAssetHeld = strAssetHeld;
+
+            // The scriptSig must reveal a preimage that is valid and hashes to the committed value
+            if (!AssetAuthPreimageFromScriptSig(tx.vin[i].scriptSig, pending.preimage)) {
+                strError = "bad-txns-assetauth-bad-preimage";
+                return false;
+            }
+
+            std::string strPreimageError;
+            if (!pending.preimage.IsValid(strPreimageError)) {
+                strError = "bad-txns-assetauth-bad-preimage";
+                return false;
+            }
+
+            uint160 hashCommitted;
+            if (!AssetAuthHashFromScript(coin.out.scriptPubKey, hashCommitted)) {
+                strError = "bad-txns-assetauth-bad-script";
+                return false;
+            }
+
+            if (pending.preimage.GetHash() != hashCommitted) {
+                strError = "bad-txns-assetauth-hash-mismatch";
+                return false;
+            }
+
+            vPending.push_back(pending);
+        } else {
+            // Owner assets entering the transaction from key-protected (non-P2AH) inputs
+            // are authorization roots
+            if (!strAssetHeld.empty())
+                setValidAuthorizers.insert(strAssetHeld);
+        }
+    }
+
+    if (vPending.empty()) {
+        return true;
+    }
+
+    // Pass 2: iteratively authorize P2AH inputs. An owner asset held at a P2AH output
+    // only becomes a valid authorizer once that P2AH input is itself authorized. This
+    // implements chaining (key -> moves A! -> authorizes moving B! -> authorizes spending
+    // P2AH(B!) outputs) and rejects authorization cycles, because a cycle has no
+    // key-protected root and can never make progress
+    // F-04: worklist fixpoint with a name->pending reverse index. Each newly
+    // authorized owner name touches exactly the pendings that name it, so the
+    // total cost is O(total names + pending inputs + edges) instead of the
+    // previous O(N^2) full rescans.
+    std::unordered_map<std::string, std::vector<size_t>> byName;
+    byName.reserve(vPending.size() * 2);
+    std::vector<uint8_t> vFound(vPending.size(), 0);
+    std::deque<size_t> ready;
+    for (size_t i = 0; i < vPending.size(); i++) {
+        for (const auto& name : vPending[i].preimage.vOwnerAssetNames) {
+            byName[name].push_back(i);
+            if (setValidAuthorizers.count(name))
+                vFound[i]++;
+        }
+        if (vFound[i] >= vPending[i].preimage.nRequired)
+            ready.push_back(i);
+    }
+
+    size_t nAuthorized = 0;
+    while (!ready.empty()) {
+        const size_t i = ready.front();
+        ready.pop_front();
+        if (vPending[i].fAuthorized)
+            continue;
+        vPending[i].fAuthorized = true;
+        nAuthorized++;
+        // The owner asset held at this P2AH output can now authorize others
+        if (!vPending[i].strOwnerAssetHeld.empty() && setValidAuthorizers.insert(vPending[i].strOwnerAssetHeld).second) {
+            const auto it = byName.find(vPending[i].strOwnerAssetHeld);
+            if (it != byName.end()) {
+                for (const size_t j : it->second) {
+                    if (vPending[j].fAuthorized)
+                        continue;
+                    vFound[j]++;
+                    if (vFound[j] >= vPending[j].preimage.nRequired)
+                        ready.push_back(j);
+                }
+            }
+        }
+    }
+
+    if (vInfoRet) {
+        for (const auto& pending : vPending) {
+            CAssetAuthInputInfo info;
+            info.nIndex = pending.nIndex;
+            info.preimage = pending.preimage;
+            info.fAuthorized = pending.fAuthorized;
+            for (const auto& name : pending.preimage.vOwnerAssetNames) {
+                if (setValidAuthorizers.count(name))
+                    info.vAuthorizingAssets.push_back(name);
+            }
+            vInfoRet->push_back(info);
+        }
+    }
+
+    if (nAuthorized < vPending.size()) {
+        strError = "bad-txns-assetauth-insufficient-owner-movement";
+        return false;
+    }
+
+    return true;
 }
 
 CReissueAsset::CReissueAsset(const std::string &strAssetName, const CAmount &nAmount, const int &nUnits, const int &nReissuable,
@@ -4319,7 +4688,13 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 }
             }
 
-            CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
+            CScript dataScript;
+            CTxDestination dataDest = DecodeDestination(pair.second);
+            if (!IsValidDestination(dataDest)) {
+                error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address: " + pair.second);
+                return false;
+            }
+            dataScript = GetScriptForNullAssetDataDestination(dataDest);
             pair.first.ConstructTransaction(dataScript);
 
             CRecipient recipient = {dataScript, 0, false};
@@ -5074,6 +5449,11 @@ bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache
     std::string address;
     if (!AssetNullDataFromScript(txout.scriptPubKey, data, address)) {
         strError = "bad-txns-null-asset-data-serialization";
+        return false;
+    }
+
+    if (NullAssetDataScriptUsesTypedDestination(txout.scriptPubKey) && !AreAssetAuthDeployed()) {
+        strError = "bad-txns-null-asset-data-p2ah-before-assetauth-active";
         return false;
     }
 

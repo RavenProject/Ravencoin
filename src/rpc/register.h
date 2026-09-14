@@ -26,6 +26,8 @@ void RegisterAssetRPCCommands(CRPCTable &tableRPC);
 void RegisterMessageRPCCommands(CRPCTable &tableRPC);
 /** Register rewards RPC commands */
 void RegisterRewardsRPCCommands(CRPCTable &tableRPC);
+/** Register pay-to-asset-hash (P2AH) RPC commands */
+void RegisterAssetAuthRPCCommands(CRPCTable &tableRPC);
 
 static inline void RegisterAllCoreRPCCommands(CRPCTable &t)
 {
@@ -37,6 +39,7 @@ static inline void RegisterAllCoreRPCCommands(CRPCTable &t)
     RegisterAssetRPCCommands(t);
     RegisterMessageRPCCommands(t);
     RegisterRewardsRPCCommands(t);
+    RegisterAssetAuthRPCCommands(t);
 }
 
 #endif

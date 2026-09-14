@@ -164,6 +164,30 @@ public:
         }
         return obj;
     }
+
+    UniValue operator()(const CAssetAuthID &assetAuthID) const {
+        UniValue obj(UniValue::VOBJ);
+        obj.push_back(Pair("isscript", false));
+        obj.push_back(Pair("isassetauth", true));
+        if (pwallet) {
+            std::vector<unsigned char> vchPreimage;
+            if (pwallet->GetAssetAuthPreimage(assetAuthID, vchPreimage)) {
+                CAssetAuthPreimage preimage;
+                std::string strStrictError;
+                if (!AssetAuthPreimageStrictFromRaw(vchPreimage, preimage, strStrictError)) {
+                    return obj; // Stored preimage failed strict validation; report nothing extra
+                }
+                obj.push_back(Pair("preimage", HexStr(vchPreimage)));
+                obj.push_back(Pair("sigsrequired", preimage.nRequired));
+                UniValue a(UniValue::VARR);
+                for (const std::string& name : preimage.vOwnerAssetNames) {
+                    a.push_back(name);
+                }
+                obj.push_back(Pair("owner_assets", a));
+            }
+        }
+        return obj;
+    }
 };
 #endif
 
@@ -657,6 +681,10 @@ bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &addr
         address = CRavenAddress(CScriptID(hash)).ToString();
     } else if (type == 1) {
         address = CRavenAddress(CKeyID(hash)).ToString();
+    } else if (type == 3) {
+        /** RVN START */
+        address = CRavenAddress(CAssetAuthID(hash)).ToString();
+        /** RVN END */
     } else {
         return false;
     }

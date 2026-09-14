@@ -277,6 +277,7 @@ libraven_server_a_SOURCES = \
   policy/rbf.cpp \
   pow.cpp \
   rest.cpp \
+  rpc/assetauth.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
   rpc/messages.cpp \

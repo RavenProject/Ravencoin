@@ -1369,6 +1369,11 @@ public:
         }
         return false;
     }
+
+    bool operator()(const CAssetAuthID &assetAuthID) {
+        // P2AH addresses cannot be wrapped in witness scripts
+        return false;
+    }
 };
 
 UniValue addwitnessaddress(const JSONRPCRequest& request)

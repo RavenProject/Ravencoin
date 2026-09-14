@@ -154,6 +154,10 @@ UniValue blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
                         delta.push_back(Pair("address", CRavenAddress(CKeyID(spentInfo.addressHash)).ToString()));
                     } else if (spentInfo.addressType == 2)  {
                         delta.push_back(Pair("address", CRavenAddress(CScriptID(spentInfo.addressHash)).ToString()));
+                    } else if (spentInfo.addressType == 3)  {
+                        /** RVN START */
+                        delta.push_back(Pair("address", CRavenAddress(CAssetAuthID(spentInfo.addressHash)).ToString()));
+                        /** RVN END */
                     } else {
                         continue;
                     }
@@ -186,6 +190,13 @@ UniValue blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
             } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
                 std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
                 delta.push_back(Pair("address", CRavenAddress(CKeyID(uint160(hashBytes))).ToString()));
+            } else if (out.scriptPubKey.IsAssetAuthScript()) {
+                /** RVN START - F-05: render purely from script shape; historical and
+                 * pre-activation blocks must not lose their type-3 representation
+                 * because of the current tip's deployment state. */
+                std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
+                delta.push_back(Pair("address", CRavenAddress(CAssetAuthID(uint160(hashBytes))).ToString()));
+                /** RVN END */
             } else {
                 continue;
             }
@@ -1505,6 +1516,7 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     BIP9SoftForkDescPushBack(bip9_softforks, "enforce", consensusParams, Consensus::DEPLOYMENT_ENFORCE_VALUE);
     BIP9SoftForkDescPushBack(bip9_softforks, "coinbase", consensusParams, Consensus::DEPLOYMENT_COINBASE_ASSETS);
     BIP9SoftForkDescPushBack(bip9_softforks, "transfer_overflow", consensusParams, Consensus::DEPLOYMENT_TRANSFER_OVERFLOW);
+    BIP9SoftForkDescPushBack(bip9_softforks, "assetauth", consensusParams, Consensus::DEPLOYMENT_P2AH);
     obj.push_back(Pair("softforks",             softforks));
     obj.push_back(Pair("bip9_softforks", bip9_softforks));
 

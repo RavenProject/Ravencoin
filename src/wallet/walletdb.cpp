@@ -98,6 +98,11 @@ bool CWalletDB::WriteCScript(const uint160& hash, const CScript& redeemScript)
     return WriteIC(std::make_pair(std::string("cscript"), hash), redeemScript, false);
 }
 
+bool CWalletDB::WriteAssetAuthPreimage(const uint160& hash, const std::vector<unsigned char>& vchPreimage)
+{
+    return WriteIC(std::make_pair(std::string("assetauthpre"), hash), vchPreimage, false);
+}
+
 bool CWalletDB::WriteWatchOnly(const CScript &dest, const CKeyMetadata& keyMeta)
 {
     if (!WriteIC(std::make_pair(std::string("watchmeta"), dest), keyMeta)) {
@@ -487,6 +492,18 @@ bool ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             if (!pwallet->LoadCScript(script))
             {
                 strErr = "Error reading wallet database: LoadCScript failed";
+                return false;
+            }
+        }
+        else if (strType == "assetauthpre")
+        {
+            uint160 hash;
+            ssKey >> hash;
+            std::vector<unsigned char> vchPreimage;
+            ssValue >> vchPreimage;
+            if (!pwallet->LoadAssetAuthPreimage(vchPreimage))
+            {
+                strErr = "Error reading wallet database: LoadAssetAuthPreimage failed";
                 return false;
             }
         }

@@ -224,6 +224,7 @@ public:
 
     bool operator()(const CKeyID& id) const { return addr->Set(id); }
     bool operator()(const CScriptID& id) const { return addr->Set(id); }
+    bool operator()(const CAssetAuthID& id) const { return addr->Set(id); }
     bool operator()(const CNoDestination& no) const { return false; }
 };
 
@@ -241,6 +242,12 @@ bool CRavenAddress::Set(const CScriptID& id)
     return true;
 }
 
+bool CRavenAddress::Set(const CAssetAuthID& id)
+{
+    SetData(GetParams().Base58Prefix(CChainParams::ASSET_AUTH_ADDRESS), &id, 20);
+    return true;
+}
+
 bool CRavenAddress::Set(const CTxDestination& dest)
 {
     return boost::apply_visitor(CRavenAddressVisitor(this), dest);
@@ -255,7 +262,8 @@ bool CRavenAddress::IsValid(const CChainParams& params) const
 {
     bool fCorrectSize = vchData.size() == 20;
     bool fKnownVersion = vchVersion == params.Base58Prefix(CChainParams::PUBKEY_ADDRESS) ||
-                         vchVersion == params.Base58Prefix(CChainParams::SCRIPT_ADDRESS);
+                         vchVersion == params.Base58Prefix(CChainParams::SCRIPT_ADDRESS) ||
+                         vchVersion == params.Base58Prefix(CChainParams::ASSET_AUTH_ADDRESS);
     return fCorrectSize && fKnownVersion;
 }
 
@@ -269,6 +277,8 @@ CTxDestination CRavenAddress::Get() const
         return CKeyID(id);
     else if (vchVersion == GetParams().Base58Prefix(CChainParams::SCRIPT_ADDRESS))
         return CScriptID(id);
+    else if (vchVersion == GetParams().Base58Prefix(CChainParams::ASSET_AUTH_ADDRESS))
+        return CAssetAuthID(id);
     else
         return CNoDestination();
 }
@@ -284,6 +294,10 @@ bool CRavenAddress::GetIndexKey(uint160& hashBytes, int& type) const
     } else if (vchVersion == GetParams().Base58Prefix(CChainParams::SCRIPT_ADDRESS)) {
         memcpy(&hashBytes, &vchData[0], 20);
         type = 2;
+        return true;
+    } else if (vchVersion == GetParams().Base58Prefix(CChainParams::ASSET_AUTH_ADDRESS)) {
+        memcpy(&hashBytes, &vchData[0], 20);
+        type = 3;
         return true;
     }
 

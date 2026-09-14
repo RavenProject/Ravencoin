@@ -55,6 +55,7 @@ class CDataStream;
 class CTransaction;
 class CTxOut;
 class Coin;
+class CCoinsViewCache;
 class CWallet;
 class CReserveKey;
 class CWalletTx;
@@ -453,6 +454,32 @@ bool RestrictedAssetFromScript(const CScript& scriptPubKey, CNewAsset& asset, st
 bool AssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& assetData, std::string& strAddress);
 bool AssetNullVerifierDataFromScript(const CScript& scriptPubKey, CNullAssetTxVerifierString& verifierData);
 bool GlobalAssetNullDataFromScript(const CScript& scriptPubKey, CNullAssetTxData& assetData);
+
+//! Pay-to-asset-hash (P2AH) helpers
+//! Parse the preimage revealed in a P2AH input's scriptSig (must be a single push)
+bool AssetAuthPreimageFromScriptSig(const CScript& scriptSig, CAssetAuthPreimage& preimage);
+/** Bounded structural pre-scan of a serialized preimage payload (no allocations) */
+bool AssetAuthPreimageFramingValid(const std::vector<unsigned char>& vchPreimage, std::string& strError);
+/** Strict (framing + semantic + canonical-form) preimage decoder shared by all ingress paths */
+bool AssetAuthPreimageStrictFromRaw(const std::vector<unsigned char>& vchPreimage, CAssetAuthPreimage& preimage, std::string& strError);
+//! Extract the committed preimage hash from a P2AH scriptPubKey
+bool AssetAuthHashFromScript(const CScript& scriptPubKey, uint160& hashRet);
+
+//! Per-input result details from CheckTxAssetAuthInputs, used by RPC to report why a
+//! P2AH spend is or isn't authorized
+struct CAssetAuthInputInfo {
+    size_t nIndex;                              // index into tx.vin
+    CAssetAuthPreimage preimage;                // preimage revealed in the scriptSig
+    bool fAuthorized;                           // whether enough committed owner assets move in this tx
+    std::vector<std::string> vAuthorizingAssets; // the committed owner assets that do move
+};
+
+//! Consensus check for P2AH inputs: every P2AH input being spent must reveal a preimage
+//! matching its committed hash, and at least preimage.nRequired of the committed owner
+//! assets must move through the transaction (be present in inputs, from key-protected
+//! inputs or from already-authorized P2AH inputs). Used by both consensus validation
+//! (Consensus::CheckTxAssets) and the verifyassetauth RPC so they can never disagree
+bool CheckTxAssetAuthInputs(const CTransaction& tx, const CCoinsViewCache& inputs, std::string& strError, std::vector<CAssetAuthInputInfo>* vInfoRet = nullptr);
 
 //! Check to make sure the script contains the burn transaction
 bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type, const int numberIssued);

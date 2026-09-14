@@ -54,6 +54,7 @@ public:
         SECRET_KEY,
         EXT_PUBLIC_KEY,
         EXT_SECRET_KEY,
+        ASSET_AUTH_ADDRESS, // Pay-to-asset-hash (P2AH) addresses
 
         MAX_BASE58_TYPES
     };

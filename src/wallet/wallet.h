@@ -939,6 +939,11 @@ public:
     bool AddCScript(const CScript& redeemScript) override;
     bool LoadCScript(const CScript& redeemScript);
 
+    //! Adds a P2AH preimage to the store, and saves it to disk
+    bool AddAssetAuthPreimage(const std::vector<unsigned char>& vchPreimage) override;
+    //! Adds a P2AH preimage to the store, without saving it to disk (used by LoadWallet)
+    bool LoadAssetAuthPreimage(const std::vector<unsigned char>& vchPreimage);
+
     //! Adds a destination data tuple to the store, and saves it to disk
     bool AddDestData(const CTxDestination &dest, const std::string &key, const std::string &value);
     //! Erases a destination data tuple in the store and on disk

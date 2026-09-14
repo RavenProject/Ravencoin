@@ -85,17 +85,19 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
         return false;
     /** RVN START */
     case TX_NEW_ASSET:
-        keyID = CKeyID(uint160(vSolutions[0]));
-        if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
-            return false;
-        else
-        {
-            CPubKey vch;
-            creator.KeyStore().GetPubKey(keyID, vch);
-            ret.push_back(ToByteVector(vch));
-        }
-        return true;
     case TX_TRANSFER_ASSET:
+    case TX_REISSUE_ASSET:
+        // Asset data can be appended to a P2AH (pay-to-asset-hash) base script as well as a
+        // P2PKH base script. P2AH-based asset scripts are satisfied by the preimage, not a key
+        if (scriptPubKey.IsAssetAuthScript()) {
+            std::vector<unsigned char> vchPreimage;
+            if (creator.KeyStore().GetAssetAuthPreimage(uint160(vSolutions[0]), vchPreimage)) {
+                ret.push_back(vchPreimage);
+                return true;
+            }
+            return false;
+        }
+
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
             return false;
@@ -107,17 +109,17 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
         }
         return true;
 
-    case TX_REISSUE_ASSET:
-        keyID = CKeyID(uint160(vSolutions[0]));
-        if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
-            return false;
-        else
-        {
-            CPubKey vch;
-            creator.KeyStore().GetPubKey(keyID, vch);
-            ret.push_back(ToByteVector(vch));
+    case TX_ASSET_AUTH: {
+        // Pay-to-asset-hash: the "signature" is the preimage that hashes to the
+        // committed value. The actual authorization (owner asset movement) is
+        // enforced by consensus, not by this script
+        std::vector<unsigned char> vchPreimage;
+        if (creator.KeyStore().GetAssetAuthPreimage(uint160(vSolutions[0]), vchPreimage)) {
+            ret.push_back(vchPreimage);
+            return true;
         }
-        return true;
+        return false;
+    }
     /** RVN END */
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
@@ -426,6 +428,11 @@ static Stacks CombineSignatures(const CScript& scriptPubKey, const BaseSignature
         return sigs1;
     case TX_REISSUE_ASSET:
         // Signatures are bigger than placeholders or empty scripts:
+        if (sigs1.script.empty() || sigs1.script[0].empty())
+            return sigs2;
+        return sigs1;
+    case TX_ASSET_AUTH:
+        // Preimages are bigger than placeholders or empty scripts:
         if (sigs1.script.empty() || sigs1.script[0].empty())
             return sigs2;
         return sigs1;

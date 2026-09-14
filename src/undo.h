@@ -90,14 +90,12 @@ public:
         // TODO: avoid reimplementing vector deserializer
         uint64_t count = 0;
         ::Unserialize(s, COMPACTSIZE(count));
-        if (fAssetsIsActive) {
-            if (count > MAX_BLOCK_WEIGHT_RIP2 / MIN_TRANSACTION_INPUT_WEIGHT) {
-                throw std::ios_base::failure("Too many input undo records");
-            }
-        } else {
-            if (count > MAX_BLOCK_WEIGHT / MIN_TRANSACTION_INPUT_WEIGHT) {
-                throw std::ios_base::failure("Too many input undo records");
-            }
+        // R-01: era-independent parse ceiling. Undo records are produced from
+        // blocks that already passed era-specific weight validation, so this
+        // deserialization guard only needs a stable upper bound and must not
+        // depend on process-local deployment state.
+        if (count > MAX_BLOCK_WEIGHT_RIP2 / MIN_TRANSACTION_INPUT_WEIGHT) {
+            throw std::ios_base::failure("Too many input undo records");
         }
         vprevout.resize(count);
         for (auto& prevout : vprevout) {

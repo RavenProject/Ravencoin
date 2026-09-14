@@ -676,6 +676,10 @@ public:
     bool IsNullAssetTxDataScript() const;
     bool IsNullAssetVerifierTxDataScript() const;
     bool IsNullGlobalRestrictionAssetTxDataScript() const;
+    /** Pay-to-asset-hash (P2AH): exact 25 byte base script that commits to a hash of owner asset names */
+    bool IsPayToAssetAuthHash() const;
+    /** Pay-to-asset-hash base script with or without asset transfer data appended after it */
+    bool IsAssetAuthScript() const;
     /** RVN END */
 
     /** Used for obsolete pay-to-pubkey addresses indexing. */

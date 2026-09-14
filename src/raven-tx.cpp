@@ -243,12 +243,9 @@ static void MutateTxAddInput(CMutableTransaction& tx, const std::string& strInpu
     // Deprecated with RIP2 implementation
     //    static const unsigned int maxVout = MAX_BLOCK_WEIGHT / (WITNESS_SCALE_FACTOR * minTxOutSz);
 
-    unsigned int maxVout = 0;
-    if (fAssetsIsActive) {
-        maxVout = MAX_BLOCK_WEIGHT_RIP2 / (WITNESS_SCALE_FACTOR * minTxOutSz);
-    } else {
-        maxVout = MAX_BLOCK_WEIGHT / (WITNESS_SCALE_FACTOR * minTxOutSz);
-    }
+    // R-01: deterministic RIP2-era bound (the old latch was never set in this
+    // offline tool and depended on process state).
+    unsigned int maxVout = MAX_BLOCK_WEIGHT_RIP2 / (WITNESS_SCALE_FACTOR * minTxOutSz);
 
     // extract and validate vout
     std::string strVout = vStrInputParts[1];

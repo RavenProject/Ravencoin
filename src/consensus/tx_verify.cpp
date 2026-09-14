@@ -604,7 +604,7 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, CValidationState& state, c
 }
 
 //! Check to make sure that the inputs and outputs CAmount match exactly.
-bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime,   std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData)
+bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests, std::set<CMessage>* setMessages, int64_t nBlocktime,   std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData, bool fAssetAuthDeployed)
 {
     // are the actual inputs available?
     if (!inputs.HaveInputs(tx)) {
@@ -665,6 +665,30 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
         }
     }
 
+    /** RVN START - Pay-to-asset-hash (P2AH) input authorization */
+    {
+        bool fHasAssetAuthInput = false;
+        for (unsigned int i = 0; i < tx.vin.size(); ++i) {
+            const Coin& coin = inputs.AccessCoin(tx.vin[i].prevout);
+            if (coin.out.scriptPubKey.IsAssetAuthScript()) {
+                fHasAssetAuthInput = true;
+                break;
+            }
+        }
+
+        // F-01: before activation this script is an ordinary hashlock for legacy
+        // nodes. To keep block acceptance identical across versions, new nodes must
+        // NOT add rules to its spending before activation either. Authorization is
+        // enforced only once the deployment is active *for the context being
+        // validated* (tip for mempool, parent block for ConnectBlock).
+        if (fHasAssetAuthInput && fAssetAuthDeployed) {
+            std::string strAssetAuthError;
+            if (!CheckTxAssetAuthInputs(tx, inputs, strAssetAuthError))
+                return state.DoS(100, false, REJECT_INVALID, strAssetAuthError, false, "", tx.GetHash());
+        }
+    }
+    /** RVN END */
+
     // Create map that stores the amount of an asset transaction output. Used to verify no assets are burned
     std::map<std::string, CAmount> totalOutputs;
     int index = 0;
@@ -682,6 +706,12 @@ bool Consensus::CheckTxAssets(const CTransaction& tx, CValidationState& state, c
         if (assetCache) {
             if (fIsAsset && !AreAssetsDeployed())
                 return state.DoS(100, false, REJECT_INVALID, "bad-txns-is-asset-and-asset-not-active");
+
+            // Reject the creation of P2AH outputs before the deployment is active. This is
+            // only enforced for mempool acceptance: blocks containing P2AH outputs are not
+            // rejected pre-activation to avoid splitting against miners who don't relay them
+            if (fCheckMempool && txout.scriptPubKey.IsAssetAuthScript() && !fAssetAuthDeployed)
+                return state.DoS(0, false, REJECT_NONSTANDARD, "bad-txns-assetauth-not-active", false, "", tx.GetHash());
 
             if (txout.scriptPubKey.IsNullAsset()) {
                 if (!AreRestrictedAssetsDeployed())

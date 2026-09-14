@@ -39,6 +39,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_NEW_ASSET: return ASSET_NEW_STRING;
     case TX_TRANSFER_ASSET: return ASSET_TRANSFER_STRING;
     case TX_REISSUE_ASSET: return ASSET_REISSUE_STRING;
+    case TX_ASSET_AUTH: return "assetauth";
     /** RVN END */
     }
     return nullptr;
@@ -72,6 +73,16 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
         return true;
     }
     /** RVN START */
+    // Pay-to-asset-hash (P2AH): the bare 25 byte base script. P2AH scripts that carry
+    // appended asset transfer data are classified as asset scripts below so that all
+    // existing asset accounting works unchanged
+    if (scriptPubKey.IsPayToAssetAuthHash()) {
+        typeRet = TX_ASSET_AUTH;
+        std::vector<unsigned char> hashBytes(scriptPubKey.begin()+3, scriptPubKey.begin()+23);
+        vSolutionsRet.push_back(hashBytes);
+        return true;
+    }
+
     int nType = 0;
     bool fIsOwner = false;
     if (scriptPubKey.IsAssetScript(nType, fIsOwner)) {
@@ -116,8 +127,13 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, std::vector<std::v
         typeRet = TX_RESTRICTED_ASSET_DATA;
 
         if (scriptPubKey.size() >= 23 && scriptPubKey[1] != OP_RESERVED) {
-            std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
-            vSolutionsRet.push_back(hashBytes);
+            if (scriptPubKey[1] == 0x14) {
+                std::vector<unsigned char> hashBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22);
+                vSolutionsRet.push_back(hashBytes);
+            } else if (scriptPubKey[1] == 0x15 && scriptPubKey.size() >= 24) {
+                std::vector<unsigned char> typedBytes(scriptPubKey.begin() + 2, scriptPubKey.begin() + 23);
+                vSolutionsRet.push_back(typedBytes);
+            }
         }
         return true;
     }
@@ -234,14 +250,20 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
         addressRet = CScriptID(uint160(vSolutions[0]));
         return true;
     /** RVN START */
+    } else if (whichType == TX_ASSET_AUTH) {
+        addressRet = CAssetAuthID(uint160(vSolutions[0]));
+        return true;
     } else if (whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET || whichType == TX_TRANSFER_ASSET) {
-        addressRet = CKeyID(uint160(vSolutions[0]));
+        // Asset data can be appended to either a P2PKH base script or a P2AH base script.
+        // Check the base script type so asset balances at P2AH addresses are tracked
+        // under the P2AH address
+        if (scriptPubKey.IsAssetAuthScript())
+            addressRet = CAssetAuthID(uint160(vSolutions[0]));
+        else
+            addressRet = CKeyID(uint160(vSolutions[0]));
         return true;
     } else if (whichType == TX_RESTRICTED_ASSET_DATA) {
-        if (vSolutions.size()) {
-            addressRet = CKeyID(uint160(vSolutions[0]));
-            return true;
-        }
+        return NullAssetDataDestinationFromScript(scriptPubKey, addressRet);
     }
      /** RVN END */
     // Multisig txns have more than one address...
@@ -313,6 +335,14 @@ public:
         *script << OP_HASH160 << ToByteVector(scriptID) << OP_EQUAL;
         return true;
     }
+
+    bool operator()(const CAssetAuthID &assetAuthID) const {
+        script->clear();
+        // Pay-to-asset-hash: same 25 byte layout as P2PKH so asset data can be appended,
+        // but ends in OP_EQUAL OP_NIP so the preimage push satisfies the script
+        *script << OP_DUP << OP_HASH160 << ToByteVector(assetAuthID) << OP_EQUAL << OP_NIP;
+        return true;
+    }
 };
 } // namespace
 
@@ -341,8 +371,67 @@ namespace
             *script << OP_RVN_ASSET << ToByteVector(scriptID);
             return true;
         }
+
+        bool operator()(const CAssetAuthID &assetAuthID) const {
+            script->clear();
+            // Typed null-data format: push21(type || hash160) so restricted tags/freeze
+            // round-trip as P2AH instead of being misread as P2PKH.
+            std::vector<unsigned char> payload;
+            payload.push_back(static_cast<unsigned char>(NullAssetDataDestType::P2AH));
+            payload.insert(payload.end(), assetAuthID.begin(), assetAuthID.end());
+            *script << OP_RVN_ASSET << ToByteVector(payload);
+            return true;
+        }
     };
 } // namespace
+
+bool NullAssetDataScriptUsesTypedDestination(const CScript& scriptPubKey)
+{
+    return scriptPubKey.IsNullAssetTxDataScript() && scriptPubKey.size() > 1 && scriptPubKey[1] == 0x15;
+}
+
+size_t NullAssetTxDataPayloadOffset(const CScript& scriptPubKey)
+{
+    if (!scriptPubKey.IsNullAssetTxDataScript())
+        return 0;
+    if (scriptPubKey[1] == 0x14)
+        return NULL_ASSET_DATA_PAYLOAD_OFFSET_LEGACY;
+    if (scriptPubKey[1] == 0x15)
+        return NULL_ASSET_DATA_PAYLOAD_OFFSET_TYPED;
+    return 0;
+}
+
+bool NullAssetDataDestinationFromScript(const CScript& scriptPubKey, CTxDestination& dest)
+{
+    if (!scriptPubKey.IsNullAssetTxDataScript())
+        return false;
+
+    if (scriptPubKey[1] == 0x14) {
+        if (scriptPubKey.size() < 22)
+            return false;
+        dest = CKeyID(uint160(std::vector<unsigned char>(scriptPubKey.begin() + 2, scriptPubKey.begin() + 22)));
+        return true;
+    }
+
+    if (scriptPubKey[1] != 0x15 || scriptPubKey.size() < 23)
+        return false;
+
+    const uint8_t nType = scriptPubKey[2];
+    const uint160 hash(std::vector<unsigned char>(scriptPubKey.begin() + 3, scriptPubKey.begin() + 23));
+    switch (static_cast<NullAssetDataDestType>(nType)) {
+        case NullAssetDataDestType::P2PKH:
+            dest = CKeyID(hash);
+            return true;
+        case NullAssetDataDestType::P2SH:
+            dest = CScriptID(hash);
+            return true;
+        case NullAssetDataDestType::P2AH:
+            dest = CAssetAuthID(hash);
+            return true;
+        default:
+            return false;
+    }
+}
 
 CScript GetScriptForDestination(const CTxDestination& dest)
 {

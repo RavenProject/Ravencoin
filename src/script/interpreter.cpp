@@ -233,6 +233,13 @@ bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned i
     {
         return set_error(serror, SCRIPT_ERR_SIG_HASHTYPE);
     }
+    // Pay-to-asset-hash (P2AH): transactions that spend P2AH inputs require every
+    // signature to commit to the whole transaction with exactly SIGHASH_ALL
+    else if ((flags & SCRIPT_VERIFY_REQUIRE_SIGHASH_ALL) != 0 && vchSig.size() > 0 &&
+             vchSig[vchSig.size() - 1] != SIGHASH_ALL)
+    {
+        return set_error(serror, SCRIPT_ERR_SIG_HASHTYPE);
+    }
     return true;
 }
 

@@ -304,6 +304,58 @@ public:
     void ConstructGlobalRestrictionTransaction(CScript &script) const;
 };
 
+/** The maximum number of owner asset names that a P2AH preimage may commit to */
+#define MAX_ASSET_AUTH_NAMES 15
+
+/**
+ * Pay-to-asset-hash (P2AH) preimage.
+ *
+ * Commits to an m-of-n set of owner asset names ("ASSET!"). A P2AH output's
+ * script contains Hash160 of the serialization of this object. To spend a
+ * P2AH output, the spending transaction reveals this preimage in the input's
+ * scriptSig and must transfer (move through inputs and outputs) at least
+ * nRequired of the named owner assets.
+ */
+class CAssetAuthPreimage
+{
+public:
+    uint8_t nRequired;                          // m: how many of the named owner assets must move
+    std::vector<std::string> vOwnerAssetNames;  // n: owner asset names, sorted ascending and unique
+
+    CAssetAuthPreimage()
+    {
+        SetNull();
+    }
+
+    CAssetAuthPreimage(const uint8_t& nRequired, const std::vector<std::string>& vOwnerAssetNames);
+
+    void SetNull()
+    {
+        nRequired = 0;
+        vOwnerAssetNames.clear();
+    }
+
+    bool IsNull() const
+    {
+        return nRequired == 0 && vOwnerAssetNames.empty();
+    }
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(nRequired);
+        READWRITE(vOwnerAssetNames);
+    }
+
+    bool IsValid(std::string& strError) const;
+    /** Hash160 of the serialization of this preimage. Only call on valid preimages */
+    uint160 GetHash() const;
+    /** Construct the 25 byte P2AH base scriptPubKey that commits to this preimage */
+    void ConstructTransaction(CScript& script) const;
+};
+
 class CNullAssetTxVerifierString {
 
 public:

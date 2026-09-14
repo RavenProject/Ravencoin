@@ -265,7 +265,7 @@ enum FlushStateMode {
 static bool FlushStateToDisk(const CChainParams& chainParams, CValidationState &state, FlushStateMode mode, int nManualPruneHeight=0);
 static void FindFilesToPruneManual(std::set<int>& setFilesToPrune, int nManualPruneHeight);
 static void FindFilesToPrune(std::set<int>& setFilesToPrune, uint64_t nPruneAfterHeight);
-bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks = nullptr);
+bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks = nullptr, bool fAssetAuthSighashActive = false);
 static FILE* OpenUndoFile(const CDiskBlockPos &pos, bool fReadOnly = false);
 
 bool CheckFinalTx(const CTransaction &tx, int flags)
@@ -511,7 +511,7 @@ static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, CValidationSt
         }
     }
 
-    return CheckInputs(tx, state, view, true, flags, cacheSigStore, true, txdata);
+    return CheckInputs(tx, state, view, true, flags, cacheSigStore, true, txdata, nullptr, AreAssetAuthDeployed());
 }
 
 static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool& pool, CValidationState& state, const CTransactionRef& ptx,
@@ -665,7 +665,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         }
 
         if (AreAssetsDeployed()) {
-            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets))
+            if (!Consensus::CheckTxAssets(tx, state, view, GetCurrentAssetCache(), true, vReissueAssets, false, nullptr, 0, nullptr, AreAssetAuthDeployed()))
                 return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                              FormatStateMessage(state));
         }
@@ -889,13 +889,13 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
         PrecomputedTransactionData txdata(tx);
-        if (!CheckInputs(tx, state, view, true, scriptVerifyFlags, true, false, txdata)) {
+        if (!CheckInputs(tx, state, view, true, scriptVerifyFlags, true, false, txdata, nullptr, AreAssetAuthDeployed())) {
             // SCRIPT_VERIFY_CLEANSTACK requires SCRIPT_VERIFY_WITNESS, so we
             // need to turn both off, and compare against just turning off CLEANSTACK
             // to see if the failure is specifically due to witness validation.
             CValidationState stateDummy; // Want reported failures to be from first CheckInputs
-            if (!tx.HasWitness() && CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~(SCRIPT_VERIFY_WITNESS | SCRIPT_VERIFY_CLEANSTACK), true, false, txdata) &&
-                !CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~SCRIPT_VERIFY_CLEANSTACK, true, false, txdata)) {
+            if (!tx.HasWitness() && CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~(SCRIPT_VERIFY_WITNESS | SCRIPT_VERIFY_CLEANSTACK), true, false, txdata, nullptr, AreAssetAuthDeployed()) &&
+                !CheckInputs(tx, stateDummy, view, true, scriptVerifyFlags & ~SCRIPT_VERIFY_CLEANSTACK, true, false, txdata, nullptr, AreAssetAuthDeployed())) {
                 // Only the witness is missing, so the transaction itself may be fine.
                 state.SetCorruptionPossible();
             }
@@ -927,7 +927,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
                 return error("%s: BUG! PLEASE REPORT THIS! ConnectInputs failed against latest-block but not STANDARD flags %s, %s",
                     __func__, hash.ToString(), FormatStateMessage(state));
             } else {
-                if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true, false, txdata)) {
+                if (!CheckInputs(tx, state, view, true, MANDATORY_SCRIPT_VERIFY_FLAGS, true, false, txdata, nullptr, AreAssetAuthDeployed())) {
                     return error("%s: ConnectInputs failed against MANDATORY but not STANDARD flags due to promiscuous mempool %s, %s",
                         __func__, hash.ToString(), FormatStateMessage(state));
                 } else {
@@ -1589,7 +1589,7 @@ void InitScriptExecutionCache() {
  *
  * Non-static (and re-declared) in src/test/txvalidationcache_tests.cpp
  */
-bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks)
+bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &inputs, bool fScriptChecks, unsigned int flags, bool cacheSigStore, bool cacheFullScriptStore, PrecomputedTransactionData& txdata, std::vector<CScriptCheck> *pvChecks, bool fAssetAuthSighashActive)
 {
     if (!tx.IsCoinBase())
     {
@@ -1611,6 +1611,23 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
             // correct (ie that the transaction hash which is in tx's prevouts
             // properly commits to the scriptPubKey in the inputs view of that
             // transaction).
+            /** RVN START - Pay-to-asset-hash (P2AH) */
+            // If this transaction spends any P2AH input, every signature in the transaction
+            // must commit to the whole transaction with SIGHASH_ALL. P2AH inputs carry no
+            // signature, so the transaction is only bound by the other inputs' signatures
+            // F-01/F-02: the caller supplies the deployment state for its
+            // context (tip for mempool, parent block for block validation).
+            if (fAssetAuthSighashActive) {
+                for (unsigned int i = 0; i < tx.vin.size(); i++) {
+                    const Coin& coin = inputs.AccessCoin(tx.vin[i].prevout);
+                    if (!coin.IsSpent() && coin.out.scriptPubKey.IsAssetAuthScript()) {
+                        flags |= SCRIPT_VERIFY_REQUIRE_SIGHASH_ALL;
+                        break;
+                    }
+                }
+            }
+            /** RVN END */
+
             uint256 hashCacheEntry;
             // We only use the first 19 bytes of nonce to avoid a second SHA
             // round - giving us 19 + 32 + 4 = 55 bytes (+ 8 + 1 = 64)
@@ -1763,7 +1780,7 @@ enum DisconnectResult
  * @param out The out point that corresponds to the tx input.
  * @return A DisconnectResult as an int
  */
-int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAssetsCache* assetCache = nullptr)
+int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAssetsCache* assetCache = nullptr, bool fAssetsDeployedCtx = false)
 {
     bool fClean = true;
 
@@ -1798,7 +1815,8 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
     view.AddCoin(out, std::move(undo), !fClean);
 
     /** RVN START */
-    if (AreAssetsDeployed()) {
+    // R-01: use the deployment state of the block being disconnected.
+    if (fAssetsDeployedCtx) {
         if (assetCache && fIsAsset) {
             if (!assetCache->UndoAssetCoin(tempCoin, out))
                 fClean = false;
@@ -1813,6 +1831,8 @@ int ApplyTxInUndo(Coin&& undo, CCoinsViewCache& view, const COutPoint& out, CAss
  *  When FAILED is returned, view is left in an indeterminate state. */
 static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* pindex, CCoinsViewCache& view, CAssetsCache* assetsCache = nullptr, bool ignoreAddressIndex = false, bool databaseMessaging = true)
 {
+    // R-01/F-05: block-contextual deployment state for every asset undo/index guard.
+    const bool fAssetsDeployedCtx = AreAssetsDeployedAt(pindex->pprev);
     bool fClean = true;
 
     CBlockUndo blockUndo;
@@ -1878,10 +1898,11 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, hash, k), CAddressUnspentValue()));
                 } else {
                     /** RVN START */
-                    if (AreAssetsDeployed()) {
+                    if (fAssetsDeployedCtx) {
                         std::string assetName;
                         CAmount assetAmount;
                         uint160 hashBytes;
+                        const int indexType = out.scriptPubKey.IsAssetAuthScript() ? 3 : 1;
 
                         if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
 //                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
@@ -1889,13 +1910,20 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
 
                             // undo receiving activity
                             addressIndex.push_back(std::make_pair(
-                                    CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, k,
+                                    CAddressIndexKey(indexType, uint160(hashBytes), assetName, pindex->nHeight, i, hash, k,
                                                      false), assetAmount));
 
                             // undo unspent index
                             addressUnspentIndex.push_back(
-                                    std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), assetName, hash, k),
+                                    std::make_pair(CAddressUnspentKey(indexType, uint160(hashBytes), assetName, hash, k),
                                                    CAddressUnspentValue()));
+                        } else if (indexType == 3) {
+                            // Undo a direct P2AH receive
+                            hashBytes = uint160(std::vector<unsigned char>(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23));
+                            addressIndex.push_back(std::make_pair(
+                                    CAddressIndexKey(3, hashBytes, pindex->nHeight, i, hash, k, false), out.nValue));
+                            addressUnspentIndex.push_back(std::make_pair(
+                                    CAddressUnspentKey(3, hashBytes, hash, k), CAddressUnspentValue()));
                         } else {
                             continue;
                         }
@@ -1918,7 +1946,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                 }
 
                 /** RVN START */
-                if (AreAssetsDeployed()) {
+                if (fAssetsDeployedCtx) {
                     if (assetsCache) {
                         if (IsScriptTransferAsset(tx.vout[o].scriptPubKey))
                             vAssetTxIndex.emplace_back(o);
@@ -1941,7 +1969,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
         }
 
         /** RVN START */
-        if (AreAssetsDeployed()) {
+        if (fAssetsDeployedCtx) {
             if (assetsCache) {
                 if (tx.IsNewAsset()) {
                     // Remove the newly created asset
@@ -2169,7 +2197,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
             for (unsigned int j = tx.vin.size(); j-- > 0;) {
                 const COutPoint &out = tx.vin[j].prevout;
                 Coin &undo = txundo.vprevout[j];
-                int res = ApplyTxInUndo(std::move(undo), view, out, assetsCache); /** RVN START */ /* Pass assetsCache into ApplyTxInUndo function */ /** RVN END */
+                int res = ApplyTxInUndo(std::move(undo), view, out, assetsCache, fAssetsDeployedCtx); /** RVN START */ /* Pass assetsCache and block-contextual deployment into ApplyTxInUndo */ /** RVN END */
                 if (res == DISCONNECT_FAILED) return DISCONNECT_FAILED;
                 fClean = fClean && res != DISCONNECT_UNCLEAN;
 
@@ -2207,10 +2235,11 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
                         addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, hashBytes, hash, j), CAddressUnspentValue()));
                     } else {
                         /** RVN START */
-                        if (AreAssetsDeployed()) {
+                        if (fAssetsDeployedCtx) {
                             std::string assetName;
                             CAmount assetAmount;
                             uint160 hashBytes;
+                            const int indexType = prevout.scriptPubKey.IsAssetAuthScript() ? 3 : 1;
 
                             if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
 //                                std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
@@ -2218,14 +2247,22 @@ static DisconnectResult DisconnectBlock(const CBlock& block, const CBlockIndex* 
 
                                 // undo spending activity
                                 addressIndex.push_back(std::make_pair(
-                                        CAddressIndexKey(1, uint160(hashBytes), assetName, pindex->nHeight, i, hash, j,
+                                        CAddressIndexKey(indexType, uint160(hashBytes), assetName, pindex->nHeight, i, hash, j,
                                                          true), assetAmount * -1));
 
                                 // restore unspent index
                                 addressUnspentIndex.push_back(std::make_pair(
-                                        CAddressUnspentKey(1, uint160(hashBytes), assetName, input.prevout.hash,
+                                        CAddressUnspentKey(indexType, uint160(hashBytes), assetName, input.prevout.hash,
                                                            input.prevout.n),
                                         CAddressUnspentValue(assetAmount, prevout.scriptPubKey, undo.nHeight)));
+                            } else if (indexType == 3) {
+                                // Undo a direct P2AH spend
+                                hashBytes = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+                                addressIndex.push_back(std::make_pair(
+                                        CAddressIndexKey(3, hashBytes, pindex->nHeight, i, hash, j, true), prevout.nValue * -1));
+                                addressUnspentIndex.push_back(std::make_pair(
+                                        CAddressUnspentKey(3, hashBytes, input.prevout.hash, input.prevout.n),
+                                        CAddressUnspentValue(prevout.nValue, prevout.scriptPubKey, undo.nHeight)));
                             } else {
                                 continue;
                             }
@@ -2387,6 +2424,8 @@ static int64_t nBlocksTotal = 0;
 static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex,
                   CCoinsViewCache& view, const CChainParams& chainparams, CAssetsCache* assetsCache = nullptr, bool fJustCheck = false, bool ignoreAddressIndex = false)
 {
+    // R-01/F-05: block-contextual deployment state for consensus checks and index writers.
+    const bool fAssetsDeployedCtx = AreAssetsDeployedAt(pindex->pprev);
 
     AssertLockHeld(cs_main);
     assert(pindex);
@@ -2535,7 +2574,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
             }
 
             /** RVN START */
-            if (!AreAssetsDeployed()) {
+            if (!fAssetsDeployedCtx) {
                 for (auto out : tx.vout)
                     if (out.scriptPubKey.IsAssetScript())
                         return state.DoS(100, error("%s : Received Block with tx that contained an asset when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-assets-not-active");
@@ -2543,9 +2582,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         return state.DoS(100, error("%s : Received Block with tx that contained an null asset data tx when assets wasn't active", __func__), REJECT_INVALID, "bad-txns-null-data-assets-not-active");
             }
 
-            if (AreAssetsDeployed()) {
+            if (fAssetsDeployedCtx) {
                 std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime, &myNullAssetData)) {
+                if (!Consensus::CheckTxAssets(tx, state, view, assetsCache, false, vReissueAssets, false, &setMessages, block.nTime, &myNullAssetData, AreAssetAuthDeployedAt(pindex->pprev))) {
                     state.SetFailedTransaction(tx.GetHash());
                     return error("%s: Consensus::CheckTxAssets: %s, %s", __func__, tx.GetHash().ToString(),
                                  FormatStateMessage(state));
@@ -2590,13 +2629,18 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                         addressType = 1;
                     } else {
                         /** RVN START */
-                        if (AreAssetsDeployed()) {
+                        if (fAssetsDeployedCtx) {
                             hashBytes.SetNull();
                             addressType = 0;
 
                             if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
-                                addressType = 1;
+                                // P2AH-based asset outputs keep the P2AH identity
+                                addressType = prevout.scriptPubKey.IsAssetAuthScript() ? 3 : 1;
                                 isAsset = true;
+                            } else if (prevout.scriptPubKey.IsAssetAuthScript()) {
+                                // Direct P2AH spend: index under the P2AH identity
+                                hashBytes = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+                                addressType = 3;
                             }
                         }
                         /** RVN END */
@@ -2648,7 +2692,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
         {
             std::vector<CScriptCheck> vChecks;
             bool fCacheResults = fJustCheck; /* Don't cache results if we're actually connecting blocks (still consult the cache, though) */
-            if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, fCacheResults, txdata[i], nScriptCheckThreads ? &vChecks : nullptr))
+            if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, fCacheResults, txdata[i], nScriptCheckThreads ? &vChecks : nullptr, AreAssetAuthDeployedAt(pindex->pprev)))
                 return error("ConnectBlock(): CheckInputs on %s failed with %s",
                     tx.GetHash().ToString(), FormatStateMessage(state));
             control.Add(vChecks);
@@ -2686,10 +2730,11 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
                                                                                       pindex->nHeight)));
                 } else {
                     /** RVN START */
-                    if (AreAssetsDeployed()) {
+                    if (fAssetsDeployedCtx) {
                         std::string assetName;
                         CAmount assetAmount;
                         uint160 hashBytes;
+                        const int indexType = out.scriptPubKey.IsAssetAuthScript() ? 3 : 1;
 
                         if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
 //                            std::cout << "ConnectBlock(): pushing assets onto addressIndex: " << "1" << ", " << hashBytes.GetHex() << ", " << assetName << ", " << pindex->nHeight
@@ -2697,14 +2742,22 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
                             // record receiving activity
                             addressIndex.push_back(std::make_pair(
-                                    CAddressIndexKey(1, hashBytes, assetName, pindex->nHeight, i, txhash, k, false),
+                                    CAddressIndexKey(indexType, hashBytes, assetName, pindex->nHeight, i, txhash, k, false),
                                     assetAmount));
 
                             // record unspent output
                             addressUnspentIndex.push_back(
-                                    std::make_pair(CAddressUnspentKey(1, hashBytes, assetName, txhash, k),
+                                    std::make_pair(CAddressUnspentKey(indexType, hashBytes, assetName, txhash, k),
                                                    CAddressUnspentValue(assetAmount, out.scriptPubKey,
                                                                         pindex->nHeight)));
+                        } else if (indexType == 3) {
+                            // Direct P2AH output: index the RVN value under the P2AH identity
+                            hashBytes = uint160(std::vector<unsigned char>(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23));
+                            addressIndex.push_back(std::make_pair(
+                                    CAddressIndexKey(3, hashBytes, pindex->nHeight, i, txhash, k, false), out.nValue));
+                            addressUnspentIndex.push_back(std::make_pair(
+                                    CAddressUnspentKey(3, hashBytes, txhash, k),
+                                    CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
                         }
                     } else {
                         continue;
@@ -5827,15 +5880,12 @@ bool AreCoinbaseCheckAssetsDeployed()
 
 bool AreAssetsDeployed()
 {
-
-    if (fAssetsIsActive)
-        return true;
-
+    // F-02: derive from the current tip without a process-global latch so the
+    // P2AH outer gate (and every asset rule) cannot depend on how many blocks
+    // this process happened to connect since startup. The versionbits cache
+    // keeps repeated calls cheap.
     const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
-    if (thresholdState == THRESHOLD_ACTIVE)
-        fAssetsIsActive = true;
-
-    return fAssetsIsActive;
+    return thresholdState == THRESHOLD_ACTIVE;
 }
 
 bool IsRip5Active()
@@ -5870,6 +5920,36 @@ bool AreTransferScriptsSizeDeployed() {
 bool AreRestrictedAssetsDeployed() {
 
     return IsRip5Active();
+}
+
+bool AreAssetAuthDeployed()
+{
+    // F-02: no process-global latch. The answer is derived purely from the
+    // current chain tip so mempool/policy/RPC behavior cannot depend on the
+    // block-processing history of this process (deep invalidation, restart).
+    // Block validation must use the explicit block-contextual overload below.
+    const ThresholdState thresholdState = VersionBitsTipState(GetParams().GetConsensus(), Consensus::DEPLOYMENT_P2AH);
+    return thresholdState == THRESHOLD_ACTIVE;
+}
+
+bool AreAssetAuthDeployedAt(const CBlockIndex* pindexPrev)
+{
+    // F-01/F-02: block-contextual deployment query. Block validation and
+    // reorg reconnect must evaluate rules against the state at the block's
+    // parent, making acceptance deterministic regardless of process history.
+    if (pindexPrev == nullptr)
+        return false;
+    LOCK(cs_main);
+    return VersionBitsState(pindexPrev, GetParams().GetConsensus(), Consensus::DEPLOYMENT_P2AH, versionbitscache) == THRESHOLD_ACTIVE;
+}
+
+bool AreAssetsDeployedAt(const CBlockIndex* pindexPrev)
+{
+    // R-01/F-05: block-contextual assets deployment for undo/disconnect/index paths.
+    if (pindexPrev == nullptr)
+        return false;
+    LOCK(cs_main);
+    return VersionBitsState(pindexPrev, GetParams().GetConsensus(), Consensus::DEPLOYMENT_ASSETS, versionbitscache) == THRESHOLD_ACTIVE;
 }
 
 bool IsDGWActive(unsigned int nBlockNumber) {

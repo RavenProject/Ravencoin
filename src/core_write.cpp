@@ -262,6 +262,18 @@ void ScriptPubKeyToUniv(const CScript& scriptPubKey,
 
         out.pushKV("asset_data", assetInfo);
     }
+
+    // Pay-to-asset-hash (P2AH): show the committed preimage hash for both bare P2AH outputs
+    // and P2AH outputs that carry asset data
+    if (scriptPubKey.IsAssetAuthScript()) {
+        UniValue authInfo(UniValue::VOBJ);
+        uint160 hash;
+        if (AssetAuthHashFromScript(scriptPubKey, hash)) {
+            authInfo.pushKV("hash", hash.GetHex());
+            authInfo.pushKV("address", EncodeDestination(CAssetAuthID(hash)));
+        }
+        out.pushKV("assetauth", authInfo);
+    }
      /** RVN END */
 
     UniValue a(UniValue::VARR);
@@ -300,6 +312,24 @@ void TxToUniv(const CTransaction& tx, const uint256& hashBlock, UniValue& entry,
                 }
                 in.pushKV("txinwitness", txinwitness);
             }
+
+            /** RVN START */
+            // Pay-to-asset-hash (P2AH): if the scriptSig decodes as a P2AH preimage, show its contents
+            {
+                CAssetAuthPreimage preimage;
+                if (AssetAuthPreimageFromScriptSig(txin.scriptSig, preimage)) {
+                    UniValue p(UniValue::VOBJ);
+                    p.pushKV("nrequired", preimage.nRequired);
+                    p.pushKV("total", (int)preimage.vOwnerAssetNames.size());
+                    UniValue assets(UniValue::VARR);
+                    for (const std::string& name : preimage.vOwnerAssetNames)
+                        assets.push_back(name);
+                    p.pushKV("owner_assets", assets);
+                    p.pushKV("hash", preimage.GetHash().GetHex());
+                    in.pushKV("assetAuthPreimage", p);
+                }
+            }
+            /** RVN END */
         }
         in.pushKV("sequence", (int64_t)txin.nSequence);
         vin.push_back(in);

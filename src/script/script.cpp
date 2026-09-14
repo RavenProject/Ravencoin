@@ -330,9 +330,13 @@ bool CScript::IsNullAsset() const
 
 bool CScript::IsNullAssetTxDataScript() const
 {
-    return (this->size() > 23 &&
-            (*this)[0] == OP_RVN_ASSET &&
-            (*this)[1] == 0x14);
+    if (this->size() <= 23 || (*this)[0] != OP_RVN_ASSET || (*this)[1] == OP_RESERVED)
+        return false;
+    // Legacy P2PKH/P2SH: OP_RVN_ASSET push20(hash)
+    if ((*this)[1] == 0x14)
+        return true;
+    // Typed null-data: push21(type || hash)
+    return (*this)[1] == 0x15 && this->size() > 22;
 }
 
 bool CScript::IsNullGlobalRestrictionAssetTxDataScript() const
@@ -352,6 +356,32 @@ bool CScript::IsNullAssetVerifierTxDataScript() const
             (*this)[0] == OP_RVN_ASSET &&
             (*this)[1] == OP_RESERVED &&
             (*this)[2] != OP_RESERVED);
+}
+
+bool CScript::IsPayToAssetAuthHash() const
+{
+    // Extra-fast test for pay-to-asset-hash (P2AH) CScripts:
+    // The base script is exactly 25 bytes so that asset transfer data can be
+    // appended after it the same way it is appended to P2PKH scripts (the
+    // asset parsing code expects OP_RVN_ASSET at index 25).
+    return (this->size() == 25 &&
+            (*this)[0] == OP_DUP &&
+            (*this)[1] == OP_HASH160 &&
+            (*this)[2] == 0x14 &&
+            (*this)[23] == OP_EQUAL &&
+            (*this)[24] == OP_NIP);
+}
+
+bool CScript::IsAssetAuthScript() const
+{
+    // A P2AH script with or without asset transfer data appended after the
+    // 25 byte base script
+    return (this->size() >= 25 &&
+            (*this)[0] == OP_DUP &&
+            (*this)[1] == OP_HASH160 &&
+            (*this)[2] == 0x14 &&
+            (*this)[23] == OP_EQUAL &&
+            (*this)[24] == OP_NIP);
 }
 /** RVN END */
 

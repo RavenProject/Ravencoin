@@ -110,6 +110,15 @@ enum
     // Public keys in segregated witness scripts must be compressed
     //
             SCRIPT_VERIFY_WITNESS_PUBKEYTYPE = (1U << 15),
+
+    // All ECDSA signatures in the transaction must use exactly SIGHASH_ALL
+    // (no SIGHASH_NONE, SIGHASH_SINGLE or SIGHASH_ANYONECANPAY).
+    //
+    // Used for transactions spending pay-to-asset-hash (P2AH) inputs: P2AH inputs carry
+    // no signature of their own, so the transaction's integrity comes entirely from the
+    // signatures on the other (authorizing) inputs. Those signatures must commit to the
+    // whole transaction, otherwise a miner could rewrite the outputs and steal P2AH value.
+            SCRIPT_VERIFY_REQUIRE_SIGHASH_ALL = (1U << 16),
 };
 
 bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned int flags, ScriptError *serror);

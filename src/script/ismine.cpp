@@ -17,6 +17,22 @@
 
 typedef std::vector<unsigned char> valtype;
 
+/**
+ * P2AH-based asset outputs (asset data appended to a P2AH base script) belong
+ * to a watched P2AH address, but their full script never matches the bare
+ * watch-only script registered by addassetauthaddress. Track them as
+ * watch-only when the wallet watches that P2AH identity and knows its
+ * preimage, so inbound transfers from third parties reach the wallet. They
+ * remain non-spendable by signatures (no SPENDABLE bit is ever returned).
+ */
+static bool IsWatchedAssetAuthOutput(const CKeyStore& keystore, const CScript& scriptPubKey, const valtype& hashBytes)
+{
+    if (!scriptPubKey.IsAssetAuthScript())
+        return false;
+    std::vector<unsigned char> vchPreimage;
+    return keystore.GetAssetAuthPreimage(uint160(hashBytes), vchPreimage);
+}
+
 unsigned int HaveKeys(const std::vector<valtype>& pubkeys, const CKeyStore& keystore)
 {
     unsigned int nResult = 0;
@@ -148,6 +164,8 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
         case TX_NEW_ASSET: {
             if (!AreAssetsDeployed())
                 return ISMINE_NO;
+            if (IsWatchedAssetAuthOutput(keystore, scriptPubKey, vSolutions[0]))
+                return ISMINE_WATCH_SOLVABLE;
             keyID = CKeyID(uint160(vSolutions[0]));
             if (sigversion != SIGVERSION_BASE) {
                 CPubKey pubkey;
@@ -165,6 +183,8 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
         case TX_TRANSFER_ASSET: {
             if (!AreAssetsDeployed())
                 return ISMINE_NO;
+            if (IsWatchedAssetAuthOutput(keystore, scriptPubKey, vSolutions[0]))
+                return ISMINE_WATCH_SOLVABLE;
             keyID = CKeyID(uint160(vSolutions[0]));
             if (sigversion != SIGVERSION_BASE) {
                 CPubKey pubkey;
@@ -181,6 +201,8 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
         case TX_REISSUE_ASSET: {
             if (!AreAssetsDeployed())
                 return ISMINE_NO;
+            if (IsWatchedAssetAuthOutput(keystore, scriptPubKey, vSolutions[0]))
+                return ISMINE_WATCH_SOLVABLE;
             keyID = CKeyID(uint160(vSolutions[0]));
             if (sigversion != SIGVERSION_BASE) {
                 CPubKey pubkey;
@@ -191,6 +213,14 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey, bool& 
             }
             if (keystore.HaveKey(keyID))
                 return ISMINE_SPENDABLE;
+            break;
+        }
+
+        case TX_ASSET_AUTH: {
+            // P2AH outputs are never ISMINE_SPENDABLE even if the wallet knows the
+            // preimage. They are not spendable by signatures, only by moving the
+            // committed owner assets, so they must never be selected as inputs by
+            // normal wallet coin selection. Wallets track them as watch-only.
             break;
         }
             /** RVN END*/

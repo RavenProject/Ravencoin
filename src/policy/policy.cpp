@@ -80,6 +80,13 @@ bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType, const bool w
         return false;
     else if (!witnessEnabled && (whichType == TX_WITNESS_V0_KEYHASH || whichType == TX_WITNESS_V0_SCRIPTHASH))
         return false;
+    // Pay-to-asset-hash (P2AH) outputs are only standard once the deployment is active
+    else if (whichType == TX_ASSET_AUTH && !AreAssetAuthDeployed())
+        return false;
+    // Asset data appended to a P2AH base script is also only standard once active
+    else if ((whichType == TX_TRANSFER_ASSET || whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET) &&
+             scriptPubKey.IsAssetAuthScript() && !AreAssetAuthDeployed())
+        return false;
 
     return whichType != TX_NONSTANDARD ;
 }
@@ -201,6 +208,19 @@ bool AreInputsStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs)
             if (subscript.GetSigOpCount(true) > MAX_P2SH_SIGOPS) {
                 return false;
             }
+        }
+        else if (whichType == TX_ASSET_AUTH ||
+                 (prevScript.IsAssetAuthScript() &&
+                  (whichType == TX_TRANSFER_ASSET || whichType == TX_NEW_ASSET || whichType == TX_REISSUE_ASSET)))
+        {
+            // Pay-to-asset-hash (P2AH) inputs are only standard once the deployment is
+            // active, and the scriptSig must be a single push of the preimage
+            if (!AreAssetAuthDeployed())
+                return false;
+            if (tx.vin[i].scriptSig.size() > MAX_SCRIPT_ELEMENT_SIZE + 3)
+                return false;
+            if (!tx.vin[i].scriptSig.IsPushOnly())
+                return false;
         }
     }
 

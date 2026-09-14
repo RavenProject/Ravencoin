@@ -28,6 +28,16 @@ public:
     CScriptID(const uint160& in) : uint160(in) {}
 };
 
+/** RVN START */
+/** A reference to a P2AH asset authorization set: the Hash160 of the serialized CAssetAuthPreimage */
+class CAssetAuthID : public uint160
+{
+public:
+    CAssetAuthID() : uint160() {}
+    CAssetAuthID(const uint160& in) : uint160(in) {}
+};
+/** RVN END */
+
 /**
  * Default setting for nMaxDatacarrierBytes. 80 bytes of data, +1 for OP_RETURN,
  * +2 for the pushdata opcodes.
@@ -70,6 +80,7 @@ enum txnouttype
     TX_REISSUE_ASSET = 9,
     TX_TRANSFER_ASSET = 10,
     TX_RESTRICTED_ASSET_DATA = 11, //!< unspendable OP_RAVEN_ASSET script that carries data
+    TX_ASSET_AUTH = 12, //!< pay-to-asset-hash (P2AH): spendable by moving committed owner assets
     /** RVN END */
 };
 
@@ -84,9 +95,10 @@ public:
  *  * CNoDestination: no destination set
  *  * CKeyID: TX_PUBKEYHASH destination
  *  * CScriptID: TX_SCRIPTHASH destination
+ *  * CAssetAuthID: TX_ASSET_AUTH (P2AH) destination
  *  A CTxDestination is the internal data type encoded in a ravencoin address
  */
-typedef boost::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
+typedef boost::variant<CNoDestination, CKeyID, CScriptID, CAssetAuthID> CTxDestination;
 
 /** Check whether a CTxDestination is a CNoDestination. */
 bool IsValidDestination(const CTxDestination& dest);
@@ -140,6 +152,25 @@ CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
 
 /** Generate a script that contains an address used for qualifier, and restricted assets data transactions */
 CScript GetScriptForNullAssetDataDestination(const CTxDestination &dest);
+
+/** Destination-type byte in typed null-asset-data scripts (21-byte push after OP_RVN_ASSET). */
+enum class NullAssetDataDestType : uint8_t {
+    P2PKH = 1,
+    P2SH = 2,
+    P2AH = 3,
+};
+
+static const size_t NULL_ASSET_DATA_PAYLOAD_OFFSET_LEGACY = 23;
+static const size_t NULL_ASSET_DATA_PAYLOAD_OFFSET_TYPED = 24;
+
+/** True when script uses the typed (push-21) null-asset-data address format. */
+bool NullAssetDataScriptUsesTypedDestination(const CScript& scriptPubKey);
+
+/** Byte offset of the serialized CNullAssetTxData push in a null-asset-data script. */
+size_t NullAssetTxDataPayloadOffset(const CScript& scriptPubKey);
+
+/** Decode the tagged address from a null-asset-data script (legacy or typed). */
+bool NullAssetDataDestinationFromScript(const CScript& scriptPubKey, CTxDestination& dest);
 
 /**
  * Generate a pay-to-witness script for the given redeem script. If the redeem

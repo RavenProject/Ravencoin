@@ -39,6 +39,11 @@ public:
     virtual bool HaveCScript(const CScriptID &hash) const =0;
     virtual bool GetCScript(const CScriptID &hash, CScript& redeemScriptOut) const =0;
 
+    //! Support for Pay-to-asset-hash (P2AH) preimages, stored like P2SH redeem scripts
+    virtual bool AddAssetAuthPreimage(const std::vector<unsigned char>& vchPreimage) =0;
+    virtual bool HaveAssetAuthPreimage(const uint160& hash) const =0;
+    virtual bool GetAssetAuthPreimage(const uint160& hash, std::vector<unsigned char>& vchPreimageOut) const =0;
+
     //! Support for Watch-only addresses
     virtual bool AddWatchOnly(const CScript &dest) =0;
     virtual bool RemoveWatchOnly(const CScript &dest) =0;
@@ -50,6 +55,7 @@ typedef std::map<CKeyID, CKey> KeyMap;
 typedef std::map<CKeyID, CPubKey> WatchKeyMap;
 typedef std::map<CScriptID, CScript > ScriptMap;
 typedef std::set<CScript> WatchOnlySet;
+typedef std::map<uint160, std::vector<unsigned char> > AssetAuthPreimageMap;
 
 /** Basic key store, that keeps keys in an address->secret map */
 class CBasicKeyStore : public CKeyStore
@@ -59,6 +65,7 @@ protected:
     WatchKeyMap mapWatchKeys;
     ScriptMap mapScripts;
     WatchOnlySet setWatchOnly;
+    AssetAuthPreimageMap mapAssetAuthPreimages;
 
     uint256 nWordHash;
     std::vector<unsigned char> vchWords;
@@ -102,6 +109,10 @@ public:
     bool AddCScript(const CScript& redeemScript) override;
     bool HaveCScript(const CScriptID &hash) const override;
     bool GetCScript(const CScriptID &hash, CScript& redeemScriptOut) const override;
+
+    bool AddAssetAuthPreimage(const std::vector<unsigned char>& vchPreimage) override;
+    bool HaveAssetAuthPreimage(const uint160& hash) const override;
+    bool GetAssetAuthPreimage(const uint160& hash, std::vector<unsigned char>& vchPreimageOut) const override;
 
     bool AddWatchOnly(const CScript &dest) override;
     bool RemoveWatchOnly(const CScript &dest) override;

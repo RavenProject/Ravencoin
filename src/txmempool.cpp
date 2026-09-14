@@ -453,8 +453,16 @@ void CTxMemPool::addAddressIndex(const CTxMemPoolEntry &entry, const CCoinsViewC
                 std::string assetName;
                 CAmount assetAmount;
                 if (ParseAssetScript(prevout.scriptPubKey, hashBytes, assetName, assetAmount)) {
-                    CMempoolAddressDeltaKey key(1, hashBytes, assetName, txhash, j, 1);
+                    const int indexType = prevout.scriptPubKey.IsAssetAuthScript() ? 3 : 1;
+                    CMempoolAddressDeltaKey key(indexType, hashBytes, assetName, txhash, j, 1);
                     CMempoolAddressDelta delta(entry.GetTime(), assetAmount * -1, input.prevout.hash, input.prevout.n);
+                    mapAddress.insert(std::make_pair(key, delta));
+                    inserted.push_back(key);
+                } else if (prevout.scriptPubKey.IsAssetAuthScript()) {
+                    // Direct P2AH spend
+                    uint160 p2ahHash(std::vector<unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+                    CMempoolAddressDeltaKey key(3, p2ahHash, RVN, txhash, j, 1);
+                    CMempoolAddressDelta delta(entry.GetTime(), prevout.nValue * -1, input.prevout.hash, input.prevout.n);
                     mapAddress.insert(std::make_pair(key, delta));
                     inserted.push_back(key);
                 }
@@ -490,8 +498,16 @@ void CTxMemPool::addAddressIndex(const CTxMemPoolEntry &entry, const CCoinsViewC
                 CAmount assetAmount;
                 if (ParseAssetScript(out.scriptPubKey, hashBytes, assetName, assetAmount)) {
                     std::pair<addressDeltaMap::iterator, bool> ret;
-                    CMempoolAddressDeltaKey key(1, hashBytes, assetName, txhash, k, 0);
+                    const int indexType = out.scriptPubKey.IsAssetAuthScript() ? 3 : 1;
+                    CMempoolAddressDeltaKey key(indexType, hashBytes, assetName, txhash, k, 0);
                     mapAddress.insert(std::make_pair(key, CMempoolAddressDelta(entry.GetTime(), assetAmount)));
+                    inserted.push_back(key);
+                } else if (out.scriptPubKey.IsAssetAuthScript()) {
+                    // Direct P2AH receive
+                    uint160 p2ahHash(std::vector<unsigned char>(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23));
+                    std::pair<addressDeltaMap::iterator, bool> ret;
+                    CMempoolAddressDeltaKey key(3, p2ahHash, RVN, txhash, k, 0);
+                    mapAddress.insert(std::make_pair(key, CMempoolAddressDelta(entry.GetTime(), out.nValue)));
                     inserted.push_back(key);
                 }
             }
@@ -571,6 +587,12 @@ void CTxMemPool::addSpentIndex(const CTxMemPoolEntry &entry, const CCoinsViewCac
         } else if (prevout.scriptPubKey.IsPayToPublicKey()) {
             addressHash = Hash160(prevout.scriptPubKey.begin()+1, prevout.scriptPubKey.end()-1);
             addressType = 1;
+        } else if (AreAssetsDeployed() && prevout.scriptPubKey.IsAssetAuthScript()) {
+            /** RVN START */
+            // Track spends of direct P2AH outputs under the P2AH identity
+            addressHash = uint160(std::vector<unsigned char>(prevout.scriptPubKey.begin()+3, prevout.scriptPubKey.begin()+23));
+            addressType = 3;
+            /** RVN END */
         } else {
             addressHash.SetNull();
             addressType = 0;
@@ -970,7 +992,7 @@ void CTxMemPool::removeForBlock(const std::vector<CTransactionRef>& vtx, unsigne
                     if (i != mapTx.end()) {
                         CValidationState state;
                         std::vector<std::pair<std::string, uint256>> vReissueAssets;
-                        if (!setAlreadyRemoving.count(hash) && !Consensus::CheckTxAssets(i->GetTx(), state, pcoinsTip, passets, false, vReissueAssets)) {
+                        if (!setAlreadyRemoving.count(hash) && !Consensus::CheckTxAssets(i->GetTx(), state, pcoinsTip, passets, false, vReissueAssets, false, nullptr, 0, nullptr, AreAssetAuthDeployed())) {
                             entries.push_back(&*i);
                             trans.emplace_back(i->GetTx());
                             setAlreadyRemoving.insert(hash);

@@ -129,6 +129,10 @@ public:
             Process(script);
     }
 
+    void operator()(const CAssetAuthID &assetAuthId) {
+        // P2AH destinations are not backed by keys
+    }
+
     void operator()(const CNoDestination &none) {}
 };
 
@@ -397,6 +401,25 @@ bool CWallet::LoadCScript(const CScript& redeemScript)
     }
 
     return CCryptoKeyStore::AddCScript(redeemScript);
+}
+
+bool CWallet::AddAssetAuthPreimage(const std::vector<unsigned char>& vchPreimage)
+{
+    if (!CCryptoKeyStore::AddAssetAuthPreimage(vchPreimage))
+        return false;
+    return CWalletDB(*dbw).WriteAssetAuthPreimage(Hash160(vchPreimage), vchPreimage);
+}
+
+bool CWallet::LoadAssetAuthPreimage(const std::vector<unsigned char>& vchPreimage)
+{
+    if (vchPreimage.size() > MAX_SCRIPT_ELEMENT_SIZE)
+    {
+        LogPrintf("%s: Warning: This wallet contains a P2AH preimage of size %i which exceeds maximum size %i and can never be used.\n",
+            __func__, vchPreimage.size(), MAX_SCRIPT_ELEMENT_SIZE);
+        return true;
+    }
+
+    return CCryptoKeyStore::AddAssetAuthPreimage(vchPreimage);
 }
 
 bool CWallet::AddWatchOnly(const CScript& dest)
