@@ -13,6 +13,12 @@
 
 BOOST_FIXTURE_TEST_SUITE(wallet_crypto, BasicTestingSetup)
 
+    class TestCryptoKeyStore : public CCryptoKeyStore
+    {
+    public:
+        using CCryptoKeyStore::Unlock;
+    };
+
     class TestCrypter
     {
     public:
@@ -130,6 +136,15 @@ BOOST_FIXTURE_TEST_SUITE(wallet_crypto, BasicTestingSetup)
             uint256 hash(GetRandHash());
             TestCrypter::TestDecrypt(crypt, std::vector<unsigned char>(hash.begin(), hash.end()));
         }
+    }
+
+    BOOST_AUTO_TEST_CASE(unlock_rejects_invalid_encrypted_bip39_data)
+    {
+        TestCryptoKeyStore keystore;
+        keystore.AddCryptedWords(uint256(), std::vector<unsigned char>(1, 0));
+
+        CKeyingMaterial masterKey(WALLET_CRYPTO_KEY_SIZE, 0);
+        BOOST_CHECK(!keystore.Unlock(masterKey));
     }
 
 BOOST_AUTO_TEST_SUITE_END()

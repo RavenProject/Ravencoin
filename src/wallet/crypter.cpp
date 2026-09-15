@@ -198,7 +198,7 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
         if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size() || vchCryptedBip39VchSeed.size()) {
             if (!DecryptBip39(vMasterKeyIn)) {
                 LogPrintf("Failed to decrypt bip 39 data");
-                assert(false);
+                return false;
             }
         }
         if (keyPass && keyFail)
