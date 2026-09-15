@@ -71,9 +71,11 @@ class AssetTest(RavenTestFramework):
         self.log.info("Checking listassetbalancesbyaddress()...")
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET"], 1000)
         assert_equal(n0.listassetbalancesbyaddress(address0)["MY_ASSET!"], 1)
+        assert_equal(n0.listassetbalancesbyaddress(address0, True), 2)
 
         self.log.info("Checking listassetbalancesbyaddress()...")
         assert_equal(n0.listaddressesbyasset("MY_ASSET"), n1.listaddressesbyasset("MY_ASSET"))
+        assert_equal(n0.listaddressesbyasset("MY_ASSET", True), 1)
 
         self.log.info("Calling transfer()...")
         address1 = n1.getnewaddress()
