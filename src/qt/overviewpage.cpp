@@ -236,10 +236,7 @@ public:
             painter->drawPixmap(ipfsLinkRect, ipfspixmap);
 
         /** Create the font that is used for painting the asset name */
-        QFont nameFont;
-#if !defined(Q_OS_MAC)
-        nameFont.setFamily("Open Sans");
-#endif
+        QFont nameFont = GUIUtil::fixedPitchFont();
         nameFont.setPixelSize(18);
         nameFont.setWeight(QFont::Weight::Normal);
         nameFont.setLetterSpacing(QFont::SpacingType::AbsoluteSpacing, -0.4);
