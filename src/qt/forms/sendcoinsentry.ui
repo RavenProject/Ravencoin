@@ -39,7 +39,11 @@
     <item row="2" column="1">
      <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0,1">
       <item>
-       <widget class="RavenAmountField" name="payAmount"/>
+       <widget class="RavenAmountField" name="payAmount">
+        <property name="toolTip">
+         <string>Enter the amount of Raven to send.</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="checkboxSubtractFeeFromAmount">
