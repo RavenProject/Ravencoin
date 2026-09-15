@@ -33,7 +33,7 @@ Loops through blocks and transactions and pins asset issuance meta-data and then
 
 * Install bitcoinrpc with ```pip3 install python-bitcoinrpc```
 
-* Install ipfsapi with ```pip3 install ipfsapi```
+* Install ipfshttpclient with ```pip3 install ipfshttpclient```
 
 * Run ravend or raven-qt with parameter to use zmq: ```-zmqpubrawtx=tcp://127.0.0.1:28766```
 

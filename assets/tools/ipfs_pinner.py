@@ -9,8 +9,8 @@
 # Install bitcoinrpc with 
 #   pip3 install python-bitcoinrpc
 
-# Install ipfsapi with 
-#   pip3 install ipfsapi
+# Install ipfshttpclient with
+#   pip3 install ipfshttpclient
 
 import sys
 import argparse
@@ -36,6 +36,7 @@ rpc_port = 8766
 #Set this information in your raven.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
+IPFS_API_ADDRESS = '/ip4/127.0.0.1/tcp/5001/http'
 
 def print_debug(str):
 	if args.debug:
@@ -257,45 +258,44 @@ def file_to_asset(file):
 
 def check_ipfs_file_size(hash):
     #print("Checking size in IPFS")
-    import ipfsapi
-    api = ipfsapi.connect('127.0.0.1', 5001)
-    res = api.object_stat(hash)
+    import ipfshttpclient
+    with ipfshttpclient.connect(IPFS_API_ADDRESS) as client:
+        res = client.stat(hash)
     #print(res)
     return(res['CumulativeSize'])
 
 def ipfs_add(file):
     print("Adding to IPFS")
-    import ipfsapi
-    api = ipfsapi.connect('127.0.0.1', 5001)
-    res = api.add(file)
+    import ipfshttpclient
+    with ipfshttpclient.connect(IPFS_API_ADDRESS) as client:
+        res = client.add(file)
     if args.debug:
     	print(res)
     return(res['Hash'])
 
 def ipfs_get(hash):    
-    import ipfsapi
-    api = ipfsapi.connect('127.0.0.1', 5001)
-    res = api.get(hash)
+    import ipfshttpclient
+    with ipfshttpclient.connect(IPFS_API_ADDRESS) as client:
+        client.get(hash)
     return()
 
 def ipfs_pin_add(hash):
-    import ipfsapi
-    api = ipfsapi.connect('127.0.0.1', 5001)
-    res = api.pin_add(hash)
-    return(res)
+    import ipfshttpclient
+    with ipfshttpclient.connect(IPFS_API_ADDRESS) as client:
+        return(client.pin.add(hash))
 
 def ipfs_repo_stat():
-    import ipfsapi
-    api = ipfsapi.connect('127.0.0.1', 5001)
-    res = api.repo_stat()
+    import ipfshttpclient
+    with ipfshttpclient.connect(IPFS_API_ADDRESS) as client:
+        res = client.repo.stat()
     if args.debug:
     	print(res)
     return(res)
 
 def ipfs_pin_ls():
-    import ipfsapi
-    api = ipfsapi.connect('127.0.0.1', 5001)
-    res = api.pin_ls()
+    import ipfshttpclient
+    with ipfshttpclient.connect(IPFS_API_ADDRESS) as client:
+        res = client.pin.ls()
     print(res)
     return(res)
 
