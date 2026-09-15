@@ -720,6 +720,9 @@
           </item>
           <item>
            <widget class="QLabel" name="labelVerifierStringErrorMessage">
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>Warning:</string>
             </property>
