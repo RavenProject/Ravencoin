@@ -38,7 +38,6 @@ public:
 #ifdef ENABLE_WALLET
     void refreshWallet() {
         qDebug() << "AssetTablePriv::refreshWallet";
-        cachedBalances.clear();
         auto currentActiveAssetCache = GetCurrentAssetCache();
         if (currentActiveAssetCache) {
             {
@@ -49,6 +48,7 @@ public:
                     qWarning("AssetTablePriv::refreshWallet: Error retrieving asset balances");
                     return;
                 }
+                QList<AssetRecord> refreshedBalances;
                 std::set<std::string> setAssetsToSkip;
                 auto bal = balances.begin();
                 for (; bal != balances.end(); bal++) {
@@ -84,8 +84,9 @@ public:
                             continue;
                         }
                     }
-                    cachedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator, EncodeAssetData(ipfsHash)));
+                    refreshedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator, EncodeAssetData(ipfsHash)));
                 }
+                cachedBalances = refreshedBalances;
             }
         }
     }
