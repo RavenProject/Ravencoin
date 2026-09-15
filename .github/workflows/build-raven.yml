@@ -26,6 +26,11 @@ on:
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
 
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
 jobs:
   check-jobs:
       # continue-on-error: true # Uncomment once integration is finished
@@ -35,7 +40,7 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
+        uses: fkirc/skip-duplicate-actions@a09bf677ad5e5dedb31a42070b6a180fde0ab6ce # master 2026-09-15
         with:
           # All of these options are optional, so you can remove them if you are happy with the defaults
           concurrent_skipping: 'never'
@@ -136,7 +141,7 @@ jobs:
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Checkout the Code
-      uses: actions/checkout@v1
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Install Build Tools
@@ -144,13 +149,13 @@ jobs:
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Cache dependencies.
-      uses: actions/cache@v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
        path: |
         ${{ GITHUB.WORKSPACE }}/depends/built
         ${{ GITHUB.WORKSPACE }}/depends/sources
         ${{ GITHUB.WORKSPACE }}/depends/work
-       key: ${{ MATRIX.OS }}
+       key: raven-depends-${{ MATRIX.OS }}-${{ hashFiles('depends/packages/*.mk', 'depends/funcs.mk', 'depends/Makefile') }}
       
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Build dependencies.
@@ -172,10 +177,9 @@ jobs:
       name: Build Evrmore
       run: make -j2
 
-# Skip the binary checks for now.
-#    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-#      name: Check Binary Security
-#      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
+      name: Check Binary Security
+      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
 
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Package Up the Build
@@ -183,7 +187,7 @@ jobs:
     
     - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
       name: Upload Artifacts to Job
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: ${{ MATRIX.OS }}
         path: ${{ GITHUB.WORKSPACE }}/release

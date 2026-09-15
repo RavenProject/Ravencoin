@@ -66,7 +66,7 @@ Signing Binaries
 
 ### Signing Windows 64 binaries
 From an Ubuntu 16.04 xenial machine- !!!IMPORTANT (openssl 1.0.2 required)  
-This process requires core to have a pvk file (kept secret)and a cert in PEM format(from comodo) uploaded to the repo at contrib/windeploy/win-codesign.cert
+This process requires a private signing key and a current PEM certificate supplied from a secure maintainer-controlled location. Set `WIN_CODESIGN_CERTFILE` to that certificate path and do not commit either signing artifact to the repository.
 
 ```
 cd ~/
@@ -101,7 +101,7 @@ Transfer raven-*-win*-setup.exe back to the Ubuntu18 build machine to the folder
 
 ### Signing Windows 32 binaries
 From an Ubuntu 16.04 xenial machine !important (openssl 1.0.2 required)  
-This process requires core to have a pvk file (kept secret)and a cert in PEM format(from comodo) uploaded to the repo at contrib/windeploy/win-codesign.cert
+This process requires a private signing key and a current PEM certificate supplied from a secure maintainer-controlled location. Set `WIN_CODESIGN_CERTFILE` to that certificate path and do not commit either signing artifact to the repository.
 
 ```
 cd ~/

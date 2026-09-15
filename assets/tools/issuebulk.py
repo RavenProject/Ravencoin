@@ -22,6 +22,8 @@ import csv
 import json
 import hashlib
 
+from safe_url import fetch_public_https
+
 
 #Set this to your raven-cli program
 cli = "raven-cli"
@@ -32,8 +34,8 @@ rpc_port = 18766
 #rpc_port = 18443
 csv_file = "Raven Assets - Sheet1.csv"
 #Set this information in your raven.conf file (in datadir, not testnet3)
-rpc_user = 'rpcuser'
-rpc_pass = 'rpcpass555'
+rpc_user = os.environ.get('RAVEN_RPC_USER', '')
+rpc_pass = os.environ.get('RAVEN_RPC_PASSWORD', '')
 
 
 def NormalizeMetaData(dict):
@@ -55,24 +57,17 @@ def NormalizeMetaData(dict):
     return(dict)
 
 def issue_asset(asset, qty, units, reissuable = False, address='', ipfs_hash = ''):
-    cmd = cli + " " + mode + " issue " + asset + " " + str(qty) + " " + "\"" + address + "\"" + " " + "\"\"" + " " + str(units) + " "
-
-    if reissuable:
-        cmd += 'true'
-    else:
-        cmd += 'false'
+    cmd = [cli, mode, "issue", asset, str(qty), address, "", str(units), str(bool(reissuable)).lower()]
 
     if len(ipfs_hash) > 0:
-        cmd = cmd + " true " + ipfs_hash
+        cmd.extend(["true", ipfs_hash])
 
-    print(cmd)
-    os.system(cmd)  
+    print("Issuing asset: " + asset)
+    subprocess.run(cmd, check=True)
 
 def get_contract_hash(url):
-    import urllib2
     print ("Downloading: " + url)
-    response = urllib2.urlopen(url)
-    rawdata = response.read()
+    rawdata = fetch_public_https(url)
     #print("Len: " + len(rawdata))
     hexdigest = hashlib.sha256(rawdata).hexdigest()
     print(hexdigest)
@@ -100,9 +95,11 @@ def generate_blocks(n):
     return(hashes)
 
 def get_rpc_connection():
+    if not rpc_user or not rpc_pass:
+        raise RuntimeError("Set RAVEN_RPC_USER and RAVEN_RPC_PASSWORD before running this tool")
     from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
     connection = "http://%s:%s@127.0.0.1:%s"%(rpc_user, rpc_pass, rpc_port)
-    print("Connection: " + connection)
+    print("Connecting to local Ravencoin RPC")
     rpc_connection = AuthServiceProxy(connection)
     return(rpc_connection)
 
@@ -117,8 +114,7 @@ def add_to_ipfs(file):
 
 
 if mode == "-regtest":  #If regtest then mine our own blocks
-    import os
-    os.system(cli + " " + mode + " generate 400")
+    subprocess.run([cli, mode, "generate", "400"], check=True)
 
 with open(csv_file, "r") as csvfile:
     #print(rpc_call('getbestblockhash'))

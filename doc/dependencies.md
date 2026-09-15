@@ -31,12 +31,12 @@ These are the dependencies currently used by Raven Core. You can find instructio
 | libXext    | 1.3.2  | | | | |
 | mac_alias    | 2.2.0  | | | | |
 | MiniUPnPc | [2.0.20170509](http://miniupnp.free.fr/files) |  | No |  |  |
-| OpenSSL | [1.1.1k](https://www.openssl.org/source) |  | Yes |  |  |
+| OpenSSL | [3.5.5](https://www.openssl.org/source) |  | Yes |  |  |
 | PCRE |  |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L76) |
 | protobuf | [2.6.1](https://github.com/google/protobuf/releases) |  | No |  |  |
 | Python (tests) |  | [3.4](https://www.python.org/downloads) |  |  |  |
 | qrencode | [3.4.4](https://fukuchi.org/works/qrencode) |  | No |  |  |
-| Qt | [5.12.11](https://download.qt.io/official_releases/qt/) | 4.7+ | No |  |  |
+| Qt | [5.15.19](https://download.qt.io/archive/qt/5.15/5.15.19/) | 4.7+ | No |  |  |
 | XCB | 1.10 |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L94) (Linux only) |
 | xkbcommon | 0.8.4 |  |  |  | [Yes](https://github.com/RavenProject/Ravencoin/blob/master/depends/packages/qt.mk#L93) (Linux only) |
 | ZeroMQ | [4.1.5](https://github.com/zeromq/libzmq/releases) |  | No |  |  |

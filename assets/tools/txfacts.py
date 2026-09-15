@@ -13,10 +13,12 @@ mode = "-testnet"
 mode = ""
 rpc_port = 18766
 #Set this information in your raven.conf file (in datadir, not testnet3)
-rpc_user = 'rpcuser'
-rpc_pass = 'rpcpass555'
+rpc_user = os.environ.get('RAVEN_RPC_USER', '')
+rpc_pass = os.environ.get('RAVEN_RPC_PASSWORD', '')
 
 def get_rpc_connection():
+    if not rpc_user or not rpc_pass:
+        raise RuntimeError("Set RAVEN_RPC_USER and RAVEN_RPC_PASSWORD before running this tool")
     from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
     connection = "http://%s:%s@127.0.0.1:%s"%(rpc_user, rpc_pass, rpc_port)
     rpc_conn = AuthServiceProxy(connection)

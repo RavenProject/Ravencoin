@@ -68,8 +68,6 @@ elif [[ ${OS} == "osx" ]]; then
     libtinfo5 \
     python3-pip
 
-    pip3 install ds-store
-    
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" || ${OS} == "aarch64" || ${OS} == "aarch64-disable-wallet" ]]; then
     apt -y install \
     apt-file \

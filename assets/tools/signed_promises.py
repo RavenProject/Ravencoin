@@ -21,12 +21,12 @@ import subprocess
 import csv
 import json
 import hashlib
-
+from safe_url import fetch_public_https
 
 cli = "raven-cli"
 mode =  "-testnet"
-rpc_user = 'rpcuser'
-rpc_pass = 'rpcpass555'
+rpc_user = os.environ.get('RAVEN_RPC_USER', '')
+rpc_pass = os.environ.get('RAVEN_RPC_PASSWORD', '')
 
 
 def rpc_call(params):
@@ -35,6 +35,8 @@ def rpc_call(params):
     return(out)
 
 def get_rpc_connection():
+    if not rpc_user or not rpc_pass:
+        raise RuntimeError("Set RAVEN_RPC_USER and RAVEN_RPC_PASSWORD before running this tool")
     from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
     rpc_connection = AuthServiceProxy("http://%s:%s@127.0.0.1:18766"%(rpc_user, rpc_pass))
     return(rpc_connection)
@@ -48,7 +50,7 @@ def get_asset_list(filter):
 def get_assets_with_ipfs_filter(assets):
     #Build a list of assets without ipfs_hash
     list_of_assets_without_ipfs = []
-    for key,value in assets.iteritems():
+    for key,value in assets.items():
         if (value['has_ipfs'] == 0):
             list_of_assets_without_ipfs.append(key)
 
@@ -60,7 +62,7 @@ def get_assets_with_ipfs_filter(assets):
 
 def get_ipfs_files(assets):
     list_of_bad_assets = []
-    for key,value in assets.iteritems():
+    for key,value in assets.items():
         if (len(value['ipfs_hash']) > 0):
             success = get_ipfs_file_wget(key+'.json', value['ipfs_hash'])
             if not success:
@@ -89,7 +91,7 @@ def get_ipfs_file(filename, hash):
 def get_signed_assets(assets):
     list_of_unsigned_assets = []
     print(assets)
-    for key,value in assets.iteritems():
+    for key,value in assets.items():
         if key == 'RAVEN_WITH_METADATA':
             print("Key " + key)
             #print("Value " + value)
@@ -118,19 +120,18 @@ def validate_contract(url, hash256, address, signature):
     if url == None or hash256 == None or address == None or signature == None:
         print("Missing info for validating contract.")
         print("Requires url, hash256, address, signature")
-        print("url: " + url)
-        print("hash256: " + hash256)
-        print("address: " + address)
-        print("signature: " + signature)
+        print("url:", url)
+        print("hash256:", hash256)
+        print("address:", address)
+        print("signature:", signature)
         return 0
 
     print("Downloading: " + url + " and validating hash")
     try:
-        filedata = urllib2.urlopen(url, timeout=30)  
-        rawdata = filedata.read()
+        rawdata = fetch_public_https(url)
 
         hexdigest = hashlib.sha256(rawdata).hexdigest()
-        if (hexdigest != hash):
+        if (hexdigest != hash256):
             print("contract_url contents did not match contract_hash")
             return 0
 
@@ -138,10 +139,10 @@ def validate_contract(url, hash256, address, signature):
             print("contract_hash did not match signature")
             return 0
 
-    except urllib2.URLError as e:
-        print type(e)
+    except (OSError, ValueError) as e:
+        print(e)
         return 0
-    except:
+    except Exception:
         print("Uncaught error while downloading url")    #not catch
         return 0
 
@@ -155,15 +156,12 @@ def verify_message(address, signature, hash256):
     return(result)    
 
 def get_ipfs_file_wget(filename, hash):
-    import urllib2
-
     print("Downloading: " + hash + " as " + filename)
     try:
-        filedata = urllib2.urlopen('https://ipfs.io/ipfs/' + hash, timeout=20)  
-        datatowrite = filedata.read()
+        datatowrite = fetch_public_https('https://ipfs.io/ipfs/' + hash, timeout=20)
 
         datatowrite.strip()
-        if (datatowrite[0] != '{'):
+        if (datatowrite[:1] != b'{'):
             print("Not a valid metadata file")
             return
 
@@ -171,10 +169,10 @@ def get_ipfs_file_wget(filename, hash):
         with open(filename, 'wb') as f:  
             f.write(datatowrite)
         print("Saving metadata file")
-    except urllib2.URLError as e:
-        print type(e)
+    except (OSError, ValueError) as e:
+        print(e)
         return 0
-    except:
+    except Exception:
         print("Uncaught error while downloading")    #not catch
         return 0
 

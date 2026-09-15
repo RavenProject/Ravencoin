@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-OS=${1}
-GITHUB_WORKSPACE=${2}
-GITHUB_REF=${3}
+OS=${1:-}
+GITHUB_WORKSPACE=${2:-}
+GITHUB_REF=${3:-}
+
+MACOS_SDK_FILE="Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz"
+MACOS_SDK_URL="https://bitcoincore.org/depends-sources/sdks/${MACOS_SDK_FILE}"
+MACOS_SDK_SHA256="436df6dfc7073365d12f8ef6c1fdb060777c720602cc67c2dcf9a59d94290e38"
 
 if [[ ! ${OS} || ! ${GITHUB_WORKSPACE} ]]; then
     echo "Error: Invalid options"
@@ -27,9 +32,11 @@ if [[ ${OS} == "windows" ]]; then
 elif [[ ${OS} == "osx" ]]; then
     mkdir SDKs
     cd SDKs
-    curl -O https://bitcoincore.org/depends-sources/sdks/Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz
-    tar -zxf Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz
-    rm -rf Xcode-11.3.1-11C505-extracted-SDK-with-libcxx-headers.tar.gz
+    curl --location --fail --silent --show-error --connect-timeout 20 --retry 3 --retry-delay 2 \
+        --output "${MACOS_SDK_FILE}" "${MACOS_SDK_URL}"
+    printf '%s  %s\n' "${MACOS_SDK_SHA256}" "${MACOS_SDK_FILE}" | sha256sum -c -
+    tar -zxf "${MACOS_SDK_FILE}"
+    rm -f "${MACOS_SDK_FILE}"
     cd ..
     make HOST=x86_64-apple-darwin14 -j2
 elif [[ ${OS} == "linux" || ${OS} == "linux-disable-wallet" ]]; then

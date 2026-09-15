@@ -240,7 +240,7 @@ export PATH=$PATH_orig
 
 # Signing windows 64 binaries #
 From an Ubuntu 16.04 xenial machine !important (openssl 1.0.2 required)  
-This process requires core to have a pvk file (kept secret)and a cert in PEM format(from comodo) as a part of the repo at contrib/windeploy
+This process requires a private signing key and a current PEM certificate supplied from a secure maintainer-controlled location. Set `WIN_CODESIGN_CERTFILE` to that certificate path and do not commit either signing artifact to the repository.
 ```
 cd ~/
 DISTNAME=raven-2.0.1
@@ -322,7 +322,7 @@ export PATH=$PATH_orig
 
 # Signing windows 32 binaries #
 From an Ubuntu 16.04 xenial machine !important (openssl 1.0.2 required)  
-This process requires core to have a pvk file (kept secret)and a cert in PEM format(from comodo) as a part of the repo at contrib/windeploy
+This process requires a private signing key and a current PEM certificate supplied from a secure maintainer-controlled location. Set `WIN_CODESIGN_CERTFILE` to that certificate path and do not commit either signing artifact to the repository.
 ```
 cd ~/
 DISTNAME=raven-2.0.1

@@ -32,8 +32,8 @@ rpc_port = 8766
 #rpc_port = 18444
 
 #Set this information in your raven.conf file (in datadir, not testnet6)
-rpc_user = 'rpcuser'
-rpc_pass = 'rpcpass555'
+rpc_user = os.environ.get('RAVEN_RPC_USER', '')
+rpc_pass = os.environ.get('RAVEN_RPC_PASSWORD', '')
 
 #Set this e-mail address, and SENDGRID_API_KEY env variable for notifications
 notification_emails='test@example.com'
@@ -64,6 +64,8 @@ def generate_blocks(n):
 
 
 def get_rpc_connection():
+    if not rpc_user or not rpc_pass:
+        raise RuntimeError("Set RAVEN_RPC_USER and RAVEN_RPC_PASSWORD before running this tool")
     from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
     connection = "http://%s:%s@127.0.0.1:%s"%(rpc_user, rpc_pass, rpc_port)
     #print("Connection: " + connection)
@@ -167,8 +169,7 @@ def audit(filter):
               send_notification(notification_emails, "Ravencoin Asset Audit Success", "All " + str(len(assets)) + " assets audited.")
 
 if mode == "-regtest":  #If regtest then mine our own blocks
-    import os
-    os.system(cli + " " + mode + " generate 400")
+    subprocess.run([cli, mode, "generate", "400"], check=True)
 
 #### Uncomment these lines to test e-mail notification ###
 #send_notification(notification_emails, "Test Subject", "Test Message")
