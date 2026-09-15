@@ -827,13 +827,16 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
     if (!IsScriptReissueAsset(scriptPubKey, nStartingIndex))
         return false;
 
+    if (scriptPubKey.empty() || scriptPubKey.back() != OP_DROP)
+        return false;
+
     CTxDestination destination;
     ExtractDestination(scriptPubKey, destination);
 
     strAddress = EncodeDestination(destination);
 
     std::vector<unsigned char> vchReissueAsset;
-    vchReissueAsset.insert(vchReissueAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end());
+    vchReissueAsset.insert(vchReissueAsset.end(), scriptPubKey.begin() + nStartingIndex, scriptPubKey.end() - 1);
     CDataStream ssReissue(vchReissueAsset, SER_NETWORK, PROTOCOL_VERSION);
 
     try {
@@ -842,6 +845,9 @@ bool ReissueAssetFromScript(const CScript& scriptPubKey, CReissueAsset& reissue,
         error("Failed to get the reissue asset from the stream: %s", e.what());
         return false;
     }
+
+    if (!ssReissue.empty())
+        return false;
 
     return true;
 }

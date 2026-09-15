@@ -111,6 +111,12 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(serializedAsset2.nAmount == 100000000, "Amount weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.strIPFSHash == "", "IPFSHash wasn't equal");
 
+        // Reject trailing data in a reissue payload.
+        scriptPubKey.insert(scriptPubKey.end() - 1, 0x00);
+        CReissueAsset malformedAsset;
+        BOOST_CHECK_MESSAGE(!ReissueAssetFromScript(scriptPubKey, malformedAsset, address),
+                            "Malformed reissue payload was accepted");
+
         // Txid Hash instead of IPFS
         CReissueAsset reissue3(name, 100000000, 0, 0, DecodeAssetData("9c2c8e121a0139ba39bffd3ca97267bca9d4c0c1e84ac0c34a883c28e7a912ca"));
         scriptPubKey = GetScriptForDestination(dest);
