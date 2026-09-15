@@ -227,11 +227,9 @@ bool RavenUnits::assetParse(int assetUnit, const QString &value, CAmount *val_ou
     bool ok = false;
     QString str = whole + decimals.leftJustified(num_decimals, '0');
 
-    if(str.size() > 18)
-    {
-        return false; // Longer numbers will exceed 63 bits
-    }
     CAmount retvalue(str.toLongLong(&ok));
+    if (!ok || retvalue > maxMoney())
+        return false;
     if(val_out)
     {
         *val_out = retvalue;

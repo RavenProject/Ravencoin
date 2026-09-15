@@ -8,6 +8,7 @@
 #endif
 
 #include "chainparams.h"
+#include "ravenunits.h"
 #include "rpcnestedtests.h"
 #include "util.h"
 #include "uritests.h"
@@ -50,6 +51,12 @@ extern void noui_connect();
 // This is all you need to run all the tests
 int main(int argc, char *argv[])
 {
+    CAmount max_asset_amount = 0;
+    if (!RavenUnits::assetParse(MAX_ASSET_UNITS, QString("21000000000"), &max_asset_amount)
+        || max_asset_amount != MAX_MONEY) {
+        return 1;
+    }
+
     return 0; //~~ The QT UI has had major changes made to it.  This test suite needs to be re-written/adapted to the new changes.  Until then, just return true so that make check passes for auto-build-testing.
     SetupEnvironment();
     SetupNetworking();
