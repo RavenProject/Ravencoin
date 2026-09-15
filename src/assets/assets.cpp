@@ -4367,12 +4367,18 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
 {
     CValidationState state;
     if (!pwallet->CommitTransaction(transaction, reserveKey, g_connman.get(), state)) {
-        error = std::make_pair(RPC_WALLET_ERROR, strprintf("Error: The transaction was rejected! Reason given: %s", state.GetRejectReason()));
+        error = std::make_pair(RPC_WALLET_ERROR, strprintf("Error: The transaction was rejected! Reason given: %s", GetAssetTransactionErrorMessage(state)));
         return false;
     }
 
     txid = transaction.GetHash().GetHex();
     return true;
+}
+
+std::string GetAssetTransactionErrorMessage(const CValidationState& state)
+{
+    const std::string rejectReason = state.GetRejectReason();
+    return rejectReason.empty() ? FormatStateMessage(state) : rejectReason;
 }
 
 bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError)

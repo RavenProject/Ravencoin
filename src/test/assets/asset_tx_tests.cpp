@@ -21,6 +21,18 @@
 
 BOOST_FIXTURE_TEST_SUITE(asset_tx_tests, BasicTestingSetup)
 
+    BOOST_AUTO_TEST_CASE(asset_transaction_error_message_test)
+    {
+        CValidationState stateWithDebugMessage;
+        stateWithDebugMessage.Invalid(false, REJECT_INVALID, "", "mempool conflict");
+        const std::string errorMessage = GetAssetTransactionErrorMessage(stateWithDebugMessage);
+        BOOST_CHECK(errorMessage.find("mempool conflict") != std::string::npos);
+
+        CValidationState stateWithRejectReason;
+        stateWithRejectReason.Invalid(false, REJECT_INVALID, "bad asset transaction");
+        BOOST_CHECK_EQUAL(GetAssetTransactionErrorMessage(stateWithRejectReason), "bad asset transaction");
+    }
+
     BOOST_AUTO_TEST_CASE(asset_tx_valid_test)
     {
         BOOST_TEST_MESSAGE("Running Asset TX Valid Test");

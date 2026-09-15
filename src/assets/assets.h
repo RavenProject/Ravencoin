@@ -62,6 +62,7 @@ struct CAssetOutputEntry;
 class CCoinControl;
 struct CBlockAssetUndo;
 class COutput;
+class CValidationState;
 
 // 2500 * 82 Bytes == 205 KB (kilobytes) of memory
 #define MAX_CACHE_ASSETS_SIZE 2500
@@ -543,6 +544,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
 
 //! Send any type of asset transaction to the network
 bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey& reserveKey, std::pair<int, std::string>& error, std::string& txid);
+std::string GetAssetTransactionErrorMessage(const CValidationState& state);
 
 /** Verifies that this wallet owns the give asset */
 bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError);
