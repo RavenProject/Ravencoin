@@ -52,7 +52,7 @@ BOOST_FIXTURE_TEST_SUITE(blockencodings_tests, RegtestingSetup)
         bool mutated;
         block.hashMerkleRoot = BlockMerkleRoot(block, &mutated);
         assert(!mutated);
-        while (!CheckProofOfWork(block.GetHash(), block.nBits, GetParams().GetConsensus())) ++block.nNonce;
+        while (!CheckProofOfWork(block.GetHash(), block.nBits, GetParams().GetConsensus())) ++block.nNonce64;
         return block;
     }
 
@@ -305,7 +305,7 @@ BOOST_FIXTURE_TEST_SUITE(blockencodings_tests, RegtestingSetup)
         bool mutated;
         block.hashMerkleRoot = BlockMerkleRoot(block, &mutated);
         assert(!mutated);
-        while (!CheckProofOfWork(block.GetHash(), block.nBits, GetParams().GetConsensus())) ++block.nNonce;
+        while (!CheckProofOfWork(block.GetHash(), block.nBits, GetParams().GetConsensus())) ++block.nNonce64;
 
         // Test simple header round-trip with only coinbase
         {

@@ -7,6 +7,11 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <chainparams.h>
+#include <primitives/block.h>
+#include <streams.h>
+#include <version.h>
+
 #include <crypto/ethash/lib/ethash/endianness.hpp>
 #include <crypto/ethash/include/ethash/progpow.hpp>
 
@@ -137,6 +142,35 @@ BOOST_AUTO_TEST_CASE(kawpow_search)
     auto r = progpow::hash(ctx, 0, {}, 395);
     BOOST_CHECK(sr.final_hash == r.final_hash);
     BOOST_CHECK(sr.mix_hash == r.mix_hash);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+struct RegtestKawpowSetup : public BasicTestingSetup
+{
+    RegtestKawpowSetup() : BasicTestingSetup(CBaseChainParams::REGTEST) {}
+};
+
+BOOST_FIXTURE_TEST_SUITE(regtest_kawpow_tests, RegtestKawpowSetup)
+
+BOOST_AUTO_TEST_CASE(regtest_blocks_use_kawpow_header)
+{
+    CBlockHeader header;
+    header.nTime = 1;
+    header.nHeight = 1;
+    header.nNonce64 = 1;
+    header.mix_hash = uint256S("1");
+
+    CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
+    stream << header;
+
+    CBlockHeader decoded;
+    stream >> decoded;
+
+    BOOST_CHECK_EQUAL(decoded.nHeight, header.nHeight);
+    BOOST_CHECK_EQUAL(decoded.nNonce64, header.nNonce64);
+    BOOST_CHECK(decoded.mix_hash == header.mix_hash);
+    BOOST_CHECK(header.GetHash() == KAWPOWHash_OnlyMix(header));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

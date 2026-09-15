@@ -710,10 +710,9 @@ public:
         nMessagingActivationBlock = 0; // Messaging activated block height
         nRestrictedActivationBlock = 0; // Restricted activated block height
 
-        // TODO, we need to figure out what to do with this for regtest. This effects the unit tests
-        // For now we can use a timestamp very far away
-        // If you are looking to test the kawpow hashing function in regtest. You will need to change this number
-        nKAAAWWWPOWActivationTime = 3582830167;
+        // Enable KAWPOW from the first regtest block so mining and block
+        // serialization exercise the same algorithm as the production nets.
+        nKAAAWWWPOWActivationTime = 0;
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
