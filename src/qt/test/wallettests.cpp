@@ -8,6 +8,7 @@
 #include "qt/sendcoinsdialog.h"
 #include "qt/sendcoinsentry.h"
 #include "qt/transactiontablemodel.h"
+#include "qt/transactionrecord.h"
 #include "qt/transactionview.h"
 #include "qt/walletmodel.h"
 #include "test/test_raven.h"
@@ -149,6 +150,8 @@ void BumpFee(TransactionView& view, const uint256& txid, bool expectDisabled, st
 //     src/qt/test/test_raven-qt -platform cocoa    # macOS
 void TestGUI()
 {
+    QCOMPARE(TransactionRecord::RecommendedNumConfirmations, 60);
+
     // Set up wallet and chain with 105 blocks (5 mature blocks for spending).
     TestChain100Setup test;
     for (int i = 0; i < 5; ++i) {
