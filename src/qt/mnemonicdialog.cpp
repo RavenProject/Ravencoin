@@ -128,6 +128,9 @@ void MnemonicDialog2::on_acceptButton_clicked()
 #endif
     my_words = words;
     my_passphrase = passphrase;
+#if !TEST
+    my_mnemonic_import = false;
+#endif
     int my_languageSelected = languageSelected;
 
 #if TEST
@@ -248,6 +251,9 @@ void MnemonicDialog3::on_acceptButton_clicked()
         return;
     }
 
+#if !TEST
+    my_mnemonic_import = true;
+#endif
     Q_EMIT allCloseRequested();
 };
 
