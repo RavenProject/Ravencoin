@@ -28,6 +28,12 @@ class AssetTest(RavenTestFramework):
         self.sync_all()
         assert_equal("active", n0.getblockchaininfo()['bip9_softforks']['assets']['status'])
 
+    def help_text_regression(self):
+        self.log.info("Checking issue RPC help wording...")
+        help_text = self.nodes[0].help("issue")
+        assert "root asset owner" in help_text
+        assert "original issuer" not in help_text
+
     def big_test(self):
         self.log.info("Running big test!")
         n0, n1 = self.nodes[0], self.nodes[1]
@@ -353,6 +359,7 @@ class AssetTest(RavenTestFramework):
 
     def run_test(self):
         self.activate_assets()
+        self.help_text_regression()
         self.big_test()
         self.issue_param_checks()
         self.chain_assets()

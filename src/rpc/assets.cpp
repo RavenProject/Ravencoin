@@ -424,7 +424,7 @@ UniValue issue(const JSONRPCRequest& request)
             "\nIssue an asset, subasset or unique asset.\n"
             "Asset name must not conflict with any existing asset.\n"
             "Unit as the number of decimals precision for the asset (0 for whole units (\"1\"), 8 for max precision (\"1.00000000\")\n"
-            "Reissuable is true/false for whether additional units can be issued by the original issuer.\n"
+            "Reissuable is true/false for whether additional units can be issued by the root asset owner.\n"
             "If issuing a unique asset these values are required (and will be defaulted to): qty=1, units=0, reissuable=false.\n"
 
             "\nArguments:\n"
