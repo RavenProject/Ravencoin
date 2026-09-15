@@ -625,7 +625,8 @@ void OverviewPage::setWalletModel(WalletModel *model)
 
         assetFilter.reset(new AssetFilterProxy());
         assetFilter->setSourceModel(model->getAssetTableModel());
-        assetFilter->sort(AssetTableModel::AssetNameRole, Qt::DescendingOrder);
+        assetFilter->setSortRole(AssetTableModel::AssetDateRole);
+        assetFilter->sort(AssetTableModel::Name, Qt::DescendingOrder);
         ui->listAssets->setModel(assetFilter.get());
         ui->listAssets->setAutoFillBackground(false);
 

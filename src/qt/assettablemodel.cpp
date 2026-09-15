@@ -84,7 +84,15 @@ public:
                             continue;
                         }
                     }
-                    cachedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator, EncodeAssetData(ipfsHash)));
+                    int64_t assetTime = 0;
+                    const auto outputsIt = outputs.find(bal->first);
+                    if (outputsIt != outputs.end()) {
+                        for (const auto& txout : outputsIt->second) {
+                            if (txout.tx && (assetTime == 0 || txout.tx->GetTxTime() < assetTime))
+                                assetTime = txout.tx->GetTxTime();
+                        }
+                    }
+                    cachedBalances.append(AssetRecord(bal->first, bal->second, units, fIsAdministrator, EncodeAssetData(ipfsHash), assetTime));
                 }
             }
         }
@@ -163,6 +171,8 @@ QVariant AssetTableModel::data(const QModelIndex &index, int role) const
             return rec->fIsAdministrator;
         case AssetIPFSHashRole:
             return QString::fromStdString(rec->ipfshash);
+        case AssetDateRole:
+            return rec->nTime;
         case AssetIPFSHashDecorationRole:
         {
             if (index.column() == Quantity)

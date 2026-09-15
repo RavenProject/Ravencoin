@@ -47,7 +47,9 @@ public:
         /** RVN or name of an asset */
             AssetIPFSHashRole = 104,
         /** IPFS Decoration Role */
-            AssetIPFSHashDecorationRole = 105
+            AssetIPFSHashDecorationRole = 105,
+        /** Time the asset was first received by the wallet */
+            AssetDateRole = 106
     };
 
     int rowCount(const QModelIndex &parent) const;
