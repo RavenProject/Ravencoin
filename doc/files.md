@@ -1,5 +1,6 @@
 
 * banlist.dat: stores the IPs/Subnets of banned nodes
+* assets/*: asset database (LevelDB)
 * raven.conf: contains configuration settings for ravend or raven-qt
 * ravend.pid: stores the process id of ravend while running
 * blocks/blk000??.dat: block data (custom, 128 MiB per file); since 0.8.0
