@@ -74,6 +74,14 @@ class WalletAccountsTest(RavenTestFramework):
         # otherwise we're off by exactly the fee amount as that's mined
         # and matures in the next 100 blocks
         node.sendfrom("", common_address, fee)
+
+        # A receive-tab address is stored in the address book before the
+        # deprecated account RPC is called. It must remain the account address.
+        receive_account = "receive-created"
+        receive_address = node.getnewaddress(receive_account)
+        assert_equal(node.getaccountaddress(receive_account), receive_address)
+        assert_equal(node.getaddressesbyaccount(receive_account), [receive_address])
+
         accounts = ["a", "b", "c", "d", "e"]
         amount_to_send = 1.0
         account_addresses = dict()

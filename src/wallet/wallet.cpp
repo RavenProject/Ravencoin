@@ -930,9 +930,23 @@ bool CWallet::GetAccountPubkey(CPubKey &pubKey, std::string strAccount, bool bFo
     walletdb.ReadAccount(strAccount, account);
 
     if (!bForceNew) {
-        if (!account.vchPubKey.IsValid())
-            bForceNew = true;
-        else {
+        if (!account.vchPubKey.IsValid()) {
+            for (const auto& item : mapAddressBook) {
+                if (item.second.name != strAccount || item.second.purpose != "receive")
+                    continue;
+
+                const CKeyID* keyID = boost::get<CKeyID>(&item.first);
+                if (keyID && GetPubKey(*keyID, account.vchPubKey))
+                    break;
+            }
+
+            if (!account.vchPubKey.IsValid())
+                bForceNew = true;
+            else
+                walletdb.WriteAccount(strAccount, account);
+        }
+
+        if (!bForceNew) {
             // Check if the current key has been used
             CScript scriptPubKey = GetScriptForDestination(account.vchPubKey.GetID());
             for (std::map<uint256, CWalletTx>::iterator it = mapWallet.begin();
