@@ -37,6 +37,14 @@ class WalletTest(RavenTestFramework):
         assert_equal(len(self.nodes[1].listunspent()), 0)
         assert_equal(len(self.nodes[2].listunspent()), 0)
 
+        self.log.info("Test removing a watch-only address")
+        watchonly_address = self.nodes[1].getnewaddress()
+        self.nodes[0].importaddress(watchonly_address, "watch-only", False)
+        assert(self.nodes[0].validateaddress(watchonly_address)["iswatchonly"])
+        self.nodes[0].removewatchonly(watchonly_address)
+        assert(not self.nodes[0].validateaddress(watchonly_address)["iswatchonly"])
+        assert_raises_rpc_error(-4, "Address is not watch-only", self.nodes[0].removewatchonly, watchonly_address)
+
         self.log.info("Mining blocks...")
 
         self.nodes[0].generate(1)

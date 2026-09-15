@@ -288,6 +288,42 @@ UniValue importaddress(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+UniValue removewatchonly(const JSONRPCRequest& request)
+{
+    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) {
+        return NullUniValue;
+    }
+
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "removewatchonly \"address\"\n"
+            "\nRemoves a watch-only address from the wallet.\n"
+            "\nArguments:\n"
+            "1. \"address\" (string, required) The address to remove\n"
+            "\nExamples:\n"
+            + HelpExampleCli("removewatchonly", "\"myaddress\"") +
+            "\nAs a JSON-RPC call\n"
+            + HelpExampleRpc("removewatchonly", "\"myaddress\"")
+        );
+
+    LOCK2(cs_main, pwallet->cs_wallet);
+
+    CTxDestination dest = DecodeDestination(request.params[0].get_str());
+    if (!IsValidDestination(dest))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid Raven address");
+
+    CScript script = GetScriptForDestination(dest);
+    if (!pwallet->HaveWatchOnly(script))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Address is not watch-only");
+
+    pwallet->MarkDirty();
+    if (!pwallet->RemoveWatchOnly(script))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Error removing watch-only address from wallet");
+
+    return NullUniValue;
+}
+
 UniValue importprunedfunds(const JSONRPCRequest& request)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
