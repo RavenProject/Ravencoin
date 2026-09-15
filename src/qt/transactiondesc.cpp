@@ -20,6 +20,7 @@
 #include "wallet/wallet.h"
 
 #include <stdint.h>
+#include <QStringList>
 #include <string>
 
 QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
@@ -44,6 +45,26 @@ QString TransactionDesc::FormatTxStatus(const CWalletTx& wtx)
         else
             return tr("%1 confirmations").arg(nDepth);
     }
+}
+
+static QString GetFromAddresses(CWallet *wallet, const CWalletTx& wtx)
+{
+    QStringList addresses;
+    for (const CTxIn& txin : wtx.tx->vin)
+    {
+        const CWalletTx* previous = wallet->GetWalletTx(txin.prevout.hash);
+        if (!previous || txin.prevout.n >= previous->tx->vout.size())
+            continue;
+
+        CTxDestination address;
+        if (ExtractDestination(previous->tx->vout[txin.prevout.n].scriptPubKey, address))
+        {
+            const QString encoded = QString::fromStdString(EncodeDestination(address));
+            if (!addresses.contains(encoded))
+                addresses.append(encoded);
+        }
+    }
+    return addresses.join(", ");
 }
 
 QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionRecord *rec, int unit)
@@ -83,6 +104,10 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
     else
     {
         // Offline transaction
+        const QString fromAddresses = GetFromAddresses(wallet, wtx);
+        if (!fromAddresses.isEmpty())
+            strHTML += "<b>" + tr("From") + ":</b> " + GUIUtil::HtmlEscape(fromAddresses) + "<br>";
+
         if (nNet > 0)
         {
             // Credit
@@ -317,6 +342,10 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
     else
     {
         // Offline transaction
+        const QString fromAddresses = GetFromAddresses(wallet, wtx);
+        if (!fromAddresses.isEmpty())
+            strHTML += "<b>" + tr("From") + ":</b> " + GUIUtil::HtmlEscape(fromAddresses) + "<br>";
+
         if (nAssetsRec > 0)
         {
             // Credit
