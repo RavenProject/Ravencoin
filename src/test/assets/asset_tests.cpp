@@ -218,6 +218,11 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(!IsAssetNameValid("$ABC^NO"));
         BOOST_CHECK(!IsAssetNameValid("$ABC~#NO"));
         BOOST_CHECK(!IsAssetNameValid("$ABC#NO"));
+
+        // Restricted assets use the root owner token without the '$' prefix.
+        BOOST_CHECK_EQUAL(GetAssetOwnerName("ABC"), "ABC!");
+        BOOST_CHECK_EQUAL(GetAssetOwnerName("ABC/SUB"), "ABC/SUB!");
+        BOOST_CHECK_EQUAL(GetAssetOwnerName("$ABC"), "ABC!");
     }
 
     BOOST_AUTO_TEST_CASE(transfer_asset_coin_test)

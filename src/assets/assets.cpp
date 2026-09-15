@@ -388,6 +388,14 @@ std::string RestrictedNameToOwnerName(const std::string& name)
     return temp_owner;
 }
 
+std::string GetAssetOwnerName(const std::string& name)
+{
+    if (IsAssetNameAnRestricted(name))
+        return RestrictedNameToOwnerName(name);
+
+    return name + OWNER_TAG;
+}
+
 std::string GetParentName(const std::string& name)
 {
     AssetType type;

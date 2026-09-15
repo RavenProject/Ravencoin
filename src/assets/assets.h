@@ -426,6 +426,9 @@ std::string GetParentName(const std::string& name); // Gets the parent name of a
 //! Get the owner token name belonging to a restricted asset
 std::string RestrictedNameToOwnerName(const std::string& name);
 
+//! Get the owner token name belonging to an asset balance
+std::string GetAssetOwnerName(const std::string& name);
+
 //! Build a unique asset buy giving the root name, and the tag name (ROOT, TAG) => ROOT#TAG
 std::string GetUniqueAssetName(const std::string& parent, const std::string& tag);
 
