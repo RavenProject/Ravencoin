@@ -849,6 +849,9 @@
             <property name="styleSheet">
              <string notr="true">color: red</string>
             </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>ERROR TEXT</string>
             </property>

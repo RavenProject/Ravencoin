@@ -192,6 +192,11 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK(!IsAssetNameValid("#ABC_"));
         BOOST_CHECK(!IsAssetNameValid("#ABC."));
 
+        std::string qualifierError;
+        BOOST_CHECK(!IsTypeCheckNameValid(AssetType::QUALIFIER, "SADS", qualifierError));
+        BOOST_CHECK(qualifierError.find("must start with '#'") != std::string::npos);
+        BOOST_CHECK(qualifierError.find("at least 3 characters") != std::string::npos);
+
 
         // Sub Qualifier
         BOOST_CHECK(IsAssetNameValid("#ABC/#TESTING"));

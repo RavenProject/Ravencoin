@@ -359,7 +359,7 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
     } else if (type == AssetType::QUALIFIER || type == AssetType::SUB_QUALIFIER) {
         if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
         bool valid = IsQualifierNameValidBeforeTag(name);
-        if (!valid) { error = "Qualifier name contains invalid characters (Valid characters are: A-Z 0-9 _ .) (# must be the first character, _ . special characters can't be the first or last characters)";  return false; }
+        if (!valid) { error = "Qualifier name must start with '#' followed by at least 3 characters (valid characters are: A-Z 0-9 _ .; _ and . can't be the first or last characters)";  return false; }
         return true;
     } else if (type == AssetType::RESTRICTED) {
         if (name.size() > MAX_NAME_LENGTH) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH); return false; }
