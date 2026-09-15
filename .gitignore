@@ -1,6 +1,10 @@
 buildspecs
 Jenkinsfile
 *.tar.gz
+.env
+.env.*
+*.key
+*.pem
 
 *.exe
 src/raven

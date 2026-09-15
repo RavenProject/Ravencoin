@@ -1,8 +1,8 @@
 package=openssl
-$(package)_version=1.1.1k
+$(package)_version=3.5.5
 $(package)_download_path=https://www.openssl.org/source
 $(package)_file_name=$(package)-$($(package)_version).tar.gz
-$(package)_sha256_hash=892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5
+$(package)_sha256_hash=b28c91532a8b65a1f983b4c28b7488174e4a01008e29ce8e69bd789f28bc2a89
 
 define $(package)_set_vars
 $(package)_config_opts=--prefix=$(host_prefix) --openssldir=$(host_prefix)/etc/openssl
@@ -48,7 +48,7 @@ $(package)_config_opts_x86_64_darwin+=RANLIB=$(host_prefix)/native/bin/x86_64-ap
 $(package)_config_opts_x86_64_darwin+=darwin64-x86_64-cc
 
 $(package)_config_opts_x86_64_mingw32=mingw64
-$(package)_config_opts_i686_mingw32=mingw32
+$(package)_config_opts_i686_mingw32=mingw
 
 ifneq (,$(findstring clang,$($(package)_cxx)))
 $(package)_toolset_$(host_os)=clang

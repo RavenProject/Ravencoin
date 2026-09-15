@@ -48,15 +48,14 @@ sha256_check() {
 http_get() {
   # Args: <url> <filename> <sha256_hash>
   #
-  # It's acceptable that we don't require SSL here because we manually verify
-  # content hashes below.
+  # TLS verification and the content hash both protect the downloaded source.
   #
   if [ -f "${2}" ]; then
     echo "File ${2} already exists; not downloading again"
   elif check_exists curl; then
-    curl --insecure --retry 5 "${1}" -o "${2}"
+    curl --location --fail --retry 5 "${1}" -o "${2}"
   else
-    wget --no-check-certificate "${1}" -O "${2}"
+    wget --https-only --tries=5 "${1}" -O "${2}"
   fi
 
   sha256_check "${3}" "${2}"
