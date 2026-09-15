@@ -66,6 +66,7 @@ class DecodeScriptTest(RavenTestFramework):
         # OP_DUP OP_HASH160 <PubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
         rpc_result = self.nodes[0].decodescript('76a9' + push_public_key_hash + '88ac')
         assert_equal('OP_DUP OP_HASH160 ' + public_key_hash + ' OP_EQUALVERIFY OP_CHECKSIG', rpc_result['asm'])
+        assert_equal(True, 'p2sh' in rpc_result)
 
         # 3) multisig scriptPubKey
         # <m> <A pubkey> <B pubkey> <C pubkey> <n> OP_CHECKMULTISIG
@@ -186,7 +187,7 @@ class DecodeScriptTest(RavenTestFramework):
         assert_equal('new_asset', result['type'])
         assert_equal(1, len(result['addresses']))
         assert_equal('mkQgP9nSuRocxERXGnPaWr8NPTWtCM4uiN', result['addresses'][0])
-        assert_equal('2MvanKE2hxx2A5jcFZ5paHZHSb6VPZMEvGe', result['p2sh'])
+        assert_equal(False, 'p2sh' in result)
         assert_equal('TESTASSET', result['asset_name'])
         assert_equal(100.0, result['amount'])
         assert_equal(8, result['units'])
@@ -197,6 +198,7 @@ class DecodeScriptTest(RavenTestFramework):
         script = "76a91435a8d9b395f1594e2cf3e06e6ec357d1da89736888acc00f72766e6f0a5445535441535345542175"
         result = self.nodes[0].decodescript(script)
         assert_equal('TESTASSET!', result['asset_name'])
+        assert_equal(False, 'p2sh' in result)
         assert_equal(1, result['amount'])
         assert_equal(0, result['units'])
 

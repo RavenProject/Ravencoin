@@ -1603,7 +1603,12 @@ UniValue decodescript(const JSONRPCRequest& request)
     UniValue type;
     type = find_value(r, "type");
 
-    if (type.isStr() && type.get_str() != "scripthash") {
+    const bool is_asset_type = type.isStr() &&
+        (type.get_str() == ASSET_TRANSFER_STRING ||
+         type.get_str() == ASSET_REISSUE_STRING ||
+         type.get_str() == ASSET_NEW_STRING ||
+         type.get_str() == "nullassetdata");
+    if (type.isStr() && type.get_str() != "scripthash" && !is_asset_type) {
         // P2SH cannot be wrapped in a P2SH. If this script is already a P2SH,
         // don't return the address for a P2SH of the P2SH.
         r.push_back(Pair("p2sh", EncodeDestination(CScriptID(script))));
