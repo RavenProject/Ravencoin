@@ -176,6 +176,20 @@ void TestGUI()
     sendCoinsDialog.setModel(&walletModel);
     transactionView.setModel(&walletModel);
 
+    // Use available balance fills the amount and enables fee subtraction.
+    QVBoxLayout* entries = sendCoinsDialog.findChild<QVBoxLayout*>("entries");
+    SendCoinsEntry* entry = qobject_cast<SendCoinsEntry*>(entries->itemAt(0)->widget());
+    QPushButton* useAvailableBalanceButton = entry->findChild<QPushButton*>("useAvailableBalanceButton");
+    QCheckBox* subtractFeeFromAmount = entry->findChild<QCheckBox*>("checkboxSubtractFeeFromAmount");
+    RavenAmountField* payAmount = entry->findChild<RavenAmountField*>("payAmount");
+    QVERIFY(useAvailableBalanceButton);
+    QVERIFY(subtractFeeFromAmount);
+    QVERIFY(payAmount);
+    useAvailableBalanceButton->click();
+    QCOMPARE(payAmount->value(), walletModel.getBalance());
+    QVERIFY(subtractFeeFromAmount->isChecked());
+    entry->clear();
+
     // Send two transactions, and verify they are added to transaction list.
     TransactionTableModel* transactionTableModel = walletModel.getTransactionTableModel();
     QCOMPARE(transactionTableModel->rowCount({}), 105);

@@ -37,7 +37,7 @@
      <number>8</number>
     </property>
     <item row="2" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0,1">
+     <layout class="QHBoxLayout" name="horizontalLayoutAmount" stretch="0,1,0">
       <item>
        <widget class="RavenAmountField" name="payAmount"/>
       </item>
@@ -48,6 +48,13 @@
         </property>
         <property name="text">
          <string>S&amp;ubtract fee from amount</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="useAvailableBalanceButton">
+        <property name="text">
+         <string>Use available balance</string>
         </property>
        </widget>
       </item>
