@@ -17,7 +17,6 @@ fi
 cd ${GITHUB_WORKSPACE}
 PKGVERSION=`grep "PACKAGE_VERSION" src/config/raven-config.h | cut -d\" -f2`
 VERSION="${PKGVERSION}"
-SHORTHASH=`git rev-parse --short HEAD`
 RELEASE_LOCATION="${GITHUB_WORKSPACE}/release"
 STAGE_DIR="${GITHUB_WORKSPACE}/stage"
 
@@ -33,11 +32,7 @@ echo "----------------------------------------"
 echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
 echo "----------------------------------------"
 
-if [[ ${GITHUB_BASE_REF} =~ "release" ]]; then
-    DISTNAME="raven-${VERSION}"
-else
-    DISTNAME="raven-${VERSION}-${SHORTHASH}"
-fi
+DISTNAME="raven-${VERSION}"
 
 echo "----------------------------------------"
 echo "DISTNAME: ${DISTNAME}"
