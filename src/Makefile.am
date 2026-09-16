@@ -187,6 +187,7 @@ RAVEN_CORE_H = \
   reverselock.h \
   rpc/blockchain.h \
   rpc/client.h \
+  rpc/misc.h \
   rpc/mining.h \
   rpc/protocol.h \
   rpc/safemode.h \

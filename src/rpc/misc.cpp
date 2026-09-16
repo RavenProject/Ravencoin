@@ -14,6 +14,7 @@
 #include "net.h"
 #include "netbase.h"
 #include "rpc/blockchain.h"
+#include "rpc/misc.h"
 #include "rpc/server.h"
 #include "timedata.h"
 #include "txmempool.h"
@@ -27,11 +28,25 @@
 #include "warnings.h"
 
 #include <stdint.h>
+#include <limits>
 #ifdef HAVE_MALLOC_INFO
 #include <malloc.h>
 #endif
 
 #include <univalue.h>
+
+bool AddToReceivedAmount(uint64_t& received, CAmount delta)
+{
+    if (delta <= 0)
+        return true;
+
+    const uint64_t amount = static_cast<uint64_t>(delta);
+    if (received > std::numeric_limits<uint64_t>::max() - amount)
+        return false;
+
+    received += amount;
+    return true;
+}
 
 /**
  * @note Do not add or change anything in the information returned by this
@@ -1110,16 +1125,16 @@ UniValue getaddressbalance(const JSONRPCRequest& request)
         }
 
         //assetName -> (received, balance)
-        std::map<std::string, std::pair<CAmount, CAmount>> balances;
+        std::map<std::string, std::pair<uint64_t, CAmount>> balances;
 
         for (std::vector<std::pair<CAddressIndexKey, CAmount> >::const_iterator it = addressIndex.begin();
              it != addressIndex.end(); it++) {
             std::string assetName = it->first.asset;
             if (balances.count(assetName) == 0) {
-                balances[assetName] = std::make_pair(0, 0);
+                balances[assetName] = std::make_pair(uint64_t{0}, CAmount{0});
             }
-            if (it->second > 0) {
-                balances[assetName].first += it->second;
+            if (!AddToReceivedAmount(balances[assetName].first, it->second)) {
+                throw JSONRPCError(RPC_MISC_ERROR, "Address received amount exceeds uint64 range");
             }
             balances[assetName].second += it->second;
         }
@@ -1147,12 +1162,12 @@ UniValue getaddressbalance(const JSONRPCRequest& request)
         }
 
         CAmount balance = 0;
-        CAmount received = 0;
+        uint64_t received = 0;
 
         for (std::vector<std::pair<CAddressIndexKey, CAmount> >::const_iterator it = addressIndex.begin();
              it != addressIndex.end(); it++) {
-            if (it->second > 0) {
-                received += it->second;
+            if (!AddToReceivedAmount(received, it->second)) {
+                throw JSONRPCError(RPC_MISC_ERROR, "Address received amount exceeds uint64 range");
             }
             balance += it->second;
         }

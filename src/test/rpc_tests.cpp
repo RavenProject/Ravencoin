@@ -5,6 +5,7 @@
 
 #include "rpc/server.h"
 #include "rpc/client.h"
+#include "rpc/misc.h"
 
 #include "base58.h"
 #include "core_io.h"
@@ -14,6 +15,8 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include <limits>
 
 #include <univalue.h>
 #include <validation.h>
@@ -43,6 +46,20 @@ UniValue CallRPC(std::string args)
 }
 
 BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
+
+    BOOST_AUTO_TEST_CASE(rpc_received_amount_overflow_test)
+    {
+        uint64_t received = static_cast<uint64_t>(std::numeric_limits<int64_t>::max());
+
+        BOOST_CHECK(AddToReceivedAmount(received, 1));
+        BOOST_CHECK_EQUAL(received, static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1);
+        BOOST_CHECK(AddToReceivedAmount(received, -1));
+        BOOST_CHECK_EQUAL(received, static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1);
+
+        received = std::numeric_limits<uint64_t>::max();
+        BOOST_CHECK(!AddToReceivedAmount(received, 1));
+        BOOST_CHECK_EQUAL(received, std::numeric_limits<uint64_t>::max());
+    }
 
     BOOST_AUTO_TEST_CASE(rpc_rawparams_test)
     {
