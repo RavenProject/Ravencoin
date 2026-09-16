@@ -21,6 +21,7 @@ class CreateTxWalletTest(RavenTestFramework):
         self.nodes[0].setmocktime(0)
 
         self.test_anti_fee_sniping()
+        self.test_randomized_input_order()
         self.test_tx_size_too_large()
 
     def test_anti_fee_sniping(self):
@@ -42,6 +43,25 @@ class CreateTxWalletTest(RavenTestFramework):
         self.nodes[0].generate(1)
         tx = self.nodes[0].decoderawtransaction(self.nodes[0].gettransaction(self.nodes[0].sendtoaddress(self.nodes[0].getnewaddress(), 1))['hex'])
         assert 0 < tx['locktime'] <= 201
+
+    def test_randomized_input_order(self):
+        self.log.info('Check that wallet transactions do not preserve ordered inputs')
+        destination = self.nodes[0].getnewaddress()
+        input_orders = []
+
+        for _ in range(8):
+            txid = self.nodes[0].sendtoaddress(destination, 24000)
+            tx = self.nodes[0].getrawtransaction(txid, True)
+            assert len(tx['vin']) >= 5
+            input_order = [
+                (bytes.fromhex(txin['txid'])[::-1], txin['vout'])
+                for txin in tx['vin']
+            ]
+            input_orders.append(input_order)
+
+        assert any(
+            order != sorted(order) for order in input_orders
+        ), 'wallet input order remained deterministic across all transactions'
 
     def test_tx_size_too_large(self):
         # More than 10kB of outputs, so that we hit -maxtxfee with a high feerate
