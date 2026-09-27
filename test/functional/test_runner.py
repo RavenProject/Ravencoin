@@ -112,6 +112,7 @@ BASE_SCRIPTS= [
     'wallet_groups.py',
     'rpc_blockchain.py',
     'p2p_feefilter.py',
+    'p2p_orphan_processing.py',
     'p2p_leak.py',
     'feature_versionbits_warning.py',
     'rpc_spentindex.py',
