@@ -761,6 +761,7 @@ void RavenGUI::createToolBars()
         // Network request code for the header widget
         QObject::connect(networkManager, &QNetworkAccessManager::finished,
                          this, [=](QNetworkReply *reply) {
+                    reply->deleteLater();
                     if (reply->error()) {
                         labelCurrentPrice->setText("");
                         qDebug() << reply->errorString();
@@ -819,6 +820,7 @@ void RavenGUI::createToolBars()
         // Network request code for the header widget
         QObject::connect(networkVersionManager, &QNetworkAccessManager::finished,
                          this, [=](QNetworkReply *reply) {
+                    reply->deleteLater();
                     if (reply->error()) {
                         qDebug() << reply->errorString();
                         return;
