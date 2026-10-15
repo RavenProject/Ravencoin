@@ -75,7 +75,7 @@ static fs::path GetAuthCookieFile(bool temp=false)
         arg += ".tmp";
     }
     fs::path path(arg);
-    if (!path.is_complete()) path = GetDataDir() / path;
+    if (!path.is_absolute()) path = GetDataDir() / path;
     return path;
 }
 

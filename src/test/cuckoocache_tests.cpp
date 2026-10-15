@@ -8,6 +8,7 @@
 #include "test/test_raven.h"
 #include "random.h"
 #include <thread>
+#include <deque>
 
 /** Test Suite for CuckooCache
  *
