@@ -77,13 +77,13 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
 
         boost::signals2::signal<bool(), CombinerAll> Test;
         BOOST_CHECK(Test());
-        Test.connect(&ReturnFalse);
+        boost::signals2::connection conn_false = Test.connect(&ReturnFalse);
         BOOST_CHECK(!Test());
-        Test.connect(&ReturnTrue);
+        boost::signals2::connection conn_true = Test.connect(&ReturnTrue);
         BOOST_CHECK(!Test());
-        Test.disconnect(&ReturnFalse);
+        conn_false.disconnect();
         BOOST_CHECK(Test());
-        Test.disconnect(&ReturnTrue);
+        conn_true.disconnect();
         BOOST_CHECK(Test());
     }
 

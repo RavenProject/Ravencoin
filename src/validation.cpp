@@ -3945,15 +3945,28 @@ static bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, 
 
 static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // If we are checking a KAWPOW block below a know checkpoint height. We can validate the proof of work using the mix_hash
-    if (fCheckPOW && block.nTime >= nKAWPOWActivationTime) {
-        CBlockIndex* pcheckpoint = Checkpoints::GetLastCheckpoint(GetParams().Checkpoints());
-        if (fCheckPOW && pcheckpoint && block.nHeight <= (uint32_t)pcheckpoint->nHeight) {
-           if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
-               return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed with mix_hash only check");
-           }
+    // A KAWPOW block below the last checkpoint we know about may have its proof of work checked
+    // against the supplied mix_hash only, without recomputing ProgPoW. That is an initial sync
+    // optimisation, and it is only sound because ContextualCheckBlockHeader refuses forks from
+    // before that checkpoint. So the shortcut is not taken:
+    //  - when checkpoints are disabled (-checkpoints=0), because that fork rule is disabled too;
+    //  - at the checkpoint height itself, because the fork rule does allow siblings there.
+    // mapBlockIndex is read under cs_main because CheckBlock() is also reached without it
+    // (ProcessNewBlock calls it before taking the lock).
+    if (fCheckPOW && block.nTime >= nKAWPOWActivationTime && fCheckpointsEnabled) {
+        int nCheckpointHeight = -1;
+        {
+            LOCK(cs_main);
+            const CBlockIndex* pcheckpoint = Checkpoints::GetLastCheckpoint(GetParams().Checkpoints());
+            if (pcheckpoint)
+                nCheckpointHeight = pcheckpoint->nHeight;
+        }
+        if (nCheckpointHeight > 0 && block.nHeight < (uint32_t)nCheckpointHeight) {
+            if (!CheckProofOfWork(block.GetHash(), block.nBits, consensusParams)) {
+                return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed with mix_hash only check");
+            }
 
-           return true;
+            return true;
         }
     }
 
@@ -4152,6 +4165,33 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
                          error("%s: declared header height %u does not match chain height %d",
                                __func__, block.nHeight, nHeight),
                          REJECT_INVALID, "bad-blk-height");
+    }
+
+    // Below nHeightHeaderCheckActivation a declared height that differs from the chain height is
+    // still tolerated, so that historical blocks keep validating. But CheckBlockHeader decides on
+    // the mix_hash-only shortcut from the declared height, so such a header may have arrived here
+    // without any ProgPoW work behind it. Require the full KAWPOW hash and a matching mix_hash for
+    // it: an honestly mined header passes this whatever height it declares, a forged one does not.
+    if (block.nTime >= nKAWPOWActivationTime && block.nHeight != (uint32_t)nHeight) {
+        // A header can never legitimately sit at a chain height below the one it declares, so
+        // refuse that case before hashing. The KAWPOW hash below selects its epoch context from
+        // the declared height, and building a context is linear in the height; rejecting the
+        // forward case first keeps that height at or under the real chain height, so a header
+        // cannot name an arbitrarily large height to force an oversized, slow context here.
+        if (block.nHeight > (uint32_t)nHeight) {
+            return state.DoS(100,
+                             error("%s: header declares height %u above chain height %d",
+                                   __func__, block.nHeight, nHeight),
+                             REJECT_INVALID, "bad-blk-height-pow");
+        }
+        uint256 mix_hash;
+        if (!CheckProofOfWork(block.GetHashFull(mix_hash), block.nBits, consensusParams) ||
+            mix_hash != block.mix_hash) {
+            return state.DoS(100,
+                             error("%s: header declares height %u at chain height %d without valid KAWPOW work",
+                                   __func__, block.nHeight, nHeight),
+                             REJECT_INVALID, "bad-blk-height-pow");
+        }
     }
 
     // Check against checkpoints
