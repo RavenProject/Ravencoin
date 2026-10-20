@@ -181,6 +181,7 @@ RAVEN_CORE_H = \
   policy/policy.h \
   policy/rbf.h \
   pow.h \
+  privacy_burn.h \
   protocol.h \
   random.h \
   reverse_iterator.h \
@@ -276,6 +277,7 @@ libraven_server_a_SOURCES = \
   policy/policy.cpp \
   policy/rbf.cpp \
   pow.cpp \
+  privacy_burn.cpp \
   rest.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
