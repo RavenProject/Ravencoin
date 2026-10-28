@@ -57,6 +57,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "reissue", 1, "qty"},
     { "reissue", 4, "reissuable"},
     { "reissue", 5, "new_unit"},
+    { "exportlegacymessagedata", 0, "acknowledge_global_scope" },
     { "listmyassets", 1, "verbose" },
     { "listmyassets", 2, "count" },
     { "listmyassets", 3, "start"},

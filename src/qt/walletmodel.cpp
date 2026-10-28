@@ -6,9 +6,12 @@
 #include "walletmodel.h"
 
 #include "addresstablemodel.h"
+#include "assets/assets.h"
+#include "chainparams.h"
 #include "consensus/validation.h"
 #include "guiconstants.h"
 #include "guiutil.h"
+#include "init.h"
 #include "optionsmodel.h"
 #include "paymentserver.h"
 #include "recentrequeststablemodel.h"
@@ -19,6 +22,7 @@
 
 #include "base58.h"
 #include "chain.h"
+#include "hash.h"
 #include "keystore.h"
 #include "validation.h"
 #include "net.h" // for g_connman
@@ -200,6 +204,42 @@ void WalletModel::updateWatchOnlyFlag(bool fHaveWatchonly)
 bool WalletModel::validateAddress(const QString &address)
 {
     return IsValidDestinationString(address.toStdString());
+}
+
+QString WalletModel::newAssetDestination()
+{
+    if (!GUIUtil::pqAssetDestinationRequired())
+        return addressTableModel->addRow(AddressTableModel::Receive, "", "");
+
+    LOCK2(cs_main, wallet->cs_wallet);
+    if (!GUIUtil::pqAssetDestinationRequired() || wallet->IsLocked())
+        return QString();
+
+    CPQPubKey pqPubKey;
+    if (!wallet->GenerateNewPQKey(pqPubKey))
+        return QString();
+
+    const WitnessV2PQDestination pqDestination(pqPubKey.GetWitnessProgram());
+    const CKeyID assetID(Hash160(pqDestination.witnessProgram.begin(),
+                                 pqDestination.witnessProgram.end()));
+    if (!wallet->StoreOwnedPQAssetDestination(assetID, pqDestination.witnessProgram))
+        return QString();
+    wallet->SetAddressBook(assetID, "", "pqasset");
+    wallet->SetAddressBook(pqDestination, "", "receive");
+    return QString::fromStdString(EncodePQAssetDestination(assetID, pqDestination.witnessProgram));
+}
+
+QStringList WalletModel::getAssetDestinations() const
+{
+    QStringList destinations;
+    for (const std::string& descriptor : wallet->GetOwnedPQAssetDestinations()) {
+        CKeyID assetID;
+        uint256 program;
+        if (!DecodePQOnlyAssetDestination(descriptor, assetID, program))
+            continue;
+        destinations.push_back(QString::fromStdString(descriptor));
+    }
+    return destinations;
 }
 
 WalletModel::SendCoinsReturn WalletModel::prepareTransaction(WalletModelTransaction &transaction, const CCoinControl& coinControl)
@@ -408,6 +448,12 @@ WalletModel::SendCoinsReturn WalletModel::sendAssets(CWalletTx& tx, QList<SendAs
         if (!rcp.paymentRequest.IsInitialized())
         {
             std::string strAddress = rcp.address.toStdString();
+            CKeyID classicalKey;
+            uint256 pqProgram;
+            if (DecodePQAssetDestination(strAddress, classicalKey, pqProgram)) {
+                Q_EMIT assetsSent(wallet, rcp, transaction_array);
+                continue;
+            }
             CTxDestination dest = DecodeDestination(strAddress);
             std::string strLabel = rcp.label.toStdString();
             {
@@ -484,7 +530,11 @@ bool WalletModel::setWalletEncrypted(bool encrypted, const SecureString &passphr
     if(encrypted)
     {
         // Encrypt
-        return wallet->EncryptWallet(passphrase);
+        const bool wasCrypted = wallet->IsCrypted();
+        const bool encryptedSuccessfully = wallet->EncryptWallet(passphrase);
+        if (!wasCrypted && !encryptedSuccessfully && wallet->IsCrypted())
+            StartShutdown();
+        return encryptedSuccessfully;
     }
     else
     {
@@ -686,17 +736,16 @@ void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins) 
 }
 
 /** RVN START */
-// AvailableCoins + LockedCoins grouped by wallet address (put change in one group with wallet address)
+// Available and locked asset coins grouped by the output's contextual destination.
 void WalletModel::listAssets(std::map<QString, std::map<QString, std::vector<COutput> > >& mapCoins) const
 {
-    std::map<QString, std::map<QString, std::vector<COutput> > > mapSortedByAssetName;
-    auto list = wallet->ListAssets();
+    LOCK2(cs_main, wallet->cs_wallet);
+    const int pqAssetActivationHeight = GetPQAssetActivationHeightForPrev(
+        chainActive.Tip(), GetParams().GetConsensus());
 
-    for (auto& group : list) {
-        auto address = QString::fromStdString(EncodeDestination(group.first));
-
+    for (auto& group : wallet->ListAssets()) {
         for (auto& coin : group.second) {
-            auto out = coin.tx->tx->vout[coin.i];
+            const CTxOut& out = coin.tx->tx->vout[coin.i];
             std::string strAssetName;
             CAmount nAmount;
             if (!GetAssetInfoFromScript(out.scriptPubKey, strAssetName, nAmount))
@@ -705,9 +754,16 @@ void WalletModel::listAssets(std::map<QString, std::map<QString, std::vector<COu
             if (nAmount == 0)
                 continue;
 
-            QString assetName = QString::fromStdString(strAssetName);
-            auto& assetMap = mapCoins[assetName];
-            assetMap[address].emplace_back(coin);
+            const CBlockIndex* originBlock = nullptr;
+            const int depth = coin.tx->GetDepthInMainChain(originBlock);
+            const int originHeight = depth > 0 && originBlock ? originBlock->nHeight : -1;
+            const std::string address = EncodeContextualAssetDestination(
+                out.scriptPubKey, originHeight, pqAssetActivationHeight);
+            if (address.empty())
+                continue;
+
+            mapCoins[QString::fromStdString(strAssetName)]
+                    [QString::fromStdString(address)].emplace_back(coin);
         }
     }
 }

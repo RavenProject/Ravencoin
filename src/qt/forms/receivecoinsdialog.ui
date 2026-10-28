@@ -164,6 +164,16 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="receivePQAssetButton">
+              <property name="toolTip">
+               <string>Create or display a protected destination for receiving assets. The PQ part must hold RVN before the received assets can be spent.</string>
+              </property>
+              <property name="text">
+               <string>Receive PQ asset</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="clearButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">

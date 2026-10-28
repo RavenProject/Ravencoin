@@ -86,6 +86,7 @@ public:
                 const CTxDestination& address = item.first;
                 bool fMine = IsMine(*wallet, address);
                 AddressTableEntry::Type addressType = translateTransactionType(
+                        wallet->IsPQOnlyAssetID(address) ? "pqasset" :
                         QString::fromStdString(item.second.purpose), fMine);
                 const std::string& strName = item.second.name;
                 cachedAddressTable.append(AddressTableEntry(addressType,
@@ -109,7 +110,9 @@ public:
         int lowerIndex = (lower - cachedAddressTable.begin());
         int upperIndex = (upper - cachedAddressTable.begin());
         bool inModel = (lower != upper);
-        AddressTableEntry::Type newEntryType = translateTransactionType(purpose, isMine);
+        AddressTableEntry::Type newEntryType = translateTransactionType(
+                wallet->IsPQOnlyAssetID(DecodeDestination(address.toStdString())) ?
+                "pqasset" : purpose, isMine);
 
         switch(status)
         {

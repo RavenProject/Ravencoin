@@ -21,8 +21,14 @@ QT_TRANSLATE_NOOP("raven-core", ""
 "A fee rate (in %s/kB) that will be used when fee estimation has insufficient "
 "data (default: %s)"),
 QT_TRANSLATE_NOOP("raven-core", ""
+"A space separated list of 12 words used to import a BIP44 wallet. Command-"
+"line arguments can be visible to other local users and process tools."),
+QT_TRANSLATE_NOOP("raven-core", ""
 "Accept relayed transactions received from whitelisted peers even when not "
 "relaying transactions (default: %d)"),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Active PQ asset change requires a protected source or explicit PQ change "
+"destination"),
 QT_TRANSLATE_NOOP("raven-core", ""
 "Add a node to connect to and attempt to keep the connection open (see the "
 "`addnode` RPC command help for more info)"),
@@ -30,6 +36,19 @@ QT_TRANSLATE_NOOP("raven-core", ""
 "Allow JSON-RPC connections from specified source. Valid for <ip> are a "
 "single IP (e.g. 1.2.3.4), a network/netmask (e.g. 1.2.3.4/255.255.255.0) or "
 "a network/CIDR (e.g. 1.2.3.4/24). This option can be specified multiple times"),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Asset change requires a legacy P2PKH address; RIP-25 witness-v2 protects "
+"native RVN only"),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Asset database state is not certified and required block data is "
+"unavailable. Retain the data directory and redownload the blockchain."),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Asset database state is not certified and the chainstate tip is unknown. "
+"Retain the data directory and rebuild the block index before retrying."),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Asset database state is not certified at the coins tip. This pruned "
+"chainstate cannot be rebuilt safely; retain the data directory and "
+"redownload the blockchain."),
 QT_TRANSLATE_NOOP("raven-core", ""
 "Bind to given address and always listen on it. Use [host]:port notation for "
 "IPv6"),
@@ -77,6 +96,9 @@ QT_TRANSLATE_NOOP("raven-core", ""
 QT_TRANSLATE_NOOP("raven-core", ""
 "Error reading %s! All keys read correctly, but transaction data or address "
 "book entries might be missing or incorrect."),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Error rescanning wallet: block %d could not be read. Restore the missing "
+"block data or restart with -reindex."),
 QT_TRANSLATE_NOOP("raven-core", ""
 "Error: Listening for incoming connections failed (listen returned error %s)"),
 QT_TRANSLATE_NOOP("raven-core", ""
@@ -154,6 +176,9 @@ QT_TRANSLATE_NOOP("raven-core", ""
 "time may be influenced by peers forward or backward by this amount. "
 "(default: %u seconds)"),
 QT_TRANSLATE_NOOP("raven-core", ""
+"Maximum memory in MiB for each KAWPOW verification context (default: %d). "
+"This local limit does not make a header invalid."),
+QT_TRANSLATE_NOOP("raven-core", ""
 "Maximum size of data in data carrier transactions we relay and mine "
 "(default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", ""
@@ -163,6 +188,9 @@ QT_TRANSLATE_NOOP("raven-core", ""
 "Number of seconds to keep misbehaving peers from reconnecting (default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", ""
 "Output debugging information (default: %u, supplying <category> is optional)"),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Passphrase securing your 12-word mnemonic word list. Command-line arguments "
+"and configuration files can retain plaintext secrets."),
 QT_TRANSLATE_NOOP("raven-core", ""
 "Please check that your computer's date and time are correct! If your clock "
 "is wrong, %s will not work properly."),
@@ -224,6 +252,14 @@ QT_TRANSLATE_NOOP("raven-core", ""
 "This may be due to your computer's date and time being set incorrectly. Only "
 "rebuild the block database if you are sure that your computer's date and "
 "time are correct"),
+QT_TRANSLATE_NOOP("raven-core", ""
+"The coins database references an invalid block. Retain the data directory "
+"and rebuild the block index and chainstate from verified block data before "
+"restarting."),
+QT_TRANSLATE_NOOP("raven-core", ""
+"The coins database references an unknown block and this pruned chainstate "
+"cannot be rebuilt safely. Retain the data directory and redownload the "
+"blockchain."),
 QT_TRANSLATE_NOOP("raven-core", ""
 "The default height that is required before rewards are allowed to be sent out"),
 QT_TRANSLATE_NOOP("raven-core", ""
@@ -292,6 +328,13 @@ QT_TRANSLATE_NOOP("raven-core", ""
 "Verifier string has length greater than 80 after whitespaces and '#' are "
 "removed"),
 QT_TRANSLATE_NOOP("raven-core", ""
+"Wallet encryption recovery could not complete: restart %s after resolving "
+"the database error"),
+QT_TRANSLATE_NOOP("raven-core", ""
+"Wallet salvage retained the original %s as %s. The retained file may contain "
+"recoverable unencrypted private-key material even if the recovered wallet is "
+"encrypted. Protect it and remove it securely only after verifying recovery."),
+QT_TRANSLATE_NOOP("raven-core", ""
 "Wallet will not create transactions that violate mempool chain limits "
 "(default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", ""
@@ -350,14 +393,18 @@ QT_TRANSLATE_NOOP("raven-core", "(default: %s)"),
 QT_TRANSLATE_NOOP("raven-core", "(default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", "-maxmempool must be at least %d MB"),
 QT_TRANSLATE_NOOP("raven-core", "<category> can be:"),
-QT_TRANSLATE_NOOP("raven-core", "A space separated list of 12-words used to import a bip44 wallet"),
 QT_TRANSLATE_NOOP("raven-core", "Accept command line and JSON-RPC commands"),
 QT_TRANSLATE_NOOP("raven-core", "Accept connections from outside (default: 1 if no -proxy or -connect)"),
 QT_TRANSLATE_NOOP("raven-core", "Accept public REST requests (default: %u)"),
+QT_TRANSLATE_NOOP("raven-core", "Active PQ asset change requires a canonical PQ-only destination"),
+QT_TRANSLATE_NOOP("raven-core", "Active PQ asset input has no canonical program"),
+QT_TRANSLATE_NOOP("raven-core", "Active PQ asset output requires a canonical PQ-only asset destination"),
+QT_TRANSLATE_NOOP("raven-core", "Active PQ asset recipient is missing a canonical program"),
 QT_TRANSLATE_NOOP("raven-core", "Allow DNS lookups for -addnode, -seednode and -connect"),
 QT_TRANSLATE_NOOP("raven-core", "Always query for peer addresses via DNS lookup (default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", "Append comment to the user agent string"),
 QT_TRANSLATE_NOOP("raven-core", "Asset Transfer amounts must be greater than 0"),
+QT_TRANSLATE_NOOP("raven-core", "Asset database requires a full chainstate rebuild"),
 QT_TRANSLATE_NOOP("raven-core", "Asset doesn't exist: "),
 QT_TRANSLATE_NOOP("raven-core", "Asset must be a qualifier, sub qualifier, or a restricted asset"),
 QT_TRANSLATE_NOOP("raven-core", "Asset name is not valid"),
@@ -374,6 +421,7 @@ QT_TRANSLATE_NOOP("raven-core", "Connect to a node to retrieve peer addresses, a
 QT_TRANSLATE_NOOP("raven-core", "Connection options:"),
 QT_TRANSLATE_NOOP("raven-core", "Copyright (C) %i-%i"),
 QT_TRANSLATE_NOOP("raven-core", "Corrupted block database detected"),
+QT_TRANSLATE_NOOP("raven-core", "Could not construct canonical PQ asset change"),
 QT_TRANSLATE_NOOP("raven-core", "Debugging/Testing options:"),
 QT_TRANSLATE_NOOP("raven-core", "Do not load the wallet and disable wallet RPC calls"),
 QT_TRANSLATE_NOOP("raven-core", "Do you want to rebuild the block database now?"),
@@ -398,10 +446,10 @@ QT_TRANSLATE_NOOP("raven-core", "Error loading wallet %s. Invalid characters in 
 QT_TRANSLATE_NOOP("raven-core", "Error not set"),
 QT_TRANSLATE_NOOP("raven-core", "Error opening block database"),
 QT_TRANSLATE_NOOP("raven-core", "Error reading from database, shutting down."),
+QT_TRANSLATE_NOOP("raven-core", "Error storing bip 39 passphrase"),
+QT_TRANSLATE_NOOP("raven-core", "Error storing bip 39 vchseed"),
+QT_TRANSLATE_NOOP("raven-core", "Error storing bip 39 words"),
 QT_TRANSLATE_NOOP("raven-core", "Error upgrading chainstate database"),
-QT_TRANSLATE_NOOP("raven-core", "Error writing bip 39 passphrase to database"),
-QT_TRANSLATE_NOOP("raven-core", "Error writing bip 39 vchseed to database"),
-QT_TRANSLATE_NOOP("raven-core", "Error writing bip 39 words to database"),
 QT_TRANSLATE_NOOP("raven-core", "Error"),
 QT_TRANSLATE_NOOP("raven-core", "Error: A fatal internal error occurred, see debug.log for details"),
 QT_TRANSLATE_NOOP("raven-core", "Error: Disk space is low!"),
@@ -467,14 +515,15 @@ QT_TRANSLATE_NOOP("raven-core", "Node relay options:"),
 QT_TRANSLATE_NOOP("raven-core", "Not enough file descriptors available."),
 QT_TRANSLATE_NOOP("raven-core", "Only connect to nodes in network <net> (ipv4, ipv6 or onion)"),
 QT_TRANSLATE_NOOP("raven-core", "Options:"),
-QT_TRANSLATE_NOOP("raven-core", "Passphrase securing your 12-word mnemonic word-list"),
 QT_TRANSLATE_NOOP("raven-core", "Password for JSON-RPC connections"),
 QT_TRANSLATE_NOOP("raven-core", "Prepend debug output with timestamp (default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", "Print this help message and exit"),
 QT_TRANSLATE_NOOP("raven-core", "Print version and exit"),
+QT_TRANSLATE_NOOP("raven-core", "Protected asset input requires a funded matching PQ anchor"),
 QT_TRANSLATE_NOOP("raven-core", "Prune cannot be configured with a negative value."),
 QT_TRANSLATE_NOOP("raven-core", "Prune mode is incompatible with -txindex."),
 QT_TRANSLATE_NOOP("raven-core", "Pruning blockstore..."),
+QT_TRANSLATE_NOOP("raven-core", "RIP-25 chainstate requires context-aware revalidation"),
 QT_TRANSLATE_NOOP("raven-core", "RPC server options:"),
 QT_TRANSLATE_NOOP("raven-core", "Rebuild chain state and block index from the blk*.dat files on disk"),
 QT_TRANSLATE_NOOP("raven-core", "Rebuild chain state from the currently indexed blocks"),
@@ -487,6 +536,7 @@ QT_TRANSLATE_NOOP("raven-core", "Rescanning..."),
 QT_TRANSLATE_NOOP("raven-core", "Restricted asset transfer from address that has been frozen"),
 QT_TRANSLATE_NOOP("raven-core", "Rewinding blocks..."),
 QT_TRANSLATE_NOOP("raven-core", "Run in the background as a daemon and accept commands"),
+QT_TRANSLATE_NOOP("raven-core", "Selected asset input is missing from the wallet"),
 QT_TRANSLATE_NOOP("raven-core", "Send trace/debug info to console instead of debug.log file"),
 QT_TRANSLATE_NOOP("raven-core", "Send transactions with full-RBF opt-in enabled (default: %u)"),
 QT_TRANSLATE_NOOP("raven-core", "Set database cache size in megabytes (%d to %d, default: %d)"),
@@ -525,15 +575,20 @@ QT_TRANSLATE_NOOP("raven-core", "Transaction must have at least one recipient"),
 QT_TRANSLATE_NOOP("raven-core", "Transaction too large for fee policy"),
 QT_TRANSLATE_NOOP("raven-core", "Transaction too large"),
 QT_TRANSLATE_NOOP("raven-core", "Turn off the databasing the messages sent with assets (default: %u)"),
+QT_TRANSLATE_NOOP("raven-core", "Unable to begin the initial wallet transaction"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to bind to %s on this computer (bind returned error %s)"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to bind to %s on this computer. %s is probably already running."),
+QT_TRANSLATE_NOOP("raven-core", "Unable to commit the initial wallet transaction"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to generate initial keys"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to get coin to verify restricted asset transfer from address"),
+QT_TRANSLATE_NOOP("raven-core", "Unable to persist the wallet feature version"),
+QT_TRANSLATE_NOOP("raven-core", "Unable to rebuild restricted address history"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to reissue asset: amount must be 0 or larger"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to reissue asset: asset_name '"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to reissue asset: reissuable is set to false"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to reissue asset: reissuable must be 0 or 1"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to reissue asset: unit must be between 8 and -1"),
+QT_TRANSLATE_NOOP("raven-core", "Unable to reset restricted address history for reindex"),
 QT_TRANSLATE_NOOP("raven-core", "Unable to start HTTP server. See debug log for details."),
 QT_TRANSLATE_NOOP("raven-core", "Unknown network specified in -onlynet: '%s'"),
 QT_TRANSLATE_NOOP("raven-core", "Unsupported argument -benchmark ignored, use -debug=bench."),
@@ -552,6 +607,7 @@ QT_TRANSLATE_NOOP("raven-core", "Verifier String doesn't exist for asset: "),
 QT_TRANSLATE_NOOP("raven-core", "Verifier String for asset trasnfer, not found"),
 QT_TRANSLATE_NOOP("raven-core", "Verifier not found for asset: "),
 QT_TRANSLATE_NOOP("raven-core", "Verifier string can not be empty. To default to true, use \"true\""),
+QT_TRANSLATE_NOOP("raven-core", "Verifier string for restricted asset change not found"),
 QT_TRANSLATE_NOOP("raven-core", "Verifier string is empty"),
 QT_TRANSLATE_NOOP("raven-core", "Verifier string not found"),
 QT_TRANSLATE_NOOP("raven-core", "Verifying blocks..."),
@@ -560,6 +616,8 @@ QT_TRANSLATE_NOOP("raven-core", "Wallet %s resides outside data directory %s"),
 QT_TRANSLATE_NOOP("raven-core", "Wallet debugging/testing options:"),
 QT_TRANSLATE_NOOP("raven-core", "Wallet needed to be rewritten: restart %s to complete"),
 QT_TRANSLATE_NOOP("raven-core", "Wallet options:"),
+QT_TRANSLATE_NOOP("raven-core", "Wallet salvage for %s did not report the retained original file."),
+QT_TRANSLATE_NOOP("raven-core", "Wallet setup was cancelled"),
 QT_TRANSLATE_NOOP("raven-core", "Warning"),
 QT_TRANSLATE_NOOP("raven-core", "Warning: unknown new rules activated (versionbit %i)"),
 QT_TRANSLATE_NOOP("raven-core", "Whether to operate in a blocks only mode (default: %u)"),

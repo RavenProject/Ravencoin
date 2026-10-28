@@ -236,9 +236,11 @@ public:
     const_iterator end() const                       { return vch.end(); }
     iterator end()                                   { return vch.end(); }
     size_type size() const                           { return vch.size() - nReadPos; }
+    size_type capacity() const                       { return vch.capacity(); }
     bool empty() const                               { return vch.size() == nReadPos; }
     void resize(size_type n, value_type c=0)         { vch.resize(n + nReadPos, c); }
     void reserve(size_type n)                        { vch.reserve(n + nReadPos); }
+    void clear_and_free()                            { vector_type().swap(vch); nReadPos = 0; }
     const_reference operator[](size_type pos) const  { return vch[pos + nReadPos]; }
     reference operator[](size_type pos)              { return vch[pos + nReadPos]; }
     void clear()                                     { vch.clear(); nReadPos = 0; }

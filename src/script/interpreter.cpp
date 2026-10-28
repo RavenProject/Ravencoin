@@ -10,8 +10,10 @@
 #include "crypto/ripemd160.h"
 #include "crypto/sha1.h"
 #include "crypto/sha256.h"
+#include "crypto/mldsa.h"
 #include "pubkey.h"
 #include "script/script.h"
+#include "consensus/consensus.h"
 
 typedef std::vector<unsigned char> valtype;
 
@@ -1294,7 +1296,7 @@ uint256 SignatureHash(const CScript &scriptCode, const CTransaction &txTo, unsig
 {
     assert(nIn < txTo.vin.size());
 
-    if (sigversion == SIGVERSION_WITNESS_V0)
+    if (sigversion == SIGVERSION_WITNESS_V0 || sigversion == SIGVERSION_WITNESS_V2_PQ)
     {
         uint256 hashPrevouts;
         uint256 hashSequence;
@@ -1374,6 +1376,28 @@ bool TransactionSignatureChecker::VerifySignature(const std::vector<unsigned cha
 
 bool TransactionSignatureChecker::CheckSig(const std::vector<unsigned char> &vchSigIn, const std::vector<unsigned char> &vchPubKey, const CScript &scriptCode, SigVersion sigversion) const
 {
+    // RIP-25: ML-DSA-44 signature verification for witness v2
+    if (sigversion == SIGVERSION_WITNESS_V2_PQ)
+    {
+        // For PQ verification, vchSigIn is the ML-DSA signature (2420 bytes, no sighash byte)
+        // vchPubKey is the ML-DSA public key (1312 bytes)
+        if (vchSigIn.size() != mldsa::SIGNATURE_BYTES)
+            return false;
+        if (vchPubKey.size() != mldsa::PUBLICKEY_BYTES)
+            return false;
+        if (!Consensus::IsValidPQSignatureContext(pqSignatureContext))
+            return false;
+
+        // Compute sighash using SIGHASH_ALL and witness v2 PQ hashing
+        uint256 sighash = SignatureHash(scriptCode, *txTo, nIn, SIGHASH_ALL, amount, SIGVERSION_WITNESS_V2_PQ, this->txdata);
+
+        // Verify ML-DSA-44 signature
+        return mldsa::Verify(vchSigIn.data(), vchSigIn.size(),
+                             sighash.begin(), 32,
+                             pqSignatureContext.data(), pqSignatureContext.size(),
+                             vchPubKey.data());
+    }
+
     CPubKey pubkey(vchPubKey);
     if (!pubkey.IsValid())
         return false;
@@ -1488,13 +1512,27 @@ static bool VerifyWitnessProgram(const CScriptWitness &witness, int witversion, 
                 return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_WITNESS_EMPTY);
             }
             scriptPubKey = CScript(witness.stack.back().begin(), witness.stack.back().end());
-            stack = std::vector<std::vector<unsigned char> >(witness.stack.begin(), witness.stack.end() - 1);
             uint256 hashScriptPubKey;
             CSHA256().Write(&scriptPubKey[0], scriptPubKey.size()).Finalize(hashScriptPubKey.begin());
             if (memcmp(hashScriptPubKey.begin(), program.data(), 32))
             {
                 return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
             }
+
+            // EvalScript checks MAX_STACK_SIZE after every opcode. The largest
+            // possible first-op reduction is CHECKMULTISIGVERIFY: 20 keys, 20
+            // signatures, their two counters, the historical dummy item, and
+            // no retained result (43 elements net). A larger initial stack is
+            // therefore unconditionally invalid and must be rejected before
+            // expanding a compact wire representation.
+            static const size_t MAX_INITIAL_WITNESS_STACK =
+                MAX_STACK_SIZE + 2 * MAX_PUBKEYS_PER_MULTISIG + 3;
+            if (witness.stack.size() - 1 > MAX_INITIAL_WITNESS_STACK)
+            {
+                return set_error(serror, SCRIPT_ERR_STACK_SIZE);
+            }
+            stack = witness.stack.ToVector();
+            stack.pop_back();
         }
         else if (program.size() == 20)
         {
@@ -1510,6 +1548,62 @@ static bool VerifyWitnessProgram(const CScriptWitness &witness, int witversion, 
         {
             return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_WRONG_LENGTH);
         }
+    }
+    else if (witversion == 2 && (flags & SCRIPT_VERIFY_PQ_HYBRID))
+    {
+        // RIP-25: Witness version 2: Post-Quantum ML-DSA-44 Only
+        // Program: SHA256(mldsa_pk) = 32 bytes
+        // Witness stack: [mldsa_sig (2420 bytes), mldsa_pk (1312 bytes)]
+        // No ECDSA: ML-DSA-44 provides quantum-resistant signatures.
+        // Old ECDSA addresses (witness v0) continue to work.
+        if (program.size() != 32)
+        {
+            return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_WRONG_LENGTH);
+        }
+
+        // Witness stack: exactly 2 elements
+        if (witness.stack.size() != 2)
+        {
+            return set_error(serror, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH);
+        }
+
+        const std::vector<unsigned char>& mldsa_sig = witness.stack[0];
+        const std::vector<unsigned char>& mldsa_pk  = witness.stack[1];
+
+        // Validate sizes
+        if (mldsa_pk.size() != mldsa::PUBLICKEY_BYTES)
+            return set_error(serror, SCRIPT_ERR_PQ_PUBKEY_SIZE);
+        if (mldsa_sig.size() != mldsa::SIGNATURE_BYTES)
+            return set_error(serror, SCRIPT_ERR_PQ_SIGNATURE_SIZE);
+
+        // Check PQ witness element sizes
+        for (unsigned int i = 0; i < witness.stack.size(); i++)
+        {
+            if (witness.stack[i].size() > MAX_PQ_WITNESS_ELEMENT_SIZE)
+                return set_error(serror, SCRIPT_ERR_PUSH_SIZE);
+        }
+
+        // Step 1: Verify public key binding: SHA256(mldsa_pk) == program
+        uint256 expected_program;
+        {
+            CSHA256 hasher;
+            hasher.Write(mldsa_pk.data(), mldsa_pk.size());
+            hasher.Finalize(expected_program.begin());
+        }
+        if (memcmp(expected_program.begin(), program.data(), 32) != 0)
+        {
+            return set_error(serror, SCRIPT_ERR_PQ_WITNESS_PROGRAM_MISMATCH);
+        }
+
+        // Step 2: Verify ML-DSA-44 signature via the checker
+        // The checker computes the sighash and calls mldsa::Verify
+        CScript pqScriptCode; // sighash is computed from tx data in CheckSig
+        if (!checker.CheckSig(mldsa_sig, mldsa_pk, pqScriptCode, SIGVERSION_WITNESS_V2_PQ))
+        {
+            return set_error(serror, SCRIPT_ERR_PQ_SIGNATURE_VERIFY_FAILED);
+        }
+
+        return set_success(serror);
     }
     else if (flags & SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM)
     {
@@ -1693,6 +1787,11 @@ size_t static WitnessSigOps(int witversion, const std::vector<unsigned char> &wi
             CScript subscript(witness.stack.back().begin(), witness.stack.back().end());
             return subscript.GetSigOpCount(true);
         }
+    }
+
+    if (witversion == 2 && witprogram.size() == 32 && (flags & SCRIPT_VERIFY_PQ_HYBRID))
+    {
+        return PQ_WITNESS_V2_SIGOPS_COST;
     }
 
     // Future flags may be implemented here.

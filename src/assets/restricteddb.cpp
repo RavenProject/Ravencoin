@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "restricteddb.h"
+#include "assets.h"
 #include "validation.h"
 
 #include <boost/thread.hpp>
@@ -147,21 +148,36 @@ bool CRestrictedDB::GetQualifierAddresses(std::string& qualifier, std::vector<st
 
 bool CRestrictedDB::CheckForAddressRootQualifier(const std::string& address, const std::string& qualifier)
 {
-    std::unique_ptr<CDBIterator> pcursor(NewIterator());
+    if (ReadAddressQualifier(address, qualifier))
+        return true;
+    return AnyAddressSubQualifier(address, qualifier, [](const std::string&) { return true; });
+}
 
-    pcursor->Seek(std::make_pair(ADDRESS_QULAIFIER_FLAG, std::make_pair(address, qualifier)));
+bool CRestrictedDB::AnyAddressSubQualifier(const std::string& address, const std::string& rootQualifier,
+                                            const std::function<bool(const std::string&)>& isActive)
+{
+    const std::string prefix = rootQualifier + "/";
+    std::unique_ptr<CDBIterator> cursor(NewIterator());
+    // Serialized strings sort by length before text. Seek each possible
+    // qualifier length separately so unrelated address tags do not require
+    // a full scan and no longer subqualifier can be skipped.
+    for (size_t length = prefix.size() + 1; length < MAX_ASSET_LENGTH; ++length) {
+        std::string first(prefix);
+        first.resize(length, '\0');
+        cursor->Seek(std::make_pair(ADDRESS_QULAIFIER_FLAG, std::make_pair(address, first)));
 
-    // Load all qualifiers related to that given address
-    while (pcursor->Valid()) {
-        boost::this_thread::interruption_point();
-        std::pair<char, std::pair<std::string, std::string> > key;
-        if (pcursor->GetKey(key) && key.first == ADDRESS_QULAIFIER_FLAG && key.second.first == address) {
-            if (key.second.second == qualifier || key.second.second.rfind(std::string(qualifier + "/"), 0) == 0) {
+        while (cursor->Valid()) {
+            boost::this_thread::interruption_point();
+            std::pair<char, std::pair<std::string, std::string>> key;
+            if (!cursor->GetKey(key))
+                break;
+            if (key.first != ADDRESS_QULAIFIER_FLAG || key.second.first != address ||
+                key.second.second.size() != length ||
+                key.second.second.compare(0, prefix.size(), prefix) != 0)
+                break;
+            if (isActive(key.second.second))
                 return true;
-            }
-            pcursor->Next();
-        } else {
-            break;
+            cursor->Next();
         }
     }
 

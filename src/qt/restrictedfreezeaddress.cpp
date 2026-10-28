@@ -193,8 +193,7 @@ void FreezeAddress::check()
     if (ui->checkBoxChangeAddress->isChecked()) {
         std::string strChangeAddress = ui->lineEditChangeAddress->text().toStdString();
         if (!strChangeAddress.empty()) {
-            CTxDestination changeDest = DecodeDestination(strChangeAddress);
-            if (!IsValidDestination(changeDest)) {
+            if (!GUIUtil::isValidAssetDestination(QString::fromStdString(strChangeAddress))) {
                 ui->lineEditChangeAddress->setStyleSheet(STYLE_INVALID);
                 failed = true;
             }

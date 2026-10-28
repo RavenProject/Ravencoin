@@ -103,6 +103,11 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
         {
             return (exp_addrType == "none");
         }
+
+        bool operator()(const WitnessV2PQDestination &dest) const
+        {
+            return (exp_addrType == "witness_v2_pq_keyhash");
+        }
     };
 
     // Visitor to check address payload
@@ -129,6 +134,11 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
         bool operator()(const CNoDestination &no) const
         {
             return exp_payload.size() == 0;
+        }
+
+        bool operator()(const WitnessV2PQDestination &dest) const
+        {
+            return false;
         }
     };
 
@@ -275,6 +285,59 @@ BOOST_FIXTURE_TEST_SUITE(base58_tests, BasicTestingSetup)
             secret.SetString(exp_base58string);
             BOOST_CHECK_MESSAGE(!secret.IsValid(), "IsValid privkey:" + strTest);
         }
+    }
+
+    BOOST_AUTO_TEST_CASE(pq_asset_destination_pair_is_canonical_and_network_bound)
+    {
+        uint160 keyHash;
+        keyHash.SetHex("00112233445566778899aabbccddeeff00112233");
+        const CKeyID classical(keyHash);
+        const uint256 program = uint256S("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
+        CKeyID parsedClassical;
+        uint256 parsedProgram;
+
+        SelectParams(CBaseChainParams::MAIN);
+        const std::string mainDescriptor = EncodePQAssetDestination(classical, program);
+        BOOST_REQUIRE(!mainDescriptor.empty());
+        BOOST_CHECK(DecodePQAssetDestination(mainDescriptor, parsedClassical, parsedProgram));
+        BOOST_CHECK(parsedClassical == classical);
+        BOOST_CHECK(parsedProgram == program);
+        BOOST_CHECK(!IsValidDestination(DecodeDestination(mainDescriptor)));
+
+        const size_t separator = mainDescriptor.find('|');
+        BOOST_REQUIRE(separator != std::string::npos);
+        const std::string classicalAddress = mainDescriptor.substr(0, separator);
+        const std::string pqAddress = mainDescriptor.substr(separator + 1);
+        BOOST_CHECK(!DecodePQAssetDestination(classicalAddress, parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(pqAddress, parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(classicalAddress + "||" + pqAddress,
+                                              parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(classicalAddress + "|" + classicalAddress,
+                                              parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(pqAddress + "|" + pqAddress,
+                                              parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(" " + mainDescriptor,
+                                              parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(mainDescriptor + " ",
+                                              parsedClassical, parsedProgram));
+
+        SelectParams(CBaseChainParams::TESTNET);
+        BOOST_CHECK(!DecodePQAssetDestination(mainDescriptor, parsedClassical, parsedProgram));
+        const std::string testDescriptor = EncodePQAssetDestination(classical, program);
+        BOOST_CHECK(DecodePQAssetDestination(testDescriptor, parsedClassical, parsedProgram));
+        BOOST_CHECK(parsedClassical == classical);
+        BOOST_CHECK(parsedProgram == program);
+        BOOST_CHECK(testDescriptor != mainDescriptor);
+
+        SelectParams(CBaseChainParams::REGTEST);
+        BOOST_CHECK(!DecodePQAssetDestination(mainDescriptor, parsedClassical, parsedProgram));
+        BOOST_CHECK(!DecodePQAssetDestination(testDescriptor, parsedClassical, parsedProgram));
+        const std::string regtestDescriptor = EncodePQAssetDestination(classical, program);
+        BOOST_CHECK(DecodePQAssetDestination(regtestDescriptor, parsedClassical, parsedProgram));
+        BOOST_CHECK(parsedClassical == classical);
+        BOOST_CHECK(parsedProgram == program);
+        BOOST_CHECK(regtestDescriptor != testDescriptor);
+        SelectParams(CBaseChainParams::MAIN);
     }
 
 

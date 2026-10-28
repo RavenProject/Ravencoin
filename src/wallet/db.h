@@ -10,6 +10,7 @@
 #include "clientversion.h"
 #include "fs.h"
 #include "serialize.h"
+#include "support/allocators/zeroafterfree.h"
 #include "streams.h"
 #include "sync.h"
 #include "version.h"
@@ -23,6 +24,10 @@
 
 static const unsigned int DEFAULT_WALLET_DBLOGSIZE = 100;
 static const bool DEFAULT_WALLET_PRIVDB = true;
+
+namespace wallet_db {
+class RecoveryTestAccess;
+}
 
 class CDBEnv
 {
@@ -62,19 +67,22 @@ public:
     /**
      * Salvage data from a file that Verify says is bad.
      * fAggressive sets the DB_AGGRESSIVE flag (see berkeley DB->verify() method documentation).
-     * Appends binary key/value pairs to vResult, returns true if successful.
+     * Appends binary key/value pairs to vResult and distinguishes complete,
+     * partial, and failed salvage output.
      * NOTE: reads the entire database into memory, so cannot be used
      * for huge databases.
      */
-    typedef std::pair<std::vector<unsigned char>, std::vector<unsigned char> > KeyValPair;
-    bool Salvage(const std::string& strFile, bool fAggressive, std::vector<KeyValPair>& vResult);
+    typedef std::vector<unsigned char, zero_after_free_allocator<unsigned char> > SalvagedBytes;
+    typedef std::pair<SalvagedBytes, SalvagedBytes> KeyValPair;
+    enum class SalvageResult { FAILED, PARTIAL, COMPLETE };
+    SalvageResult Salvage(const std::string& strFile, bool fAggressive, std::vector<KeyValPair>& vResult);
 
     bool Open(const fs::path& path);
     void Close();
     void Flush(bool fShutdown);
     void CheckpointLSN(const std::string& strFile);
 
-    void CloseDb(const std::string& strFile);
+    bool CloseDb(const std::string& strFile);
 
     DbTxn* TxnBegin(int flags = DB_TXN_WRITE_NOSYNC)
     {
@@ -145,6 +153,8 @@ private:
 /** RAII class that provides access to a Berkeley database */
 class CDB
 {
+    friend class wallet_db::RecoveryTestAccess;
+
 protected:
     Db* pdb;
     std::string strFile;
@@ -152,6 +162,30 @@ protected:
     bool fReadOnly;
     bool fFlushOnClose;
     CDBEnv *env;
+
+private:
+    enum class RecoveryFault {
+        NONE,
+        NULL_WRITE_TRANSACTION,
+        WRITE_COMMIT,
+        TEMP_CLOSE,
+        SECOND_RENAME,
+        INSTALL_COMMIT,
+    };
+
+    struct RecoveryTestOptions {
+        RecoveryFault fault{RecoveryFault::NONE};
+        bool duplicate_first_row{false};
+        bool force_partial_salvage{false};
+        std::string temp_filename;
+        std::string backup_filename;
+    };
+
+    static bool RecoverInternal(const std::string& filename,
+                                void* callbackDataIn,
+                                bool (*recoverKVcallback)(void*, CDataStream, CDataStream),
+                                std::string& out_backup_filename,
+                                const RecoveryTestOptions* test_options);
 
 public:
     explicit CDB(CWalletDBWrapper& dbw, const char* pszMode = "r+", bool fFlushOnCloseIn=true);
@@ -260,10 +294,10 @@ public:
     }
 
     template <typename K>
-    bool Exists(const K& key)
+    int ExistsStatus(const K& key)
     {
         if (!pdb)
-            return false;
+            return DB_NOTFOUND;
 
         // Key
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
@@ -276,7 +310,13 @@ public:
 
         // Clear memory
         memory_cleanse(datKey.get_data(), datKey.get_size());
-        return (ret == 0);
+        return ret;
+    }
+
+    template <typename K>
+    bool Exists(const K& key)
+    {
+        return ExistsStatus(key) == 0;
     }
 
     Dbc* GetCursor()
@@ -326,22 +366,22 @@ public:
     }
 
 public:
-    bool TxnBegin()
+    bool TxnBegin(int flags = DB_TXN_WRITE_NOSYNC)
     {
         if (!pdb || activeTxn)
             return false;
-        DbTxn* ptxn = bitdb.TxnBegin();
+        DbTxn* ptxn = bitdb.TxnBegin(flags);
         if (!ptxn)
             return false;
         activeTxn = ptxn;
         return true;
     }
 
-    bool TxnCommit()
+    bool TxnCommit(int flags = 0)
     {
         if (!pdb || !activeTxn)
             return false;
-        int ret = activeTxn->commit(0);
+        int ret = activeTxn->commit(flags);
         activeTxn = nullptr;
         return (ret == 0);
     }

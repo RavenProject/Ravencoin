@@ -3,110 +3,402 @@ name: Build Raven
 on:
   push:
     branches:
-      - release*
+      - fix/rip25-v48-glm-remediation
+      - feature/rip25-v481-upstream
   pull_request:
     branches:
       - master
       - develop
       - release*
-#    paths-ignore:
-#      - 'binaries/**'
-#      - 'community/**'
-#      - 'contrib/**'
-#      - 'doc/**'
-#      - 'roadmap/**'
-#      - 'share/**'
-#      - 'static-builds/**'
-#      - 'whitepaper/**'
-#      - '*.md'
+      - integration/rip25-v4.8.0
+      - fix/rip25-v48-glm-remediation
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   SCRIPTS: ${{ GITHUB.WORKSPACE }}/.github/scripts
 
 jobs:
-  check-jobs:
-      # continue-on-error: true # Uncomment once integration is finished
-    runs-on: ubuntu-20.04
-    # Map a step output to a job output
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+  security-tests:
+    name: Required security tests before artifact builds
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
     steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@master
+      - name: Checkout tested commit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          # All of these options are optional, so you can remove them if you are happy with the defaults
-          concurrent_skipping: 'never'
-          skip_after_successful_duplicate: 'true'
-          paths_ignore: '[
-                          "binaries/**",
-                          "community/**",
-                          "contrib/**",
-                          "doc/**",
-                          "roadmap/**",
-                          "share/**",
-                          "static-builds/**",
-                          "whitepaper/**",
-                          "**/*.md"
-                          ]'
-          do_not_skip: '["workflow_dispatch", "schedule"]'
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Install test prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            automake autotools-dev bsdmainutils build-essential ca-certificates \
+            cmake curl git libtool pkg-config python3 ninja-build
+
+      - name: Check structural security invariants
+        run: ./contrib/devtools/check-rip25-v48-invariants.sh --structural-only
+
+      - name: Build pinned test dependencies
+        run: make -C depends -j2 HOST=x86_64-pc-linux-gnu NO_QT=1
+
+      - name: Verify source before test build
+        shell: bash
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Configure native test build
+        run: |
+          ./autogen.sh
+          mkdir -p "$HOME/.ccache"
+          "$PWD/depends/x86_64-pc-linux-gnu/native/bin/ccache" --print-config > /dev/null
+          CONFIG_SITE="$PWD/depends/x86_64-pc-linux-gnu/share/config.site" \
+            ./configure --without-gui --with-tx --disable-bench
+
+      - name: Build and run unit tests
+        run: |
+          make -j2
+          if ! make check; then
+            for log in src/test-suite.log src/test/test_raven.log; do
+              if [ -f "$log" ]; then
+                echo "Failure details from $log:"
+                tail -n 160 "$log"
+              fi
+            done
+            exit 1
+          fi
+
+      - name: Exercise the real PQ verifier fuzz target
+        run: |
+          make -C src -j2 test/test_raven_fuzzy
+          src/test/test_raven_fuzzy --pq-smoke
+          src/test/test_raven_fuzzy < src/test/fuzz/pq_witness_v2_seed
+          src/test/test_raven_fuzzy --pq-seed-tx | src/test/test_raven_fuzzy
+
+      - name: Run behavioral security invariants
+        run: ./contrib/devtools/check-rip25-v48-invariants.sh --run-tests
+
+      - name: Prove source mutation sensitivity
+        run: python3 contrib/devtools/test-rip25-source-mutation-sensitivity.py --full
+
+      - name: Run required functional security tests
+        run: |
+          python3 contrib/devtools/test-required-functional-gate.py
+          python3 test/functional/test_runner.py --require-tests --jobs=2 \
+            wallet_encryption_rewrite.py wallet_asset_multiwallet.py feature_rewards_restart.py wallet_pq_recovery.py wallet_restricted_multiwallet.py wallet_messaging_multiwallet.py rpc_assettransfer.py feature_chainstate_ahead.py \
+            feature_asset_activation_reorg.py feature_pq_activation_reorg_sigops.py feature_transfer_script_reorg.py feature_rip5_activation_reorg.py feature_enforced_coinbase_activation.py \
+            feature_asset_dbcrash.py feature_asset_dbcrash_transfer.py feature_asset_db_missing_block.py \
+            feature_asset_verifydb_sameblock.py feature_transfer_mempool_reorg.py feature_mempool_clear_reissue.py feature_mempool_reissue_restart.py feature_transfer_sidebranch.py feature_pq_asset_anchor.py feature_pq_asset_authority_selection.py feature_pq_asset_source_rpc.py feature_pq_asset_wallet_ownership.py feature_loadblock.py \
+            feature_restricted_dbcrash.py feature_restricted_verifydb.py feature_restricted_verifydb_root.py \
+            feature_restricted_verifydb_freeze.py feature_restricted_verifydb_global.py feature_restricted_verifydb_verifier.py \
+            feature_restricted_root_cache.py feature_restricted_root_split.py feature_restricted_root_prefix_split.py \
+            feature_reissue_mempool_block_split.py feature_restricted_assets.py feature_raw_restricted_assets.py
+
+      - name: Verify tested source and commit
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
 
   build:
-    needs: check-jobs
-    runs-on: ubuntu-20.04
+    needs: security-tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 180
+
     strategy:
+      fail-fast: false
       matrix:
-       OS: [ 'windows', 'linux', 'linux-disable-wallet', 'arm32v7', 'arm32v7-disable-wallet', 'aarch64', 'aarch64-disable-wallet' ]
+        include:
+          - OS: windows
+            host: x86_64-w64-mingw32
+          - OS: osx
+            host: x86_64-apple-darwin14
+          - OS: linux
+            host: x86_64-linux-gnu
+          - OS: arm32v7
+            host: arm-linux-gnueabihf
+          - OS: aarch64
+            host: aarch64-linux-gnu
 
+#&&&&&& Beginning- section to free up space on root for the builds and for 30GB of swap
     steps:
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Checkout the Code
-      uses: actions/checkout@v1
+    - name: Print Original Available Memory and Storage
+      shell: bash
+      run: |
+        echo "Original Available Memory and Storage:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Install Build Tools
-      run: sudo ${SCRIPTS}/00-install-deps.sh ${{ MATRIX.OS }}
+    - name: Delete Unwanted Software
+      shell: bash
+      run: |
+        echo "Removing Unwanted Software"
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        sudo rm -rf /opt/hostedtoolcache/CodeQL
+        sudo docker image prune --all --force
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Cache dependencies.
-      uses: actions/cache@v4
+    - name: Print Available Memory and Storage after Unwanted Software Removal
+      shell: bash
+      run: |
+        echo "Original Available Memory and Storage after Unwanted Software Removal:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+
+#     We use a SWAP_FILE variable because some runner VMs allocate /swapfile and some use /mnt/swapfile
+    - name: Delete the existing swap
+      shell: bash
+      run: |
+        export SWAP_FILE=$(swapon --show=NAME | tail -n 1)
+        sudo swapoff "${SWAP_FILE}"
+        sudo rm "${SWAP_FILE}"
+
+    - name: Print Available Memory and Storage after Deleting Swap
+      shell: bash
+      run: |
+        echo "Available Memory and Storage after Deleting Swap:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+
+    - name: Allocate swap on root
+      shell: bash
+      run: |
+        sudo fallocate -l 30G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+
+    - name: Print Finnal Available Memory and Storage
+      shell: bash
+      run: |
+        echo "Final Available Memory and Storage:"
+        free -h
+        echo
+        swapon --show
+        echo
+        df -vh
+        echo
+#&&&&&& End- section to free up space on root for the builds and for 30GB of swap
+
+    - name: Checkout the Code
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       with:
-       path: |
-        ${{ GITHUB.WORKSPACE }}/depends/built
-        ${{ GITHUB.WORKSPACE }}/depends/sources
-        ${{ GITHUB.WORKSPACE }}/depends/work
-       key: ${{ MATRIX.OS }}
-      
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Build dependencies.
-      run: ${SCRIPTS}/02-copy-build-dependencies.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
+        fetch-depth: 0
+        persist-credentials: false
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Add Dependencies to the System PATH
-      run: ${SCRIPTS}/03-export-path.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+    - name: Verify Checked-Out Commit Is Pristine
+      shell: bash
+      run: |
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        git diff --exit-code
+        git diff --cached --exit-code
+        test -z "$(git status --porcelain)"
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Build Config
-      run: cd ${{ GITHUB.WORKSPACE }} && ./autogen.sh
+    - name: Verify Security and Consensus Invariants
+      shell: bash
+      run: ./contrib/devtools/check-rip25-v48-invariants.sh --structural-only
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Configure Build
-      run: ${SCRIPTS}/04-configure-build.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+    - name: Install Build Tools
+      run: sudo bash -Eeuo pipefail "${SCRIPTS}/00-install-deps.sh" "${{ matrix.OS }}"
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Build Raven
+    # Release dependencies are rebuilt from pinned recipes. Restoring compiled
+    # depends state would make artifact contents depend on unauthenticated cache.
+    - name: Build Dependencies
+      run: bash -Eeuo pipefail "${SCRIPTS}/02-copy-build-dependencies.sh" "${{ matrix.OS }}" "$GITHUB_WORKSPACE" "$GITHUB_REF"
+
+    - name: Add Dependencies to the System PATH
+      shell: bash
+      run: |
+        native_bin="$GITHUB_WORKSPACE/depends/${{ matrix.host }}/native/bin"
+        test -d "$native_bin"
+        echo "$native_bin" >> "$GITHUB_PATH"
+
+    - name: Build Config
+      run: |
+        ./autogen.sh
+        mkdir -p "$HOME/.ccache"
+        "$PWD/depends/${{ matrix.host }}/native/bin/ccache" --print-config > /dev/null
+
+    - name: Configure Build
+      run: bash -Eeuo pipefail "${SCRIPTS}/04-configure-build.sh" "${{ matrix.OS }}" "$GITHUB_WORKSPACE"
+
+    - name: Verify Tracked Source Remains Unchanged
+      shell: bash
+      run: |
+        git diff --exit-code
+        git diff --cached --exit-code
+
+    - name: Build Raven
       run: make -j2
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Check Binary Security
-      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+    - name: Install Qt runtime test prerequisites
+      if: matrix.OS == 'linux'
+      run: sudo apt-get install -y xvfb xauth x11-utils libxtst6 libxkbcommon-x11-0
 
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Package Up the Build
-      run: ${SCRIPTS}/06-package.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }} ${{ GITHUB.BASE_REF }} ${{ GITHUB.REF }}
+    - name: Verify Qt smoke runtime libraries
+      if: matrix.OS == 'linux'
+      shell: bash
+      run: |
+        for binary in src/qt/raven-qt src/raven-cli; do
+          test -x "$binary"
+          libraries="$(ldd "$binary")"
+          if grep -Fq 'not found' <<< "$libraries"; then
+            printf 'Missing runtime libraries for %s:\n%s\n' "$binary" "$libraries"
+            exit 1
+          fi
+        done
+
+    - name: Test Qt startup without wallet
+      if: matrix.OS == 'linux'
+      run: ./contrib/devtools/test-qt-no-wallet-startup.sh
+
+    - name: Test Qt Options without wallet
+      if: matrix.OS == 'linux'
+      run: |
+        xvfb-run -a -s '-screen 0 1024x768x24' \
+          python3 contrib/devtools/test-qt-no-wallet-options.py \
+          src/qt/raven-qt src/raven-cli
+
+    - name: Test pinned Qt mnemonic dialog
+      if: matrix.OS == 'linux'
+      shell: bash
+      run: |
+        make -C src -j2 qt/test/test_mnemonicdialog
+        QT_QPA_PLATFORM=minimal src/qt/test/test_mnemonicdialog
+
+# Skip the binary checks for now.
+#      name: Check Binary Security
+#      run: ${SCRIPTS}/05-binary-checks.sh ${{ MATRIX.OS }} ${{ GITHUB.WORKSPACE }}
+
+    - name: Package Up the Build
+      run: bash -Eeuo pipefail "${SCRIPTS}/06-package.sh" "${{ matrix.OS }}" "$GITHUB_WORKSPACE" "${{ github.base_ref || github.ref_name }}"
+
+    - name: Verify Packaged Source and Artifacts
+      shell: bash
+      run: |
+        test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+        git diff --exit-code
+        git diff --cached --exit-code
+        pkgversion="$(sed -n 's/^#define PACKAGE_VERSION "\([^"]*\)"/\1/p' src/config/raven-config.h)"
+        test -n "$pkgversion"
+        distname="raven-${pkgversion}"
+        if [[ "${{ github.base_ref || github.ref_name }}" != *release* ]]; then
+          distname="${distname}-$(git rev-parse --short HEAD)"
+        fi
+
+        case "${{ matrix.OS }}" in
+          windows)
+            artifacts=("${distname}-win64.zip" "${distname}-win64-setup-unsigned.exe" "${distname}-win64-unsigned.tar.gz")
+            ;;
+          osx)
+            artifacts=("${distname}-osx64.tar.gz" "${distname}-osx-unsigned.dmg" "${distname}-osx-unsigned.tar.gz")
+            ;;
+          linux) artifacts=("${distname}-x86_64-linux-gnu.tar.gz") ;;
+          arm32v7) artifacts=("${distname}-arm-linux-gnueabihf.tar.gz") ;;
+          aarch64) artifacts=("${distname}-aarch64-linux-gnu.tar.gz") ;;
+          *) exit 1 ;;
+        esac
+
+        source_archive="${distname}.tar.gz"
+        source_tar="release/${distname}.tar"
+        git archive --format=tar --prefix="${distname}/" HEAD > "$source_tar"
+        test "$(git get-tar-commit-id < "$source_tar")" = "$GITHUB_SHA"
+        gzip -9n "$source_tar"
+        test -s "release/${source_archive}"
+        gzip -t "release/${source_archive}"
+
+        cd release
+        for artifact in "${artifacts[@]}"; do
+          test -s "$artifact"
+        done
+        {
+          echo "commit=$GITHUB_SHA"
+          echo "target=${{ matrix.OS }}"
+          echo "host=${{ matrix.host }}"
+          echo "source_archive=$source_archive"
+          echo "status=unsigned CI build; Windows and macOS outputs are not signed final releases"
+        } > PROVENANCE.txt
+        test -s PROVENANCE.txt
+        grep -Fx "commit=$GITHUB_SHA" PROVENANCE.txt
+        grep -Fx "source_archive=$source_archive" PROVENANCE.txt
+        sha256sum -- "${artifacts[@]}" "$source_archive" PROVENANCE.txt > SHA256SUMS
+        test -s SHA256SUMS
+        sha256sum --check SHA256SUMS
     
-    - if: ${{ needs.check-jobs.outputs.should_skip != 'true' }}
-      name: Upload Artifacts to Job
-      uses: actions/upload-artifact@master
+    - name: Upload Artifacts to Job
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ MATRIX.OS }}
-        path: ${{ GITHUB.WORKSPACE }}/release
+        name: raven-unsigned-${{ matrix.OS }}-${{ github.sha }}
+        path: ${{ github.workspace }}/release
+        if-no-files-found: error
+        retention-days: 14
+
+  verify-artifacts:
+    name: Verify all five downloaded release bundles
+    needs: build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Install archive validation tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Prove the artifact verifier fails closed
+        run: python3 -m unittest discover -s contrib/devtools -p test_build_raven_artifacts.py -v
+
+      - name: Download all Build Raven bundles
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: raven-unsigned-*
+          path: ${{ runner.temp }}/rip25-artifacts
+          merge-multiple: false
+
+      - name: Verify package provenance and binary targets
+        env:
+          PACKAGE_REF: ${{ github.base_ref || github.ref_name }}
+        shell: bash
+        run: |
+          python3 contrib/devtools/verify_build_raven_artifacts.py \
+            "$RUNNER_TEMP/rip25-artifacts" "$GITHUB_SHA" \
+            --repository "$GITHUB_WORKSPACE" --package-ref "$PACKAGE_REF" \
+            --output "$RUNNER_TEMP/rip25-artifact-verification.json"

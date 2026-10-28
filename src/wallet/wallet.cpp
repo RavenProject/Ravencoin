@@ -13,6 +13,7 @@
 #include "consensus/consensus.h"
 #include "consensus/validation.h"
 #include "fs.h"
+#include "hash.h"
 #include "init.h"
 #include "key.h"
 #include "keystore.h"
@@ -29,12 +30,15 @@
 #include "timedata.h"
 #include "txmempool.h"
 #include "util.h"
+#include "utilstrencodings.h"
 #include "ui_interface.h"
 #include "utilmoneystr.h"
 #include "wallet/fees.h"
 #include "wallet/bip39.h"
+#include "wallet/pqderivation.h"
 
 #include <assert.h>
+#include <cstdio>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
@@ -52,9 +56,188 @@ bool fWalletRbf = DEFAULT_WALLET_RBF;
 
 const char * DEFAULT_WALLET_DAT = "wallet.dat";
 const uint32_t BIP32_HARDENED_KEY_LIMIT = 0x80000000;
+static const char* const PQ_ASSET_ANCHOR_CHANGE_VOUT_KEY = "pq_asset_anchor_change_vout";
+static_assert(CPQHDChain::MAX_COUNTER == pqderivation::HARDENED_LIMIT,
+              "PQ HD counter limit mismatch");
+static_assert(CPQHDChain::SEED_SOURCE_LEGACY_HD ==
+                  pqderivation::SEED_SOURCE_LEGACY_HD,
+              "PQ HD legacy seed source mismatch");
+static_assert(CPQHDChain::SEED_SOURCE_BIP39 ==
+                  pqderivation::SEED_SOURCE_BIP39,
+              "PQ HD BIP39 seed source mismatch");
 
-std::string my_words;
-std::string my_passphrase;
+static CCriticalSection cs_pending_mnemonic;
+static SecureString pending_mnemonic_words;
+static SecureString pending_mnemonic_passphrase;
+
+class ScopedSecureStringCleanser
+{
+private:
+    SecureString& value;
+
+public:
+    explicit ScopedSecureStringCleanser(SecureString& valueIn) : value(valueIn) {}
+    ~ScopedSecureStringCleanser() { ClearSecureString(value); }
+};
+
+static CKeyID Bip39SeedId(const SecureVector& seed)
+{
+    // Include the trailing zero to make this domain unambiguous. The raw
+    // BIP39 seed remains the input to BIP32 derivation; this is metadata only.
+    static const char domain[] = "Ravencoin BIP39 HD seed ID v1";
+    uint160 hash;
+    CHash160()
+        .Write(reinterpret_cast<const unsigned char*>(domain), sizeof(domain))
+        .Write(seed.data(), seed.size())
+        .Finalize(hash.begin());
+    return CKeyID(hash);
+}
+
+static CKeyID LegacyBip39SeedId()
+{
+    uint160 hash;
+    CHash160().Finalize(hash.begin());
+    return CKeyID(hash);
+}
+
+static bool MatchesBip44Keypath(const SecureVector& seed,
+                                const std::string& path, const CPubKey& pubkey)
+{
+    unsigned int coin = 0;
+    unsigned int account = 0;
+    unsigned int change = 0;
+    unsigned int index = 0;
+    int consumed = 0;
+    if (std::sscanf(path.c_str(), "m/44'/%u'/%u'/%u/%u%n",
+                    &coin, &account, &change, &index, &consumed) != 4 ||
+        consumed != static_cast<int>(path.size()) ||
+        coin >= BIP32_HARDENED_KEY_LIMIT ||
+        account >= BIP32_HARDENED_KEY_LIMIT ||
+        change > 1 || index >= BIP32_HARDENED_KEY_LIMIT ||
+        path != strprintf("m/44'/%u'/%u'/%u/%u",
+                          coin, account, change, index))
+        return false;
+
+    CExtKey root, purposeKey, coinKey, accountKey, chainKey, childKey;
+    root.SetSeed(seed.data(), seed.size());
+    return root.Derive(purposeKey, 44 | BIP32_HARDENED_KEY_LIMIT) &&
+           purposeKey.Derive(coinKey, coin | BIP32_HARDENED_KEY_LIMIT) &&
+           coinKey.Derive(accountKey, account | BIP32_HARDENED_KEY_LIMIT) &&
+           accountKey.Derive(chainKey, change) &&
+           chainKey.Derive(childKey, index) &&
+           childKey.key.GetPubKey() == pubkey;
+}
+
+static bool MigrateLegacyBip39SeedId(CWallet& wallet)
+{
+    AssertLockHeld(wallet.cs_wallet);
+    if (!wallet.IsBip44Enabled() || wallet.IsLocked())
+        return true;
+
+    SecureVector seed;
+    if (!wallet.GetBip39Seed(seed))
+        return false;
+    const CKeyID oldId = LegacyBip39SeedId();
+    const CKeyID newId = Bip39SeedId(seed);
+    if (wallet.GetHDChain().seed_id != oldId)
+        return true;
+    if (newId.IsNull() || newId == oldId)
+        return false;
+
+    // The old constant ID could also label keys from a prior BIP44 seed.
+    // Update only keys provably derived from the currently stored seed.
+    // Replace those references and the current chain together so a failed
+    // write leaves the legacy state intact.
+    std::vector<std::pair<CTxDestination, CPubKey>> metadataUpdates;
+    for (const auto& entry : wallet.mapKeyMetadata) {
+        if (entry.second.hd_seed_id != oldId)
+            continue;
+        const CKeyID* keyId = boost::get<CKeyID>(&entry.first);
+        CPubKey pubkey;
+        if (keyId && wallet.GetPubKey(*keyId, pubkey) &&
+            pubkey.IsValid() && pubkey.GetID() == *keyId &&
+            MatchesBip44Keypath(seed, entry.second.hdKeypath, pubkey))
+            metadataUpdates.emplace_back(entry.first, pubkey);
+    }
+
+    CHDChain migrated = wallet.GetHDChain();
+    migrated.seed_id = newId;
+    // The synchronous transaction commit supplies durability; skip the
+    // separate checkpoint so transaction-begin failure leaves no side effect.
+    CWalletDB walletdb(wallet.GetDBHandle(), "r+", false);
+    if (!walletdb.TxnBegin(DB_TXN_SYNC))
+        return false;
+    for (const auto& update : metadataUpdates) {
+        CKeyMetadata metadata = wallet.mapKeyMetadata.at(update.first);
+        metadata.hd_seed_id = newId;
+        if (!walletdb.WriteKeyMetadata(update.second, metadata)) {
+            walletdb.TxnAbort();
+            return false;
+        }
+    }
+    if (!walletdb.WriteHDChain(migrated)) {
+        walletdb.TxnAbort();
+        return false;
+    }
+    if (!walletdb.TxnCommit(DB_TXN_SYNC))
+        return false;
+
+    wallet.SetHDChain(migrated, true);
+    for (const auto& update : metadataUpdates)
+        wallet.mapKeyMetadata.at(update.first).hd_seed_id = newId;
+    return true;
+}
+
+void SetPendingMnemonicInput(SecureString words, SecureString passphrase)
+{
+    ScopedSecureStringCleanser cleanseWords(words);
+    ScopedSecureStringCleanser cleansePassphrase(passphrase);
+    SecureString lockedWords;
+    SecureString lockedPassphrase;
+    ScopedSecureStringCleanser cleanseLockedWords(lockedWords);
+    ScopedSecureStringCleanser cleanseLockedPassphrase(lockedPassphrase);
+    lockedWords.reserve(words.size() > 64 ? words.size() : 64);
+    lockedPassphrase.reserve(passphrase.size() > 64 ? passphrase.size() : 64);
+    lockedWords.assign(words.begin(), words.end());
+    lockedPassphrase.assign(passphrase.begin(), passphrase.end());
+    ClearSecureString(words);
+    ClearSecureString(passphrase);
+
+    LOCK(cs_pending_mnemonic);
+    ClearSecureString(pending_mnemonic_words);
+    ClearSecureString(pending_mnemonic_passphrase);
+    pending_mnemonic_words.swap(lockedWords);
+    pending_mnemonic_passphrase.swap(lockedPassphrase);
+}
+
+bool TakePendingMnemonicInput(
+    SecureString& wordsOut, SecureString& passphraseOut)
+{
+    LOCK(cs_pending_mnemonic);
+    ClearSecureString(wordsOut);
+    ClearSecureString(passphraseOut);
+    const bool haveInput = !pending_mnemonic_words.empty() ||
+        !pending_mnemonic_passphrase.empty();
+    wordsOut.swap(pending_mnemonic_words);
+    passphraseOut.swap(pending_mnemonic_passphrase);
+    ClearSecureString(pending_mnemonic_words);
+    ClearSecureString(pending_mnemonic_passphrase);
+    return haveInput;
+}
+
+void ClearPendingMnemonicInput()
+{
+    LOCK(cs_pending_mnemonic);
+    ClearSecureString(pending_mnemonic_words);
+    ClearSecureString(pending_mnemonic_passphrase);
+}
+
+bool HasPendingMnemonicInput()
+{
+    LOCK(cs_pending_mnemonic);
+    return !pending_mnemonic_words.empty() ||
+        !pending_mnemonic_passphrase.empty();
+}
 
 /**
  * Fees smaller than this (in satoshi) are considered zero fee (for transaction creation)
@@ -130,6 +313,7 @@ public:
     }
 
     void operator()(const CNoDestination &none) {}
+    void operator()(const WitnessV2PQDestination &dest) {}
 };
 
 const CWalletTx* CWallet::GetWalletTx(const uint256& hash) const
@@ -160,9 +344,8 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
     }
 
     // Compressed public keys were introduced in version 0.6.0
-    if (fCompressed) {
-        SetMinVersion(FEATURE_COMPRPUBKEY);
-    }
+    if (fCompressed && !SetMinVersion(FEATURE_COMPRPUBKEY, &walletdb))
+        throw std::runtime_error(std::string(__func__) + ": writing min version failed");
 
     CPubKey pubkey = secret.GetPubKey();
     assert(secret.VerifyPubKey(pubkey));
@@ -178,6 +361,8 @@ CPubKey CWallet::GenerateNewKey(CWalletDB &walletdb, bool internal)
 
 void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKey& secret, bool internal)
 {
+    AssertLockHeld(cs_wallet);
+
     // for now we use a fixed keypath scheme of m/0'/0'/k
     CExtKey masterKey;             //hd master key
 
@@ -198,7 +383,10 @@ void CWallet::DeriveNewChildKey(CWalletDB &walletdb, CKeyMetadata& metadata, CKe
             throw std::runtime_error(std::string(__func__) + ": seed not found");
         masterKey.SetSeed(seed.begin(), seed.size());
     } else {
-        masterKey.SetSeed(g_vchSeed.data(), g_vchSeed.size());
+        SecureVector seed;
+        if (!GetBip39Seed(seed))
+            throw std::runtime_error(std::string(__func__) + ": invalid BIP39 seed size");
+        masterKey.SetSeed(seed.data(), seed.size());
     }
 
     // Select which chain we are using depending on if this is a change address or not
@@ -294,22 +482,419 @@ bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
     return CWallet::AddKeyPubKeyWithDB(walletdb, secret, pubkey);
 }
 
+bool CWallet::AddPQKeyPubKey(const CPQKey &key, const CPQPubKey &pubkey)
+{
+    AssertLockHeld(cs_wallet);
+    CWalletDB walletdb(*dbw);
+    return AddPQKeyPubKeyWithDB(walletdb, key, pubkey);
+}
+
+void CWallet::ErasePQKeyFromMemory(const uint256& witnessProgram)
+{
+    LOCK(cs_KeyStore);
+    mapPQKeys.erase(witnessProgram);
+    mapPQPubKeys.erase(witnessProgram);
+    mapCryptedPQKeys.erase(witnessProgram);
+}
+
+bool CWallet::AddPQKeyPubKeyWithDB(CWalletDB& walletdb, const CPQKey& key,
+                                   const CPQPubKey& pubkey)
+{
+    AssertLockHeld(cs_wallet);
+    if (!key.IsValid() || !pubkey.IsValid())
+        return false;
+
+    const uint256 witnessProgram = pubkey.GetWitnessProgram();
+    bool hadPlainKey = false;
+    bool hadPubKey = false;
+    bool hadCryptedKey = false;
+    CPQKey previousPlainKey;
+    CPQPubKey previousPubKey;
+    std::pair<CPQPubKey, std::vector<unsigned char>> previousCryptedKey;
+    {
+        LOCK(cs_KeyStore);
+        const auto plainIt = mapPQKeys.find(witnessProgram);
+        if (plainIt != mapPQKeys.end()) {
+            hadPlainKey = true;
+            previousPlainKey = plainIt->second;
+        }
+        const auto pubIt = mapPQPubKeys.find(witnessProgram);
+        if (pubIt != mapPQPubKeys.end()) {
+            hadPubKey = true;
+            previousPubKey = pubIt->second;
+        }
+        const auto cryptedIt = mapCryptedPQKeys.find(witnessProgram);
+        if (cryptedIt != mapCryptedPQKeys.end()) {
+            hadCryptedKey = true;
+            previousCryptedKey = cryptedIt->second;
+        }
+    }
+
+    auto restoreMemory = [&]() {
+        LOCK(cs_KeyStore);
+        if (hadPlainKey)
+            mapPQKeys[witnessProgram] = previousPlainKey;
+        else
+            mapPQKeys.erase(witnessProgram);
+        if (hadPubKey)
+            mapPQPubKeys[witnessProgram] = previousPubKey;
+        else
+            mapPQPubKeys.erase(witnessProgram);
+        if (hadCryptedKey)
+            mapCryptedPQKeys[witnessProgram] = previousCryptedKey;
+        else
+            mapCryptedPQKeys.erase(witnessProgram);
+    };
+
+    const bool needsDB = !pwalletdbEncryption;
+    if (needsDB)
+        pwalletdbEncryption = &walletdb;
+
+    bool added = false;
+    try {
+        added = CCryptoKeyStore::AddPQKeyPubKey(key, pubkey);
+    } catch (...) {
+        if (needsDB)
+            pwalletdbEncryption = nullptr;
+        restoreMemory();
+        throw;
+    }
+    if (needsDB)
+        pwalletdbEncryption = nullptr;
+    if (!added) {
+        restoreMemory();
+        return false;
+    }
+
+    // The encrypted keystore path has already persisted an encrypted cpqkey
+    // record through AddCryptedPQKey(). Never recreate a plaintext pqkey.
+    if (IsCrypted())
+        return true;
+
+    try {
+        if (walletdb.WritePQKey(witnessProgram, pubkey, key.GetKeyData()))
+            return true;
+    } catch (...) {
+        restoreMemory();
+        throw;
+    }
+    restoreMemory();
+    return false;
+}
+
+bool CWallet::GenerateNewPQKey(CPQPubKey& pubkeyOut, uint32_t* indexOut)
+{
+    LOCK(cs_wallet);
+    pubkeyOut = CPQPubKey();
+
+    if (!IsHDEnabled() || IsLocked() || !pqHDChain.IsValid()) {
+        return false;
+    }
+
+    SecureVector walletSeed;
+    const uint8_t seedSource = hdChain.IsBip44()
+        ? pqderivation::SEED_SOURCE_BIP39
+        : pqderivation::SEED_SOURCE_LEGACY_HD;
+    if (hdChain.IsBip44()) {
+        if (!GetBip39Seed(walletSeed))
+            return false;
+    } else {
+        CKey seed;
+        if (!GetKey(hdChain.seed_id, seed) ||
+            seed.size() != pqderivation::LEGACY_SEED_BYTES) {
+            return false;
+        }
+        walletSeed.assign(seed.begin(), seed.end());
+    }
+
+    const uint32_t coinType = GetParams().ExtCoinType();
+    uint256 lineageId;
+    if (!pqderivation::GetLineageId(walletSeed.data(), walletSeed.size(),
+                                    seedSource, coinType, lineageId)) {
+        return false;
+    }
+
+    CPQHDChain allocationChain = pqHDChain;
+    if (!allocationChain.IsInitialized() ||
+        allocationChain.nSeedSource != seedSource ||
+        allocationChain.nCoinType != coinType ||
+        allocationChain.lineage_id != lineageId) {
+        allocationChain.SetLineage(seedSource, coinType, lineageId);
+    }
+    if (!allocationChain.IsInitialized() ||
+        allocationChain.nExternalChainCounter >= pqderivation::HARDENED_LIMIT) {
+        return false;
+    }
+
+    uint32_t candidateIndex = allocationChain.nExternalChainCounter;
+    uint32_t nextCounter = candidateIndex;
+    CPQKey candidateKey;
+    CPQPubKey candidatePubKey;
+    bool found = false;
+    while (candidateIndex < pqderivation::HARDENED_LIMIT) {
+        SecureVector pqSeed;
+        if (!pqderivation::DeriveSeed(walletSeed.data(), walletSeed.size(),
+                                      coinType, candidateIndex,
+                                      pqSeed)) {
+            return false;
+        }
+        const bool generated = candidateKey.SetSeed(pqSeed.data());
+        SecureVector().swap(pqSeed);
+        if (!generated)
+            return false;
+
+        candidatePubKey = candidateKey.GetPubKey();
+        nextCounter = candidateIndex + 1;
+        if (!HavePQKey(candidatePubKey.GetWitnessProgram())) {
+            found = true;
+            break;
+        }
+        candidateIndex = nextCounter;
+    }
+    SecureVector().swap(walletSeed);
+    if (!found)
+        return false;
+
+    // Allocate the result before changing persistent state so a post-commit
+    // allocation failure cannot make the caller observe a false failure.
+    pubkeyOut = candidatePubKey;
+
+    CPQHDChain updatedChain = allocationChain;
+    updatedChain.nExternalChainCounter = nextCounter;
+    CWalletDB walletdb(*dbw);
+    if (!walletdb.TxnBegin(DB_TXN_SYNC)) {
+        pubkeyOut = CPQPubKey();
+        return false;
+    }
+
+    bool addedToMemory = false;
+    bool transactionActive = true;
+    auto abortGeneration = [&]() {
+        if (transactionActive && !walletdb.TxnAbort())
+            LogPrintf("GenerateNewPQKey: failed to abort wallet transaction\n");
+        transactionActive = false;
+        if (addedToMemory)
+            ErasePQKeyFromMemory(candidatePubKey.GetWitnessProgram());
+        pubkeyOut = CPQPubKey();
+        return false;
+    };
+
+    try {
+        if (!AddPQKeyPubKeyWithDB(walletdb, candidateKey, candidatePubKey))
+            return abortGeneration();
+        addedToMemory = true;
+        if (!walletdb.WritePQHDChain(updatedChain))
+            return abortGeneration();
+        if (!walletdb.TxnCommit(DB_TXN_SYNC)) {
+            // TxnCommit consumes the transaction handle even on failure.
+            transactionActive = false;
+            ErasePQKeyFromMemory(candidatePubKey.GetWitnessProgram());
+            pubkeyOut = CPQPubKey();
+            return false;
+        }
+        transactionActive = false;
+    } catch (...) {
+        return abortGeneration();
+    }
+
+    pqHDChain = updatedChain;
+    if (indexOut)
+        *indexOut = candidateIndex;
+    return true;
+}
+
+bool CWallet::RecoverPQKey(uint32_t index, bool& addedOut)
+{
+    LOCK(cs_wallet);
+    addedOut = false;
+    if (index >= pqderivation::HARDENED_LIMIT || !IsHDEnabled() ||
+        IsLocked() || !pqHDChain.IsValid()) {
+        return false;
+    }
+
+    SecureVector walletSeed;
+    const uint8_t seedSource = hdChain.IsBip44()
+        ? pqderivation::SEED_SOURCE_BIP39
+        : pqderivation::SEED_SOURCE_LEGACY_HD;
+    if (hdChain.IsBip44()) {
+        if (!GetBip39Seed(walletSeed))
+            return false;
+    } else {
+        CKey seed;
+        if (!GetKey(hdChain.seed_id, seed) ||
+            seed.size() != pqderivation::LEGACY_SEED_BYTES) {
+            return false;
+        }
+        walletSeed.assign(seed.begin(), seed.end());
+    }
+
+    const uint32_t coinType = GetParams().ExtCoinType();
+    uint256 lineageId;
+    if (!pqderivation::GetLineageId(walletSeed.data(), walletSeed.size(),
+                                    seedSource, coinType, lineageId)) {
+        return false;
+    }
+
+    CPQHDChain allocationChain = pqHDChain;
+    if (!allocationChain.IsInitialized() ||
+        allocationChain.nSeedSource != seedSource ||
+        allocationChain.nCoinType != coinType ||
+        allocationChain.lineage_id != lineageId) {
+        allocationChain.SetLineage(seedSource, coinType, lineageId);
+    }
+    if (!allocationChain.IsInitialized())
+        return false;
+
+    SecureVector pqSeed;
+    if (!pqderivation::DeriveSeed(walletSeed.data(), walletSeed.size(),
+                                  coinType, index, pqSeed)) {
+        return false;
+    }
+    SecureVector().swap(walletSeed);
+    CPQKey candidateKey;
+    const bool generated = candidateKey.SetSeed(pqSeed.data());
+    SecureVector().swap(pqSeed);
+    if (!generated)
+        return false;
+    const CPQPubKey candidatePubKey = candidateKey.GetPubKey();
+    const bool keyExists = HavePQKey(candidatePubKey.GetWitnessProgram());
+
+    CPQHDChain updatedChain = allocationChain;
+    updatedChain.nExternalChainCounter = std::max(
+        allocationChain.nExternalChainCounter, index + 1);
+    const bool chainChanged = !pqHDChain.IsInitialized() ||
+        pqHDChain.nSeedSource != updatedChain.nSeedSource ||
+        pqHDChain.nCoinType != updatedChain.nCoinType ||
+        pqHDChain.lineage_id != updatedChain.lineage_id ||
+        pqHDChain.nExternalChainCounter != updatedChain.nExternalChainCounter;
+    if (keyExists && !chainChanged)
+        return true;
+
+    CWalletDB walletdb(*dbw);
+    if (!walletdb.TxnBegin(DB_TXN_SYNC))
+        return false;
+
+    bool addedToMemory = false;
+    bool transactionActive = true;
+    auto abortRecovery = [&]() {
+        if (transactionActive && !walletdb.TxnAbort())
+            LogPrintf("RecoverPQKey: failed to abort wallet transaction\n");
+        transactionActive = false;
+        if (addedToMemory)
+            ErasePQKeyFromMemory(candidatePubKey.GetWitnessProgram());
+        return false;
+    };
+
+    try {
+        if (!keyExists) {
+            if (!AddPQKeyPubKeyWithDB(walletdb, candidateKey, candidatePubKey))
+                return abortRecovery();
+            addedToMemory = true;
+        }
+        if (chainChanged && !walletdb.WritePQHDChain(updatedChain))
+            return abortRecovery();
+        if (!walletdb.TxnCommit(DB_TXN_SYNC)) {
+            transactionActive = false;
+            if (addedToMemory)
+                ErasePQKeyFromMemory(candidatePubKey.GetWitnessProgram());
+            return false;
+        }
+        transactionActive = false;
+    } catch (...) {
+        return abortRecovery();
+    }
+
+    pqHDChain = updatedChain;
+    addedOut = !keyExists;
+    return true;
+}
+
 bool CWallet::AddCryptedKey(const CPubKey &vchPubKey,
                             const std::vector<unsigned char> &vchCryptedSecret)
 {
+    const CKeyID keyID = vchPubKey.GetID();
+    const bool wasCrypted = IsCrypted();
+    bool hadPrevious = false;
+    std::pair<CPubKey, std::vector<unsigned char>> previous;
+    {
+        LOCK(cs_KeyStore);
+        const auto it = mapCryptedKeys.find(keyID);
+        if (it != mapCryptedKeys.end()) {
+            hadPrevious = true;
+            previous = it->second;
+        }
+    }
+
     if (!CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret))
         return false;
+
+    bool persisted = false;
     {
         LOCK(cs_wallet);
         if (pwalletdbEncryption)
-            return pwalletdbEncryption->WriteCryptedKey(vchPubKey,
-                                                        vchCryptedSecret,
-                                                        mapKeyMetadata[vchPubKey.GetID()]);
+            persisted = pwalletdbEncryption->WriteCryptedKey(vchPubKey,
+                                                              vchCryptedSecret,
+                                                              mapKeyMetadata[keyID]);
         else
-            return CWalletDB(*dbw).WriteCryptedKey(vchPubKey,
-                                                            vchCryptedSecret,
-                                                            mapKeyMetadata[vchPubKey.GetID()]);
+            persisted = CWalletDB(*dbw).WriteCryptedKey(vchPubKey,
+                                                        vchCryptedSecret,
+                                                        mapKeyMetadata[keyID]);
     }
+
+    if (!persisted) {
+        {
+            LOCK(cs_KeyStore);
+            if (hadPrevious)
+                mapCryptedKeys[keyID] = std::move(previous);
+            else
+                mapCryptedKeys.erase(keyID);
+        }
+        if (!wasCrypted)
+            ResetCryptedOnAddFailure();
+    }
+    return persisted;
+}
+
+bool CWallet::AddCryptedPQKey(const CPQPubKey &pqPubKey,
+                              const std::vector<unsigned char> &vchCryptedSecret)
+{
+    const uint256 witnessProgram = pqPubKey.GetWitnessProgram();
+    const bool wasCrypted = IsCrypted();
+    bool hadPrevious = false;
+    std::pair<CPQPubKey, std::vector<unsigned char>> previous;
+    {
+        LOCK(cs_KeyStore);
+        const auto it = mapCryptedPQKeys.find(witnessProgram);
+        if (it != mapCryptedPQKeys.end()) {
+            hadPrevious = true;
+            previous = it->second;
+        }
+    }
+
+    if (!CCryptoKeyStore::AddCryptedPQKey(pqPubKey, vchCryptedSecret))
+        return false;
+
+    bool persisted = false;
+    {
+        LOCK(cs_wallet);
+        if (pwalletdbEncryption)
+            persisted = pwalletdbEncryption->WriteCryptedPQKey(witnessProgram, pqPubKey, vchCryptedSecret);
+        else
+            persisted = CWalletDB(*dbw).WriteCryptedPQKey(witnessProgram, pqPubKey, vchCryptedSecret);
+    }
+
+    if (!persisted) {
+        {
+            LOCK(cs_KeyStore);
+            if (hadPrevious)
+                mapCryptedPQKeys[witnessProgram] = std::move(previous);
+            else
+                mapCryptedPQKeys.erase(witnessProgram);
+        }
+        if (!wasCrypted)
+            ResetCryptedOnAddFailure();
+    }
+    return persisted;
 }
 
 bool CWallet::LoadKeyMetadata(const CTxDestination& keyID, const CKeyMetadata &meta)
@@ -323,6 +908,11 @@ bool CWallet::LoadKeyMetadata(const CTxDestination& keyID, const CKeyMetadata &m
 bool CWallet::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
 {
     return CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret);
+}
+
+bool CWallet::LoadCryptedPQKey(const CPQPubKey &pqPubKey, const std::vector<unsigned char> &vchCryptedSecret)
+{
+    return CCryptoKeyStore::AddCryptedPQKey(pqPubKey, vchCryptedSecret);
 }
 
 bool CWallet::LoadCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords)
@@ -345,14 +935,29 @@ bool CWallet::LoadWords(const uint256& hash, const std::vector<unsigned char> &v
     return CCryptoKeyStore::AddWords(hash, vchWords);
 }
 
+bool CWallet::LoadWords(const uint256& hash, SecureVector vchWords)
+{
+    return CCryptoKeyStore::AddWords(hash, std::move(vchWords));
+}
+
 bool CWallet::LoadPassphrase(const std::vector<unsigned char> &vchPassphrase)
 {
     return CCryptoKeyStore::AddPassphrase(vchPassphrase);
 }
 
+bool CWallet::LoadPassphrase(SecureVector vchPassphrase)
+{
+    return CCryptoKeyStore::AddPassphrase(std::move(vchPassphrase));
+}
+
 bool CWallet::LoadVchSeed(const std::vector<unsigned char> &vchSeed)
 {
     return CCryptoKeyStore::AddVchSeed(vchSeed);
+}
+
+bool CWallet::LoadVchSeed(SecureVector vchSeed)
+{
+    return CCryptoKeyStore::AddVchSeed(std::move(vchSeed));
 }
 
 void CWallet::GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase, std::vector<unsigned char>& vchSeed)
@@ -440,6 +1045,8 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase)
 
     {
         LOCK(cs_wallet);
+        if (fEncryptionRewritePending)
+            return false;
         for (const MasterKeyMap::value_type& pMasterKey : mapMasterKeys)
         {
             if(!crypter.SetKeyFromPassphrase(strWalletPassphrase, pMasterKey.second.vchSalt, pMasterKey.second.nDeriveIterations, pMasterKey.second.nDerivationMethod))
@@ -447,11 +1054,43 @@ bool CWallet::Unlock(const SecureString& strWalletPassphrase)
             if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, _vMasterKey))
                 continue; // try another master key
             if (CCryptoKeyStore::Unlock(_vMasterKey)) {
+                if (!MigrateLegacyBip39SeedId(*this)) {
+                    Lock();
+                    return false;
+                }
                 return true;
             }
         }
     }
     return false;
+}
+
+bool CWallet::IsEncryptionRewritePending() const
+{
+    LOCK(cs_wallet);
+    return fEncryptionRewritePending;
+}
+
+void CWallet::SetEncryptionRewritePending(bool pending)
+{
+    AssertLockHeld(cs_wallet);
+    fEncryptionRewritePending = pending;
+}
+
+bool CWallet::Lock()
+{
+    {
+        LOCK(cs_wallet);
+        if (!LockKeyStore())
+            return false;
+
+        // Remove the redundant HD-chain copies before publishing the locked
+        // state. Derivation follows the same cs_wallet -> cs_KeyStore order.
+        hdChain.ClearSensitiveData();
+    }
+
+    NotifyStatusChanged(this);
+    return true;
 }
 
 bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase)
@@ -460,6 +1099,8 @@ bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase,
 
     {
         LOCK(cs_wallet);
+        if (fEncryptionRewritePending)
+            return false;
         Lock();
 
         CCrypter crypter;
@@ -516,19 +1157,20 @@ bool CWallet::SetMinVersion(enum WalletFeature nVersion, CWalletDB* pwalletdbIn,
     if (fExplicit && nVersion > nWalletMaxVersion)
             nVersion = FEATURE_LATEST;
 
-    nWalletVersion = nVersion;
-
-    if (nVersion > nWalletMaxVersion)
-        nWalletMaxVersion = nVersion;
-
+    // Persist first. A failed database write must not make a later retry skip
+    // the min-version record because only the in-memory version was advanced.
     {
         CWalletDB* pwalletdb = pwalletdbIn ? pwalletdbIn : new CWalletDB(*dbw);
-        if (nWalletVersion > 40000)
-            pwalletdb->WriteMinVersion(nWalletVersion);
+        const bool fWriteSuccess = nVersion <= 40000 || pwalletdb->WriteMinVersion(nVersion);
         if (!pwalletdbIn)
             delete pwalletdb;
+        if (!fWriteSuccess)
+            return false;
     }
 
+    nWalletVersion = nVersion;
+    if (nVersion > nWalletMaxVersion)
+        nWalletMaxVersion = nVersion;
     return true;
 }
 
@@ -662,6 +1304,53 @@ void CWallet::AddToSpends(const uint256& wtxid)
         AddToSpends(txin.prevout, wtxid);
 }
 
+bool CWallet::CompleteEncryptionRewrite()
+{
+    AssertLockHeld(cs_wallet);
+    if (!fEncryptionRewritePending)
+        return false;
+
+    if (!dbw->Rewrite())
+        return false;
+
+    int previousMinVersion = 0;
+    {
+        CWalletDB walletdb(*dbw);
+        bool markerPending = false;
+        if (!walletdb.ReadEncryptionRewritePending(markerPending, previousMinVersion) ||
+            !markerPending)
+            return false;
+        if (!walletdb.TxnBegin(DB_TXN_SYNC))
+            return false;
+        if (!walletdb.WriteMinVersion(previousMinVersion) ||
+            !walletdb.EraseEncryptionRewritePending()) {
+            walletdb.TxnAbort();
+            return false;
+        }
+        if (!walletdb.TxnCommit(DB_TXN_SYNC))
+            return false;
+    }
+
+    {
+        CWalletDB walletdb(*dbw, "r");
+        bool markerPending = true;
+        int ignoredPreviousMinVersion = 0;
+        if (!walletdb.ReadEncryptionRewritePending(
+                markerPending, ignoredPreviousMinVersion) || markerPending)
+            return false;
+    }
+    {
+        CDB rawdb(*dbw, "r");
+        int storedMinVersion = 0;
+        if (!rawdb.Read(std::string("minversion"), storedMinVersion) ||
+            storedMinVersion != previousMinVersion)
+            return false;
+    }
+
+    fEncryptionRewritePending = false;
+    return true;
+}
+
 bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
 {
     if (IsCrypted())
@@ -698,100 +1387,149 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
 
     {
         LOCK(cs_wallet);
-        mapMasterKeys[++nMasterKeyMaxID] = kMasterKey;
-        assert(!pwalletdbEncryption);
-        pwalletdbEncryption = new CWalletDB(*dbw);
-        if (!pwalletdbEncryption->TxnBegin()) {
+        const unsigned int previousMasterKeyMaxID = nMasterKeyMaxID;
+        const int previousWalletVersion = nWalletVersion;
+        const int previousWalletMaxVersion = nWalletMaxVersion;
+        const unsigned int masterKeyID = ++nMasterKeyMaxID;
+        mapMasterKeys[masterKeyID] = kMasterKey;
+
+        auto abortEncryptionSetup = [&](bool transactionActive) {
+            if (pwalletdbEncryption) {
+                if (transactionActive)
+                    pwalletdbEncryption->TxnAbort();
+                delete pwalletdbEncryption;
+                pwalletdbEncryption = nullptr;
+            }
+            mapMasterKeys.erase(masterKeyID);
+            nMasterKeyMaxID = previousMasterKeyMaxID;
+            nWalletVersion = previousWalletVersion;
+            nWalletMaxVersion = previousWalletMaxVersion;
+            return false;
+        };
+
+        // EncryptKeys cannot be rolled back after it has successfully
+        // replaced the live plaintext maps. From that point on, close the
+        // database transaction exactly once, retain the encrypted in-memory
+        // state as an unambiguous signal to callers, and require a restart.
+        auto failEncryptionAfterKeyMutation = [&](bool transactionActive) {
+            if (pwalletdbEncryption) {
+                if (transactionActive && !pwalletdbEncryption->TxnAbort()) {
+                    LogPrintf("EncryptWallet: failed to abort wallet database transaction\n");
+                }
+                delete pwalletdbEncryption;
+                pwalletdbEncryption = nullptr;
+            }
+            if (!Lock())
+                LogPrintf("EncryptWallet: failed to lock quarantined wallet\n");
+            return false;
+        };
+
+        bool transactionActive = false;
+        bool keysMutated = false;
+        try {
+            assert(!pwalletdbEncryption);
+            pwalletdbEncryption = new CWalletDB(*dbw);
+            if (!pwalletdbEncryption->TxnBegin(DB_TXN_SYNC)) {
+                return abortEncryptionSetup(false);
+            }
+            transactionActive = true;
+            if (!pwalletdbEncryption->WriteMasterKey(masterKeyID, kMasterKey)) {
+                return abortEncryptionSetup(true);
+            }
+
+            // Encryption was introduced in version 0.4.0. Persist the version
+            // before mutating the in-memory keystore so a write failure can abort
+            // cleanly.
+            if (!SetMinVersion(FEATURE_WALLETCRYPT, pwalletdbEncryption, true)) {
+                return abortEncryptionSetup(true);
+            }
+
+            if (!EncryptKeys(_vMasterKey))
+            {
+                // EncryptKeys is failure-atomic in memory. Abort the database
+                // transaction and restore the setup metadata for a clean retry.
+                return abortEncryptionSetup(true);
+            }
+            keysMutated = true;
+            fEncryptionRewritePending = true;
+
+            if(hdChain.IsBip44()) {
+                if (!pwalletdbEncryption->EraseBip39Words(false) ||
+                    !pwalletdbEncryption->EraseBip39Passphrase(false) ||
+                    !pwalletdbEncryption->EraseBip39VchSeed(false)) {
+                    return failEncryptionAfterKeyMutation(true);
+                }
+
+                if (!EncryptBip39(_vMasterKey))
+                {
+                    return failEncryptionAfterKeyMutation(true);
+                }
+
+                if (!pwalletdbEncryption->WriteBip39Words(nWordHash, vchCryptedBip39Words, true)) {
+                    return failEncryptionAfterKeyMutation(true);
+                }
+
+                if (!vchCryptedBip39Passphrase.empty()) {
+                    if (!pwalletdbEncryption->WriteBip39Passphrase(vchCryptedBip39Passphrase, true)) {
+                        return failEncryptionAfterKeyMutation(true);
+                    }
+                }
+
+                if (!vchCryptedBip39VchSeed.empty()) {
+                    if (!pwalletdbEncryption->WriteBip39VchSeed(vchCryptedBip39VchSeed, true)) {
+                        return failEncryptionAfterKeyMutation(true);
+                    }
+                }
+            }
+
+            const int previousMinVersion = nWalletVersion;
+            if (!pwalletdbEncryption->WriteEncryptionRewritePending(previousMinVersion) ||
+                !pwalletdbEncryption->WriteMinVersion(
+                    WALLET_ENCRYPTION_REWRITE_MIN_VERSION)) {
+                return failEncryptionAfterKeyMutation(true);
+            }
+
+            const bool transactionCommitted =
+                pwalletdbEncryption->TxnCommit(DB_TXN_SYNC);
+            // TxnCommit consumes the transaction handle even on failure.
+            transactionActive = false;
+            if (!transactionCommitted) {
+                return failEncryptionAfterKeyMutation(false);
+            }
+
             delete pwalletdbEncryption;
             pwalletdbEncryption = nullptr;
-            return false;
-        }
-        pwalletdbEncryption->WriteMasterKey(nMasterKeyMaxID, kMasterKey);
 
-        if (!EncryptKeys(_vMasterKey))
-        {
-            pwalletdbEncryption->TxnAbort();
-            delete pwalletdbEncryption;
-            // We now probably have half of our keys encrypted in memory, and half not...
-            // die and let the user reload the unencrypted wallet.
-            assert(false);
-        }
+            if (!Lock() || !CCryptoKeyStore::Unlock(_vMasterKey))
+                return failEncryptionAfterKeyMutation(false);
 
-        if(hdChain.IsBip44()) {
-            pwalletdbEncryption->EraseBip39Words( false);
-            pwalletdbEncryption->EraseBip39Passphrase(false);
-            pwalletdbEncryption->EraseBip39VchSeed(false);
-
-            if (!EncryptBip39(_vMasterKey))
-            {
-                pwalletdbEncryption->TxnAbort();
-                delete pwalletdbEncryption;
-                // We now probably have half of our keys encrypted in memory, and half not...
-                // die and let the user reload the unencrypted wallet.
-                assert(false);
-            }
-
-            if (!pwalletdbEncryption->WriteBip39Words(nWordHash, vchCryptedBip39Words, true)) {
-                pwalletdbEncryption->TxnAbort();
-                delete pwalletdbEncryption;
-                assert(false);
-            }
-
-            if (!vchCryptedBip39Passphrase.empty()) {
-                if (!pwalletdbEncryption->WriteBip39Passphrase(vchCryptedBip39Passphrase, true)) {
-                    pwalletdbEncryption->TxnAbort();
-                    delete pwalletdbEncryption;
-                    assert(false);
+            // if we are using HD, replace the HD seed with a new one
+            if (IsHDEnabled() && !hdChain.IsBip44()) {
+                if (!SetHDSeed(GenerateNewSeed())) {
+                    return failEncryptionAfterKeyMutation(false);
                 }
             }
 
-            if (!vchCryptedBip39VchSeed.empty()) {
-                if (!pwalletdbEncryption->WriteBip39VchSeed(vchCryptedBip39VchSeed, true)) {
-                    pwalletdbEncryption->TxnAbort();
-                    delete pwalletdbEncryption;
-                    assert(false);
-                }
-            }
-        }
+            if (!hdChain.IsBip44() && !NewKeyPoolInternal(true))
+                return failEncryptionAfterKeyMutation(false);
 
-        // Encryption was introduced in version 0.4.0
-        SetMinVersion(FEATURE_WALLETCRYPT, pwalletdbEncryption, true);
+            if (!Lock())
+                return failEncryptionAfterKeyMutation(false);
 
-        if (!pwalletdbEncryption->TxnCommit()) {
-            delete pwalletdbEncryption;
-            // We now have keys encrypted in memory, but not on disk...
-            // die to avoid confusion and let the user reload the unencrypted wallet.
-            assert(false);
-        }
-
-        delete pwalletdbEncryption;
-        pwalletdbEncryption = nullptr;
-
-        Lock();
-        Unlock(strWalletPassphrase);
-
-        // if we are using HD, replace the HD seed with a new one
-        if (IsHDEnabled() && !hdChain.IsBip44()) {
-            if (!SetHDSeed(GenerateNewSeed())) {
+            // Need to completely rewrite the wallet file; if we don't, bdb might keep
+            // bits of the unencrypted private key in slack space in the database file.
+            if (!CompleteEncryptionRewrite())
                 return false;
-            }
-        }
-
-        if (!hdChain.IsBip44())
-            NewKeyPool();
-
-        Lock();
-
-        // Need to completely rewrite the wallet file; if we don't, bdb might keep
-        // bits of the unencrypted private key in slack space in the database file.
-        dbw->Rewrite();
-
-        if (hdChain.IsBip44()) {
-            CWalletDB walletdb(*dbw);
-            walletdb.WriteBip39Words(nWordHash, vchCryptedBip39Words, true);
-            walletdb.WriteBip39VchSeed(vchCryptedBip39VchSeed, true);
-            if (!vchCryptedBip39Passphrase.empty())
-                walletdb.WriteBip39Passphrase(vchCryptedBip39Passphrase, true);
+        } catch (const std::exception& e) {
+            LogPrintf("EncryptWallet: exception while encrypting wallet: %s\n", e.what());
+            return keysMutated
+                ? failEncryptionAfterKeyMutation(transactionActive)
+                : abortEncryptionSetup(transactionActive);
+        } catch (...) {
+            LogPrintf("EncryptWallet: unknown exception while encrypting wallet\n");
+            return keysMutated
+                ? failEncryptionAfterKeyMutation(transactionActive)
+                : abortEncryptionSetup(transactionActive);
         }
     }
     NotifyStatusChanged(this);
@@ -1138,7 +1876,14 @@ bool CWallet::AddToWalletIfInvolvingMe(const CTransactionRef& ptx, const CBlockI
 
         bool fExisted = mapWallet.count(tx.GetHash()) != 0;
         if (fExisted && !fUpdate) return false;
-        if (fExisted || IsMine(tx) || IsFromMe(tx))
+        bool hasOwnedOutput = false;
+        for (const CTxOut& txout : tx.vout) {
+            if (IsMine(txout, pIndex)) {
+                hasOwnedOutput = true;
+                break;
+            }
+        }
+        if (fExisted || hasOwnedOutput || IsFromMe(tx))
         {
             /* Check if any keys in the wallet keypool that were supposed to be unused
              * have appeared in a new transaction. If so, remove those keys from the keypool.
@@ -1355,16 +2100,23 @@ void CWallet::BlockDisconnected(const std::shared_ptr<const CBlock>& pblock) {
 
 
 
+static bool HasRequiredPQAssetKey(const CWallet& wallet, const CTxOut& output,
+                                  int depth, const CBlockIndex* originBlock,
+                                  int activationHeight);
+
 isminetype CWallet::IsMine(const CTxIn &txin) const
 {
     {
-        LOCK(cs_wallet);
+        LOCK2(cs_main, cs_wallet);
         std::map<uint256, CWalletTx>::const_iterator mi = mapWallet.find(txin.prevout.hash);
         if (mi != mapWallet.end())
         {
             const CWalletTx& prev = (*mi).second;
-            if (txin.prevout.n < prev.tx->vout.size())
-                return IsMine(prev.tx->vout[txin.prevout.n]);
+            if (txin.prevout.n < prev.tx->vout.size()) {
+                const CBlockIndex* originBlock = nullptr;
+                prev.GetDepthInMainChain(originBlock);
+                return IsMine(prev.tx->vout[txin.prevout.n], originBlock);
+            }
         }
     }
     return ISMINE_NO;
@@ -1380,19 +2132,22 @@ CAmount CWallet::GetDebit(const CTxIn &txin, const isminefilter& filter) const {
 CAmount CWallet::GetDebit(const CTxIn &txin, const isminefilter& filter, CAssetOutputEntry& assetData) const
 {
     {
-        LOCK(cs_wallet);
+        LOCK2(cs_main, cs_wallet);
         std::map<uint256, CWalletTx>::const_iterator mi = mapWallet.find(txin.prevout.hash);
         if (mi != mapWallet.end())
         {
             const CWalletTx& prev = (*mi).second;
-            if (txin.prevout.n < prev.tx->vout.size())
-                if (IsMine(prev.tx->vout[txin.prevout.n]) & filter) {
+            if (txin.prevout.n < prev.tx->vout.size()) {
+                const CBlockIndex* originBlock = nullptr;
+                prev.GetDepthInMainChain(originBlock);
+                if (IsMine(prev.tx->vout[txin.prevout.n], originBlock) & filter) {
                     // if asset get that assets data from the scriptPubKey
                     if (prev.tx->vout[txin.prevout.n].scriptPubKey.IsAssetScript())
                         GetAssetData(prev.tx->vout[txin.prevout.n].scriptPubKey, assetData);
 
                     return prev.tx->vout[txin.prevout.n].nValue;
                 }
+            }
         }
     }
     return 0;
@@ -1403,11 +2158,42 @@ isminetype CWallet::IsMine(const CTxOut& txout) const
     return ::IsMine(*this, txout.scriptPubKey);
 }
 
+isminetype CWallet::IsMine(const CTxOut& txout, const CBlockIndex* originBlock) const
+{
+    LOCK2(cs_main, cs_wallet);
+    const int activationHeight =
+        GetPQAssetActivationHeightForPrev(
+            originBlock ? originBlock->pprev : chainActive.Tip(),
+            GetParams().GetConsensus());
+    uint256 pqOnlyProgram;
+    if (IsPQOnlyAssetScript(txout.scriptPubKey, pqOnlyProgram)) {
+        if (activationHeight < 0 ||
+            (originBlock && originBlock->nHeight < activationHeight))
+            return ISMINE_NO;
+        return HavePQKey(pqOnlyProgram) ? ISMINE_SPENDABLE : ISMINE_NO;
+    }
+
+    const isminetype mine = IsMine(txout);
+    if (!(mine & ISMINE_SPENDABLE) || !txout.scriptPubKey.IsAssetScript())
+        return mine;
+
+    return HasRequiredPQAssetKey(*this, txout, originBlock ? 1 : 0,
+                                 originBlock, activationHeight) ? mine : ISMINE_NO;
+}
+
 CAmount CWallet::GetCredit(const CTxOut& txout, const isminefilter& filter) const
 {
     if (!MoneyRange(txout.nValue))
         throw std::runtime_error(std::string(__func__) + ": value out of range");
     return ((IsMine(txout) & filter) ? txout.nValue : 0);
+}
+
+CAmount CWallet::GetCredit(const CTxOut& txout, const isminefilter& filter,
+                           const CBlockIndex* originBlock) const
+{
+    if (!MoneyRange(txout.nValue))
+        throw std::runtime_error(std::string(__func__) + ": value out of range");
+    return ((IsMine(txout, originBlock) & filter) ? txout.nValue : 0);
 }
 
 bool CWallet::IsChange(const CTxOut& txout) const
@@ -1432,6 +2218,46 @@ bool CWallet::IsChange(const CTxOut& txout) const
     return false;
 }
 
+bool CWallet::IsChange(const CTxOut& txout, const CBlockIndex* originBlock) const
+{
+    if (IsMine(txout, originBlock)) {
+        CTxDestination address;
+        if (!ExtractDestination(txout.scriptPubKey, address))
+            return true;
+
+        LOCK(cs_wallet);
+        if (!mapAddressBook.count(address))
+            return true;
+    }
+    return false;
+}
+
+bool CWallet::IsChange(const CWalletTx& wtx, unsigned int outputIndex,
+                       const CBlockIndex* originBlock) const
+{
+    if (outputIndex >= wtx.tx->vout.size())
+        return false;
+
+    const auto marker = wtx.mapValue.find(PQ_ASSET_ANCHOR_CHANGE_VOUT_KEY);
+    if (marker != wtx.mapValue.end()) {
+        int markedIndex = -1;
+        if (ParseInt32(marker->second, &markedIndex) && markedIndex >= 0 &&
+            static_cast<size_t>(markedIndex) < wtx.tx->vout.size() &&
+            static_cast<unsigned int>(markedIndex) == outputIndex) {
+            const CTxOut& markedOutput = wtx.tx->vout[outputIndex];
+            int version = -1;
+            std::vector<unsigned char> program;
+            if (markedOutput.nValue > 0 &&
+                markedOutput.scriptPubKey.IsWitnessProgram(version, program) &&
+                version == 2 && program.size() == 32 &&
+                (IsMine(markedOutput, originBlock) & ISMINE_SPENDABLE))
+                return true;
+        }
+    }
+
+    return IsChange(wtx.tx->vout[outputIndex], originBlock);
+}
+
 CAmount CWallet::GetChange(const CTxOut& txout) const
 {
     if (!MoneyRange(txout.nValue))
@@ -1441,8 +2267,13 @@ CAmount CWallet::GetChange(const CTxOut& txout) const
 
 bool CWallet::IsMine(const CTransaction& tx) const
 {
+    LOCK2(cs_main, cs_wallet);
+    const CBlockIndex* originBlock = nullptr;
+    const auto known = mapWallet.find(tx.GetHash());
+    if (known != mapWallet.end())
+        known->second.GetDepthInMainChain(originBlock);
     for (const CTxOut& txout : tx.vout)
-        if (IsMine(txout))
+        if (IsMine(txout, originBlock))
             return true;
     return false;
 }
@@ -1479,7 +2310,7 @@ CAmount CWallet::GetDebit(const CTransaction& tx, const isminefilter& filter) co
 
 bool CWallet::IsAllFromMe(const CTransaction& tx, const isminefilter& filter) const
 {
-    LOCK(cs_wallet);
+    LOCK2(cs_main, cs_wallet);
 
     for (const CTxIn& txin : tx.vin)
     {
@@ -1492,7 +2323,9 @@ bool CWallet::IsAllFromMe(const CTransaction& tx, const isminefilter& filter) co
         if (txin.prevout.n >= prev.tx->vout.size())
             return false; // invalid input!
 
-        if (!(IsMine(prev.tx->vout[txin.prevout.n]) & filter))
+        const CBlockIndex* originBlock = nullptr;
+        prev.GetDepthInMainChain(originBlock);
+        if (!(IsMine(prev.tx->vout[txin.prevout.n], originBlock) & filter))
             return false;
     }
     return true;
@@ -1500,10 +2333,15 @@ bool CWallet::IsAllFromMe(const CTransaction& tx, const isminefilter& filter) co
 
 CAmount CWallet::GetCredit(const CTransaction& tx, const isminefilter& filter) const
 {
+    LOCK2(cs_main, cs_wallet);
+    const CBlockIndex* originBlock = nullptr;
+    const auto known = mapWallet.find(tx.GetHash());
+    if (known != mapWallet.end())
+        known->second.GetDepthInMainChain(originBlock);
     CAmount nCredit = 0;
     for (const CTxOut& txout : tx.vout)
     {
-        nCredit += GetCredit(txout, filter);
+        nCredit += GetCredit(txout, filter, originBlock);
         if (!MoneyRange(nCredit))
             throw std::runtime_error(std::string(__func__) + ": value out of range");
     }
@@ -1512,18 +2350,54 @@ CAmount CWallet::GetCredit(const CTransaction& tx, const isminefilter& filter) c
 
 CAmount CWallet::GetChange(const CTransaction& tx) const
 {
+    LOCK2(cs_main, cs_wallet);
+    const CBlockIndex* originBlock = nullptr;
+    const auto known = mapWallet.find(tx.GetHash());
+    if (known != mapWallet.end())
+        known->second.GetDepthInMainChain(originBlock);
     CAmount nChange = 0;
-    for (const CTxOut& txout : tx.vout)
+    for (unsigned int i = 0; i < tx.vout.size(); ++i)
     {
-        nChange += GetChange(txout);
+        const CTxOut& txout = tx.vout[i];
+        if (!MoneyRange(txout.nValue))
+            throw std::runtime_error(std::string(__func__) + ": value out of range");
+        const bool isChange = known != mapWallet.end()
+            ? IsChange(known->second, i, originBlock)
+            : IsChange(txout, originBlock);
+        nChange += isChange ? txout.nValue : 0;
         if (!MoneyRange(nChange))
             throw std::runtime_error(std::string(__func__) + ": value out of range");
     }
     return nChange;
 }
 
+CAmount CWallet::GetChange(const CWalletTx& wtx) const
+{
+    LOCK2(cs_main, cs_wallet);
+    const CBlockIndex* originBlock = nullptr;
+    wtx.GetDepthInMainChain(originBlock);
+    CAmount change = 0;
+    for (unsigned int i = 0; i < wtx.tx->vout.size(); ++i) {
+        const CTxOut& output = wtx.tx->vout[i];
+        if (!MoneyRange(output.nValue))
+            throw std::runtime_error(std::string(__func__) + ": value out of range");
+        if (IsChange(wtx, i, originBlock))
+            change += output.nValue;
+        if (!MoneyRange(change))
+            throw std::runtime_error(std::string(__func__) + ": value out of range");
+    }
+    return change;
+}
+
 CPubKey CWallet::GenerateNewSeed()
 {
+    return GenerateNewSeed(nullptr);
+}
+
+CPubKey CWallet::GenerateNewSeed(CWalletDB* pwalletdb)
+{
+    LOCK(cs_wallet);
+
     // If bip44 is not set to true on wallet creation
     if (!hdChain.IsBip44()) {
         hdChain.nVersion = CHDChain::VERSION_HD_CHAIN_SPLIT;
@@ -1535,37 +2409,40 @@ CPubKey CWallet::GenerateNewSeed()
     CHDChain newHdChain(this);
 	newHdChain.UseBip44(hdChain.IsBip44());
 
-	// NOTE: empty mnemonic means "generate a new one for me"
-	std::string strMnemonic = gArgs.GetArg("-mnemonic", "");
-	// NOTE: default mnemonic passphrase is an empty string
-	std::string strMnemonicPassphrase = gArgs.GetArg("-mnemonicpassphrase", "");
+	// Empty mnemonic means "generate a new one for me". Consuming these
+	// arguments also removes every application-owned ordinary-string copy.
+	SecureString vchMnemonic;
+	SecureString vchMnemonicPassphrase;
+	ScopedSecureStringCleanser cleanseMnemonic(vchMnemonic);
+	ScopedSecureStringCleanser cleanseMnemonicPassphrase(vchMnemonicPassphrase);
+	gArgs.TakeArgSecure("-mnemonic", vchMnemonic);
+	gArgs.TakeArgSecure("-mnemonicpassphrase", vchMnemonicPassphrase);
 
-    if (!my_words.empty()) {
-        strMnemonic = my_words;
+    SecureString pendingWords;
+    SecureString pendingPassphrase;
+    ScopedSecureStringCleanser cleansePendingWords(pendingWords);
+    ScopedSecureStringCleanser cleansePendingPassphrase(pendingPassphrase);
+    if (TakePendingMnemonicInput(pendingWords, pendingPassphrase)) {
+        if (!pendingWords.empty())
+            vchMnemonic.swap(pendingWords);
+        if (!pendingPassphrase.empty())
+            vchMnemonicPassphrase.swap(pendingPassphrase);
     }
-
-    if (!my_passphrase.empty()) {
-        strMnemonicPassphrase = my_passphrase;
-    }
-
-	SecureString vchMnemonic(strMnemonic.begin(), strMnemonic.end());
-	SecureString vchMnemonicPassphrase(strMnemonicPassphrase.begin(), strMnemonicPassphrase.end());
 
 	SecureVector& vchSeed = newHdChain.vchSeed;
 	if (!newHdChain.SetMnemonic(vchMnemonic, vchMnemonicPassphrase, vchSeed))
 		throw std::runtime_error(std::string(__func__) + ": SetMnemonic failed");
 
-	g_vchSeed = std::vector<unsigned char>(vchSeed.begin(), vchSeed.end());
+	if (!AddVchSeed(vchSeed))
+		throw std::runtime_error(std::string(__func__) + ": storing BIP39 seed failed");
 
-	CPubKey seed(vchSeed.begin(), vchSeed.end());
-	newHdChain.seed_id = seed.GetID();
+	newHdChain.seed_id = Bip39SeedId(vchSeed);
 
-	SetHDChain(newHdChain, false);
+	SetHDChain(newHdChain, false, pwalletdb);
 
-	my_passphrase.clear();
-	my_words.clear();
-
-	return seed;
+	// BIP39 uses a 64-byte seed, which is not a public key. The BIP44 caller
+	// uses the persisted chain ID and ignores this legacy return value.
+	return CPubKey();
 
 }
 
@@ -1612,11 +2489,32 @@ bool CWallet::SetHDSeed(const CPubKey& seed)
 
 bool CWallet::SetHDChain(const CHDChain& chain, bool memonly)
 {
-    LOCK(cs_wallet);
-    if (!memonly && !CWalletDB(*dbw).WriteHDChain(chain))
-        throw std::runtime_error(std::string(__func__) + ": writing chain failed");
+    return SetHDChain(chain, memonly, nullptr);
+}
 
-    hdChain = chain;
+bool CWallet::SetHDChain(const CHDChain& chain, bool memonly, CWalletDB* pwalletdb)
+{
+    LOCK(cs_wallet);
+    if (!memonly) {
+        const bool written = pwalletdb ? pwalletdb->WriteHDChain(chain)
+                                       : CWalletDB(*dbw).WriteHDChain(chain);
+        if (!written)
+            throw std::runtime_error(std::string(__func__) + ": writing chain failed");
+    }
+
+    if (&chain != &hdChain) {
+        hdChain.ClearSensitiveData();
+        hdChain = chain;
+    }
+    return true;
+}
+
+bool CWallet::LoadPQHDChain(const CPQHDChain& chain)
+{
+    LOCK(cs_wallet);
+    if (!chain.IsInitialized())
+        return false;
+    pqHDChain = chain;
     return true;
 }
 
@@ -1661,17 +2559,22 @@ void CWalletTx::GetAmounts(std::list<COutputEntry>& listReceived,
     }
 
     // Sent/received.
+    const CBlockIndex* originBlock = nullptr;
+    {
+        LOCK(cs_main);
+        GetDepthInMainChain(originBlock);
+    }
     for (unsigned int i = 0; i < tx->vout.size(); ++i)
     {
         const CTxOut& txout = tx->vout[i];
-        isminetype fIsMine = pwallet->IsMine(txout);
+        isminetype fIsMine = pwallet->IsMine(txout, originBlock);
         // Only need to handle txouts if AT LEAST one of these is true:
         //   1) they debit from us (sent)
         //   2) the output is to us (received)
         if (nDebit > 0)
         {
             // Don't report 'change' txouts
-            if (pwallet->IsChange(txout))
+            if (pwallet->IsChange(*this, i, originBlock))
                 continue;
         }
         else if (!(fIsMine & filter))
@@ -2069,7 +2972,9 @@ bool CWalletTx::IsTrusted() const
         if (parent == nullptr)
             return false;
         const CTxOut& parentOut = parent->tx->vout[txin.prevout.n];
-        if (pwallet->IsMine(parentOut) != ISMINE_SPENDABLE)
+        const CBlockIndex* originBlock = nullptr;
+        parent->GetDepthInMainChain(originBlock);
+        if (pwallet->IsMine(parentOut, originBlock) != ISMINE_SPENDABLE)
             return false;
     }
     return true;
@@ -2246,7 +3151,8 @@ CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth, cons
     CAmount balance = 0;
     for (const auto& entry : mapWallet) {
         const CWalletTx& wtx = entry.second;
-        const int depth = wtx.GetDepthInMainChain();
+        const CBlockIndex* originBlock = nullptr;
+        const int depth = wtx.GetDepthInMainChain(originBlock);
         if (depth < 0 || !CheckFinalTx(*wtx.tx) || wtx.GetBlocksToMaturity() > 0) {
             continue;
         }
@@ -2255,10 +3161,11 @@ CAmount CWallet::GetLegacyBalance(const isminefilter& filter, int minDepth, cons
         // treat change outputs specially, as part of the amount debited.
         CAmount debit = wtx.GetDebit(filter);
         const bool outgoing = debit > 0;
-        for (const CTxOut& out : wtx.tx->vout) {
-            if (outgoing && IsChange(out)) {
+        for (unsigned int i = 0; i < wtx.tx->vout.size(); ++i) {
+            const CTxOut& out = wtx.tx->vout[i];
+            if (outgoing && IsChange(wtx, i, originBlock)) {
                 debit -= out.nValue;
-            } else if (IsMine(out) & filter && depth >= minDepth && (!account || *account == GetAccountName(out.scriptPubKey))) {
+            } else if (IsMine(out, originBlock) & filter && depth >= minDepth && (!account || *account == GetAccountName(out.scriptPubKey))) {
                 balance += out.nValue;
             }
         }
@@ -2319,11 +3226,25 @@ void CWallet::AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<st
     AvailableCoinsAll(vCoins, mapAssetCoins, true, AreAssetsDeployed(), fOnlySafe, coinControl, nMinimumAmount, nMaximumAmount, nMinimumSumAmount, nMaximumCount, nMinDepth, nMaxDepth);
 }
 
+static bool HasRequiredPQAssetKey(const CWallet& wallet, const CTxOut& output,
+                                  int depth, const CBlockIndex* originBlock,
+                                  int activationHeight)
+{
+    if (activationHeight < 0 ||
+        (depth > 0 && originBlock && originBlock->nHeight < activationHeight))
+        return true;
+
+    uint256 program;
+    return GetPQAssetProgram(output.scriptPubKey, program) && wallet.HavePQKey(program);
+}
+
 void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins, bool fGetRVN, bool fGetAssets, bool fOnlySafe, const CCoinControl *coinControl, const CAmount& nMinimumAmount, const CAmount& nMaximumAmount, const CAmount& nMinimumSumAmount, const uint64_t& nMaximumCount, const int& nMinDepth, const int& nMaxDepth) const {
     vCoins.clear();
 
     {
         LOCK2(cs_main, cs_wallet);
+
+        const int pqAssetActivationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
 
         CAmount nTotal = 0;
 
@@ -2346,7 +3267,8 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
             if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
                 continue;
 
-            int nDepth = pcoin->GetDepthInMainChain();
+            const CBlockIndex* originBlock = nullptr;
+            int nDepth = pcoin->GetDepthInMainChain(originBlock);
             if (nDepth < 0)
                 continue;
 
@@ -2400,10 +3322,18 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                 int nType;
                 bool fIsOwner;
                 bool isAssetScript = pcoin->tx->vout[i].scriptPubKey.IsAssetScript(nType, fIsOwner);
+
+                // Verify the PQ key required by a protected asset output.
+                if (fGetAssets && isAssetScript &&
+                    !HasRequiredPQAssetKey(*this, pcoin->tx->vout[i], nDepth,
+                                           originBlock, pqAssetActivationHeight))
+                    continue;
                 if (coinControl && !isAssetScript && coinControl->HasSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsSelected(COutPoint((*it).first, i)))
                     continue;
 
-                if (coinControl && isAssetScript && coinControl->HasAssetSelected() && !coinControl->fAllowOtherInputs && !coinControl->IsAssetSelected(COutPoint((*it).first, i)))
+                if (coinControl && isAssetScript && coinControl->HasAssetSelected() &&
+                    (!coinControl->fAllowOtherInputs || coinControl->fRequireSelectedAssetInputs) &&
+                    !coinControl->IsAssetSelected(COutPoint((*it).first, i)))
                     continue;
 
                 if (IsLockedCoin((*it).first, i))
@@ -2412,7 +3342,7 @@ void CWallet::AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::stri
                 if (IsSpent(wtxid, i))
                     continue;
 
-                isminetype mine = IsMine(pcoin->tx->vout[i]);
+                isminetype mine = IsMine(pcoin->tx->vout[i], originBlock);
 
                 if (mine == ISMINE_NO) {
                     continue;
@@ -2536,14 +3466,20 @@ std::map<CTxDestination, std::vector<COutput>> CWallet::ListAssets() const
 
     std::vector<COutPoint> lockedCoins;
     ListLockedCoins(lockedCoins);
+    const int pqAssetActivationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
     for (const auto& output : lockedCoins) {
         auto it = mapWallet.find(output.hash);
         if (it != mapWallet.end()) {
-            if (!it->second.tx->vout[output.n].scriptPubKey.IsAssetScript()) // If not an asset script skip it
+            if (output.n >= it->second.tx->vout.size())
                 continue;
-            int depth = it->second.GetDepthInMainChain();
-            if (depth >= 0 && output.n < it->second.tx->vout.size() &&
-                IsMine(it->second.tx->vout[output.n]) == ISMINE_SPENDABLE) {
+            const CTxOut& txout = it->second.tx->vout[output.n];
+            if (!txout.scriptPubKey.IsAssetScript()) // If not an asset script skip it
+                continue;
+            const CBlockIndex* originBlock = nullptr;
+            int depth = it->second.GetDepthInMainChain(originBlock);
+            if (depth >= 0 && IsMine(txout, originBlock) == ISMINE_SPENDABLE &&
+                HasRequiredPQAssetKey(*this, txout, depth, originBlock,
+                                      pqAssetActivationHeight)) {
                 CTxDestination address;
                 if (ExtractDestination(FindNonChangeParentOutput(*it->second.tx, output.n).scriptPubKey, address)) {
                     result[address].emplace_back(
@@ -2608,13 +3544,24 @@ const CTxOut& CWallet::FindNonChangeParentOutput(const CTransaction& tx, int out
 {
     const CTransaction* ptx = &tx;
     int n = output;
-    while (IsChange(ptx->vout[n]) && ptx->vin.size() > 0) {
+    while (ptx->vin.size() > 0) {
+        const CBlockIndex* originBlock = nullptr;
+        const auto current = mapWallet.find(ptx->GetHash());
+        if (current != mapWallet.end())
+            current->second.GetDepthInMainChain(originBlock);
+        if (current != mapWallet.end()
+                ? !IsChange(current->second, n, originBlock)
+                : !IsChange(ptx->vout[n], originBlock))
+            break;
         const COutPoint& prevout = ptx->vin[0].prevout;
         auto it = mapWallet.find(prevout.hash);
-        if (it == mapWallet.end() || it->second.tx->vout.size() <= prevout.n ||
-            !IsMine(it->second.tx->vout[prevout.n])) {
+        if (it == mapWallet.end() || it->second.tx->vout.size() <= prevout.n) {
             break;
         }
+        const CBlockIndex* parentOrigin = nullptr;
+        it->second.GetDepthInMainChain(parentOrigin);
+        if (!IsMine(it->second.tx->vout[prevout.n], parentOrigin))
+            break;
         ptx = it->second.tx.get();
         n = prevout.n;
     }
@@ -3135,7 +4082,10 @@ bool CWallet::SignTransaction(CMutableTransaction &tx)
         const CScript& scriptPubKey = mi->second.tx->vout[input.prevout.n].scriptPubKey;
         const CAmount& amount = mi->second.tx->vout[input.prevout.n].nValue;
         SignatureData sigdata;
-        if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, amount, SIGHASH_ALL), scriptPubKey, sigdata)) {
+        if (!ProduceSignature(TransactionSignatureCreator(
+                                  this, &txNewConst, nIn, amount, SIGHASH_ALL,
+                                  GetParams().GetConsensus().pqSignatureContext),
+                              scriptPubKey, sigdata)) {
             return false;
         }
         UpdateTransaction(tx, nIn, sigdata);
@@ -3258,13 +4208,15 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     if (!AreAssetsDeployed() && (fTransferAsset || fNewAsset || fReissueAsset))
         return false;
 
-    if (fNewAsset && (assets.size() < 1 || !IsValidDestination(destination)))
+    if (fNewAsset && (assets.size() < 1 || !IsValidDestination(destination) ||
+                      !IsSupportedAssetDestination(destination)))
         return error("%s : Tried creating a new asset transaction and the asset was null or the destination was invalid", __func__);
 
     if ((fNewAsset && fTransferAsset) || (fReissueAsset && fTransferAsset) || (fReissueAsset && fNewAsset))
         return error("%s : Only one type of asset transaction allowed per transaction");
 
-    if (fReissueAsset && (reissueAsset.IsNull() || !IsValidDestination(destination)))
+    if (fReissueAsset && (reissueAsset.IsNull() || !IsValidDestination(destination) ||
+                          !IsSupportedAssetDestination(destination)))
         return error("%s : Tried reissuing an asset and the reissue data was null or the destination was invalid", __func__);
     /** RVN END */
 
@@ -3346,12 +4298,30 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
     FeeCalculation feeCalc;
     CAmount nFeeNeeded;
     unsigned int nBytes;
+    bool returnReservedKeyForPQChange = false;
     {
         std::set<CInputCoin> setCoins;
 
         std::set<CInputCoin> setAssets;
         LOCK2(cs_main, cs_wallet);
         {
+            const int pqAssetActivationHeight =
+                GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
+            const bool pqAssetsActive = pqAssetActivationHeight >= 0 &&
+                chainActive.Height() + 1 >= pqAssetActivationHeight;
+            const auto tagPQAssetOutput = [&](CScript& script,
+                                             const boost::optional<uint256>& program) {
+                if (!pqAssetsActive)
+                    return true;
+                CScript tagged;
+                if (!program || !BuildPQOnlyAssetScript(script, *program, tagged)) {
+                    strFailReason = _("Active PQ asset output requires a canonical PQ-only asset destination");
+                    return false;
+                }
+                script = std::move(tagged);
+                return true;
+            };
+
             /** RVN START */
             std::vector<COutput> vAvailableCoins;
             std::map<std::string, std::vector<COutput> > mapAssetCoins;
@@ -3380,13 +4350,34 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             }
 
             /** RVN START */
+            const bool needsAssetChangeScript =
+                fTransferAsset || fReissueAsset || assetType == AssetType::SUB ||
+                assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL ||
+                assetType == AssetType::SUB_QUALIFIER || assetType == AssetType::RESTRICTED;
+
             if (!boost::get<CNoDestination>(&coin_control.assetDestChange)) {
+                if (needsAssetChangeScript && !IsSupportedAssetDestination(coin_control.assetDestChange)) {
+                    strFailReason = _("Asset change requires a legacy P2PKH address; RIP-25 witness-v2 protects native RVN only");
+                    return false;
+                }
                 assetScriptChange = GetScriptForDestination(coin_control.assetDestChange);
+            } else if (needsAssetChangeScript) {
+                CTxDestination nativeChangeDestination;
+                if (ExtractDestination(scriptChange, nativeChangeDestination) &&
+                    IsSupportedAssetDestination(nativeChangeDestination)) {
+                    assetScriptChange = scriptChange;
+                } else {
+                    CKeyID assetChangeKeyID;
+                    if (!CreateNewChangeAddress(reservekey, assetChangeKeyID, strFailReason))
+                        return false;
+                    assetScriptChange = GetScriptForDestination(assetChangeKeyID);
+                }
             } else {
                 assetScriptChange = scriptChange;
             }
             /** RVN END */
 
+            const CScript defaultScriptChange = scriptChange;
             CTxOut change_prototype_txout(0, scriptChange);
             size_t change_prototype_size = GetSerializeSize(change_prototype_txout, SER_DISK, 0);
 
@@ -3394,11 +4385,13 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             nFeeRet = 0;
             bool pick_new_inputs = true;
             CAmount nValueIn = 0;
+            std::map<std::string, CAmount> mapAssetsIn;
+            std::set<uint256> requiredAnchorPrograms;
 
             // Start with no fee and loop until there is enough fee
             while (true)
             {
-                std::map<std::string, CAmount> mapAssetsIn;
+                scriptChange = defaultScriptChange;
                 nChangePosInOut = nChangePosRequest;
                 txNew.vin.clear();
                 txNew.vout.clear();
@@ -3414,6 +4407,14 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 for (const auto& recipient : vecSend)
                 {
                     CTxOut txout(recipient.nAmount, recipient.scriptPubKey);
+
+                    if (pqAssetsActive && recipient.scriptPubKey.IsAssetScript()) {
+                        uint256 program;
+                        if (!GetPQAssetProgram(recipient.scriptPubKey, program)) {
+                            strFailReason = _("Active PQ asset recipient is missing a canonical program");
+                            return false;
+                        }
+                    }
 
                     /** RVN START */
                     // Check to see if you need to make an asset data outpoint OP_RVN_ASSET data
@@ -3472,9 +4473,79 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                             strFailReason = _("Insufficient asset funds");
                             return false;
                         }
+
+                        if (pqAssetsActive) {
+                            requiredAnchorPrograms.clear();
+                            for (const CInputCoin& asset : setAssets) {
+                                const auto walletTx = mapWallet.find(asset.outpoint.hash);
+                                if (walletTx == mapWallet.end()) {
+                                    strFailReason = _("Selected asset input is missing from the wallet");
+                                    return false;
+                                }
+                                const CBlockIndex* originBlock = nullptr;
+                                const int depth = walletTx->second.GetDepthInMainChain(originBlock);
+                                if (depth > 0 && originBlock &&
+                                    originBlock->nHeight < pqAssetActivationHeight)
+                                    continue;
+                                uint256 program;
+                                if (!GetPQAssetProgram(asset.txout.scriptPubKey, program)) {
+                                    strFailReason = _("Active PQ asset input has no canonical program");
+                                    return false;
+                                }
+                                requiredAnchorPrograms.insert(program);
+                            }
+
+                            for (const uint256& program : requiredAnchorPrograms) {
+                                bool hasAnchor = false;
+                                for (const CInputCoin& coin : setCoins) {
+                                    int version = -1;
+                                    std::vector<unsigned char> witnessProgram;
+                                    if (coin.txout.scriptPubKey.IsWitnessProgram(version, witnessProgram) &&
+                                        version == 2 && witnessProgram.size() == 32 &&
+                                        std::equal(witnessProgram.begin(), witnessProgram.end(), program.begin())) {
+                                        hasAnchor = true;
+                                        break;
+                                    }
+                                }
+                                if (hasAnchor)
+                                    continue;
+
+                                for (const COutput& output : vAvailableCoins) {
+                                    if (!output.fSpendable)
+                                        continue;
+                                    const CInputCoin candidate(output.tx, output.i);
+                                    if (setCoins.count(candidate) ||
+                                        (coin_control.HasSelected() && !coin_control.fAllowOtherInputs &&
+                                         !coin_control.IsSelected(candidate.outpoint)))
+                                        continue;
+                                    int version = -1;
+                                    std::vector<unsigned char> witnessProgram;
+                                    if (!candidate.txout.scriptPubKey.IsWitnessProgram(version, witnessProgram) ||
+                                        version != 2 || witnessProgram.size() != 32 ||
+                                        !std::equal(witnessProgram.begin(), witnessProgram.end(), program.begin()))
+                                        continue;
+                                    setCoins.insert(candidate);
+                                    nValueIn += candidate.txout.nValue;
+                                    hasAnchor = true;
+                                    break;
+                                }
+                                if (!hasAnchor) {
+                                    strFailReason = _("Protected asset input requires a funded matching PQ anchor");
+                                    return false;
+                                }
+                            }
+                        }
                     }
                     /** RVN END */
                 }
+
+                if (pqAssetsActive && requiredAnchorPrograms.size() == 1 &&
+                    boost::get<CNoDestination>(&coin_control.destChange)) {
+                    scriptChange = GetScriptForDestination(
+                        WitnessV2PQDestination(*requiredAnchorPrograms.begin()));
+                }
+                change_prototype_txout.scriptPubKey = scriptChange;
+                change_prototype_size = GetSerializeSize(change_prototype_txout, SER_DISK, 0);
 
                 const CAmount nChange = nValueIn - nValueToSelect;
 
@@ -3490,6 +4561,77 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
                     for (auto assetChange : mapAssetChange) {
                         if (assetChange.second > 0) {
+                            if (pqAssetsActive) {
+                                CTxDestination changeDestination;
+                                uint256 changeProgram;
+                                bool foundChange = false;
+                                if (!boost::get<CNoDestination>(&coin_control.assetDestChange)) {
+                                    if (!IsSupportedAssetDestination(coin_control.assetDestChange) ||
+                                        !coin_control.pqAssetChangeProgram) {
+                                        strFailReason = _("Active PQ asset change requires a canonical PQ-only destination");
+                                        return false;
+                                    }
+                                    changeDestination = coin_control.assetDestChange;
+                                    changeProgram = *coin_control.pqAssetChangeProgram;
+                                    foundChange = true;
+                                } else {
+                                    for (const CInputCoin& asset : setAssets) {
+                                        CAssetOutputEntry source;
+                                        uint256 program;
+                                        if (!GetAssetData(asset.txout.scriptPubKey, source) ||
+                                            source.assetName != assetChange.first ||
+                                            !GetPQAssetProgram(asset.txout.scriptPubKey, program) ||
+                                            !HavePQKey(program))
+                                            continue;
+                                        const auto walletTx = mapWallet.find(asset.outpoint.hash);
+                                        if (walletTx == mapWallet.end())
+                                            continue;
+                                        const CBlockIndex* originBlock = nullptr;
+                                        const int depth = walletTx->second.GetDepthInMainChain(originBlock);
+                                        if (depth > 0 && originBlock &&
+                                            originBlock->nHeight < pqAssetActivationHeight)
+                                            continue;
+                                        if (IsAssetNameAnRestricted(assetChange.first)) {
+                                            CNullAssetTxVerifierString verifier;
+                                            if (!passets->GetAssetVerifierStringIfExists(assetChange.first, verifier)) {
+                                                strFailReason = _("Verifier string for restricted asset change not found");
+                                                return false;
+                                            }
+                                            std::string verifierError;
+                                            if (!ContextualCheckVerifierString(
+                                                    passets, verifier.verifier_string,
+                                                    EncodeDestination(source.destination), verifierError))
+                                                continue;
+                                        }
+                                        changeDestination = source.destination;
+                                        changeProgram = program;
+                                        foundChange = true;
+                                        break;
+                                    }
+                                }
+                                if (!foundChange) {
+                                    strFailReason = _("Active PQ asset change requires a protected source or explicit PQ change destination");
+                                    return false;
+                                }
+                                if (IsAssetNameAnRestricted(assetChange.first)) {
+                                    CNullAssetTxVerifierString verifier;
+                                    if (!passets->GetAssetVerifierStringIfExists(assetChange.first, verifier) ||
+                                        !ContextualCheckVerifierString(
+                                            passets, verifier.verifier_string,
+                                            EncodeDestination(changeDestination), strFailReason))
+                                        return false;
+                                }
+                                CScript scriptAssetChange = GetScriptForDestination(changeDestination);
+                                CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
+                                assetTransfer.ConstructTransaction(scriptAssetChange);
+                                CScript tagged;
+                                if (!BuildPQOnlyAssetScript(scriptAssetChange, changeProgram, tagged)) {
+                                    strFailReason = _("Could not construct canonical PQ asset change");
+                                    return false;
+                                }
+                                txNew.vout.emplace_back(0, tagged);
+                                continue;
+                            }
                             if (IsAssetNameAnRestricted(assetChange.first))
                             {
                                 // Get the verifier string for the restricted asset
@@ -3532,6 +4674,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                                                 CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
 
                                                 assetTransfer.ConstructTransaction(scriptAssetChange);
+                                                if (!tagPQAssetOutput(scriptAssetChange, coin_control.pqAssetChangeProgram))
+                                                    return false;
                                                 CTxOut newAssetTxOut(0, scriptAssetChange);
 
                                                 txNew.vout.emplace_back(newAssetTxOut);
@@ -3545,6 +4689,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                                     CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
 
                                     assetTransfer.ConstructTransaction(scriptAssetChange);
+                                    if (!tagPQAssetOutput(scriptAssetChange, coin_control.pqAssetChangeProgram))
+                                        return false;
                                     CTxOut newAssetTxOut(0, scriptAssetChange);
 
                                     txNew.vout.emplace_back(newAssetTxOut);
@@ -3558,6 +4704,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                                 CAssetTransfer assetTransfer(assetChange.first, assetChange.second);
 
                                 assetTransfer.ConstructTransaction(scriptAssetChange);
+                                if (!tagPQAssetOutput(scriptAssetChange, coin_control.pqAssetChangeProgram))
+                                    return false;
                                 CTxOut newAssetTxOut(0, scriptAssetChange);
 
                                 txNew.vout.emplace_back(newAssetTxOut);
@@ -3607,6 +4755,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                             if (assetType != AssetType::UNIQUE && assetType != AssetType::MSGCHANNEL && assetType != AssetType::QUALIFIER && assetType != AssetType::SUB_QUALIFIER && assetType != AssetType::RESTRICTED) {
                                 CScript ownerScript = GetScriptForDestination(destination);
                                 asset.ConstructOwnerTransaction(ownerScript);
+                                if (!tagPQAssetOutput(ownerScript, coin_control.pqAssetDestinationProgram))
+                                    return false;
                                 CTxOut ownerTxOut(0, ownerScript);
                                 txNew.vout.push_back(ownerTxOut);
                             }
@@ -3614,6 +4764,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                             // Create the asset transaction and push it back so it is the last CTxOut in the transaction
                             CScript scriptPubKey = GetScriptForDestination(destination);
                             asset.ConstructTransaction(scriptPubKey);
+                            if (!tagPQAssetOutput(scriptPubKey, coin_control.pqAssetDestinationProgram))
+                                return false;
                             CTxOut newTxOut(0, scriptPubKey);
                             txNew.vout.push_back(newTxOut);
                         }
@@ -3623,6 +4775,8 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
 
                         // Create the scriptPubKeys for the reissue data, and that owner asset
                         reissueAsset.ConstructTransaction(reissueScript);
+                        if (!tagPQAssetOutput(reissueScript, coin_control.pqAssetDestinationProgram))
+                            return false;
 
                         CTxOut reissueTxOut(0, reissueScript);
                         txNew.vout.push_back(reissueTxOut);
@@ -3741,9 +4895,12 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 nFeeRet = nFeeNeeded;
                 continue;
             }
+            returnReservedKeyForPQChange = pqAssetsActive && requiredAnchorPrograms.size() == 1 &&
+                boost::get<CNoDestination>(&coin_control.destChange);
         }
 
-        if (nChangePosInOut == -1) reservekey.ReturnKey(); // Return any reserved key if we don't have change
+        if (nChangePosInOut == -1 || returnReservedKeyForPQChange)
+            reservekey.ReturnKey();
 
         if (sign)
         {
@@ -3754,7 +4911,11 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 const CScript& scriptPubKey = coin.txout.scriptPubKey;
                 SignatureData sigdata;
 
-                if (!ProduceSignature(TransactionSignatureCreator(this, &txNewConst, nIn, coin.txout.nValue, SIGHASH_ALL), scriptPubKey, sigdata))
+                if (!ProduceSignature(TransactionSignatureCreator(
+                                          this, &txNewConst, nIn,
+                                          coin.txout.nValue, SIGHASH_ALL,
+                                          GetParams().GetConsensus().pqSignatureContext),
+                                      scriptPubKey, sigdata))
                 {
                     strFailReason = _("Signing transaction failed");
                     return false;
@@ -3771,7 +4932,10 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                     SignatureData sigdata;
 
                     if (!ProduceSignature(
-                            TransactionSignatureCreator(this, &txNewConst, nIn, asset.txout.nValue, SIGHASH_ALL),
+                            TransactionSignatureCreator(
+                                this, &txNewConst, nIn, asset.txout.nValue,
+                                SIGHASH_ALL,
+                                GetParams().GetConsensus().pqSignatureContext),
                             scriptPubKey, sigdata)) {
                         strFailReason = _("Signing asset transaction failed");
                         return false;
@@ -3783,6 +4947,22 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
                 }
             }
             /** RVN END */
+        }
+
+        // Record the exact native PQ anchor change output. Its address is a
+        // published receive address, so address-book heuristics cannot identify
+        // this change safely after a wallet reload.
+        wtxNew.mapValue.erase(PQ_ASSET_ANCHOR_CHANGE_VOUT_KEY);
+        if (returnReservedKeyForPQChange && nChangePosInOut >= 0 &&
+            static_cast<size_t>(nChangePosInOut) < txNew.vout.size()) {
+            int version = -1;
+            std::vector<unsigned char> program;
+            const CTxOut& output = txNew.vout[nChangePosInOut];
+            if (output.nValue > 0 &&
+                output.scriptPubKey.IsWitnessProgram(version, program) &&
+                version == 2 && program.size() == 32)
+                wtxNew.mapValue[PQ_ASSET_ANCHOR_CHANGE_VOUT_KEY] =
+                    std::to_string(nChangePosInOut);
         }
 
         // Embed the constructed transaction data in wtxNew.
@@ -3830,6 +5010,8 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CCon
 {
     {
         LOCK2(cs_main, cs_wallet);
+        if (fEncryptionRewritePending)
+            return false;
         LogPrintf("CommitTransaction:\n%s", wtxNew.tx->ToString());
         {
             // Take key pair from key pool so it won't be used again
@@ -3891,15 +5073,41 @@ bool CWallet::AddAccountingEntry(const CAccountingEntry& acentry, CWalletDB *pwa
 
 bool CWallet::IsFirstRun()
 {
-    return mapKeys.empty() && mapCryptedKeys.empty() && mapWatchKeys.empty() && setWatchOnly.empty() && mapScripts.empty();
+    LOCK(cs_wallet);
+    LOCK(cs_KeyStore);
+    return mapKeys.empty() && mapCryptedKeys.empty() &&
+           mapPQKeys.empty() && mapCryptedPQKeys.empty() && mapPQPubKeys.empty() &&
+           mapWatchKeys.empty() && setWatchOnly.empty() && mapScripts.empty() &&
+           mapMasterKeys.empty() && !IsCrypted() && !IsHDEnabled() && nWordHash.IsNull() &&
+           vchWords.empty() && vchPassphrase.empty() && g_vchSeed.empty() &&
+           vchCryptedBip39Words.empty() && vchCryptedBip39Passphrase.empty() &&
+           vchCryptedBip39VchSeed.empty();
 }
 
 DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
+{
+    return LoadWallet(fFirstRunRet, true);
+}
+
+DBErrors CWallet::LoadWallet(bool& fFirstRunRet, bool notifyLoad)
 {
     LOCK2(cs_main, cs_wallet);
 
     fFirstRunRet = false;
     DBErrors nLoadWalletRet = CWalletDB(*dbw,"cr+").LoadWallet(this);
+    const bool rewriteHadNoncriticalErrors =
+        nLoadWalletRet == DB_NEED_REWRITE_ENCRYPTION_NONCRITICAL;
+    if (nLoadWalletRet == DB_NEED_REWRITE_ENCRYPTION ||
+        rewriteHadNoncriticalErrors)
+    {
+        if (!CompleteEncryptionRewrite())
+            return rewriteHadNoncriticalErrors
+                ? DB_NEED_REWRITE_ENCRYPTION_NONCRITICAL
+                : DB_NEED_REWRITE_ENCRYPTION;
+        nLoadWalletRet = rewriteHadNoncriticalErrors
+            ? DB_NONCRITICAL_ERROR
+            : DB_LOAD_OK;
+    }
     if (nLoadWalletRet == DB_NEED_REWRITE)
     {
         if (dbw->Rewrite("\x04pool"))
@@ -3913,13 +5121,18 @@ DBErrors CWallet::LoadWallet(bool& fFirstRunRet)
         }
     }
 
-    // This wallet is in its first run if all of these are empty
-    fFirstRunRet = mapKeys.empty() && mapCryptedKeys.empty() && mapWatchKeys.empty() && setWatchOnly.empty() && mapScripts.empty();
+    // Use the single authoritative predicate so HD, BIP39, and PQ-only
+    // recovery state can never be mistaken for a newly created wallet.
+    fFirstRunRet = IsFirstRun();
 
     if (nLoadWalletRet != DB_LOAD_OK)
         return nLoadWalletRet;
 
-    uiInterface.LoadWallet(this);
+    if (!MigrateLegacyBip39SeedId(*this))
+        return DB_LOAD_FAIL;
+
+    if (notifyLoad)
+        uiInterface.LoadWallet(this);
 
     return DB_LOAD_OK;
 }
@@ -4034,10 +5247,12 @@ const std::string& CWallet::GetAccountName(const CScript& scriptPubKey) const
  * Mark old keypool keys as used,
  * and generate all new keys
  */
-bool CWallet::NewKeyPool()
+bool CWallet::NewKeyPoolInternal(bool allowEncryptionRewritePending)
 {
     {
         LOCK(cs_wallet);
+        if (fEncryptionRewritePending && !allowEncryptionRewritePending)
+            return false;
         CWalletDB walletdb(*dbw);
 
         for (int64_t nIndex : setInternalKeyPool) {
@@ -4052,12 +5267,17 @@ bool CWallet::NewKeyPool()
 
         m_pool_key_to_index.clear();
 
-        if (!TopUpKeyPool()) {
+        if (!TopUpKeyPoolInternal(0, allowEncryptionRewritePending)) {
             return false;
         }
         LogPrintf("CWallet::NewKeyPool rewrote keypool\n");
     }
     return true;
+}
+
+bool CWallet::NewKeyPool()
+{
+    return NewKeyPoolInternal(false);
 }
 
 size_t CWallet::KeypoolCountExternalKeys()
@@ -4085,13 +5305,23 @@ void CWallet::LoadKeyPool(int64_t nIndex, const CKeyPool &keypool)
         mapKeyMetadata[keyid] = CKeyMetadata(keypool.nTime);
 }
 
-bool CWallet::TopUpKeyPool(unsigned int kpSize)
+bool CWallet::TopUpKeyPoolInternal(
+    unsigned int kpSize, bool allowEncryptionRewritePending,
+    CWalletDB* pwalletdb)
 {
     {
         LOCK(cs_wallet);
 
+        if (fEncryptionRewritePending && !allowEncryptionRewritePending)
+            return false;
+
         if (IsLocked())
             return false;
+
+        // Refuse before touching the keypool index or HD counters. A recovered
+        // BIP44 chain without its seed must never fall back to empty-seed BIP32.
+        if (IsBip44Enabled() && !HasValidBip39Seed())
+            throw std::runtime_error(std::string(__func__) + ": invalid BIP39 seed");
 
         // Top up key pool
         unsigned int nTargetSize;
@@ -4111,7 +5341,11 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize)
             missingInternal = 0;
         }
         bool internal = false;
-        CWalletDB walletdb(*dbw);
+        std::unique_ptr<CWalletDB> ownedWalletdb;
+        if (!pwalletdb) {
+            ownedWalletdb.reset(new CWalletDB(*dbw));
+            pwalletdb = ownedWalletdb.get();
+        }
         for (int64_t i = missingInternal + missingExternal; i--;)
         {
             if (i < missingInternal) {
@@ -4121,8 +5355,8 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize)
             assert(m_max_keypool_index < std::numeric_limits<int64_t>::max()); // How in the hell did you use so many keys?
             int64_t index = ++m_max_keypool_index;
 
-            CPubKey pubkey(GenerateNewKey(walletdb, internal));
-            if (!walletdb.WritePool(index, CKeyPool(pubkey, internal))) {
+            CPubKey pubkey(GenerateNewKey(*pwalletdb, internal));
+            if (!pwalletdb->WritePool(index, CKeyPool(pubkey, internal))) {
                 throw std::runtime_error(std::string(__func__) + ": writing generated key failed");
             }
 
@@ -4140,12 +5374,20 @@ bool CWallet::TopUpKeyPool(unsigned int kpSize)
     return true;
 }
 
+bool CWallet::TopUpKeyPool(unsigned int kpSize)
+{
+    return TopUpKeyPoolInternal(kpSize, false);
+}
+
 void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fRequestedInternal)
 {
     nIndex = -1;
     keypool.vchPubKey = CPubKey();
     {
         LOCK(cs_wallet);
+
+        if (fEncryptionRewritePending)
+            return;
 
         if (!IsLocked())
             TopUpKeyPool();
@@ -4180,6 +5422,10 @@ void CWallet::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool, bool fRe
 
 void CWallet::KeepKey(int64_t nIndex)
 {
+    LOCK(cs_wallet);
+    if (fEncryptionRewritePending)
+        return;
+
     // Remove from key pool
     CWalletDB walletdb(*dbw);
     walletdb.ErasePool(nIndex);
@@ -4191,6 +5437,8 @@ void CWallet::ReturnKey(int64_t nIndex, bool fInternal, const CPubKey& pubkey)
     // Return to key pool
     {
         LOCK(cs_wallet);
+        if (fEncryptionRewritePending)
+            return;
         if (fInternal) {
             setInternalKeyPool.insert(nIndex);
         } else {
@@ -4206,6 +5454,8 @@ bool CWallet::GetKeyFromPool(CPubKey& result, bool internal)
     CKeyPool keypool;
     {
         LOCK(cs_wallet);
+        if (fEncryptionRewritePending)
+            return false;
         int64_t nIndex = 0;
         ReserveKeyFromKeyPool(nIndex, keypool, internal);
         if (nIndex == -1)
@@ -4266,14 +5516,17 @@ std::map<CTxDestination, CAmount> CWallet::GetAddressBalances()
             if (pcoin->IsCoinBase() && pcoin->GetBlocksToMaturity() > 0)
                 continue;
 
-            int nDepth = pcoin->GetDepthInMainChain();
+            const CBlockIndex* originBlock = nullptr;
+            int nDepth = pcoin->GetDepthInMainChain(originBlock);
             if (nDepth < (pcoin->IsFromMe(ISMINE_ALL) ? 0 : 1))
                 continue;
 
             for (unsigned int i = 0; i < pcoin->tx->vout.size(); i++)
             {
                 CTxDestination addr;
-                if (!IsMine(pcoin->tx->vout[i]))
+                uint256 assetProgram;
+                if (IsPQOnlyAssetScript(pcoin->tx->vout[i].scriptPubKey, assetProgram) ||
+                    !IsMine(pcoin->tx->vout[i], originBlock))
                     continue;
                 if(!ExtractDestination(pcoin->tx->vout[i].scriptPubKey, addr))
                     continue;
@@ -4299,6 +5552,8 @@ std::set< std::set<CTxDestination> > CWallet::GetAddressGroupings()
     for (const auto& walletEntry : mapWallet)
     {
         const CWalletTx *pcoin = &walletEntry.second;
+        const CBlockIndex* originBlock = nullptr;
+        pcoin->GetDepthInMainChain(originBlock);
 
         if (pcoin->tx->vin.size() > 0)
         {
@@ -4309,7 +5564,10 @@ std::set< std::set<CTxDestination> > CWallet::GetAddressGroupings()
                 CTxDestination address;
                 if(!IsMine(txin)) /* If this input isn't mine, ignore it */
                     continue;
-                if(!ExtractDestination(mapWallet[txin.prevout.hash].tx->vout[txin.prevout.n].scriptPubKey, address))
+                const CScript& prevScript = mapWallet[txin.prevout.hash].tx->vout[txin.prevout.n].scriptPubKey;
+                uint256 assetProgram;
+                if (IsPQOnlyAssetScript(prevScript, assetProgram) ||
+                    !ExtractDestination(prevScript, address))
                     continue;
                 grouping.insert(address);
                 any_mine = true;
@@ -4318,11 +5576,14 @@ std::set< std::set<CTxDestination> > CWallet::GetAddressGroupings()
             // group change with input addresses
             if (any_mine)
             {
-               for (CTxOut txout : pcoin->tx->vout)
-                   if (IsChange(txout))
+               for (unsigned int i = 0; i < pcoin->tx->vout.size(); ++i)
+                   if (IsChange(*pcoin, i, originBlock))
                    {
                        CTxDestination txoutAddr;
-                       if(!ExtractDestination(txout.scriptPubKey, txoutAddr))
+                       const CTxOut& txout = pcoin->tx->vout[i];
+                       uint256 assetProgram;
+                       if (IsPQOnlyAssetScript(txout.scriptPubKey, assetProgram) ||
+                           !ExtractDestination(txout.scriptPubKey, txoutAddr))
                            continue;
                        grouping.insert(txoutAddr);
                    }
@@ -4336,10 +5597,12 @@ std::set< std::set<CTxDestination> > CWallet::GetAddressGroupings()
 
         // group lone addrs by themselves
         for (const auto& txout : pcoin->tx->vout)
-            if (IsMine(txout))
+            if (IsMine(txout, originBlock))
             {
                 CTxDestination address;
-                if(!ExtractDestination(txout.scriptPubKey, address))
+                uint256 assetProgram;
+                if (IsPQOnlyAssetScript(txout.scriptPubKey, assetProgram) ||
+                    !ExtractDestination(txout.scriptPubKey, address))
                     continue;
                 grouping.insert(address);
                 groupings.insert(grouping);
@@ -4391,7 +5654,7 @@ std::set<CTxDestination> CWallet::GetAccountAddresses(const std::string& strAcco
     {
         const CTxDestination& address = item.first;
         const std::string& strName = item.second.name;
-        if (strName == strAccount)
+        if (strName == strAccount && !IsPQOnlyAssetID(address))
             result.insert(address);
     }
     return result;
@@ -4640,7 +5903,16 @@ bool CWallet::EraseDestData(const CTxDestination &dest, const std::string &key)
 
 bool CWallet::LoadDestData(const CTxDestination &dest, const std::string &key, const std::string &value)
 {
-    mapAddressBook[dest].destdata.insert(std::make_pair(key, value));
+    CAddressBookData& data = mapAddressBook[dest];
+    data.destdata.insert(std::make_pair(key, value));
+    if (key == "pqasset:destination:v2") {
+        const CKeyID* assetID = boost::get<CKeyID>(&dest);
+        CKeyID decodedID;
+        uint256 program;
+        if (assetID && DecodePQOnlyAssetDestination(value, decodedID, program) &&
+            decodedID == *assetID && EncodePQAssetDestination(decodedID, program) == value)
+            data.purpose = "pqasset";
+    }
     return true;
 }
 
@@ -4674,6 +5946,104 @@ std::vector<std::string> CWallet::GetDestValues(const std::string& prefix) const
     return values;
 }
 
+namespace {
+const char* const PQ_ASSET_DESTDATA_KEY = "pqasset:destination:v1";
+const char* const PQ_ONLY_ASSET_DESTDATA_KEY = "pqasset:destination:v2";
+}
+
+bool CWallet::IsPQOnlyAssetID(const CTxDestination& dest) const
+{
+    LOCK(cs_wallet);
+    const CKeyID* assetID = boost::get<CKeyID>(&dest);
+    if (!assetID)
+        return false;
+    const auto address = mapAddressBook.find(dest);
+    if (address == mapAddressBook.end())
+        return false;
+    const auto pair = address->second.destdata.find(PQ_ONLY_ASSET_DESTDATA_KEY);
+    if (pair == address->second.destdata.end())
+        return false;
+    CKeyID decodedID;
+    uint256 program;
+    return DecodePQOnlyAssetDestination(pair->second, decodedID, program) &&
+           decodedID == *assetID &&
+           EncodePQAssetDestination(decodedID, program) == pair->second;
+}
+
+bool CWallet::StoreOwnedPQAssetDestination(const CKeyID& classicalKey, const uint256& pqProgram)
+{
+    LOCK(cs_wallet);
+    const bool pqOnly = classicalKey == CKeyID(Hash160(pqProgram.begin(), pqProgram.end()));
+    if (!HavePQKey(pqProgram) || (!pqOnly && !HaveKey(classicalKey)))
+        return false;
+    const char* const destdataKey = pqOnly ? PQ_ONLY_ASSET_DESTDATA_KEY : PQ_ASSET_DESTDATA_KEY;
+
+    const std::string descriptor = EncodePQAssetDestination(classicalKey, pqProgram);
+    CKeyID decodedClassical;
+    uint256 decodedProgram;
+    if (descriptor.empty() ||
+        !DecodePQAssetDestination(descriptor, decodedClassical, decodedProgram) ||
+        decodedClassical != classicalKey || decodedProgram != pqProgram)
+        return false;
+
+    const auto existingAddress = mapAddressBook.find(classicalKey);
+    if (existingAddress != mapAddressBook.end()) {
+        const auto existingPair = existingAddress->second.destdata.find(destdataKey);
+        if (existingPair != existingAddress->second.destdata.end())
+            return existingPair->second == descriptor;
+    }
+
+    // A PQ key must not be silently reused by another asset identity.
+    for (const auto& address : mapAddressBook) {
+        for (const char* key : {PQ_ASSET_DESTDATA_KEY, PQ_ONLY_ASSET_DESTDATA_KEY}) {
+            const auto existingPair = address.second.destdata.find(key);
+            if (existingPair == address.second.destdata.end())
+                continue;
+            CKeyID pairedClassical;
+            uint256 pairedProgram;
+            if (DecodePQAssetDestination(existingPair->second, pairedClassical, pairedProgram) &&
+                pairedProgram == pqProgram)
+                return false;
+        }
+    }
+
+    if (!CWalletDB(*dbw).WriteDestData(
+            EncodeDestination(classicalKey), destdataKey, descriptor))
+        return false;
+    mapAddressBook[classicalKey].destdata.emplace(destdataKey, descriptor);
+    return true;
+}
+
+std::vector<std::string> CWallet::GetOwnedPQAssetDestinations() const
+{
+    LOCK(cs_wallet);
+    std::vector<std::string> descriptors;
+    std::set<uint256> usedPrograms;
+    for (const auto& address : mapAddressBook) {
+        const CKeyID* associatedClassical = boost::get<CKeyID>(&address.first);
+        if (!associatedClassical)
+            continue;
+        for (const char* key : {PQ_ASSET_DESTDATA_KEY, PQ_ONLY_ASSET_DESTDATA_KEY}) {
+            const auto pair = address.second.destdata.find(key);
+            if (pair == address.second.destdata.end())
+                continue;
+            CKeyID decodedClassical;
+            uint256 decodedProgram;
+            if (!DecodePQAssetDestination(pair->second, decodedClassical, decodedProgram) ||
+                decodedClassical != *associatedClassical ||
+                EncodePQAssetDestination(decodedClassical, decodedProgram) != pair->second ||
+                !HavePQKey(decodedProgram) ||
+                (key == PQ_ASSET_DESTDATA_KEY && !HaveKey(decodedClassical)) ||
+                (key == PQ_ONLY_ASSET_DESTDATA_KEY &&
+                 decodedClassical != CKeyID(Hash160(decodedProgram.begin(), decodedProgram.end()))) ||
+                !usedPrograms.insert(decodedProgram).second)
+                continue;
+            descriptors.push_back(pair->second);
+        }
+    }
+    return descriptors;
+}
+
 CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
 {
     // needed to restore wallet transaction meta data after -zapwallettxes
@@ -4696,8 +6066,8 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
     int64_t nStart = GetTimeMillis();
     bool fFirstRun = true;
     std::unique_ptr<CWalletDBWrapper> dbw(new CWalletDBWrapper(&bitdb, walletFile));
-    CWallet *walletInstance = new CWallet(std::move(dbw));
-    DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun);
+    std::unique_ptr<CWallet> walletInstance(new CWallet(std::move(dbw)));
+    DBErrors nLoadWalletRet = walletInstance->LoadWallet(fFirstRun, false);
     if (nLoadWalletRet != DB_LOAD_OK)
     {
         if (nLoadWalletRet == DB_CORRUPT) {
@@ -4717,6 +6087,12 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
         else if (nLoadWalletRet == DB_NEED_REWRITE)
         {
             InitError(strprintf(_("Wallet needed to be rewritten: restart %s to complete"), _(PACKAGE_NAME)));
+            return nullptr;
+        }
+        else if (nLoadWalletRet == DB_NEED_REWRITE_ENCRYPTION ||
+                 nLoadWalletRet == DB_NEED_REWRITE_ENCRYPTION_NONCRITICAL)
+        {
+            InitError(strprintf(_("Wallet encryption recovery could not complete: restart %s after resolving the database error"), _(PACKAGE_NAME)));
             return nullptr;
         }
         else {
@@ -4747,13 +6123,27 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
 
     if (fFirstRun)
     {
+        class ScopedMnemonicIngressCleanup
+        {
+        public:
+            ~ScopedMnemonicIngressCleanup()
+            {
+                gArgs.ClearArg("-mnemonic");
+                gArgs.ClearArg("-mnemonicpassphrase");
+                ClearPendingMnemonicInput();
+            }
+        } mnemonicIngressCleanup;
+
         // ensure this wallet.dat can only be opened by clients supporting HD with chain split and expects no default key
         if (!gArgs.GetBoolArg("-usehd", true)) {
             InitError(strprintf(_("Error creating %s: You can't create non-HD wallets with this version."), walletFile));
             return nullptr;
         }
 
-        walletInstance->SetMinVersion(FEATURE_NO_DEFAULT_KEY);
+        if (!walletInstance->SetMinVersion(FEATURE_NO_DEFAULT_KEY)) {
+            InitError(_("Unable to persist the wallet feature version"));
+            return nullptr;
+        }
 
         walletInstance->UseBip44(gArgs.GetBoolArg("-bip44", true));
         LogPrintf("parameter interaction: -bip44 wallet enabled: %s\n", gArgs.GetBoolArg("-bip44", true));
@@ -4762,25 +6152,111 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
             CPubKey seed = walletInstance->GenerateNewSeed();
             if (!walletInstance->SetHDSeed(seed))
                 throw std::runtime_error(std::string(__func__) + ": Storing HD seed failed");
-        }
-
-        // If this is the first run, show the bip44 gui to the user
-        if (walletInstance->hdChain.IsBip44()){
-            if (gArgs.GetArg("-mnemonic", "").empty() && gArgs.GetArg("-mnemonicpassphrase", "").empty())
+            if (!walletInstance->TopUpKeyPool()) {
+                InitError(_("Unable to generate initial keys") += "\n");
+                return nullptr;
+            }
+        } else {
+            // Do not hold a database transaction while waiting for the UI.
+            if (!gArgs.IsArgSetAndNonEmpty("-mnemonic") &&
+                !gArgs.IsArgSetAndNonEmpty("-mnemonicpassphrase") &&
+                !HasPendingMnemonicInput()) {
+                const bool promptHasHandler =
+                    uiInterface.ShowMnemonic.num_slots() != 0;
                 uiInterface.ShowMnemonic(CClientUIInterface::MODAL);
+                if (promptHasHandler && !HasPendingMnemonicInput()) {
+                    InitError(_("Wallet setup was cancelled"));
+                    return nullptr;
+                }
+            }
+
+            // The HD chain, complete BIP39 domain, and initial keypool must
+            // either become durable together or remain a true first-run wallet.
+            CWalletDB walletdb(walletInstance->GetDBHandle());
+            class WalletCreationTransaction
+            {
+            private:
+                CWalletDB& walletdb;
+                bool active;
+
+            public:
+                explicit WalletCreationTransaction(CWalletDB& walletdbIn)
+                    : walletdb(walletdbIn), active(walletdb.TxnBegin(DB_TXN_SYNC))
+                {
+                }
+
+                ~WalletCreationTransaction()
+                {
+                    if (active)
+                        walletdb.TxnAbort();
+                }
+
+                bool IsActive() const
+                {
+                    return active;
+                }
+
+                bool Commit()
+                {
+                    if (!active)
+                        return false;
+                    active = false;
+                    return walletdb.TxnCommit(DB_TXN_SYNC);
+                }
+            } transaction(walletdb);
+
+            if (!transaction.IsActive()) {
+                InitError(_("Unable to begin the initial wallet transaction"));
+                return nullptr;
+            }
+
+            walletInstance->GenerateNewSeed(&walletdb);
+
+            SecureVector vchWords(
+                walletInstance->hdChain.vchMnemonic.begin(),
+                walletInstance->hdChain.vchMnemonic.end());
+            const uint256 hash = Hash(vchWords.begin(), vchWords.end());
+            if (!walletdb.WriteBip39Words(hash, vchWords, false) ||
+                !walletInstance->LoadWords(hash, std::move(vchWords))) {
+                InitError(_("Error storing bip 39 words"));
+                return nullptr;
+            }
+
+            SecureVector vchSeed(
+                walletInstance->hdChain.vchSeed.begin(),
+                walletInstance->hdChain.vchSeed.end());
+            if (!walletdb.WriteBip39VchSeed(vchSeed, false) ||
+                !walletInstance->LoadVchSeed(std::move(vchSeed))) {
+                InitError(_("Error storing bip 39 vchseed"));
+                return nullptr;
+            }
+
+            if (!walletInstance->TopUpKeyPoolInternal(0, false, &walletdb)) {
+                InitError(_("Unable to generate initial keys") += "\n");
+                return nullptr;
+            }
+
+            // Keep one persisted recovery record after key generation so a
+            // failure here exercises rollback of the complete initial pool.
+            if (!walletInstance->hdChain.vchMnemonicPassphrase.empty()) {
+                SecureVector vchPassphrase(
+                    walletInstance->hdChain.vchMnemonicPassphrase.begin(),
+                    walletInstance->hdChain.vchMnemonicPassphrase.end());
+                if (!walletdb.WriteBip39Passphrase(vchPassphrase, false) ||
+                    !walletInstance->LoadPassphrase(std::move(vchPassphrase))) {
+                    InitError(_("Error storing bip 39 passphrase"));
+                    return nullptr;
+                }
+            }
+
+            if (!transaction.Commit()) {
+                InitError(_("Unable to commit the initial wallet transaction"));
+                return nullptr;
+            }
+
+            walletInstance->hdChain.ClearSensitiveData();
         }
 
-        // generate a new seed
-        if (walletInstance->hdChain.IsBip44())
-            walletInstance->GenerateNewSeed();
-
-        // Top up the keypool
-        if (!walletInstance->TopUpKeyPool()) {
-            InitError(_("Unable to generate initial keys") += "\n");
-            return nullptr;
-        }
-
-        walletInstance->SetBestChain(chainActive.GetLocator());
     }
     else if (gArgs.IsArgSet("-usehd")) {
         bool useHD = gArgs.GetBoolArg("-usehd", true);
@@ -4796,43 +6272,8 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
 
     LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
 
-    RegisterValidationInterface(walletInstance);
-
     // Try to top up keypool. No-op if the wallet is locked.
     walletInstance->TopUpKeyPool();
-
-    if (walletInstance->hdChain.IsBip44() && fFirstRun) {
-        CWalletDB walletdb(walletInstance->GetDBHandle());
-
-        std::string strWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
-        std::vector<unsigned char> vchWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
-
-        auto hash = Hash(strWords.begin(), strWords.end());
-        if (!walletdb.WriteBip39Words(hash, vchWords, false)) {
-            InitError(_("Error writing bip 39 words to database"));
-            return nullptr;
-        }
-
-        walletInstance->LoadWords(hash, vchWords);
-
-        std::vector<unsigned char> vchSeed(walletInstance->hdChain.vchSeed.begin(), walletInstance->hdChain.vchSeed.end());
-        if (!walletdb.WriteBip39VchSeed(vchSeed, false)) {
-            InitError(_("Error writing bip 39 vchseed to database"));
-            return nullptr;
-        }
-
-        walletInstance->LoadVchSeed(vchSeed);
-
-        if (!walletInstance->hdChain.vchMnemonicPassphrase.empty()) {
-            std::vector<unsigned char> vchPassphrase(walletInstance->hdChain.vchMnemonicPassphrase.begin(), walletInstance->hdChain.vchMnemonicPassphrase.end());
-            if (!walletdb.WriteBip39Passphrase(vchPassphrase, false)) {
-                InitError(_("Error writing bip 39 passphrase to database"));
-                return nullptr;
-            }
-
-            walletInstance->LoadPassphrase(vchPassphrase);
-        }
-    }
 
     CBlockIndex *pindexRescan = chainActive.Genesis();
     if (!gArgs.GetBoolArg("-rescan", false))
@@ -4842,6 +6283,7 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
         if (walletdb.ReadBestBlock(locator))
             pindexRescan = FindForkInGlobalIndex(chainActive, locator);
     }
+    bool updateBestChain = fFirstRun;
     if (chainActive.Tip() && chainActive.Tip() != pindexRescan)
     {
         //We can't rescan beyond non-pruned blocks, stop and throw an error
@@ -4869,9 +6311,16 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
         }
 
         nStart = GetTimeMillis();
-        walletInstance->ScanForWalletTransactions(pindexRescan, nullptr, true);
+        CBlockIndex* failedBlock =
+            walletInstance->ScanForWalletTransactions(pindexRescan, nullptr, true);
+        if (failedBlock) {
+            InitError(strprintf(
+                _("Error rescanning wallet: block %d could not be read. Restore the missing block data or restart with -reindex."),
+                failedBlock->nHeight));
+            return nullptr;
+        }
         LogPrintf(" rescan      %15dms\n", GetTimeMillis() - nStart);
-        walletInstance->SetBestChain(chainActive.GetLocator());
+        updateBestChain = true;
         walletInstance->dbw->IncrementUpdateCounter();
 
         // Restore wallet transaction metadata after -zapwallettxes=1
@@ -4899,6 +6348,8 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
             }
         }
     }
+    if (updateBestChain)
+        walletInstance->SetBestChain(chainActive.GetLocator());
     walletInstance->SetBroadcastTransactions(gArgs.GetBoolArg("-walletbroadcast", DEFAULT_WALLETBROADCAST));
 
     {
@@ -4908,7 +6359,22 @@ CWallet* CWallet:: CreateWalletFromFile(const std::string walletFile)
         LogPrintf("mapAddressBook.size() = %u\n",  walletInstance->mapAddressBook.size());
     }
 
-    return walletInstance;
+    CWallet* publishedWallet = walletInstance.get();
+    try {
+        RegisterValidationInterface(publishedWallet);
+    } catch (...) {
+        UnregisterValidationInterface(publishedWallet);
+        throw;
+    }
+    try {
+        uiInterface.LoadWallet(publishedWallet);
+    } catch (const std::exception& e) {
+        LogPrintf("Wallet load observer failed: %s\n", e.what());
+    } catch (...) {
+        LogPrintf("Wallet load observer failed with an unknown exception\n");
+    }
+
+    return walletInstance.release();
 }
 
 std::atomic<bool> CWallet::fFlushScheduled(false);
@@ -4927,6 +6393,42 @@ void CWallet::postInitProcess(CScheduler& scheduler)
 
 bool CWallet::BackupWallet(const std::string& strDest)
 {
+    LOCK(cs_wallet);
+    if (fEncryptionRewritePending)
+        return false;
+
+    {
+        CWalletDB walletdb(*dbw, "r");
+        bool markerPending = false;
+        int previousMinVersion = 0;
+        if (!walletdb.ReadEncryptionRewritePending(
+                markerPending, previousMinVersion) || markerPending)
+            return false;
+    }
+
+    if (IsCrypted()) {
+        {
+            LOCK(cs_KeyStore);
+            if (!mapPQKeys.empty())
+                return false;
+        }
+
+        bool hasPlaintextPQKeys = false;
+        bool hasPlaintextKeys = false;
+        bool hasPlaintextBip39 = false;
+        {
+            CWalletDB walletdb(*dbw, "r");
+            if (!walletdb.HasPlaintextKeys(hasPlaintextKeys) || hasPlaintextKeys ||
+                !walletdb.HasPlaintextPQKeys(hasPlaintextPQKeys) || hasPlaintextPQKeys ||
+                !walletdb.HasPlaintextBip39(hasPlaintextBip39) || hasPlaintextBip39)
+                return false;
+        }
+
+        // Compact before every encrypted backup so deleted plaintext cannot be
+        // copied from Berkeley DB slack space.
+        if (!dbw->Rewrite())
+            return false;
+    }
     return dbw->Backup(strDest);
 }
 

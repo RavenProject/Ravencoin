@@ -1,0 +1,261 @@
+name: RIP-25 v4.8 Final Gate
+
+on:
+  push:
+    branches:
+      - integration/rip25-v4.8.0
+      - fix/rip25-v48-glm-remediation
+      - feature/rip25-v481-upstream
+  pull_request:
+    branches:
+      - master
+      - develop
+      - release*
+      - integration/rip25-v4.8.0
+      - fix/rip25-v48-glm-remediation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rip25-v48-final-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAKEJOBS: -j2
+
+jobs:
+  security-tests:
+    name: PQ + v4.8 security tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - id: checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: source_integrity
+        name: Verify checked-out commit is pristine
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+          test -z "$(git status --porcelain)"
+
+      - id: prereqs
+        name: Install build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            automake autotools-dev bsdmainutils build-essential ca-certificates \
+            cmake curl git libtool pkg-config python3 ninja-build
+
+      - id: invariants
+        name: Lint security and consensus invariants
+        shell: bash
+        run: ./contrib/devtools/check-rip25-v48-invariants.sh --structural-only
+
+      - id: depends
+        name: Build pinned dependencies
+        shell: bash
+        run: make -C depends $MAKEJOBS HOST=x86_64-pc-linux-gnu NO_QT=1
+
+      - id: prebuild_integrity
+        name: Verify tracked source remains unchanged
+        shell: bash
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - id: configure
+        name: Configure Linux test build
+        run: |
+          ./autogen.sh
+          mkdir -p "$HOME/.ccache"
+          "$PWD/depends/x86_64-pc-linux-gnu/native/bin/ccache" --print-config > /dev/null
+          CONFIG_SITE="$PWD/depends/x86_64-pc-linux-gnu/share/config.site" \
+            ./configure --without-gui --with-tx --disable-bench
+
+      - id: build_tests
+        name: Build tests
+        run: make $MAKEJOBS
+
+      - id: unit_tests
+        name: Run unit and regression tests
+        run: make check
+
+      - id: pq_fuzz_smoke
+        name: Exercise the real PQ verifier fuzz target
+        shell: bash
+        run: |
+          make -C src -j2 test/test_raven_fuzzy
+          src/test/test_raven_fuzzy --pq-smoke
+          src/test/test_raven_fuzzy < src/test/fuzz/pq_witness_v2_seed
+          src/test/test_raven_fuzzy --pq-seed-tx | src/test/test_raven_fuzzy
+
+      - id: behavioral_invariants
+        name: Verify behavioral security invariants
+        shell: bash
+        run: ./contrib/devtools/check-rip25-v48-invariants.sh --run-tests
+
+      - id: source_mutation_sensitivity
+        name: Prove source mutation sensitivity
+        shell: bash
+        run: python3 contrib/devtools/test-rip25-source-mutation-sensitivity.py --full
+
+      - id: required_functional
+        name: Run required functional security tests
+        shell: bash
+        run: |
+          python3 contrib/devtools/test-required-functional-gate.py
+          python3 test/functional/test_runner.py --require-tests --jobs=2 \
+            wallet_encryption_rewrite.py wallet_asset_multiwallet.py feature_rewards_restart.py wallet_pq_recovery.py wallet_restricted_multiwallet.py wallet_messaging_multiwallet.py rpc_assettransfer.py feature_chainstate_ahead.py \
+            feature_asset_activation_reorg.py feature_pq_activation_reorg_sigops.py feature_transfer_script_reorg.py feature_rip5_activation_reorg.py feature_enforced_coinbase_activation.py \
+            feature_asset_dbcrash.py feature_asset_dbcrash_transfer.py feature_asset_db_missing_block.py \
+            feature_asset_verifydb_sameblock.py feature_transfer_mempool_reorg.py feature_mempool_clear_reissue.py feature_mempool_reissue_restart.py feature_transfer_sidebranch.py feature_pq_asset_anchor.py feature_pq_asset_authority_selection.py feature_pq_asset_source_rpc.py feature_pq_asset_wallet_ownership.py feature_loadblock.py \
+            feature_restricted_dbcrash.py feature_restricted_verifydb.py feature_restricted_verifydb_root.py \
+            feature_restricted_verifydb_freeze.py feature_restricted_verifydb_global.py feature_restricted_verifydb_verifier.py \
+            feature_restricted_root_cache.py feature_restricted_root_split.py feature_restricted_root_prefix_split.py \
+            feature_reissue_mempool_block_split.py feature_restricted_assets.py feature_raw_restricted_assets.py
+
+      - id: posttest_integrity
+        name: Verify tested source still matches checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+
+  build:
+    name: build (${{ matrix.name }})
+    needs: security-tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: arm32v7-disable-wallet
+            host: arm-linux-gnueabihf
+            packages: g++-arm-linux-gnueabihf
+            configure_flags: --without-gui --disable-wallet --disable-bench
+            run_tests: false
+          - name: arm32v7
+            host: arm-linux-gnueabihf
+            packages: g++-arm-linux-gnueabihf
+            configure_flags: --without-gui --disable-bench
+            run_tests: false
+          - name: aarch64-disable-wallet
+            host: aarch64-linux-gnu
+            packages: g++-aarch64-linux-gnu
+            configure_flags: --without-gui --disable-wallet --disable-bench
+            run_tests: false
+          - name: aarch64
+            host: aarch64-linux-gnu
+            packages: g++-aarch64-linux-gnu
+            configure_flags: --without-gui --disable-bench
+            run_tests: false
+          - name: linux-disable-wallet
+            host: x86_64-pc-linux-gnu
+            packages: ''
+            configure_flags: --without-gui --disable-wallet --disable-bench
+            run_tests: true
+          - name: linux
+            host: x86_64-pc-linux-gnu
+            packages: ''
+            configure_flags: --without-gui --disable-bench
+            run_tests: true
+          - name: windows
+            host: x86_64-w64-mingw32
+            packages: g++-mingw-w64-x86-64
+            configure_flags: --without-gui --disable-bench
+            run_tests: false
+
+    steps:
+      - id: checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - id: source_integrity
+        name: Verify checked-out commit is pristine
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+          test -z "$(git status --porcelain)"
+
+      - id: prereqs
+        name: Install build prerequisites
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            automake autotools-dev bsdmainutils build-essential ca-certificates \
+            cmake curl git libtool pkg-config python3 ninja-build \
+            ${{ matrix.packages }}
+          if [ "${{ matrix.host }}" = "x86_64-w64-mingw32" ]; then
+            sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
+            sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+          fi
+
+      - id: invariants
+        name: Lint security and consensus invariants
+        shell: bash
+        run: ./contrib/devtools/check-rip25-v48-invariants.sh --structural-only
+
+      - id: depends
+        name: Build pinned dependencies
+        shell: bash
+        run: make -C depends $MAKEJOBS HOST=${{ matrix.host }} NO_QT=1
+
+      - id: prebuild_integrity
+        name: Verify tracked source remains unchanged
+        shell: bash
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - id: configure
+        name: Configure
+        shell: bash
+        run: |
+          ./autogen.sh
+          mkdir -p "$HOME/.ccache"
+          "$PWD/depends/${{ matrix.host }}/native/bin/ccache" --print-config > /dev/null
+          CONFIG_SITE="$PWD/depends/${{ matrix.host }}/share/config.site" \
+            ./configure ${{ matrix.configure_flags }}
+
+      - id: build
+        name: Build
+        shell: bash
+        run: make $MAKEJOBS
+
+      - id: native_tests
+        name: Run native tests
+        if: matrix.run_tests
+        shell: bash
+        run: |
+          if ! make check; then
+            if test -f src/test-suite.log; then
+              tail -n 300 src/test-suite.log
+            fi
+            if test -f src/test/test_raven.log; then
+              tail -n 300 src/test/test_raven.log
+            fi
+            exit 1
+          fi
+
+      - id: postbuild_integrity
+        name: Verify built source still matches checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code

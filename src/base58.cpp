@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
+#include "bech32.h"
 
 #include "hash.h"
 #include "uint256.h"
@@ -225,6 +226,7 @@ public:
     bool operator()(const CKeyID& id) const { return addr->Set(id); }
     bool operator()(const CScriptID& id) const { return addr->Set(id); }
     bool operator()(const CNoDestination& no) const { return false; }
+    bool operator()(const WitnessV2PQDestination&) const { return false; } // PQ uses bech32m, not base58
 };
 
 } // namespace
@@ -323,8 +325,46 @@ bool CRavenSecret::SetString(const std::string& strSecret)
     return SetString(strSecret.c_str());
 }
 
+namespace {
+/** Convert from one power-of-2 number base to another. */
+template<int frombits, int tobits, bool pad>
+bool ConvertBits(std::vector<uint8_t>& out, const std::vector<uint8_t>& in) {
+    static_assert(frombits > 0 && frombits <= 8 && tobits > 0 && tobits <= 8,
+                  "ConvertBits requires byte-sized input and output groups");
+    uint32_t acc = 0;
+    int bits = 0;
+    const uint32_t maxv = (1U << tobits) - 1U;
+    const uint32_t max_acc = (1U << (frombits + tobits - 1)) - 1U;
+    for (size_t i = 0; i < in.size(); ++i) {
+        const uint32_t value = in[i];
+        if (value >> frombits) return false;
+        acc = ((acc << frombits) | value) & max_acc;
+        bits += frombits;
+        while (bits >= tobits) {
+            bits -= tobits;
+            out.push_back((acc >> bits) & maxv);
+        }
+    }
+    if (pad) {
+        if (bits) out.push_back((acc << (tobits - bits)) & maxv);
+    } else if (bits >= frombits || ((acc << (tobits - bits)) & maxv)) {
+        return false;
+    }
+    return true;
+}
+} // namespace
+
 std::string EncodeDestination(const CTxDestination& dest)
 {
+    // Check for WitnessV2PQDestination first: uses bech32m
+    if (const WitnessV2PQDestination* pqDest = boost::get<WitnessV2PQDestination>(&dest)) {
+        std::vector<uint8_t> data8(pqDest->witnessProgram.begin(), pqDest->witnessProgram.end());
+        std::vector<uint8_t> data5;
+        data5.push_back(2); // witness version 2
+        ConvertBits<8, 5, true>(data5, data8);
+        return bech32::Encode(bech32::BECH32M, GetParams().Bech32PQHrp(), data5);
+    }
+
     CRavenAddress addr(dest);
     if (!addr.IsValid()) return "";
     return addr.ToString();
@@ -332,15 +372,82 @@ std::string EncodeDestination(const CTxDestination& dest)
 
 CTxDestination DecodeDestination(const std::string& str)
 {
+    // Try bech32m first (PQ witness v2 addresses)
+    bech32::DecodeResult bech = bech32::Decode(str);
+    if (bech.encoding == bech32::BECH32M && !bech.data.empty()) {
+        // Check HRP matches current network
+        if (bech.hrp == GetParams().Bech32PQHrp()) {
+            int version = bech.data[0]; // witness version
+            if (version == 2) {
+                std::vector<uint8_t> data5(bech.data.begin() + 1, bech.data.end());
+                std::vector<uint8_t> data8;
+                if (ConvertBits<5, 8, false>(data8, data5) && data8.size() == 32) {
+                    uint256 wp;
+                    memcpy(wp.begin(), data8.data(), 32);
+                    return WitnessV2PQDestination(wp);
+                }
+            }
+        }
+    }
+
+    // Fall back to base58
     return CRavenAddress(str).Get();
+}
+
+std::string EncodePQAssetDestination(const CKeyID& classicalKey, const uint256& pqProgram)
+{
+    const std::string classicalAddress = EncodeDestination(classicalKey);
+    const std::string pqAddress = EncodeDestination(WitnessV2PQDestination(pqProgram));
+    if (classicalAddress.empty() || pqAddress.empty())
+        return std::string();
+    return classicalAddress + "|" + pqAddress;
+}
+
+bool DecodePQAssetDestination(const std::string& descriptor, CKeyID& classicalKey, uint256& pqProgram)
+{
+    const size_t separator = descriptor.find('|');
+    if (separator == std::string::npos || separator == 0 ||
+        separator + 1 == descriptor.size() ||
+        descriptor.find('|', separator + 1) != std::string::npos)
+        return false;
+
+    const std::string classicalAddress = descriptor.substr(0, separator);
+    const std::string pqAddress = descriptor.substr(separator + 1);
+    const CTxDestination classicalDestination = DecodeDestination(classicalAddress);
+    const CTxDestination pqDestination = DecodeDestination(pqAddress);
+    const CKeyID* classical = boost::get<CKeyID>(&classicalDestination);
+    const WitnessV2PQDestination* pq = boost::get<WitnessV2PQDestination>(&pqDestination);
+    if (!classical || !pq || EncodeDestination(*classical) != classicalAddress ||
+        EncodeDestination(*pq) != pqAddress)
+        return false;
+
+    classicalKey = *classical;
+    pqProgram = pq->witnessProgram;
+    return true;
+}
+
+bool DecodePQOnlyAssetDestination(const std::string& descriptor, CKeyID& assetID, uint256& pqProgram)
+{
+    if (!DecodePQAssetDestination(descriptor, assetID, pqProgram))
+        return false;
+    return assetID == CKeyID(Hash160(pqProgram.begin(), pqProgram.end()));
 }
 
 bool IsValidDestinationString(const std::string& str, const CChainParams& params)
 {
+    // Check bech32m first
+    bech32::DecodeResult bech = bech32::Decode(str);
+    if (bech.encoding == bech32::BECH32M && !bech.data.empty()) {
+        if (bech.hrp == params.Bech32PQHrp() && bech.data[0] == 2) {
+            std::vector<uint8_t> data5(bech.data.begin() + 1, bech.data.end());
+            std::vector<uint8_t> data8;
+            return ConvertBits<5, 8, false>(data8, data5) && data8.size() == 32;
+        }
+    }
     return CRavenAddress(str).IsValid(params);
 }
 
 bool IsValidDestinationString(const std::string& str)
 {
-    return CRavenAddress(str).IsValid();
+    return IsValidDestinationString(str, GetParams());
 }

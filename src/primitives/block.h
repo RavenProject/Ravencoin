@@ -7,9 +7,13 @@
 #ifndef RAVEN_PRIMITIVES_BLOCK_H
 #define RAVEN_PRIMITIVES_BLOCK_H
 
+#include "consensus/consensus.h"
 #include "primitives/transaction.h"
 #include "serialize.h"
 #include "uint256.h"
+
+#include <utility>
+#include <vector>
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
@@ -138,7 +142,28 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(*(CBlockHeader*)this);
-        READWRITE(vtx);
+
+        uint64_t transactionCount = vtx.size();
+        READWRITE(COMPACTSIZE(transactionCount));
+        if (transactionCount > MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("Block transaction count exceeds structural limit");
+        }
+
+        if (ser_action.ForRead()) {
+            std::vector<CTransactionRef> parsed;
+            parsed.reserve(static_cast<size_t>(transactionCount));
+            for (uint64_t i = 0; i < transactionCount; ++i) {
+                CTransactionRef transaction;
+                READWRITE(transaction);
+                parsed.push_back(std::move(transaction));
+            }
+            vtx.swap(parsed);
+            fChecked = false;
+        } else {
+            for (CTransactionRef& transaction : vtx) {
+                READWRITE(transaction);
+            }
+        }
     }
 
     void SetNull()

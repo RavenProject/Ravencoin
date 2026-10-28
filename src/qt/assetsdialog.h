@@ -40,6 +40,7 @@ public:
     void setupAssetControlFrame(const PlatformStyle *platformStyle);
     void setupScrollView(const PlatformStyle *platformStyle);
     void setupFeeControl(const PlatformStyle *platformStyle);
+    bool applyProtectedAssetChange(CCoinControl& ctrl, QString* error = nullptr) const;
 
     /** Set up the tab chain manually, as Qt messes up the tab chain by default in some cases (issue https://bugreports.qt-project.org/browse/QTBUG-10907).
      */
@@ -93,6 +94,8 @@ private Q_SLOTS:
     void assetControlButtonClicked();
     void assetControlChangeChecked(int);
     void assetControlChangeEdited(const QString &);
+    void chooseProtectedAssetChange();
+    void updateProtectedAssetChangeAvailability();
     void assetControlUpdateLabels();
     void assetControlClipboardQuantity();
     void assetControlClipboardAmount();

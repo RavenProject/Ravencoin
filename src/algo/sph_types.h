@@ -48,6 +48,7 @@
 #define SPH_TYPES_H__
 
 #include <limits.h>
+#include <string.h>
 
 /*
  * All our I/O functions are defined over octet streams. We do not know
@@ -1329,6 +1330,37 @@ sph_bswap64(sph_u64 x)
 
 #endif
 
+/* Byte buffers need not have integer alignment or effective type. */
+static SPH_INLINE sph_u32
+sph_load32(const void *src)
+{
+	sph_u32 val;
+	memcpy(&val, src, sizeof val);
+	return val;
+}
+
+static SPH_INLINE void
+sph_store32(void *dst, sph_u32 val)
+{
+	memcpy(dst, &val, sizeof val);
+}
+
+#if SPH_64
+static SPH_INLINE sph_u64
+sph_load64(const void *src)
+{
+	sph_u64 val;
+	memcpy(&val, src, sizeof val);
+	return val;
+}
+
+static SPH_INLINE void
+sph_store64(void *dst, sph_u64 val)
+{
+	memcpy(dst, &val, sizeof val);
+}
+#endif
+
 static SPH_INLINE void
 sph_enc16be(void *dst, unsigned val)
 {
@@ -1371,13 +1403,13 @@ sph_enc32be(void *dst, sph_u32 val)
 #if SPH_LITTLE_ENDIAN
 	val = sph_bswap32(val);
 #endif
-	*(sph_u32 *)dst = val;
+	sph_store32(dst, val);
 #else
 	if (((SPH_UPTR)dst & 3) == 0) {
 #if SPH_LITTLE_ENDIAN
 		val = sph_bswap32(val);
 #endif
-		*(sph_u32 *)dst = val;
+		sph_store32(dst, val);
 	} else {
 		((unsigned char *)dst)[0] = (val >> 24);
 		((unsigned char *)dst)[1] = (val >> 16);
@@ -1404,9 +1436,9 @@ static SPH_INLINE void
 sph_enc32be_aligned(void *dst, sph_u32 val)
 {
 #if SPH_LITTLE_ENDIAN
-	*(sph_u32 *)dst = sph_bswap32(val);
+	sph_store32(dst, sph_bswap32(val));
 #elif SPH_BIG_ENDIAN
-	*(sph_u32 *)dst = val;
+	sph_store32(dst, val);
 #else
 	((unsigned char *)dst)[0] = (val >> 24);
 	((unsigned char *)dst)[1] = (val >> 16);
@@ -1427,16 +1459,16 @@ sph_dec32be(const void *src)
 #if defined SPH_UPTR
 #if SPH_UNALIGNED
 #if SPH_LITTLE_ENDIAN
-	return sph_bswap32(*(const sph_u32 *)src);
+	return sph_bswap32(sph_load32(src));
 #else
-	return *(const sph_u32 *)src;
+	return sph_load32(src);
 #endif
 #else
 	if (((SPH_UPTR)src & 3) == 0) {
 #if SPH_LITTLE_ENDIAN
-		return sph_bswap32(*(const sph_u32 *)src);
+		return sph_bswap32(sph_load32(src));
 #else
-		return *(const sph_u32 *)src;
+		return sph_load32(src);
 #endif
 	} else {
 		return ((sph_u32)(((const unsigned char *)src)[0]) << 24)
@@ -1464,9 +1496,9 @@ static SPH_INLINE sph_u32
 sph_dec32be_aligned(const void *src)
 {
 #if SPH_LITTLE_ENDIAN
-	return sph_bswap32(*(const sph_u32 *)src);
+	return sph_bswap32(sph_load32(src));
 #elif SPH_BIG_ENDIAN
-	return *(const sph_u32 *)src;
+	return sph_load32(src);
 #else
 	return ((sph_u32)(((const unsigned char *)src)[0]) << 24)
 		| ((sph_u32)(((const unsigned char *)src)[1]) << 16)
@@ -1489,13 +1521,13 @@ sph_enc32le(void *dst, sph_u32 val)
 #if SPH_BIG_ENDIAN
 	val = sph_bswap32(val);
 #endif
-	*(sph_u32 *)dst = val;
+	sph_store32(dst, val);
 #else
 	if (((SPH_UPTR)dst & 3) == 0) {
 #if SPH_BIG_ENDIAN
 		val = sph_bswap32(val);
 #endif
-		*(sph_u32 *)dst = val;
+		sph_store32(dst, val);
 	} else {
 		((unsigned char *)dst)[0] = val;
 		((unsigned char *)dst)[1] = (val >> 8);
@@ -1522,9 +1554,9 @@ static SPH_INLINE void
 sph_enc32le_aligned(void *dst, sph_u32 val)
 {
 #if SPH_LITTLE_ENDIAN
-	*(sph_u32 *)dst = val;
+	sph_store32(dst, val);
 #elif SPH_BIG_ENDIAN
-	*(sph_u32 *)dst = sph_bswap32(val);
+	sph_store32(dst, sph_bswap32(val));
 #else
 	((unsigned char *)dst)[0] = val;
 	((unsigned char *)dst)[1] = (val >> 8);
@@ -1545,9 +1577,9 @@ sph_dec32le(const void *src)
 #if defined SPH_UPTR
 #if SPH_UNALIGNED
 #if SPH_BIG_ENDIAN
-	return sph_bswap32(*(const sph_u32 *)src);
+	return sph_bswap32(sph_load32(src));
 #else
-	return *(const sph_u32 *)src;
+	return sph_load32(src);
 #endif
 #else
 	if (((SPH_UPTR)src & 3) == 0) {
@@ -1584,10 +1616,10 @@ sph_dec32le(const void *src)
 		return tmp;
  */
 #else
-		return sph_bswap32(*(const sph_u32 *)src);
+		return sph_bswap32(sph_load32(src));
 #endif
 #else
-		return *(const sph_u32 *)src;
+		return sph_load32(src);
 #endif
 	} else {
 		return (sph_u32)(((const unsigned char *)src)[0])
@@ -1615,7 +1647,7 @@ static SPH_INLINE sph_u32
 sph_dec32le_aligned(const void *src)
 {
 #if SPH_LITTLE_ENDIAN
-	return *(const sph_u32 *)src;
+	return sph_load32(src);
 #elif SPH_BIG_ENDIAN
 #if SPH_SPARCV9_GCC && !SPH_NO_ASM
 	sph_u32 tmp;
@@ -1632,7 +1664,7 @@ sph_dec32le_aligned(const void *src)
 	return tmp;
  */
 #else
-	return sph_bswap32(*(const sph_u32 *)src);
+	return sph_bswap32(sph_load32(src));
 #endif
 #else
 	return (sph_u32)(((const unsigned char *)src)[0])
@@ -1658,13 +1690,13 @@ sph_enc64be(void *dst, sph_u64 val)
 #if SPH_LITTLE_ENDIAN
 	val = sph_bswap64(val);
 #endif
-	*(sph_u64 *)dst = val;
+	sph_store64(dst, val);
 #else
 	if (((SPH_UPTR)dst & 7) == 0) {
 #if SPH_LITTLE_ENDIAN
 		val = sph_bswap64(val);
 #endif
-		*(sph_u64 *)dst = val;
+		sph_store64(dst, val);
 	} else {
 		((unsigned char *)dst)[0] = (val >> 56);
 		((unsigned char *)dst)[1] = (val >> 48);
@@ -1699,9 +1731,9 @@ static SPH_INLINE void
 sph_enc64be_aligned(void *dst, sph_u64 val)
 {
 #if SPH_LITTLE_ENDIAN
-	*(sph_u64 *)dst = sph_bswap64(val);
+	sph_store64(dst, sph_bswap64(val));
 #elif SPH_BIG_ENDIAN
-	*(sph_u64 *)dst = val;
+	sph_store64(dst, val);
 #else
 	((unsigned char *)dst)[0] = (val >> 56);
 	((unsigned char *)dst)[1] = (val >> 48);
@@ -1726,16 +1758,16 @@ sph_dec64be(const void *src)
 #if defined SPH_UPTR
 #if SPH_UNALIGNED
 #if SPH_LITTLE_ENDIAN
-	return sph_bswap64(*(const sph_u64 *)src);
+	return sph_bswap64(sph_load64(src));
 #else
-	return *(const sph_u64 *)src;
+	return sph_load64(src);
 #endif
 #else
 	if (((SPH_UPTR)src & 7) == 0) {
 #if SPH_LITTLE_ENDIAN
-		return sph_bswap64(*(const sph_u64 *)src);
+		return sph_bswap64(sph_load64(src));
 #else
-		return *(const sph_u64 *)src;
+		return sph_load64(src);
 #endif
 	} else {
 		return ((sph_u64)(((const unsigned char *)src)[0]) << 56)
@@ -1771,9 +1803,9 @@ static SPH_INLINE sph_u64
 sph_dec64be_aligned(const void *src)
 {
 #if SPH_LITTLE_ENDIAN
-	return sph_bswap64(*(const sph_u64 *)src);
+	return sph_bswap64(sph_load64(src));
 #elif SPH_BIG_ENDIAN
-	return *(const sph_u64 *)src;
+	return sph_load64(src);
 #else
 	return ((sph_u64)(((const unsigned char *)src)[0]) << 56)
 		| ((sph_u64)(((const unsigned char *)src)[1]) << 48)
@@ -1800,13 +1832,13 @@ sph_enc64le(void *dst, sph_u64 val)
 #if SPH_BIG_ENDIAN
 	val = sph_bswap64(val);
 #endif
-	*(sph_u64 *)dst = val;
+	sph_store64(dst, val);
 #else
 	if (((SPH_UPTR)dst & 7) == 0) {
 #if SPH_BIG_ENDIAN
 		val = sph_bswap64(val);
 #endif
-		*(sph_u64 *)dst = val;
+		sph_store64(dst, val);
 	} else {
 		((unsigned char *)dst)[0] = val;
 		((unsigned char *)dst)[1] = (val >> 8);
@@ -1841,9 +1873,9 @@ static SPH_INLINE void
 sph_enc64le_aligned(void *dst, sph_u64 val)
 {
 #if SPH_LITTLE_ENDIAN
-	*(sph_u64 *)dst = val;
+	sph_store64(dst, val);
 #elif SPH_BIG_ENDIAN
-	*(sph_u64 *)dst = sph_bswap64(val);
+	sph_store64(dst, sph_bswap64(val));
 #else
 	((unsigned char *)dst)[0] = val;
 	((unsigned char *)dst)[1] = (val >> 8);
@@ -1868,9 +1900,9 @@ sph_dec64le(const void *src)
 #if defined SPH_UPTR
 #if SPH_UNALIGNED
 #if SPH_BIG_ENDIAN
-	return sph_bswap64(*(const sph_u64 *)src);
+	return sph_bswap64(sph_load64(src));
 #else
-	return *(const sph_u64 *)src;
+	return sph_load64(src);
 #endif
 #else
 	if (((SPH_UPTR)src & 7) == 0) {
@@ -1896,10 +1928,10 @@ sph_dec64le(const void *src)
 		return tmp;
  */
 #else
-		return sph_bswap64(*(const sph_u64 *)src);
+		return sph_bswap64(sph_load64(src));
 #endif
 #else
-		return *(const sph_u64 *)src;
+		return sph_load64(src);
 #endif
 	} else {
 		return (sph_u64)(((const unsigned char *)src)[0])
@@ -1935,7 +1967,7 @@ static SPH_INLINE sph_u64
 sph_dec64le_aligned(const void *src)
 {
 #if SPH_LITTLE_ENDIAN
-	return *(const sph_u64 *)src;
+	return sph_load64(src);
 #elif SPH_BIG_ENDIAN
 #if SPH_SPARCV9_GCC_64 && !SPH_NO_ASM
 	sph_u64 tmp;
@@ -1955,7 +1987,7 @@ sph_dec64le_aligned(const void *src)
 	return tmp;
  */
 #else
-	return sph_bswap64(*(const sph_u64 *)src);
+	return sph_bswap64(sph_load64(src));
 #endif
 #else
 	return (sph_u64)(((const unsigned char *)src)[0])

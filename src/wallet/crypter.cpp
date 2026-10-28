@@ -7,10 +7,14 @@
 
 #include "crypto/aes.h"
 #include "crypto/sha512.h"
+#include "hash.h"
 #include "script/script.h"
 #include "script/standard.h"
 #include "util.h"
+#include "utilstrencodings.h"
+#include "wallet/bip39.h"
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -74,7 +78,9 @@ bool CCrypter::SetKey(const CKeyingMaterial& chNewKey, const std::vector<unsigne
 
 bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned char> &vchCiphertext) const
 {
-    if (!fKeySet)
+    vchCiphertext.clear();
+    if (!fKeySet || vchPlaintext.empty() ||
+        vchPlaintext.size() > static_cast<size_t>(std::numeric_limits<int>::max() - AES_BLOCKSIZE))
         return false;
 
     // max ciphertext len for a n bytes of plaintext is
@@ -82,9 +88,11 @@ bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned
     vchCiphertext.resize(vchPlaintext.size() + AES_BLOCKSIZE);
 
     AES256CBCEncrypt enc(vchKey.data(), vchIV.data(), true);
-    size_t nLen = enc.Encrypt(&vchPlaintext[0], vchPlaintext.size(), vchCiphertext.data());
-    if(nLen < vchPlaintext.size())
+    int nLen = enc.Encrypt(vchPlaintext.data(), static_cast<int>(vchPlaintext.size()), vchCiphertext.data());
+    if (nLen <= static_cast<int>(vchPlaintext.size())) {
+        vchCiphertext.clear();
         return false;
+    }
     vchCiphertext.resize(nLen);
 
     return true;
@@ -92,18 +100,21 @@ bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned
 
 bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingMaterial& vchPlaintext) const
 {
-    if (!fKeySet)
+    CKeyingMaterial().swap(vchPlaintext);
+    if (!fKeySet || vchCiphertext.size() < AES_BLOCKSIZE ||
+        vchCiphertext.size() % AES_BLOCKSIZE != 0 ||
+        vchCiphertext.size() > static_cast<size_t>(std::numeric_limits<int>::max()))
         return false;
 
     // plaintext will always be equal to or lesser than length of ciphertext
-    int nLen = vchCiphertext.size();
-
-    vchPlaintext.resize(nLen);
+    vchPlaintext.resize(vchCiphertext.size());
 
     AES256CBCDecrypt dec(vchKey.data(), vchIV.data(), true);
-    nLen = dec.Decrypt(vchCiphertext.data(), vchCiphertext.size(), &vchPlaintext[0]);
-    if(nLen == 0)
+    int nLen = dec.Decrypt(vchCiphertext.data(), static_cast<int>(vchCiphertext.size()), vchPlaintext.data());
+    if (nLen == 0) {
+        CKeyingMaterial().swap(vchPlaintext);
         return false;
+    }
 
     vchPlaintext.resize(nLen);
     return true;
@@ -148,24 +159,42 @@ bool CCryptoKeyStore::SetCrypted()
     LOCK(cs_KeyStore);
     if (fUseCrypto)
         return true;
-    if (!mapKeys.empty())
+    if (!mapKeys.empty() || !mapPQKeys.empty())
         return false;
     fUseCrypto = true;
     return true;
 }
 
-bool CCryptoKeyStore::Lock()
+void CCryptoKeyStore::ResetCryptedOnAddFailure()
+{
+    LOCK(cs_KeyStore);
+    if (mapCryptedKeys.empty() && mapCryptedPQKeys.empty()) {
+        CKeyingMaterial().swap(vMasterKey);
+        fUseCrypto = false;
+        fDecryptionThoroughlyChecked = false;
+    }
+}
+
+bool CCryptoKeyStore::LockKeyStore()
 {
     if (!SetCrypted())
         return false;
 
     {
         LOCK(cs_KeyStore);
-        vMasterKey.clear();
+        CKeyingMaterial().swap(vMasterKey);
+        SecureVector().swap(vchWords);
+        SecureVector().swap(vchPassphrase);
+        SecureVector().swap(g_vchSeed);
     }
 
-    vchWords.clear();
-    vchPassphrase.clear();
+    return true;
+}
+
+bool CCryptoKeyStore::Lock()
+{
+    if (!LockKeyStore())
+        return false;
 
     NotifyStatusChanged(this);
     return true;
@@ -195,20 +224,48 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
             if (fDecryptionThoroughlyChecked)
                 break;
         }
-        if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size() || vchCryptedBip39VchSeed.size()) {
-            if (!DecryptBip39(vMasterKeyIn)) {
-                LogPrintf("Failed to decrypt bip 39 data");
-                assert(false);
+        // RIP-25: validate decrypted PQ secret/public-key pairs as well.
+        // A successful AES decrypt alone is not sufficient: the persisted ML-DSA
+        // secret must cryptographically match the public key/witness program.
+        if (!keyFail) {
+            CryptedPQKeyMap::const_iterator pqi = mapCryptedPQKeys.begin();
+            for (; pqi != mapCryptedPQKeys.end(); ++pqi)
+            {
+                const CPQPubKey &pqPubKey = (*pqi).second.first;
+                const std::vector<unsigned char> &vchCryptedSecret = (*pqi).second.second;
+                CKeyingMaterial vchSecret;
+                if (!DecryptSecret(vMasterKeyIn, vchCryptedSecret, pqPubKey.GetWitnessProgram(), vchSecret))
+                {
+                    keyFail = true;
+                    break;
+                }
+                CPQKey pqKey;
+                if (!pqKey.SetKeyData(vchSecret, pqPubKey))
+                {
+                    keyFail = true;
+                    break;
+                }
+                keyPass = true;
+                if (fDecryptionThoroughlyChecked)
+                    break;
             }
         }
         if (keyPass && keyFail)
         {
             LogPrintf("The wallet is probably corrupted: Some keys decrypt but not all.\n");
-            assert(false);
+            return false;
         }
         if (keyFail || !keyPass)
             return false;
-        vMasterKey = vMasterKeyIn;
+
+        CKeyingMaterial validatedMasterKey(vMasterKeyIn);
+        if (vchCryptedBip39Words.size() || vchCryptedBip39Passphrase.size() || vchCryptedBip39VchSeed.size()) {
+            if (!DecryptBip39(vMasterKeyIn)) {
+                LogPrintf("Failed to decrypt or validate BIP39 data\n");
+                return false;
+            }
+        }
+        vMasterKey.swap(validatedMasterKey);
         fDecryptionThoroughlyChecked = true;
     }
     NotifyStatusChanged(this);
@@ -247,6 +304,81 @@ bool CCryptoKeyStore::AddCryptedKey(const CPubKey &vchPubKey, const std::vector<
         mapCryptedKeys[vchPubKey.GetID()] = make_pair(vchPubKey, vchCryptedSecret);
     }
     return true;
+}
+
+bool CCryptoKeyStore::AddPQKeyPubKey(const CPQKey &key, const CPQPubKey &pubkey)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!key.IsValid() || !pubkey.IsValid() || !key.MatchesPubKey(pubkey))
+            return false;
+
+        if (!IsCrypted())
+            return CBasicKeyStore::AddPQKeyPubKey(key, pubkey);
+
+        if (IsLocked())
+            return false;
+
+        std::vector<unsigned char> vchCryptedSecret;
+        CKeyingMaterial vchSecret(key.GetKeyData().begin(), key.GetKeyData().end());
+        uint256 witnessProgram = pubkey.GetWitnessProgram();
+        if (!EncryptSecret(vMasterKey, vchSecret, witnessProgram, vchCryptedSecret))
+            return false;
+
+        if (!AddCryptedPQKey(pubkey, vchCryptedSecret))
+            return false;
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::AddCryptedPQKey(const CPQPubKey &pqPubKey, const std::vector<unsigned char> &vchCryptedSecret)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!pqPubKey.IsValid() || !SetCrypted())
+            return false;
+
+        mapCryptedPQKeys[pqPubKey.GetWitnessProgram()] = make_pair(pqPubKey, vchCryptedSecret);
+    }
+    return true;
+}
+
+bool CCryptoKeyStore::GetPQKey(const uint256 &witnessProgram, CPQKey &keyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted())
+            return CBasicKeyStore::GetPQKey(witnessProgram, keyOut);
+
+        CryptedPQKeyMap::const_iterator mi = mapCryptedPQKeys.find(witnessProgram);
+        if (mi != mapCryptedPQKeys.end())
+        {
+            const CPQPubKey &pqPubKey = (*mi).second.first;
+            const std::vector<unsigned char> &vchCryptedSecret = (*mi).second.second;
+            CKeyingMaterial vchSecret;
+            if (!DecryptSecret(vMasterKey, vchCryptedSecret, pqPubKey.GetWitnessProgram(), vchSecret))
+                return false;
+            return keyOut.SetKeyData(vchSecret, pqPubKey);
+        }
+    }
+    return false;
+}
+
+bool CCryptoKeyStore::GetPQPubKey(const uint256 &witnessProgram, CPQPubKey &pubkeyOut) const
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!IsCrypted())
+            return CBasicKeyStore::GetPQPubKey(witnessProgram, pubkeyOut);
+
+        CryptedPQKeyMap::const_iterator mi = mapCryptedPQKeys.find(witnessProgram);
+        if (mi != mapCryptedPQKeys.end())
+        {
+            pubkeyOut = (*mi).second.first;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CCryptoKeyStore::GetKey(const CKeyID &address, CKey& keyOut) const
@@ -292,11 +424,17 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial& vMasterKeyIn)
 {
     {
         LOCK(cs_KeyStore);
-        if (!mapCryptedKeys.empty() || IsCrypted())
+        if (!mapCryptedKeys.empty() || !mapCryptedPQKeys.empty() || IsCrypted())
             return false;
 
-        fUseCrypto = true;
-        for (KeyMap::value_type& mKey : mapKeys)
+        // Build every ciphertext before changing keystore mode. Persistence is
+        // performed through the virtual AddCrypted* methods below; if any of
+        // those writes fails, restore the original plaintext maps so callers
+        // can abort their database transaction without leaving a half-crypted
+        // in-memory wallet.
+        CryptedKeyMap cryptedKeys;
+        CryptedPQKeyMap cryptedPQKeys;
+        for (const KeyMap::value_type& mKey : mapKeys)
         {
             const CKey &key = mKey.second;
             CPubKey vchPubKey = key.GetPubKey();
@@ -304,10 +442,56 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial& vMasterKeyIn)
             std::vector<unsigned char> vchCryptedSecret;
             if (!EncryptSecret(vMasterKeyIn, vchSecret, vchPubKey.GetHash(), vchCryptedSecret))
                 return false;
-            if (!AddCryptedKey(vchPubKey, vchCryptedSecret))
-                return false;
+            cryptedKeys[vchPubKey.GetID()] = std::make_pair(vchPubKey, std::move(vchCryptedSecret));
         }
-        mapKeys.clear();
+
+        for (const PQKeyMap::value_type& mKey : mapPQKeys)
+        {
+            const CPQKey &key = mKey.second;
+            CPQPubKey pqPubKey = key.GetPubKey();
+            if (!key.IsValid() || !pqPubKey.IsValid() || !key.MatchesPubKey(pqPubKey))
+                return false;
+            CKeyingMaterial vchSecret(key.GetKeyData().begin(), key.GetKeyData().end());
+            std::vector<unsigned char> vchCryptedSecret;
+            if (!EncryptSecret(vMasterKeyIn, vchSecret, pqPubKey.GetWitnessProgram(), vchCryptedSecret))
+                return false;
+            cryptedPQKeys[pqPubKey.GetWitnessProgram()] = std::make_pair(pqPubKey, std::move(vchCryptedSecret));
+        }
+
+        KeyMap plaintextKeys;
+        PQKeyMap plaintextPQKeys;
+        plaintextKeys.swap(mapKeys);
+        plaintextPQKeys.swap(mapPQKeys);
+        fUseCrypto = true;
+
+        bool success = true;
+        try {
+            for (const CryptedKeyMap::value_type& entry : cryptedKeys) {
+                if (!AddCryptedKey(entry.second.first, entry.second.second)) {
+                    success = false;
+                    break;
+                }
+            }
+            if (success) {
+                for (const CryptedPQKeyMap::value_type& entry : cryptedPQKeys) {
+                    if (!AddCryptedPQKey(entry.second.first, entry.second.second)) {
+                        success = false;
+                        break;
+                    }
+                }
+            }
+        } catch (...) {
+            success = false;
+        }
+
+        if (!success) {
+            mapCryptedKeys.clear();
+            mapCryptedPQKeys.clear();
+            mapKeys.swap(plaintextKeys);
+            mapPQKeys.swap(plaintextPQKeys);
+            fUseCrypto = false;
+            return false;
+        }
     }
     return true;
 }
@@ -386,27 +570,55 @@ bool CCryptoKeyStore::DecryptBip39(const CKeyingMaterial& vMasterKeyIn)
 {
     {
         LOCK(cs_KeyStore);
+        if (vchCryptedBip39Words.size() < AES_BLOCKSIZE ||
+            vchCryptedBip39Words.size() % AES_BLOCKSIZE != 0 ||
+            vchCryptedBip39VchSeed.size() != BIP39_CRYPTED_SEED_SIZE ||
+            (!vchCryptedBip39Passphrase.empty() &&
+             (vchCryptedBip39Passphrase.size() < AES_BLOCKSIZE ||
+              vchCryptedBip39Passphrase.size() % AES_BLOCKSIZE != 0))) {
+            return false;
+        }
+
         CKeyingMaterial vchDecryptedWords;
         if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39Words, nWordHash, vchDecryptedWords)) {
             return false;
         }
-
-        vchWords = std::vector<unsigned char>(vchDecryptedWords.begin(), vchDecryptedWords.end());
-
-        CKeyingMaterial vchDecryptedVchSeed;
-        if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39VchSeed, nWordHash, vchDecryptedVchSeed)) {
+        if (Hash(vchDecryptedWords.begin(), vchDecryptedWords.end()) != nWordHash) {
+            return false;
+        }
+        SecureString words;
+        words.reserve(vchDecryptedWords.size() > 64 ? vchDecryptedWords.size() : 64);
+        words.assign(vchDecryptedWords.begin(), vchDecryptedWords.end());
+        if (!CMnemonic::Check(words)) {
             return false;
         }
 
-        g_vchSeed = std::vector<unsigned char>(vchDecryptedVchSeed.begin(), vchDecryptedVchSeed.end());
+        CKeyingMaterial vchDecryptedVchSeed;
+        if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39VchSeed, nWordHash, vchDecryptedVchSeed) ||
+            vchDecryptedVchSeed.size() != BIP39_SEED_SIZE) {
+            return false;
+        }
 
+        CKeyingMaterial vchDecryptedPassphrase;
         if (!vchCryptedBip39Passphrase.empty()) {
-            CKeyingMaterial vchDecryptedPassphrase;
             if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39Passphrase, nWordHash, vchDecryptedPassphrase)) {
                 return false;
             }
-            vchPassphrase = std::vector<unsigned char>(vchDecryptedPassphrase.begin(), vchDecryptedPassphrase.end());
         }
+
+        SecureString passphrase;
+        passphrase.reserve(vchDecryptedPassphrase.size() > 64 ? vchDecryptedPassphrase.size() : 64);
+        passphrase.assign(vchDecryptedPassphrase.begin(), vchDecryptedPassphrase.end());
+        SecureVector derivedSeed;
+        if (!CMnemonic::ToSeed(words, passphrase, derivedSeed) ||
+            derivedSeed.size() != BIP39_SEED_SIZE ||
+            !TimingResistantEqual(derivedSeed, vchDecryptedVchSeed)) {
+            return false;
+        }
+
+        vchWords.swap(vchDecryptedWords);
+        vchPassphrase.swap(vchDecryptedPassphrase);
+        g_vchSeed.swap(vchDecryptedVchSeed);
     }
 
     return true;

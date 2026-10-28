@@ -176,6 +176,7 @@ RAVEN_CORE_H = \
   netbase.h \
   netmessagemaker.h \
   noui.h \
+  pqkey.h \
   policy/feerate.h \
   policy/fees.h \
   policy/policy.h \
@@ -224,6 +225,7 @@ RAVEN_CORE_H = \
   wallet/feebumper.h \
   wallet/fees.h \
   wallet/init.h \
+  wallet/pqderivation.h \
   wallet/rpcwallet.h \
   wallet/wallet.h \
   wallet/walletdb.h \
@@ -319,6 +321,7 @@ libraven_wallet_a_SOURCES = \
   wallet/feebumper.cpp \
   wallet/fees.cpp \
   wallet/init.cpp \
+  wallet/pqderivation.cpp \
   wallet/rpcdump.cpp \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \
@@ -327,11 +330,13 @@ libraven_wallet_a_SOURCES = \
   $(RAVEN_CORE_H)
 
 # crypto primitives library
-crypto_libraven_crypto_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libraven_crypto_a_CPPFLAGS = $(AM_CPPFLAGS) $(LIBOQS_CFLAGS)
 crypto_libraven_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 crypto_libraven_crypto_a_SOURCES = \
   crypto/aes.cpp \
   crypto/aes.h \
+  crypto/mldsa.cpp \
+  crypto/mldsa.h \
   crypto/chacha20.h \
   crypto/chacha20.cpp \
   crypto/common.h \
@@ -385,6 +390,7 @@ libraven_consensus_a_SOURCES = \
   consensus/merkle.cpp \
   consensus/merkle.h \
   consensus/params.h \
+  consensus/rip25.h \
   consensus/validation.h \
   hash.cpp \
   hash.h \
@@ -420,7 +426,9 @@ libraven_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
 libraven_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libraven_common_a_SOURCES = \
   base58.cpp \
+  bech32.cpp \
   chainparams.cpp \
+  pqkey.cpp \
   coins.cpp \
   compressor.cpp \
   core_read.cpp \
@@ -499,7 +507,7 @@ ravend_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-ravend_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+ravend_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(LIBOQS_LIBS)
 
 # raven-cli binary #
 raven_cli_SOURCES = raven-cli.cpp
@@ -517,10 +525,21 @@ raven_cli_LDADD = \
   $(LIBRAVEN_UTIL) \
   $(LIBRAVEN_CRYPTO)
 
-raven_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+raven_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS) $(LIBOQS_LIBS)
 #
 
 # raven-tx binary #
+# Keep the interdependent transaction, asset, and wallet objects in one archive.
+EXTRA_LIBRARIES += libraven_tx_core.a
+libraven_tx_core_a_SOURCES =
+libraven_tx_core_a_LIBADD = \
+  $(libraven_common_a_OBJECTS) \
+  $(libraven_server_a_OBJECTS)
+
+if ENABLE_WALLET
+libraven_tx_core_a_LIBADD += $(libraven_wallet_a_OBJECTS)
+endif
+
 raven_tx_SOURCES = raven-tx.cpp
 raven_tx_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
 raven_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
@@ -531,14 +550,18 @@ raven_tx_SOURCES += raven-tx-res.rc
 endif
 
 raven_tx_LDADD = \
+  libraven_tx_core.a \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_COMMON) \
   $(LIBRAVEN_UTIL) \
+  $(LIBRAVEN_ZMQ) \
   $(LIBRAVEN_CONSENSUS) \
   $(LIBRAVEN_CRYPTO) \
+  $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
+  $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-raven_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+raven_tx_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(LIBOQS_LIBS)
 #
 
 # ravenconsensus library #
@@ -550,9 +573,25 @@ if GLIBC_BACK_COMPAT
   libravenconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
-libravenconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libravenconsensus_la_LIBADD = $(LIBSECP256K1) $(BOOST_LIBS)
-libravenconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_RAVEN_INTERNAL
+if TARGET_WINDOWS
+libravenconsensus_la_LDFLAGS = $(LIBTOOL_LDFLAGS) $(HARDENED_LDFLAGS) -no-undefined $(RELDFLAGS)
+else
+libravenconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) $(NOUNDEFINED_LDFLAGS)
+endif
+libravenconsensus_la_LIBADD = $(LIBSECP256K1) $(BOOST_LIBS) $(LIBOQS_LIBS)
+
+if TARGET_WINDOWS
+# AX_PTHREAD selected -pthread for this MinGW toolchain. The target-specific
+# LDFLAGS above intentionally omit PTHREAD_CFLAGS here because -pthread plus
+# archive_cmds_CXX -static would inject libpthread.a. The PIC objects instead
+# need the DLL import symbols (__imp_pthread_*), so link only the import archive.
+# Non-Windows targets retain the normal AM_LDFLAGS and PTHREAD_LIBS paths.
+libravenconsensus_la_LIBADD += /usr/$(host)/lib/libwinpthread.dll.a
+else
+libravenconsensus_la_LIBADD += $(PTHREAD_LIBS)
+endif
+
+libravenconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) $(LIBOQS_CFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_RAVEN_INTERNAL
 libravenconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif

@@ -3,9 +3,17 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "assets/assets.h"
+#include "base58.h"
+#include "chainparams.h"
+#include "consensus/tx_verify.h"
+#include "consensus/validation.h"
 #include "policy/policy.h"
+#include "crypto/mldsa.h"
+#include "script/standard.h"
 #include "txmempool.h"
 #include "util.h"
+#include "validation.h"
 
 #include "test/test_raven.h"
 
@@ -14,6 +22,27 @@
 #include <vector>
 
 BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
+
+    BOOST_AUTO_TEST_CASE(mempool_clear_drops_compact_block_index)
+    {
+        CTxMemPool pool;
+        TestMemPoolEntryHelper entry;
+        CMutableTransaction tx;
+        tx.vin.resize(1);
+        tx.vin[0].prevout = COutPoint(uint256S("31"), 0);
+        tx.vout.emplace_back(1000, CScript() << OP_TRUE);
+        BOOST_REQUIRE(pool.addUnchecked(tx.GetHash(), entry.FromTx(tx)));
+        BOOST_REQUIRE_EQUAL(pool.vTxHashes.size(), 1U);
+
+        pool.clear();
+        BOOST_CHECK_EQUAL(pool.size(), 0U);
+        BOOST_REQUIRE(pool.vTxHashes.empty());
+
+        tx.nLockTime = 1;
+        BOOST_REQUIRE(pool.addUnchecked(tx.GetHash(), entry.FromTx(tx)));
+        BOOST_REQUIRE_EQUAL(pool.vTxHashes.size(), 1U);
+        BOOST_CHECK(pool.vTxHashes[0].second->GetTx().GetHash() == tx.GetHash());
+    }
 
     BOOST_AUTO_TEST_CASE(mempool_remove_test)
     {
@@ -595,6 +624,323 @@ BOOST_FIXTURE_TEST_SUITE(mempool_tests, TestingSetup)
         // ... unless it has gone all the way to 0 (after getting past 1000/2)
 
         SetMockTime(0);
+    }
+
+    BOOST_AUTO_TEST_CASE(rip25_reorg_purges_preactivation_policy_transactions)
+    {
+        LOCK(cs_main);
+        mempool.clear();
+
+        const std::vector<unsigned char> program(32, 0x42);
+        const CScript pqScript = CScript() << OP_2 << program;
+        const CScript p2shPQScript = GetScriptForDestination(CScriptID(pqScript));
+        const CScript ordinaryScript = CScript() << OP_TRUE;
+
+        CTxIn helperInput;
+        helperInput.scriptSig << std::vector<unsigned char>(pqScript.begin(), pqScript.end());
+        BOOST_CHECK(SpendsPQWitnessV2Program(helperInput, pqScript));
+        BOOST_CHECK(SpendsPQWitnessV2Program(helperInput, p2shPQScript));
+        BOOST_CHECK(!SpendsPQWitnessV2Program(helperInput, ordinaryScript));
+
+        CTxIn multiplePushInput;
+        multiplePushInput.scriptSig << std::vector<unsigned char>(1, 0x01)
+                                    << std::vector<unsigned char>(pqScript.begin(), pqScript.end());
+        BOOST_CHECK(!SpendsPQWitnessV2Program(multiplePushInput, p2shPQScript));
+
+        CTxIn malformedPushInput;
+        malformedPushInput.scriptSig << OP_PUSHDATA1;
+        BOOST_CHECK(!SpendsPQWitnessV2Program(malformedPushInput, p2shPQScript));
+
+        const CScript wrongP2SH = GetScriptForDestination(CScriptID(ordinaryScript));
+        BOOST_CHECK(!SpendsPQWitnessV2Program(helperInput, wrongP2SH));
+
+        auto addFundingCoin = [&](const CScript& script) {
+            const COutPoint outpoint(InsecureRand256(), 0);
+            pcoinsTip->AddCoin(outpoint,
+                               Coin(CTxOut(10 * COIN, script), chainActive.Height(), false),
+                               false);
+            return outpoint;
+        };
+
+        CMutableTransaction pqCreation;
+        pqCreation.vin.resize(1);
+        pqCreation.vin[0].prevout = addFundingCoin(ordinaryScript);
+        pqCreation.vout.resize(1);
+        pqCreation.vout[0] = CTxOut(9 * COIN, pqScript);
+
+        CMutableTransaction descendant;
+        descendant.vin.resize(1);
+        descendant.vin[0].prevout = COutPoint(pqCreation.GetHash(), 0);
+        descendant.vout.resize(1);
+        descendant.vout[0] = CTxOut(8 * COIN, ordinaryScript);
+
+        CMutableTransaction nativeSpend;
+        nativeSpend.vin.resize(1);
+        nativeSpend.vin[0].prevout = addFundingCoin(pqScript);
+        nativeSpend.vin[0].scriptWitness.stack.emplace_back(mldsa::SIGNATURE_BYTES, 0x11);
+        nativeSpend.vin[0].scriptWitness.stack.emplace_back(mldsa::PUBLICKEY_BYTES, 0x22);
+        nativeSpend.vout.resize(1);
+        nativeSpend.vout[0] = CTxOut(9 * COIN, ordinaryScript);
+
+        CMutableTransaction wrappedSpend;
+        wrappedSpend.vin.resize(1);
+        wrappedSpend.vin[0].prevout = addFundingCoin(p2shPQScript);
+        wrappedSpend.vin[0].scriptSig << std::vector<unsigned char>(pqScript.begin(), pqScript.end());
+        wrappedSpend.vin[0].scriptWitness.stack.emplace_back(mldsa::SIGNATURE_BYTES, 0x33);
+        wrappedSpend.vin[0].scriptWitness.stack.emplace_back(mldsa::PUBLICKEY_BYTES, 0x44);
+        wrappedSpend.vout.resize(1);
+        wrappedSpend.vout[0] = CTxOut(9 * COIN, ordinaryScript);
+
+        CMutableTransaction wrappedParent;
+        wrappedParent.vin.resize(1);
+        wrappedParent.vin[0].prevout = addFundingCoin(ordinaryScript);
+        wrappedParent.vout.resize(1);
+        wrappedParent.vout[0] = CTxOut(9 * COIN, p2shPQScript);
+
+        CMutableTransaction wrappedChild;
+        wrappedChild.vin.resize(1);
+        wrappedChild.vin[0].prevout = COutPoint(wrappedParent.GetHash(), 0);
+        wrappedChild.vin[0].scriptSig << std::vector<unsigned char>(pqScript.begin(), pqScript.end());
+        wrappedChild.vin[0].scriptWitness.stack.emplace_back(mldsa::SIGNATURE_BYTES, 0x55);
+        wrappedChild.vin[0].scriptWitness.stack.emplace_back(mldsa::PUBLICKEY_BYTES, 0x66);
+        wrappedChild.vout.resize(1);
+        wrappedChild.vout[0] = CTxOut(8 * COIN, ordinaryScript);
+
+        CMutableTransaction unrelated;
+        unrelated.vin.resize(1);
+        unrelated.vin[0].prevout = addFundingCoin(ordinaryScript);
+        unrelated.vout.resize(1);
+        unrelated.vout[0] = CTxOut(9 * COIN, ordinaryScript);
+
+        TestMemPoolEntryHelper entry;
+        mempool.addUnchecked(pqCreation.GetHash(), entry.FromTx(pqCreation));
+        mempool.addUnchecked(descendant.GetHash(), entry.FromTx(descendant));
+        mempool.addUnchecked(nativeSpend.GetHash(), entry.FromTx(nativeSpend));
+        mempool.addUnchecked(wrappedSpend.GetHash(), entry.FromTx(wrappedSpend));
+        mempool.addUnchecked(wrappedParent.GetHash(), entry.FromTx(wrappedParent));
+        mempool.addUnchecked(wrappedChild.GetHash(), entry.FromTx(wrappedChild));
+        mempool.addUnchecked(unrelated.GetHash(), entry.FromTx(unrelated));
+        BOOST_REQUIRE_EQUAL(mempool.size(), 7U);
+
+        const TxAssetDeploymentContext noAssets = {};
+        mempool.removeForReorg(pcoinsTip, chainActive.Height() + 1,
+                               STANDARD_LOCKTIME_VERIFY_FLAGS, true, noAssets);
+        BOOST_REQUIRE_EQUAL(mempool.size(), 7U);
+
+        mempool.removeForReorg(pcoinsTip, chainActive.Height() + 1,
+                               STANDARD_LOCKTIME_VERIFY_FLAGS, false, noAssets);
+
+        BOOST_CHECK(!mempool.exists(pqCreation.GetHash()));
+        BOOST_CHECK(!mempool.exists(descendant.GetHash()));
+        BOOST_CHECK(!mempool.exists(nativeSpend.GetHash()));
+        BOOST_CHECK(!mempool.exists(wrappedSpend.GetHash()));
+        BOOST_CHECK(mempool.exists(wrappedParent.GetHash()));
+        BOOST_CHECK(!mempool.exists(wrappedChild.GetHash()));
+        BOOST_CHECK(mempool.exists(unrelated.GetHash()));
+
+        mempool.clear();
+    }
+
+    BOOST_AUTO_TEST_CASE(rip25_preactivation_policy_rejects_future_witness_spends)
+    {
+        LOCK(cs_main);
+        mempool.clear();
+
+        const Consensus::Params& consensus = GetParams().GetConsensus();
+        BOOST_REQUIRE(GetParams().RequireStandard());
+        BOOST_REQUIRE(!consensus.nPQHybridEnabled);
+        BOOST_REQUIRE(!IsPQWitnessDiscountActive(chainActive.Tip(), consensus));
+
+        const std::vector<unsigned char> program(32, 0x42);
+        const CScript pqScript = CScript() << OP_2 << program;
+        const CScript p2shPQScript = GetScriptForDestination(CScriptID(pqScript));
+        const CScript ordinaryScript =
+            GetScriptForDestination(CScriptID(CScript() << OP_TRUE));
+
+        auto addFundingCoin = [&](const CScript& script) {
+            const COutPoint outpoint(InsecureRand256(), 0);
+            pcoinsTip->AddCoin(outpoint,
+                               Coin(CTxOut(10 * COIN, script), chainActive.Height(), false),
+                               false);
+            return outpoint;
+        };
+
+        auto makeInvalidPQSpend = [&](const CScript& fundingScript, bool p2shWrapped) {
+            CMutableTransaction spend;
+            spend.vin.emplace_back(addFundingCoin(fundingScript));
+            if (p2shWrapped) {
+                spend.vin[0].scriptSig <<
+                    std::vector<unsigned char>(pqScript.begin(), pqScript.end());
+            }
+            // The stack satisfies preactivation shape policy but is not bound
+            // to the program and does not contain a valid ML-DSA signature.
+            spend.vin[0].scriptWitness.stack.emplace_back(mldsa::SIGNATURE_BYTES, 0x11);
+            spend.vin[0].scriptWitness.stack.emplace_back(mldsa::PUBLICKEY_BYTES, 0x22);
+            spend.vout.emplace_back(9 * COIN, ordinaryScript);
+            return MakeTransactionRef(std::move(spend));
+        };
+
+        const std::vector<CTransactionRef> candidates{
+            makeInvalidPQSpend(pqScript, false),
+            makeInvalidPQSpend(p2shPQScript, true),
+        };
+
+        for (const CTransactionRef& tx : candidates) {
+            BOOST_REQUIRE(IsWitnessStandard(*tx, *pcoinsTip));
+
+            // Legacy consensus deliberately treats witness-v2 as a future
+            // witness program before activation.
+            ScriptError error = SCRIPT_ERR_UNKNOWN_ERROR;
+            BOOST_REQUIRE(VerifyScript(
+                tx->vin[0].scriptSig,
+                pcoinsTip->AccessCoin(tx->vin[0].prevout).out.scriptPubKey,
+                &tx->vin[0].scriptWitness,
+                SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                TransactionSignatureChecker(tx.get(), 0, 10 * COIN), &error));
+            BOOST_CHECK_EQUAL(error, SCRIPT_ERR_OK);
+
+            // Default node policy nevertheless rejects every unknown witness
+            // version. Therefore the invalid transaction cannot survive in
+            // the mempool until the forward PQ activation transition.
+            CValidationState state;
+            BOOST_CHECK(!AcceptToMemoryPool(mempool, state, tx, nullptr, nullptr,
+                                            false, 0));
+            BOOST_CHECK_EQUAL(state.GetRejectCode(), REJECT_NONSTANDARD);
+            BOOST_CHECK_EQUAL(
+                state.GetRejectReason(),
+                "non-mandatory-script-verify-flag (Witness version reserved for soft-fork upgrades)");
+            BOOST_CHECK(!mempool.exists(tx->GetHash()));
+        }
+
+        BOOST_CHECK_EQUAL(mempool.size(), 0U);
+    }
+
+    BOOST_AUTO_TEST_CASE(transfer_overflow_activation_purges_invalid_graph)
+    {
+        LOCK(cs_main);
+        mempool.clear();
+
+        class ScopedAssetsDeployment
+        {
+        private:
+            const bool previous;
+
+        public:
+            ScopedAssetsDeployment() : previous(AreAssetsDeployed())
+            {
+                SetAssetsDeployed(true);
+            }
+            ~ScopedAssetsDeployment()
+            {
+                SetAssetsDeployed(previous);
+            }
+        } assetsDeployment;
+
+        const std::string assetName = "MEMPOOL_OVERFLOW";
+        const CNewAsset metadata(assetName, 100, 8, 1, 0, "");
+        BOOST_REQUIRE(passets->AddNewAsset(metadata, GetParams().GlobalBurnAddress(),
+                                           chainActive.Height(), chainActive.Tip()->GetBlockHash()));
+
+        auto makeAssetOutput = [&](CAmount amount) {
+            CScript script = GetScriptForDestination(
+                DecodeDestination(GetParams().GlobalBurnAddress()));
+            CAssetTransfer(assetName, amount).ConstructTransaction(script);
+            return CTxOut(0, script);
+        };
+        auto addCoin = [&](const CTxOut& output) {
+            const COutPoint outpoint(InsecureRand256(), 0);
+            pcoinsTip->AddCoin(outpoint,
+                               Coin(output, chainActive.Height(), false), false);
+            return outpoint;
+        };
+
+        constexpr uint64_t wrapPartA = 8173372036854775857ULL;
+        constexpr uint64_t wrapPartB = 2100000000000000002ULL;
+        static_assert(wrapPartA + wrapPartA + wrapPartB == 100ULL,
+                      "overflow vector must equal 100 modulo 2^64");
+
+        auto makeOverflowTransaction = [&]() {
+            CMutableTransaction tx;
+            tx.vin.emplace_back(addCoin(makeAssetOutput(100)));
+            tx.vout.emplace_back(0, CScript() << OP_TRUE);
+            tx.vout.emplace_back(makeAssetOutput(static_cast<CAmount>(wrapPartA)));
+            tx.vout.emplace_back(makeAssetOutput(static_cast<CAmount>(wrapPartA)));
+            tx.vout.emplace_back(makeAssetOutput(static_cast<CAmount>(wrapPartB)));
+            return MakeTransactionRef(tx);
+        };
+        const CTransactionRef invalid = makeOverflowTransaction();
+
+        std::vector<std::pair<std::string, uint256>> reissues;
+        CValidationState preactivationState;
+        const bool preactivationValid =
+            Consensus::CheckTxAssets(*invalid, preactivationState, *pcoinsTip,
+                                     passets, false, reissues, false);
+        BOOST_REQUIRE_MESSAGE(preactivationValid, preactivationState.GetRejectReason());
+        CValidationState activeState;
+        BOOST_CHECK(!Consensus::CheckTxAssets(*invalid, activeState, *pcoinsTip,
+                                              passets, false, reissues, true));
+        BOOST_CHECK_EQUAL(activeState.GetRejectReason(),
+                          "bad-txns-transfer-asset-amount-toolarge");
+
+        CMutableTransaction childMutable;
+        childMutable.vin.emplace_back(COutPoint(invalid->GetHash(), 0));
+        childMutable.vout.emplace_back(0, CScript() << OP_TRUE);
+        const CTransactionRef child = MakeTransactionRef(childMutable);
+
+        CMutableTransaction validAssetMutable;
+        validAssetMutable.vin.emplace_back(addCoin(makeAssetOutput(100)));
+        validAssetMutable.vout.emplace_back(makeAssetOutput(100));
+        const CTransactionRef validAsset = MakeTransactionRef(validAssetMutable);
+
+        // The block that crosses the activation boundary is itself checked
+        // under the previous (LOCKED_IN) rules. Simulate its already-flushed
+        // output so an ACTIVE-valid child must survive after the parent is
+        // removed with reason BLOCK.
+        const CTransactionRef lastPreactivationBlockTx = makeOverflowTransaction();
+        pcoinsTip->AddCoin(COutPoint(lastPreactivationBlockTx->GetHash(), 0),
+                           Coin(lastPreactivationBlockTx->vout[0],
+                                chainActive.Height() + 1, false), false);
+        CMutableTransaction confirmedChildMutable;
+        confirmedChildMutable.vin.emplace_back(
+            COutPoint(lastPreactivationBlockTx->GetHash(), 0));
+        confirmedChildMutable.vout.emplace_back(0, CScript() << OP_TRUE);
+        const CTransactionRef confirmedChild = MakeTransactionRef(confirmedChildMutable);
+
+        CMutableTransaction unrelatedMutable;
+        unrelatedMutable.vin.emplace_back(
+            addCoin(CTxOut(COIN, CScript() << OP_TRUE)));
+        unrelatedMutable.vout.emplace_back(COIN, CScript() << OP_TRUE);
+        const CTransactionRef unrelated = MakeTransactionRef(unrelatedMutable);
+
+        TestMemPoolEntryHelper entry;
+        BOOST_REQUIRE(mempool.addUnchecked(invalid->GetHash(), entry.FromTx(*invalid)));
+        BOOST_REQUIRE(mempool.addUnchecked(child->GetHash(), entry.FromTx(*child)));
+        BOOST_REQUIRE(mempool.addUnchecked(validAsset->GetHash(), entry.FromTx(*validAsset)));
+        BOOST_REQUIRE(mempool.addUnchecked(lastPreactivationBlockTx->GetHash(),
+                                           entry.FromTx(*lastPreactivationBlockTx)));
+        BOOST_REQUIRE(mempool.addUnchecked(confirmedChild->GetHash(),
+                                           entry.FromTx(*confirmedChild)));
+        BOOST_REQUIRE(mempool.addUnchecked(unrelated->GetHash(), entry.FromTx(*unrelated)));
+        BOOST_REQUIRE_EQUAL(mempool.size(), 6U);
+
+        ConnectedBlockAssetData noAssetChanges;
+        const std::vector<CTransactionRef> noBlockTransactions;
+        mempool.removeForBlock(noBlockTransactions, chainActive.Height() + 1,
+                               noAssetChanges, false, false);
+        BOOST_REQUIRE_EQUAL(mempool.size(), 6U);
+
+        const std::vector<CTransactionRef> activatingBlock{lastPreactivationBlockTx};
+        mempool.removeForBlock(activatingBlock, chainActive.Height() + 1,
+                               noAssetChanges, true, true);
+        BOOST_CHECK(!mempool.exists(invalid->GetHash()));
+        BOOST_CHECK(!mempool.exists(child->GetHash()));
+        BOOST_CHECK(mempool.exists(validAsset->GetHash()));
+        BOOST_CHECK(!mempool.exists(lastPreactivationBlockTx->GetHash()));
+        BOOST_CHECK(mempool.exists(confirmedChild->GetHash()));
+        BOOST_CHECK(mempool.exists(unrelated->GetHash()));
+        BOOST_CHECK_EQUAL(mempool.size(), 3U);
+
+        mempool.clear();
     }
 
 BOOST_AUTO_TEST_SUITE_END()

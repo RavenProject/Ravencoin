@@ -461,7 +461,11 @@ BOOST_FIXTURE_TEST_SUITE(checkqueue_tests, TestingSetup)
         // Try to get control of the queue a bunch of times
         for (auto x = 0; x < 100 && !fails; ++x)
         {
-            fails = queue->ControlMutex.try_lock();
+            if (queue->ControlMutex.try_lock())
+            {
+                queue->ControlMutex.unlock();
+                fails = true;
+            }
         }
         {
             // Unfreeze (we need lock n case of spurious wakeup)
@@ -507,11 +511,12 @@ BOOST_FIXTURE_TEST_SUITE(checkqueue_tests, TestingSetup)
             boost::thread_group tg;
             std::mutex m;
             std::condition_variable cv;
+            bool has_lock{false};
+            bool has_tried{false};
+            bool done{false};
+            bool done_ack{false};
+            bool fails{false};
             {
-                bool has_lock{false};
-                bool has_tried{false};
-                bool done{false};
-                bool done_ack{false};
                 std::unique_lock<std::mutex> l(m);
                 tg.create_thread([&]
                                  {
@@ -531,10 +536,13 @@ BOOST_FIXTURE_TEST_SUITE(checkqueue_tests, TestingSetup)
                 // Wait for thread to get the lock
                 cv.wait(l, [&]()
                 { return has_lock; });
-                bool fails = false;
                 for (auto x = 0; x < 100 && !fails; ++x)
                 {
-                    fails = queue->ControlMutex.try_lock();
+                    if (queue->ControlMutex.try_lock())
+                    {
+                        queue->ControlMutex.unlock();
+                        fails = true;
+                    }
                 }
                 has_tried = true;
                 cv.notify_one();
@@ -543,11 +551,10 @@ BOOST_FIXTURE_TEST_SUITE(checkqueue_tests, TestingSetup)
                 // Acknowledge the done
                 done_ack = true;
                 cv.notify_one();
-                BOOST_REQUIRE(!fails);
             }
             tg.join_all();
+            BOOST_REQUIRE(!fails);
         }
     }
 
 BOOST_AUTO_TEST_SUITE_END()
-

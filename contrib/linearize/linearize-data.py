@@ -50,7 +50,7 @@ def wordreverse(in_buf):
 	return b''.join(out_words)
 
 def calc_hash_str(blk_hdr):
-	x16r_hash_cmd = os.path.dirname(os.path.realpath(__file__)) + "/../../src/test/test_raven_hash"
+	x16r_hash_cmd = settings.get('hashcmd', os.path.dirname(os.path.realpath(__file__)) + "/../../src/test/test_raven_hash")
 	cmd = [x16r_hash_cmd, hexlify(blk_hdr).decode('utf-8'), "2"]
 	blk_hash = subprocess.run(cmd, stdout=subprocess.PIPE, check=True).stdout.decode('ascii')
 	return blk_hash

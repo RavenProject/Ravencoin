@@ -27,6 +27,8 @@
 #include <deque>
 #include <stdint.h>
 #include <thread>
+#include <list>
+#include <map>
 #include <memory>
 #include <condition_variable>
 
@@ -56,8 +58,8 @@ static const unsigned int MAX_LOCATOR_SZ = 101;
 static const unsigned int MAX_ASSET_INV_SZ = 1024;
 /** The maximum number of new addresses to accumulate before announcing. */
 static const unsigned int MAX_ADDR_TO_SEND = 1000;
-/** Maximum length of incoming protocol messages (no message over 4 MB is currently acceptable). */
-static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 4 * 1000 * 1000;
+/** Maximum length of incoming protocol messages (increased for RIP-25 PQ signatures). */
+static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 16 * 1000 * 1000;
 /** Maximum length of strSubVer in `version` message */
 static const unsigned int MAX_SUBVERSION_LENGTH = 256;
 /** Maximum number of automatic outgoing nodes */
@@ -116,6 +118,50 @@ struct CSerializedNetMsg
 
     std::vector<unsigned char> data;
     std::string command;
+};
+
+/**
+ * Bounds memory retained by received P2P messages from allocation through
+ * processing. Each owner has a small guaranteed headroom; allocations above
+ * it consume a class-wide bulk pool. Outbound peers use a separate protected
+ * class so an inbound peer cannot consume all receive capacity.
+ */
+class CNetMessageBuffer
+{
+private:
+    struct OwnerUsage {
+        size_t nSize;
+        bool fProtected;
+    };
+
+    mutable CCriticalSection cs_size;
+    const size_t nMaxNormalBulkSize;
+    const size_t nMaxProtectedBulkSize;
+    const size_t nOwnerHeadroom;
+    size_t nSize GUARDED_BY(cs_size);
+    size_t nNormalHeadroomSize GUARDED_BY(cs_size);
+    size_t nNormalBulkSize GUARDED_BY(cs_size);
+    size_t nProtectedHeadroomSize GUARDED_BY(cs_size);
+    size_t nProtectedBulkSize GUARDED_BY(cs_size);
+    std::map<NodeId, OwnerUsage> mapOwnerUsage GUARDED_BY(cs_size);
+
+    size_t HeadroomUsage(size_t nOwnerSize) const;
+    size_t BulkUsage(size_t nOwnerSize) const;
+
+public:
+    static const size_t DEFAULT_OWNER_HEADROOM = 64 * 1024;
+
+    explicit CNetMessageBuffer(size_t nMaxSizeIn);
+    CNetMessageBuffer(size_t nMaxNormalBulkSizeIn,
+                      size_t nMaxProtectedBulkSizeIn,
+                      size_t nOwnerHeadroomIn);
+
+    bool TryReserve(NodeId owner, bool fProtected, size_t nBytes);
+    void Release(NodeId owner, bool fProtected, size_t nBytes);
+    size_t Size() const;
+    size_t SizeForOwner(NodeId owner) const;
+    size_t NormalBulkSize() const;
+    size_t ProtectedBulkSize() const;
 };
 
 class NetEventsInterface;
@@ -390,6 +436,7 @@ private:
 
     unsigned int nSendBufferMaxSize;
     unsigned int nReceiveFloodSize;
+    CNetMessageBuffer recvBuffer;
 
     std::vector<ListenSocket> vhListenSocket;
     std::atomic<bool> fNetworkActive;
@@ -568,6 +615,14 @@ class CNetMessage {
 private:
     mutable CHash256 hasher;
     mutable uint256 data_hash;
+    CNetMessageBuffer& memoryBuffer;
+    const NodeId memoryOwner;
+    const bool memoryProtected;
+    size_t nFixedMemoryUsage;
+    size_t nPayloadMemoryUsage;
+
+    bool ReconcileDataBufferUsage();
+    void ClearDataBuffer();
 public:
     bool in_data;                   // parsing header (false) or data (true)
 
@@ -580,13 +635,14 @@ public:
 
     int64_t nTime;                  // time (in microseconds) of message receipt.
 
-    CNetMessage(const CMessageHeader::MessageStartChars& pchMessageStartIn, int nTypeIn, int nVersionIn) : hdrbuf(nTypeIn, nVersionIn), hdr(pchMessageStartIn), vRecv(nTypeIn, nVersionIn) {
-        hdrbuf.resize(24);
-        in_data = false;
-        nHdrPos = 0;
-        nDataPos = 0;
-        nTime = 0;
-    }
+    CNetMessage(const CMessageHeader::MessageStartChars& pchMessageStartIn,
+                int nTypeIn, int nVersionIn, CNetMessageBuffer& memoryBufferIn,
+                NodeId memoryOwnerIn, bool memoryProtectedIn);
+    ~CNetMessage();
+    CNetMessage(const CNetMessage&) = delete;
+    CNetMessage& operator=(const CNetMessage&) = delete;
+    CNetMessage(CNetMessage&&) = delete;
+    CNetMessage& operator=(CNetMessage&&) = delete;
 
     bool complete() const
     {
@@ -604,7 +660,10 @@ public:
     }
 
     int readHeader(const char *pch, unsigned int nBytes);
+    size_t GetDataBufferSize(unsigned int nBytes) const;
+    bool PrepareDataBuffer(unsigned int nBytes);
     int readData(const char *pch, unsigned int nBytes);
+    size_t GetMemoryUsage() const { return nFixedMemoryUsage + nPayloadMemoryUsage; }
 };
 
 
@@ -735,7 +794,7 @@ public:
     CAmount lastSentFeeFilter;
     int64_t nextSendTimeFeeFilter;
 
-    CNode(NodeId id, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn, SOCKET hSocketIn, const CAddress &addrIn, uint64_t nKeyedNetGroupIn, uint64_t nLocalHostNonceIn, const CAddress &addrBindIn, const std::string &addrNameIn = "", bool fInboundIn = false);
+    CNode(NodeId id, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn, SOCKET hSocketIn, const CAddress &addrIn, uint64_t nKeyedNetGroupIn, uint64_t nLocalHostNonceIn, const CAddress &addrBindIn, CNetMessageBuffer& recvBufferIn, const std::string &addrNameIn = "", bool fInboundIn = false);
     ~CNode();
     CNode(const CNode&) = delete;
     CNode& operator=(const CNode&) = delete;
@@ -747,6 +806,7 @@ private:
     const ServiceFlags nLocalServices;
     const int nMyStartingHeight;
     int nSendVersion;
+    CNetMessageBuffer& recvBuffer;
     std::list<CNetMessage> vRecvMsg;  // Used only by SocketHandler thread
 
     mutable CCriticalSection cs_addrName;
@@ -776,6 +836,7 @@ public:
     }
 
     bool ReceiveMsgBytes(const char *pch, unsigned int nBytes, bool& complete);
+    bool MoveCompletedMessagesToProcessQueue(size_t nReceiveFloodSize);
 
     void SetRecvVersion(int nVersionIn)
     {

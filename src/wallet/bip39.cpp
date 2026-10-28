@@ -23,6 +23,7 @@
  */
 
 #include <array>
+#include <limits>
 #include "wallet/bip39.h"
 #include "crypto/sha256.h"
 #include "random.h"
@@ -36,6 +37,20 @@
 #include "wallet/bip39_spanish.h"
 
 #include <openssl/evp.h>
+
+namespace {
+
+class ScopedSecureStringCleanser
+{
+private:
+    SecureString& value;
+
+public:
+    explicit ScopedSecureStringCleanser(SecureString& valueIn) : value(valueIn) {}
+    ~ScopedSecureStringCleanser() { ClearSecureString(value); }
+};
+
+} // namespace
 
 SecureString CMnemonic::Generate(int strength, int languageSelected)
 {
@@ -88,6 +103,7 @@ SecureString CMnemonic::FromData(const SecureVector& data, int len, int language
 
 bool CMnemonic::Check(SecureString mnemonic, int languageSelected)
 {
+    ScopedSecureStringCleanser cleanseMnemonic(mnemonic);
     if (mnemonic.empty()) {
         return false;
     }
@@ -107,6 +123,7 @@ bool CMnemonic::Check(SecureString mnemonic, int languageSelected)
     }
 
     SecureString ssCurrentWord;
+    ScopedSecureStringCleanser cleanseCurrentWord(ssCurrentWord);
     SecureVector bits(32 + 1);
 
     if (languageSelected == -1) {
@@ -119,7 +136,8 @@ bool CMnemonic::Check(SecureString mnemonic, int languageSelected)
     uint32_t nWordIndex, ki, nBitsCount{};
 
     for (size_t i = 0; i < mnemonic.size(); ++i) {
-        ssCurrentWord = "";
+        ClearSecureString(ssCurrentWord);
+        ssCurrentWord.reserve(64);
         while (i + ssCurrentWord.size() < mnemonic.size() && mnemonic[i + ssCurrentWord.size()] != ' ') {
             ssCurrentWord += mnemonic[i + ssCurrentWord.size()];
         }
@@ -175,7 +193,7 @@ std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> CMnemonic::GetLanguag
 
 const char* const* CMnemonic::GetLanguageWords(int lang)
 {
-    if (lang >= 0 && lang <= NUM_LANGUAGES_BIP39_SUPPORTED) {
+    if (lang >= 0 && lang < NUM_LANGUAGES_BIP39_SUPPORTED) {
         return CMnemonic::GetLanguagesDetails()[lang].wordlist;
     }
 
@@ -184,7 +202,9 @@ const char* const* CMnemonic::GetLanguageWords(int lang)
 
 int CMnemonic::DetectLanguageSeed(SecureString mnemonic)
 {
+    ScopedSecureStringCleanser cleanseMnemonic(mnemonic);
     SecureString ssCurrentWord;
+    ScopedSecureStringCleanser cleanseCurrentWord(ssCurrentWord);
     uint32_t nWordIndex;
 
     int lang_detected = -1;
@@ -200,7 +220,8 @@ int CMnemonic::DetectLanguageSeed(SecureString mnemonic)
 
         bool searching_is_ok = true;
         for (size_t i = 0; i < mnemonic.size() && words_founds < required_words_to_detect && searching_is_ok; ++i) {
-            ssCurrentWord = "";
+            ClearSecureString(ssCurrentWord);
+            ssCurrentWord.reserve(64);
             while (i + ssCurrentWord.size() < mnemonic.size() && mnemonic[i + ssCurrentWord.size()] != ' ') {
                 ssCurrentWord += mnemonic[i + ssCurrentWord.size()];
             }
@@ -227,10 +248,36 @@ int CMnemonic::DetectLanguageSeed(SecureString mnemonic)
     return lang_detected;
 }
 
-void CMnemonic::ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet)
+bool CMnemonic::ToSeedWithPbkdf2(const SecureString& mnemonic,
+                                 const SecureString& passphrase,
+                                 SecureVector& seedRet,
+                                 Pbkdf2Function pbkdf2)
 {
-    SecureString ssSalt = SecureString("mnemonic") + passphrase;
+    SecureString ssSalt("mnemonic");
+    ScopedSecureStringCleanser cleanseSalt(ssSalt);
+    ssSalt.reserve(64);
+    ssSalt.append(passphrase);
     SecureVector vchSalt(ssSalt.begin(), ssSalt.end());
-    seedRet.resize(64);
-    PKCS5_PBKDF2_HMAC(mnemonic.c_str(), mnemonic.size(), &vchSalt[0], vchSalt.size(), 2048, EVP_sha512(), 64, &seedRet[0]);
+    SecureVector derivedSeed(BIP39_SEED_SIZE);
+
+    const EVP_MD* digest = EVP_sha512();
+    if (pbkdf2 == nullptr || digest == nullptr ||
+        mnemonic.size() > static_cast<size_t>(std::numeric_limits<int>::max()) ||
+        vchSalt.size() > static_cast<size_t>(std::numeric_limits<int>::max()) ||
+        pbkdf2(mnemonic.c_str(), static_cast<int>(mnemonic.size()),
+               vchSalt.data(), static_cast<int>(vchSalt.size()), 2048,
+               digest, BIP39_SEED_SIZE, derivedSeed.data()) != 1) {
+        SecureVector().swap(seedRet);
+        return false;
+    }
+
+    seedRet.swap(derivedSeed);
+    return true;
+}
+
+bool CMnemonic::ToSeed(const SecureString& mnemonic,
+                       const SecureString& passphrase,
+                       SecureVector& seedRet)
+{
+    return ToSeedWithPbkdf2(mnemonic, passphrase, seedRet, PKCS5_PBKDF2_HMAC);
 }

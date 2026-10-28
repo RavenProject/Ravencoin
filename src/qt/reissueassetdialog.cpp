@@ -522,9 +522,9 @@ void ReissueAssetDialog::CheckFormState()
     }
 
     // Check the destination address
-    const CTxDestination dest = DecodeDestination(ui->addressText->text().toStdString());
+    const QString assetAddress = ui->addressText->text();
     if (!ui->addressText->text().isEmpty()) {
-        if (!IsValidDestination(dest)) {
+        if (!GUIUtil::isValidAssetDestination(assetAddress)) {
             showMessage(tr("Invalid Raven Destination Address"));
             return;
         }
@@ -552,13 +552,7 @@ void ReissueAssetDialog::CheckFormState()
             std::string strAddress = qAddress.toStdString();
 
             bool fHasQuantity = ui->quantitySpinBox->value() > 0;
-            if (fHasQuantity && strAddress.empty()) {
-                ui->addressText->setStyleSheet(STYLE_INVALID);
-                showMessage(tr("Warning: Restricted Assets Issuance requires an address"));
-                return;
-            }
-
-            if (fHasQuantity && !IsValidDestination(dest)) {
+            if (fHasQuantity && !strAddress.empty() && !GUIUtil::isValidAssetDestination(qAddress)) {
                 ui->addressText->setStyleSheet(STYLE_INVALID);
                 showMessage(tr("Warning: Invalid Raven address"));
                 return;
@@ -568,7 +562,8 @@ void ReissueAssetDialog::CheckFormState()
             std::string strError;
             ErrorReport errorReport;
             errorReport.type = ErrorReport::ErrorType::NotSetError;
-            if (!ContextualCheckVerifierString(passets, strippedVerifier, strAddress, strError, &errorReport)) {
+            if (!ContextualCheckVerifierString(passets, strippedVerifier,
+                    GUIUtil::classicalAssetAddress(qAddress).toStdString(), strError, &errorReport)) {
                 ui->lineEditVerifierString->setStyleSheet(STYLE_INVALID);
                 qDebug() << "Failing here 1";
                 showInvalidVerifierStringMessage(QString::fromStdString(GetUserErrorString(errorReport)));
@@ -885,15 +880,13 @@ void ReissueAssetDialog::openIpfsBrowser()
 
 void ReissueAssetDialog::onAddressNameChanged(QString address)
 {
-    const CTxDestination dest = DecodeDestination(address.toStdString());
-
     if (address.isEmpty()) // Nothing entered
     {
         hideMessage();
         ui->addressText->setStyleSheet("");
         CheckFormState();
     }
-    else if (!IsValidDestination(dest)) // Invalid address
+    else if (!GUIUtil::isValidAssetDestination(address)) // Invalid address
     {
         ui->addressText->setStyleSheet("border: 1px solid red");
         CheckFormState();
@@ -921,7 +914,11 @@ void ReissueAssetDialog::onReissueAssetClicked()
 
     QString address;
     if (ui->addressText->text().isEmpty()) {
-        address = model->getAddressTableModel()->addRow(AddressTableModel::Receive, "", "");
+        address = model->newAssetDestination();
+        if (address.isEmpty()) {
+            showMessage(tr("Unable to create a protected asset destination"));
+            return;
+        }
     } else {
         address = ui->addressText->text();
     }
@@ -958,6 +955,14 @@ void ReissueAssetDialog::onReissueAssetClicked()
         verifier_string = ui->lineEditVerifierString->text().toStdString();
         std::string stripped = GetStrippedVerifierString(verifier_string);
         verifier_string = stripped;
+        if (!verifier_string.empty()) {
+            std::string verifierError;
+            if (!ContextualCheckVerifierString(passets, verifier_string,
+                    GUIUtil::classicalAssetAddress(address).toStdString(), verifierError)) {
+                showMessage(QString::fromStdString(verifierError));
+                return;
+            }
+        }
     }
 
     if (IsInitialBlockDownload()) {
@@ -1490,5 +1495,3 @@ void ReissueAssetDialog::hideInvalidVerifierStringMessage()
     ui->labelReissueVerifierStringErrorMessage->clear();
     ui->labelReissueVerifierStringErrorMessage->hide();
 }
-
-

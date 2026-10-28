@@ -595,6 +595,39 @@
       </widget>
      </item>
      <item>
+      <widget class="QWidget" name="widgetProtectedAssetChange">
+       <layout class="QHBoxLayout" name="horizontalLayoutProtectedAssetChange">
+        <item>
+         <widget class="QLabel" name="labelProtectedAssetChange">
+          <property name="toolTip">
+           <string>For a partial transfer of historical assets after PQ asset activation, choose a wallet-owned protected destination for the remaining assets.</string>
+          </property>
+          <property name="text">
+           <string>Protected asset change:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QValidatedLineEdit" name="lineEditProtectedAssetChange">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="buttonChooseProtectedAssetChange">
+          <property name="text">
+           <string>Choose...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
       <widget class="QScrollArea" name="scrollArea">
        <property name="widgetResizable">
         <bool>true</bool>

@@ -1,0 +1,15 @@
+--- a/db/db.c
++++ b/db/db.c
+@@ -549,3 +549,3 @@
+-		clear_len = CRYPTO_ON(env) ?
+-		    (dbp->pgsize != 0 ? dbp->pgsize : DB_CLEARLEN_NOTSET) :
+-		    DB_PAGE_DB_LEN;
++		/* Clear the full page so old records cannot survive page reuse. */
++		clear_len = dbp->pgsize != 0 ?
++		    dbp->pgsize : DB_CLEARLEN_NOTSET;
+@@ -555,3 +555,2 @@
+-		clear_len = CRYPTO_ON(env) ?
+-		    (dbp->pgsize != 0 ? dbp->pgsize : DB_CLEARLEN_NOTSET) :
+-		    DB_PAGE_DB_LEN;
++		clear_len = dbp->pgsize != 0 ?
++		    dbp->pgsize : DB_CLEARLEN_NOTSET;

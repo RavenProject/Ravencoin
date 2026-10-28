@@ -17,7 +17,11 @@
 
 #include <univalue.h>
 #include <validation.h>
+#include <assets/messages.h>
+#include <assets/myassetsdb.h>
 #include <consensus/consensus.h>
+
+UniValue exportlegacymessagedata(const JSONRPCRequest& request);
 
 UniValue CallRPC(std::string args)
 {
@@ -43,6 +47,96 @@ UniValue CallRPC(std::string args)
 }
 
 BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
+
+    BOOST_AUTO_TEST_CASE(legacy_message_export_preserves_unscoped_rows)
+    {
+        CMessageDB messageStore(1 << 20, true, true);
+        CMessageChannelDB channelStore(1 << 20, true, true);
+        struct RestoreDatabases {
+            CMessageDB* messages;
+            CMessageChannelDB* channels;
+            ~RestoreDatabases() {
+                pmessagedb = messages;
+                pmessagechanneldb = channels;
+            }
+        } restore{pmessagedb, pmessagechanneldb};
+        pmessagedb = &messageStore;
+        pmessagechanneldb = &channelStore;
+
+        CMessage message;
+        message.out = COutPoint(uint256S("01"), 7);
+        message.strName = "LEGACY~NEWS";
+        message.ipfsHash = std::string("\x01\x02", 2);
+        message.time = 100;
+        message.nExpiredTime = 200;
+        message.nBlockHeight = 300;
+        message.status = MessageStatus::UNREAD;
+        BOOST_REQUIRE(messageStore.WriteMessage(message));
+        BOOST_REQUIRE(channelStore.WriteMyMessageChannel("LEGACY~NEWS"));
+
+        JSONRPCRequest request;
+        request.URI = "/";
+        BOOST_REQUIRE(request.params.read("[true]"));
+        UniValue exportResult = exportlegacymessagedata(request).get_obj();
+        BOOST_CHECK_EQUAL(find_value(exportResult, "scope").get_str(),
+                          "legacy-global-unscoped");
+        const UniValue& rows = find_value(exportResult, "messages");
+        BOOST_REQUIRE_EQUAL(rows.size(), 1U);
+        BOOST_CHECK_EQUAL(find_value(rows[0].get_obj(), "txid").get_str(),
+                          message.out.hash.GetHex());
+        BOOST_CHECK_EQUAL(find_value(rows[0].get_obj(), "vout").get_int(), 7);
+        BOOST_CHECK_EQUAL(find_value(rows[0].get_obj(), "message_hex").get_str(), "0102");
+        BOOST_CHECK_EQUAL(find_value(rows[0].get_obj(), "status").get_int(), 1);
+        const UniValue& channels = find_value(exportResult, "channels");
+        BOOST_REQUIRE_EQUAL(channels.size(), 1U);
+        BOOST_CHECK_EQUAL(channels[0].get_str(), "LEGACY~NEWS");
+
+        const UniValue cliArgs = RPCConvertValues("exportlegacymessagedata", {"true"});
+        BOOST_REQUIRE_EQUAL(cliArgs.size(), 1U);
+        BOOST_CHECK(cliArgs[0].get_bool());
+        request.URI = "/wallet/w1";
+        BOOST_CHECK_THROW(exportlegacymessagedata(request), UniValue);
+        request.URI = "/";
+
+        const COutPoint badOut(uint256S("02"), 8);
+        BOOST_REQUIRE(messageStore.Write(std::make_pair('Z', badOut),
+                                         std::string("bad")));
+        BOOST_CHECK_THROW(exportlegacymessagedata(request), UniValue);
+        BOOST_REQUIRE(messageStore.Erase(std::make_pair('Z', badOut)));
+        BOOST_REQUIRE(channelStore.Write(std::make_pair('C', std::string("BROKEN~NEWS")),
+                                         std::string("x")));
+        BOOST_CHECK_THROW(exportlegacymessagedata(request), UniValue);
+    }
+
+    BOOST_AUTO_TEST_CASE(rip25_gbt_reports_contextual_resource_limits)
+    {
+        BOOST_REQUIRE(chainActive.Tip() != nullptr);
+        const Consensus::Params& consensus = GetParams().GetConsensus();
+        const int64_t expectedSize = GetMaxBlockSerializedSizeForPrev(chainActive.Tip(), consensus);
+        const int64_t expectedWeight = GetMaxBlockWeightForPrev(chainActive.Tip(), consensus);
+
+        // The default fixture is mainnet before RIP-25 activation, so its next
+        // block is independently known to retain the RIP-2 limits rather than
+        // the binary's phase-2 structural ceiling.
+        BOOST_REQUIRE_EQUAL(expectedSize, MAX_BLOCK_SERIALIZED_SIZE_RIP2);
+        BOOST_REQUIRE_EQUAL(expectedWeight, MAX_BLOCK_WEIGHT_RIP2);
+
+        const bool oldBypassDownload = gArgs.GetBoolArg("-bypassdownload", false);
+        gArgs.ForceSetArg("-bypassdownload", "1");
+        UniValue result;
+        try {
+            result = CallRPC("getblocktemplate");
+        } catch (...) {
+            gArgs.ForceSetArg("-bypassdownload", oldBypassDownload ? "1" : "0");
+            throw;
+        }
+        gArgs.ForceSetArg("-bypassdownload", oldBypassDownload ? "1" : "0");
+
+        BOOST_CHECK_EQUAL(find_value(result.get_obj(), "previousblockhash").get_str(),
+                          chainActive.Tip()->GetBlockHash().GetHex());
+        BOOST_CHECK_EQUAL(find_value(result.get_obj(), "sizelimit").get_int64(), expectedSize);
+        BOOST_CHECK_EQUAL(find_value(result.get_obj(), "weightlimit").get_int64(), expectedWeight);
+    }
 
     BOOST_AUTO_TEST_CASE(rpc_rawparams_test)
     {
@@ -159,11 +253,16 @@ BOOST_FIXTURE_TEST_SUITE(rpc_tests, TestingSetup)
 
         fUnitTest = true;
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000}"));
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"issue\":{\"asset_name\":\"RAVEN_ASSET\",\"asset_quantity\":20000,\"units\":0,\"reissuable\":1,\"has_ipfs\":0}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"issue\":{\"asset_name\":\"RAVEN_ASSET\",\"asset_quantity\":20000,\"units\":0,\"reissuable\":1,\"has_ipfs\":0}}}"));
 
         // one address multiple asset outs
-        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000,\"RAVEN_ASSET_2\":20000}}}"));
+        BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":{\"transfer\":{\"RAVEN_ASSET\":20000,\"RAVEN_ASSET_2\":20000}}}"));
+
+        // P2SH can hold native RVN, but the legacy asset parser recognizes
+        // only the P2PKH asset envelope. Refuse construction of an output that
+        // asset consensus would not recognize.
+        BOOST_CHECK_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":{\"transfer\":{\"RAVEN_ASSET\":20000}}}"), std::runtime_error);
 
         // multiple coin outs
         BOOST_CHECK_NO_THROW(CallRPC("createrawtransaction [{\"txid\":\"a3b807410df0b60fcb9736768df5823938b2f838694939ba45f3c0a1bff150ed\",\"vout\":0}] {\"rNNjqrDbSHxJZNfC54WsF8dxqbcue9SoiB\":20000,\"RUrmBNPvWemcczvE9uWMmkaVxHik753vKm\":20000}"));

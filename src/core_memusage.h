@@ -19,11 +19,9 @@ static inline size_t RecursiveDynamicUsage(const COutPoint& out) {
 }
 
 static inline size_t RecursiveDynamicUsage(const CTxIn& in) {
-    size_t mem = RecursiveDynamicUsage(in.scriptSig) + RecursiveDynamicUsage(in.prevout) + memusage::DynamicUsage(in.scriptWitness.stack);
-    for (std::vector<std::vector<unsigned char> >::const_iterator it = in.scriptWitness.stack.begin(); it != in.scriptWitness.stack.end(); it++) {
-         mem += memusage::DynamicUsage(*it);
-    }
-    return mem;
+    return RecursiveDynamicUsage(in.scriptSig) +
+           RecursiveDynamicUsage(in.prevout) +
+           in.scriptWitness.stack.DynamicMemoryUsage();
 }
 
 static inline size_t RecursiveDynamicUsage(const CTxOut& out) {

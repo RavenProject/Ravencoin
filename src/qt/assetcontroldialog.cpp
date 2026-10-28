@@ -650,7 +650,8 @@ void AssetControlDialog::updateView()
         CAssetControlWidgetItem *itemWalletAddress = new CAssetControlWidgetItem();
         itemWalletAddress->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
         QString sWalletAddress = coins.first;
-        QString sWalletLabel = model->getAddressTableModel()->labelForAddress(sWalletAddress);
+        QString sWalletLabel = model->getAddressTableModel()->labelForAddress(
+            GUIUtil::classicalAssetAddress(sWalletAddress));
         if (sWalletLabel.isEmpty())
             sWalletLabel = tr("(no label)");
 
@@ -691,29 +692,37 @@ void AssetControlDialog::updateView()
             itemOutput->setFlags(flgCheckbox);
             itemOutput->setCheckState(COLUMN_CHECKBOX, Qt::Unchecked);
 
-            // address
-            CTxDestination outputAddress;
-            QString sAddress = "";
-            if (ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, outputAddress)) {
-                sAddress = QString::fromStdString(EncodeDestination(outputAddress));
-
-                // if listMode or change => show raven address. In tree mode, address is not shown again for direct wallet address outputs
-                if (!treeMode || (!(sAddress == sWalletAddress))) {
-                    itemOutput->setText(COLUMN_ADDRESS, sAddress);
-                    // asset name
-                    itemOutput->setText(COLUMN_ASSET_NAME, QString::fromStdString(strAssetName));
-                }
+            // The group key comes from this output's activation context and
+            // includes its PQ program when the output is protected.
+            const QString sAddress = sWalletAddress;
+            if (!treeMode) {
+                itemOutput->setText(COLUMN_ADDRESS, sAddress);
+                itemOutput->setText(COLUMN_ASSET_NAME, QString::fromStdString(strAssetName));
             }
 
-            // label
-            if (!(sAddress == sWalletAddress)) // change
+            QString sourceAddress;
             {
-                // tooltip from where the change comes from
+                LOCK2(cs_main, model->getWallet()->cs_wallet);
+                CTxDestination sourceDestination;
+                if (ExtractDestination(model->getWallet()->FindNonChangeParentOutput(
+                        *out.tx->tx, out.i).scriptPubKey, sourceDestination))
+                    sourceAddress = QString::fromStdString(EncodeDestination(sourceDestination));
+            }
+            const bool isChange = !sourceAddress.isEmpty() &&
+                sourceAddress != GUIUtil::classicalAssetAddress(sAddress);
+
+            // label
+            if (isChange)
+            {
+                QString sourceLabel = model->getAddressTableModel()->labelForAddress(sourceAddress);
+                if (sourceLabel.isEmpty())
+                    sourceLabel = tr("(no label)");
                 itemOutput->setToolTip(COLUMN_LABEL,
-                                       tr("change from %1 (%2)").arg(sWalletLabel).arg(sWalletAddress));
+                                       tr("change from %1 (%2)").arg(sourceLabel).arg(sourceAddress));
                 itemOutput->setText(COLUMN_LABEL, tr("(change)"));
             } else if (!treeMode) {
-                QString sLabel = model->getAddressTableModel()->labelForAddress(sAddress);
+                QString sLabel = model->getAddressTableModel()->labelForAddress(
+                    GUIUtil::classicalAssetAddress(sAddress));
                 if (sLabel.isEmpty())
                     sLabel = tr("(no label)");
                 itemOutput->setText(COLUMN_LABEL, sLabel);

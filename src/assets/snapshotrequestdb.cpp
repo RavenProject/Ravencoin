@@ -11,6 +11,7 @@ static const char SNAPSHOTREQUEST_FLAG = 'S';
 
 static const char DISTRIBUTEREQUEST_FLAG = 'D';
 static const char DISTRIBUTETRANSACTION_FLAG = 'T';
+static const char DISTRIBUTEBINDING_FLAG = 'B';
 
 CSnapshotRequestDBEntry::CSnapshotRequestDBEntry()
 {
@@ -162,9 +163,14 @@ CDistributeSnapshotRequestDB::CDistributeSnapshotRequestDB(
 }
 
 // Schedule a distribution to occur
-bool CDistributeSnapshotRequestDB::AddDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot)
+bool CDistributeSnapshotRequestDB::AddDistributeSnapshot(const uint256& hash,
+                                                          const CRewardSnapshot& p_rewardSnapshot,
+                                                          const CRewardWalletBinding& binding)
 {
-    return Write(std::make_pair(DISTRIBUTEREQUEST_FLAG, hash), p_rewardSnapshot);
+    CDBBatch batch(*this);
+    batch.Write(std::make_pair(DISTRIBUTEBINDING_FLAG, hash), binding);
+    batch.Write(std::make_pair(DISTRIBUTEREQUEST_FLAG, hash), p_rewardSnapshot);
+    return WriteBatch(batch, true);
 }
 
 bool CDistributeSnapshotRequestDB::OverrideDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot)
@@ -177,7 +183,7 @@ bool OverrideDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_re
 // Add a new distribution transaction
 bool CDistributeSnapshotRequestDB::AddDistributeTransaction(const uint256& hash, const int& nBatchNumber, const uint256& txid)
 {
-    return Write(std::make_pair(DISTRIBUTETRANSACTION_FLAG, std::make_pair(hash, nBatchNumber)), txid);
+    return Write(std::make_pair(DISTRIBUTETRANSACTION_FLAG, std::make_pair(hash, nBatchNumber)), txid, true);
 }
 
 // Find a distribution transaction from the database
@@ -186,10 +192,20 @@ bool CDistributeSnapshotRequestDB::GetDistributeTransaction(const uint256& hash,
     return Read(std::make_pair(DISTRIBUTETRANSACTION_FLAG, std::make_pair(hash, nBatchNumber)), txid);
 }
 
+bool CDistributeSnapshotRequestDB::ContainsDistributeTransaction(const uint256& hash, const int& nBatchNumber)
+{
+    return Exists(std::make_pair(DISTRIBUTETRANSACTION_FLAG, std::make_pair(hash, nBatchNumber)));
+}
+
 //  Find a distribute snapshot request
 bool CDistributeSnapshotRequestDB::RetrieveDistributeSnapshotRequest(const uint256& hash, CRewardSnapshot& p_rewardSnapshot)
 {
     return Read(std::make_pair(DISTRIBUTEREQUEST_FLAG, hash), p_rewardSnapshot);
+}
+
+bool CDistributeSnapshotRequestDB::ContainsDistributeSnapshotRequest(const uint256& hash)
+{
+    return Exists(std::make_pair(DISTRIBUTEREQUEST_FLAG, hash));
 }
 
 // Remove a distribute snapshot request
@@ -199,9 +215,31 @@ bool CDistributeSnapshotRequestDB::RemoveDistributeSnapshotRequest(const uint256
 }
 
 // Load all distribute snapshot from database
-void CDistributeSnapshotRequestDB::LoadAllDistributeSnapshot(std::map<uint256, CRewardSnapshot>& mapRewardSnapshots)
+void CDistributeSnapshotRequestDB::LoadAllDistributeSnapshot(
+    std::map<uint256, CRewardSnapshot>& mapRewardSnapshots,
+    std::map<uint256, CRewardWalletBinding>& mapWalletBindings)
 {
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
+
+    mapRewardSnapshots.clear();
+    mapWalletBindings.clear();
+
+    pcursor->Seek(std::make_pair(DISTRIBUTEBINDING_FLAG, uint256()));
+    while (pcursor->Valid()) {
+        boost::this_thread::interruption_point();
+        std::pair<char, uint256> key;
+        if (!pcursor->GetKey(key) || key.first != DISTRIBUTEBINDING_FLAG)
+            break;
+
+        CRewardWalletBinding binding;
+        if (pcursor->GetValue(binding)) {
+            mapWalletBindings[key.second] = binding;
+        } else {
+            LogPrint(BCLog::REWARDS, "%s: Failed to read wallet binding for reward %s\n",
+                     __func__, key.second.GetHex());
+        }
+        pcursor->Next();
+    }
 
     pcursor->Seek(std::make_pair(DISTRIBUTEREQUEST_FLAG, uint256()));
 
@@ -211,10 +249,12 @@ void CDistributeSnapshotRequestDB::LoadAllDistributeSnapshot(std::map<uint256, C
         std::pair<char, uint256> key;
 
         //  Only retrieve entries at the provided block height
-        if (pcursor->GetKey(key) && key.first == DISTRIBUTEREQUEST_FLAG) {
+        if (!pcursor->GetKey(key) || key.first != DISTRIBUTEREQUEST_FLAG)
+            break;
+        {
             CRewardSnapshot distributeDbEntry;
 
-            if (pcursor->GetValue(distributeDbEntry)) {
+            if (pcursor->GetValue(distributeDbEntry) && distributeDbEntry.GetHash() == key.second) {
                 mapRewardSnapshots[key.second] = distributeDbEntry;
             } else {
                 LogPrint(BCLog::REWARDS, "%s: Failed to read snapshot distribution for key: %s\n", __func__, key.second.GetHex());

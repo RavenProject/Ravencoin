@@ -332,16 +332,22 @@ public:
     /** RVN START */
     bool IsNewAsset() const;
     bool VerifyNewAsset(std::string& strError) const;
+    bool VerifyNewAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const;
     bool IsNewUniqueAsset() const;
     bool VerifyNewUniqueAsset(std::string& strError) const;
+    bool VerifyNewUniqueAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const;
     bool IsReissueAsset() const;
     bool VerifyReissueAsset(std::string& strError) const;
+    bool VerifyReissueAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const;
     bool IsNewMsgChannelAsset() const;
     bool VerifyNewMsgChannelAsset(std::string& strError) const;
+    bool VerifyNewMsgChannelAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const;
     bool IsNewQualifierAsset() const;
     bool VerifyNewQualfierAsset(std::string &strError) const;
+    bool VerifyNewQualfierAsset(std::string &strError, bool fTransferScriptsSizeDeployed) const;
     bool IsNewRestrictedAsset() const;
     bool VerifyNewRestrictedAsset(std::string& strError) const;
+    bool VerifyNewRestrictedAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const;
 
     bool CheckAddingTagBurnFee(const int& count) const;
 

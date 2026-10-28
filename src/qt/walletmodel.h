@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <QObject>
+#include <QStringList>
 
 class AddressTableModel;
 class OptionsModel;
@@ -210,6 +211,8 @@ public:
 
     // Check address for validity
     bool validateAddress(const QString &address);
+    QString newAssetDestination();
+    QStringList getAssetDestinations() const;
 
     // Return status record for SendCoins, contains error id + information
     struct SendCoinsReturn

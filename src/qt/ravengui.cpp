@@ -914,6 +914,9 @@ void RavenGUI::createToolBars()
 
 void RavenGUI::updateIconsOnlyToolbar(bool IconsOnly)
 {
+    if (!labelToolbar || !m_toolbar)
+        return;
+
     if(IconsOnly) {
         labelToolbar->setPixmap(QPixmap::fromImage(QImage(":/icons/rvntext")));
         m_toolbar->setMaximumWidth(65);
@@ -1866,6 +1869,10 @@ void RavenGUI::onCurrencyChange(int newIndex)
     qDebug() << "RavenGUI::onPriceUnitChange: " + QString::number(newIndex);
 
     if(newIndex < 0 || newIndex >= CurrencyUnits::count()){
+        return;
+    }
+
+    if (!comboRvnUnit) {
         return;
     }
 

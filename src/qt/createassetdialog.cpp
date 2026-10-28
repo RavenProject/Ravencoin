@@ -536,7 +536,7 @@ void CreateAssetDialog::CheckFormState()
     ui->openIpfsButton->setDisabled(true);
     ui->availabilityButton->setDisabled(true);
 
-    const CTxDestination dest = DecodeDestination(ui->addressText->text().toStdString());
+    const QString assetAddress = ui->addressText->text();
 
     QString name = GetAssetName();
 
@@ -559,7 +559,7 @@ void CreateAssetDialog::CheckFormState()
         return;
     }
 
-    if (!(ui->addressText->text().isEmpty() || IsValidDestination(dest)) && assetNameValid) {
+    if (!(assetAddress.isEmpty() || GUIUtil::isValidAssetDestination(assetAddress)) && assetNameValid) {
         ui->addressText->setStyleSheet(STYLE_INVALID);
         showMessage(tr("Warning: Invalid Raven address"));
         return;
@@ -577,11 +577,7 @@ void CreateAssetDialog::CheckFormState()
             QString qAddress = ui->addressText->text();
             std::string strAddress = qAddress.toStdString();
 
-            if (strAddress.empty()) {
-                ui->addressText->setStyleSheet(STYLE_INVALID);
-                showMessage(tr("Warning: Restricted Assets Reissuance requires an address"));
-                return;
-            } else if (!IsValidDestination(dest)) {
+            if (!strAddress.empty() && !GUIUtil::isValidAssetDestination(qAddress)) {
                 ui->addressText->setStyleSheet(STYLE_INVALID);
                 showMessage(tr("Warning: Invalid Raven address"));
                 return;
@@ -591,7 +587,8 @@ void CreateAssetDialog::CheckFormState()
             std::string strError;
             ErrorReport errorReport;
             errorReport.type = ErrorReport::ErrorType::NotSetError;
-            if (!ContextualCheckVerifierString(passets, strippedVerifier, strAddress, strError, &errorReport)) {
+            if (!ContextualCheckVerifierString(passets, strippedVerifier,
+                    GUIUtil::classicalAssetAddress(qAddress).toStdString(), strError, &errorReport)) {
                 ui->lineEditVerifierString->setStyleSheet(STYLE_INVALID);
                 showInvalidVerifierStringMessage(QString::fromStdString(GetUserErrorString(errorReport)));
                 return;
@@ -818,9 +815,22 @@ void CreateAssetDialog::onCreateAssetClicked()
 
     QString address;
     if (ui->addressText->text().isEmpty()) {
-        address = model->getAddressTableModel()->addRow(AddressTableModel::Receive, "", "");
+        address = model->newAssetDestination();
+        if (address.isEmpty()) {
+            showMessage(tr("Unable to create a protected asset destination"));
+            return;
+        }
     } else {
         address = ui->addressText->text();
+    }
+
+    if (fRestrictedAssetCreation) {
+        std::string verifierError;
+        if (!ContextualCheckVerifierString(passets, verifierStripped,
+                GUIUtil::classicalAssetAddress(address).toStdString(), verifierError)) {
+            showMessage(QString::fromStdString(verifierError));
+            return;
+        }
     }
 
     if (IsInitialBlockDownload()) {

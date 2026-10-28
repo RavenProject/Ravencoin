@@ -28,8 +28,8 @@ std::string GetWalletHelpString(bool showDebug)
     strUsage += HelpMessageOpt("-fallbackfee=<amt>", strprintf(_("A fee rate (in %s/kB) that will be used when fee estimation has insufficient data (default: %s)"), CURRENCY_UNIT, FormatMoney(DEFAULT_FALLBACK_FEE)));
     strUsage += HelpMessageOpt("-keypool=<n>", strprintf(_("Set key pool size to <n> (default: %u)"), DEFAULT_KEYPOOL_SIZE));
     strUsage += HelpMessageOpt("-mintxfee=<amt>", strprintf(_("Fees (in %s/kB) smaller than this are considered zero fee for transaction creation (default: %s)"), CURRENCY_UNIT, FormatMoney(DEFAULT_TRANSACTION_MINFEE)));
-    strUsage += HelpMessageOpt("-mnemonic=<word-list>", strprintf(_("A space separated list of 12-words used to import a bip44 wallet")));
-    strUsage += HelpMessageOpt("-mnemonicpassphrase=<passphrase>", strprintf(_("Passphrase securing your 12-word mnemonic word-list")));
+    strUsage += HelpMessageOpt("-mnemonic=<word-list>", _("A space separated list of 12 words used to import a BIP44 wallet. Command-line arguments can be visible to other local users and process tools."));
+    strUsage += HelpMessageOpt("-mnemonicpassphrase=<passphrase>", _("Passphrase securing your 12-word mnemonic word list. Command-line arguments and configuration files can retain plaintext secrets."));
     strUsage += HelpMessageOpt("-paytxfee=<amt>", strprintf(_("Fee (in %s/kB) to add to transactions you send (default: %s)"), CURRENCY_UNIT, FormatMoney(payTxFee.GetFeePerK())));
     strUsage += HelpMessageOpt("-rescan", _("Rescan the block chain for missing wallet transactions on startup"));
     strUsage += HelpMessageOpt("-salvagewallet", _("Attempt to recover private keys from a corrupt wallet on startup"));
@@ -228,6 +228,18 @@ bool VerifyWallets()
             if (!CWalletDB::Recover(walletFile, (void *)&dummyWallet, CWalletDB::RecoverKeysOnlyFilter, backup_filename)) {
                 return false;
             }
+            if (backup_filename.empty()) {
+                return InitError(strprintf(
+                    _("Wallet salvage for %s did not report the retained original file."),
+                    walletFile));
+            }
+            const fs::path backup_path = GetDataDir() / backup_filename;
+            InitWarning(strprintf(
+                _("Wallet salvage retained the original %s as %s. "
+                  "The retained file may contain recoverable unencrypted private-key material "
+                  "even if the recovered wallet is encrypted. Protect it and remove it securely "
+                  "only after verifying recovery."),
+                walletFile, backup_path.string()));
         }
 
         std::string strWarning;
@@ -246,6 +258,17 @@ bool VerifyWallets()
 
 bool OpenWallets()
 {
+    class ScopedUnusedMnemonicCleanup
+    {
+    public:
+        ~ScopedUnusedMnemonicCleanup()
+        {
+            gArgs.ClearArg("-mnemonic");
+            gArgs.ClearArg("-mnemonicpassphrase");
+            ClearPendingMnemonicInput();
+        }
+    } unusedMnemonicCleanup;
+
     if (gArgs.GetBoolArg("-disablewallet", DEFAULT_DISABLE_WALLET)) {
         LogPrintf("Wallet disabled!\n");
         return true;

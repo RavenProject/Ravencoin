@@ -8,9 +8,12 @@
 #include "test/test_raven.h"
 
 #include "clientversion.h"
+#include "chainparams.h"
 #include "checkqueue.h"
 #include "consensus/tx_verify.h"
 #include "consensus/validation.h"
+#include "crypto/mldsa.h"
+#include "core_memusage.h"
 #include "core_io.h"
 #include "key.h"
 #include "keystore.h"
@@ -22,8 +25,12 @@
 #include "script/standard.h"
 #include "utilstrencodings.h"
 
+#include <algorithm>
+#include <cstring>
+#include <limits>
 #include <map>
 #include <string>
+#include <utility>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -32,6 +39,67 @@
 #include <univalue.h>
 
 typedef std::vector<unsigned char> valtype;
+
+namespace {
+
+void AppendLE32(std::vector<unsigned char>& out, uint32_t value)
+{
+    for (unsigned int shift = 0; shift < 32; shift += 8) {
+        out.push_back(static_cast<unsigned char>(value >> shift));
+    }
+}
+
+void AppendTestCompactSize(std::vector<unsigned char>& out, uint64_t value)
+{
+    if (value < 253) {
+        out.push_back(static_cast<unsigned char>(value));
+    } else if (value <= std::numeric_limits<uint16_t>::max()) {
+        out.push_back(253);
+        out.push_back(static_cast<unsigned char>(value));
+        out.push_back(static_cast<unsigned char>(value >> 8));
+    } else {
+        BOOST_REQUIRE(value <= std::numeric_limits<uint32_t>::max());
+        out.push_back(254);
+        AppendLE32(out, static_cast<uint32_t>(value));
+    }
+}
+
+class RecordingFailStream
+{
+private:
+    std::vector<unsigned char> m_bytes;
+    size_t m_pos{0};
+
+public:
+    size_t max_read_request{0};
+
+    explicit RecordingFailStream(std::vector<unsigned char> bytes) :
+        m_bytes(std::move(bytes)) {}
+
+    int GetType() const { return SER_NETWORK; }
+    int GetVersion() const { return PROTOCOL_VERSION; }
+
+    void read(char* destination, size_t size)
+    {
+        max_read_request = std::max(max_read_request, size);
+        if (size > m_bytes.size() - m_pos) {
+            throw std::ios_base::failure("test stream truncated");
+        }
+        if (size != 0) {
+            std::memcpy(destination, m_bytes.data() + m_pos, size);
+            m_pos += size;
+        }
+    }
+
+    template <typename T>
+    RecordingFailStream& operator>>(T& value)
+    {
+        ::Unserialize(*this, value);
+        return *this;
+    }
+};
+
+} // namespace
 
 // In script_tests.cpp
 extern UniValue read_json(const std::string &jsondata);
@@ -55,6 +123,7 @@ static std::map<std::string, unsigned int> mapFlagNames = {
         {std::string("WITNESS"),                               (unsigned int) SCRIPT_VERIFY_WITNESS},
         {std::string("DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM"), (unsigned int) SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM},
         {std::string("WITNESS_PUBKEYTYPE"),                    (unsigned int) SCRIPT_VERIFY_WITNESS_PUBKEYTYPE},
+        {std::string("PQ_HYBRID"),                             (unsigned int) SCRIPT_VERIFY_PQ_HYBRID},
 };
 
 unsigned int ParseScriptFlags(std::string strFlags)
@@ -110,8 +179,11 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         //
         // verifyFlags is a comma separated list of script verification flags to apply, or "NONE"
         UniValue tests = read_json(std::string(json_tests::tx_valid, json_tests::tx_valid + sizeof(json_tests::tx_valid)));
+        const Consensus::PQSignatureContext mainnetPQContext =
+            CreateChainParams("main")->GetConsensus().pqSignatureContext;
 
         ScriptError err;
+        bool sawPQVector = false;
         for (unsigned int idx = 0; idx < tests.size(); idx++)
         {
             UniValue test = tests[idx];
@@ -156,6 +228,7 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
                 }
 
                 std::string transaction = test[1].get_str();
+                sawPQVector |= test[2].get_str() == "P2SH,WITNESS,PQ_HYBRID";
                 CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION);
                 CTransaction tx(deserialize, stream);
 
@@ -180,12 +253,13 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
                     unsigned int verify_flags = ParseScriptFlags(test[2].get_str());
                     const CScriptWitness *witness = &tx.vin[i].scriptWitness;
                     BOOST_CHECK_MESSAGE(VerifyScript(tx.vin[i].scriptSig, mapprevOutScriptPubKeys[tx.vin[i].prevout],
-                                                     witness, verify_flags, TransactionSignatureChecker(&tx, i, amount, txdata), &err),
+                                                     witness, verify_flags, TransactionSignatureChecker(&tx, i, amount, txdata, mainnetPQContext), &err),
                                         strTest);
                     BOOST_CHECK_MESSAGE(err == SCRIPT_ERR_OK, ScriptErrorString(err));
                 }
             }
         }
+        BOOST_CHECK_MESSAGE(sawPQVector, "Missing signed RIP-25 tx_valid vector");
     }
 
     BOOST_AUTO_TEST_CASE(tx_invalid_test)
@@ -200,10 +274,13 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         //
         // verifyFlags is a comma separated list of script verification flags to apply, or "NONE"
         UniValue tests = read_json(std::string(json_tests::tx_invalid, json_tests::tx_invalid + sizeof(json_tests::tx_invalid)));
+        const Consensus::PQSignatureContext mainnetPQContext =
+            CreateChainParams("main")->GetConsensus().pqSignatureContext;
 
         // Initialize to SCRIPT_ERR_OK. The tests expect err to be changed to a
         // value other than SCRIPT_ERR_OK.
         ScriptError err = SCRIPT_ERR_OK;
+        bool sawPQVector = false;
         for (unsigned int idx = 0; idx < tests.size(); idx++)
         {
             UniValue test = tests[idx];
@@ -248,6 +325,7 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
                 }
 
                 std::string transaction = test[1].get_str();
+                sawPQVector |= test[2].get_str() == "P2SH,WITNESS,PQ_HYBRID";
                 CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION);
                 CTransaction tx(deserialize, stream);
 
@@ -271,12 +349,143 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
                     }
                     const CScriptWitness *witness = &tx.vin[i].scriptWitness;
                     fValid = VerifyScript(tx.vin[i].scriptSig, mapprevOutScriptPubKeys[tx.vin[i].prevout],
-                                          witness, verify_flags, TransactionSignatureChecker(&tx, i, amount, txdata), &err);
+                                          witness, verify_flags, TransactionSignatureChecker(&tx, i, amount, txdata, mainnetPQContext), &err);
                 }
                 BOOST_CHECK_MESSAGE(!fValid, strTest);
                 BOOST_CHECK_MESSAGE(err != SCRIPT_ERR_OK, ScriptErrorString(err));
             }
         }
+        BOOST_CHECK_MESSAGE(sawPQVector, "Missing corrupted RIP-25 tx_invalid vector");
+    }
+
+    BOOST_AUTO_TEST_CASE(pq_witness_v2_tx_vector_mutations)
+    {
+        const UniValue vectors = read_json(std::string(
+            json_tests::tx_valid, json_tests::tx_valid + sizeof(json_tests::tx_valid)));
+        unsigned int vectorIndex = vectors.size();
+        for (unsigned int i = 0; i < vectors.size(); ++i) {
+            const UniValue& candidate = vectors[i];
+            if (candidate.isArray() && candidate.size() == 3 &&
+                candidate[2].isStr() &&
+                candidate[2].get_str() == "P2SH,WITNESS,PQ_HYBRID") {
+                vectorIndex = i;
+                break;
+            }
+        }
+        BOOST_REQUIRE_MESSAGE(vectorIndex < vectors.size(),
+                              "Missing signed RIP-25 tx_valid vector");
+        const UniValue& vector = vectors[vectorIndex];
+        BOOST_REQUIRE(vector[0].isArray());
+        BOOST_REQUIRE_EQUAL(vector[0].size(), 1U);
+        const UniValue& prevout = vector[0][0];
+        BOOST_REQUIRE_EQUAL(prevout.size(), 4U);
+        const CScript prevoutScript = ParseScript(prevout[2].get_str());
+        BOOST_REQUIRE_EQUAL(prevoutScript.size(), 34U);
+        const CAmount amount = prevout[3].get_int64();
+        CDataStream stream(ParseHex(vector[1].get_str()), SER_NETWORK, PROTOCOL_VERSION);
+        const CTransaction serializedTx(deserialize, stream);
+        const CMutableTransaction signedSpend(serializedTx);
+        BOOST_REQUIRE_EQUAL(signedSpend.vin.size(), 1U);
+        BOOST_REQUIRE_EQUAL(signedSpend.vin[0].scriptWitness.stack.size(), 2U);
+        BOOST_REQUIRE_EQUAL(signedSpend.vin[0].scriptWitness.stack[0].size(),
+                            mldsa::SIGNATURE_BYTES);
+        BOOST_REQUIRE_EQUAL(signedSpend.vin[0].scriptWitness.stack[1].size(),
+                            mldsa::PUBLICKEY_BYTES);
+
+        const Consensus::PQSignatureContext mainnetContext =
+            CreateChainParams("main")->GetConsensus().pqSignatureContext;
+        const Consensus::PQSignatureContext testnetContext =
+            CreateChainParams("test")->GetConsensus().pqSignatureContext;
+        const unsigned int flags = ParseScriptFlags(vector[2].get_str());
+
+        auto check = [&](const CMutableTransaction& candidate,
+                         const CScript& candidatePrevoutScript,
+                         const Consensus::PQSignatureContext& context,
+                         bool expectedResult, ScriptError expectedError,
+                         const char* label) {
+            const CTransaction tx(candidate);
+            CValidationState state;
+            BOOST_REQUIRE_MESSAGE(CheckTransaction(tx, state) && state.IsValid(),
+                                  label << ": CheckTransaction must remain valid");
+            const PrecomputedTransactionData txdata(tx);
+            ScriptError err = SCRIPT_ERR_UNKNOWN_ERROR;
+            const bool result = VerifyScript(
+                tx.vin[0].scriptSig, candidatePrevoutScript,
+                &tx.vin[0].scriptWitness, flags,
+                TransactionSignatureChecker(&tx, 0, amount, txdata, context),
+                &err);
+            BOOST_CHECK_MESSAGE(result == expectedResult,
+                                label << ": unexpected verification result");
+            BOOST_CHECK_MESSAGE(err == expectedError,
+                                label << ": " << ScriptErrorString(err));
+        };
+
+        check(signedSpend, prevoutScript, mainnetContext,
+              true, SCRIPT_ERR_OK, "valid ML-DSA witness-v2 spend");
+
+        CMutableTransaction shortSignature(signedSpend);
+        shortSignature.vin[0].scriptWitness.stack[0].pop_back();
+        check(shortSignature, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_SIGNATURE_SIZE, "short signature");
+
+        CMutableTransaction longSignature(signedSpend);
+        longSignature.vin[0].scriptWitness.stack[0].push_back(0);
+        check(longSignature, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_SIGNATURE_SIZE, "long signature");
+
+        CMutableTransaction appendedHashType(signedSpend);
+        appendedHashType.vin[0].scriptWitness.stack[0].push_back(SIGHASH_ALL);
+        check(appendedHashType, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_SIGNATURE_SIZE, "appended sighash byte");
+
+        CMutableTransaction shortPublicKey(signedSpend);
+        shortPublicKey.vin[0].scriptWitness.stack[1].pop_back();
+        check(shortPublicKey, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_PUBKEY_SIZE, "short public key");
+
+        CMutableTransaction longPublicKey(signedSpend);
+        longPublicKey.vin[0].scriptWitness.stack[1].push_back(0);
+        check(longPublicKey, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_PUBKEY_SIZE, "long public key");
+
+        CMutableTransaction missingElement(signedSpend);
+        missingElement.vin[0].scriptWitness.stack.resize(1);
+        check(missingElement, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH, "missing witness element");
+
+        CMutableTransaction extraElement(signedSpend);
+        extraElement.vin[0].scriptWitness.stack.emplace_back(1, 0);
+        check(extraElement, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_WITNESS_PROGRAM_MISMATCH, "extra witness element");
+
+        CScript wrongProgram(prevoutScript);
+        wrongProgram[2] ^= 0x01;
+        check(signedSpend, wrongProgram, mainnetContext,
+              false, SCRIPT_ERR_PQ_WITNESS_PROGRAM_MISMATCH, "wrong witness program");
+
+        const CScript shortProgram = CScript() << OP_2 <<
+            std::vector<unsigned char>(prevoutScript.begin() + 2,
+                                       prevoutScript.end() - 1);
+        check(signedSpend, shortProgram, mainnetContext,
+              false, SCRIPT_ERR_WITNESS_PROGRAM_WRONG_LENGTH, "short witness program");
+
+        CMutableTransaction changedPublicKey(signedSpend);
+        changedPublicKey.vin[0].scriptWitness.stack[1][0] ^= 0x01;
+        check(changedPublicKey, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_WITNESS_PROGRAM_MISMATCH, "changed public key");
+
+        CMutableTransaction changedSignature(signedSpend);
+        changedSignature.vin[0].scriptWitness.stack[0][0] ^= 0x01;
+        check(changedSignature, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_SIGNATURE_VERIFY_FAILED, "changed signature");
+
+        check(signedSpend, prevoutScript, testnetContext,
+              false, SCRIPT_ERR_PQ_SIGNATURE_VERIFY_FAILED, "wrong network context");
+
+        CMutableTransaction changedOutput(signedSpend);
+        --changedOutput.vout[0].nValue;
+        check(changedOutput, prevoutScript, mainnetContext,
+              false, SCRIPT_ERR_PQ_SIGNATURE_VERIFY_FAILED, "changed sighash input");
     }
 
     BOOST_AUTO_TEST_CASE(basic_transaction_test)
@@ -862,6 +1071,219 @@ BOOST_FIXTURE_TEST_SUITE(transaction_tests, BasicTestingSetup)
         for (int i = 0; i < 99; i++)
             t.vout[i].scriptPubKey = CScript() << OP_RVN_ASSET;
         BOOST_CHECK(IsStandardTx(t, reason));
+    }
+
+    BOOST_AUTO_TEST_CASE(compact_witness_empty_element_amplification)
+    {
+        // A transaction containing one input, no outputs, and N empty witness
+        // elements has 58 non-element bytes. This independently constructed
+        // vector is exactly the largest P2P message accepted by this binary.
+        static const size_t wireSize = MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE2;
+        static const size_t fixedSize = 58;
+        static const size_t witnessElements = wireSize - fixedSize;
+
+        std::vector<unsigned char> wire;
+        wire.reserve(wireSize);
+        AppendLE32(wire, 2);                         // nVersion
+        wire.push_back(0);                           // witness marker
+        wire.push_back(1);                           // witness flag
+        wire.push_back(1);                           // one input
+        wire.insert(wire.end(), 32, 0);              // previous txid
+        AppendLE32(wire, std::numeric_limits<uint32_t>::max());
+        wire.push_back(0);                           // empty scriptSig
+        AppendLE32(wire, std::numeric_limits<uint32_t>::max());
+        wire.push_back(0);                           // no outputs
+        AppendTestCompactSize(wire, witnessElements);
+        wire.insert(wire.end(), witnessElements, 0); // empty witness items
+        AppendLE32(wire, 0);                         // nLockTime
+        BOOST_REQUIRE_EQUAL(wire.size(), wireSize);
+
+        CDataStream input(wire, SER_NETWORK, PROTOCOL_VERSION);
+        CTransaction tx(deserialize, input);
+        BOOST_REQUIRE(input.empty());
+        BOOST_REQUIRE_EQUAL(tx.vin.size(), 1U);
+        BOOST_REQUIRE_EQUAL(tx.vin[0].scriptWitness.stack.size(), witnessElements);
+        BOOST_CHECK(tx.vin[0].scriptWitness.stack[0].empty());
+        BOOST_CHECK(tx.vin[0].scriptWitness.stack[255].empty());
+        BOOST_CHECK(tx.vin[0].scriptWitness.stack[256].empty());
+        BOOST_CHECK(tx.vin[0].scriptWitness.stack[witnessElements - 1].empty());
+
+        // The vulnerable vector<vector<byte>> representation owns hundreds of
+        // MiB here. Permit at most linear (2x plus index) allocator growth on
+        // all supported standard-library implementations.
+        BOOST_CHECK_LE(RecursiveDynamicUsage(tx), 2 * wireSize + 1024 * 1024);
+
+        // Unknown witness versions remain forward-compatible even with this
+        // element count; a count cap would silently turn that soft-fork rule
+        // into a new consensus restriction.
+        const CScript futureWitness = CScript() << 3 << std::vector<unsigned char>(32, 0x42);
+        ScriptError futureError = SCRIPT_ERR_UNKNOWN_ERROR;
+        BOOST_CHECK(VerifyScript(CScript(), futureWitness,
+                                 &tx.vin[0].scriptWitness,
+                                 SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS,
+                                 BaseSignatureChecker(), &futureError));
+        BOOST_CHECK_EQUAL(futureError, SCRIPT_ERR_OK);
+        BOOST_CHECK(!VerifyScript(CScript(), futureWitness,
+                                  &tx.vin[0].scriptWitness,
+                                  SCRIPT_VERIFY_P2SH | SCRIPT_VERIFY_WITNESS |
+                                      SCRIPT_VERIFY_DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM,
+                                  BaseSignatureChecker(), &futureError));
+        BOOST_CHECK_EQUAL(futureError,
+                          SCRIPT_ERR_DISCOURAGE_UPGRADABLE_WITNESS_PROGRAM);
+
+        CDataStream encoded(SER_NETWORK, PROTOCOL_VERSION);
+        encoded << tx;
+        BOOST_REQUIRE_EQUAL(encoded.size(), wire.size());
+        BOOST_CHECK_EQUAL(std::memcmp(encoded.data(), wire.data(), wire.size()), 0);
+
+        CTransaction roundTrip(deserialize, encoded);
+        BOOST_REQUIRE(encoded.empty());
+        BOOST_CHECK(roundTrip.GetWitnessHash() == tx.GetWitnessHash());
+        BOOST_CHECK(roundTrip.vin[0].scriptWitness.stack ==
+                    tx.vin[0].scriptWitness.stack);
+    }
+
+    BOOST_AUTO_TEST_CASE(compact_witness_block_empty_element_amplification)
+    {
+        // Independently encode an exact 16-MB legacy-header block containing
+        // one transaction whose witness consists entirely of empty elements.
+        // This exercises the BLOCK deserialization path, not a transaction
+        // object assembled by the implementation under test.
+        static const size_t wireSize = MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE2;
+        static const size_t legacyHeaderSize = 80;
+        static const size_t transactionCountSize = 1;
+        static const size_t transactionFixedSize = 58;
+        static const size_t witnessElements =
+            wireSize - legacyHeaderSize - transactionCountSize - transactionFixedSize;
+
+        std::vector<unsigned char> wire;
+        wire.reserve(wireSize);
+        wire.insert(wire.end(), legacyHeaderSize, 0); // nTime=0: legacy header
+        wire.push_back(1);                           // one transaction
+        AppendLE32(wire, 2);                         // nVersion
+        wire.push_back(0);                           // witness marker
+        wire.push_back(1);                           // witness flag
+        wire.push_back(1);                           // one input
+        wire.insert(wire.end(), 32, 0);              // previous txid
+        AppendLE32(wire, std::numeric_limits<uint32_t>::max());
+        wire.push_back(0);                           // empty scriptSig
+        AppendLE32(wire, std::numeric_limits<uint32_t>::max());
+        wire.push_back(0);                           // no outputs
+        AppendTestCompactSize(wire, witnessElements);
+        wire.insert(wire.end(), witnessElements, 0); // empty witness items
+        AppendLE32(wire, 0);                         // nLockTime
+        BOOST_REQUIRE_EQUAL(wire.size(), wireSize);
+
+        CDataStream input(wire, SER_NETWORK, PROTOCOL_VERSION);
+        CBlock block;
+        input >> block;
+        BOOST_REQUIRE(input.empty());
+        BOOST_REQUIRE_EQUAL(block.vtx.size(), 1U);
+        BOOST_REQUIRE_EQUAL(block.vtx[0]->vin.size(), 1U);
+        BOOST_REQUIRE_EQUAL(block.vtx[0]->vin[0].scriptWitness.stack.size(),
+                            witnessElements);
+        BOOST_CHECK(block.vtx[0]->vin[0].scriptWitness.stack[0].empty());
+        BOOST_CHECK(block.vtx[0]->vin[0].scriptWitness.stack[255].empty());
+        BOOST_CHECK(block.vtx[0]->vin[0].scriptWitness.stack[256].empty());
+        BOOST_CHECK(block.vtx[0]->vin[0].scriptWitness.stack[witnessElements - 1].empty());
+        BOOST_CHECK_LE(RecursiveDynamicUsage(block), 2 * wireSize + 1024 * 1024);
+
+        CDataStream encoded(SER_NETWORK, PROTOCOL_VERSION);
+        encoded << block;
+        BOOST_REQUIRE_EQUAL(encoded.size(), wire.size());
+        BOOST_CHECK_EQUAL(std::memcmp(encoded.data(), wire.data(), wire.size()), 0);
+    }
+
+    BOOST_AUTO_TEST_CASE(compact_witness_truncated_element_is_atomic_and_chunked)
+    {
+        CScriptWitness witness;
+        witness.stack.push_back(std::vector<unsigned char>{0xaa});
+
+        // One element claims a large canonical CompactSize length that fits
+        // the encoded-size bound, but no payload follows. Historical vector
+        // parsing resized/read in 5-MB chunks before discovering truncation.
+        RecordingFailStream stream({0x01, 0xfe, 0xf0, 0xff, 0xff, 0x01});
+        BOOST_CHECK_THROW(stream >> witness.stack, std::ios_base::failure);
+        BOOST_CHECK_LE(stream.max_read_request, 64U * 1024U);
+
+        // Failed parsing must not partially replace a previously valid stack.
+        BOOST_REQUIRE_EQUAL(witness.stack.size(), 1U);
+        BOOST_REQUIRE_EQUAL(witness.stack[0].size(), 1U);
+        BOOST_CHECK_EQUAL(witness.stack[0][0], 0xaa);
+    }
+
+    BOOST_AUTO_TEST_CASE(compact_witness_move_leaves_valid_source)
+    {
+        CDataStream encoded(ParseHex("0201aa00"), SER_NETWORK, PROTOCOL_VERSION);
+        CScriptWitness source;
+        encoded >> source.stack;
+        BOOST_REQUIRE(encoded.empty());
+
+        CScriptWitness moved(std::move(source));
+        BOOST_CHECK(source.stack.empty());
+        BOOST_REQUIRE_EQUAL(moved.stack.size(), 2U);
+        BOOST_REQUIRE_EQUAL(moved.stack[0].size(), 1U);
+        BOOST_CHECK_EQUAL(moved.stack[0][0], 0xaa);
+        BOOST_CHECK(moved.stack[1].empty());
+
+        CScriptWitness assigned;
+        assigned.stack.push_back(std::vector<unsigned char>{0xbb});
+        assigned = std::move(moved);
+        BOOST_CHECK(moved.stack.empty());
+        BOOST_REQUIRE_EQUAL(assigned.stack.size(), 2U);
+        BOOST_CHECK_EQUAL(assigned.stack[0][0], 0xaa);
+        BOOST_CHECK(assigned.stack[1].empty());
+    }
+
+    BOOST_AUTO_TEST_CASE(compact_witness_preserves_compactsize_boundaries)
+    {
+        static const size_t elementCount = 260;
+        std::vector<unsigned char> wire;
+        AppendTestCompactSize(wire, elementCount);
+        for (size_t i = 0; i < elementCount; ++i) {
+            size_t size = 0;
+            if (i == 1) size = 1;
+            if (i == 2) size = 252;
+            if (i == 3) size = 253;
+            if (i == 254) size = 65535;
+            if (i == 255) size = 65536;
+            if (i == 256) size = 1;
+            if (i == 257) size = 253;
+            AppendTestCompactSize(wire, size);
+            wire.insert(wire.end(), size, static_cast<unsigned char>(i));
+        }
+
+        CDataStream input(wire, SER_NETWORK, PROTOCOL_VERSION);
+        CScriptWitness witness;
+        input >> witness.stack;
+        BOOST_REQUIRE(input.empty());
+        BOOST_REQUIRE_EQUAL(witness.stack.size(), elementCount);
+        BOOST_CHECK(witness.stack[0].empty());
+        BOOST_REQUIRE_EQUAL(witness.stack[2].size(), 252U);
+        BOOST_CHECK_EQUAL(witness.stack[2][251], 2U);
+        BOOST_REQUIRE_EQUAL(witness.stack[3].size(), 253U);
+        BOOST_CHECK_EQUAL(witness.stack[3][252], 3U);
+        BOOST_REQUIRE_EQUAL(witness.stack[254].size(), 65535U);
+        BOOST_CHECK_EQUAL(witness.stack[254][65534], 254U);
+        BOOST_REQUIRE_EQUAL(witness.stack[255].size(), 65536U);
+        BOOST_CHECK_EQUAL(witness.stack[255][65535], 255U);
+        BOOST_REQUIRE_EQUAL(witness.stack[256].size(), 1U);
+        BOOST_CHECK_EQUAL(witness.stack[256][0], 0U);
+        BOOST_REQUIRE_EQUAL(witness.stack[257].size(), 253U);
+        BOOST_CHECK_EQUAL(witness.stack[257][252], 1U);
+        BOOST_CHECK(witness.stack[259].empty());
+
+        CDataStream output(SER_NETWORK, PROTOCOL_VERSION);
+        output << witness.stack;
+        BOOST_REQUIRE_EQUAL(output.size(), wire.size());
+        BOOST_CHECK_EQUAL(std::memcmp(output.data(), wire.data(), wire.size()), 0);
+
+        CScriptWitness copied(witness);
+        BOOST_CHECK(copied.stack == witness.stack);
+        copied.stack[256].push_back(0x77);
+        BOOST_REQUIRE_EQUAL(copied.stack[256].size(), 2U);
+        BOOST_CHECK_EQUAL(copied.stack[256][1], 0x77);
+        BOOST_CHECK(copied.stack != witness.stack);
     }
 
 BOOST_AUTO_TEST_SUITE_END()

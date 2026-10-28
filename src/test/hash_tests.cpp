@@ -4,16 +4,70 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "hash.h"
+#include "algo/sph_types.h"
 #include "utilstrencodings.h"
 #include "test/test_raven.h"
 #include "consensus/merkle.h"
 
+#include <algorithm>
+#include <array>
 #include <vector>
 #include<iostream>
 
 #include <boost/test/unit_test.hpp>
 
 BOOST_FIXTURE_TEST_SUITE(hash_tests, BasicTestingSetup)
+
+    BOOST_AUTO_TEST_CASE(sph_unaligned_encoding)
+    {
+        const std::array<unsigned char, 4> big32 = {{0x01, 0x23, 0x45, 0x67}};
+        const std::array<unsigned char, 4> little32 = {{0x67, 0x45, 0x23, 0x01}};
+        const std::array<unsigned char, 8> big64 = {{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}};
+        const std::array<unsigned char, 8> little64 = {{0xef, 0xcd, 0xab, 0x89, 0x67, 0x45, 0x23, 0x01}};
+        std::array<unsigned char, 32> buf{};
+
+        for (size_t offset = 0; offset < 8; ++offset) {
+            unsigned char* p = buf.data() + offset;
+            sph_enc32be(p, 0x01234567U);
+            for (size_t i = 0; i < big32.size(); ++i) BOOST_CHECK_EQUAL(p[i], big32[i]);
+            BOOST_CHECK_EQUAL(sph_dec32be(p), 0x01234567U);
+
+            sph_enc32le(p, 0x01234567U);
+            for (size_t i = 0; i < little32.size(); ++i) BOOST_CHECK_EQUAL(p[i], little32[i]);
+            BOOST_CHECK_EQUAL(sph_dec32le(p), 0x01234567U);
+
+            sph_enc64be(p, SPH_C64(0x0123456789abcdef));
+            for (size_t i = 0; i < big64.size(); ++i) BOOST_CHECK_EQUAL(p[i], big64[i]);
+            BOOST_CHECK_EQUAL(sph_dec64be(p), SPH_C64(0x0123456789abcdef));
+
+            sph_enc64le(p, SPH_C64(0x0123456789abcdef));
+            for (size_t i = 0; i < little64.size(); ++i) BOOST_CHECK_EQUAL(p[i], little64[i]);
+            BOOST_CHECK_EQUAL(sph_dec64le(p), SPH_C64(0x0123456789abcdef));
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(x16r_legacy_digest_vectors)
+    {
+        struct Vector { const char* prev_hex; const char* expected; };
+        const Vector vectors[] = {
+            {"0000000000000000000000000000000000000000000000000000000000000000", "a97d0c054b5db2bf07e050524f2744fe56afdcd6f69b1dcd5dc35626e0773222"},
+            {"9999999999999999999999999999999999999999999999999999999999999999", "97baae0f33ab1251704500da754f8b77470d1d68920a0f27268e28c9159caa9e"},
+            {"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "7af9f36a4bfd3630d9a9249e0fee3fcc1a9b7dbb96ec7ba4fe5222a6ca99c043"},
+            {"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "d630d3023b0de9bcf131fdbb6e16e025f5738fd8896f1e4db4f6dc892572e848"},
+        };
+        for (const Vector& vector : vectors) {
+            std::array<unsigned char, 80> header{};
+            header[0] = 1;
+            const std::vector<unsigned char> prev_bytes = ParseHex(vector.prev_hex);
+            std::copy(prev_bytes.begin(), prev_bytes.end(), header.begin() + 4);
+            header[72] = 0xff;
+            header[73] = 0xff;
+            header[74] = 0x7f;
+            header[75] = 0x20;
+            const uint256 prev(prev_bytes);
+            BOOST_CHECK_EQUAL(HashX16R(header.data(), header.data() + header.size(), prev).GetHex(), vector.expected);
+        }
+    }
 
 
     BOOST_AUTO_TEST_CASE(murmurhash3)

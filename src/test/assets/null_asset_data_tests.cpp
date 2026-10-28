@@ -9,6 +9,9 @@
 #include <amount.h>
 #include <base58.h>
 #include <chainparams.h>
+#include <consensus/tx_verify.h>
+#include <consensus/validation.h>
+#include <primitives/transaction.h>
 
 BOOST_FIXTURE_TEST_SUITE(null_asset_data_tests, BasicTestingSetup)
 
@@ -70,6 +73,24 @@ BOOST_FIXTURE_TEST_SUITE(null_asset_data_tests, BasicTestingSetup)
         CNullAssetTxData fetchedData;
 
         BOOST_CHECK_MESSAGE(!GlobalAssetNullDataFromScript(nullGlobalDataScript, fetchedData), "Null Global Data From Script Failure Test 1: should have failed");
+    }
+
+    BOOST_AUTO_TEST_CASE(empty_per_address_asset_name_rejected)
+    {
+        CScript nullDataScript = GetScriptForNullAssetDataDestination(
+            DecodeDestination(GetParams().GlobalBurnAddress()));
+        CNullAssetTxData("", 0).ConstructTransaction(nullDataScript);
+        BOOST_REQUIRE(nullDataScript.IsNullAssetTxDataScript());
+
+        CMutableTransaction mutableTx;
+        mutableTx.vin.resize(1);
+        mutableTx.vin[0].prevout.n = 0;
+        mutableTx.vout.emplace_back(0, nullDataScript);
+        const CTransaction tx(mutableTx);
+        CValidationState state;
+
+        BOOST_CHECK(!CheckTransaction(tx, state));
+        BOOST_CHECK_EQUAL(state.GetRejectReason(), "bad-txns-null-data-asset-name-empty");
     }
 
 

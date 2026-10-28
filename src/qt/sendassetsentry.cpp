@@ -22,6 +22,8 @@
 #include <QGraphicsDropShadowEffect>
 #include <QApplication>
 #include <QClipboard>
+#include <QInputDialog>
+#include <QMessageBox>
 #include <validation.h>
 #include <core_io.h>
 #include <QStringListModel>
@@ -51,7 +53,7 @@ SendAssetsEntry::SendAssetsEntry(const PlatformStyle *_platformStyle, const QStr
 #endif
 
     // normal raven address field
-    GUIUtil::setupAddressWidget(ui->payTo, this);
+    GUIUtil::setupAssetAddressWidget(ui->payTo, this);
     // just a label for displaying raven address(es)
     ui->payTo_is->setFont(GUIUtil::fixedPitchFont());
 
@@ -150,6 +152,24 @@ void SendAssetsEntry::on_addressBookButton_clicked()
 {
     if(!model)
         return;
+    if (GUIUtil::pqAssetDestinationRequired()) {
+        const QStringList destinations = model->getAssetDestinations();
+        if (destinations.isEmpty()) {
+            QMessageBox::information(this, tr("PQ asset destination"),
+                tr("No saved PQ-only asset destination is available. Paste the recipient's complete PQ-only destination."));
+            return;
+        }
+        bool selected = false;
+        const QString destination = QInputDialog::getItem(
+            this, tr("Choose a protected asset destination"),
+            tr("Owned destinations (paste an external recipient in the address field):"),
+            destinations, 0, false, &selected);
+        if (selected && GUIUtil::isValidAssetDestination(destination)) {
+            ui->payTo->setText(destination);
+            ui->payAssetAmount->setFocus();
+        }
+        return;
+    }
     AddressBookPage dlg(platformStyle, AddressBookPage::ForSelection, AddressBookPage::SendingTab, this);
     dlg.setModel(model->getAddressTableModel());
     if(dlg.exec())
@@ -211,7 +231,7 @@ bool SendAssetsEntry::validate()
     if (recipient.paymentRequest.IsInitialized())
         return retval;
 
-    if (!model->validateAddress(ui->payTo->text()))
+    if (!GUIUtil::isValidAssetDestination(ui->payTo->text()))
     {
         ui->payTo->setValid(false);
         retval = false;
@@ -277,7 +297,8 @@ bool SendAssetsEntry::validate()
             if (passets->GetAssetVerifierStringIfExists(assetName, verifier)) {
                 std::string strError = "";
                 ErrorReport report;
-                if (!ContextualCheckVerifierString(passets, verifier.verifier_string,ui->payTo->text().toStdString(), strError, &report)) {
+                if (!ContextualCheckVerifierString(passets, verifier.verifier_string,
+                        GUIUtil::classicalAssetAddress(ui->payTo->text()).toStdString(), strError, &report)) {
                     ui->payTo->setValid(false);
                     ui->messageTextLabel->show();
                     ui->messageTextLabel->setText(QString::fromStdString(GetUserErrorString(report)));

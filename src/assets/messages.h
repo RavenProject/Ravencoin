@@ -11,26 +11,58 @@
 
 class CMessage;
 class COutPoint;
+class CWallet;
+
+using WalletMessageKey = std::pair<std::string, COutPoint>;
+using WalletChannelKey = std::pair<std::string, std::string>;
 
 // Message Database caches
 extern std::set<COutPoint> setDirtyMessagesRemove;
 extern std::map<COutPoint, CMessage> mapDirtyMessagesAdd;
 extern std::map<COutPoint, CMessage> mapDirtyMessagesOrphaned;
+extern std::set<WalletMessageKey> setDirtyWalletMessagesRemove;
+extern std::map<WalletMessageKey, CMessage> mapDirtyWalletMessagesAdd;
+extern std::map<WalletMessageKey, CMessage> mapDirtyWalletMessagesOrphaned;
 
 // Message Channel Database caches
 extern std::set<std::string> setDirtyChannelsAdd;
 extern std::set<std::string> setDirtyChannelsRemove;
 extern std::set<std::string> setSubscribedChannelsAskedForFalse;
+extern std::set<WalletChannelKey> setDirtyWalletChannelsAdd;
+extern std::set<WalletChannelKey> setDirtyWalletChannelsRemove;
+extern std::set<WalletChannelKey> setWalletChannelsAskedForFalse;
+extern std::map<WalletChannelKey, std::vector<std::pair<int, uint256>>> mapDirtyWalletAutoEvents;
 
 // Spam prevention address index
 extern std::set<std::string> setDirtySeenAddressAdd;
 extern std::set<std::string> setAddressAskedForFalse;
+extern std::set<WalletChannelKey> setDirtyWalletSeenAddressesAdd;
+extern std::set<WalletChannelKey> setWalletAddressesAskedForFalse;
 
 // Lock for messaging
 extern CCriticalSection cs_messaging;
 
 size_t GetMessageDirtyCacheSize();
 bool IsChannelSubscribed(const std::string &name); // Is this channel marked as spamA
+#ifdef ENABLE_WALLET
+bool GetMessageWalletScope(CWallet& wallet, std::string& scope);
+bool IsChannelSubscribed(CWallet& wallet, const std::string& name);
+bool IsMessageWalletScanComplete(CWallet& wallet);
+bool ScanForMessageChannels(CWallet& wallet, int startHeight, std::string& strError);
+void AddChannel(CWallet& wallet, const std::string& name, int eventHeight,
+                const uint256& blockHash);
+void RemoveChannel(CWallet& wallet, const std::string& name);
+bool SetWalletChannelSubscription(CWallet& wallet, const std::string& name,
+                                  bool subscribed);
+bool IsAddressSeen(CWallet& wallet, const std::string& address);
+void AddAddressSeen(CWallet& wallet, const std::string& address);
+bool LoadWalletMessages(CWallet& wallet, std::set<CMessage>& messages);
+bool AddWalletMessage(CWallet& wallet, const CMessage& message);
+bool LoadWalletChannels(CWallet& wallet, std::set<std::string>& channels);
+bool ClearWalletMessages(CWallet& wallet, int& count);
+bool ResetWalletDerivedMessageState(CWallet& wallet);
+bool InvalidateMessageWalletScans();
+#endif
 
 bool GetMessage(const COutPoint &out, CMessage &message);
 
@@ -46,9 +78,6 @@ void RemoveMessage(const COutPoint &out);
 void OrphanMessage(const CMessage &message);
 void OrphanMessage(const COutPoint &out);
 
-#ifdef ENABLE_WALLET
-bool ScanForMessageChannels(std::string& strError);
-#endif
 bool IsAddressSeen(const std::string &address); // Has this address already been sent an asset before
 void AddAddressSeen(const std::string &address);
 

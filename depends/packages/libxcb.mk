@@ -1,9 +1,16 @@
 package=libxcb
 $(package)_version=1.10
 $(package)_download_path=http://xcb.freedesktop.org/dist
+$(package)_fallback_download_path=https://download.bitcoinabc.org/depends-sources
 $(package)_file_name=$(package)-$($(package)_version).tar.bz2
 $(package)_sha256_hash=98d9ab05b636dd088603b64229dd1ab2d2cc02ab807892e107d674f9c3f2d5b5
 $(package)_dependencies=xcb_proto libXau xproto
+
+define $(package)_fetch_cmds
+( test -f $(libxcb_source) || \
+  $(call fetch_file_inner,libxcb,$(libxcb_download_path),$(libxcb_download_file),$(libxcb_file_name),$(libxcb_sha256_hash)) || \
+  $(call fetch_file_inner,libxcb,$(libxcb_fallback_download_path),$(libxcb_download_file),$(libxcb_file_name),$(libxcb_sha256_hash)) )
+endef
 
 define $(package)_set_vars
 $(package)_config_opts=--disable-static

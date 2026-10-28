@@ -7,6 +7,7 @@
 #define RAVENCOIN_RESTRICTEDDB_H
 
 #include <dbwrapper.h>
+#include <functional>
 
 class CRestrictedDB  : public CDBWrapper {
 
@@ -51,6 +52,8 @@ public:
     bool GetGlobalRestrictions(std::vector<std::string>& restrictions);
 
     bool CheckForAddressRootQualifier(const std::string& address, const std::string& qualifier);
+    bool AnyAddressSubQualifier(const std::string& address, const std::string& rootQualifier,
+                                const std::function<bool(const std::string&)>& isActive);
 
     bool Flush();
 };

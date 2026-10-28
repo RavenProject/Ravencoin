@@ -55,6 +55,8 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
     }
 
     LOCK2(cs_main, wallet->cs_wallet);
+    const CBlockIndex* originBlock = nullptr;
+    wtx.GetDepthInMainChain(originBlock);
     strHTML.reserve(4000);
     strHTML += "<html><font face='verdana, arial, helvetica, sans-serif'>";
 
@@ -128,7 +130,7 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
         //
         CAmount nUnmatured = 0;
         for (const CTxOut& txout : wtx.tx->vout)
-            nUnmatured += wallet->GetCredit(txout, ISMINE_ALL);
+            nUnmatured += wallet->GetCredit(txout, ISMINE_ALL, originBlock);
         strHTML += "<b>" + tr("Credit") + ":</b> ";
         if (wtx.IsInMainChain())
             strHTML += RavenUnits::formatHtmlWithUnit(unit, nUnmatured)+ " (" + tr("matures in %n more block(s)", "", wtx.GetBlocksToMaturity()) + ")";
@@ -155,7 +157,7 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
         isminetype fAllToMe = ISMINE_SPENDABLE;
         for (const CTxOut& txout : wtx.tx->vout)
         {
-            isminetype mine = wallet->IsMine(txout);
+            isminetype mine = wallet->IsMine(txout, originBlock);
             if(fAllToMe > mine) fAllToMe = mine;
         }
 
@@ -170,7 +172,7 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
             for (const CTxOut& txout : wtx.tx->vout)
             {
                 // Ignore change
-                isminetype toSelf = wallet->IsMine(txout);
+                isminetype toSelf = wallet->IsMine(txout, originBlock);
                 if ((toSelf == ISMINE_SPENDABLE) && (fAllFromMe == ISMINE_SPENDABLE))
                     continue;
 
@@ -219,8 +221,8 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx, TransactionReco
                 if (wallet->IsMine(txin))
                     strHTML += "<b>" + tr("Debit") + ":</b> " + RavenUnits::formatHtmlWithUnit(unit, -wallet->GetDebit(txin, ISMINE_ALL)) + "<br>";
             for (const CTxOut& txout : wtx.tx->vout)
-                if (wallet->IsMine(txout))
-                    strHTML += "<b>" + tr("Credit") + ":</b> " + RavenUnits::formatHtmlWithUnit(unit, wallet->GetCredit(txout, ISMINE_ALL)) + "<br>";
+                if (wallet->IsMine(txout, originBlock))
+                    strHTML += "<b>" + tr("Credit") + ":</b> " + RavenUnits::formatHtmlWithUnit(unit, wallet->GetCredit(txout, ISMINE_ALL, originBlock)) + "<br>";
         }
     }
 
@@ -281,6 +283,8 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
     QString strHTML;
 
     LOCK2(cs_main, wallet->cs_wallet);
+    const CBlockIndex* originBlock = nullptr;
+    wtx.GetDepthInMainChain(originBlock);
     strHTML.reserve(4000);
     strHTML += "<html><font face='verdana, arial, helvetica, sans-serif'>";
 
@@ -321,13 +325,20 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
         {
             // Credit
             CTxDestination address = DecodeDestination(rec->address);
+            CKeyID classicalKey;
+            uint256 pqProgram;
+            if (DecodePQAssetDestination(rec->address, classicalKey, pqProgram))
+                address = classicalKey;
             if (IsValidDestination(address)) {
                 if (wallet->mapAddressBook.count(address))
                 {
                     strHTML += "<b>" + tr("From") + ":</b> " + tr("unknown") + "<br>";
                     strHTML += "<b>" + tr("To") + ":</b> ";
                     strHTML += GUIUtil::HtmlEscape(rec->address);
-                    QString addressOwned = (::IsMine(*wallet, address) == ISMINE_SPENDABLE) ? tr("own address") : tr("watch-only");
+                    const bool spendable = rec->idx >= 0 &&
+                        static_cast<size_t>(rec->idx) < wtx.tx->vout.size() &&
+                        wallet->IsMine(wtx.tx->vout[rec->idx], originBlock) == ISMINE_SPENDABLE;
+                    QString addressOwned = spendable ? tr("own address") : tr("watch-only");
                     if (!wallet->mapAddressBook[address].name.empty())
                         strHTML += " (" + addressOwned + ", " + tr("label") + ": " + GUIUtil::HtmlEscape(wallet->mapAddressBook[address].name) + ")";
                     else
@@ -347,6 +358,10 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
         std::string strAddress = wtx.mapValue["to"];
         strHTML += "<b>" + tr("To") + ":</b> ";
         CTxDestination dest = DecodeDestination(strAddress);
+        CKeyID classicalKey;
+        uint256 pqProgram;
+        if (DecodePQAssetDestination(strAddress, classicalKey, pqProgram))
+            dest = classicalKey;
         if (wallet->mapAddressBook.count(dest) && !wallet->mapAddressBook[dest].name.empty())
             strHTML += GUIUtil::HtmlEscape(wallet->mapAddressBook[dest].name) + " ";
         strHTML += GUIUtil::HtmlEscape(strAddress) + "<br>";
@@ -419,6 +434,8 @@ QString TransactionDesc::toAssetHTML(CWallet *wallet, CWalletTx &wtx, Transactio
 
 void TransactionDesc::CreateDebugString(QString& strHTML, CWallet *wallet, CWalletTx &wtx, int unit)
 {
+    const CBlockIndex* originBlock = nullptr;
+    wtx.GetDepthInMainChain(originBlock);
     strHTML += "<hr><br>" + tr("Debug information") + "<br><br>";
     for (const CTxIn& txin : wtx.tx->vin)
         if (wallet->IsMine(txin)) {
@@ -433,7 +450,7 @@ void TransactionDesc::CreateDebugString(QString& strHTML, CWallet *wallet, CWall
         }
 
     for (const CTxOut& txout : wtx.tx->vout)
-        if (wallet->IsMine(txout)) {
+        if (wallet->IsMine(txout, originBlock)) {
             if (txout.scriptPubKey.IsAssetScript()) {
                 CAssetOutputEntry assetData;
                 GetAssetData(txout.scriptPubKey, assetData);
@@ -441,7 +458,7 @@ void TransactionDesc::CreateDebugString(QString& strHTML, CWallet *wallet, CWall
                            RavenUnits::formatWithCustomName(QString::fromStdString(assetData.assetName), assetData.nAmount) + "<br>";
             } else
                 strHTML += "<b>" + tr("Credit") + ":</b> " +
-                           RavenUnits::formatHtmlWithUnit(unit, wallet->GetCredit(txout, ISMINE_ALL)) + "<br>";
+                           RavenUnits::formatHtmlWithUnit(unit, wallet->GetCredit(txout, ISMINE_ALL, originBlock)) + "<br>";
         }
 
     strHTML += "<br><b>" + tr("Transaction") + ":</b><br>";

@@ -17,6 +17,7 @@
 
 class CBlockIndex;
 class CChainParams;
+class CCoinsViewCache;
 class CScript;
 
 namespace Consensus { struct Params; };
@@ -28,6 +29,7 @@ struct CBlockTemplate
     CBlock block;
     std::vector<CAmount> vTxFees;
     std::vector<int64_t> vTxSigOpsCost;
+    std::vector<size_t> vTxWeights;
     std::vector<unsigned char> vchCoinbaseCommitment;
 };
 
@@ -140,11 +142,14 @@ private:
 
     // Configuration parameters for the block size
     bool fIncludeWitness;
+    bool fApplyPQDiscount;
     unsigned int nBlockMaxWeight;
+    unsigned int nBlockMaxSerializedSize;
     CFeeRate blockMinFeeRate;
 
     // Information on the current status of the block
     uint64_t nBlockWeight;
+    uint64_t nBlockSerializedSize;
     uint64_t nBlockTx;
     uint64_t nBlockSigOpsCost;
     CAmount nFees;
@@ -159,6 +164,7 @@ public:
     struct Options {
         Options();
         size_t nBlockMaxWeight;
+        size_t nBlockMaxSerializedSize;
         CFeeRate blockMinFeeRate;
     };
 
@@ -169,23 +175,32 @@ public:
     std::unique_ptr<CBlockTemplate> CreateNewBlock(const CScript& scriptPubKeyIn, bool fMineWitnessTx=true);
 
 private:
+    struct ResourceUsage {
+        uint64_t weight{0};
+        uint64_t serializedSize{0};
+        int64_t sigOpsCost{0};
+    };
+
     // utility functions
     /** Clear the block's state and prepare for assembling a new block */
     void resetBlock();
     /** Add a tx to the block */
-    void AddToBlock(CTxMemPool::txiter iter);
+    void AddToBlock(CTxMemPool::txiter iter, const ResourceUsage& resources);
+    /** Calculate UTXO-bound weight and exact serialized bytes. */
+    ResourceUsage GetTransactionResources(const CTransaction& tx, const CCoinsViewCache& view) const;
+    ResourceUsage GetPackageResources(const CTxMemPool::setEntries& package, const CCoinsViewCache& view) const;
 
     // Methods for how to add transactions to a block.
     /** Add transactions based on feerate including unconfirmed ancestors
       * Increments nPackagesSelected / nDescendantsUpdated with corresponding
       * statistics from the package selection (for logging statistics). */
-    void addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated);
+    void addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated, const CCoinsViewCache& view);
 
     // helper functions for addPackageTxs()
     /** Remove confirmed (inBlock) entries from given set */
     void onlyUnconfirmed(CTxMemPool::setEntries& testSet);
     /** Test if a new package would "fit" in the block */
-    bool TestPackage(uint64_t packageSize, int64_t packageSigOpsCost) const;
+    bool TestPackage(const ResourceUsage& resources) const;
     /** Perform checks on each transaction in a package:
       * locktime, premature-witness, serialized size (if necessary)
       * These checks should always succeed, and they're here

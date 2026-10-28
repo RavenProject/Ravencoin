@@ -25,8 +25,17 @@ class CNullAssetTxData;
 
 /** Transaction validation functions */
 
-/** Context-independent validity checks */
-bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true, bool fMempoolCheck = false, bool fBlockCheck = false);
+struct TxAssetDeploymentContext {
+    bool fTransferScriptsSizeDeployed;
+    bool fEnforcedValuesDeployed;
+    bool fCoinbaseCheckAssetsDeployed;
+    bool fAssetsDeployed;
+    bool fMessagesDeployed;
+    bool fRestrictedAssetsDeployed;
+};
+
+/** Structural checks; candidate-block prechecks defer deployment-sensitive asset rules. */
+bool CheckTransaction(const CTransaction& tx, CValidationState& state, bool fCheckDuplicateInputs=true, bool fMempoolCheck = false, bool fBlockCheck = false, const TxAssetDeploymentContext* pAssetContext = nullptr, bool fContextFreeBlockCheck = false);
 
 namespace Consensus {
 /**
@@ -35,10 +44,15 @@ namespace Consensus {
  * @param[out] txfee Set to the transaction fee if successful.
  * Preconditions: tx.IsCoinBase() is false.
  */
-bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight, CAmount& txfee);
+bool CheckTxInputs(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, int nSpendHeight, CAmount& txfee, const TxAssetDeploymentContext* pAssetContext = nullptr);
+
+/** Enforce the dependent RIP-25 asset output and native witness-v2 anchor rule. */
+bool CheckTxPQAssets(const CTransaction& tx, CValidationState& state,
+                     const CCoinsViewCache& inputs, int activationHeight,
+                     bool* pHasProtectedInput = nullptr);
 
 /** RVN START */
-bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0,  std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData = nullptr);
+bool CheckTxAssets(const CTransaction& tx, CValidationState& state, const CCoinsViewCache& inputs, CAssetsCache* assetCache, bool fCheckMempool, std::vector<std::pair<std::string, uint256> >& vPairReissueAssets, const bool fTransferOverflowActive, const bool fRunningUnitTests = false, std::set<CMessage>* setMessages = nullptr, int64_t nBlocktime = 0,  std::vector<std::pair<std::string, CNullAssetTxData>>* myNullAssetData = nullptr, const TxAssetDeploymentContext* pAssetContext = nullptr);
 /** RVN END */
 } // namespace Consensus
 

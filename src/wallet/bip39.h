@@ -27,11 +27,18 @@
 
 #include "support/allocators/secure.h"
 
+#include <openssl/evp.h>
+
 const int NUM_LANGUAGES_BIP39_SUPPORTED = 8;
 
 const int DEFAULT_LANG = 0;
 
 const int NOT_LANG_DEFINED = -1;
+
+// BIP39 always derives a 512-bit seed. Persisted encrypted seeds add one
+// PKCS#7 AES block to the 64-byte plaintext.
+const unsigned int BIP39_SEED_SIZE = 64;
+const unsigned int BIP39_CRYPTED_SEED_SIZE = 80;
 
 const char *const ENGLISH = "english";
 const char *const SPANISH = "spanish";
@@ -59,8 +66,16 @@ public:
     static int DetectLanguageSeed(SecureString mnemonic);
     static std::array<LanguageDetails, NUM_LANGUAGES_BIP39_SUPPORTED> GetLanguagesDetails();
     static const char * const* GetLanguageWords(int lang);
-    static void ToSeed(SecureString mnemonic, SecureString passphrase, SecureVector& seedRet);
+    static bool ToSeed(const SecureString& mnemonic, const SecureString& passphrase, SecureVector& seedRet);
 private:
+    using Pbkdf2Function = decltype(&PKCS5_PBKDF2_HMAC);
+
+    static bool ToSeedWithPbkdf2(const SecureString& mnemonic,
+                                 const SecureString& passphrase,
+                                 SecureVector& seedRet,
+                                 Pbkdf2Function pbkdf2);
+
+    friend class Bip39TestAccess;
     CMnemonic() {};
 };
 

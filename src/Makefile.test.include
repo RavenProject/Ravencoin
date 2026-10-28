@@ -11,6 +11,7 @@ TEST_SRCDIR = test
 TEST_BINARY=test/test_raven$(EXEEXT)
 
 JSON_TEST_FILES = \
+  test/data/bip39_vectors.json \
   test/data/script_tests.json \
   test/data/base58_keys_valid.json \
   test/data/base58_encode_decode.json \
@@ -68,11 +69,15 @@ RAVEN_TESTS =\
   test/net_tests.cpp \
   test/netbase_tests.cpp \
   test/pmt_tests.cpp \
+  test/pqkey_tests.cpp \
+  test/pqkey_hardening_tests.cpp \
   test/policyestimator_tests.cpp \
   test/pow_tests.cpp \
   test/prevector_tests.cpp \
   test/kawpow_tests.cpp \
+  test/kawpow_v48_hardening_tests.cpp \
   test/raii_event_tests.cpp \
+  test/rip25_versionbits_tests.cpp \
   test/random_tests.cpp \
   test/reverselock_tests.cpp \
   test/rpc_tests.cpp \
@@ -103,11 +108,16 @@ RAVEN_TESTS =\
 
 if ENABLE_WALLET
 RAVEN_TESTS += \
+  test/bip39_tests.cpp \
   wallet/test/wallet_test_fixture.cpp \
   wallet/test/wallet_test_fixture.h \
   wallet/test/accounting_tests.cpp \
   wallet/test/wallet_tests.cpp \
+  wallet/test/pq_wallet_tests.cpp \
   wallet/test/crypto_tests.cpp
+else
+# The always-on full-chain PQ KAT uses this derivation without linking wallet.
+RAVEN_TESTS += wallet/pqderivation.cpp
 endif
 
 test_test_raven_SOURCES = $(RAVEN_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
@@ -120,7 +130,7 @@ test_test_raven_LDADD += $(LIBRAVEN_SERVER) $(LIBRAVEN_CLI) $(LIBRAVEN_COMMON) $
   $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1) $(EVENT_LIBS) $(EVENT_PTHREADS_LIBS)
 test_test_raven_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
-test_test_raven_LDADD += $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS)
+test_test_raven_LDADD += $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBOQS_LIBS)
 test_test_raven_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
@@ -143,7 +153,7 @@ test_test_raven_fuzzy_LDADD = \
   $(LIBRAVEN_CRYPTO) \
   $(LIBSECP256K1)
 
-test_test_raven_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+test_test_raven_fuzzy_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS) $(LIBOQS_LIBS)
 #
 
 # test_raven_hash binary #

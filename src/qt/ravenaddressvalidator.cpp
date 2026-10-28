@@ -6,6 +6,7 @@
 #include "ravenaddressvalidator.h"
 
 #include "base58.h"
+#include "guiutil.h"
 
 /* Base58 characters are:
      "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -95,4 +96,44 @@ QValidator::State RavenAddressCheckValidator::validate(QString &input, int &pos)
     }
 
     return QValidator::Invalid;
+}
+
+RavenAssetAddressEntryValidator::RavenAssetAddressEntryValidator(QObject *parent) :
+    QValidator(parent)
+{
+}
+
+QValidator::State RavenAssetAddressEntryValidator::validate(QString &input, int &pos) const
+{
+    Q_UNUSED(pos);
+    if (input.isEmpty())
+        return QValidator::Intermediate;
+
+    int separators = 0;
+    for (int idx = 0; idx < input.size();) {
+        const QChar ch = input.at(idx);
+        if (ch.isSpace() || ch.unicode() == 0x200B || ch.unicode() == 0xFEFF) {
+            input.remove(idx, 1);
+            continue;
+        }
+        if (ch == QLatin1Char('|')) {
+            if (++separators > 1)
+                return QValidator::Invalid;
+        } else if (ch.unicode() > 127 || !ch.isLetterOrNumber()) {
+            return QValidator::Invalid;
+        }
+        ++idx;
+    }
+    return QValidator::Acceptable;
+}
+
+RavenAssetAddressCheckValidator::RavenAssetAddressCheckValidator(QObject *parent) :
+    QValidator(parent)
+{
+}
+
+QValidator::State RavenAssetAddressCheckValidator::validate(QString &input, int &pos) const
+{
+    Q_UNUSED(pos);
+    return GUIUtil::isValidAssetDestination(input) ? QValidator::Acceptable : QValidator::Invalid;
 }

@@ -167,6 +167,15 @@ typedef CRavenExtKeyBase<CExtPubKey, BIP32_EXTKEY_SIZE, CChainParams::EXT_PUBLIC
 
 std::string EncodeDestination(const CTxDestination& dest);
 CTxDestination DecodeDestination(const std::string& str);
+
+/** Asset descriptor. Historical pairs contain a classical key ID; PQ-only
+ *  pairs contain the HASH160 of the PQ program as an asset identifier.
+ *  Neither form is a native RVN payment address.
+ */
+std::string EncodePQAssetDestination(const CKeyID& classicalKey, const uint256& pqProgram);
+bool DecodePQAssetDestination(const std::string& descriptor, CKeyID& classicalKey, uint256& pqProgram);
+bool DecodePQOnlyAssetDestination(const std::string& descriptor, CKeyID& assetID, uint256& pqProgram);
+
 bool IsValidDestinationString(const std::string& str);
 bool IsValidDestinationString(const std::string& str, const CChainParams& params);
 

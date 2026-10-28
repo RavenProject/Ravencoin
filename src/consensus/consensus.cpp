@@ -3,26 +3,18 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "consensus.h"
-#include <validation.h>
 
 unsigned int GetMaxBlockWeight()
 {
-    // Now that Assets have gone live, we should make checks against the new larger block size only
-    // This is necessary because when the chain loads, it can fail certain blocks(that are valid) when
-    // The asset active state isn't set like during a reindex
-    return MAX_BLOCK_WEIGHT_RIP2;
-
-    // Old block weight for when assets weren't activated
-//    return MAX_BLOCK_WEIGHT;
+    // Absolute structural ceiling supported by an RIP-25-aware binary.
+    // The active 8/12/16 MWU consensus limit is enforced contextually
+    // from pindexPrev and VersionBits in validation.cpp.
+    return MAX_BLOCK_WEIGHT_RIP25_PHASE2;
 }
 
 unsigned int GetMaxBlockSerializedSize()
 {
-    // Now that Assets have gone live, we should make checks against the new larger block size only
-    // This is necessary because when the chain loads, it can fail certain blocks(that are valid) when
-    // The asset active state isn't set like during a reindex
-    return MAX_BLOCK_SERIALIZED_SIZE_RIP2;
-
-    // Old block serialized size for when assets weren't activated
-//    return MAX_BLOCK_SERIALIZED_SIZE;
+    // Absolute buffer/import ceiling. The active phased limit is enforced
+    // contextually together with block weight in validation.cpp.
+    return MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE2;
 }

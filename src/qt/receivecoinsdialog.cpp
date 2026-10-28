@@ -18,7 +18,10 @@
 #include "guiconstants.h"
 
 #include <QAction>
+#include <QApplication>
+#include <QClipboard>
 #include <QCursor>
+#include <QInputDialog>
 #include <QItemSelection>
 #include <QMessageBox>
 #include <QScrollBar>
@@ -223,6 +226,52 @@ void ReceiveCoinsDialog::on_receiveButton_clicked()
 
     /* Store request for later reference */
     model->getRecentRequestsTableModel()->addNewRequest(info);
+}
+
+void ReceiveCoinsDialog::on_receivePQAssetButton_clicked()
+{
+    if (!model)
+        return;
+    if (!GUIUtil::pqAssetDestinationRequired()) {
+        QMessageBox::information(this, tr("PQ asset destination"),
+                                 tr("Protected asset destinations are unavailable before PQ asset activation."));
+        return;
+    }
+
+    QStringList choices = model->getAssetDestinations();
+    choices.prepend(tr("Create a new protected asset destination"));
+    bool selected = false;
+    const QString choice = QInputDialog::getItem(
+        this, tr("Receive PQ asset"), tr("Protected asset destination:"),
+        choices, 0, false, &selected);
+    if (!selected)
+        return;
+
+    QString destination = choice;
+    if (choice == choices.first()) {
+        WalletModel::UnlockContext ctx(model->requestUnlock());
+        if (!ctx.isValid())
+            return;
+        destination = model->newAssetDestination();
+    }
+    if (!GUIUtil::isValidAssetDestination(destination)) {
+        QMessageBox::warning(this, tr("PQ asset destination"),
+                             tr("The protected asset destination could not be created or validated."));
+        return;
+    }
+
+    const QString pqAddress = destination.section('|', 1, 1);
+    QMessageBox display(this);
+    display.setWindowTitle(tr("Receive PQ asset"));
+    display.setText(tr("Share this complete protected asset destination:"));
+    display.setInformativeText(destination + "\n\n" +
+        tr("To spend assets received here, first fund the PQ address with RVN: %1").arg(pqAddress));
+    display.setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+    QPushButton *copyButton = display.addButton(tr("Copy asset destination"), QMessageBox::ActionRole);
+    display.addButton(QMessageBox::Close);
+    display.exec();
+    if (display.clickedButton() == copyButton)
+        QApplication::clipboard()->setText(destination);
 }
 
 void ReceiveCoinsDialog::on_recentRequestsView_doubleClicked(const QModelIndex &index)

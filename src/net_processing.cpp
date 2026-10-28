@@ -628,8 +628,12 @@ bool AddOrphanTx(const CTransactionRef& tx, NodeId peer) EXCLUSIVE_LOCKS_REQUIRE
     // have been mined or received.
     // 100 orphans, each of which is at most 99,999 bytes big is
     // at most 10 megabytes of orphans and somewhat more byprev index (in the worst case):
-    unsigned int sz = GetTransactionWeight(*tx);
-    if (sz >= MAX_STANDARD_TX_WEIGHT)
+    // An orphan has no available prevout, so an attacker-controlled witness
+    // shape must not receive the RIP-25 PQ discount. Bound the bytes retained
+    // in memory directly; the 100-orphan default therefore remains below the
+    // 10-MB payload target stated above.
+    const unsigned int sz = ::GetSerializeSize(*tx, SER_NETWORK, PROTOCOL_VERSION);
+    if (sz >= MAX_STANDARD_TX_WEIGHT / WITNESS_SCALE_FACTOR)
     {
         LogPrint(BCLog::MEMPOOL, "ignoring large orphan tx (size: %u, hash: %s)\n", sz, hash.ToString());
         return false;
@@ -1385,6 +1389,9 @@ bool static ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::ve
             }
             return error("invalid header received");
         }
+        LogPrintf("Unable to verify header from peer %d: %s\n",
+                  pfrom->GetId(), state.GetRejectReason());
+        return true;
     }
 
     {
@@ -2394,6 +2401,9 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 LogPrintf("Peer %d sent us invalid header via cmpctblock\n", pfrom->GetId());
                 return true;
             }
+            LogPrintf("Unable to verify cmpctblock header from peer %d: %s\n",
+                      pfrom->GetId(), state.GetRejectReason());
+            return true;
         }
 
         // When we succeed in decoding a block's txids from a cmpctblock
@@ -2479,6 +2489,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     return true;
                 } else if (status == READ_STATUS_FAILED) {
                     // Duplicate txindexes, the block is now in-flight, so just request it
+                    (*queuedBlockIt)->partialBlock.reset();
                     std::vector<CInv> vInv(1);
                     vInv[0] = CInv(MSG_BLOCK | GetFetchFlags(pfrom), cmpctblock.header.GetHash());
                     connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETDATA, vInv));
@@ -2488,7 +2499,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 BlockTransactionsRequest req;
                 for (size_t i = 0; i < cmpctblock.BlockTxCount(); i++) {
                     if (!partialBlock.IsTxAvailable(i))
-                        req.indexes.push_back(i);
+                        req.indexes.push_back(static_cast<uint32_t>(i));
                 }
                 if (req.indexes.empty()) {
                     // Dirty hack to jump to BLOCKTXN code (TODO: move message handling into their own functions)
@@ -2579,7 +2590,11 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     MarkBlockAsReceived(pblock->GetHash());
                 } else {
                     uint256 mix_hash;
-                    MarkBlockAsReceived(pblock->GetHashFull(mix_hash));
+                    try {
+                        MarkBlockAsReceived(pblock->GetHashFull(mix_hash));
+                    } catch (const KAWPOWResourceError& e) {
+                        LogPrintf("Unable to calculate compact block work: %s\n", e.what());
+                    }
                 }
             }
         }
@@ -2589,7 +2604,43 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     else if (strCommand == NetMsgType::BLOCKTXN && !fImporting && !fReindex) // Ignore blocks received while importing
     {
         BlockTransactions resp;
-        vRecv >> resp;
+        vRecv >> resp.blockhash;
+
+        size_t expectedTransactionCount = 0;
+        {
+            LOCK(cs_main);
+            std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> >::iterator it = mapBlocksInFlight.find(resp.blockhash);
+            if (it == mapBlocksInFlight.end() || !it->second.second->partialBlock ||
+                    it->second.first != pfrom->GetId() ||
+                    !it->second.second->partialBlock->TryGetMissingTxCount(expectedTransactionCount)) {
+                LogPrint(BCLog::NET, "Peer %d sent us block transactions for block we weren't expecting\n", pfrom->GetId());
+                return true;
+            }
+        }
+
+        const uint64_t transactionCount = ReadCompactSize(vRecv);
+        if (transactionCount > MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("BlockTransactions count exceeds structural limit");
+        }
+        if (transactionCount != expectedTransactionCount) {
+            LOCK(cs_main);
+            std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> >::iterator it = mapBlocksInFlight.find(resp.blockhash);
+            size_t currentExpectedTransactionCount = 0;
+            if (it == mapBlocksInFlight.end() || !it->second.second->partialBlock ||
+                    it->second.first != pfrom->GetId() ||
+                    !it->second.second->partialBlock->TryGetMissingTxCount(currentExpectedTransactionCount) ||
+                    currentExpectedTransactionCount != expectedTransactionCount) {
+                LogPrint(BCLog::NET, "Peer %d sent stale block transactions for block %s\n",
+                         pfrom->GetId(), resp.blockhash.ToString());
+                return true;
+            }
+            MarkBlockAsReceived(resp.blockhash);
+            Misbehaving(pfrom->GetId(), 100);
+            LogPrintf("Peer %d sent a non-matching block transaction count for block %s\n",
+                      pfrom->GetId(), resp.blockhash.ToString());
+            return true;
+        }
+        resp.UnserializeTransactions(vRecv, transactionCount);
 
         std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
         bool fBlockRead = false;
@@ -2597,8 +2648,11 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             LOCK(cs_main);
 
             std::map<uint256, std::pair<NodeId, std::list<QueuedBlock>::iterator> >::iterator it = mapBlocksInFlight.find(resp.blockhash);
+            size_t currentExpectedTransactionCount = 0;
             if (it == mapBlocksInFlight.end() || !it->second.second->partialBlock ||
-                    it->second.first != pfrom->GetId()) {
+                    it->second.first != pfrom->GetId() ||
+                    !it->second.second->partialBlock->TryGetMissingTxCount(currentExpectedTransactionCount) ||
+                    currentExpectedTransactionCount != expectedTransactionCount) {
                 LogPrint(BCLog::NET, "Peer %d sent us block transactions for block we weren't expecting\n", pfrom->GetId());
                 return true;
             }
@@ -2612,6 +2666,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                 return true;
             } else if (status == READ_STATUS_FAILED) {
                 // Might have collided, fall back to getdata now :(
+                it->second.second->partialBlock.reset();
                 std::vector<CInv> invs;
                 invs.push_back(CInv(MSG_BLOCK | GetFetchFlags(pfrom), resp.blockhash));
                 connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETDATA, invs));
@@ -2660,7 +2715,12 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     mapBlockSource.erase(pblock->GetHash());
                 } else {
                     uint256 mix_hash;
-                    mapBlockSource.erase(pblock->GetHashFull(mix_hash));
+                    try {
+                        mapBlockSource.erase(pblock->GetHashFull(mix_hash));
+                    } catch (const KAWPOWResourceError& e) {
+                        LogPrintf("Unable to calculate compact block work: %s\n", e.what());
+                        mapBlockSource.erase(pblock->GetHash());
+                    }
                 }
             }
         }
@@ -3001,7 +3061,8 @@ bool PeerLogicValidation::ProcessMessages(CNode* pfrom, std::atomic<bool>& inter
             return false;
         // Just take one message
         msgs.splice(msgs.begin(), pfrom->vProcessMsg, pfrom->vProcessMsg.begin());
-        pfrom->nProcessQueueSize -= msgs.front().vRecv.size() + CMessageHeader::HEADER_SIZE;
+        assert(msgs.front().GetMemoryUsage() <= pfrom->nProcessQueueSize);
+        pfrom->nProcessQueueSize -= msgs.front().GetMemoryUsage();
         pfrom->fPauseRecv = pfrom->nProcessQueueSize > connman->GetReceiveFloodSize();
         fMoreWork = !pfrom->vProcessMsg.empty();
     }

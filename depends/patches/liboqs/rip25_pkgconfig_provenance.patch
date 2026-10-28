@@ -1,0 +1,9 @@
+diff --git a/src/liboqs.pc.in b/src/liboqs.pc.in
+index 5750f23..41095c0 100644
+--- a/src/liboqs.pc.in
++++ b/src/liboqs.pc.in
+@@ -1,3 +1,4 @@
++rip25_source_sha256=162d5b510518ee5f285f82fa1f16402a885176e818bf1b1a4c3c91c9a2f01eae
+ prefix=@CMAKE_INSTALL_PREFIX@
+ libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+ includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@

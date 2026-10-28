@@ -8,6 +8,8 @@
 #define RAVEN_HASH_H
 #include <iostream>
 #include <chrono>
+#include <cstdint>
+#include <stdexcept>
 #include "crypto/ripemd160.h"
 #include "crypto/sha256.h"
 #include "prevector.h"
@@ -608,6 +610,27 @@ inline uint256 HashX16RV2(const T1 pbegin, const T1 pend, const uint256 PrevBloc
 uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash);
 uint256 KAWPOWHash_OnlyMix(const CBlockHeader& blockHeader);
 
+/** Local inability to calculate KAWPOW work; this is not a consensus failure. */
+class KAWPOWResourceError : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
+
+constexpr int DEFAULT_MAX_KAWPOW_CONTEXT_MIB = 256;
+
+/** Set the local KAWPOW context budget. Returns false and keeps the previous
+ *  value if the budget is not positive or cannot be represented in bytes. */
+bool SetKAWPOWContextBudgetMiB(int64_t maxContextMiB);
+int64_t GetKAWPOWContextBudgetMiB();
+
+/** Check the node's configured context budget and the bundled verifier's integer bounds. */
+bool IsKAWPOWContextWithinLocalBudget(uint32_t blockHeight);
+
+/** Free the KAWPOW verification context cached by the calling thread. */
+void ReleaseKAWPOWThreadContext();
+
+/** Make later KAWPOW context allocations fail, for deterministic tests. */
+void SetKAWPOWContextAllocationFailureForTesting(bool fail);
+
 
 #endif // RAVEN_HASH_H
-

@@ -9,6 +9,7 @@
 #include "key.h"
 #include "pubkey.h"
 #include "util.h"
+#include "wallet/bip39.h"
 
 bool CKeyStore::AddKey(const CKey &key) {
     return AddKeyPubKey(key, key.GetPubKey());
@@ -116,31 +117,65 @@ bool CBasicKeyStore::HaveWatchOnly() const
 
 bool CBasicKeyStore::AddWords(const uint256& p_hash, const std::vector<unsigned char>& p_vchWords)
 {
+    return AddWords(p_hash, SecureVector(p_vchWords.begin(), p_vchWords.end()));
+}
+
+bool CBasicKeyStore::AddWords(const uint256& p_hash, SecureVector p_vchWords)
+{
     LOCK(cs_KeyStore);
     nWordHash = p_hash;
-    vchWords = p_vchWords;
+    vchWords.swap(p_vchWords);
     return true;
 }
 
 bool CBasicKeyStore::AddPassphrase(const std::vector<unsigned char>& p_vchPassphrase)
 {
+    return AddPassphrase(SecureVector(p_vchPassphrase.begin(), p_vchPassphrase.end()));
+}
+
+bool CBasicKeyStore::AddPassphrase(SecureVector p_vchPassphrase)
+{
     LOCK(cs_KeyStore);
-    vchPassphrase = p_vchPassphrase;
+    vchPassphrase.swap(p_vchPassphrase);
     return true;
+}
+
+bool CBasicKeyStore::HasValidBip39Seed() const
+{
+    LOCK(cs_KeyStore);
+    return g_vchSeed.size() == BIP39_SEED_SIZE;
 }
 
 void CBasicKeyStore::GetBip39Data(uint256& p_hash, std::vector<unsigned char>& p_vchWords, std::vector<unsigned char>& p_vchPassphrase, std::vector<unsigned char>& p_vchSeed)
 {
     LOCK(cs_KeyStore);
     p_hash = nWordHash;
-    p_vchWords = vchWords;
-    p_vchPassphrase = vchPassphrase;
-    p_vchSeed = g_vchSeed;
+    p_vchWords.assign(vchWords.begin(), vchWords.end());
+    p_vchPassphrase.assign(vchPassphrase.begin(), vchPassphrase.end());
+    p_vchSeed.assign(g_vchSeed.begin(), g_vchSeed.end());
 }
 
 bool CBasicKeyStore::AddVchSeed(const std::vector<unsigned char>& p_vchSeed)
 {
+    return AddVchSeed(SecureVector(p_vchSeed.begin(), p_vchSeed.end()));
+}
+
+bool CBasicKeyStore::AddVchSeed(SecureVector p_vchSeed)
+{
     LOCK(cs_KeyStore);
-    g_vchSeed = p_vchSeed;
+    g_vchSeed.swap(p_vchSeed);
+    return true;
+}
+
+bool CBasicKeyStore::GetBip39Seed(SecureVector& p_vchSeed) const
+{
+    LOCK(cs_KeyStore);
+    if (g_vchSeed.size() != BIP39_SEED_SIZE) {
+        SecureVector().swap(p_vchSeed);
+        return false;
+    }
+
+    SecureVector seed(g_vchSeed);
+    p_vchSeed.swap(seed);
     return true;
 }

@@ -1,0 +1,222 @@
+--- a/src/validation.cpp
++++ b/src/validation.cpp
+@@ -122,6 +122,7 @@
+ CTxMemPool mempool(&feeEstimator);
+ 
+ static void CheckBlockIndex(const Consensus::Params& consensusParams);
++static bool IsPQHybridActiveLocked(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+ 
+ /** Constant stuff for coinbase transactions we create: */
+ CScript COINBASE_FLAGS;
+@@ -538,6 +539,7 @@
+ 
+     // Reject transactions with witness before segregated witness activates (override with -prematurewitness)
+     bool witnessEnabled = IsWitnessEnabled(chainActive.Tip(), chainparams.GetConsensus());
++    const bool pqEnabled = IsPQHybridActiveLocked(chainActive.Tip(), chainparams.GetConsensus());
+     if (!gArgs.GetBoolArg("-prematurewitness", false) && tx.HasWitness() && !witnessEnabled) {
+         return state.DoS(0, false, REJECT_NONSTANDARD, "no-witness-yet", true);
+     }
+@@ -882,6 +884,8 @@
+         }
+ 
+         unsigned int scriptVerifyFlags = STANDARD_SCRIPT_VERIFY_FLAGS;
++        if (pqEnabled)
++            scriptVerifyFlags |= SCRIPT_VERIFY_PQ_HYBRID;
+         if (!chainparams.RequireStandard()) {
+             scriptVerifyFlags = gArgs.GetArg("-promiscuousmempoolflags", scriptVerifyFlags);
+         }
+@@ -2291,6 +2295,72 @@
+ // Protected by cs_main
+ VersionBitsCache versionbitscache;
+ 
++static bool IsPQHybridActiveLocked(const CBlockIndex* pindexPrev, const Consensus::Params& params)
++{
++    AssertLockHeld(cs_main);
++    // Test chains may explicitly force-enable RIP-25; mainnet follows BIP9.
++    if (params.nPQHybridEnabled)
++        return true;
++    return VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_PQ_HYBRID, versionbitscache) == THRESHOLD_ACTIVE;
++}
++
++bool IsPQWitnessDiscountActive(const CBlockIndex* pindexPrev, const Consensus::Params& params)
++{
++    AssertLockHeld(cs_main);
++    return IsPQHybridActiveLocked(pindexPrev, params);
++}
++
++static bool IsPQWitnessV2Prevout(const CScript& scriptPubKey)
++{
++    int witnessVersion = -1;
++    std::vector<unsigned char> witnessProgram;
++    return scriptPubKey.IsWitnessProgram(witnessVersion, witnessProgram) &&
++           witnessVersion == 2 && witnessProgram.size() == 32;
++}
++
++static int64_t GetContextualPQWitnessDiscount(const CTransaction& tx, const CCoinsViewCache& view)
++{
++    int64_t discount = 0;
++    for (const auto& txin : tx.vin) {
++        const Coin& coin = view.AccessCoin(txin.prevout);
++        if (coin.IsSpent() || !IsPQWitnessV2Prevout(coin.out.scriptPubKey))
++            continue;
++        discount += GetPQWitnessInputDiscount(txin);
++    }
++    return discount;
++}
++
++static int GetPQHybridActivationHeightLocked(const CBlockIndex* pindexPrev, const Consensus::Params& params)
++{
++    AssertLockHeld(cs_main);
++    if (params.nPQHybridEnabled)
++        return 0;
++    if (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_PQ_HYBRID, versionbitscache) != THRESHOLD_ACTIVE)
++        return -1;
++    return VersionBitsStateSinceHeight(pindexPrev, params, Consensus::DEPLOYMENT_PQ_HYBRID, versionbitscache);
++}
++
++static unsigned int GetMaxBlockWeightForPrevLocked(const CBlockIndex* pindexPrev, const Consensus::Params& params)
++{
++    AssertLockHeld(cs_main);
++    const int activationHeight = GetPQHybridActivationHeightLocked(pindexPrev, params);
++    if (activationHeight < 0)
++        return MAX_BLOCK_WEIGHT_RIP2;
++
++    const int candidateHeight = pindexPrev ? pindexPrev->nHeight + 1 : 0;
++    assert(params.nPowTargetSpacing > 0);
++    const int64_t blocksPerYear = (365LL * 24 * 60 * 60) / params.nPowTargetSpacing;
++    if ((int64_t)candidateHeight >= (int64_t)activationHeight + blocksPerYear)
++        return MAX_BLOCK_WEIGHT_RIP25_PHASE2;
++    return MAX_BLOCK_WEIGHT_RIP25_PHASE1;
++}
++
++unsigned int GetMaxBlockWeightForPrev(const CBlockIndex* pindexPrev, const Consensus::Params& params)
++{
++    LOCK(cs_main);
++    return GetMaxBlockWeightForPrevLocked(pindexPrev, params);
++}
++
+ int32_t ComputeBlockVersion(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+ {
+     LOCK(cs_main);
+@@ -2367,6 +2437,11 @@
+     		flags |= SCRIPT_VERIFY_NULLDUMMY;
+     }
+ 
++    // RIP-25: enforce ML-DSA witness-v2 rules only when the deployment is active.
++    if (IsPQHybridActiveLocked(pindex->pprev, consensusparams)) {
++        flags |= SCRIPT_VERIFY_PQ_HYBRID;
++    }
++
+     return flags;
+ }
+ 
+@@ -2486,8 +2561,11 @@
+     		nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
+     }
+ 
+-    // Get the script flags for this block
++    // Get the script flags and active resource limits for this block.
+     unsigned int flags = GetBlockScriptFlags(pindex, chainparams.GetConsensus());
++    const bool pqWitnessDiscountActive = IsPQWitnessDiscountActive(pindex->pprev, chainparams.GetConsensus());
++    const unsigned int activeBlockWeightLimit = GetMaxBlockWeightForPrevLocked(pindex->pprev, chainparams.GetConsensus());
++    int64_t contextualBlockWeight = GetBlockWeight(block);
+ 
+     int64_t nTime2 = GetTimeMicros(); nTimeForks += nTime2 - nTime1;
+     LogPrint(BCLog::BENCH, "    - Fork checks: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime2 - nTime1), nTimeForks * MICRO, nTimeForks * MILLI / nBlocksTotal);
+@@ -2528,6 +2606,14 @@
+                 state.SetFailedTransaction(tx.GetHash());
+                 return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
+             }
++
++            // RIP-25 consensus weight: preserve the approved 8x discount, but
++            // grant it only to an input that actually spends a witness-v2
++            // 32-byte program. This prevents unrelated/future witness stacks
++            // from obtaining the PQ discount merely by matching ML-DSA sizes.
++            if (pqWitnessDiscountActive)
++                contextualBlockWeight -= GetContextualPQWitnessDiscount(tx, view);
++
+             nFees += txfee;
+             if (!MoneyRange(nFees)) {
+                 return state.DoS(100, error("%s: accumulated fee in the block out of range.", __func__),
+@@ -2735,6 +2821,11 @@
+         vPos.push_back(std::make_pair(tx.GetHash(), pos));
+         pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
+     }
++    if (contextualBlockWeight > activeBlockWeightLimit) {
++        return state.DoS(100, false, REJECT_INVALID, "bad-blk-weight", false,
++                         strprintf("%s : UTXO-bound block weight %d exceeds %u", __func__, contextualBlockWeight, activeBlockWeightLimit));
++    }
++
+     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
+     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
+ 
+@@ -4145,9 +4236,10 @@
+ 
+     // The height declared inside the KAWPOW header feeds the PoW hash, the DAG epoch
+     // and the ProgPoW period. It must match the actual height of the block.
+-    if (nHeight >= consensusParams.nHeightHeaderCheckActivation &&
+-        block.nTime >= nKAWPOWActivationTime &&
+-        block.nHeight != (uint32_t)nHeight) {
++    if (!IsKAWPOWHeaderHeightValid(block,
++                                   nHeight,
++                                   consensusParams.nHeightHeaderCheckActivation,
++                                   nKAWPOWActivationTime)) {
+         return state.DoS(100,
+                          error("%s: declared header height %u does not match chain height %d",
+                                __func__, block.nHeight, nHeight),
+@@ -4199,6 +4291,23 @@
+ {
+     const int nHeight = pindexPrev == nullptr ? 0 : pindexPrev->nHeight + 1;
+ 
++    // RIP-25: reorg/reindex-safe phased resource rules. Before activation
++    // retain RIP-2 8 MWU. At activation use 12 MWU + approved 8x PQ witness
++    // discount; after one nominal year of blocks use 16 MWU.
++    const bool pqActive = IsPQWitnessDiscountActive(pindexPrev, consensusParams);
++    const unsigned int activeWeightLimit = GetMaxBlockWeightForPrevLocked(pindexPrev, consensusParams);
++    const unsigned int activeSerializedLimit = activeWeightLimit == MAX_BLOCK_WEIGHT_RIP25_PHASE2 ? MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE2 :
++                                               activeWeightLimit == MAX_BLOCK_WEIGHT_RIP25_PHASE1 ? MAX_BLOCK_SERIALIZED_SIZE_RIP25_PHASE1 :
++                                               MAX_BLOCK_SERIALIZED_SIZE_RIP2;
++    // After activation this is an optimistic lower bound: stack shape can be
++    // checked here, but the discounted input must also spend a real witness-v2
++    // prevout. ConnectBlock performs that UTXO-bound check before acceptance.
++    const int64_t preliminaryWeight = pqActive ? GetBlockWeightRIP25(block) : GetBlockWeight(block);
++    if (preliminaryWeight > activeWeightLimit)
++        return state.DoS(100, false, REJECT_INVALID, "bad-blk-weight", false, strprintf("%s : preliminary block weight %d exceeds %u", __func__, preliminaryWeight, activeWeightLimit));
++    if (::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION) > activeSerializedLimit)
++        return state.DoS(100, false, REJECT_INVALID, "bad-blk-size", false, strprintf("%s : contextual serialized block size exceeds %u", __func__, activeSerializedLimit));
++
+     // Start enforcing BIP113 (Median Time Past) using versionbits logic.
+     int nLockTimeFlags = 0;
+     if(consensusParams.nCSVEnabled == true) {
+@@ -4268,8 +4377,15 @@
+     // large by filling up the coinbase witness, which doesn't change
+     // the block hash, so we couldn't mark the block as permanently
+     // failed).
+-    if (GetBlockWeight(block) > GetMaxBlockWeight()) {
+-        return state.DoS(100, false, REJECT_INVALID, "bad-blk-weight", false, strprintf("%s : weight limit failed", __func__));
++    // Absolute structural ceiling. GetBlockWeightRIP25 is deliberately
++    // optimistic (shape-only) here; if even that lower bound exceeds the
++    // phase-2 maximum, the block can never be valid. Exact UTXO-bound
++    // discounting is enforced later in ConnectBlock.
++    if (GetBlockWeightRIP25(block) > GetMaxBlockWeight()) {
++        return state.DoS(100, false, REJECT_INVALID, "bad-blk-weight", false, strprintf("%s : absolute RIP-25 weight ceiling failed", __func__));
++    }
++    if (::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION) > GetMaxBlockSerializedSize()) {
++        return state.DoS(100, false, REJECT_INVALID, "bad-blk-size", false, strprintf("%s : absolute serialized size limit failed", __func__));
+     }
+ 
+     return true;
+@@ -5909,6 +6025,13 @@
+ {
+     return passets;
+ }
++
++/** RIP-25: Post-Quantum Signatures deployment check at active-chain tip. */
++bool IsPQHybridDeployed()
++{
++    LOCK(cs_main);
++    return IsPQHybridActiveLocked(chainActive.Tip(), GetParams().GetConsensus());
++}
+ /** RVN END */
+ 
+ class CMainCleanup

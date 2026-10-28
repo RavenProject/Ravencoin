@@ -9,10 +9,13 @@
 #include "consensus/merkle.h"
 #include "consensus/tx_verify.h"
 #include "consensus/validation.h"
+#include "keystore.h"
 #include "validation.h"
 #include "miner.h"
 #include "policy/policy.h"
+#include "pqkey.h"
 #include "pubkey.h"
+#include "script/sign.h"
 #include "script/standard.h"
 #include "txmempool.h"
 #include "uint256.h"
@@ -21,11 +24,16 @@
 
 #include "test/test_raven.h"
 
+#include <univalue.h>
+
 #include <memory>
+#include <stdexcept>
 
 #include <boost/test/unit_test.hpp>
 
 #include "util.h"
+
+UniValue CallRPC(std::string args);
 
 BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
 
@@ -656,5 +664,365 @@ BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
 
         fCheckpointsEnabled = true;
     }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+namespace {
+
+struct RIP25MinerTestingSetup : public TestingSetup
+{
+    RIP25MinerTestingSetup() : TestingSetup(CBaseChainParams::REGTEST) {}
+};
+
+CTransactionRef AddPQSpendToMempool(bool p2shWrapped, size_t inputCount, uint32_t nonce,
+                                    CAmount fee, bool validatedAdmission = false,
+                                    int64_t cachedSigOps = -1)
+{
+    CPQKey key;
+    key.MakeNewKey();
+    if (!key.IsValid())
+        throw std::runtime_error("failed to create PQ key");
+
+    const CPQPubKey pubkey = key.GetPubKey();
+    const CScript witnessV2 = GetScriptForWitnessV2PQ(pubkey.GetWitnessProgram());
+    const CScript fundingScript = p2shWrapped ? GetScriptForDestination(CScriptID(witnessV2)) : witnessV2;
+
+    CBasicKeyStore keystore;
+    if (!keystore.AddPQKeyPubKey(key, pubkey))
+        throw std::runtime_error("failed to add PQ key");
+    if (p2shWrapped && !keystore.AddCScript(witnessV2))
+        throw std::runtime_error("failed to add witness-v2 redeem script");
+
+    const CAmount inputAmount = 2 * COIN;
+    CMutableTransaction funding;
+    funding.nLockTime = nonce;
+    funding.vout.resize(inputCount, CTxOut(inputAmount, fundingScript));
+    const CTransaction fundingTx(funding);
+
+    CMutableTransaction spend;
+    spend.vin.reserve(inputCount);
+    for (size_t i = 0; i < inputCount; ++i) {
+        const COutPoint prevout(fundingTx.GetHash(), i);
+        pcoinsTip->AddCoin(prevout, Coin(fundingTx.vout[i], chainActive.Height(), false), false);
+        spend.vin.emplace_back(prevout);
+    }
+    spend.vout.emplace_back(inputAmount * inputCount - fee, fundingScript);
+
+    for (size_t i = 0; i < inputCount; ++i) {
+        if (!SignSignature(keystore, fundingTx, spend, i, SIGHASH_ALL,
+                           GetParams().GetConsensus().pqSignatureContext))
+            throw std::runtime_error("failed to sign PQ spend");
+    }
+
+    const CTransactionRef tx = MakeTransactionRef(std::move(spend));
+    if (validatedAdmission) {
+        CValidationState state;
+        if (!AcceptToMemoryPool(mempool, state, tx, nullptr, nullptr, true, 0))
+            throw std::runtime_error(strprintf("failed validated PQ mempool admission: %s", state.GetRejectReason()));
+    } else {
+        TestMemPoolEntryHelper entry;
+        const int64_t sigOps = cachedSigOps >= 0 ? cachedSigOps : static_cast<int64_t>(inputCount) * 2;
+        entry.Fee(fee).Time(GetTime()).Height(chainActive.Height()).SigOpsCost(sigOps);
+        if (!mempool.addUnchecked(tx->GetHash(), entry.FromTx(*tx)))
+            throw std::runtime_error("failed to add PQ spend to mempool");
+    }
+    return tx;
+}
+
+CTransactionRef AddStandardP2SHSigOpsToMempool(size_t p2shSigOps, uint32_t nonce, CAmount fee)
+{
+    if (p2shSigOps == 0)
+        throw std::runtime_error("P2SH sigop test transaction must contain sigops");
+
+    const CAmount inputAmount = 100 * COIN;
+    std::vector<CScript> redeemScripts;
+    CMutableTransaction funding;
+    funding.nLockTime = nonce;
+    for (size_t remaining = p2shSigOps; remaining > 0;) {
+        const size_t inputSigOps = std::min<size_t>(remaining, MAX_P2SH_SIGOPS);
+        CScript redeemScript;
+        redeemScript << OP_IF;
+        for (size_t i = 0; i < inputSigOps; ++i)
+            redeemScript << OP_CHECKSIG;
+        redeemScript << OP_ENDIF << OP_TRUE;
+        redeemScripts.push_back(redeemScript);
+        funding.vout.emplace_back(inputAmount, GetScriptForDestination(CScriptID(redeemScript)));
+        remaining -= inputSigOps;
+    }
+    const CTransaction fundingTx(funding);
+
+    CMutableTransaction spend;
+    spend.vin.reserve(redeemScripts.size());
+    for (size_t i = 0; i < redeemScripts.size(); ++i) {
+        const COutPoint prevout(fundingTx.GetHash(), i);
+        pcoinsTip->AddCoin(prevout, Coin(fundingTx.vout[i], chainActive.Height(), false), false);
+        CTxIn input(prevout);
+        input.scriptSig = CScript() << OP_0
+                                    << std::vector<unsigned char>(redeemScripts[i].begin(), redeemScripts[i].end());
+        spend.vin.push_back(std::move(input));
+    }
+    spend.vout.emplace_back(inputAmount * redeemScripts.size() - fee, funding.vout.front().scriptPubKey);
+
+    const CTransactionRef tx = MakeTransactionRef(std::move(spend));
+    CValidationState state;
+    if (!AcceptToMemoryPool(mempool, state, tx, nullptr, nullptr, true, 0))
+        throw std::runtime_error(strprintf("failed validated P2SH mempool admission: %s", state.GetRejectReason()));
+    return tx;
+}
+
+} // namespace
+
+BOOST_FIXTURE_TEST_SUITE(rip25_miner_tests, RIP25MinerTestingSetup)
+
+BOOST_AUTO_TEST_CASE(active_pq_admission_caches_contextual_sigops)
+{
+    LOCK(cs_main);
+    mempool.clear();
+
+    const CTransactionRef native = AddPQSpendToMempool(false, 1, 10, 100000, true);
+    const CTransactionRef wrapped = AddPQSpendToMempool(true, 1, 11, 100000, true);
+
+    {
+        LOCK(mempool.cs);
+        const auto nativeEntry = mempool.mapTx.find(native->GetHash());
+        const auto wrappedEntry = mempool.mapTx.find(wrapped->GetHash());
+        BOOST_REQUIRE(nativeEntry != mempool.mapTx.end());
+        BOOST_REQUIRE(wrappedEntry != mempool.mapTx.end());
+        BOOST_CHECK_EQUAL(nativeEntry->GetSigOpCost(), 2);
+        BOOST_CHECK_EQUAL(wrappedEntry->GetSigOpCost(), 2);
+    }
+
+    BlockAssembler::Options options;
+    options.blockMinFeeRate = CFeeRate(0);
+    const std::unique_ptr<CBlockTemplate> blockTemplate =
+        BlockAssembler(GetParams(), options).CreateNewBlock(CScript() << OP_TRUE);
+    BOOST_REQUIRE(blockTemplate);
+    BOOST_REQUIRE_EQUAL(blockTemplate->block.vtx.size(), 3U);
+    BOOST_REQUIRE_EQUAL(blockTemplate->vTxSigOpsCost.size(), 3U);
+    bool foundNative = false;
+    bool foundWrapped = false;
+    for (size_t i = 1; i < blockTemplate->block.vtx.size(); ++i) {
+        if (blockTemplate->block.vtx[i]->GetHash() == native->GetHash()) {
+            foundNative = true;
+            BOOST_CHECK_EQUAL(blockTemplate->vTxSigOpsCost[i], 2);
+        }
+        if (blockTemplate->block.vtx[i]->GetHash() == wrapped->GetHash()) {
+            foundWrapped = true;
+            BOOST_CHECK_EQUAL(blockTemplate->vTxSigOpsCost[i], 2);
+        }
+    }
+    BOOST_CHECK(foundNative);
+    BOOST_CHECK(foundWrapped);
+}
+
+BOOST_AUTO_TEST_CASE(stale_pq_sigop_cache_cannot_poison_template)
+{
+    LOCK(cs_main);
+    mempool.clear();
+
+    // First prove that each PQ transaction is independently policy-admissible,
+    // then recreate the vulnerable cache value (zero) without constructing an
+    // oversized transaction that normal admission would reject.
+    std::vector<CTransactionRef> stalePQ;
+    for (uint32_t i = 0; i < 3; ++i) {
+        const CTransactionRef tx = AddPQSpendToMempool(false, 135, 20 + i, COIN, true);
+        BOOST_REQUIRE_LT(GetTransactionWeight(*tx), MAX_STANDARD_TX_WEIGHT);
+        stalePQ.push_back(tx);
+    }
+    mempool.clear();
+    for (const CTransactionRef& tx : stalePQ) {
+        TestMemPoolEntryHelper entry;
+        entry.Fee(COIN).Time(GetTime()).Height(chainActive.Height()).SigOpsCost(0);
+        BOOST_REQUIRE(mempool.addUnchecked(tx->GetHash(), entry.FromTx(*tx)));
+    }
+
+    // Five independently admitted standard P2SH transactions contribute
+    // 79,192 sigops cost. Cost one would admit all three PQ transactions
+    // at 79,597; cost two raises the real total to 80,002. Recompute all
+    // 405 active witness-v2 inputs from the UTXO view before selection.
+    const size_t p2shSigOpChunks[] = {3990, 3990, 3990, 3990, 3838};
+    std::vector<CTransactionRef> legacy;
+    for (size_t i = 0; i < sizeof(p2shSigOpChunks) / sizeof(p2shSigOpChunks[0]); ++i)
+        legacy.push_back(AddStandardP2SHSigOpsToMempool(p2shSigOpChunks[i], 30 + i, 10 * COIN));
+
+    CCoinsViewMemPool viewMemPool(pcoinsTip, mempool);
+    CCoinsViewCache view(&viewMemPool);
+    int64_t legacySigOpsCost = 0;
+    for (size_t i = 0; i < legacy.size(); ++i) {
+        const int64_t cost = GetTransactionSigOpCost(*legacy[i], view, STANDARD_SCRIPT_VERIFY_FLAGS);
+        BOOST_REQUIRE_EQUAL(cost, static_cast<int64_t>(p2shSigOpChunks[i] * WITNESS_SCALE_FACTOR));
+        BOOST_REQUIRE_LE(cost, static_cast<int64_t>(MAX_STANDARD_TX_SIGOPS_COST));
+        legacySigOpsCost += cost;
+    }
+    BOOST_REQUIRE_EQUAL(legacySigOpsCost, 79192);
+    int64_t pqSigOpsCost = 0;
+    for (const CTransactionRef& tx : stalePQ)
+        pqSigOpsCost += GetTransactionSigOpCost(*tx, view,
+            STANDARD_SCRIPT_VERIFY_FLAGS | SCRIPT_VERIFY_PQ_HYBRID);
+    BOOST_REQUIRE_EQUAL(pqSigOpsCost, 810);
+    BOOST_REQUIRE_EQUAL(legacySigOpsCost + pqSigOpsCost, MAX_BLOCK_SIGOPS_COST + 2);
+
+    BlockAssembler::Options options;
+    options.blockMinFeeRate = CFeeRate(0);
+    std::unique_ptr<CBlockTemplate> blockTemplate;
+    BOOST_REQUIRE_NO_THROW(blockTemplate = BlockAssembler(GetParams(), options).CreateNewBlock(CScript() << OP_TRUE));
+    BOOST_REQUIRE(blockTemplate);
+    // The 400-unit miner reserve permits one 270-cost PQ transaction, but
+    // excludes the second and third despite their stale zero-cost entries.
+    BOOST_REQUIRE_EQUAL(blockTemplate->block.vtx.size(), 2U + legacy.size());
+    BOOST_REQUIRE_EQUAL(blockTemplate->vTxSigOpsCost.size(), 2U + legacy.size());
+    int64_t templateSigOpsCost = 0;
+    size_t selectedPQ = 0;
+    for (size_t i = 1; i < blockTemplate->block.vtx.size(); ++i) {
+        templateSigOpsCost += blockTemplate->vTxSigOpsCost[i];
+        bool isLegacy = false;
+        for (const CTransactionRef& tx : legacy)
+            isLegacy |= blockTemplate->block.vtx[i]->GetHash() == tx->GetHash();
+        if (!isLegacy) {
+            ++selectedPQ;
+            BOOST_CHECK_EQUAL(blockTemplate->vTxSigOpsCost[i], 270);
+        }
+    }
+    BOOST_CHECK_EQUAL(selectedPQ, 1U);
+    BOOST_CHECK_EQUAL(templateSigOpsCost, legacySigOpsCost + 270);
+    BOOST_CHECK_LE(templateSigOpsCost, MAX_BLOCK_SIGOPS_COST - 400);
+    size_t missingPQ = 0;
+    for (const CTransactionRef& pqTx : stalePQ) {
+        bool found = false;
+        for (const CTransactionRef& blockTx : blockTemplate->block.vtx)
+            found |= blockTx->GetHash() == pqTx->GetHash();
+        if (!found)
+            ++missingPQ;
+    }
+    BOOST_CHECK_EQUAL(missingPQ, 2U);
+}
+
+BOOST_AUTO_TEST_CASE(native_v2_raw_size_clamping_returns_valid_template)
+{
+    LOCK(cs_main);
+    const CAmount fee = 100000;
+    const CTransactionRef first = AddPQSpendToMempool(false, 8, 1, fee);
+    const CTransactionRef second = AddPQSpendToMempool(false, 8, 2, fee);
+    const uint64_t txSize = ::GetSerializeSize(*first, SER_NETWORK, PROTOCOL_VERSION);
+    BOOST_REQUIRE_EQUAL(txSize, ::GetSerializeSize(*second, SER_NETWORK, PROTOCOL_VERSION));
+
+    BlockAssembler::Options options;
+    options.blockMinFeeRate = CFeeRate(0);
+    options.nBlockMaxWeight = GetMaxBlockWeight();
+    options.nBlockMaxSerializedSize = 1000 + txSize + 1;
+
+    std::unique_ptr<CBlockTemplate> blockTemplate;
+    BOOST_REQUIRE_NO_THROW(blockTemplate = BlockAssembler(GetParams(), options).CreateNewBlock(CScript() << OP_TRUE));
+    BOOST_REQUIRE(blockTemplate);
+    BOOST_REQUIRE_EQUAL(blockTemplate->block.vtx.size(), 2U);
+
+    const uint256 selected = blockTemplate->block.vtx[1]->GetHash();
+    BOOST_CHECK(selected == first->GetHash() || selected == second->GetHash());
+    BOOST_CHECK(::GetSerializeSize(blockTemplate->block, SER_NETWORK, PROTOCOL_VERSION) < options.nBlockMaxSerializedSize);
+    BOOST_CHECK(::GetSerializeSize(blockTemplate->block, SER_NETWORK, PROTOCOL_VERSION) <=
+                GetMaxBlockSerializedSizeForPrev(chainActive.Tip(), GetParams().GetConsensus()));
+}
+
+BOOST_AUTO_TEST_CASE(p2sh_wrapped_v2_uses_undiscounted_weight)
+{
+    LOCK(cs_main);
+    const CTransactionRef wrapped = AddPQSpendToMempool(true, 1, 3, 100000);
+
+    CCoinsViewMemPool viewMemPool(pcoinsTip, mempool);
+    CCoinsViewCache view(&viewMemPool);
+    const uint64_t contextualWeight = GetContextualTransactionWeight(*wrapped, view, true);
+    const uint64_t standardWeight = ::GetSerializeSize(*wrapped, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1)
+                                  + ::GetSerializeSize(*wrapped, SER_NETWORK, PROTOCOL_VERSION);
+    const uint64_t shapeDiscountedWeight = GetTransactionWeight(*wrapped);
+    BOOST_REQUIRE_EQUAL(contextualWeight, standardWeight);
+    BOOST_REQUIRE_LT(shapeDiscountedWeight, contextualWeight);
+
+    BlockAssembler::Options options;
+    options.blockMinFeeRate = CFeeRate(0);
+    options.nBlockMaxWeight = 4000 + shapeDiscountedWeight + 1;
+    options.nBlockMaxSerializedSize = GetMaxBlockSerializedSize();
+
+    std::unique_ptr<CBlockTemplate> blockTemplate;
+    BOOST_REQUIRE_NO_THROW(blockTemplate = BlockAssembler(GetParams(), options).CreateNewBlock(CScript() << OP_TRUE));
+    BOOST_REQUIRE(blockTemplate);
+    BOOST_CHECK_EQUAL(blockTemplate->block.vtx.size(), 1U);
+}
+
+BOOST_AUTO_TEST_CASE(gbt_entries_report_contextual_pq_weight)
+{
+    LOCK(cs_main);
+    mempool.clear();
+    const CTransactionRef native = AddPQSpendToMempool(false, 1, 41, 100000, true);
+    const CTransactionRef wrapped = AddPQSpendToMempool(true, 1, 42, 100000, true);
+
+    CCoinsViewMemPool viewMemPool(pcoinsTip, mempool);
+    CCoinsViewCache view(&viewMemPool);
+    const uint64_t expectedNative =
+        GetContextualTransactionWeight(*native, view, true);
+    const uint64_t expectedWrapped =
+        GetContextualTransactionWeight(*wrapped, view, true);
+    BOOST_REQUIRE_EQUAL(expectedNative, GetTransactionWeight(*native));
+    BOOST_REQUIRE_LT(GetTransactionWeight(*wrapped), expectedWrapped);
+
+    BlockAssembler::Options options;
+    options.blockMinFeeRate = CFeeRate(0);
+    const std::unique_ptr<CBlockTemplate> blockTemplate =
+        BlockAssembler(GetParams(), options).CreateNewBlock(CScript() << OP_TRUE);
+    BOOST_REQUIRE(blockTemplate);
+    BOOST_REQUIRE_EQUAL(blockTemplate->vTxWeights.size(),
+                        blockTemplate->block.vtx.size());
+    BOOST_REQUIRE_EQUAL(blockTemplate->block.vtx.size(), 3U);
+    size_t reportedTransactions = 0;
+    for (size_t i = 1; i < blockTemplate->block.vtx.size(); ++i) {
+        const uint256 txid = blockTemplate->block.vtx[i]->GetHash();
+        if (txid == native->GetHash()) {
+            BOOST_CHECK_EQUAL(blockTemplate->vTxWeights[i], expectedNative);
+            ++reportedTransactions;
+        } else if (txid == wrapped->GetHash()) {
+            BOOST_CHECK_EQUAL(blockTemplate->vTxWeights[i], expectedWrapped);
+            ++reportedTransactions;
+        }
+    }
+    BOOST_CHECK_EQUAL(reportedTransactions, 2U);
+
+    const bool hadBypassArg = gArgs.IsArgSet("-bypassdownload");
+    const std::string oldBypassArg = gArgs.GetArg("-bypassdownload", "");
+    const int64_t oldMockTime = GetMockTime();
+    gArgs.ForceSetArg("-bypassdownload", "1");
+    SetMockTime(GetTime() + 10);
+    UniValue result;
+    try {
+        result = CallRPC("getblocktemplate");
+    } catch (...) {
+        SetMockTime(oldMockTime);
+        if (hadBypassArg)
+            gArgs.ForceSetArg("-bypassdownload", oldBypassArg);
+        else
+            gArgs.ClearArg("-bypassdownload");
+        throw;
+    }
+    SetMockTime(oldMockTime);
+    if (hadBypassArg)
+        gArgs.ForceSetArg("-bypassdownload", oldBypassArg);
+    else
+        gArgs.ClearArg("-bypassdownload");
+
+    bool foundNative = false;
+    bool foundWrapped = false;
+    const UniValue& transactions = find_value(result.get_obj(), "transactions");
+    for (const UniValue& entry : transactions.get_array().getValues()) {
+        const uint256 txid = uint256S(find_value(entry.get_obj(), "txid").get_str());
+        const uint64_t weight = find_value(entry.get_obj(), "weight").get_int64();
+        if (txid == native->GetHash()) {
+            foundNative = true;
+            BOOST_CHECK_EQUAL(weight, expectedNative);
+        } else if (txid == wrapped->GetHash()) {
+            foundWrapped = true;
+            BOOST_CHECK_EQUAL(weight, expectedWrapped);
+        }
+    }
+    BOOST_CHECK(foundNative);
+    BOOST_CHECK(foundWrapped);
+}
 
 BOOST_AUTO_TEST_SUITE_END()

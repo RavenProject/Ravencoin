@@ -8,11 +8,12 @@
 #define RAVEN_KEYSTORE_H
 
 #include "key.h"
+#include "pqkey.h"
 #include "pubkey.h"
 #include "script/script.h"
 #include "script/standard.h"
+#include "support/allocators/secure.h"
 #include "sync.h"
-
 #include <boost/signals2/signal.hpp>
 
 /** A virtual base class for key stores */
@@ -34,6 +35,12 @@ public:
     virtual std::set<CKeyID> GetKeys() const =0;
     virtual bool GetPubKey(const CKeyID &address, CPubKey& vchPubKeyOut) const =0;
 
+    //! RIP-25: Post-quantum key support
+    virtual bool AddPQKeyPubKey(const CPQKey &key, const CPQPubKey &pubkey) =0;
+    virtual bool HavePQKey(const uint256 &witnessProgram) const =0;
+    virtual bool GetPQKey(const uint256 &witnessProgram, CPQKey &keyOut) const =0;
+    virtual bool GetPQPubKey(const uint256 &witnessProgram, CPQPubKey &pubkeyOut) const =0;
+
     //! Support for BIP 0013 : see https://github.com/bitcoin/bips/blob/master/bip-0013.mediawiki
     virtual bool AddCScript(const CScript& redeemScript) =0;
     virtual bool HaveCScript(const CScriptID &hash) const =0;
@@ -51,6 +58,10 @@ typedef std::map<CKeyID, CPubKey> WatchKeyMap;
 typedef std::map<CScriptID, CScript > ScriptMap;
 typedef std::set<CScript> WatchOnlySet;
 
+// RIP-25: PQ key maps keyed by witness program (SHA256 of ML-DSA pubkey)
+typedef std::map<uint256, CPQKey> PQKeyMap;
+typedef std::map<uint256, CPQPubKey> PQPubKeyMap;
+
 /** Basic key store, that keeps keys in an address->secret map */
 class CBasicKeyStore : public CKeyStore
 {
@@ -60,10 +71,14 @@ protected:
     ScriptMap mapScripts;
     WatchOnlySet setWatchOnly;
 
+    // RIP-25: PQ key storage
+    PQKeyMap mapPQKeys;
+    PQPubKeyMap mapPQPubKeys;
+
     uint256 nWordHash;
-    std::vector<unsigned char> vchWords;
-    std::vector<unsigned char> vchPassphrase;
-    std::vector<unsigned char> g_vchSeed;
+    SecureVector vchWords;
+    SecureVector vchPassphrase;
+    SecureVector g_vchSeed;
 
 public:
     bool AddKeyPubKey(const CKey& key, const CPubKey &pubkey) override;
@@ -99,6 +114,51 @@ public:
         }
         return false;
     }
+
+    // RIP-25: PQ key methods. Every key pair is cryptographically checked
+    // before it enters the keystore so wallet DB corruption cannot associate a
+    // secret key with an unrelated witness-v2 public key.
+    bool AddPQKeyPubKey(const CPQKey &key, const CPQPubKey &pubkey) override
+    {
+        LOCK(cs_KeyStore);
+        if (!key.IsValid() || !pubkey.IsValid())
+            return false;
+
+        CPQKey validatedKey;
+        if (!validatedKey.SetKeyData(key.GetKeyData(), pubkey))
+            return false;
+
+        uint256 wp = pubkey.GetWitnessProgram();
+        mapPQKeys[wp] = validatedKey;
+        mapPQPubKeys[wp] = pubkey;
+        return true;
+    }
+    bool HavePQKey(const uint256 &witnessProgram) const override
+    {
+        LOCK(cs_KeyStore);
+        return mapPQKeys.count(witnessProgram) > 0;
+    }
+    bool GetPQKey(const uint256 &witnessProgram, CPQKey &keyOut) const override
+    {
+        LOCK(cs_KeyStore);
+        auto mi = mapPQKeys.find(witnessProgram);
+        if (mi != mapPQKeys.end()) {
+            keyOut = mi->second;
+            return true;
+        }
+        return false;
+    }
+    bool GetPQPubKey(const uint256 &witnessProgram, CPQPubKey &pubkeyOut) const override
+    {
+        LOCK(cs_KeyStore);
+        auto mi = mapPQPubKeys.find(witnessProgram);
+        if (mi != mapPQPubKeys.end()) {
+            pubkeyOut = mi->second;
+            return true;
+        }
+        return false;
+    }
+
     bool AddCScript(const CScript& redeemScript) override;
     bool HaveCScript(const CScriptID &hash) const override;
     bool GetCScript(const CScriptID &hash, CScript& redeemScriptOut) const override;
@@ -109,12 +169,18 @@ public:
     bool HaveWatchOnly() const override;
 
     bool AddWords(const uint256& p_hash, const std::vector<unsigned char>& p_vchWords);
+    bool AddWords(const uint256& p_hash, SecureVector p_vchWords);
     bool AddPassphrase(const std::vector<unsigned char>& p_vchPassphrase);
+    bool AddPassphrase(SecureVector p_vchPassphrase);
     bool AddVchSeed(const std::vector<unsigned char>& p_vchSeed);
+    bool AddVchSeed(SecureVector p_vchSeed);
+    bool HasValidBip39Seed() const;
+    bool GetBip39Seed(SecureVector& p_vchSeed) const;
     void GetBip39Data(uint256& p_hash, std::vector<unsigned char>& p_vchWords, std::vector<unsigned char>& p_vchPassphrase, std::vector<unsigned char>& p_vchSeed);
 };
 
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CKeyingMaterial;
 typedef std::map<CKeyID, std::pair<CPubKey, std::vector<unsigned char> > > CryptedKeyMap;
+typedef std::map<uint256, std::pair<CPQPubKey, std::vector<unsigned char> > > CryptedPQKeyMap;
 
 #endif // RAVEN_KEYSTORE_H

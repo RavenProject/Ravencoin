@@ -75,6 +75,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 BlockAssembler::Options::Options() {
     blockMinFeeRate = CFeeRate(DEFAULT_BLOCK_MIN_TX_FEE);
     nBlockMaxWeight = GetMaxBlockWeight() - 4000;
+    nBlockMaxSerializedSize = GetMaxBlockSerializedSize();
 }
 
 BlockAssembler::BlockAssembler(const CChainParams& params, const Options& options) : chainparams(params)
@@ -82,6 +83,7 @@ BlockAssembler::BlockAssembler(const CChainParams& params, const Options& option
     blockMinFeeRate = options.blockMinFeeRate;
     // Limit weight to between 4K and MAX_BLOCK_WEIGHT-4K for sanity:
     nBlockMaxWeight = std::max<size_t>(4000, std::min<size_t>(GetMaxBlockWeight() - 4000, options.nBlockMaxWeight));
+    nBlockMaxSerializedSize = std::max<size_t>(1000, std::min<size_t>(GetMaxBlockSerializedSize(), options.nBlockMaxSerializedSize));
 }
 
 static BlockAssembler::Options DefaultOptions(const CChainParams& params)
@@ -92,6 +94,7 @@ static BlockAssembler::Options DefaultOptions(const CChainParams& params)
     // If both are given, restrict both.
     BlockAssembler::Options options;
     options.nBlockMaxWeight = gArgs.GetArg("-blockmaxweight",  GetMaxBlockWeight() - 4000);
+    options.nBlockMaxSerializedSize = GetMaxBlockSerializedSize();
     if (gArgs.IsArgSet("-blockmintxfee")) {
         CAmount n = 0;
         ParseMoney(gArgs.GetArg("-blockmintxfee", ""), n);
@@ -110,8 +113,10 @@ void BlockAssembler::resetBlock()
 
     // Reserve space for coinbase tx
     nBlockWeight = 4000;
+    nBlockSerializedSize = 1000;
     nBlockSigOpsCost = 400;
     fIncludeWitness = false;
+    fApplyPQDiscount = false;
 
     // These counters do not include coinbase tx
     nBlockTx = 0;
@@ -134,10 +139,22 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblock->vtx.emplace_back();
     pblocktemplate->vTxFees.push_back(-1); // updated at end
     pblocktemplate->vTxSigOpsCost.push_back(-1); // updated at end
+    pblocktemplate->vTxWeights.push_back(0); // updated at end
 
     LOCK2(cs_main, mempool.cs);
     CBlockIndex* pindexPrev = chainActive.Tip();
     assert(pindexPrev != nullptr);
+
+    // RIP-25: never construct a template above the consensus limit active
+    // for the block building on pindexPrev (8 -> 12 -> 16 MWU).
+    const size_t activeMaxWeight = GetMaxBlockWeightForPrev(pindexPrev, chainparams.GetConsensus());
+    const size_t activeMaxSerializedSize = GetMaxBlockSerializedSizeForPrev(pindexPrev, chainparams.GetConsensus());
+    nBlockMaxWeight = std::max<size_t>(4000,
+        std::min<size_t>(nBlockMaxWeight, activeMaxWeight - 4000));
+    nBlockMaxSerializedSize = std::max<size_t>(1000,
+        std::min<size_t>(nBlockMaxSerializedSize, activeMaxSerializedSize));
+    fApplyPQDiscount = IsPQWitnessDiscountActive(pindexPrev, chainparams.GetConsensus());
+
     nHeight = pindexPrev->nHeight + 1;
 
     pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
@@ -163,7 +180,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
-    addPackageTxs(nPackagesSelected, nDescendantsUpdated);
+    CCoinsViewMemPool viewMemPool(pcoinsTip, mempool);
+    CCoinsViewCache view(&viewMemPool);
+    addPackageTxs(nPackagesSelected, nDescendantsUpdated, view);
 
     int64_t nTime1 = GetTimeMicros();
 
@@ -192,6 +211,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblock->nNonce64         = 0;
     pblock->nHeight          = nHeight;
     pblocktemplate->vTxSigOpsCost[0] = WITNESS_SCALE_FACTOR * GetLegacySigOpCount(*pblock->vtx[0]);
+    pblocktemplate->vTxWeights[0] = GetTransactionWeight(*pblock->vtx[0]);
 
     CValidationState state;
     if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
@@ -240,12 +260,13 @@ void BlockAssembler::onlyUnconfirmed(CTxMemPool::setEntries& testSet)
     }
 }
 
-bool BlockAssembler::TestPackage(uint64_t packageSize, int64_t packageSigOpsCost) const
+bool BlockAssembler::TestPackage(const ResourceUsage& resources) const
 {
-    // TODO: switch to weight-based accounting for packages instead of vsize-based accounting.
-    if (nBlockWeight + WITNESS_SCALE_FACTOR * packageSize >= nBlockMaxWeight)
+    if (nBlockWeight + resources.weight >= nBlockMaxWeight)
         return false;
-    if (nBlockSigOpsCost + packageSigOpsCost >= MAX_BLOCK_SIGOPS_COST)
+    if (nBlockSerializedSize + resources.serializedSize >= nBlockMaxSerializedSize)
+        return false;
+    if (nBlockSigOpsCost + resources.sigOpsCost >= MAX_BLOCK_SIGOPS_COST)
         return false;
     return true;
 }
@@ -265,14 +286,39 @@ bool BlockAssembler::TestPackageTransactions(const CTxMemPool::setEntries& packa
     return true;
 }
 
-void BlockAssembler::AddToBlock(CTxMemPool::txiter iter)
+BlockAssembler::ResourceUsage BlockAssembler::GetTransactionResources(const CTransaction& tx, const CCoinsViewCache& view) const
+{
+    ResourceUsage resources;
+    resources.weight = GetContextualTransactionWeight(tx, view, fApplyPQDiscount);
+    resources.serializedSize = ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION);
+    const unsigned int sigOpFlags = STANDARD_SCRIPT_VERIFY_FLAGS |
+        (fApplyPQDiscount ? SCRIPT_VERIFY_PQ_HYBRID : SCRIPT_VERIFY_NONE);
+    resources.sigOpsCost = GetTransactionSigOpCost(tx, view, sigOpFlags);
+    return resources;
+}
+
+BlockAssembler::ResourceUsage BlockAssembler::GetPackageResources(const CTxMemPool::setEntries& package, const CCoinsViewCache& view) const
+{
+    ResourceUsage resources;
+    for (const CTxMemPool::txiter it : package) {
+        const ResourceUsage txResources = GetTransactionResources(it->GetTx(), view);
+        resources.weight += txResources.weight;
+        resources.serializedSize += txResources.serializedSize;
+        resources.sigOpsCost += txResources.sigOpsCost;
+    }
+    return resources;
+}
+
+void BlockAssembler::AddToBlock(CTxMemPool::txiter iter, const ResourceUsage& resources)
 {
     pblock->vtx.emplace_back(iter->GetSharedTx());
     pblocktemplate->vTxFees.push_back(iter->GetFee());
-    pblocktemplate->vTxSigOpsCost.push_back(iter->GetSigOpCost());
-    nBlockWeight += iter->GetTxWeight();
+    pblocktemplate->vTxSigOpsCost.push_back(resources.sigOpsCost);
+    pblocktemplate->vTxWeights.push_back(resources.weight);
+    nBlockWeight += resources.weight;
+    nBlockSerializedSize += resources.serializedSize;
     ++nBlockTx;
-    nBlockSigOpsCost += iter->GetSigOpCost();
+    nBlockSigOpsCost += resources.sigOpsCost;
     nFees += iter->GetFee();
     inBlock.insert(iter);
 
@@ -347,7 +393,7 @@ void BlockAssembler::SortForBlock(const CTxMemPool::setEntries& package, CTxMemP
 // Each time through the loop, we compare the best transaction in
 // mapModifiedTxs with the next transaction in the mempool to decide what
 // transaction package to work on next.
-void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated)
+void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated, const CCoinsViewCache& view)
 {
     // mapModifiedTx will store sorted packages after they are modified
     // because some of their txs are already in the block
@@ -409,35 +455,14 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
 
         uint64_t packageSize = iter->GetSizeWithAncestors();
         CAmount packageFees = iter->GetModFeesWithAncestors();
-        int64_t packageSigOpsCost = iter->GetSigOpCostWithAncestors();
         if (fUsingModified) {
             packageSize = modit->nSizeWithAncestors;
             packageFees = modit->nModFeesWithAncestors;
-            packageSigOpsCost = modit->nSigOpCostWithAncestors;
         }
 
         if (packageFees < blockMinFeeRate.GetFee(packageSize)) {
             // Everything else we might consider has a lower fee rate
             return;
-        }
-
-        if (!TestPackage(packageSize, packageSigOpsCost)) {
-            if (fUsingModified) {
-                // Since we always look at the best entry in mapModifiedTx,
-                // we must erase failed entries so that we can consider the
-                // next best entry on the next loop iteration
-                mapModifiedTx.get<ancestor_score>().erase(modit);
-                failedTx.insert(iter);
-            }
-
-            ++nConsecutiveFailed;
-
-            if (nConsecutiveFailed > MAX_CONSECUTIVE_FAILURES && nBlockWeight >
-                    nBlockMaxWeight - 4000) {
-                // Give up if we're close to full and haven't succeeded in a while
-                break;
-            }
-            continue;
         }
 
         CTxMemPool::setEntries ancestors;
@@ -457,6 +482,27 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
             continue;
         }
 
+        const ResourceUsage packageResources = GetPackageResources(ancestors, view);
+        if (!TestPackage(packageResources)) {
+            if (fUsingModified) {
+                // Since we always look at the best entry in mapModifiedTx,
+                // we must erase failed entries so that we can consider the
+                // next best entry on the next loop iteration
+                mapModifiedTx.get<ancestor_score>().erase(modit);
+                failedTx.insert(iter);
+            }
+
+            ++nConsecutiveFailed;
+
+            if (nConsecutiveFailed > MAX_CONSECUTIVE_FAILURES &&
+                    (nBlockWeight > nBlockMaxWeight - 4000 ||
+                     nBlockSerializedSize > nBlockMaxSerializedSize - 1000)) {
+                // Give up if we're close to a resource limit and haven't succeeded in a while
+                break;
+            }
+            continue;
+        }
+
         // This transaction will make it in; reset the failed counter.
         nConsecutiveFailed = 0;
 
@@ -465,7 +511,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
         SortForBlock(ancestors, iter, sortedEntries);
 
         for (size_t i=0; i<sortedEntries.size(); ++i) {
-            AddToBlock(sortedEntries[i]);
+            AddToBlock(sortedEntries[i], GetTransactionResources(sortedEntries[i]->GetTx(), view));
             // Erase from the modified set, if present
             mapModifiedTx.erase(sortedEntries[i]);
         }

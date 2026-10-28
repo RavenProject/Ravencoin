@@ -18,7 +18,40 @@
 #include <boost/test/unit_test.hpp>
 #include <assets/assets.h>
 
-int ApplyTxInUndo(Coin &&undo, CCoinsViewCache &view, const COutPoint &out, CAssetsCache *assetsCache = nullptr);
+int ApplyTxInUndo(Coin &&undo, CCoinsViewCache &view, const COutPoint &out, CAssetsCache *assetsCache = nullptr, const TxAssetDeploymentContext* pAssetContext = nullptr);
+
+namespace txdb_tests
+{
+class CCoinsViewDBTestAccess
+{
+public:
+    static void SetBestBlock(CCoinsViewDB& view, const uint256& hash)
+    {
+        BOOST_REQUIRE(view.db.Write('B', hash));
+    }
+
+    static void SetInterruptedState(CCoinsViewDB& view,
+                                    const uint256& newTip,
+                                    const uint256& oldTip,
+                                    uint8_t version)
+    {
+        BOOST_REQUIRE(view.db.Erase('B'));
+        BOOST_REQUIRE(view.db.Write('H', std::vector<uint256>{newTip, oldTip}));
+        BOOST_REQUIRE(view.db.Write('Q', std::make_pair(version, oldTip)));
+        BOOST_REQUIRE(view.db.Write('q', std::make_pair(version, newTip)));
+    }
+
+    static void SetValidatedMarker(CCoinsViewDB& view, uint8_t version, const uint256& tip)
+    {
+        BOOST_REQUIRE(view.db.Write('Q', std::make_pair(version, tip)));
+    }
+
+    static void SetAssetValidatedMarker(CCoinsViewDB& view, uint8_t version, const uint256& tip)
+    {
+        BOOST_REQUIRE(view.db.Write('Y', std::make_pair(version, tip)));
+    }
+};
+} // namespace txdb_tests
 
 namespace
 {
@@ -109,6 +142,106 @@ namespace
 } // namespace
 
 BOOST_FIXTURE_TEST_SUITE(coins_tests, BasicTestingSetup)
+
+BOOST_AUTO_TEST_CASE(rip25_context_chainstate_markers)
+{
+    CCoinsViewDB view(1 << 20, true, true);
+    const uint256 first = uint256S("01");
+    const uint256 second = uint256S("02");
+    const uint256 third = uint256S("03");
+    const uint256 absent;
+
+    BOOST_CHECK(view.GetRIP25ContextValidatedTip().IsNull());
+    BOOST_CHECK(view.GetRIP25ContextPendingTip().IsNull());
+    BOOST_CHECK(!IsRIP25ContextChainstateCurrent(absent, {}, absent, absent));
+    BOOST_CHECK(!RIP25ContextChainstateRequiresRebuild(
+            false, first, first, {}, absent, absent));
+
+    CCoinsMap changes;
+    BOOST_REQUIRE(view.BatchWrite(changes, first));
+    BOOST_CHECK(view.GetBestBlock() == first);
+    BOOST_CHECK(view.GetRIP25ContextValidatedTip() == first);
+    BOOST_CHECK(view.GetRIP25ContextPendingTip().IsNull());
+    BOOST_CHECK(IsRIP25ContextChainstateCurrent(first, {}, first, absent));
+
+    BOOST_REQUIRE(view.BatchWrite(changes, second));
+    BOOST_CHECK(view.GetBestBlock() == second);
+    BOOST_CHECK(view.GetRIP25ContextValidatedTip() == second);
+    BOOST_CHECK(view.GetRIP25ContextPendingTip().IsNull());
+    BOOST_CHECK(IsRIP25ContextChainstateCurrent(second, {}, second, absent));
+
+    // A legacy writer can advance DB_BEST_BLOCK without advancing the marker.
+    txdb_tests::CCoinsViewDBTestAccess::SetBestBlock(view, third);
+    BOOST_CHECK(view.GetBestBlock() == third);
+    BOOST_CHECK(view.GetRIP25ContextValidatedTip() == second);
+    BOOST_CHECK(RIP25ContextChainstateRequiresRebuild(
+            true, third, view.GetBestBlock(), view.GetHeadBlocks(),
+            view.GetRIP25ContextValidatedTip(), view.GetRIP25ContextPendingTip()));
+    BOOST_CHECK(!RIP25ContextChainstateRequiresRebuild(
+            false, third, view.GetBestBlock(), view.GetHeadBlocks(),
+            view.GetRIP25ContextValidatedTip(), view.GetRIP25ContextPendingTip()));
+
+    // A current interrupted flush proves both its old stable tip and target.
+    const std::vector<uint256> interrupted{third, second};
+    BOOST_CHECK(IsRIP25ContextChainstateCurrent(absent, interrupted, second, third));
+    BOOST_CHECK(!IsRIP25ContextChainstateCurrent(absent, interrupted, second, absent));
+    BOOST_CHECK(!IsRIP25ContextChainstateCurrent(absent, interrupted, first, third));
+
+    // The first interrupted flush has no old stable tip, but must prove target.
+    const std::vector<uint256> firstFlush{first, absent};
+    BOOST_CHECK(IsRIP25ContextChainstateCurrent(absent, firstFlush, absent, first));
+    BOOST_CHECK(!IsRIP25ContextChainstateCurrent(absent, firstFlush, absent, absent));
+
+    // Persisted interrupted markers are exact and unsupported versions fail closed.
+    txdb_tests::CCoinsViewDBTestAccess::SetInterruptedState(view, third, second, 1);
+    BOOST_CHECK(view.GetBestBlock().IsNull());
+    BOOST_CHECK(view.GetHeadBlocks() == interrupted);
+    BOOST_CHECK(view.GetRIP25ContextValidatedTip() == second);
+    BOOST_CHECK(view.GetRIP25ContextPendingTip() == third);
+    BOOST_CHECK(!RIP25ContextChainstateRequiresRebuild(
+            true, third, view.GetBestBlock(), view.GetHeadBlocks(),
+            view.GetRIP25ContextValidatedTip(), view.GetRIP25ContextPendingTip()));
+
+    txdb_tests::CCoinsViewDBTestAccess::SetValidatedMarker(view, 2, second);
+    BOOST_CHECK(view.GetRIP25ContextValidatedTip().IsNull());
+    BOOST_CHECK(RIP25ContextChainstateRequiresRebuild(
+            true, third, view.GetBestBlock(), view.GetHeadBlocks(),
+            view.GetRIP25ContextValidatedTip(), view.GetRIP25ContextPendingTip()));
+    BOOST_CHECK(!IsRIP25ContextChainstateCurrent(second, {third, second}, second, third));
+}
+
+BOOST_AUTO_TEST_CASE(asset_commit_chainstate_markers)
+{
+    CCoinsViewDB view(1 << 20, true, true);
+    const uint256 first = uint256S("01");
+    const uint256 second = uint256S("02");
+    CCoinsMap changes;
+
+    BOOST_CHECK(!view.HasAssetCommitPending());
+    BOOST_CHECK(view.GetAssetCommitValidatedTip().IsNull());
+
+    BOOST_REQUIRE(view.BatchWrite(changes, first));
+    BOOST_CHECK(view.GetBestBlock() == first);
+    BOOST_CHECK(view.HasAssetCommitPending());
+    BOOST_CHECK(view.GetAssetCommitValidatedTip().IsNull());
+
+    BOOST_REQUIRE(view.ClearAssetCommitPending(first));
+    BOOST_CHECK(!view.HasAssetCommitPending());
+    BOOST_CHECK(view.GetAssetCommitValidatedTip() == first);
+
+    BOOST_REQUIRE(view.BatchWrite(changes, second));
+    BOOST_CHECK(view.GetBestBlock() == second);
+    BOOST_CHECK(view.HasAssetCommitPending());
+    BOOST_CHECK(view.GetAssetCommitValidatedTip() == first);
+
+    BOOST_REQUIRE(view.ClearAssetCommitPending(second));
+    BOOST_CHECK(!view.HasAssetCommitPending());
+    BOOST_CHECK(view.GetAssetCommitValidatedTip() == second);
+
+    // A marker written by an unknown protocol version cannot certify state.
+    txdb_tests::CCoinsViewDBTestAccess::SetAssetValidatedMarker(view, 2, second);
+    BOOST_CHECK(view.GetAssetCommitValidatedTip().IsNull());
+}
 
     static const unsigned int NUM_SIMULATION_ITERATIONS = 40000;
 
@@ -595,6 +728,52 @@ BOOST_FIXTURE_TEST_SUITE(coins_tests, BasicTestingSetup)
         } catch (const std::ios_base::failure &e)
         {
         }
+    }
+
+    BOOST_AUTO_TEST_CASE(txundo_large_roundtrip_test)
+    {
+        static const size_t UNDO_RECORDS = 50000;
+        const bool old_assets_active = fAssetsIsActive;
+
+        CTxUndo original;
+        original.vprevout.assign(UNDO_RECORDS, Coin(CTxOut(1, CScript()), 1, false));
+
+        CDataStream serialized(SER_DISK, CLIENT_VERSION);
+        serialized << original;
+
+        for (bool assets_active : {false, true}) {
+            fAssetsIsActive = assets_active;
+            CDataStream stream(serialized.begin(), serialized.end(), SER_DISK, CLIENT_VERSION);
+            CTxUndo decoded;
+            BOOST_CHECK_NO_THROW(stream >> decoded);
+            BOOST_CHECK_EQUAL(decoded.vprevout.size(), UNDO_RECORDS);
+            bool records_match = decoded.vprevout.size() == original.vprevout.size();
+            for (size_t i = 0; records_match && i < decoded.vprevout.size(); ++i) {
+                records_match = decoded.vprevout[i].out == original.vprevout[i].out &&
+                                decoded.vprevout[i].nHeight == original.vprevout[i].nHeight &&
+                                decoded.vprevout[i].fCoinBase == original.vprevout[i].fCoinBase;
+            }
+            BOOST_CHECK(records_match);
+            BOOST_CHECK(stream.empty());
+        }
+
+        fAssetsIsActive = old_assets_active;
+    }
+
+    BOOST_AUTO_TEST_CASE(txundo_deserialization_limit_test)
+    {
+        const uint64_t max_undo_records = MAX_BLOCK_WEIGHT_RIP25_PHASE2 / MIN_TRANSACTION_INPUT_WEIGHT;
+        const bool old_assets_active = fAssetsIsActive;
+
+        for (bool assets_active : {false, true}) {
+            fAssetsIsActive = assets_active;
+            CDataStream stream(SER_DISK, CLIENT_VERSION);
+            WriteCompactSize(stream, max_undo_records + 1);
+            CTxUndo decoded;
+            BOOST_CHECK_THROW(stream >> decoded, std::ios_base::failure);
+        }
+
+        fAssetsIsActive = old_assets_active;
     }
 
     const static COutPoint OUTPOINT;

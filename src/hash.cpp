@@ -12,6 +12,9 @@
 
 #include <crypto/ethash/include/ethash/progpow.hpp>
 
+#include <atomic>
+#include <limits>
+
 //TODO remove these
 double algoHashTotal[16];
 int algoHashHits[16];
@@ -255,22 +258,87 @@ uint64_t SipHashUint256Extra(uint64_t k0, uint64_t k1, const uint256& val, uint3
     return v0 ^ v1 ^ v2 ^ v3;
 }
 
+namespace {
+// The node sets this from -maxkawpowcontextmb. The standalone consensus
+// library has no argument manager and keeps the default.
+std::atomic<int64_t> g_kawpow_context_budget_mib{DEFAULT_MAX_KAWPOW_CONTEXT_MIB};
+std::atomic<bool> g_kawpow_fail_context_allocation{false};
+thread_local ethash::epoch_context_ptr g_kawpow_context{nullptr, nullptr};
+
+constexpr uint64_t MEBIBYTE = uint64_t{1} << 20;
+} // namespace
+
+bool SetKAWPOWContextBudgetMiB(int64_t maxContextMiB)
+{
+    if (maxContextMiB <= 0 ||
+        static_cast<uint64_t>(maxContextMiB) > std::numeric_limits<uint64_t>::max() / MEBIBYTE)
+        return false;
+    g_kawpow_context_budget_mib = maxContextMiB;
+    return true;
+}
+
+int64_t GetKAWPOWContextBudgetMiB()
+{
+    return g_kawpow_context_budget_mib;
+}
+
+void ReleaseKAWPOWThreadContext()
+{
+    g_kawpow_context.reset();
+}
+
+void SetKAWPOWContextAllocationFailureForTesting(bool fail)
+{
+    g_kawpow_fail_context_allocation = fail;
+}
+
+bool IsKAWPOWContextWithinLocalBudget(uint32_t blockHeight)
+{
+    // The bundled verifier accepts signed block numbers and calculates both
+    // cache and dataset item counts with signed int arithmetic. Check those
+    // bounds before entering it, even though only the light cache is allocated.
+    if (blockHeight > static_cast<uint32_t>(std::numeric_limits<int>::max()))
+        return false;
+
+    const uint64_t epoch = static_cast<uint64_t>(blockHeight) / ethash::epoch_length;
+    const uint64_t fullDatasetItems =
+        ((uint64_t{1} << 30) + epoch * (uint64_t{1} << 23)) / ethash::full_dataset_item_size;
+    if (fullDatasetItems > static_cast<uint64_t>(std::numeric_limits<int>::max()))
+        return false;
+
+    const uint64_t lightCacheBytes = (uint64_t{1} << 24) + epoch * (uint64_t{1} << 17);
+    const uint64_t allocationBytes = sizeof(ethash::hash512) + lightCacheBytes + progpow::l1_cache_size;
+
+    // A node operator may raise this local memory budget to verify an exceptional
+    // historical header. Exceeding it must never mark a header invalid.
+    const uint64_t maxContextMiB = static_cast<uint64_t>(GetKAWPOWContextBudgetMiB());
+    return allocationBytes <= maxContextMiB * MEBIBYTE;
+}
+
 uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash)
 {
-    static ethash::epoch_context_ptr context{nullptr, nullptr};
+    if (!IsKAWPOWContextWithinLocalBudget(blockHeader.nHeight))
+        throw KAWPOWResourceError("kawpow-context-unsupported");
 
     // Get the context from the block height
     const auto epoch_number = ethash::get_epoch_number(blockHeader.nHeight);
 
-    if (!context || context->epoch_number != epoch_number)
-        context = ethash::create_epoch_context(epoch_number);
+    if (!g_kawpow_context || g_kawpow_context->epoch_number != epoch_number) {
+        g_kawpow_context.reset();
+        auto nextContext = g_kawpow_fail_context_allocation
+                               ? ethash::epoch_context_ptr{nullptr, nullptr}
+                               : ethash::create_epoch_context(epoch_number);
+        if (!nextContext)
+            throw KAWPOWResourceError("kawpow-context-allocation-failed");
+        g_kawpow_context = std::move(nextContext);
+    }
 
     // Build the header_hash
     uint256 nHeaderHash = blockHeader.GetKAWPOWHeaderHash();
     const auto header_hash = to_hash256(nHeaderHash.GetHex());
 
     // ProgPow hash
-    const auto result = progpow::hash(*context, blockHeader.nHeight, header_hash, blockHeader.nNonce64);
+    const auto result = progpow::hash(*g_kawpow_context, blockHeader.nHeight, header_hash, blockHeader.nNonce64);
 
     mix_hash = uint256S(to_hex(result.mix_hash));
     return uint256S(to_hex(result.final_hash));
@@ -288,7 +356,5 @@ uint256 KAWPOWHash_OnlyMix(const CBlockHeader& blockHeader)
 
     return uint256S(to_hex(result));
 }
-
-
 
 

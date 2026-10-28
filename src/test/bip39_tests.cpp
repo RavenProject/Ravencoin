@@ -10,6 +10,8 @@
 #include "test/test_raven.h"
 #include "wallet/bip39.h"
 
+#include <limits>
+
 #include <boost/test/unit_test.hpp>
 
 #include <univalue.h>
@@ -17,7 +19,43 @@
 // In script_tests.cpp
 extern UniValue read_json(const std::string& jsondata);
 
+class Bip39TestAccess
+{
+private:
+    static int FailAfterPartialDerivation(const char*, int,
+                                          const unsigned char*, int,
+                                          int, const EVP_MD*, int keyLength,
+                                          unsigned char* seed)
+    {
+        for (int i = 0; i < keyLength; ++i) {
+            seed[i] = 0x42;
+        }
+        return 0;
+    }
+
+public:
+    static bool ToSeedWithFailure(const SecureString& mnemonic,
+                                  const SecureString& passphrase,
+                                  SecureVector& seed)
+    {
+        return CMnemonic::ToSeedWithPbkdf2(
+            mnemonic, passphrase, seed, FailAfterPartialDerivation);
+    }
+};
+
 BOOST_FIXTURE_TEST_SUITE(bip39_tests, BasicTestingSetup)
+
+BOOST_AUTO_TEST_CASE(bip39_language_index_boundaries)
+{
+    const char* const* english = CMnemonic::GetLanguageWords(DEFAULT_LANG);
+    const char* const* italian = CMnemonic::GetLanguageWords(NUM_LANGUAGES_BIP39_SUPPORTED - 1);
+    BOOST_REQUIRE(english != nullptr);
+    BOOST_CHECK(italian != nullptr);
+    BOOST_CHECK(italian != english);
+    BOOST_CHECK(CMnemonic::GetLanguageWords(-1) == english);
+    BOOST_CHECK(CMnemonic::GetLanguageWords(NUM_LANGUAGES_BIP39_SUPPORTED) == english);
+    BOOST_CHECK(CMnemonic::GetLanguageWords(std::numeric_limits<int>::max()) == english);
+}
 
 // https://github.com/trezor/python-mnemonic/blob/b502451a33a440783926e04428115e0bed87d01f/vectors.json
 BOOST_AUTO_TEST_CASE(bip39_vectors)
@@ -47,7 +85,7 @@ BOOST_AUTO_TEST_CASE(bip39_vectors)
 
         SecureVector seed;
         SecureString passphrase("TREZOR");
-        CMnemonic::ToSeed(mnemonic, passphrase, seed);
+        BOOST_REQUIRE(CMnemonic::ToSeed(mnemonic, passphrase, seed));
         // printf("seed: %s\n", HexStr(seed).c_str());
         BOOST_CHECK(HexStr(seed) == test[2].get_str());
 
@@ -62,6 +100,17 @@ BOOST_AUTO_TEST_CASE(bip39_vectors)
         // printf("CRavenExtKey: %s\n", b58key.ToString().c_str());
         BOOST_CHECK(b58key.ToString() == test[3].get_str());
     }
+}
+
+BOOST_AUTO_TEST_CASE(bip39_seed_derivation_failure_is_fail_closed)
+{
+    const SecureString mnemonic(
+        "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about");
+    const SecureString passphrase("TREZOR");
+    SecureVector seed(BIP39_SEED_SIZE, 0x7f);
+
+    BOOST_CHECK(!Bip39TestAccess::ToSeedWithFailure(mnemonic, passphrase, seed));
+    BOOST_CHECK(seed.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

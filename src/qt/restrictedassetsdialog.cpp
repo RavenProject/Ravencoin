@@ -46,6 +46,45 @@
 #include <wallet/wallet.h>
 #include <wallet/coincontrol.h>
 
+namespace {
+
+bool ResolveGUIAdministrativeReturn(WalletModel* model, CReserveKey& reservekey,
+                                    const std::string& authorityName, std::string& returnAddress,
+                                    CCoinControl& coinControl, QString& errorText)
+{
+    if (GUIUtil::pqAssetDestinationRequired()) {
+        if (returnAddress.empty()) {
+            std::pair<int, std::string> error;
+            if (!GetWalletProtectedAssetReturnDescriptor(model->getWallet(), authorityName,
+                    returnAddress, error)) {
+                errorText = QString::fromStdString(error.second);
+                return false;
+            }
+        }
+        CKeyID classicalKey;
+        uint256 pqProgram;
+        if (!DecodePQOnlyAssetDestination(returnAddress, classicalKey, pqProgram)) {
+            errorText = QObject::tr("Authority return requires a canonical PQ-only asset destination");
+            return false;
+        }
+        return true;
+    }
+
+    if (returnAddress.empty()) {
+        CKeyID keyID;
+        std::string reason;
+        if (!model->getWallet()->CreateNewChangeAddress(reservekey, keyID, reason)) {
+            errorText = QString::fromStdString(reason);
+            return false;
+        }
+        returnAddress = EncodeDestination(keyID);
+    }
+    coinControl.destChange = DecodeDestination(returnAddress);
+    return IsValidDestination(coinControl.destChange);
+}
+
+}
+
 RestrictedAssetsDialog::RestrictedAssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent) :
         QDialog(parent),
         ui(new Ui::RestrictedAssetsDialog),
@@ -213,21 +252,13 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     CAmount nRequiredFee;
     CCoinControl ctrl;
 
-    // If the optional change address wasn't given create a new change address for this wallet
-    if (change_address == "") {
-        CKeyID keyID;
-        std::string strFailReason;
-        if (!model->getWallet()->CreateNewChangeAddress(reservekey, keyID, strFailReason)) {
-            QMessageBox changeAddressBox;
-            changeAddressBox.setText(tr("Failed to create a change address"));
-            changeAddressBox.exec();
-            return;
-        }
-
-        change_address = EncodeDestination(keyID);
+    const std::string asset_owner_token = RestrictedNameToOwnerName(asset_name);
+    QString returnError;
+    if (!ResolveGUIAdministrativeReturn(model, reservekey, asset_owner_token,
+            change_address, ctrl, returnError)) {
+        QMessageBox::warning(this, tr("Invalid authority return"), returnError);
+        return;
     }
-
-    ctrl.destChange = DecodeDestination(change_address);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -237,8 +268,6 @@ void RestrictedAssetsDialog::freezeAddressClicked()
     std::vector<CNullAssetTxData> vecFreezeGlobalTxData;
 
     // We have to send the owner token for the asset in order to perform a restriction
-    std::string asset_owner_token = RestrictedNameToOwnerName(asset_name);
-
     vTransfers.emplace_back(std::make_pair(CAssetTransfer(asset_owner_token, 1 * COIN, decodedAssetData), change_address));
 
     int flag = -1;
@@ -364,21 +393,12 @@ void RestrictedAssetsDialog::assignQualifierClicked()
     CAmount nRequiredFee;
     CCoinControl ctrl;
 
-    // If the optional change address wasn't given create a new change address for this wallet
-    if (change_address == "") {
-        CKeyID keyID;
-        std::string strFailReason;
-        if (!model->getWallet()->CreateNewChangeAddress(reservekey, keyID, strFailReason)) {
-            QMessageBox changeAddressBox;
-            changeAddressBox.setText(tr("Failed to create a change address"));
-            changeAddressBox.exec();
-            return;
-        }
-
-        change_address = EncodeDestination(keyID);
+    QString returnError;
+    if (!ResolveGUIAdministrativeReturn(model, reservekey, asset_name,
+            change_address, ctrl, returnError)) {
+        QMessageBox::warning(this, tr("Invalid authority return"), returnError);
+        return;
     }
-
-    ctrl.destChange = DecodeDestination(change_address);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -459,9 +479,3 @@ void RestrictedAssetsDialog::assignQualifierClicked()
 
     widget->clear();
 }
-
-
-
-
-
-

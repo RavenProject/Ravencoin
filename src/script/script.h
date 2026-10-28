@@ -10,6 +10,7 @@
 #include "crypto/common.h"
 #include "prevector.h"
 #include "serialize.h"
+#include "script/witness.h"
 #include "amount.h"
 
 #include <assert.h>
@@ -707,7 +708,7 @@ struct CScriptWitness
 {
     // Note that this encodes the data elements being pushed, rather than
     // encoding them as a CScript that pushes them.
-    std::vector<std::vector<unsigned char> > stack;
+    CWitnessStack stack;
 
     // Some compilers complain without a default constructor
     CScriptWitness() { }

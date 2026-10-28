@@ -111,6 +111,35 @@ BOOST_FIXTURE_TEST_SUITE(getarg_tests, BasicTestingSetup)
 
     }
 
+    BOOST_AUTO_TEST_CASE(secure_arg_is_single_consumption)
+    {
+        const char* argv[] = {
+            "raven", "-secret=first-copy", "-secret=second-copy", "-empty="};
+        gArgs.ParseParameters(4, argv);
+
+        BOOST_CHECK(gArgs.IsArgSetAndNonEmpty("-secret"));
+        BOOST_CHECK(gArgs.IsArgSet("-empty"));
+        BOOST_CHECK(!gArgs.IsArgSetAndNonEmpty("-empty"));
+
+        SecureString secret;
+        BOOST_REQUIRE(gArgs.TakeArgSecure("-secret", secret));
+        BOOST_CHECK_EQUAL(std::string(secret.begin(), secret.end()), "second-copy");
+        BOOST_CHECK(!gArgs.IsArgSet("-secret"));
+        BOOST_CHECK(gArgs.GetArgs("-secret").empty());
+
+        secret.assign(32, 'x');
+        BOOST_CHECK(!gArgs.TakeArgSecure("-secret", secret));
+        BOOST_CHECK(secret.empty());
+        BOOST_CHECK_EQUAL(secret.capacity(), SecureString().capacity());
+
+        gArgs.ForceSetArg("-short-secret", "tiny");
+        BOOST_REQUIRE(gArgs.TakeArgSecure("-short-secret", secret));
+        BOOST_CHECK_EQUAL(std::string(secret.begin(), secret.end()), "tiny");
+        BOOST_CHECK_GE(secret.capacity(), 64U);
+        ClearSecureString(secret);
+        gArgs.ClearArg("-empty");
+    }
+
     BOOST_AUTO_TEST_CASE(intarg_test)
     {
         BOOST_TEST_MESSAGE("Running IntArg Test");

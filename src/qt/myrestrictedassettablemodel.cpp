@@ -6,6 +6,8 @@
 #include "myrestrictedassettablemodel.h"
 
 #include "addresstablemodel.h"
+#include "assets/assets.h"
+#include "chainparams.h"
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
@@ -83,7 +85,18 @@ public:
         qDebug() << "MyRestrictedAssetsTablePriv::refreshWallet";
         cacheMyAssetData.clear();
         vectAssetData.clear();
+        LOCK(cs_main);
+        if (!pmyrestricteddb || !BackfillMyRestrictedIndex(GetParams())) {
+            qWarning() << "Restricted address history could not be loaded";
+            return;
+        }
+        char indexState = 0;
+        if (!pmyrestricteddb->ReadRestrictedIndexState(indexState) || indexState != 'C') {
+            qWarning() << "Restricted address history is incomplete";
+            return;
+        }
         {
+            LOCK(wallet->cs_wallet);
             std::vector<std::tuple<std::string, std::string, bool, uint32_t> > myTaggedAddresses;
             std::vector<std::tuple<std::string, std::string, bool, uint32_t> > myRestrictedAddresses;
             pmyrestricteddb->LoadMyTaggedAddresses(myTaggedAddresses);
@@ -93,13 +106,16 @@ public:
                 for (auto item : myTaggedAddresses) {
                     MyRestrictedAssetRecord sub;
                     sub.address = std::get<0>(item);
+                    const isminetype ownership = GetRestrictedAddressOwnership(*this->wallet, sub.address);
+                    if (!(ownership & ISMINE_ALL))
+                        continue;
                     sub.assetName = std::get<1>(item);
                     sub.time = std::get<3>(item);
                     if (IsAssetNameAQualifier(sub.assetName))
                         sub.type = std::get<2>(item) ? MyRestrictedAssetRecord::Type::Tagged : MyRestrictedAssetRecord::Type::UnTagged;
                     else if (IsAssetNameAnRestricted(sub.assetName))
                         sub.type = std::get<2>(item) ? MyRestrictedAssetRecord::Type::Frozen : MyRestrictedAssetRecord::Type::UnFrozen;
-                    sub.involvesWatchAddress = IsMine(*this->wallet, DecodeDestination(sub.address)) & ISMINE_WATCH_ONLY;
+                    sub.involvesWatchAddress = ownership & ISMINE_WATCH_ONLY;
                     vectAssetData.push_back(qMakePair(QString::fromStdString(std::get<0>(item)), QString::fromStdString(std::get<1>(item))));
                     cacheMyAssetData[qMakePair(QString::fromStdString(std::get<0>(item)), QString::fromStdString(std::get<1>(item)))] = sub;
                 }
@@ -108,6 +124,26 @@ public:
     }
 
     void updateMyRestrictedAssets(const QString &address, const QString& asset_name, const int type, const qint64& date) {
+        if (type == RESTRICTED_ASSET_VIEW_RELOAD) {
+            parent->beginResetModel();
+            refreshWallet();
+            parent->endResetModel();
+            return;
+        }
+        const isminetype ownership = GetRestrictedAddressOwnership(*this->wallet, address.toStdString());
+        if (!(ownership & ISMINE_ALL))
+            return;
+        QPair<QString, QString> pair(address, asset_name);
+        if (type < 0) {
+            const int row = vectAssetData.indexOf(pair);
+            if (row >= 0) {
+                parent->beginRemoveRows(QModelIndex(), row, row);
+                vectAssetData.removeAt(row);
+                cacheMyAssetData.remove(pair);
+                parent->endRemoveRows();
+            }
+            return;
+        }
         MyRestrictedAssetRecord rec;
 
         if (IsAssetNameAQualifier(asset_name.toStdString())) {
@@ -120,13 +156,16 @@ public:
         rec.assetName = asset_name.toStdString();
         rec.address = address.toStdString();
 
-        QPair<QString, QString> pair(address, asset_name);
         if (cacheMyAssetData.contains(pair)) {
             rec.involvesWatchAddress = cacheMyAssetData[pair].involvesWatchAddress;
             cacheMyAssetData[pair] = rec;
+            const int row = vectAssetData.indexOf(pair);
+            if (row >= 0)
+                Q_EMIT parent->dataChanged(parent->index(row, 0),
+                                           parent->index(row, parent->columnCount(QModelIndex()) - 1));
         } else {
             rec.involvesWatchAddress =
-                    IsMine(*this->wallet, DecodeDestination(address.toStdString())) & ISMINE_WATCH_ONLY ? true : false;
+                    ownership & ISMINE_WATCH_ONLY;
             parent->beginInsertRows(QModelIndex(), 0, 0);
             cacheMyAssetData[pair] = rec;
             vectAssetData.push_front(pair);

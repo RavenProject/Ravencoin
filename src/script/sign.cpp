@@ -6,17 +6,22 @@
 
 #include "script/sign.h"
 
+#include "assets/assets.h"
 #include "key.h"
 #include "keystore.h"
 #include "policy/policy.h"
 #include "primitives/transaction.h"
 #include "script/standard.h"
 #include "uint256.h"
+#include "pqkey.h"
+#include "crypto/mldsa.h"
 
 
 typedef std::vector<unsigned char> valtype;
 
 TransactionSignatureCreator::TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, const CAmount& amountIn, int nHashTypeIn) : BaseSignatureCreator(keystoreIn), txTo(txToIn), nIn(nInIn), nHashType(nHashTypeIn), amount(amountIn), checker(txTo, nIn, amountIn) {}
+
+TransactionSignatureCreator::TransactionSignatureCreator(const CKeyStore* keystoreIn, const CTransaction* txToIn, unsigned int nInIn, const CAmount& amountIn, int nHashTypeIn, const Consensus::PQSignatureContext& pqSignatureContextIn) : BaseSignatureCreator(keystoreIn), txTo(txToIn), nIn(nInIn), nHashType(nHashTypeIn), amount(amountIn), checker(txTo, nIn, amountIn, pqSignatureContextIn) {}
 
 bool TransactionSignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, const CKeyID& address, const CScript& scriptCode, SigVersion sigversion) const
 {
@@ -85,6 +90,13 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
         return false;
     /** RVN START */
     case TX_NEW_ASSET:
+        {
+        uint256 program;
+        if (IsPQOnlyAssetScript(scriptPubKey, program)) {
+            CPQKey pqKey;
+            return creator.KeyStore().GetPQKey(program, pqKey) && pqKey.IsValid();
+        }
+        }
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
             return false;
@@ -96,6 +108,13 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
         }
         return true;
     case TX_TRANSFER_ASSET:
+        {
+        uint256 program;
+        if (IsPQOnlyAssetScript(scriptPubKey, program)) {
+            CPQKey pqKey;
+            return creator.KeyStore().GetPQKey(program, pqKey) && pqKey.IsValid();
+        }
+        }
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
             return false;
@@ -108,6 +127,13 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
         return true;
 
     case TX_REISSUE_ASSET:
+        {
+        uint256 program;
+        if (IsPQOnlyAssetScript(scriptPubKey, program)) {
+            CPQKey pqKey;
+            return creator.KeyStore().GetPQKey(program, pqKey) && pqKey.IsValid();
+        }
+        }
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, creator, scriptPubKey, ret, sigversion))
             return false;
@@ -155,6 +181,11 @@ static bool SignStep(const BaseSignatureCreator& creator, const CScript& scriptP
             return true;
         }
         return false;
+
+    case TX_WITNESS_V2_PQ_KEYHASH:
+        // RIP-25: Return the witness program hash; actual signing happens in ProduceSignature
+        ret.push_back(vSolutions[0]);
+        return true;
 
     default:
         return false;
@@ -214,14 +245,62 @@ bool ProduceSignature(const BaseSignatureCreator& creator, const CScript& fromPu
         sigdata.scriptWitness.stack = result;
         result.clear();
     }
+    else if (solved && whichType == TX_WITNESS_V2_PQ_KEYHASH)
+    {
+        // RIP-25: Witness v2 ML-DSA-44 signing
+        // result[0] = 32-byte witness program (SHA256 of ML-DSA pubkey)
+        uint256 witnessProgram;
+        if (result[0].size() == 32) {
+            memcpy(witnessProgram.begin(), result[0].data(), 32);
+        }
+
+        CPQKey pqKey;
+        CPQPubKey pqPubKey;
+        if (creator.KeyStore().HavePQKey(witnessProgram) &&
+            creator.KeyStore().GetPQKey(witnessProgram, pqKey) &&
+            creator.KeyStore().GetPQPubKey(witnessProgram, pqPubKey))
+        {
+            // Compute sighash for witness v2
+            const TransactionSignatureCreator* txCreator =
+                dynamic_cast<const TransactionSignatureCreator*>(&creator);
+            if (txCreator && txCreator->GetHashType() == SIGHASH_ALL &&
+                Consensus::IsValidPQSignatureContext(txCreator->GetPQSignatureContext())) {
+                CScript pqScriptCode; // empty for witness v2
+                uint256 sighash = SignatureHash(pqScriptCode, *txCreator->GetTransaction(),
+                    txCreator->GetInput(), SIGHASH_ALL,
+                    txCreator->GetAmount(), SIGVERSION_WITNESS_V2_PQ);
+
+                std::vector<unsigned char> mldsa_sig;
+                if (pqKey.Sign(sighash, mldsa_sig,
+                               txCreator->GetPQSignatureContext().data(),
+                               txCreator->GetPQSignatureContext().size())) {
+                    sigdata.scriptWitness.stack.clear();
+                    sigdata.scriptWitness.stack.push_back(mldsa_sig);
+                    sigdata.scriptWitness.stack.push_back(pqPubKey.GetVch());
+                } else {
+                    solved = false;
+                }
+            } else {
+                // Non-transaction creator (e.g. DummySignatureCreator): cannot sign.
+                // Fee estimation handles this in DummySignTx with correctly-sized dummy witness.
+                solved = false;
+            }
+        } else {
+            solved = false;
+        }
+        result.clear();
+    }
 
     if (P2SH) {
         result.push_back(std::vector<unsigned char>(subscript.begin(), subscript.end()));
     }
     sigdata.scriptSig = PushAll(result);
 
-    // Test solution
-    return solved && VerifyScript(sigdata.scriptSig, fromPubKey, &sigdata.scriptWitness, STANDARD_SCRIPT_VERIFY_FLAGS, creator.Checker());
+    // Test the completed solution. PQ signing must validate under the active
+    // witness-v2 rules even though activation is applied contextually elsewhere.
+    unsigned int verifyFlags = STANDARD_SCRIPT_VERIFY_FLAGS;
+    if (whichType == TX_WITNESS_V2_PQ_KEYHASH) verifyFlags |= SCRIPT_VERIFY_PQ_HYBRID;
+    return solved && VerifyScript(sigdata.scriptSig, fromPubKey, &sigdata.scriptWitness, verifyFlags, creator.Checker());
 }
 
 SignatureData DataFromTransaction(const CMutableTransaction& tx, unsigned int nIn)
@@ -240,12 +319,13 @@ void UpdateTransaction(CMutableTransaction& tx, unsigned int nIn, const Signatur
     tx.vin[nIn].scriptWitness = data.scriptWitness;
 }
 
-bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CMutableTransaction& txTo, unsigned int nIn, const CAmount& amount, int nHashType)
+bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CMutableTransaction& txTo, unsigned int nIn, const CAmount& amount, int nHashType, const Consensus::PQSignatureContext& pqSignatureContext)
 {
     assert(nIn < txTo.vin.size());
 
     CTransaction txToConst(txTo);
-    TransactionSignatureCreator creator(&keystore, &txToConst, nIn, amount, nHashType);
+    TransactionSignatureCreator creator(&keystore, &txToConst, nIn, amount,
+                                        nHashType, pqSignatureContext);
 
     SignatureData sigdata;
     bool ret = ProduceSignature(creator, fromPubKey, sigdata);
@@ -253,14 +333,15 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CMutabl
     return ret;
 }
 
-bool SignSignature(const CKeyStore &keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType)
+bool SignSignature(const CKeyStore &keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType, const Consensus::PQSignatureContext& pqSignatureContext)
 {
     assert(nIn < txTo.vin.size());
     CTxIn& txin = txTo.vin[nIn];
     assert(txin.prevout.n < txFrom.vout.size());
     const CTxOut& txout = txFrom.vout[txin.prevout.n];
 
-    return SignSignature(keystore, txout.scriptPubKey, txTo, nIn, txout.nValue, nHashType);
+    return SignSignature(keystore, txout.scriptPubKey, txTo, nIn,
+                         txout.nValue, nHashType, pqSignatureContext);
 }
 
 static std::vector<valtype> CombineMultisig(const CScript& scriptPubKey, const BaseSignatureChecker& checker,
@@ -427,6 +508,11 @@ static Stacks CombineSignatures(const CScript& scriptPubKey, const BaseSignature
     case TX_REISSUE_ASSET:
         // Signatures are bigger than placeholders or empty scripts:
         if (sigs1.script.empty() || sigs1.script[0].empty())
+            return sigs2;
+        return sigs1;
+    case TX_WITNESS_V2_PQ_KEYHASH:
+        // RIP-25: PQ ML-DSA-44: prefer the more complete witness
+        if (sigs1.witness.empty() || sigs1.witness[0].empty())
             return sigs2;
         return sigs1;
 

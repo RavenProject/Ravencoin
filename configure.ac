@@ -1,7 +1,7 @@
 dnl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
 AC_PREREQ([2.60])
 define(_CLIENT_VERSION_MAJOR, 4)
-define(_CLIENT_VERSION_MINOR, 6)
+define(_CLIENT_VERSION_MINOR, 8)
 define(_CLIENT_VERSION_REVISION, 1)
 define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_RC, 0)
@@ -207,6 +207,22 @@ AC_ARG_ENABLE([zmq],
   [use_zmq=$enableval],
   [use_zmq=yes])
 
+AC_ARG_WITH([liboqs],
+  [AS_HELP_STRING([--with-liboqs],
+  [RIP-25 requires the pinned liboqs 0.16.0 build (required; disabling is unsupported)])],
+  [use_liboqs=$withval],
+  [use_liboqs=yes])
+
+if test "x$use_liboqs" != "xyes"; then
+  AC_MSG_ERROR([RIP-25 requires the pinned liboqs 0.16.0 build; --without-liboqs is not supported])
+fi
+
+AC_ARG_ENABLE([system-liboqs],
+  [AS_HELP_STRING([--enable-system-liboqs],
+  [explicitly permit an unproven system liboqs 0.16.0 build (unsupported for release artifacts)])],
+  [allow_system_liboqs=$enableval],
+  [allow_system_liboqs=no])
+
 AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
 
 AC_ARG_ENABLE(man,
@@ -379,10 +395,15 @@ case $host in
 
      dnl libtool insists upon adding -nostdlib and a list of objects/libs to link against.
      dnl That breaks our ability to build dll's with static libgcc/libstdc++/libssp. Override
-     dnl its command here, with the predeps/postdeps removed, and -static inserted. Postdeps are
-     dnl also overridden to prevent their insertion later.
+     dnl its command here, with the predeps/postdeps removed. Postdeps are also overridden to
+     dnl prevent their insertion later. The libtool supplied libraries are bracketed in
+     dnl -Bstatic so they keep linking statically, libgcc and libstdc++ use their dedicated
+     dnl driver flags, and -Bdynamic is restored before the trailing driver libraries. That
+     dnl way the -lpthread which the mingw-w64 posix driver appends from its own spec binds
+     dnl to the same winpthread import library that libravenconsensus already links, rather
+     dnl than pulling in a second, static implementation of the pthread mutex functions.
      dnl This should only affect dll's.
-     archive_cmds_CXX="\$CC -shared \$libobjs \$deplibs \$compiler_flags -static -o \$output_objdir/\$soname \${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker \$lib"
+     archive_cmds_CXX="\$CC -shared \$libobjs ${wl}-Bstatic \$deplibs \$compiler_flags -static-libgcc -static-libstdc++ ${wl}-Bdynamic -o \$output_objdir/\$soname \${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker \$lib"
      postdeps_CXX=
 
      ;;
@@ -472,15 +493,55 @@ case $host in
      ;;
 esac
 
-if test x$use_pkgconfig = xyes; then
-  m4_ifndef([PKG_PROG_PKG_CONFIG], [AC_MSG_ERROR(PKG_PROG_PKG_CONFIG macro not found. Please install pkg-config and re-run autogen.sh.)])
-  m4_ifdef([PKG_PROG_PKG_CONFIG], [
-  PKG_PROG_PKG_CONFIG
-  if test x"$PKG_CONFIG" = "x"; then
-    AC_MSG_ERROR(pkg-config not found.)
-  fi
-  ])
+m4_ifndef([PKG_PROG_PKG_CONFIG], [m4_fatal([PKG_PROG_PKG_CONFIG macro not found. Please install pkg-config and re-run autogen.sh.])])
+m4_ifndef([PKG_CHECK_MODULES], [m4_fatal([PKG_CHECK_MODULES macro not found. Please install pkg-config and re-run autogen.sh.])])
+PKG_PROG_PKG_CONFIG
+if test x"$PKG_CONFIG" = x; then
+  AC_MSG_ERROR([pkg-config is required to prove pinned liboqs 0.16.0 compatibility])
 fi
+
+dnl RIP-25 consensus signatures require final FIPS-204 ML-DSA-44 semantics.
+dnl Refuse version ranges and unversioned probes: backend changes can be
+dnl byte-size compatible while changing wallet or consensus behavior.
+PKG_CHECK_MODULES([LIBOQS], [liboqs = 0.16.0],
+  [AC_DEFINE([HAVE_LIBOQS], [1], [Define to 1 if liboqs is available])],
+  [AC_MSG_ERROR([RIP-25 requires exactly liboqs 0.16.0 discoverable via pkg-config; refusing an unversioned system-library fallback])])
+
+LIBOQS_RIP25_SOURCE_SHA256=`$PKG_CONFIG --variable=rip25_source_sha256 liboqs 2>/dev/null`
+if test "x$LIBOQS_RIP25_SOURCE_SHA256" != "x162d5b510518ee5f285f82fa1f16402a885176e818bf1b1a4c3c91c9a2f01eae"; then
+  if test "x$allow_system_liboqs" != "xyes"; then
+    AC_MSG_ERROR([liboqs provenance is not the pinned RIP-25 source archive; build depends or explicitly pass --enable-system-liboqs for unsupported local development])
+  fi
+  AC_MSG_WARN([using explicitly requested unproven system liboqs; this build is not eligible for release artifacts])
+fi
+
+save_CPPFLAGS="$CPPFLAGS"
+save_LIBS="$LIBS"
+CPPFLAGS="$CPPFLAGS $LIBOQS_CFLAGS"
+LIBS="$LIBOQS_LIBS $LIBS"
+AC_LANG_PUSH([C++])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+#include <cstdint>
+#include <oqs/oqs.h>
+#if !defined(OQS_VERSION_MAJOR) || !defined(OQS_VERSION_MINOR) || !defined(OQS_VERSION_PATCH)
+#error liboqs version macros are required
+#endif
+#if OQS_VERSION_MAJOR != 0 || OQS_VERSION_MINOR != 16 || OQS_VERSION_PATCH != 0
+#error exactly liboqs 0.16.0 is required
+#endif
+extern "C" int PQCP_MLDSA_NATIVE_MLDSA44_C_keypair_internal(
+    std::uint8_t*, std::uint8_t*, const std::uint8_t*);
+]], [[
+std::uint8_t pk[OQS_SIG_ml_dsa_44_length_public_key] = {};
+std::uint8_t sk[OQS_SIG_ml_dsa_44_length_secret_key] = {};
+const std::uint8_t seed[32] = {};
+return PQCP_MLDSA_NATIVE_MLDSA44_C_keypair_internal(pk, sk, seed);
+]])], [], [AC_MSG_ERROR([liboqs 0.16.0 lacks the required mldsa-native ML-DSA-44 deterministic keygen backend])])
+AC_LANG_POP([C++])
+CPPFLAGS="$save_CPPFLAGS"
+LIBS="$save_LIBS"
+AC_SUBST([LIBOQS_LIBS])
+AC_SUBST([LIBOQS_CFLAGS])
 
 if test x$use_extended_functional_tests != xno; then
   AC_SUBST(EXTENDED_FUNCTIONAL_TESTS, --extended)
@@ -810,6 +871,14 @@ if test x$use_reduce_exports = xyes; then
     AX_CHECK_LINK_FLAG([[-Wl,--exclude-libs,ALL]], [RELDFLAGS="-Wl,--exclude-libs,ALL"])
 fi
 
+dnl libtool's -no-undefined rejects unresolved symbols only in a Windows DLL.
+dnl Make ELF linkers reject them in the standalone consensus library as well.
+dnl Sanitizer runtimes can leave intended undefined symbols in shared objects.
+case "$CXXFLAGS $LDFLAGS" in
+  *-fsanitize=*) ;;
+  *) AX_CHECK_LINK_FLAG([[-Wl,-z,defs]], [NOUNDEFINED_LDFLAGS="-Wl,-z,defs"]) ;;
+esac
+
 if test x$use_tests = xyes; then
 
   if test x$HEXDUMP = x; then
@@ -1001,7 +1070,6 @@ else
       ;;
     esac
   fi
-
   RAVEN_QT_CHECK(AC_CHECK_LIB([protobuf] ,[main],[PROTOBUF_LIBS=-lprotobuf], RAVEN_QT_FAIL(libprotobuf not found)))
   if test x$use_qr != xno; then
     RAVEN_QT_CHECK([AC_CHECK_LIB([qrencode], [main],[QR_LIBS=-lqrencode], [have_qrencode=no])])
@@ -1246,6 +1314,7 @@ AC_SUBST(RAVEN_CLI_NAME)
 AC_SUBST(RAVEN_TX_NAME)
 
 AC_SUBST(RELDFLAGS)
+AC_SUBST(NOUNDEFINED_LDFLAGS)
 AC_SUBST(COMPAT_LDFLAGS)
 AC_SUBST(ERROR_CXXFLAGS)
 AC_SUBST(HARDENED_CXXFLAGS)

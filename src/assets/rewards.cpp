@@ -20,26 +20,52 @@
 #include "wallet/wallet.h"
 
 std::map<uint256, CRewardSnapshot> mapRewardSnapshots;
+#ifdef ENABLE_WALLET
+std::map<uint256, CRewardWalletBinding> mapRewardWalletBindings;
+#endif
 
 uint256 CRewardSnapshot::GetHash() const
 {
     return SerializeHash(*this, SER_GETHASH);
 }
 
-bool AddDistributeRewardSnapshot(CRewardSnapshot& p_rewardSnapshot)
+#ifdef ENABLE_WALLET
+bool AddDistributeRewardSnapshot(CWallet* p_wallet, CRewardSnapshot& p_rewardSnapshot)
 {
+    AssertLockHeld(cs_main);
+    if (!p_wallet || !pDistributeSnapshotDb || !pAssetSnapshotDb ||
+        p_rewardSnapshot.nHeight > static_cast<uint32_t>(chainActive.Height()) ||
+        !chainActive[p_rewardSnapshot.nHeight])
+        return false;
     auto hash = p_rewardSnapshot.GetHash();
-    CRewardSnapshot temp;
-    if (pDistributeSnapshotDb->RetrieveDistributeSnapshotRequest(hash, temp)) {
+    if (pDistributeSnapshotDb->ContainsDistributeSnapshotRequest(hash)) {
         return false;
     }
 
-    if (pDistributeSnapshotDb->AddDistributeSnapshot(hash, p_rewardSnapshot)) {
-        mapRewardSnapshots[hash] = p_rewardSnapshot;
-    }
+    CAssetSnapshotDBEntry snapshotEntry;
+    if (!pAssetSnapshotDb->RetrieveOwnershipSnapshot(p_rewardSnapshot.strOwnershipAsset,
+                                                     p_rewardSnapshot.nHeight, snapshotEntry))
+        return false;
 
+    CPubKey walletKey;
+    if (!p_wallet->GetKeyFromPool(walletKey) || !walletKey.IsValid())
+        return false;
+
+    CRewardWalletBinding binding;
+    binding.walletName = p_wallet->GetName();
+    binding.walletKeyId = walletKey.GetID();
+    binding.genesisHash = GetParams().GenesisBlock().GetHash();
+    binding.snapshotBlockHash = chainActive[p_rewardSnapshot.nHeight]->GetBlockHash();
+    binding.snapshotContentHash = SerializeHash(snapshotEntry, SER_GETHASH);
+    if (binding.walletName.empty() || !p_wallet->HaveKey(binding.walletKeyId) ||
+        !pDistributeSnapshotDb->AddDistributeSnapshot(hash, p_rewardSnapshot, binding))
+        return false;
+
+    mapRewardWalletBindings[hash] = binding;
+    mapRewardSnapshots[hash] = p_rewardSnapshot;
     return true;
 }
+#endif
 
 bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vector<OwnerAndAmount>& vecDistributionList)
 {
@@ -205,9 +231,9 @@ void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewar
         return;
     }
 
-    int nNumberOfTransactions = ((int)paymentDetails.size() / MAX_PAYMENTS_PER_TRANSACTION) + 1;
+    size_t nNumberOfTransactions = CountRewardBatches(paymentDetails.size());
     CRewardSnapshot copyRewardSnapshot = p_rewardSnapshot;
-    for (int i = 0; i < nNumberOfTransactions; i++) {
+    for (size_t i = 0; i < nNumberOfTransactions; i++) {
         uint256 txid;
         if (pDistributeSnapshotDb->GetDistributeTransaction(p_rewardSnapshot.GetHash(), i, txid)) {
             CTransactionRef txRef;
@@ -219,26 +245,43 @@ void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewar
                     LogPrint(BCLog::REWARDS, "Failed distribution: Tx conflict with another tx: %s: number of block back %d!\n", txid.GetHex(), depth);
                     return;
                 } else if (depth == 0) {
-                    LogPrint(BCLog::REWARDS, "Tx is in the mempool! %s\n", txid.GetHex());
+                    if (!walletTx->InMempool()) {
+                        LogPrint(BCLog::REWARDS, "Reward transaction %s is unconfirmed and absent from the mempool; refusing automatic retry\n", txid.GetHex());
+                        mapRewardSnapshots[p_rewardSnapshot.GetHash()].nStatus = CRewardSnapshot::STUCK_TX;
+                        pDistributeSnapshotDb->OverrideDistributeSnapshot(
+                            p_rewardSnapshot.GetHash(), mapRewardSnapshots.at(p_rewardSnapshot.GetHash()));
+                        return;
+                    }
+                    LogPrint(BCLog::REWARDS, "Reward transaction remains in the mempool: %s\n", txid.GetHex());
                     return;
                 } else if (depth > 0) {
                     LogPrint(BCLog::REWARDS, "Tx is in a block %s!\n", txid.GetHex());
                     continue;
                 }
             } else {
-                LogPrint(BCLog::REWARDS, "Failed to get wallet Tx: %s\n", txid.GetHex());
+                LogPrint(BCLog::REWARDS, "Reward batch %d has durable intent %s but no wallet transaction; refusing automatic retry\n",
+                         i, txid.GetHex());
+                mapRewardSnapshots[p_rewardSnapshot.GetHash()].nStatus = CRewardSnapshot::STUCK_TX;
+                pDistributeSnapshotDb->OverrideDistributeSnapshot(
+                    p_rewardSnapshot.GetHash(), mapRewardSnapshots.at(p_rewardSnapshot.GetHash()));
+                return;
             }
+        } else if (pDistributeSnapshotDb->ContainsDistributeTransaction(p_rewardSnapshot.GetHash(), i)) {
+            LogPrint(BCLog::REWARDS, "Reward batch %d has an unreadable durable intent; refusing automatic retry\n", i);
+            mapRewardSnapshots[p_rewardSnapshot.GetHash()].nStatus = CRewardSnapshot::STUCK_TX;
+            pDistributeSnapshotDb->OverrideDistributeSnapshot(
+                p_rewardSnapshot.GetHash(), mapRewardSnapshots.at(p_rewardSnapshot.GetHash()));
+            return;
         } else {
             LogPrint(BCLog::REWARDS, "Didn't find transaction in database creating new transaction: %s %s %d %d\n", p_rewardSnapshot.strOwnershipAsset, p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount, i);
             // Create a new transaction and database it
             int start = i * MAX_PAYMENTS_PER_TRANSACTION;
             uint256 retTxid;
             std::string change = "";
-            if (!BuildTransaction(p_wallet, p_rewardSnapshot, paymentDetails, start, change, retTxid)) {
+            if (!BuildTransaction(p_wallet, p_rewardSnapshot, paymentDetails, start, i, change, retTxid)) {
                 LogPrint(BCLog::REWARDS, "Failed to build Tx: distribute: %s, amount: %d\n", p_rewardSnapshot.strDistributionAsset, p_rewardSnapshot.nDistributionAmount);
                 return;
             }
-            pDistributeSnapshotDb->AddDistributeTransaction(p_rewardSnapshot.GetHash(), i, retTxid);
         }
     }
 }
@@ -246,6 +289,7 @@ void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewar
 bool BuildTransaction(
         CWallet * const p_walletPtr, const CRewardSnapshot& p_rewardSnapshot,
         const std::vector<OwnerAndAmount> & p_pendingPayments,const int& start,
+        const int& batchNumber,
         std::string& change_address, uint256& retTxid)
 {
     int expectedCount = 0;
@@ -267,6 +311,29 @@ bool BuildTransaction(
     std::shared_ptr<UniValue> batchResult = std::make_shared<UniValue>(UniValue::VOBJ);
     CAmount nFeeRequired = 0;
     CAmount totalPaymentAmt = 0;
+
+    // Store the batch identity before any wallet side effect. A crash after
+    // this write can stop a retry, but cannot silently pay the batch twice.
+    const auto commitRewardTransaction = [&]() {
+        const uint256 txid = txnPtr->GetHash();
+        if (!pDistributeSnapshotDb->AddDistributeTransaction(rewardSnapshotHash, batchNumber, txid)) {
+            LogPrint(BCLog::REWARDS, "Failed to persist reward batch intent before transaction commit\n");
+            return false;
+        }
+
+        if (p_walletPtr->CommitTransaction(*txnPtr.get(), *reserveKeyPtr.get(), g_connman.get(), state))
+            return true;
+
+        // Wallet abandonment and the rewards database are separate stores.
+        // A failed wallet database write can revive this transaction after a
+        // crash, so never remove its durable intent for an automatic retry.
+        mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::STUCK_TX;
+        pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash,
+                                                           mapRewardSnapshots.at(rewardSnapshotHash));
+        LogPrint(BCLog::REWARDS, "Reward commit failed for %s: %s; automatic retry blocked\n",
+                 txid.GetHex(), state.GetRejectReason());
+        return false;
+    };
 
 
     //  Handle payouts using RVN differently from those using an asset
@@ -325,10 +392,7 @@ bool BuildTransaction(
             return false;
         }
 
-        if (!p_walletPtr->CommitTransaction(*txnPtr.get(), *reserveKeyPtr.get(), g_connman.get(), state)) {
-            mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::FAILED_COMMIT_TRANSACTION;
-            pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
-            LogPrint(BCLog::REWARDS, "%s\n", state.GetRejectReason());
+        if (!commitRewardTransaction()) {
             return false;
         }
     }
@@ -339,7 +403,7 @@ bool BuildTransaction(
 
         // Get the total amount of distribution assets this wallet has
         CAmount totalAssetBalance = 0;
-        GetMyAssetBalance(p_rewardSnapshot.strDistributionAsset, totalAssetBalance, 0);
+        GetMyAssetBalance(p_walletPtr, p_rewardSnapshot.strDistributionAsset, totalAssetBalance, 0);
 
         //  This should (due to external logic) only include pending payments
         for (int i = start; i < (int)p_pendingPayments.size() && i < stop; i++) {
@@ -368,10 +432,7 @@ bool BuildTransaction(
             return false;
         }
 
-        if (!p_walletPtr->CommitTransaction(*txnPtr.get(), *reserveKeyPtr.get(), g_connman.get(), state)) {
-            mapRewardSnapshots[rewardSnapshotHash].nStatus = CRewardSnapshot::FAILED_COMMIT_TRANSACTION;
-            pDistributeSnapshotDb->OverrideDistributeSnapshot(rewardSnapshotHash, mapRewardSnapshots.at(rewardSnapshotHash));
-            LogPrint(BCLog::REWARDS, "%s\n", state.GetRejectReason());
+        if (!commitRewardTransaction()) {
             return false;
         }
     }
@@ -382,14 +443,71 @@ bool BuildTransaction(
     return true;
 }
 
-void CheckRewardDistributions(CWallet * p_wallet)
+void CheckRewardDistributions()
 {
-    for (auto item : mapRewardSnapshots) {
-        DistributeRewardSnapshot(p_wallet, item.second);
+    AssertLockHeld(cs_main);
+    for (const auto& item : mapRewardSnapshots) {
+        if (item.second.nStatus == CRewardSnapshot::STUCK_TX ||
+            item.second.nStatus == CRewardSnapshot::INVALIDATED_SNAPSHOT)
+            continue;
+        const auto owner = mapRewardWalletBindings.find(item.first);
+        if (owner == mapRewardWalletBindings.end()) {
+            LogPrint(BCLog::REWARDS, "Skipping reward %s without a wallet binding\n",
+                     item.first.GetHex());
+            continue;
+        }
+
+        const CRewardWalletBinding& binding = owner->second;
+        if (binding.nVersion != CRewardWalletBinding::CURRENT_VERSION ||
+            binding.walletName.empty() || binding.walletKeyId.IsNull() ||
+            binding.genesisHash != GetParams().GenesisBlock().GetHash() ||
+            item.second.nHeight > static_cast<uint32_t>(chainActive.Height()) ||
+            !chainActive[item.second.nHeight]) {
+            LogPrint(BCLog::REWARDS, "Skipping reward %s with invalid wallet or chain binding\n",
+                     item.first.GetHex());
+            continue;
+        }
+
+        if (binding.snapshotBlockHash != chainActive[item.second.nHeight]->GetBlockHash()) {
+            LogPrint(BCLog::REWARDS, "Reward %s snapshot block was replaced; automatic retry blocked\n",
+                     item.first.GetHex());
+            mapRewardSnapshots[item.first].nStatus = CRewardSnapshot::INVALIDATED_SNAPSHOT;
+            pDistributeSnapshotDb->OverrideDistributeSnapshot(item.first, mapRewardSnapshots.at(item.first));
+            continue;
+        }
+
+        CAssetSnapshotDBEntry snapshotEntry;
+        if (!pAssetSnapshotDb ||
+            !pAssetSnapshotDb->RetrieveOwnershipSnapshot(item.second.strOwnershipAsset,
+                                                         item.second.nHeight, snapshotEntry)) {
+            LogPrint(BCLog::REWARDS, "Skipping reward %s with changed ownership snapshot\n",
+                     item.first.GetHex());
+            continue;
+        }
+        if (binding.snapshotContentHash != SerializeHash(snapshotEntry, SER_GETHASH)) {
+            LogPrint(BCLog::REWARDS, "Reward %s snapshot contents changed; automatic retry blocked\n",
+                     item.first.GetHex());
+            mapRewardSnapshots[item.first].nStatus = CRewardSnapshot::INVALIDATED_SNAPSHOT;
+            pDistributeSnapshotDb->OverrideDistributeSnapshot(item.first, mapRewardSnapshots.at(item.first));
+            continue;
+        }
+
+        CWallet* wallet = nullptr;
+        int identityMatches = 0;
+        for (const CWalletRef& loaded : vpwallets) {
+            if (loaded && loaded->HaveKey(binding.walletKeyId)) {
+                ++identityMatches;
+                if (loaded->GetName() == binding.walletName)
+                    wallet = loaded;
+            }
+        }
+        if (!wallet || identityMatches != 1) {
+            LogPrint(BCLog::REWARDS, "Skipping reward %s without a unique loaded wallet\n",
+                     item.first.GetHex());
+            continue;
+        }
+        DistributeRewardSnapshot(wallet, item.second);
     }
 }
 
 #endif //ENABLE_WALLET
-
-
-

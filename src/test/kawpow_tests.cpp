@@ -5,6 +5,8 @@
 
 #include <test/test_raven.h>
 
+#include <primitives/block.h>
+
 #include <boost/test/unit_test.hpp>
 
 #include <crypto/ethash/lib/ethash/endianness.hpp>
@@ -14,6 +16,8 @@
 #include "crypto/ethash/progpow_test_vectors.hpp"
 
 #include <array>
+#include <atomic>
+#include <thread>
 
 BOOST_FIXTURE_TEST_SUITE(kawpow_tests, BasicTestingSetup)
 
@@ -70,6 +74,53 @@ BOOST_AUTO_TEST_CASE(kawpow_hash_30000)
     BOOST_CHECK_EQUAL(to_hex(result.mix_hash), mix_hex);
     BOOST_CHECK_EQUAL(to_hex(result.final_hash), final_hex);
 
+}
+
+BOOST_AUTO_TEST_CASE(kawpow_hash_full_concurrent_epochs)
+{
+    BOOST_REQUIRE(nKAWPOWActivationTime > 0);
+
+    std::array<CBlockHeader, 2> headers;
+    headers[0].nTime = nKAWPOWActivationTime;
+    headers[0].nHeight = 0;
+    headers[1].nTime = nKAWPOWActivationTime;
+    headers[1].nHeight = ethash::epoch_length;
+
+    std::array<uint256, 2> expected_hashes;
+    std::array<uint256, 2> expected_mixes;
+    for (size_t i = 0; i < headers.size(); ++i)
+        expected_hashes[i] = headers[i].GetHashFull(expected_mixes[i]);
+
+    std::atomic<bool> first_worker_started{false};
+    std::array<bool, 2> matched{{true, true}};
+    std::thread first([&] {
+        first_worker_started.store(true, std::memory_order_release);
+        for (int i = 0; i < 256; ++i) {
+            uint256 mix;
+            const auto hash = headers[1].GetHashFull(mix);
+            if (hash != expected_hashes[1] || mix != expected_mixes[1]) {
+                matched[1] = false;
+                return;
+            }
+        }
+    });
+    std::thread second([&] {
+        while (!first_worker_started.load(std::memory_order_acquire))
+            std::this_thread::yield();
+        for (int i = 0; i < 256; ++i) {
+            uint256 mix;
+            const auto hash = headers[0].GetHashFull(mix);
+            if (hash != expected_hashes[0] || mix != expected_mixes[0]) {
+                matched[0] = false;
+                return;
+            }
+        }
+    });
+    first.join();
+    second.join();
+
+    BOOST_CHECK(matched[0]);
+    BOOST_CHECK(matched[1]);
 }
 
 BOOST_AUTO_TEST_CASE(kawpow_hash_and_verify)

@@ -104,17 +104,68 @@ public:
     std::string GetDebugMessage() const { return strDebugMessage; }
 };
 
+/**
+ * Ravencoin 4.8.0 KAWPOW header-height invariant.
+ * Before the 4.8 height gate (or before KAWPOW itself) the legacy field is
+ * not enforced. At/after both gates, the height declared in the PoW header
+ * must exactly match the block's contextual chain height.
+ */
+static inline bool IsKAWPOWHeaderHeightValid(const CBlockHeader& block,
+                                              int actualHeight,
+                                              int headerHeightCheckActivation,
+                                              uint32_t kawpowActivationTime)
+{
+    return actualHeight < headerHeightCheckActivation ||
+           block.nTime < kawpowActivationTime ||
+           block.nHeight == static_cast<uint32_t>(actualHeight);
+}
+
 // These implement the weight = (stripped_size * 4) + witness_size formula,
 // using only serialization with and without witness data. As witness_size
 // is equal to total_size - stripped_size, this formula is identical to:
 // weight = (stripped_size * 3) + total_size.
+static inline int64_t GetPQWitnessInputDiscount(const CTxIn& txin)
+{
+    const auto& stack = txin.scriptWitness.stack;
+    if (stack.size() != 2 || stack[0].size() != 2420 || stack[1].size() != 1312)
+        return 0;
+
+    const int64_t pqBytes = (int64_t)stack[0].size() + (int64_t)stack[1].size();
+    return pqBytes * (PQ_WITNESS_SCALE_FACTOR - WITNESS_SCALE_FACTOR) / PQ_WITNESS_SCALE_FACTOR;
+}
+
+static inline int64_t GetPQWitnessDiscount(const CTransaction& tx)
+{
+    int64_t discount = 0;
+    for (const auto& txin : tx.vin)
+        discount += GetPQWitnessInputDiscount(txin);
+    return discount;
+}
+
 static inline int64_t GetTransactionWeight(const CTransaction& tx)
 {
-    return ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1) + ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION);
+    const int64_t standardWeight = ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1)
+                                 + ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION);
+    // RIP-25 fee/policy accounting keeps the approved 8x ML-DSA witness discount.
+    return standardWeight - GetPQWitnessDiscount(tx);
 }
+
 static inline int64_t GetBlockWeight(const CBlock& block)
 {
-    return ::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1) + ::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION);
+    // Legacy/RIP-2 consensus weight. The RIP-25 block-level discount is
+    // activation-gated and UTXO-bound in validation.cpp.
+    return ::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1)
+         + ::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION);
+}
+
+static inline int64_t GetBlockWeightRIP25(const CBlock& block)
+{
+    // Optimistic/structural RIP-25 weight. Consensus validation additionally
+    // binds every discounted input to an actual witness-v2 32-byte prevout.
+    int64_t weight = GetBlockWeight(block);
+    for (const auto& tx : block.vtx)
+        weight -= GetPQWitnessDiscount(*tx);
+    return weight;
 }
 
 #endif // RAVEN_CONSENSUS_VALIDATION_H

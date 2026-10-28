@@ -1,0 +1,18 @@
+diff --git a/src/miner.cpp b/src/miner.cpp
+index d50501f..2f8a9a5 100644
+--- a/src/miner.cpp
++++ b/src/miner.cpp
+@@ -138,6 +138,13 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
+     LOCK2(cs_main, mempool.cs);
+     CBlockIndex* pindexPrev = chainActive.Tip();
+     assert(pindexPrev != nullptr);
++
++    // RIP-25: never construct a template above the consensus limit active
++    // for the block building on pindexPrev (8 -> 12 -> 16 MWU).
++    const size_t activeMaxWeight = GetMaxBlockWeightForPrev(pindexPrev, chainparams.GetConsensus());
++    nBlockMaxWeight = std::max<size_t>(4000,
++        std::min<size_t>(nBlockMaxWeight, activeMaxWeight - 4000));
++
+     nHeight = pindexPrev->nHeight + 1;
+ 
+     pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());

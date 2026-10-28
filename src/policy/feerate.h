@@ -10,6 +10,7 @@
 #include "amount.h"
 #include "serialize.h"
 
+#include <limits>
 #include <string>
 
 extern const std::string CURRENCY_UNIT;
@@ -30,7 +31,7 @@ public:
         // We've previously had bugs creep in from silent double->int conversion...
         static_assert(std::is_integral<I>::value, "CFeeRate should be used without floats");
     }
-    /** Constructor for a fee rate in satoshis per kB. The size in bytes must not exceed (2^63 - 1)*/
+    /** Constructor for a fee rate in satoshis per kB. Supports any size_t byte count. */
     CFeeRate(const CAmount& nFeePaid, size_t nBytes);
     /**
      * Return the fee in satoshis for the given size in bytes.
@@ -46,7 +47,15 @@ public:
     friend bool operator<=(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK <= b.nSatoshisPerK; }
     friend bool operator>=(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK >= b.nSatoshisPerK; }
     friend bool operator!=(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK != b.nSatoshisPerK; }
-    CFeeRate& operator+=(const CFeeRate& a) { nSatoshisPerK += a.nSatoshisPerK; return *this; }
+    CFeeRate& operator+=(const CFeeRate& a) {
+        if (a.nSatoshisPerK > 0 && nSatoshisPerK > std::numeric_limits<CAmount>::max() - a.nSatoshisPerK)
+            nSatoshisPerK = std::numeric_limits<CAmount>::max();
+        else if (a.nSatoshisPerK < 0 && nSatoshisPerK < std::numeric_limits<CAmount>::min() - a.nSatoshisPerK)
+            nSatoshisPerK = std::numeric_limits<CAmount>::min();
+        else
+            nSatoshisPerK += a.nSatoshisPerK;
+        return *this;
+    }
     std::string ToString() const;
 
     ADD_SERIALIZE_METHODS;

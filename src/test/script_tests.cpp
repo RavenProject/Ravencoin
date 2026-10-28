@@ -5,12 +5,15 @@
 
 #include "data/script_tests.json.h"
 
+#include "chainparams.h"
 #include "core_io.h"
-#include "key.h"
 #include "keystore.h"
+#include "key.h"
+#include "pqkey.h"
 #include "script/script.h"
 #include "script/script_error.h"
 #include "script/sign.h"
+#include "script/standard.h"
 #include "util.h"
 #include "utilstrencodings.h"
 #include "test/test_raven.h"
@@ -21,6 +24,7 @@
 #endif
 
 #include <fstream>
+#include <memory>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -120,6 +124,196 @@ ScriptError_t ParseScriptError(const std::string &name)
 }
 
 BOOST_FIXTURE_TEST_SUITE(script_tests, BasicTestingSetup)
+
+#if defined(HAVE_CONSENSUS_LIB)
+    BOOST_AUTO_TEST_CASE(ravenconsensus_legacy_rejects_unverifiable_pq)
+    {
+        BOOST_CHECK_EQUAL(ravenconsensus_version(), RAVENCONSENSUS_API_VER);
+        const CScript witnessV2 = CScript() << OP_2 << std::vector<unsigned char>(32, 0x42);
+        const CScript nested = GetScriptForDestination(CScriptID(witnessV2));
+        CMutableTransaction tx;
+        tx.vin.resize(1);
+        tx.vout.resize(1);
+        tx.vin[0].prevout = COutPoint(uint256S("01"), 0);
+        tx.vout[0].nValue = 1;
+
+        auto verify = [&](const CScript& prevout, unsigned int flags) {
+            CDataStream serialized(SER_NETWORK, PROTOCOL_VERSION);
+            serialized << tx;
+            ravenconsensus_error err = ravenconsensus_ERR_OK;
+            const int result = ravenconsensus_verify_script_with_amount(
+                prevout.data(), prevout.size(), 1,
+                reinterpret_cast<const unsigned char*>(serialized.data()), serialized.size(),
+                0, flags, &err);
+            return std::make_pair(result, err);
+        };
+
+        const unsigned int flags = ravenconsensus_SCRIPT_FLAGS_VERIFY_ALL;
+        const auto nativeResult = verify(witnessV2, flags);
+        BOOST_CHECK_EQUAL(nativeResult.first, 0);
+        BOOST_CHECK_EQUAL(nativeResult.second, ravenconsensus_ERR_PQ_CONTEXT_REQUIRED);
+        CDataStream nativeSerialized(SER_NETWORK, PROTOCOL_VERSION);
+        nativeSerialized << tx;
+        ravenconsensus_error noAmountError = ravenconsensus_ERR_OK;
+        BOOST_CHECK_EQUAL(ravenconsensus_verify_script(
+            witnessV2.data(), witnessV2.size(),
+            reinterpret_cast<const unsigned char*>(nativeSerialized.data()),
+            nativeSerialized.size(), 0, flags, &noAmountError), 0);
+        BOOST_CHECK_EQUAL(noAmountError, ravenconsensus_ERR_AMOUNT_REQUIRED);
+        BOOST_CHECK_EQUAL(ravenconsensus_verify_script(
+            witnessV2.data(), witnessV2.size(),
+            reinterpret_cast<const unsigned char*>(nativeSerialized.data()),
+            nativeSerialized.size(), 0, flags | (1U << 31), &noAmountError), 0);
+        BOOST_CHECK_EQUAL(noAmountError, ravenconsensus_ERR_INVALID_FLAGS);
+        BOOST_CHECK_EQUAL(ravenconsensus_verify_script(
+            witnessV2.data(), witnessV2.size(),
+            reinterpret_cast<const unsigned char*>(nativeSerialized.data()),
+            nativeSerialized.size(), 0, ravenconsensus_SCRIPT_FLAGS_VERIFY_NONE,
+            &noAmountError), 0);
+        BOOST_CHECK_EQUAL(noAmountError, ravenconsensus_ERR_PQ_CONTEXT_REQUIRED);
+        tx.vin[0].scriptSig = CScript() << ToByteVector(witnessV2);
+        const auto nestedResult = verify(nested, flags);
+        BOOST_CHECK_EQUAL(nestedResult.first, 0);
+        BOOST_CHECK_EQUAL(nestedResult.second, ravenconsensus_ERR_PQ_CONTEXT_REQUIRED);
+
+        tx.vin[0].scriptSig.clear();
+        const auto ordinaryScript = verify(CScript() << OP_TRUE, flags);
+        BOOST_CHECK_EQUAL(ordinaryScript.first, 1);
+        BOOST_CHECK_EQUAL(ordinaryScript.second, ravenconsensus_ERR_OK);
+        const auto invalidFlags = verify(CScript() << OP_TRUE, 1U << 31);
+        BOOST_CHECK_EQUAL(invalidFlags.first, 0);
+        BOOST_CHECK_EQUAL(invalidFlags.second, ravenconsensus_ERR_INVALID_FLAGS);
+    }
+
+    BOOST_AUTO_TEST_CASE(ravenconsensus_witness_requires_p2sh_flag)
+    {
+        const CScript witnessV2 = CScript() << OP_2 << std::vector<unsigned char>(32, 0x42);
+        const CScript nested = GetScriptForDestination(CScriptID(witnessV2));
+        const std::vector<std::pair<CScript, CScript>> candidates = {
+            {witnessV2, CScript()},
+            {nested, CScript() << ToByteVector(witnessV2)},
+        };
+        const unsigned int invalidFlags[] = {
+            ravenconsensus_SCRIPT_FLAGS_VERIFY_WITNESS,
+            ravenconsensus_SCRIPT_FLAGS_VERIFY_WITNESS |
+                ravenconsensus_SCRIPT_FLAGS_VERIFY_PQ_HYBRID,
+        };
+        for (const auto& candidate : candidates) {
+            CMutableTransaction tx;
+            tx.vin.resize(1);
+            tx.vout.resize(1);
+            tx.vin[0].prevout = COutPoint(uint256S("01"), 0);
+            tx.vin[0].scriptSig = candidate.second;
+            tx.vout[0].nValue = 1;
+            CDataStream serialized(SER_NETWORK, PROTOCOL_VERSION);
+            serialized << tx;
+            const auto* bytes = reinterpret_cast<const unsigned char*>(serialized.data());
+            for (const unsigned int flags : invalidFlags) {
+                ravenconsensus_error err = ravenconsensus_ERR_OK;
+                BOOST_CHECK_EQUAL(ravenconsensus_verify_script_with_amount(
+                    candidate.first.data(), candidate.first.size(), 1,
+                    bytes, serialized.size(), 0, flags, &err), 0);
+                BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_INVALID_FLAGS);
+                err = ravenconsensus_ERR_OK;
+                BOOST_CHECK_EQUAL(ravenconsensus_verify_script(
+                    candidate.first.data(), candidate.first.size(),
+                    bytes, serialized.size(), 0, flags, &err), 0);
+                BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_INVALID_FLAGS);
+                err = ravenconsensus_ERR_OK;
+                BOOST_CHECK_EQUAL(ravenconsensus_verify_script_with_amount_and_network(
+                    candidate.first.data(), candidate.first.size(), 1,
+                    bytes, serialized.size(), 0, flags,
+                    ravenconsensus_NETWORK_MAIN, &err), 0);
+                BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_INVALID_FLAGS);
+            }
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(ravenconsensus_pq_network_context_and_activation)
+    {
+        const char* names[] = {"main", "test", "regtest"};
+        const ravenconsensus_network networks[] = {
+            ravenconsensus_NETWORK_MAIN,
+            ravenconsensus_NETWORK_TEST,
+            ravenconsensus_NETWORK_REGTEST,
+        };
+        CPQKey key;
+        key.MakeNewKey();
+        BOOST_REQUIRE(key.IsValid());
+        CBasicKeyStore keystore;
+        BOOST_REQUIRE(keystore.AddPQKeyPubKey(key, key.GetPubKey()));
+
+        const CAmount amount = 10 * COIN;
+        const CScript pqScript = GetScriptForWitnessV2PQ(key.GetPubKey().GetWitnessProgram());
+        const CScript wrappedScript = GetScriptForDestination(CScriptID(pqScript));
+        BOOST_REQUIRE(keystore.AddCScript(pqScript));
+        const unsigned int activeFlags = ravenconsensus_SCRIPT_FLAGS_VERIFY_ALL;
+        const unsigned int inactiveFlags = activeFlags & ~ravenconsensus_SCRIPT_FLAGS_VERIFY_PQ_HYBRID;
+
+        for (unsigned int signingNetwork = 0; signingNetwork < 3; ++signingNetwork) {
+            const std::unique_ptr<CChainParams> params = CreateChainParams(names[signingNetwork]);
+            CMutableTransaction funding;
+            funding.vout.emplace_back(amount, pqScript);
+            const CTransaction fundingTx(funding);
+            CMutableTransaction spend;
+            spend.vin.emplace_back(COutPoint(fundingTx.GetHash(), 0));
+            spend.vout.emplace_back(amount - 1000, CScript() << OP_TRUE);
+            BOOST_REQUIRE(SignSignature(keystore, fundingTx, spend, 0, SIGHASH_ALL,
+                                        params->GetConsensus().pqSignatureContext));
+
+            auto verify = [&](const CScript& prevout, const CMutableTransaction& candidate, unsigned int flags,
+                              ravenconsensus_network network, ravenconsensus_error& err) {
+                CDataStream serialized(SER_NETWORK, PROTOCOL_VERSION);
+                serialized << candidate;
+                return ravenconsensus_verify_script_with_amount_and_network(
+                    prevout.data(), prevout.size(), amount,
+                    reinterpret_cast<const unsigned char*>(serialized.data()), serialized.size(),
+                    0, flags, network, &err);
+            };
+
+            for (unsigned int verifyingNetwork = 0; verifyingNetwork < 3; ++verifyingNetwork) {
+                ravenconsensus_error err = ravenconsensus_ERR_TX_DESERIALIZE;
+                BOOST_CHECK_EQUAL(verify(pqScript, spend, activeFlags, networks[verifyingNetwork], err),
+                                  signingNetwork == verifyingNetwork ? 1 : 0);
+                BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_OK);
+            }
+
+            CMutableTransaction corrupt = spend;
+            corrupt.vin[0].scriptWitness.stack[0][0] ^= 1;
+            ravenconsensus_error err = ravenconsensus_ERR_TX_DESERIALIZE;
+            BOOST_CHECK_EQUAL(verify(pqScript, corrupt, activeFlags, networks[signingNetwork], err), 0);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_OK);
+            BOOST_CHECK_EQUAL(verify(pqScript, corrupt, inactiveFlags, networks[signingNetwork], err), 1);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_OK);
+            BOOST_CHECK_EQUAL(verify(pqScript, spend, activeFlags,
+                                    static_cast<ravenconsensus_network>(3), err), 0);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_INVALID_NETWORK);
+            BOOST_CHECK_EQUAL(verify(pqScript, spend, ravenconsensus_SCRIPT_FLAGS_VERIFY_PQ_HYBRID,
+                                    networks[signingNetwork], err), 0);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_INVALID_FLAGS);
+
+            CMutableTransaction wrappedFunding;
+            wrappedFunding.vout.emplace_back(amount, wrappedScript);
+            const CTransaction wrappedFundingTx(wrappedFunding);
+            CMutableTransaction wrappedSpend;
+            wrappedSpend.vin.emplace_back(COutPoint(wrappedFundingTx.GetHash(), 0));
+            wrappedSpend.vout.emplace_back(amount - 1000, CScript() << OP_TRUE);
+            BOOST_REQUIRE(SignSignature(keystore, wrappedFundingTx, wrappedSpend,
+                                        0, SIGHASH_ALL,
+                                        params->GetConsensus().pqSignatureContext));
+            BOOST_CHECK_EQUAL(verify(wrappedScript, wrappedSpend, activeFlags,
+                                     networks[signingNetwork], err), 1);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_OK);
+            BOOST_CHECK_EQUAL(verify(wrappedScript, wrappedSpend, activeFlags,
+                                     networks[(signingNetwork + 1) % 3], err), 0);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_OK);
+            wrappedSpend.vin[0].scriptWitness.stack[0][0] ^= 1;
+            BOOST_CHECK_EQUAL(verify(wrappedScript, wrappedSpend, activeFlags,
+                                     networks[signingNetwork], err), 0);
+            BOOST_CHECK_EQUAL(err, ravenconsensus_ERR_OK);
+        }
+    }
+#endif
 
     CMutableTransaction BuildCreditingTransaction(const CScript &scriptPubKey, int nValue = 0)
     {

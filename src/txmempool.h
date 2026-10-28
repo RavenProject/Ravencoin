@@ -32,6 +32,7 @@
 
 class CBlockIndex;
 struct ConnectedBlockAssetData;
+struct TxAssetDeploymentContext;
 
 /** Fake height value used in Coin to signify they are only in the memory pool (since 0.8) */
 static const uint32_t MEMPOOL_HEIGHT = 0x7FFFFFFF;
@@ -579,9 +580,20 @@ public:
     bool removeSpentIndex(const uint256 txhash);
 
     void removeRecursive(const CTransaction &tx, MemPoolRemovalReason reason = MemPoolRemovalReason::UNKNOWN);
-    void removeForReorg(const CCoinsViewCache *pcoins, unsigned int nMemPoolHeight, int flags);
+    /**
+     * Revalidate finality and context-dependent transaction structure against
+     * a new chain tip. Remove witness-v2 transactions when RIP-25 is inactive
+     * and remove descendants of each invalid transaction.
+     */
+    void removeForReorg(CCoinsViewCache *pcoins, unsigned int nMemPoolHeight,
+                        int flags, bool fPQHybridActive,
+                        const TxAssetDeploymentContext& assetContext,
+                        int pqAssetActivationHeight = -1);
     void removeConflicts(const CTransaction &tx);
-    void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight, ConnectedBlockAssetData& connectedBlockData );
+    void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight,
+                        ConnectedBlockAssetData& connectedBlockData,
+                        bool fTransferOverflowActive,
+                        bool fTransferOverflowJustActivated = false);
     void removeForBlock(const std::vector<CTransactionRef>& vtx, unsigned int nBlockHeight);
 
     void clear();

@@ -238,4 +238,43 @@ BOOST_FIXTURE_TEST_SUITE(sigopcount_tests, BasicTestingSetup)
         }
     }
 
+    BOOST_AUTO_TEST_CASE(rip25_v2_sigops_activation_gated)
+    {
+        CCoinsView coinsDummy;
+        CCoinsViewCache coins(&coinsDummy);
+        CMutableTransaction creationTx;
+        CMutableTransaction spendingTx;
+
+        const int preActivationFlags = SCRIPT_VERIFY_WITNESS | SCRIPT_VERIFY_P2SH;
+        const int activeFlags = preActivationFlags | SCRIPT_VERIFY_PQ_HYBRID;
+        const CScript witnessV2 = CScript() << OP_2 << std::vector<unsigned char>(32, 0x42);
+
+        // Native witness-v2 is a future witness program before RIP-25 activates,
+        // so its sigop must become effective at the same boundary as validation.
+        BuildTxs(spendingTx, coins, creationTx, witnessV2, CScript(), CScriptWitness());
+        const int64_t nativePreActivationCost = GetTransactionSigOpCost(CTransaction(spendingTx), coins, preActivationFlags);
+        const int64_t nativeActiveCost = GetTransactionSigOpCost(CTransaction(spendingTx), coins, activeFlags);
+        BOOST_CHECK_EQUAL(nativePreActivationCost, 0);
+        BOOST_CHECK_EQUAL(nativeActiveCost, 2);
+
+        // Reproduce the consensus-split boundary: 20,000 legacy CHECKSIG
+        // outputs consume exactly 80,000 cost units.  The future witness-v2
+        // spend must not push a pre-activation block over that limit.
+        CMutableTransaction saturatedLegacyTx;
+        saturatedLegacyTx.vout.resize(MAX_BLOCK_SIGOPS_COST / WITNESS_SCALE_FACTOR);
+        for (CTxOut& txout : saturatedLegacyTx.vout)
+            txout.scriptPubKey = CScript() << OP_CHECKSIG;
+        const int64_t saturatedLegacyCost = GetTransactionSigOpCost(CTransaction(saturatedLegacyTx), coins, preActivationFlags);
+        BOOST_REQUIRE_EQUAL(saturatedLegacyCost, MAX_BLOCK_SIGOPS_COST);
+        BOOST_CHECK_EQUAL(saturatedLegacyCost + nativePreActivationCost, MAX_BLOCK_SIGOPS_COST);
+        BOOST_CHECK_EQUAL(saturatedLegacyCost + nativeActiveCost, MAX_BLOCK_SIGOPS_COST + 2);
+
+        // The same activation rule must hold when witness-v2 is wrapped in P2SH.
+        const CScript p2shWitnessV2 = GetScriptForDestination(CScriptID(witnessV2));
+        const CScript scriptSig = CScript() << ToByteVector(witnessV2);
+        BuildTxs(spendingTx, coins, creationTx, p2shWitnessV2, scriptSig, CScriptWitness());
+        BOOST_CHECK_EQUAL(GetTransactionSigOpCost(CTransaction(spendingTx), coins, preActivationFlags), 0);
+        BOOST_CHECK_EQUAL(GetTransactionSigOpCost(CTransaction(spendingTx), coins, activeFlags), 2);
+    }
+
 BOOST_AUTO_TEST_SUITE_END()

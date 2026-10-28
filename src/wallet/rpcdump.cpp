@@ -341,7 +341,18 @@ UniValue importprunedfunds(const JSONRPCRequest& request)
 
     LOCK2(cs_main, pwallet->cs_wallet);
 
-    if (pwallet->IsMine(wtx)) {
+    const auto origin = mapBlockIndex.find(wtx.hashBlock);
+    if (origin == mapBlockIndex.end() || !chainActive.Contains(origin->second))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found in chain");
+
+    bool hasOwnedOutput = false;
+    for (const CTxOut& output : wtx.tx->vout) {
+        if (pwallet->IsMine(output, origin->second)) {
+            hasOwnedOutput = true;
+            break;
+        }
+    }
+    if (hasOwnedOutput) {
         pwallet->AddToWallet(wtx, false);
         return NullUniValue;
     }

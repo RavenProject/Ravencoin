@@ -58,4 +58,16 @@ struct secure_allocator : public std::allocator<T> {
 typedef std::basic_string<char, std::char_traits<char>, secure_allocator<char> > SecureString;
 typedef std::vector<unsigned char, secure_allocator<unsigned char> >             SecureVector;
 
+// A short SecureString may use inline storage instead of secure_allocator.
+// Overwrite its complete current capacity, including bytes left by a move,
+// before releasing its storage.
+inline void ClearSecureString(SecureString& value)
+{
+    if (value.capacity() != 0) {
+        value.resize(value.capacity(), '\0');
+        memory_cleanse(&value[0], value.size());
+    }
+    SecureString().swap(value);
+}
+
 #endif // RAVEN_SUPPORT_ALLOCATORS_SECURE_H

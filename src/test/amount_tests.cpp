@@ -8,6 +8,7 @@
 #include "test/test_raven.h"
 
 #include <boost/test/unit_test.hpp>
+#include <limits>
 
 BOOST_FIXTURE_TEST_SUITE(amount_tests, BasicTestingSetup)
 
@@ -82,8 +83,55 @@ BOOST_FIXTURE_TEST_SUITE(amount_tests, BasicTestingSetup)
         // some more integer checks
         BOOST_CHECK(CFeeRate(CAmount(26), 789) == CFeeRate(32));
         BOOST_CHECK(CFeeRate(CAmount(27), 789) == CFeeRate(34));
-        // Maximum size in bytes, should not crash
-        CFeeRate(MAX_MONEY, std::numeric_limits<size_t>::max() >> 1).GetFeePerK();
+        // The quotient is 227 sat/kB on 64-bit systems even though the product overflows int64_t.
+        const size_t halfMaxSize = std::numeric_limits<size_t>::max() >> 1;
+        if (sizeof(size_t) == 8) {
+            BOOST_CHECK(CFeeRate(MAX_MONEY, halfMaxSize) == CFeeRate(227));
+        } else {
+            const CAmount expected = MAX_MONEY / halfMaxSize * 1000 + MAX_MONEY % halfMaxSize * 1000 / halfMaxSize;
+            BOOST_CHECK(CFeeRate(MAX_MONEY, halfMaxSize) == CFeeRate(expected));
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(Fee_Arithmetic_Boundaries_Test)
+    {
+        const CAmount maxAmount = std::numeric_limits<CAmount>::max();
+        const CAmount minAmount = std::numeric_limits<CAmount>::min();
+        const size_t maxSize = std::numeric_limits<size_t>::max();
+
+        // These quotients fit, even though the original intermediate products do not.
+        BOOST_CHECK(CFeeRate(maxAmount, 1000) == CFeeRate(maxAmount));
+        BOOST_CHECK(CFeeRate(minAmount, 1000) == CFeeRate(minAmount));
+        const uint64_t max1001 = uint64_t(maxAmount) / 1001 * 1000 + uint64_t(maxAmount) % 1001 * 1000 / 1001;
+        const uint64_t minMagnitude = uint64_t(maxAmount) + 1;
+        const uint64_t min1001 = minMagnitude / 1001 * 1000 + minMagnitude % 1001 * 1000 / 1001;
+        BOOST_CHECK(CFeeRate(maxAmount, 1001) == CFeeRate(CAmount(max1001)));
+        BOOST_CHECK(CFeeRate(minAmount, 1001) == CFeeRate(-CAmount(min1001)));
+        const CAmount max999 = CAmount(uint64_t(maxAmount) / 1000 * 999 + uint64_t(maxAmount) % 1000 * 999 / 1000);
+        BOOST_CHECK_EQUAL(CFeeRate(maxAmount).GetFee(999), max999);
+        BOOST_CHECK_EQUAL(CFeeRate(1000).GetFee(maxSize),
+                          maxSize <= static_cast<size_t>(maxAmount) ? static_cast<CAmount>(maxSize) : maxAmount);
+        BOOST_CHECK_EQUAL(CFeeRate(-1000).GetFee(1000), -1000);
+
+        // Results outside CAmount saturate, rather than wrapping or invoking UB.
+        BOOST_CHECK(CFeeRate(maxAmount, 1) == CFeeRate(maxAmount));
+        BOOST_CHECK(CFeeRate(minAmount, 1) == CFeeRate(minAmount));
+        BOOST_CHECK_EQUAL(CFeeRate(maxAmount).GetFee(2000), maxAmount);
+        BOOST_CHECK_EQUAL(CFeeRate(minAmount).GetFee(2000), minAmount);
+
+        // Retain truncation toward zero for small, non-integral results.
+        BOOST_CHECK(CFeeRate(CAmount(1), 3000) == CFeeRate(0));
+        BOOST_CHECK(CFeeRate(CAmount(-1), 3000) == CFeeRate(0));
+        BOOST_CHECK_EQUAL(CFeeRate(1).GetFee(999), 1);
+        BOOST_CHECK_EQUAL(CFeeRate(-1).GetFee(999), -1);
+
+        if (maxSize > static_cast<size_t>(maxAmount)) {
+            // Full-width size_t values must not narrow to negative int64_t.
+            BOOST_CHECK(CFeeRate(CAmount(1), maxSize) == CFeeRate(0));
+            BOOST_CHECK(CFeeRate(maxAmount, maxSize) == CFeeRate(499));
+            BOOST_CHECK_EQUAL(CFeeRate(1).GetFee(maxSize), static_cast<CAmount>(maxSize / 1000));
+            BOOST_CHECK_EQUAL(CFeeRate(-1).GetFee(maxSize), -static_cast<CAmount>(maxSize / 1000));
+        }
     }
 
     BOOST_AUTO_TEST_CASE(Binary_Operator_Test)
@@ -103,6 +151,35 @@ BOOST_FIXTURE_TEST_SUITE(amount_tests, BasicTestingSetup)
         // a should be 0.00000002 RVN/kB now
         a += a;
         BOOST_CHECK(a == b);
+    }
+
+    BOOST_AUTO_TEST_CASE(Fee_Rate_Addition_Boundaries_Test)
+    {
+        const CAmount maxAmount = std::numeric_limits<CAmount>::max();
+        const CAmount minAmount = std::numeric_limits<CAmount>::min();
+
+        CFeeRate positive(maxAmount - 1);
+        positive += CFeeRate(1);
+        BOOST_CHECK(positive == CFeeRate(maxAmount));
+        positive += CFeeRate(1);
+        BOOST_CHECK(positive == CFeeRate(maxAmount));
+
+        CFeeRate negative(minAmount + 1);
+        negative += CFeeRate(-1);
+        BOOST_CHECK(negative == CFeeRate(minAmount));
+        negative += CFeeRate(-1);
+        BOOST_CHECK(negative == CFeeRate(minAmount));
+
+        CFeeRate positiveSelf(maxAmount / 2 + 1);
+        positiveSelf += positiveSelf;
+        BOOST_CHECK(positiveSelf == CFeeRate(maxAmount));
+        CFeeRate negativeSelf(minAmount / 2 - 1);
+        negativeSelf += negativeSelf;
+        BOOST_CHECK(negativeSelf == CFeeRate(minAmount));
+
+        CFeeRate opposite(maxAmount);
+        opposite += CFeeRate(minAmount);
+        BOOST_CHECK(opposite == CFeeRate(-1));
     }
 
     BOOST_AUTO_TEST_CASE(ToString_Test)

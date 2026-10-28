@@ -25,6 +25,34 @@ Before every major release:
 * Update [`BLOCK_CHAIN_SIZE`](/src/qt/intro.cpp) to the current size plus some overhead.
 * Update `src/chainparams.cpp` chainTxData with statistics about the transaction count and rate.
 
+### Core 4.8.1 pre-tag qualification
+
+For the RIP-25 4.8.1 release, the tag instruction is step 5 below.
+Complete this sequence before signing or publishing. Keep the evidence
+tied to one full final source SHA. Any source change creates a new
+candidate and restarts these gates.
+
+1. Freeze the final source SHA after all code and documentation edits.
+   Run `python3 contrib/devtools/test-rip25-release-contract.py` and the
+   mandatory `make check` on that final SHA; record green results.
+2. Run Build Raven and RIP-25 v4.8 Final Gate on the same final SHA.
+   Both workflows must be green, and their reported checkout SHAs must
+   match the source SHA from step 1.
+3. Download and review artifacts from all five Build Raven targets:
+   windows, osx, linux, arm32v7, and aarch64. Check each package against
+   its SHA256 checksum and review its provenance, including the recorded
+   source SHA. Record the five target results and artifact names before
+   proceeding.
+4. Present the recorded qualification and operator readiness evidence to
+   the owner. Obtain a separate, explicit owner approval to create the
+   4.8.1 tag. The rollout go/no-go decision and permission to publish are
+   separate decisions. Native Windows and macOS GUI exercise is assigned
+   to post-publication community testing; disclose that limitation in the
+   release notes and do not describe the native GUIs as verified.
+5. Create the 4.8.1 tag on the exact qualified final SHA. Verify the tag
+   resolves to that SHA before signing or publishing release material.
+   Publication requires its own owner decision.
+
 ### First time / New builders
 
 
@@ -40,7 +68,7 @@ Generate list of authors:
 
     git log --format='%aN' "$*" | sort -ui | sed -e 's/^/- /'
 
-Tag version (or release candidate) in git
+For releases other than 4.8.1, tag the version (or release candidate) in git:
 
     git tag -s v(new version, e.g. 0.8.0)
 

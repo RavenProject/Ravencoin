@@ -95,19 +95,23 @@ public:
     CDistributeSnapshotRequestDB& operator=(const CDistributeSnapshotRequestDB&) = delete;
 
     // Schedule a asset snapshot
-    bool AddDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot);
+    bool AddDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot,
+                               const CRewardWalletBinding& binding);
     bool OverrideDistributeSnapshot(const uint256& hash, const CRewardSnapshot& p_rewardSnapshot);
 
     //  Find a snapshot request using its ID
     bool RetrieveDistributeSnapshotRequest(const uint256& hash, CRewardSnapshot& p_rewardSnapshot);
+    bool ContainsDistributeSnapshotRequest(const uint256& hash);
 
     // Remove a snapshot request
     bool RemoveDistributeSnapshotRequest(const uint256& hash);
 
     bool AddDistributeTransaction(const uint256& hash, const int& nBatchNumber, const uint256& txid);
     bool GetDistributeTransaction(const uint256& hash, const int& nBatchNumber, uint256& txid);
+    bool ContainsDistributeTransaction(const uint256& hash, const int& nBatchNumber);
 
-    void LoadAllDistributeSnapshot(std::map<uint256, CRewardSnapshot>& mapRewardSnapshots);
+    void LoadAllDistributeSnapshot(std::map<uint256, CRewardSnapshot>& mapRewardSnapshots,
+                                   std::map<uint256, CRewardWalletBinding>& mapWalletBindings);
 
 
 };

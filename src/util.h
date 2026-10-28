@@ -17,6 +17,7 @@
 
 #include "compat.h"
 #include "fs.h"
+#include "support/allocators/secure.h"
 #include "sync.h"
 #include "tinyformat.h"
 #include "utiltime.h"
@@ -247,6 +248,15 @@ public:
      */
     bool IsArgSet(const std::string &strArg) const;
 
+    /** Return true if an argument exists and its value is not empty. */
+    bool IsArgSetAndNonEmpty(const std::string& strArg) const;
+
+    /**
+     * Move one argument value into locked, cleansing memory and remove all
+     * application-owned ordinary-string copies of that argument.
+     */
+    bool TakeArgSecure(const std::string& strArg, SecureString& valueOut);
+
     /**
      * Return string argument or default value
      *
@@ -297,6 +307,9 @@ public:
     void ForceSetArg(const std::string &strArg, const std::string &strValue);
 
     void ForceSetArg(const std::string &strArg, const int64_t &nValue);
+
+    /** Remove every application-owned value for an argument. */
+    void ClearArg(const std::string& strArg);
 };
 
 extern ArgsManager gArgs;

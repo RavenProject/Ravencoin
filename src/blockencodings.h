@@ -6,9 +6,13 @@
 #ifndef RAVEN_BLOCK_ENCODINGS_H
 #define RAVEN_BLOCK_ENCODINGS_H
 
+#include "consensus/consensus.h"
 #include "primitives/block.h"
 
 #include <memory>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 class CTxMemPool;
 class CDatabasedAssetData;
@@ -32,7 +36,7 @@ class BlockTransactionsRequest {
 public:
     // A BlockTransactionsRequest message
     uint256 blockhash;
-    std::vector<uint16_t> indexes;
+    std::vector<uint32_t> indexes;
 
     ADD_SERIALIZE_METHODS;
 
@@ -41,30 +45,38 @@ public:
         READWRITE(blockhash);
         uint64_t indexes_size = (uint64_t)indexes.size();
         READWRITE(COMPACTSIZE(indexes_size));
+        if (indexes_size > MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("BlockTransactionsRequest count exceeds structural limit");
+        }
         if (ser_action.ForRead()) {
-            size_t i = 0;
-            while (indexes.size() < indexes_size) {
-                indexes.resize(std::min((uint64_t)(1000 + indexes.size()), indexes_size));
-                for (; i < indexes.size(); i++) {
-                    uint64_t index = 0;
-                    READWRITE(COMPACTSIZE(index));
-                    if (index > std::numeric_limits<uint16_t>::max())
-                        throw std::ios_base::failure("index overflowed 16 bits");
-                    indexes[i] = index;
+            std::vector<uint32_t> parsed;
+            parsed.reserve(static_cast<size_t>(indexes_size));
+            uint64_t next_index = 0;
+            for (uint64_t i = 0; i < indexes_size; ++i) {
+                uint64_t differential_index = 0;
+                READWRITE(COMPACTSIZE(differential_index));
+                if (differential_index >= MAX_BLOCK_TRANSACTION_COUNT ||
+                        next_index >= MAX_BLOCK_TRANSACTION_COUNT ||
+                        differential_index >= MAX_BLOCK_TRANSACTION_COUNT - next_index) {
+                    throw std::ios_base::failure("BlockTransactionsRequest index exceeds structural limit");
                 }
+                const uint64_t absolute_index = next_index + differential_index;
+                parsed.push_back(static_cast<uint32_t>(absolute_index));
+                next_index = absolute_index + 1;
             }
-
-            uint16_t offset = 0;
-            for (size_t j = 0; j < indexes.size(); j++) {
-                if (uint64_t(indexes[j]) + uint64_t(offset) > std::numeric_limits<uint16_t>::max())
-                    throw std::ios_base::failure("indexes overflowed 16 bits");
-                indexes[j] = indexes[j] + offset;
-                offset = indexes[j] + 1;
-            }
+            indexes.swap(parsed);
         } else {
+            uint64_t next_index = 0;
             for (size_t i = 0; i < indexes.size(); i++) {
-                uint64_t index = indexes[i] - (i == 0 ? 0 : (indexes[i - 1] + 1));
-                READWRITE(COMPACTSIZE(index));
+                const uint64_t absolute_index = indexes[i];
+                if (absolute_index >= MAX_BLOCK_TRANSACTION_COUNT ||
+                        absolute_index < next_index) {
+                    throw std::ios_base::failure(
+                        "BlockTransactionsRequest indexes are not strictly increasing within structural limit");
+                }
+                uint64_t differential_index = absolute_index - next_index;
+                READWRITE(COMPACTSIZE(differential_index));
+                next_index = absolute_index + 1;
             }
         }
     }
@@ -80,6 +92,23 @@ public:
     explicit BlockTransactions(const BlockTransactionsRequest& req) :
         blockhash(req.blockhash), txn(req.indexes.size()) {}
 
+    template <typename Stream>
+    inline void UnserializeTransactions(Stream& s, uint64_t txnSize) {
+        if (txnSize > MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("BlockTransactions count exceeds structural limit");
+        }
+
+        std::vector<CTransactionRef> parsed;
+        parsed.reserve(static_cast<size_t>(txnSize));
+        for (uint64_t i = 0; i < txnSize; ++i) {
+            CTransactionRef transaction;
+            TransactionCompressor compressor(transaction);
+            ::Unserialize(s, compressor);
+            parsed.push_back(std::move(transaction));
+        }
+        txn.swap(parsed);
+    }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -87,16 +116,24 @@ public:
         READWRITE(blockhash);
         uint64_t txn_size = (uint64_t)txn.size();
         READWRITE(COMPACTSIZE(txn_size));
+        if (txn_size > MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("BlockTransactions count exceeds structural limit");
+        }
         if (ser_action.ForRead()) {
-            size_t i = 0;
-            while (txn.size() < txn_size) {
-                txn.resize(std::min((uint64_t)(1000 + txn.size()), txn_size));
-                for (; i < txn.size(); i++)
-                    READWRITE(REF(TransactionCompressor(txn[i])));
+            std::vector<CTransactionRef> parsed;
+            parsed.reserve(static_cast<size_t>(txn_size));
+            for (uint64_t i = 0; i < txn_size; ++i) {
+                CTransactionRef transaction;
+                TransactionCompressor compressor(transaction);
+                READWRITE(REF(compressor));
+                parsed.push_back(std::move(transaction));
             }
+            txn.swap(parsed);
         } else {
-            for (size_t i = 0; i < txn.size(); i++)
-                READWRITE(REF(TransactionCompressor(txn[i])));
+            for (CTransactionRef& transaction : txn) {
+                TransactionCompressor compressor(transaction);
+                READWRITE(REF(compressor));
+            }
         }
     }
 };
@@ -105,7 +142,7 @@ public:
 struct PrefilledTransaction {
     // Used as an offset since last prefilled tx in CBlockHeaderAndShortTxIDs,
     // as a proper transaction-in-block-index in PartiallyDownloadedBlock
-    uint16_t index;
+    uint32_t index{0};
     CTransactionRef tx;
 
     ADD_SERIALIZE_METHODS;
@@ -114,9 +151,10 @@ struct PrefilledTransaction {
     inline void SerializationOp(Stream& s, Operation ser_action) {
         uint64_t idx = index;
         READWRITE(COMPACTSIZE(idx));
-        if (idx > std::numeric_limits<uint16_t>::max())
-            throw std::ios_base::failure("index overflowed 16-bits");
-        index = idx;
+        if (idx >= MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("PrefilledTransaction index exceeds structural limit");
+        }
+        index = static_cast<uint32_t>(idx);
         READWRITE(REF(TransactionCompressor(tx)));
     }
 };
@@ -165,17 +203,20 @@ public:
 
         uint64_t shorttxids_size = (uint64_t)shorttxids.size();
         READWRITE(COMPACTSIZE(shorttxids_size));
+        if (shorttxids_size > MAX_BLOCK_TRANSACTION_COUNT) {
+            throw std::ios_base::failure("Compact block short ID count exceeds structural limit");
+        }
+
+        std::vector<uint64_t> parsedShortTxIDs;
         if (ser_action.ForRead()) {
-            size_t i = 0;
-            while (shorttxids.size() < shorttxids_size) {
-                shorttxids.resize(std::min((uint64_t)(1000 + shorttxids.size()), shorttxids_size));
-                for (; i < shorttxids.size(); i++) {
-                    uint32_t lsb = 0; uint16_t msb = 0;
-                    READWRITE(lsb);
-                    READWRITE(msb);
-                    shorttxids[i] = (uint64_t(msb) << 32) | uint64_t(lsb);
-                    static_assert(SHORTTXIDS_LENGTH == 6, "shorttxids serialization assumes 6-byte shorttxids");
-                }
+            parsedShortTxIDs.resize(static_cast<size_t>(shorttxids_size));
+            for (uint64_t i = 0; i < shorttxids_size; ++i) {
+                uint32_t lsb = 0;
+                uint16_t msb = 0;
+                READWRITE(lsb);
+                READWRITE(msb);
+                parsedShortTxIDs[static_cast<size_t>(i)] =
+                    (uint64_t(msb) << 32) | uint64_t(lsb);
             }
         } else {
             for (size_t i = 0; i < shorttxids.size(); i++) {
@@ -185,11 +226,30 @@ public:
                 READWRITE(msb);
             }
         }
+        static_assert(SHORTTXIDS_LENGTH == 6, "shorttxids serialization assumes 6-byte shorttxids");
 
-        READWRITE(prefilledtxn);
+        uint64_t prefilledSize = prefilledtxn.size();
+        READWRITE(COMPACTSIZE(prefilledSize));
+        if (prefilledSize > MAX_BLOCK_TRANSACTION_COUNT - shorttxids_size) {
+            throw std::ios_base::failure("Compact block transaction count exceeds structural limit");
+        }
 
-        if (ser_action.ForRead())
+        if (ser_action.ForRead()) {
+            std::vector<PrefilledTransaction> parsedPrefilled;
+            parsedPrefilled.reserve(static_cast<size_t>(prefilledSize));
+            for (uint64_t i = 0; i < prefilledSize; ++i) {
+                PrefilledTransaction transaction;
+                READWRITE(transaction);
+                parsedPrefilled.push_back(std::move(transaction));
+            }
+            shorttxids.swap(parsedShortTxIDs);
+            prefilledtxn.swap(parsedPrefilled);
             FillShortTxIDSelector();
+        } else {
+            for (PrefilledTransaction& transaction : prefilledtxn) {
+                READWRITE(transaction);
+            }
+        }
     }
 };
 
@@ -205,6 +265,7 @@ public:
     // extra_txn is a list of extra transactions to look at, in <witness hash, reference> form
     ReadStatus InitData(const CBlockHeaderAndShortTxIDs& cmpctblock, const std::vector<std::pair<uint256, CTransactionRef>>& extra_txn);
     bool IsTxAvailable(size_t index) const;
+    bool TryGetMissingTxCount(size_t& missing) const;
     ReadStatus FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing);
 };
 

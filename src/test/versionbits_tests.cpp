@@ -387,5 +387,60 @@ BOOST_FIXTURE_TEST_SUITE(versionbits_tests, TestingSetup)
         //BOOST_CHECK_EQUAL(ComputeBlockVersion(lastBlock, mainnetParams) & VERSIONBITS_TOP_MASK, VERSIONBITS_TOP_BITS);
     }
 
+    BOOST_AUTO_TEST_CASE(pq_hybrid_mainnet_activation_test)
+    {
+        const auto chainParams = CreateChainParams(CBaseChainParams::MAIN);
+        const Consensus::Params &params = chainParams->GetConsensus();
+        const Consensus::DeploymentPos deployment = Consensus::DEPLOYMENT_PQ_HYBRID;
+        const auto &rules = params.vDeployments[deployment];
+
+        BOOST_CHECK_EQUAL(rules.bit, 12);
+        BOOST_CHECK_EQUAL(rules.nStartTime, 1814400000LL); // July 1, 2027 00:00 UTC
+        BOOST_CHECK_EQUAL(rules.nTimeout, 1861920000LL); // January 1, 2029 00:00 UTC
+        BOOST_CHECK_EQUAL(rules.nOverrideRuleChangeActivationThreshold, 1714);
+        BOOST_CHECK_EQUAL(rules.nOverrideMinerConfirmationWindow, 2016);
+
+        const int32_t oldVersion = VERSIONBITS_TOP_BITS;
+        const int32_t signalVersion = oldVersion | VersionBitsMask(params, deployment);
+
+        // A calendar start time alone cannot start the deployment. The median
+        // time of the preceding period must reach the start time.
+        VersionBitsTester chain;
+        VersionBitsCache cache;
+        chain.Mine(2016, rules.nStartTime - 1, oldVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(chain.Tip(), params, deployment, cache), THRESHOLD_DEFINED);
+        chain.Mine(4032, rules.nStartTime, oldVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(chain.Tip(), params, deployment, cache), THRESHOLD_STARTED);
+
+        // The 1714th signal locks in the rule at the next period boundary.
+        chain.Mine(4334, rules.nStartTime + 60, oldVersion);
+        chain.Mine(6047, rules.nStartTime + 60, signalVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(chain.Tip(), params, deployment, cache), THRESHOLD_STARTED);
+        chain.Mine(6048, rules.nStartTime + 60, signalVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(chain.Tip(), params, deployment, cache), THRESHOLD_LOCKED_IN);
+        chain.Mine(8064, rules.nStartTime + 120, oldVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(chain.Tip(), params, deployment, cache), THRESHOLD_ACTIVE);
+
+        VersionBitsTester belowThreshold;
+        VersionBitsCache belowThresholdCache;
+        belowThreshold.Mine(2016, rules.nStartTime - 1, oldVersion);
+        belowThreshold.Mine(4032, rules.nStartTime, oldVersion);
+        belowThreshold.Mine(4335, rules.nStartTime + 60, oldVersion);
+        belowThreshold.Mine(6048, rules.nStartTime + 60, signalVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(belowThreshold.Tip(), params, deployment, belowThresholdCache), THRESHOLD_STARTED);
+
+        // An unsuccessful signaling period reaches FAILED only after its MTP
+        // reaches the timeout at a period boundary.
+        VersionBitsTester timeoutChain;
+        VersionBitsCache timeoutCache;
+        timeoutChain.Mine(2016, rules.nStartTime - 1, oldVersion);
+        timeoutChain.Mine(4032, rules.nStartTime, oldVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(timeoutChain.Tip(), params, deployment, timeoutCache), THRESHOLD_STARTED);
+        timeoutChain.Mine(6048, rules.nTimeout - 1, oldVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(timeoutChain.Tip(), params, deployment, timeoutCache), THRESHOLD_STARTED);
+        timeoutChain.Mine(8064, rules.nTimeout, oldVersion);
+        BOOST_CHECK_EQUAL(VersionBitsState(timeoutChain.Tip(), params, deployment, timeoutCache), THRESHOLD_FAILED);
+    }
+
 
 BOOST_AUTO_TEST_SUITE_END()

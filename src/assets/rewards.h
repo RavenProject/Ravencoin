@@ -6,10 +6,12 @@
 #define RAVENCOIN_REWARDS_H
 
 #include "amount.h"
+#include "pubkey.h"
 #include "tinyformat.h"
 #include "assettypes.h"
 
 #include <string>
+#include <cstddef>
 #include <set>
 #include <map>
 #include <unordered_map>
@@ -25,6 +27,12 @@ extern std::map<uint256, CRewardSnapshot> mapRewardSnapshots;
 //  Addresses are delimited by commas
 static const std::string ADDRESS_COMMA_DELIMITER = ",";
 const int MAX_PAYMENTS_PER_TRANSACTION = 1000;
+
+inline size_t CountRewardBatches(size_t recipientCount)
+{
+    return recipientCount / MAX_PAYMENTS_PER_TRANSACTION +
+           (recipientCount % MAX_PAYMENTS_PER_TRANSACTION != 0);
+}
 
 //  Individual payment record
 struct OwnerAndAmount
@@ -90,7 +98,8 @@ public:
         STUCK_TX = 6,
         NETWORK_ERROR = 7,
         FAILED_CREATE_TRANSACTION = 8,
-        FAILED_COMMIT_TRANSACTION = 9
+        FAILED_COMMIT_TRANSACTION = 9,
+        INVALIDATED_SNAPSHOT = 10
     };
 
     std::string strOwnershipAsset;
@@ -141,13 +150,46 @@ public:
     }
 };
 
+// Persist separately from CRewardSnapshot so legacy requests remain readable
+// but cannot be retried without an explicit wallet binding.
+class CRewardWalletBinding {
+public:
+    static const uint32_t CURRENT_VERSION = 1;
+
+    uint32_t nVersion{CURRENT_VERSION};
+    std::string walletName;
+    CKeyID walletKeyId;
+    uint256 genesisHash;
+    uint256 snapshotBlockHash;
+    uint256 snapshotContentHash;
+
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(nVersion);
+        READWRITE(walletName);
+        READWRITE(walletKeyId);
+        READWRITE(genesisHash);
+        READWRITE(snapshotBlockHash);
+        READWRITE(snapshotContentHash);
+    }
+};
+
+#ifdef ENABLE_WALLET
+extern std::map<uint256, CRewardWalletBinding> mapRewardWalletBindings;
+#endif
+
 enum {
     FAILED_GETTING_DISTRIBUTION_LIST = 1,
     FAILED_
 };
 
 bool GenerateDistributionList(const CRewardSnapshot& p_rewardSnapshot, std::vector<OwnerAndAmount>& vecDistributionList);
-bool AddDistributeRewardSnapshot(CRewardSnapshot& p_rewardSnapshot);
+#ifdef ENABLE_WALLET
+bool AddDistributeRewardSnapshot(CWallet* p_wallet, CRewardSnapshot& p_rewardSnapshot);
+#endif
 
 #ifdef ENABLE_WALLET
 void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewardSnapshot);
@@ -155,9 +197,10 @@ void DistributeRewardSnapshot(CWallet * p_wallet, const CRewardSnapshot& p_rewar
 bool BuildTransaction(
         CWallet * const p_walletPtr, const CRewardSnapshot& p_rewardSnapshot,
         const std::vector<OwnerAndAmount> & p_pendingPayments, const int& start,
+        const int& batchNumber,
         std::string& change_address, uint256& retTxid);
 
-void CheckRewardDistributions(CWallet * p_wallet);
+void CheckRewardDistributions();
 #endif //ENABLE_WALLET
 
 

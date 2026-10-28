@@ -17,7 +17,9 @@
 #include "checkpoints.h"
 #include "compat/sanity.h"
 #include "consensus/validation.h"
+#include "crypto/mldsa.h"
 #include "fs.h"
+#include "hash.h"
 #include "httpserver.h"
 #include "httprpc.h"
 #include "key.h"
@@ -447,6 +449,7 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-dbbatchsize", strprintf("Maximum database write batch size in bytes (default: %u)", nDefaultDbBatchSize));
     }
     strUsage += HelpMessageOpt("-dbcache=<n>", strprintf(_("Set database cache size in megabytes (%d to %d, default: %d)"), nMinDbCache, nMaxDbCache, nDefaultDbCache));
+    strUsage += HelpMessageOpt("-maxkawpowcontextmb=<n>", strprintf(_("Maximum memory in MiB for each KAWPOW verification context (default: %d). This local limit does not make a header invalid."), DEFAULT_MAX_KAWPOW_CONTEXT_MIB));
     strUsage += HelpMessageOpt("-disablemessaging", strprintf(_("Turn off the databasing the messages sent with assets (default: %u)"), false));
     if (showDebug)
         strUsage += HelpMessageOpt("-feefilter", strprintf("Tell other nodes to filter invs to us by our mempool min fee (default: %u)", DEFAULT_FEEFILTER));
@@ -821,6 +824,11 @@ bool InitSanityCheck(void)
         return false;
     }
 
+    if (!mldsa::SelfTest()) {
+        InitError("ML-DSA-44 consensus backend sanity check failure. Aborting.");
+        return false;
+    }
+
     return true;
 }
 
@@ -1087,6 +1095,8 @@ bool AppInitParameterInteraction()
     }
     fCheckBlockIndex = gArgs.GetBoolArg("-checkblockindex", chainparams.DefaultConsistencyChecks());
     fCheckpointsEnabled = gArgs.GetBoolArg("-checkpoints", DEFAULT_CHECKPOINTS_ENABLED);
+    if (!SetKAWPOWContextBudgetMiB(gArgs.GetArg("-maxkawpowcontextmb", DEFAULT_MAX_KAWPOW_CONTEXT_MIB)))
+        return InitError(strprintf("Invalid -maxkawpowcontextmb value: '%s'", gArgs.GetArg("-maxkawpowcontextmb", "")));
 
     hashAssumeValid = uint256S(gArgs.GetArg("-assumevalid", chainparams.GetConsensus().defaultAssumeValid.GetHex()));
     if (!hashAssumeValid.IsNull())
@@ -1526,6 +1536,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     LogPrintf("* Using %.1fMiB for in-memory UTXO set (plus up to %.1fMiB of unused mempool space)\n", nCoinCacheUsage * (1.0 / 1024 / 1024), nMempoolSizeMax * (1.0 / 1024 / 1024));
 
     bool fLoaded = false;
+    bool fRetryWithChainStateRebuild = false;
     while (!fLoaded && !fRequestShutdown) {
         bool fReset = fReindex;
         std::string strLoadError;
@@ -1572,7 +1583,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     delete pDistributeSnapshotDb;
 
                     // Basic assets
-                    passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset);
+                    passetsdb = new CAssetsDB(nBlockTreeDBCache, false, fReset || fReindexChainState);
                     passets = new CAssetsCache();
                     passetsCache = new CLRUCache<std::string, CDatabasedAssetData>(MAX_CACHE_ASSETS_SIZE);
 
@@ -1587,7 +1598,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     pmyrestricteddb = new CMyRestrictedDB(nBlockTreeDBCache, false, false);
 
                     // Restricted assets
-                    prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset);
+                    prestricteddb = new CRestrictedDB(nBlockTreeDBCache, false, fReset || fReindexChainState);
                     passetsVerifierCache = new CLRUCache<std::string, CNullAssetTxVerifierString>(
                             MAX_CACHE_ASSETS_SIZE);
                     passetsQualifierCache = new CLRUCache<std::string, int8_t>(MAX_CACHE_ASSETS_SIZE);
@@ -1598,6 +1609,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     pSnapshotRequestDb = new CSnapshotRequestDB(nBlockTreeDBCache, false, false);
                     pAssetSnapshotDb = new CAssetSnapshotDB(nBlockTreeDBCache, false, false);
                     pDistributeSnapshotDb = new CDistributeSnapshotRequestDB(nBlockTreeDBCache, false, false);
+#ifdef ENABLE_WALLET
+                    pDistributeSnapshotDb->LoadAllDistributeSnapshot(mapRewardSnapshots,
+                                                                      mapRewardWalletBindings);
+#endif
 
                     // Read for fAssetIndex to make sure that we only load asset address balances if it if true
                     pblocktree->ReadFlag("assetindex", fAssetIndex);
@@ -1607,9 +1622,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                         break;
                     }
 
-                    if (!passetsdb->ReadReissuedMempoolState())
-                        LogPrintf(
-                                "Database failed to load last Reissued Mempool State. Will have to start from empty state");
+                    // Pending reissue reservations are mempool state, not
+                    // chain state. Loading a separately persisted map here
+                    // can retain a lock for a transaction that is absent
+                    // from mempool.dat. Rebuild it as transactions are
+                    // accepted during the normal mempool load instead.
 
                     LogPrintf("Successfully loaded assets from database.\nCache of assets size: %d\n",
                               passetsCache->Size());
@@ -1642,6 +1659,13 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     strLoadError = _("Error loading block database");
                     break;
                 }
+#ifdef ENABLE_WALLET
+                if ((fReset || fReindexChainState || fReindex) &&
+                    !pmyrestricteddb->WriteRestrictedIndexState('N')) {
+                    strLoadError = _("Unable to reset restricted address history for reindex");
+                    break;
+                }
+#endif
 
                 // If the loaded chain has a wrong genesis, bail out immediately
                 // (we're likely using a testnet datadir, or the other way around).
@@ -1701,6 +1725,97 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                     break;
                 }
 
+                // A retained or crash-interrupted chainstate that contains an
+                // active RIP-25 block must prove that its signature context
+                // was enforced. Check before ReplayBlocks, which reconstructs
+                // the UTXO effects without rerunning script validation.
+                const uint256 chainstateBestBlock = pcoinsdbview->GetBestBlock();
+                const std::vector<uint256> chainstateHeadBlocks = pcoinsdbview->GetHeadBlocks();
+                uint256 chainstateCandidate = chainstateBestBlock;
+                if (chainstateCandidate.IsNull() && chainstateHeadBlocks.size() == 2) {
+                    chainstateCandidate = chainstateHeadBlocks[0];
+                }
+
+                bool fRIP25ActiveInChainstate = false;
+                bool fChainstateTipsResolved = true;
+                const bool fCompleteChainstate =
+                    !chainstateBestBlock.IsNull() && chainstateHeadBlocks.empty();
+                const bool fInterruptedChainstate =
+                    chainstateBestBlock.IsNull() && chainstateHeadBlocks.size() == 2 &&
+                    !chainstateHeadBlocks[0].IsNull();
+                const bool fEmptyChainstate =
+                    chainstateBestBlock.IsNull() && chainstateHeadBlocks.empty();
+
+                if (!fCompleteChainstate && !fInterruptedChainstate && !fEmptyChainstate) {
+                    fChainstateTipsResolved = false;
+                } else if (!fEmptyChainstate) {
+                    LOCK(cs_main);
+                    std::vector<uint256> chainstateTips{chainstateCandidate};
+                    if (fInterruptedChainstate && !chainstateHeadBlocks[1].IsNull()) {
+                        chainstateTips.push_back(chainstateHeadBlocks[1]);
+                    }
+                    for (const uint256& hashTip : chainstateTips) {
+                        const auto tip = mapBlockIndex.find(hashTip);
+                        if (tip == mapBlockIndex.end()) {
+                            fChainstateTipsResolved = false;
+                            break;
+                        }
+                        fRIP25ActiveInChainstate |= IsPQWitnessDiscountActive(
+                                tip->second->pprev, chainparams.GetConsensus());
+                    }
+                }
+
+                // Coins and asset records live in different databases. A
+                // completed coins batch alone does not prove that the asset
+                // database reached the same tip. ReplayBlocks cannot safely
+                // repair an interrupted asset transfer because its spent
+                // input may already have disappeared from the coins database.
+                const bool fAssetStateNeedsRebuild = !fEmptyChainstate &&
+                    (fInterruptedChainstate ||
+                     pcoinsdbview->HasAssetCommitPending() ||
+                     pcoinsdbview->GetAssetCommitValidatedTip() != chainstateBestBlock);
+                if (fAssetStateNeedsRebuild) {
+                    // Do not erase the only copy of a pruned chainstate or a
+                    // chainstate whose block data is not locally available.
+                    if (fHavePruned) {
+                        return InitError(_("Asset database state is not certified at the coins tip. This pruned chainstate cannot be rebuilt safely; retain the data directory and redownload the blockchain."));
+                    }
+                    {
+                        LOCK(cs_main);
+                        const auto tip = mapBlockIndex.find(chainstateCandidate);
+                        if (tip == mapBlockIndex.end()) {
+                            return InitError(_("Asset database state is not certified and the chainstate tip is unknown. Retain the data directory and rebuild the block index before retrying."));
+                        }
+                        for (const CBlockIndex* pindex = tip->second; pindex; pindex = pindex->pprev) {
+                            CBlock block;
+                            if (!(pindex->nStatus & BLOCK_HAVE_DATA) ||
+                                !ReadBlockFromDisk(block, pindex, chainparams.GetConsensus())) {
+                                return InitError(_("Asset database state is not certified and required block data is unavailable. Retain the data directory and redownload the blockchain."));
+                            }
+                        }
+                    }
+                    LogPrintf("Asset database state is interrupted or not certified at coins tip %s; rebuilding chainstate\n",
+                              chainstateCandidate.ToString());
+                    fRetryWithChainStateRebuild = true;
+                    strLoadError = _("Asset database requires a full chainstate rebuild");
+                    break;
+                }
+
+                if (!fChainstateTipsResolved ||
+                    RIP25ContextChainstateRequiresRebuild(
+                            fRIP25ActiveInChainstate,
+                            chainstateCandidate,
+                            chainstateBestBlock,
+                            chainstateHeadBlocks,
+                            pcoinsdbview->GetRIP25ContextValidatedTip(),
+                            pcoinsdbview->GetRIP25ContextPendingTip())) {
+                    LogPrintf("RIP-25 chainstate proof is missing, stale, or references an unknown tip %s, rebuilding chainstate\n",
+                              chainstateCandidate.IsNull() ? "(none)" : chainstateCandidate.ToString());
+                    fRetryWithChainStateRebuild = true;
+                    strLoadError = _("RIP-25 chainstate requires context-aware revalidation");
+                    break;
+                }
+
                 // ReplayBlocks is a no-op if we cleared the coinsviewdb with -reindex or -reindex-chainstate
                 if (!ReplayBlocks(chainparams, pcoinsdbview)) {
                     strLoadError = _("Unable to replay blocks. You will need to rebuild the database using -reindex-chainstate.");
@@ -1714,6 +1829,29 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
                 if (!is_coinsview_empty) {
                     // LoadChainTip sets chainActive based on pcoinsTip's best block
                     if (!LoadChainTip(chainparams)) {
+                        // Loading the block index drops entries whose proof of work no longer
+                        // verifies together with everything descending from them. When that
+                        // happens the coins database is left ahead of the block index and has
+                        // to be rebuilt rather than treated as corruption.
+                        bool fCoinsAheadOfIndex;
+                        bool fInvalidIndexedTip;
+                        {
+                            LOCK(cs_main);
+                            const auto tip = mapBlockIndex.find(pcoinsTip->GetBestBlock());
+                            fInvalidIndexedTip = tip != mapBlockIndex.end() &&
+                                (tip->second->nStatus & BLOCK_FAILED_MASK);
+                            fCoinsAheadOfIndex = tip == mapBlockIndex.end() || fInvalidIndexedTip;
+                        }
+                        if (fCoinsAheadOfIndex) {
+                            if (fInvalidIndexedTip) {
+                                return InitError(_("The coins database references an invalid block. Retain the data directory and rebuild the block index and chainstate from verified block data before restarting."));
+                            }
+                            if (fHavePruned) {
+                                return InitError(_("The coins database references an unknown block and this pruned chainstate cannot be rebuilt safely. Retain the data directory and redownload the blockchain."));
+                            }
+                            LogPrintf("Coins database is ahead of the block index, rebuilding chainstate\n");
+                            fRetryWithChainStateRebuild = true;
+                        }
                         strLoadError = _("Error initializing block database");
                         break;
                     }
@@ -1766,6 +1904,11 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         } while(false);
 
         if (!fLoaded && !fRequestShutdown) {
+            if (fRetryWithChainStateRebuild) {
+                fRetryWithChainStateRebuild = false;
+                fReindexChainState = true;
+                continue;
+            }
             // first suggest a reindex
             if (!fReset) {
                 bool fRet = uiInterface.ThreadSafeQuestion(
@@ -1796,6 +1939,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (fLoaded) {
         LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
     }
+    // The saved-header audit and block verification ran on this thread. Do
+    // not keep their KAWPOW context for the rest of the process lifetime.
+    ReleaseKAWPOWThreadContext();
 
     fs::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
     CAutoFile est_filein(fsbridge::fopen(est_path, "rb"), SER_DISK, CLIENT_VERSION);
@@ -1806,6 +1952,8 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 8: load wallet
 #ifdef ENABLE_WALLET
+    if (!BackfillMyRestrictedIndex(chainparams))
+        return InitError(_("Unable to rebuild restricted address history"));
     if (!OpenWallets())
         return false;
 #else
@@ -1828,6 +1976,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     if(chainparams.GetConsensus().nSegwitEnabled) {
     		nLocalServices = ServiceFlags(nLocalServices | NODE_WITNESS);
     }
+
+    // RIP-25: advertise binary capability independently of BIP9 activation.
+    nLocalServices = ServiceFlags(nLocalServices | NODE_PQ_HYBRID);
     // ********************************************************* Step 10: import blocks
 
     if (!CheckDiskSpace())
@@ -1948,15 +2099,62 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
 
     // ********************************************************* Step 12: Init Msg Channel list
-    if (!fReindex && fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
-        bool found;
-        if (!pmessagechanneldb->ReadFlag("init", found)) {
+    if (fLoaded && fMessaging && pmessagechanneldb && !gArgs.GetBoolArg("-disablewallet", false)) {
+        LOCK(cs_main);
+        for (CWalletRef wallet : vpwallets) {
+            std::string scope;
+            if (!GetMessageWalletScope(*wallet, scope)) {
+                LogPrintf("%s: Failed to establish message scope for wallet %s\n",
+                          __func__, wallet->GetName());
+                continue;
+            }
+            int scanStart = GetParams().GetAssetActivationHeight();
+            int previousHeight = -1;
+            uint256 previousHash;
+            if (pmessagechanneldb->ReadWalletMessageScanTip(scope, previousHeight, previousHash)) {
+                if (previousHeight < 0 || previousHeight > chainActive.Height() ||
+                    chainActive[previousHeight]->GetBlockHash() != previousHash) {
+                    if (!pmessagechanneldb->WriteFlag("init:" + scope, false) ||
+                        !ResetWalletDerivedMessageState(*wallet)) {
+                        LogPrintf("%s: Failed to reset orphaned message scan for wallet %s\n",
+                                  __func__, wallet->GetName());
+                        continue;
+                    }
+                    LogPrintf("%s: Rebuilding message channels after reorganization for wallet %s\n",
+                              __func__, wallet->GetName());
+                    previousHeight = -1;
+                }
+                if (previousHeight >= 0)
+                    scanStart = std::max(scanStart, previousHeight + 1);
+            }
+            if (previousHeight < 0 &&
+                (!pmessagedb || !pmessagedb->OrphanWalletMessages(scope))) {
+                LogPrintf("%s: Failed to orphan previous message history for wallet %s\n",
+                          __func__, wallet->GetName());
+                continue;
+            }
+            bool scanned = false;
+            if (scanStart > chainActive.Height() &&
+                pmessagechanneldb->ReadFlag("init:" + scope, scanned) && scanned)
+                continue;
+            if (!pmessagechanneldb->WriteFlag("init:" + scope, false)) {
+                LogPrintf("%s: Failed to mark message channel scan incomplete for wallet %s\n",
+                          __func__, wallet->GetName());
+                continue;
+            }
             uiInterface.InitMessage(_("Init Message Channels - Scanning Asset Transactions"));
             std::string strLoadError;
-            if (!ScanForMessageChannels(strLoadError)) {
-                LogPrintf("%s : Failed to scan for message channels, %s\n", __func__, strLoadError);
-            } else {
-                pmessagechanneldb->WriteFlag("init", true);
+            if (!ScanForMessageChannels(*wallet, scanStart, strLoadError)) {
+                LogPrintf("%s: Failed to scan message channels for wallet %s: %s\n",
+                          __func__, wallet->GetName(), strLoadError);
+            } else if (!pmessagechanneldb->Flush() ||
+                       !pmessagedb->Flush() ||
+                       !pmessagedb->Sync() ||
+                       !pmessagechanneldb->Sync() ||
+                       !pmessagechanneldb->CompleteWalletMessageScan(
+                           scope, chainActive.Height(), chainActive.Tip()->GetBlockHash())) {
+                LogPrintf("%s: Failed to persist message channel scan for wallet %s\n",
+                          __func__, wallet->GetName());
             }
         }
     }

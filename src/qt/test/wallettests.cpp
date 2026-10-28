@@ -13,8 +13,10 @@
 #include "test/test_raven.h"
 #include "validation.h"
 #include "wallet/wallet.h"
+#include "wallet/coincontrol.h"
 #include "qt/overviewpage.h"
 #include "qt/receivecoinsdialog.h"
+#include "qt/assetsdialog.h"
 #include "qt/recentrequeststablemodel.h"
 #include "qt/receiverequestdialog.h"
 
@@ -262,4 +264,31 @@ void TestGUI()
 void WalletTests::walletTests()
 {
     TestGUI();
+}
+
+void WalletTests::protectedAssetChangeField()
+{
+    TestingSetup test;
+    std::unique_ptr<const PlatformStyle> platformStyle(PlatformStyle::instantiate("other"));
+    AssetsDialog dialog(platformStyle.get());
+    QValidatedLineEdit* field = dialog.findChild<QValidatedLineEdit*>("lineEditProtectedAssetChange");
+    QLabel* label = dialog.findChild<QLabel*>("labelProtectedAssetChange");
+    QVERIFY2(field != nullptr, "The asset transfer dialog must expose protected asset change");
+    QVERIFY(label != nullptr);
+    QVERIFY(!field->isHidden());
+    QVERIFY(!field->isEnabled());
+
+    CCoinControl ctrl;
+    ctrl.assetDestChange = CKeyID();
+    ctrl.pqAssetChangeProgram = uint256S("01");
+    QVERIFY(dialog.applyProtectedAssetChange(ctrl));
+    QVERIFY(!IsValidDestination(ctrl.assetDestChange));
+    QVERIFY(!ctrl.pqAssetChangeProgram);
+
+    field->setText("not-a-protected-asset-destination");
+    QString error;
+    QVERIFY(!dialog.applyProtectedAssetChange(ctrl, &error));
+    QVERIFY(error.contains("canonical PQ-only"));
+    QVERIFY(!IsValidDestination(ctrl.assetDestChange));
+    QVERIFY(!ctrl.pqAssetChangeProgram);
 }

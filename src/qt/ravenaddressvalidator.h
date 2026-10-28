@@ -33,4 +33,20 @@ public:
     State validate(QString &input, int &pos) const;
 };
 
+class RavenAssetAddressEntryValidator : public QValidator
+{
+    Q_OBJECT
+public:
+    explicit RavenAssetAddressEntryValidator(QObject *parent);
+    State validate(QString &input, int &pos) const;
+};
+
+class RavenAssetAddressCheckValidator : public QValidator
+{
+    Q_OBJECT
+public:
+    explicit RavenAssetAddressCheckValidator(QObject *parent);
+    State validate(QString &input, int &pos) const;
+};
+
 #endif // RAVEN_QT_RAVENADDRESSVALIDATOR_H

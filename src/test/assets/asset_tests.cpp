@@ -3,6 +3,10 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <assets/assets.h>
+#include <sync.h>
+#include <assets/messages.h>
+#include <assets/myassetsdb.h>
+#include <assets/rewards.h>
 
 #include <test/test_raven.h>
 
@@ -16,6 +20,41 @@
 #include "LibBoolEE.h"
 
 BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
+
+    BOOST_AUTO_TEST_CASE(legacy_message_reader_rejects_malformed_rows)
+    {
+        CMessageDB messages(1 << 20, true, true);
+        CMessage message;
+        message.out = COutPoint(uint256S("01"), 1);
+        message.strName = "LEGACY~NEWS";
+        message.ipfsHash = std::string("\x01\x02", 2);
+        message.time = 100;
+        message.nExpiredTime = 200;
+        message.nBlockHeight = 300;
+        message.status = MessageStatus::UNREAD;
+        BOOST_REQUIRE(messages.WriteMessage(message));
+        std::set<CMessage> loadedMessages;
+        BOOST_REQUIRE(messages.LoadMessages(loadedMessages));
+        BOOST_CHECK_EQUAL(loadedMessages.size(), 1U);
+        BOOST_CHECK(loadedMessages.begin()->out == message.out);
+
+        const COutPoint badOut(uint256S("02"), 2);
+        BOOST_REQUIRE(messages.Write(std::make_pair('Z', badOut), std::string("bad")));
+        loadedMessages.clear();
+        BOOST_CHECK(!messages.LoadMessages(loadedMessages));
+
+        CMessageChannelDB channels(1 << 20, true, true);
+        BOOST_REQUIRE(channels.WriteMyMessageChannel("LEGACY~NEWS"));
+        std::set<std::string> loadedChannels;
+        BOOST_REQUIRE(channels.LoadMyMessageChannels(loadedChannels));
+        BOOST_CHECK_EQUAL(loadedChannels.size(), 1U);
+        BOOST_CHECK(loadedChannels.count("LEGACY~NEWS") == 1);
+
+        BOOST_REQUIRE(channels.Write(std::make_pair('C', std::string("BAD~NEWS")),
+                                     std::string("x")));
+        loadedChannels.clear();
+        BOOST_CHECK(!channels.LoadMyMessageChannels(loadedChannels));
+    }
 
     BOOST_AUTO_TEST_CASE(name_validation_tests)
     {
@@ -730,5 +769,20 @@ BOOST_FIXTURE_TEST_SUITE(asset_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(!txWithDoubleFee.CheckAddingTagBurnFee(1), "CheckAddingTagBurnFee: Test 3 Didn't fail with double burn fee");
     }
 
+
+    BOOST_AUTO_TEST_CASE(reward_batch_boundaries)
+    {
+        const std::pair<size_t, size_t> cases[] = {
+            {0, 0}, {1, 1}, {999, 1}, {1000, 1},
+            {1001, 2}, {1999, 2}, {2000, 2}, {2001, 3}
+        };
+        for (const auto& item : cases) {
+            const size_t batches = CountRewardBatches(item.first);
+            BOOST_CHECK_EQUAL(batches, item.second);
+            for (size_t batch = 0; batch < batches; ++batch) {
+                BOOST_CHECK(batch * MAX_PAYMENTS_PER_TRANSACTION < item.first);
+            }
+        }
+    }
 
 BOOST_AUTO_TEST_SUITE_END()

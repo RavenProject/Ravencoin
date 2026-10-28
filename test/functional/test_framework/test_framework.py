@@ -398,6 +398,18 @@ class RavenTestFramework:
             for node in self.nodes:
                 node.wait_for_rpc_connection()
 
+            # RPC readiness does not ensure that the cache nodes have connected
+            # to node 0. Retry a missing peer before mining any blocks.
+            cache_peer = "127.0.0.1:" + str(p2p_port(0))
+            for node in self.nodes[1:]:
+                deadline = time.monotonic() + 60
+                while not any(peer['addr'] == cache_peer and peer['version'] > 0
+                              for peer in node.getpeerinfo()):
+                    if time.monotonic() >= deadline:
+                        raise AssertionError("Cache node {} did not connect to {}".format(node.index, cache_peer))
+                    node.addnode(cache_peer, "onetry")
+                    time.sleep(0.5)
+
             # Create a 200-block-long chain; each of the 4 first nodes
             # gets 25 mature blocks and 25 immature.
             # Note: To preserve compatibility with older versions of
@@ -414,7 +426,20 @@ class RavenTestFramework:
                         self.nodes[peer].generate(1)
                         block_time += 1 * 60
                     # Must sync before next peer starts generating blocks
-                    sync_blocks(self.nodes)
+                    try:
+                        sync_blocks(self.nodes)
+                    except AssertionError as e:
+                        peer_states = []
+                        for node in self.nodes:
+                            try:
+                                peers = [{key: peer.get(key) for key in
+                                          ('addr', 'version', 'inbound', 'synced_headers', 'synced_blocks')}
+                                         for peer in node.getpeerinfo()]
+                            except Exception as peer_error:
+                                peers = "unavailable: {}".format(peer_error)
+                            peer_states.append("node {}: {}".format(node.index, peers))
+                        raise AssertionError("{}\nCache peer state:\n  {}".format(
+                            e, "\n  ".join(peer_states))) from e
 
             # Shut them down, and clean up cache directories:
             self.stop_nodes()

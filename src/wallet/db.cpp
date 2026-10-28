@@ -10,10 +10,15 @@
 #include "fs.h"
 #include "hash.h"
 #include "protocol.h"
+#include "random.h"
 #include "util.h"
 #include "utilstrencodings.h"
 
+#include <cerrno>
+#include <cctype>
 #include <stdint.h>
+#include <limits>
+#include <sstream>
 
 #ifndef WIN32
 #include <sys/stat.h>
@@ -22,6 +27,40 @@
 #include <boost/thread.hpp>
 
 namespace {
+using SalvageString =
+    std::basic_string<char, std::char_traits<char>, zero_after_free_allocator<char>>;
+using SalvageStream =
+    std::basic_stringstream<char, std::char_traits<char>, zero_after_free_allocator<char>>;
+
+void ClearSalvageString(SalvageString& value)
+{
+    // Short lines may live inside the string object rather than its allocator.
+    if (value.capacity() != 0) {
+        value.resize(value.capacity(), '\0');
+        memory_cleanse(&value[0], value.size());
+    }
+    SalvageString().swap(value);
+}
+
+CDBEnv::SalvagedBytes ParseSalvageHex(const SalvageString& encoded)
+{
+    CDBEnv::SalvagedBytes result;
+    const char* psz = encoded.c_str();
+    while (true) {
+        while (std::isspace(static_cast<unsigned char>(*psz)))
+            ++psz;
+        signed char digit = HexDigit(*psz++);
+        if (digit == -1)
+            break;
+        unsigned char byte = digit << 4;
+        digit = HexDigit(*psz++);
+        if (digit == -1)
+            break;
+        result.push_back(byte | digit);
+    }
+    return result;
+}
+
 //! Make sure database has a unique fileid within the environment. If it
 //! doesn't, throw an error. BDB caches do not work properly when more than one
 //! open database has the same fileid (values written to one database may show
@@ -51,6 +90,44 @@ void CheckUniqueFileid(const CDBEnv& env, const std::string& filename, Db& db)
                 HexStr(std::begin(item_fileid), std::end(item_fileid)),
                 item_filename ? item_filename : "(unknown database)"));
         }
+    }
+}
+
+void ClearSalvagedData(std::vector<CDBEnv::KeyValPair>& rows)
+{
+    for (CDBEnv::KeyValPair& row : rows) {
+        if (!row.first.empty())
+            memory_cleanse(row.first.data(), row.first.size());
+        if (!row.second.empty())
+            memory_cleanse(row.second.data(), row.second.size());
+        CDBEnv::SalvagedBytes().swap(row.first);
+        CDBEnv::SalvagedBytes().swap(row.second);
+    }
+    std::vector<CDBEnv::KeyValPair>().swap(rows);
+}
+
+void RemoveRecoveryDatabase(CDBEnv& env, const std::string& filename)
+{
+    DbTxn* txn = env.TxnBegin(DB_TXN_SYNC);
+    if (!txn) {
+        LogPrintf("CDB::Recover: Cannot begin cleanup transaction for %s\n", filename);
+        return;
+    }
+
+    const int removeResult = env.dbenv->dbremove(txn, filename.c_str(), nullptr, 0);
+    if (removeResult != 0) {
+        txn->abort();
+        LogPrintf("CDB::Recover: Cannot remove temporary database %s: %d\n",
+                  filename, removeResult);
+        return;
+    }
+
+    // Berkeley DB invalidates the transaction handle after commit, including
+    // on an error return, so never inspect or abort txn beyond this call.
+    const int commitResult = txn->commit(DB_TXN_SYNC);
+    if (commitResult != 0) {
+        LogPrintf("CDB::Recover: Cannot commit cleanup of %s: %d\n",
+                  filename, commitResult);
     }
 }
 } // namespace
@@ -138,6 +215,7 @@ bool CDBEnv::Open(const fs::path& pathIn)
                          S_IRUSR | S_IWUSR);
     if (ret != 0) {
         dbenv->close(0);
+        Reset();
         return error("CDBEnv::Open: Error %d opening database environment: %s\n", ret, DbEnv::strerror(ret));
     }
 
@@ -171,8 +249,11 @@ void CDBEnv::MakeMock()
                              DB_THREAD |
                              DB_PRIVATE,
                          S_IRUSR | S_IWUSR);
-    if (ret > 0)
+    if (ret != 0) {
+        dbenv->close(0);
+        Reset();
         throw std::runtime_error(strprintf("CDBEnv::MakeMock: Error %d opening database environment.", ret));
+    }
 
     fDbEnvInit = true;
     fMockDb = true;
@@ -197,68 +278,248 @@ CDBEnv::VerifyResult CDBEnv::Verify(const std::string& strFile, recoverFunc_type
 
 bool CDB::Recover(const std::string& filename, void *callbackDataIn, bool (*recoverKVcallback)(void* callbackData, CDataStream ssKey, CDataStream ssValue), std::string& newFilename)
 {
-    // Recovery procedure:
-    // move wallet file to walletfilename.timestamp.bak
-    // Call Salvage with fAggressive=true to
-    // get as much data as possible.
-    // Rewrite salvaged data to fresh wallet file
-    // Set -rescan so any missing transactions will be
-    // found.
-    int64_t now = GetTime();
-    newFilename = strprintf("%s.%d.bak", filename, now);
+    return RecoverInternal(filename, callbackDataIn, recoverKVcallback,
+                           newFilename, nullptr);
+}
 
-    int result = bitdb.dbenv->dbrename(nullptr, filename.c_str(), nullptr,
-                                       newFilename.c_str(), DB_AUTO_COMMIT);
-    if (result == 0)
-        LogPrintf("Renamed %s to %s\n", filename, newFilename);
-    else
-    {
-        LogPrintf("Failed to rename %s to %s\n", filename, newFilename);
+bool CDB::RecoverInternal(const std::string& filename,
+                          void* callbackDataIn,
+                          bool (*recoverKVcallback)(void*, CDataStream, CDataStream),
+                          std::string& newFilename,
+                          const RecoveryTestOptions* testOptions)
+{
+    LOCK(bitdb.cs_db);
+    newFilename.clear();
+
+    const auto inUse = bitdb.mapFileUseCount.find(filename);
+    if (inUse != bitdb.mapFileUseCount.end() && inUse->second != 0) {
+        LogPrintf("CDB::Recover: Refusing to recover open database %s\n", filename);
         return false;
     }
+    if (!bitdb.CloseDb(filename)) {
+        LogPrintf("CDB::Recover: Cannot close source database %s\n", filename);
+        return false;
+    }
+    bitdb.mapFileUseCount.erase(filename);
 
     std::vector<CDBEnv::KeyValPair> salvagedData;
-    bool fSuccess = bitdb.Salvage(newFilename, true, salvagedData);
-    if (salvagedData.empty())
-    {
-        LogPrintf("Salvage(aggressive) found no records in %s.\n", newFilename);
-        return false;
-    }
-    LogPrintf("Salvage(aggressive) found %u records\n", salvagedData.size());
+    std::unique_ptr<Db> recoveryDb;
+    DbTxn* activeTxn = nullptr;
+    bool recoveryDbOpen = false;
+    bool recoveryDbCreated = false;
+    std::string recoveryFilename;
 
-    std::unique_ptr<Db> pdbCopy(new Db(bitdb.dbenv, 0));
-    int ret = pdbCopy->open(nullptr,               // Txn pointer
-                            filename.c_str(),   // Filename
-                            "main",             // Logical db name
-                            DB_BTREE,           // Database type
-                            DB_CREATE,          // Flags
-                            0);
-    if (ret > 0) {
-        LogPrintf("Cannot create database file %s\n", filename);
-        pdbCopy->close(0);
-        return false;
-    }
-
-    DbTxn* ptxn = bitdb.TxnBegin();
-    for (CDBEnv::KeyValPair& row : salvagedData)
-    {
-        if (recoverKVcallback)
-        {
-            CDataStream ssKey(row.first, SER_DISK, CLIENT_VERSION);
-            CDataStream ssValue(row.second, SER_DISK, CLIENT_VERSION);
-            if (!(*recoverKVcallback)(callbackDataIn, ssKey, ssValue))
-                continue;
+    auto closeRecoveryDb = [&]() {
+        if (!recoveryDb || !recoveryDbOpen)
+            return 0;
+        const int result = recoveryDb->close(0);
+        recoveryDbOpen = false;
+        return result;
+    };
+    auto failRecovery = [&]() {
+        if (activeTxn) {
+            activeTxn->abort();
+            activeTxn = nullptr;
         }
-        Dbt datKey(&row.first[0], row.first.size());
-        Dbt datValue(&row.second[0], row.second.size());
-        int ret2 = pdbCopy->put(ptxn, &datKey, &datValue, DB_NOOVERWRITE);
-        if (ret2 > 0)
-            fSuccess = false;
-    }
-    ptxn->commit(0);
-    pdbCopy->close(0);
+        closeRecoveryDb();
+        recoveryDb.reset();
+        if (recoveryDbCreated)
+            RemoveRecoveryDatabase(bitdb, recoveryFilename);
+        ClearSalvagedData(salvagedData);
+        newFilename.clear();
+        return false;
+    };
 
-    return fSuccess;
+    try {
+        CDBEnv::SalvageResult salvageResult =
+            bitdb.Salvage(filename, true, salvagedData);
+        if (testOptions && testOptions->force_partial_salvage &&
+            salvageResult == CDBEnv::SalvageResult::COMPLETE) {
+            salvageResult = CDBEnv::SalvageResult::PARTIAL;
+        }
+        if (salvageResult == CDBEnv::SalvageResult::FAILED || salvagedData.empty()) {
+            LogPrintf("CDB::Recover: Aggressive salvage found no usable records in %s\n",
+                      filename);
+            return failRecovery();
+        }
+
+        LogPrintf("CDB::Recover: Aggressive salvage found %u records%s\n",
+                  salvagedData.size(),
+                  salvageResult == CDBEnv::SalvageResult::PARTIAL ? " (partial)" : "");
+
+        const std::string recoveryToken = GetRandHash().GetHex();
+        recoveryFilename = testOptions && !testOptions->temp_filename.empty()
+            ? testOptions->temp_filename
+            : strprintf("%s.recover.%s", filename, recoveryToken);
+        const std::string backupFilename =
+            testOptions && !testOptions->backup_filename.empty()
+                ? testOptions->backup_filename
+                : strprintf("%s.%d.%s.bak", filename, GetTime(),
+                            recoveryToken.substr(0, 16));
+
+        recoveryDb.reset(new Db(bitdb.dbenv, 0));
+        const int openResult = recoveryDb->open(nullptr,
+                                                recoveryFilename.c_str(),
+                                                "main",
+                                                DB_BTREE,
+                                                DB_CREATE | DB_EXCL | DB_AUTO_COMMIT,
+                                                0);
+        if (openResult != 0) {
+            LogPrintf("CDB::Recover: Cannot create exclusive temporary database %s: %d\n",
+                      recoveryFilename, openResult);
+            recoveryDb->close(0);
+            recoveryDb.reset();
+            return failRecovery();
+        }
+        recoveryDbOpen = true;
+        recoveryDbCreated = true;
+
+        activeTxn = testOptions &&
+                            testOptions->fault == RecoveryFault::NULL_WRITE_TRANSACTION
+            ? nullptr
+            : bitdb.TxnBegin(DB_TXN_SYNC);
+        if (!activeTxn) {
+            LogPrintf("CDB::Recover: Cannot begin temporary database transaction\n");
+            return failRecovery();
+        }
+
+        auto putRow = [&](CDBEnv::KeyValPair& row, u_int32_t flags) {
+            if (row.first.size() > std::numeric_limits<u_int32_t>::max() ||
+                row.second.size() > std::numeric_limits<u_int32_t>::max()) {
+                return EINVAL;
+            }
+            Dbt datKey(row.first.empty() ? nullptr : row.first.data(),
+                       static_cast<u_int32_t>(row.first.size()));
+            Dbt datValue(row.second.empty() ? nullptr : row.second.data(),
+                         static_cast<u_int32_t>(row.second.size()));
+            return recoveryDb->put(activeTxn, &datKey, &datValue, flags);
+        };
+
+        if (testOptions && testOptions->duplicate_first_row) {
+            const int injectedPut = putRow(salvagedData.front(), 0);
+            if (injectedPut != 0) {
+                LogPrintf("CDB::Recover: Cannot prepare duplicate-row regression: %d\n",
+                          injectedPut);
+                return failRecovery();
+            }
+        }
+
+        size_t rowsWritten = 0;
+        for (CDBEnv::KeyValPair& row : salvagedData) {
+            if (row.first.size() > std::numeric_limits<u_int32_t>::max() ||
+                row.second.size() > std::numeric_limits<u_int32_t>::max()) {
+                LogPrintf("CDB::Recover: Salvaged row exceeds Berkeley DB size limits\n");
+                return failRecovery();
+            }
+
+            if (recoverKVcallback) {
+                CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+                CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+                if (!row.first.empty()) {
+                    ssKey.write(reinterpret_cast<const char*>(row.first.data()),
+                                row.first.size());
+                }
+                if (!row.second.empty()) {
+                    ssValue.write(reinterpret_cast<const char*>(row.second.data()),
+                                  row.second.size());
+                }
+                if (!(*recoverKVcallback)(callbackDataIn, ssKey, ssValue))
+                    continue;
+            }
+
+            const int putResult = putRow(row, DB_NOOVERWRITE);
+            if (putResult != 0) {
+                LogPrintf("CDB::Recover: Cannot write salvaged row: %d\n", putResult);
+                return failRecovery();
+            }
+            ++rowsWritten;
+        }
+
+        if (rowsWritten == 0) {
+            LogPrintf("CDB::Recover: Recovery filter retained no records\n");
+            return failRecovery();
+        }
+
+        int writeCommitResult;
+        if (testOptions && testOptions->fault == RecoveryFault::WRITE_COMMIT) {
+            activeTxn->abort();
+            activeTxn = nullptr;
+            writeCommitResult = DB_RUNRECOVERY;
+        } else {
+            writeCommitResult = activeTxn->commit(DB_TXN_SYNC);
+            activeTxn = nullptr;
+        }
+        if (writeCommitResult != 0) {
+            LogPrintf("CDB::Recover: Cannot commit temporary database: %d\n",
+                      writeCommitResult);
+            return failRecovery();
+        }
+
+        const int actualCloseResult = closeRecoveryDb();
+        const int closeResult = testOptions &&
+                                        testOptions->fault == RecoveryFault::TEMP_CLOSE
+            ? DB_RUNRECOVERY
+            : actualCloseResult;
+        recoveryDb.reset();
+        if (closeResult != 0) {
+            LogPrintf("CDB::Recover: Cannot close temporary database: %d\n", closeResult);
+            return failRecovery();
+        }
+
+        // No plaintext row is needed after the checked temporary database is
+        // closed. Release it before the namespace transaction is attempted.
+        ClearSalvagedData(salvagedData);
+
+        activeTxn = bitdb.TxnBegin(DB_TXN_SYNC);
+        if (!activeTxn) {
+            LogPrintf("CDB::Recover: Cannot begin installation transaction\n");
+            return failRecovery();
+        }
+
+        const int backupRenameResult = bitdb.dbenv->dbrename(
+            activeTxn, filename.c_str(), nullptr, backupFilename.c_str(), 0);
+        const int installRenameResult = backupRenameResult != 0
+            ? backupRenameResult
+            : (testOptions && testOptions->fault == RecoveryFault::SECOND_RENAME
+                   ? DB_RUNRECOVERY
+                   : bitdb.dbenv->dbrename(activeTxn, recoveryFilename.c_str(),
+                                           nullptr, filename.c_str(), 0));
+        if (backupRenameResult != 0 || installRenameResult != 0) {
+            activeTxn->abort();
+            activeTxn = nullptr;
+            LogPrintf("CDB::Recover: Atomic installation rename failed: %d/%d\n",
+                      backupRenameResult, installRenameResult);
+            return failRecovery();
+        }
+
+        int installCommitResult;
+        if (testOptions && testOptions->fault == RecoveryFault::INSTALL_COMMIT) {
+            activeTxn->abort();
+            activeTxn = nullptr;
+            installCommitResult = DB_RUNRECOVERY;
+        } else {
+            installCommitResult = activeTxn->commit(DB_TXN_SYNC);
+            activeTxn = nullptr;
+        }
+        if (installCommitResult != 0) {
+            LogPrintf("CDB::Recover: Cannot commit atomic installation: %d\n",
+                      installCommitResult);
+            return failRecovery();
+        }
+
+        recoveryDbCreated = false;
+        newFilename = backupFilename;
+        LogPrintf("CDB::Recover: Installed recovered %s and retained original as %s\n",
+                  filename, newFilename);
+        return true;
+    } catch (const std::exception& e) {
+        LogPrintf("CDB::Recover: Exception while recovering %s: %s\n",
+                  filename, e.what());
+        return failRecovery();
+    } catch (...) {
+        LogPrintf("CDB::Recover: Unknown exception while recovering %s\n", filename);
+        return failRecovery();
+    }
 }
 
 bool CDB::VerifyEnvironment(const std::string& walletFile, const fs::path& dataDir, std::string& errorStr)
@@ -324,7 +585,7 @@ static const char *HEADER_END = "HEADER=END";
 /* End of key/value data */
 static const char *DATA_END = "DATA=END";
 
-bool CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<CDBEnv::KeyValPair>& vResult)
+CDBEnv::SalvageResult CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<CDBEnv::KeyValPair>& vResult)
 {
     LOCK(cs_db);
     assert(mapFileUseCount.count(strFile) == 0);
@@ -333,7 +594,9 @@ bool CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<C
     if (fAggressive)
         flags |= DB_AGGRESSIVE;
 
-    std::stringstream strDump;
+    // Berkeley DB renders the entire wallet as hex. The locked secure allocator
+    // cannot hold large wallets, so use a cleanse-on-free allocator here.
+    SalvageStream strDump;
 
     Db db(dbenv, 0);
     int result = db.verify(strFile.c_str(), nullptr, &strDump, flags);
@@ -341,12 +604,12 @@ bool CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<C
         LogPrintf("CDBEnv::Salvage: Database salvage found errors, all data may not be recoverable.\n");
         if (!fAggressive) {
             LogPrintf("CDBEnv::Salvage: Rerun with aggressive mode to ignore errors and continue.\n");
-            return false;
+            return SalvageResult::FAILED;
         }
     }
     if (result != 0 && result != DB_VERIFY_BAD) {
         LogPrintf("CDBEnv::Salvage: Database salvage failed with result %d.\n", result);
-        return false;
+        return SalvageResult::FAILED;
     }
 
     // Format of bdb dump is ascii lines:
@@ -357,11 +620,22 @@ bool CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<C
     //  ... repeated
     // DATA=END
 
-    std::string strLine;
+    SalvageString strLine;
+    SalvageString keyHex, valueHex;
+    struct LineCleaner {
+        SalvageString& header;
+        SalvageString& key;
+        SalvageString& value;
+        ~LineCleaner()
+        {
+            ClearSalvageString(header);
+            ClearSalvageString(key);
+            ClearSalvageString(value);
+        }
+    } cleanLines{strLine, keyHex, valueHex};
     while (!strDump.eof() && strLine != HEADER_END)
         getline(strDump, strLine); // Skip past header
 
-    std::string keyHex, valueHex;
     while (!strDump.eof() && keyHex != DATA_END) {
         getline(strDump, keyHex);
         if (keyHex != DATA_END) {
@@ -372,16 +646,17 @@ bool CDBEnv::Salvage(const std::string& strFile, bool fAggressive, std::vector<C
                 LogPrintf("CDBEnv::Salvage: WARNING: Number of keys in data does not match number of values.\n");
                 break;
             }
-            vResult.push_back(make_pair(ParseHex(keyHex), ParseHex(valueHex)));
+            vResult.emplace_back(ParseSalvageHex(keyHex), ParseSalvageHex(valueHex));
         }
     }
 
     if (keyHex != DATA_END) {
         LogPrintf("CDBEnv::Salvage: WARNING: Unexpected end of file while reading salvage output.\n");
-        return false;
+        return SalvageResult::FAILED;
     }
 
-    return (result == 0);
+    return result == DB_VERIFY_BAD ? SalvageResult::PARTIAL
+                                   : SalvageResult::COMPLETE;
 }
 
 
@@ -491,18 +766,23 @@ void CDB::Close()
     }
 }
 
-void CDBEnv::CloseDb(const std::string& strFile)
+bool CDBEnv::CloseDb(const std::string& strFile)
 {
-    {
-        LOCK(cs_db);
-        if (mapDb[strFile] != nullptr) {
-            // Close the database handle
-            Db* pdb = mapDb[strFile];
-            pdb->close(0);
-            delete pdb;
-            mapDb[strFile] = nullptr;
-        }
+    LOCK(cs_db);
+    if (mapDb[strFile] == nullptr)
+        return true;
+
+    // Berkeley DB invalidates a handle after close even on an error return.
+    Db* pdb = mapDb[strFile];
+    const int result = pdb->close(0);
+    delete pdb;
+    mapDb[strFile] = nullptr;
+    if (result != 0) {
+        LogPrintf("CDBEnv::CloseDb: Error %d closing database %s\n",
+                  result, strFile);
+        return false;
     }
+    return true;
 }
 
 bool CDB::Rewrite(CWalletDBWrapper& dbw, const char* pszSkip)
@@ -524,6 +804,52 @@ bool CDB::Rewrite(CWalletDBWrapper& dbw, const char* pszSkip)
                 bool fSuccess = true;
                 LogPrintf("CDB::Rewrite: Rewriting %s...\n", strFile);
                 std::string strFileRes = strFile + ".rewrite";
+                const fs::path pathRewrite = GetDataDir() / strFileRes;
+                try {
+                    const fs::file_status rewriteStatus = fs::symlink_status(pathRewrite);
+                    if (fs::exists(rewriteStatus)) {
+                        // The source still exists at this point, so a regular
+                        // temporary database can only be stale. Never follow
+                        // or remove an unexpected symlink/directory.
+                        if (fs::is_symlink(rewriteStatus) ||
+                            !fs::is_regular_file(rewriteStatus)) {
+                            LogPrintf("CDB::Rewrite: Refusing stale non-regular path %s\n",
+                                      pathRewrite.string());
+                            return false;
+                        }
+
+                        // Keep stale-file cleanup inside Berkeley DB as well.
+                        // Renaming or unlinking an environment database behind
+                        // Berkeley DB's back can invalidate its recovery state.
+                        if (env->mapFileUseCount.count(strFileRes) &&
+                            env->mapFileUseCount[strFileRes] != 0) {
+                            LogPrintf("CDB::Rewrite: Stale database file is still in use %s\n",
+                                      strFileRes);
+                            return false;
+                        }
+                        env->CloseDb(strFileRes);
+                        env->mapFileUseCount.erase(strFileRes);
+                        DbTxn* cleanupTxn = env->TxnBegin();
+                        if (!cleanupTxn) {
+                            return false;
+                        }
+                        if (env->dbenv->dbremove(cleanupTxn, strFileRes.c_str(), nullptr, 0) != 0) {
+                            cleanupTxn->abort();
+                            LogPrintf("CDB::Rewrite: Can't remove stale database file %s\n",
+                                      strFileRes);
+                            return false;
+                        }
+                        if (cleanupTxn->commit(DB_TXN_SYNC) != 0) {
+                            LogPrintf("CDB::Rewrite: Can't commit removal of stale database file %s\n",
+                                      strFileRes);
+                            return false;
+                        }
+                    }
+                } catch (const fs::filesystem_error& e) {
+                    LogPrintf("CDB::Rewrite: Can't clear stale database file %s: %s\n",
+                              pathRewrite.string(), e.what());
+                    return false;
+                }
                 { // surround usage of db with extra {}
                     CDB db(dbw, "r");
                     Db* pdbCopy = new Db(env->dbenv, 0);
@@ -534,39 +860,61 @@ bool CDB::Rewrite(CWalletDBWrapper& dbw, const char* pszSkip)
                                             DB_BTREE,           // Database type
                                             DB_CREATE,          // Flags
                                             0);
-                    if (ret > 0) {
+                    if (ret != 0) {
                         LogPrintf("CDB::Rewrite: Can't create database file %s\n", strFileRes);
                         fSuccess = false;
                     }
 
-                    Dbc* pcursor = db.GetCursor();
-                    if (pcursor)
-                        while (fSuccess) {
-                            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-                            CDataStream ssValue(SER_DISK, CLIENT_VERSION);
-                            int ret1 = db.ReadAtCursor(pcursor, ssKey, ssValue);
-                            if (ret1 == DB_NOTFOUND) {
-                                pcursor->close();
-                                break;
-                            } else if (ret1 != 0) {
-                                pcursor->close();
-                                fSuccess = false;
-                                break;
-                            }
-                            if (pszSkip &&
-                                strncmp(ssKey.data(), pszSkip, std::min(ssKey.size(), strlen(pszSkip))) == 0)
-                                continue;
-                            if (strncmp(ssKey.data(), "\x07version", 8) == 0) {
-                                // Update version:
-                                ssValue.clear();
-                                ssValue << CLIENT_VERSION;
-                            }
-                            Dbt datKey(ssKey.data(), ssKey.size());
-                            Dbt datValue(ssValue.data(), ssValue.size());
-                            int ret2 = pdbCopy->put(nullptr, &datKey, &datValue, DB_NOOVERWRITE);
-                            if (ret2 > 0)
-                                fSuccess = false;
+                    if (fSuccess) {
+                        u_int32_t pageSize = 0;
+                        u_int32_t clearLength = 0;
+                        DbMpoolFile* mpf = pdbCopy->get_mpf();
+                        const int pageResult = pdbCopy->get_pagesize(&pageSize);
+                        const int clearResult = mpf ? mpf->get_clear_len(&clearLength) : EINVAL;
+                        // Berkeley DB treats an unset clear length as a full page.
+                        if (pageResult != 0 || clearResult != 0 || pageSize == 0 ||
+                            (clearLength != std::numeric_limits<u_int32_t>::max() &&
+                             clearLength != pageSize)) {
+                            LogPrintf("CDB::Rewrite: Refusing rewrite without full-page clearing "
+                                      "(page result %d, clear result %d, page size %u, clear length %u)\n",
+                                      pageResult, clearResult, pageSize, clearLength);
+                            fSuccess = false;
                         }
+                    }
+
+                    Dbc* pcursor = fSuccess ? db.GetCursor() : nullptr;
+                    bool fReachedEnd = false;
+                    if (!pcursor)
+                        fSuccess = false;
+                    while (fSuccess) {
+                        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+                        CDataStream ssValue(SER_DISK, CLIENT_VERSION);
+                        int ret1 = db.ReadAtCursor(pcursor, ssKey, ssValue);
+                        if (ret1 == DB_NOTFOUND) {
+                            fReachedEnd = true;
+                            break;
+                        } else if (ret1 != 0) {
+                            fSuccess = false;
+                            break;
+                        }
+                        if (pszSkip &&
+                            strncmp(ssKey.data(), pszSkip, std::min(ssKey.size(), strlen(pszSkip))) == 0)
+                            continue;
+                        if (strncmp(ssKey.data(), "\x07version", 8) == 0) {
+                            // Update version:
+                            ssValue.clear();
+                            ssValue << CLIENT_VERSION;
+                        }
+                        Dbt datKey(ssKey.data(), ssKey.size());
+                        Dbt datValue(ssValue.data(), ssValue.size());
+                        int ret2 = pdbCopy->put(nullptr, &datKey, &datValue, DB_NOOVERWRITE);
+                        if (ret2 != 0)
+                            fSuccess = false;
+                    }
+                    if (pcursor && pcursor->close() != 0)
+                        fSuccess = false;
+                    if (!fReachedEnd)
+                        fSuccess = false;
                     if (fSuccess) {
                         db.Close();
                         env->CloseDb(strFile);
@@ -578,12 +926,28 @@ bool CDB::Rewrite(CWalletDBWrapper& dbw, const char* pszSkip)
                     delete pdbCopy;
                 }
                 if (fSuccess) {
-                    Db dbA(env->dbenv, 0);
-                    if (dbA.remove(strFile.c_str(), nullptr, 0))
+                    // Keep the namespace update inside one durable Berkeley
+                    // DB transaction. A crash leaves either the complete
+                    // source or the complete rewritten database at the
+                    // configured path after Berkeley DB recovery; there is no
+                    // non-transactional remove/rename gap.
+                    DbTxn* ptxn = env->TxnBegin();
+                    if (!ptxn) {
                         fSuccess = false;
-                    Db dbB(env->dbenv, 0);
-                    if (dbB.rename(strFileRes.c_str(), nullptr, strFile.c_str(), 0))
-                        fSuccess = false;
+                    } else {
+                        const int removeResult =
+                            env->dbenv->dbremove(ptxn, strFile.c_str(), nullptr, 0);
+                        const int renameResult = removeResult == 0
+                            ? env->dbenv->dbrename(ptxn, strFileRes.c_str(), nullptr,
+                                                  strFile.c_str(), 0)
+                            : removeResult;
+                        if (removeResult != 0 || renameResult != 0) {
+                            ptxn->abort();
+                            fSuccess = false;
+                        } else if (ptxn->commit(DB_TXN_SYNC) != 0) {
+                            fSuccess = false;
+                        }
+                    }
                 }
                 if (!fSuccess)
                     LogPrintf("CDB::Rewrite: Failed to rewrite database file %s\n", strFileRes);

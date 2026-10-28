@@ -521,7 +521,7 @@ qt_raven_qt_LDADD += $(LIBRAVEN_ZMQ) $(ZMQ_LIBS)
 endif
 qt_raven_qt_LDADD += $(LIBRAVEN_CLI) $(LIBRAVEN_COMMON) $(LIBRAVEN_UTIL) $(LIBRAVEN_CONSENSUS) $(LIBRAVEN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBLEVELDB_SSE42) $(LIBMEMENV) \
   $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
-  $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+  $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(LIBOQS_LIBS)
 qt_raven_qt_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 qt_raven_qt_LIBTOOLFLAGS = --tag CXX
 
@@ -535,7 +535,7 @@ $(srcdir)/qt/ravenstrings.cpp: $(libraven_server_a_SOURCES) $(libraven_wallet_a_
 	$(AM_V_GEN) cd $(srcdir); XGETTEXT=$(XGETTEXT) PACKAGE_NAME="$(PACKAGE_NAME)" COPYRIGHT_HOLDERS="$(COPYRIGHT_HOLDERS)" COPYRIGHT_HOLDERS_SUBSTITUTION="$(COPYRIGHT_HOLDERS_SUBSTITUTION)" $(PYTHON) ../share/qt/extract_strings_qt.py $^
 
 translate: $(srcdir)/qt/ravenstrings.cpp $(QT_FORMS_UI) $(QT_FORMS_UI) $(RAVEN_QT_BASE_CPP) qt/raven.cpp $(RAVEN_QT_WINDOWS_CPP) $(RAVEN_QT_WALLET_CPP) $(RAVEN_QT_H) $(RAVEN_MM)
-	@test -n $(LUPDATE) || echo "lupdate is required for updating translations"
+	@test -n $(LUPDATE) || echo "lupdate is required for updating qt translations"
 	$(AM_V_GEN) QT_SELECT=$(QT_SELECT) $(LUPDATE) $^ -locations relative -no-obsolete -ts $(srcdir)/qt/locale/raven_en.ts
 
 $(QT_QRC_LOCALE_CPP): $(QT_QRC_LOCALE) $(QT_QM)

@@ -1,0 +1,14 @@
+diff --git a/src/init.cpp b/src/init.cpp
+index b3d5ea5..1ec012e 100644
+--- a/src/init.cpp
++++ b/src/init.cpp
+@@ -1847,6 +1847,9 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
+     if(chainparams.GetConsensus().nSegwitEnabled) {
+     		nLocalServices = ServiceFlags(nLocalServices | NODE_WITNESS);
+     }
++
++    // RIP-25: advertise binary capability independently of BIP9 activation.
++    nLocalServices = ServiceFlags(nLocalServices | NODE_PQ_HYBRID);
+     // ********************************************************* Step 10: import blocks
+ 
+     if (!CheckDiskSpace())

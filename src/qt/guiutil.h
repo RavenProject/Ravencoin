@@ -55,6 +55,10 @@ namespace GUIUtil
 
     // Set up widgets for address and amounts
     void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
+    void setupAssetAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
+    bool pqAssetDestinationRequired();
+    bool isValidAssetDestination(const QString& address);
+    QString classicalAssetAddress(const QString& address);
     void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
     // Parse "raven:" URI into recipient object, return true on successful parsing

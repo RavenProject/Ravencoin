@@ -17,6 +17,7 @@
 #include "chain.h"
 #include "consensus/validation.h"
 #include "core_io.h"
+#include "hash.h"
 #include "httpserver.h"
 #include "validation.h"
 #include "net.h"
@@ -114,6 +115,89 @@ UniValue UnitValueFromAmount(const CAmount& amount, const std::string asset_name
 }
 
 #ifdef ENABLE_WALLET
+static std::string AssetSourceAddressForOutput(const COutput& output,
+                                               int pqAssetActivationHeight)
+{
+    const CScript& script = output.tx->tx->vout[output.i].scriptPubKey;
+    const CBlockIndex* originBlock = nullptr;
+    const int depth = output.tx->GetDepthInMainChain(originBlock);
+    const int originHeight = depth > 0 && originBlock ? originBlock->nHeight : -1;
+    return EncodeContextualAssetDestination(script, originHeight,
+                                            pqAssetActivationHeight);
+}
+
+static std::string NewAssetIssueDestination(CWallet* pwallet)
+{
+    const int activationHeight = GetPQAssetActivationHeightForPrev(
+        chainActive.Tip(), GetParams().GetConsensus());
+    if (activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight) {
+        CPQPubKey pqPubKey;
+        if (!pwallet->GenerateNewPQKey(pqPubKey))
+            throw JSONRPCError(RPC_WALLET_ERROR,
+                               "Error: Failed to derive and persist ML-DSA-44 keypair");
+        const WitnessV2PQDestination pqDestination(pqPubKey.GetWitnessProgram());
+        const CKeyID assetID(Hash160(pqDestination.witnessProgram.begin(),
+                                     pqDestination.witnessProgram.end()));
+        if (!pwallet->StoreOwnedPQAssetDestination(assetID,
+                                                   pqDestination.witnessProgram))
+            throw JSONRPCError(RPC_WALLET_ERROR,
+                               "Error: Failed to persist PQ-only asset destination");
+        pwallet->SetAddressBook(assetID, "", "pqasset");
+        pwallet->SetAddressBook(pqDestination, "", "receive");
+        return EncodePQAssetDestination(assetID,
+                                        pqDestination.witnessProgram);
+    }
+
+    if (!pwallet->IsLocked())
+        pwallet->TopUpKeyPool();
+    CPubKey newKey;
+    if (!pwallet->GetKeyFromPool(newKey))
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT,
+                           "Error: Keypool ran out, please call keypoolrefill first");
+    const CKeyID keyID = newKey.GetID();
+    pwallet->SetAddressBook(keyID, "", "receive");
+    return EncodeDestination(keyID);
+}
+
+static void ResolveAdministrativeAssetReturn(CWallet* pwallet, const std::string& authorityName,
+                                             std::string& changeAddress, CReserveKey& reservekey,
+                                             CCoinControl& coinControl, bool useNativeChange)
+{
+    const int activationHeight = GetPQAssetActivationHeightForPrev(
+        chainActive.Tip(), GetParams().GetConsensus());
+    const bool pqAssetsActive = activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight;
+    if (pqAssetsActive) {
+        if (changeAddress.empty()) {
+            std::pair<int, std::string> error;
+            if (!GetWalletProtectedAssetReturnDescriptor(
+                    pwallet, authorityName, changeAddress, error))
+                throw JSONRPCError(error.first, error.second);
+        }
+        CKeyID classicalKey;
+        uint256 program;
+        if (!DecodePQOnlyAssetDestination(changeAddress, classicalKey, program))
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                "Active PQ authority return requires a canonical PQ-only asset destination");
+        return;
+    }
+
+    if (!changeAddress.empty()) {
+        const CTxDestination destination = DecodeDestination(changeAddress);
+        if (!IsValidDestination(destination))
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                std::string("Invalid Raven change address: ") + changeAddress);
+        if (useNativeChange)
+            coinControl.destChange = destination;
+        return;
+    }
+
+    CKeyID keyID;
+    std::string failReason;
+    if (!pwallet->CreateNewChangeAddress(reservekey, keyID, failReason))
+        throw JSONRPCError(RPC_WALLET_ERROR, failReason);
+    changeAddress = EncodeDestination(keyID);
+}
+
 UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
 {
     CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
@@ -159,12 +243,6 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     std::string change_address = "";
     if (request.params.size() > 2) {
         change_address = request.params[2].get_str();
-        if (!change_address.empty()) {
-           CTxDestination change_dest = DecodeDestination(change_address);
-           if (!IsValidDestination(change_dest)) {
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
-           }
-        }
     }
 
     // Get the optional asset data
@@ -181,18 +259,8 @@ UniValue UpdateAddressTag(const JSONRPCRequest &request, const int8_t &flag)
     CWalletTx transaction;
     CAmount nRequiredFee;
     CCoinControl ctrl;
-
-    ctrl.destChange = DecodeDestination(change_address);
-
-    // If the optional change address wasn't given create a new change address for this wallet
-    if (change_address == "") {
-        CKeyID keyID;
-        std::string strFailReason;
-        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
-            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
-
-        change_address = EncodeDestination(keyID);
-    }
+    ResolveAdministrativeAssetReturn(pwallet, tag_name, change_address,
+                                     reservekey, ctrl, true);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -259,12 +327,6 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     std::string change_address = "";
     if (request.params.size() > 2) {
         change_address = request.params[2].get_str();
-        if (!change_address.empty()) {
-           CTxDestination change_dest = DecodeDestination(change_address);
-           if (!IsValidDestination(change_dest)) {
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
-           }
-        }
     }
 
     // Get the optional asset data
@@ -281,23 +343,16 @@ UniValue UpdateAddressRestriction(const JSONRPCRequest &request, const int8_t &f
     CWalletTx transaction;
     CAmount nRequiredFee;
     CCoinControl ctrl;
-
-    // If the optional change address wasn't given create a new change address for this wallet
-    if (change_address == "") {
-        CKeyID keyID;
-        std::string strFailReason;
-        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
-            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
-
-        change_address = EncodeDestination(keyID);
-    }
+    const std::string authorityName = restricted_name.substr(1) + OWNER_TAG;
+    ResolveAdministrativeAssetReturn(pwallet, authorityName, change_address,
+                                     reservekey, ctrl, false);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     // Always transfer 1 of the restricted tokens to the change address
     // Use the ROOT owner token to make this change occur. if $TOKEN -> Use TOKEN!
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN, asset_data), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(authorityName, 1 * COIN, asset_data), change_address));
 
     // Add the asset data with the flag to remove or add the tag 1 = Freeze, 0 = Unfreeze
     std::vector< std::pair<CNullAssetTxData, std::string> > vecAssetData;
@@ -356,12 +411,6 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     std::string change_address = "";
     if (request.params.size() > 1) {
         change_address = request.params[1].get_str();
-        if (!change_address.empty()) {
-           CTxDestination change_dest = DecodeDestination(change_address);
-           if (!IsValidDestination(change_dest)) {
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven change address: ") + change_address);
-           }
-        }
     }
 
     // Get the optional asset data
@@ -378,23 +427,16 @@ UniValue UpdateGlobalRestrictedAsset(const JSONRPCRequest &request, const int8_t
     CWalletTx transaction;
     CAmount nRequiredFee;
     CCoinControl ctrl;
-
-    // If the optional change address wasn't given create a new change address for this wallet
-    if (change_address == "") {
-        CKeyID keyID;
-        std::string strFailReason;
-        if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason))
-            throw JSONRPCError(RPC_WALLET_ERROR, strFailReason);
-
-        change_address = EncodeDestination(keyID);
-    }
+    const std::string authorityName = restricted_name.substr(1) + OWNER_TAG;
+    ResolveAdministrativeAssetReturn(pwallet, authorityName, change_address,
+                                     reservekey, ctrl, false);
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
 
     // Always transfer 1 of the restricted tokens to the change address
     // Use the ROOT owner token to make this change occur. if $TOKEN -> Use TOKEN!
-    vTransfers.emplace_back(std::make_pair(CAssetTransfer(restricted_name.substr(1, restricted_name.size()) + OWNER_TAG, 1 * COIN, asset_data), change_address));
+    vTransfers.emplace_back(std::make_pair(CAssetTransfer(authorityName, 1 * COIN, asset_data), change_address));
 
     // Add the global asset data, 1 = Freeze all transfers, 0 = Allow transfers
     std::vector<CNullAssetTxData> vecGlobalAssetData;
@@ -493,27 +535,14 @@ UniValue issue(const JSONRPCRequest& request)
 
     if (!address.empty()) {
         CTxDestination destination = DecodeDestination(address);
-        if (!IsValidDestination(destination)) {
+        CKeyID classicalKey;
+        uint256 pqProgram;
+        if (!IsValidDestination(destination) &&
+            !DecodePQAssetDestination(address, classicalKey, pqProgram)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
         }
     } else {
-        // Create a new address
-        std::string strAccount;
-
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
-
-        address = EncodeDestination(keyID);
+        address = NewAssetIssueDestination(pwallet);
     }
 
     std::string change_address = "";
@@ -655,27 +684,14 @@ UniValue issueunique(const JSONRPCRequest& request)
 
     if (!address.empty()) {
         CTxDestination destination = DecodeDestination(address);
-        if (!IsValidDestination(destination)) {
+        CKeyID classicalKey;
+        uint256 pqProgram;
+        if (!IsValidDestination(destination) &&
+            !DecodePQAssetDestination(address, classicalKey, pqProgram)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
         }
     } else {
-        // Create a new address
-        std::string strAccount;
-
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
-
-        address = EncodeDestination(keyID);
+        address = NewAssetIssueDestination(pwallet);
     }
 
     std::string changeAddress = "";
@@ -977,19 +993,19 @@ UniValue listmyassets(const JSONRPCRequest &request)
     std::map<std::string, CAmount> balances;
     std::map<std::string, std::vector<COutput> > outputs;
     if (filter == "*") {
-        if (!GetAllMyAssetBalances(outputs, balances, confs))
+        if (!GetAllMyAssetBalances(pwallet, outputs, balances, confs))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
     else if (filter.back() == '*') {
         std::vector<std::string> assetNames;
         filter.pop_back();
-        if (!GetAllMyAssetBalances(outputs, balances, confs, filter))
+        if (!GetAllMyAssetBalances(pwallet, outputs, balances, confs, filter))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
     else {
         if (!IsAssetNameValid(filter))
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid asset name.");
-        if (!GetAllMyAssetBalances(outputs, balances, confs, filter))
+        if (!GetAllMyAssetBalances(pwallet, outputs, balances, confs, filter))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "Couldn't get asset balances. For all assets");
     }
 
@@ -1190,7 +1206,10 @@ UniValue transfer(const JSONRPCRequest& request)
 
     std::string to_address = request.params[2].get_str();
     CTxDestination to_dest = DecodeDestination(to_address);
-    if (!IsValidDestination(to_dest)) {
+    CKeyID classicalKey;
+    uint256 pqProgram;
+    if (!IsValidDestination(to_dest) &&
+        !DecodePQAssetDestination(to_address, classicalKey, pqProgram)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
@@ -1233,8 +1252,23 @@ UniValue transfer(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + rvn_change_address);
 
     CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
-    if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+    uint256 assetChangeProgram;
+    bool hasPQAssetChange = false;
+    if (!asset_change_address.empty()) {
+        const int activationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
+        const bool pqAssetsActive = activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight;
+        if (pqAssetsActive) {
+            CKeyID classicalKey;
+            if (!DecodePQOnlyAssetDestination(asset_change_address, classicalKey, assetChangeProgram))
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                    "Active PQ asset change requires a canonical PQ-only asset destination");
+            asset_change_dest = classicalKey;
+            hasPQAssetChange = true;
+        } else if (!IsValidDestination(asset_change_dest)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+        }
+    }
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -1249,6 +1283,8 @@ UniValue transfer(const JSONRPCRequest& request)
     CCoinControl ctrl;
     ctrl.destChange = rvn_change_dest;
     ctrl.assetDestChange = asset_change_dest;
+    if (hasPQAssetChange)
+        ctrl.pqAssetChangeProgram = assetChangeProgram;
 
     // Create the Transaction
     if (!CreateTransferAssetTransaction(pwallet, ctrl, vTransfers, "", error, transaction, reservekey, nRequiredFee))
@@ -1278,13 +1314,13 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
             "\nArguments:\n"
             "1. \"asset_name\"               (string, required) name of asset\n"
-            "2. \"from_addresses\"           (array, required) list of from addresses to send from\n"
+            "2. \"from_addresses\"           (array, required) legacy addresses for historical outputs or asset descriptors for protected outputs\n"
             "3. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
             "4. \"to_address\"               (string, required) address to send the asset to\n"
             "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
             "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
             "7. \"rvn_change_address\"       (string, optional, default = \"\") the transactions RVN change will be sent to this address\n"
-            "8. \"asset_change_address\"     (string, optional, default = \"\") the transactions Asset change will be sent to this address\n"
+            "8. \"asset_change_address\"     (string, optional, default = \"\") asset change destination; a canonical PQ-only descriptor is required after PQ asset activation\n"
 
             "\nResult:\n"
             "txid"
@@ -1309,6 +1345,11 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
     std::string asset_name = request.params[0].get_str();
 
+    const int pqAssetActivationHeight = GetPQAssetActivationHeightForPrev(
+        chainActive.Tip(), GetParams().GetConsensus());
+    const bool pqAssetsActive = pqAssetActivationHeight >= 0 &&
+        chainActive.Height() + 1 >= pqAssetActivationHeight;
+
     const UniValue& from_addresses = request.params[1];
 
     if (!from_addresses.isArray() || from_addresses.size() < 1) {
@@ -1321,7 +1362,10 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     for (int i = 0; i < (int) from_addresses.size(); i++) {
         std::string address = from_addresses[i].get_str();
         CTxDestination dest = DecodeDestination(address);
-        if (!IsValidDestination(dest))
+        CKeyID classicalKey;
+        uint256 program;
+        if (!IsValidDestination(dest) &&
+            !(pqAssetsActive && DecodePQAssetDestination(address, classicalKey, program)))
             throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("From addresses must be valid addresses. Invalid address: ") + address);
 
         setFromDestinations.insert(address);
@@ -1364,8 +1408,21 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + rvn_change_address);
 
     CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
-    if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+    uint256 assetChangeProgram;
+    bool hasPQAssetChange = false;
+    if (!asset_change_address.empty()) {
+        if (pqAssetsActive) {
+            CKeyID classicalKey;
+            if (!DecodePQOnlyAssetDestination(asset_change_address, classicalKey, assetChangeProgram))
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                    "Active PQ asset change requires a canonical PQ-only asset destination");
+            asset_change_dest = classicalKey;
+            hasPQAssetChange = true;
+        } else if (!IsValidDestination(asset_change_dest)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+        }
+    }
 
     std::pair<int, std::string> error;
     std::vector< std::pair<CAssetTransfer, std::string> >vTransfers;
@@ -1382,6 +1439,8 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
     // Set the change addresses
     ctrl.destChange = rvn_change_dest;
     ctrl.assetDestChange = asset_change_dest;
+    if (hasPQAssetChange)
+        ctrl.pqAssetChangeProgram = assetChangeProgram;
 
     if (!mapAssetCoins.count(asset_name)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
@@ -1389,11 +1448,8 @@ UniValue transferfromaddresses(const JSONRPCRequest& request)
 
     // Add all the asset outpoints that match the set of given from addresses
     for (const auto& out : mapAssetCoins.at(asset_name)) {
-        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
-        CTxDestination dest;
-        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, dest);
-
-        if (setFromDestinations.count(EncodeDestination(dest)))
+        if (setFromDestinations.count(
+                AssetSourceAddressForOutput(out, pqAssetActivationHeight)))
             ctrl.SelectAsset(COutPoint(out.tx->GetHash(), out.i));
     }
 
@@ -1431,13 +1487,13 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"               (string, required) name of asset\n"
-                "2. \"from_address\"             (string, required) address that the asset will be transferred from\n"
+                "2. \"from_address\"             (string, required) legacy address for historical outputs or asset descriptor for protected outputs\n"
                 "3. \"qty\"                      (numeric, required) number of assets you want to send to the address\n"
                 "4. \"to_address\"               (string, required) address to send the asset to\n"
                 "5. \"message\"                  (string, optional) Once RIP5 is voted in ipfs hash or txid hash to send along with the transfer\n"
                 "6. \"expire_time\"              (numeric, optional) UTC timestamp of when the message expires\n"
                 "7. \"rvn_change_address\"       (string, optional, default = \"\") the transaction RVN change will be sent to this address\n"
-                "8. \"asset_change_address\"     (string, optional, default = \"\") the transaction Asset change will be sent to this address\n"
+                "8. \"asset_change_address\"     (string, optional, default = \"\") asset change destination; a canonical PQ-only descriptor is required after PQ asset activation\n"
 
                 "\nResult:\n"
                 "txid"
@@ -1462,11 +1518,19 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
 
     std::string asset_name = request.params[0].get_str();
 
+    const int pqAssetActivationHeight = GetPQAssetActivationHeightForPrev(
+        chainActive.Tip(), GetParams().GetConsensus());
+    const bool pqAssetsActive = pqAssetActivationHeight >= 0 &&
+        chainActive.Height() + 1 >= pqAssetActivationHeight;
+
     std::string from_address = request.params[1].get_str();
 
     // Check to make sure the given from address is valid
     CTxDestination dest = DecodeDestination(from_address);
-    if (!IsValidDestination(dest))
+    CKeyID classicalKey;
+    uint256 program;
+    if (!IsValidDestination(dest) &&
+        !(pqAssetsActive && DecodePQAssetDestination(from_address, classicalKey, program)))
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("From address must be valid addresses. Invalid address: ") + from_address);
 
     CAmount nAmount = AmountFromValue(request.params[2]);
@@ -1508,8 +1572,21 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("RVN change address must be a valid address. Invalid address: ") + rvn_change_address);
 
     CTxDestination asset_change_dest = DecodeDestination(asset_change_address);
-    if (!asset_change_address.empty() && !IsValidDestination(asset_change_dest))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+    uint256 assetChangeProgram;
+    bool hasPQAssetChange = false;
+    if (!asset_change_address.empty()) {
+        if (pqAssetsActive) {
+            CKeyID changeClassicalKey;
+            if (!DecodePQOnlyAssetDestination(asset_change_address, changeClassicalKey, assetChangeProgram))
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+                    "Active PQ asset change requires a canonical PQ-only asset destination");
+            asset_change_dest = changeClassicalKey;
+            hasPQAssetChange = true;
+        } else if (!IsValidDestination(asset_change_dest)) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                std::string("Asset change address must be a valid address. Invalid address: ") + asset_change_address);
+        }
+    }
 
 
     std::pair<int, std::string> error;
@@ -1527,6 +1604,8 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
     // Set the change addresses
     ctrl.destChange = rvn_change_dest;
     ctrl.assetDestChange = asset_change_dest;
+    if (hasPQAssetChange)
+        ctrl.pqAssetChangeProgram = assetChangeProgram;
 
     if (!mapAssetCoins.count(asset_name)) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Wallet doesn't own the asset_name: " + asset_name));
@@ -1534,11 +1613,7 @@ UniValue transferfromaddress(const JSONRPCRequest& request)
 
     // Add all the asset outpoints that match the given from addresses
     for (const auto& out : mapAssetCoins.at(asset_name)) {
-        // Get the address that the coin resides in, because to send a valid message. You need to send it to the same address that it currently resides in.
-        CTxDestination dest;
-        ExtractDestination(out.tx->tx->vout[out.i].scriptPubKey, dest);
-
-        if (from_address == EncodeDestination(dest))
+        if (from_address == AssetSourceAddressForOutput(out, pqAssetActivationHeight))
             ctrl.SelectAsset(COutPoint(out.tx->GetHash(), out.i));
     }
 
@@ -1842,7 +1917,7 @@ UniValue addtagtoaddress(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"tag_name\"            (string, required) the name of the tag you are assigning to the address, if it doens't have '#' at the front it will be added\n"
                 "2. \"to_address\"          (string, required) the address that will be assigned the tag\n"
-                "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
+                "3. \"change_address\"      (string, optional) Qualifier return destination; after PQ asset activation use a canonical PQ-only descriptor\n"
                 "4. \"asset_data\"          (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the qualifier token\n"
 
                 "\nResult:\n"
@@ -1870,7 +1945,7 @@ UniValue removetagfromaddress(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"tag_name\"            (string, required) the name of the tag you are removing from the address\n"
                 "2. \"to_address\"          (string, required) the address that the tag will be removed from\n"
-                "3. \"change_address\"      (string, optional) The change address for the qualifier token to be sent to\n"
+                "3. \"change_address\"      (string, optional) Qualifier return destination; after PQ asset activation use a canonical PQ-only descriptor\n"
                 "4. \"asset_data\"          (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the qualifier token\n"
 
                 "\nResult:\n"
@@ -1898,7 +1973,7 @@ UniValue freezeaddress(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to freeze\n"
                 "2. \"address\"          (string, required) the address that will be frozen\n"
-                "3. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "3. \"change_address\"   (string, optional) Owner return destination; after PQ asset activation use a canonical PQ-only descriptor\n"
                 "4. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
@@ -1926,7 +2001,7 @@ UniValue unfreezeaddress(const JSONRPCRequest& request)
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
                 "2. \"address\"          (string, required) the address that will be unfrozen\n"
-                "3. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "3. \"change_address\"   (string, optional) Owner return destination; after PQ asset activation use a canonical PQ-only descriptor\n"
                 "4. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
@@ -1953,7 +2028,7 @@ UniValue freezerestrictedasset(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
-                "2. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "2. \"change_address\"   (string, optional) Owner return destination; after PQ asset activation use a canonical PQ-only descriptor\n"
                 "3. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
@@ -1980,7 +2055,7 @@ UniValue unfreezerestrictedasset(const JSONRPCRequest& request)
 
                 "\nArguments:\n"
                 "1. \"asset_name\"       (string, required) the name of the restricted asset you want to unfreeze\n"
-                "2. \"change_address\"   (string, optional) The change address for the owner token of the restricted asset\n"
+                "2. \"change_address\"   (string, optional) Owner return destination; after PQ asset activation use a canonical PQ-only descriptor\n"
                 "4. \"asset_data\"       (string, optional) The asset data (ipfs or a hash) to be applied to the transfer of the owner token\n"
 
                 "\nResult:\n"
@@ -2401,27 +2476,14 @@ UniValue issuequalifierasset(const JSONRPCRequest& request)
 
     if (!address.empty()) {
         CTxDestination destination = DecodeDestination(address);
-        if (!IsValidDestination(destination)) {
+        CKeyID classicalKey;
+        uint256 pqProgram;
+        if (!IsValidDestination(destination) &&
+            !DecodePQAssetDestination(address, classicalKey, pqProgram)) {
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
         }
     } else {
-        // Create a new address
-        std::string strAccount;
-
-        if (!pwallet->IsLocked()) {
-            pwallet->TopUpKeyPool();
-        }
-
-        // Generate a new key that is added to wallet
-        CPubKey newKey;
-        if (!pwallet->GetKeyFromPool(newKey)) {
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        }
-        CKeyID keyID = newKey.GetID();
-
-        pwallet->SetAddressBook(keyID, strAccount, "receive");
-
-        address = EncodeDestination(keyID);
+        address = NewAssetIssueDestination(pwallet);
     }
 
     std::string change_address = "";
@@ -2552,7 +2614,11 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
 
     // Validate the address
     CTxDestination destination = DecodeDestination(to_address);
-    if (!IsValidDestination(destination)) {
+    CKeyID classicalKey;
+    uint256 pqProgram;
+    const bool isPQAssetDestination =
+        DecodePQAssetDestination(to_address, classicalKey, pqProgram);
+    if (!IsValidDestination(destination) && !isPQAssetDestination) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
@@ -2561,7 +2627,10 @@ UniValue issuerestrictedasset(const JSONRPCRequest& request)
 
     // Validate the verifier string with the given to_address
     std::string strError = "";
-    if (!ContextualCheckVerifierString(passets, verifierStripped, to_address, strError))
+    if (!ContextualCheckVerifierString(
+            passets, verifierStripped,
+            isPQAssetDestination ? EncodeDestination(classicalKey) : to_address,
+            strError))
         throw JSONRPCError(RPC_INVALID_PARAMETER, strError);
 
     // Get the change address if one was given
@@ -2696,7 +2765,10 @@ UniValue reissuerestrictedasset(const JSONRPCRequest& request)
     std::string to_address = request.params[2].get_str();
 
     CTxDestination to_dest = DecodeDestination(to_address);
-    if (!IsValidDestination(to_dest)) {
+    CKeyID classicalKey;
+    uint256 pqProgram;
+    if (!IsValidDestination(to_dest) &&
+        !DecodePQAssetDestination(to_address, classicalKey, pqProgram)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 
@@ -2820,7 +2892,10 @@ UniValue transferqualifier(const JSONRPCRequest& request)
 
     std::string to_address = request.params[2].get_str();
     CTxDestination to_dest = DecodeDestination(to_address);
-    if (!IsValidDestination(to_dest)) {
+    CKeyID classicalKey;
+    uint256 pqProgram;
+    if (!IsValidDestination(to_dest) &&
+        !DecodePQAssetDestination(to_address, classicalKey, pqProgram)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + to_address);
     }
 

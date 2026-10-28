@@ -22,6 +22,23 @@
 class CBlockIndex;
 class CCoinsViewDBCursor;
 class uint256;
+namespace txdb_tests { class CCoinsViewDBTestAccess; }
+
+/**
+ * Check whether versioned RIP-25 chainstate markers describe one complete or
+ * interrupted coins database state. Null marker hashes mean absent or
+ * unsupported marker records.
+ */
+bool IsRIP25ContextChainstateCurrent(const uint256& bestBlock,
+                                     const std::vector<uint256>& headBlocks,
+                                     const uint256& validatedTip,
+                                     const uint256& pendingTip);
+bool RIP25ContextChainstateRequiresRebuild(bool rip25Active,
+                                           const uint256& candidateTip,
+                                           const uint256& bestBlock,
+                                           const std::vector<uint256>& headBlocks,
+                                           const uint256& validatedTip,
+                                           const uint256& pendingTip);
 
 //! No need to periodic flush if at least this much space still available.
 static constexpr int MAX_BLOCK_COINSDB_USAGE = 10;
@@ -70,6 +87,7 @@ struct CDiskTxPos : public CDiskBlockPos
 /** CCoinsView backed by the coin database (chainstate/) */
 class CCoinsViewDB final : public CCoinsView
 {
+    friend class txdb_tests::CCoinsViewDBTestAccess;
 protected:
     CDBWrapper db;
 public:
@@ -79,6 +97,11 @@ public:
     bool HaveCoin(const COutPoint &outpoint) const override;
     uint256 GetBestBlock() const override;
     std::vector<uint256> GetHeadBlocks() const override;
+    uint256 GetRIP25ContextValidatedTip() const;
+    uint256 GetRIP25ContextPendingTip() const;
+    bool HasAssetCommitPending() const;
+    uint256 GetAssetCommitValidatedTip() const;
+    bool ClearAssetCommitPending(const uint256& tip);
     bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock) override;
     CCoinsViewCursor *Cursor() const override;
 

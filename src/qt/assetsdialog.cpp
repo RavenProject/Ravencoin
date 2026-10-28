@@ -32,6 +32,7 @@
 
 #include <QGraphicsDropShadowEffect>
 #include <QFontMetrics>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSettings>
@@ -67,6 +68,8 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
     }
 
     GUIUtil::setupAddressWidget(ui->lineEditAssetControlChange, this);
+    GUIUtil::setupAssetAddressWidget(ui->lineEditProtectedAssetChange, this);
+    updateProtectedAssetChangeAvailability();
 
     addEntry();
 
@@ -77,6 +80,7 @@ AssetsDialog::AssetsDialog(const PlatformStyle *_platformStyle, QWidget *parent)
     connect(ui->pushButtonAssetControl, SIGNAL(clicked()), this, SLOT(assetControlButtonClicked()));
     connect(ui->checkBoxAssetControlChange, SIGNAL(stateChanged(int)), this, SLOT(assetControlChangeChecked(int)));
     connect(ui->lineEditAssetControlChange, SIGNAL(textEdited(const QString &)), this, SLOT(assetControlChangeEdited(const QString &)));
+    connect(ui->buttonChooseProtectedAssetChange, SIGNAL(clicked()), this, SLOT(chooseProtectedAssetChange()));
 
     // Coin Control: clipboard actions
     QAction *clipboardQuantityAction = new QAction(tr("Copy quantity"), this);
@@ -135,12 +139,14 @@ void AssetsDialog::setClientModel(ClientModel *_clientModel)
 
     if (_clientModel) {
         connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(updateSmartFeeLabel()));
+        connect(_clientModel, SIGNAL(numBlocksChanged(int,QDateTime,double,bool)), this, SLOT(updateProtectedAssetChangeAvailability()));
     }
 }
 
 void AssetsDialog::setModel(WalletModel *_model)
 {
     this->model = _model;
+    updateProtectedAssetChangeAvailability();
 
     if(_model && _model->getOptionsModel())
     {
@@ -376,6 +382,13 @@ void AssetsDialog::on_sendButton_clicked()
     CCoinControl ctrl;
     if (model->getOptionsModel()->getCoinControlFeatures())
         ctrl = *AssetControlDialog::assetControl;
+
+    QString assetChangeError;
+    if (!applyProtectedAssetChange(ctrl, &assetChangeError)) {
+        QMessageBox::warning(this, tr("Protected asset change"), assetChangeError);
+        fNewRecipientAllowed = true;
+        return;
+    }
 
     updateAssetControlState(ctrl);
 
@@ -956,6 +969,78 @@ void AssetsDialog::assetControlChangeEdited(const QString& text)
             }
         }
     }
+}
+
+void AssetsDialog::updateProtectedAssetChangeAvailability()
+{
+    const bool active = GUIUtil::pqAssetDestinationRequired();
+    if (!active)
+        ui->lineEditProtectedAssetChange->clear();
+    ui->lineEditProtectedAssetChange->setEnabled(active);
+    ui->buttonChooseProtectedAssetChange->setEnabled(active && model);
+    ui->labelProtectedAssetChange->setEnabled(active);
+    ui->widgetProtectedAssetChange->setToolTip(active ?
+        tr("Choose a wallet-owned PQ-only destination when a partial transfer of historical assets creates change.") :
+        tr("Protected asset change is available after PQ asset activation."));
+}
+
+void AssetsDialog::chooseProtectedAssetChange()
+{
+    if (!model || !GUIUtil::pqAssetDestinationRequired())
+        return;
+
+    QStringList choices;
+    choices << tr("Create a new protected change destination");
+    choices.append(model->getAssetDestinations());
+    bool selected = false;
+    const QString choice = QInputDialog::getItem(this, tr("Protected asset change"),
+        tr("Wallet-owned destination:"), choices, 0, false, &selected);
+    if (!selected)
+        return;
+
+    QString descriptor = choice;
+    if (choice == choices.first()) {
+        WalletModel::UnlockContext ctx(model->requestUnlock());
+        if (!ctx.isValid())
+            return;
+        descriptor = model->newAssetDestination();
+    }
+    if (!GUIUtil::isValidAssetDestination(descriptor) ||
+        !model->getAssetDestinations().contains(descriptor)) {
+        QMessageBox::warning(this, tr("Protected asset change"),
+            tr("Could not create or select a wallet-owned PQ-only asset destination."));
+        return;
+    }
+    ui->lineEditProtectedAssetChange->setText(descriptor);
+}
+
+bool AssetsDialog::applyProtectedAssetChange(CCoinControl& ctrl, QString* error) const
+{
+    ctrl.assetDestChange = CNoDestination();
+    ctrl.pqAssetChangeProgram.reset();
+
+    const QString descriptor = ui->lineEditProtectedAssetChange->text().trimmed();
+    if (descriptor.isEmpty())
+        return true;
+
+    CKeyID assetID;
+    uint256 pqProgram;
+    if (!model || !GUIUtil::pqAssetDestinationRequired() ||
+        !DecodePQOnlyAssetDestination(descriptor.toStdString(), assetID, pqProgram)) {
+        if (error)
+            *error = tr("Enter a canonical PQ-only asset destination after PQ asset activation.");
+        return false;
+    }
+    if (!model->getWallet()->IsPQOnlyAssetID(assetID) ||
+        !model->getAssetDestinations().contains(descriptor)) {
+        if (error)
+            *error = tr("Asset change must use a protected destination owned by this wallet.");
+        return false;
+    }
+
+    ctrl.assetDestChange = assetID;
+    ctrl.pqAssetChangeProgram = pqProgram;
+    return true;
 }
 
 // Coin Control: update labels

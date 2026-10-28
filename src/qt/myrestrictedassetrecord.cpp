@@ -47,7 +47,7 @@ QList<MyRestrictedAssetRecord> MyRestrictedAssetRecord::decomposeTransaction(con
             if (!AssetNullDataFromScript(txout.scriptPubKey, data, address)) {
                 continue;
             }
-            mine = IsMine(*wallet, DecodeDestination(address));
+            mine = GetRestrictedAddressOwnership(*wallet, address);
             if (mine & ISMINE_ALL) {
                 MyRestrictedAssetRecord sub(hash, nTime);
                 sub.involvesWatchAddress = mine & ISMINE_SPENDABLE ? false : true;

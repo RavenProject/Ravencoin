@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 OS=${1}
 GITHUB_WORKSPACE=${2}
 GITHUB_BASE_REF=${3}
 
-echo "----------------------------------------"
-env
-echo "----------------------------------------"
 
 if [[ ! ${OS} || ! ${GITHUB_WORKSPACE} || ! ${GITHUB_BASE_REF} ]]; then
     echo "Error: Invalid options"
@@ -59,7 +58,11 @@ if [[ ${OS} == "windows" ]]; then
     make install DESTDIR=${STAGE_DIR}/${DISTNAME}
 
     cd ${STAGE_DIR}
-    mv ${DISTNAME}/bin/*.dll ${DISTNAME}/lib/
+    # Depends builds link statically, so there may be no DLLs to move;
+    # a hard glob failure here would discard an otherwise complete build.
+    if compgen -G "${DISTNAME}/bin/*.dll" > /dev/null; then
+        mv ${DISTNAME}/bin/*.dll ${DISTNAME}/lib/
+    fi
     find . -name "lib*.la" -delete
     find . -name "lib*.a" -delete
     rm -rf ${DISTNAME}/lib/pkgconfig
@@ -96,12 +99,28 @@ if [[ ${OS} == "windows" ]]; then
     done
     
 elif [[ ${OS} == "osx" ]]; then
-    
+
+    # Use all three checksum-pinned macdeploy modules from depends.
+    native_python_lib="${GITHUB_WORKSPACE}/depends/x86_64-apple-darwin14/native/lib"
+    export PYTHONPATH="${native_python_lib}/python3/dist-packages:${native_python_lib}/python/dist-packages${PYTHONPATH:+:${PYTHONPATH}}"
+    python3 - "${native_python_lib}" <<'PY'
+import importlib
+import os
+import sys
+
+root = os.path.realpath(sys.argv[1])
+for name in ("biplist", "mac_alias", "ds_store"):
+    module = importlib.import_module(name)
+    source = os.path.realpath(module.__file__)
+    if os.path.commonpath((root, source)) != root:
+        raise SystemExit("macOS packaging requires pinned depends module: " + name)
+PY
+
     make install-strip DESTDIR=${STAGE_DIR}/${DISTNAME}
 
     make osx_volname
 
-    make deploydir
+    make PYTHONPATH="${PYTHONPATH}" deploydir
 
     if [[ -e ${GITHUB_WORKSPACE}/dist/Raven-Qt.app/Contents/MacOS/install_cli.sh ]]; then
         chmod +x ${GITHUB_WORKSPACE}/dist/Raven-Qt.app/Contents/MacOS/install_cli.sh
@@ -121,7 +140,7 @@ elif [[ ${OS} == "osx" ]]; then
 
     cd ${GITHUB_WORKSPACE}
 
-    make deploy
+    make PYTHONPATH="${PYTHONPATH}" deploy
 
     ${GITHUB_WORKSPACE}/depends/x86_64-apple-darwin14/native/bin/dmg dmg "Raven-Core.dmg" ${RELEASE_LOCATION}/${DISTNAME}-osx-unsigned.dmg
 

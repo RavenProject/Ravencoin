@@ -10,6 +10,7 @@ class WalletTests : public QObject
 
 private Q_SLOTS:
     void walletTests();
+    void protectedAssetChangeField();
 };
 
 #endif // RAVEN_QT_TEST_WALLETTESTS_H

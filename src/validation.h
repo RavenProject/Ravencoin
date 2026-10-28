@@ -13,6 +13,7 @@
 
 #include "amount.h"
 #include "coins.h"
+#include "consensus/rip25.h"
 #include "fs.h"
 #include "protocol.h" // For CMessageHeader::MessageStartChars
 #include "policy/feerate.h"
@@ -52,6 +53,7 @@ class CBlockPolicyEstimator;
 class CTxMemPool;
 class CValidationState;
 class CTxUndo;
+class CBlock;
 struct ChainTxData;
 
 class CAssetsDB;
@@ -60,6 +62,9 @@ class CSnapshotRequestDB;
 
 struct PrecomputedTransactionData;
 struct LockPoints;
+
+bool CollectConfirmedAssetMessages(const CBlock& block, const CBlockIndex* pindex,
+                                   std::set<CMessage>& messages);
 
 /** Default for -whitelistrelay. */
 static const bool DEFAULT_WHITELISTRELAY = true;
@@ -361,7 +366,7 @@ int VersionBitsTipStateSinceHeight(const Consensus::Params& params, Consensus::D
 /** Apply the effects of this transaction on the UTXO set represented by view */
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, int nHeight);
 
-void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight, uint256 blockHash, CAssetsCache* assetCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr);
+void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight, uint256 blockHash, CAssetsCache* assetCache = nullptr, std::pair<std::string, CBlockAssetUndo>* undoAssetData = nullptr, const TxAssetDeploymentContext* pAssetContext = nullptr);
 
 /** Transaction validation functions */
 
@@ -406,11 +411,12 @@ private:
     bool cacheStore;
     ScriptError error;
     PrecomputedTransactionData *txdata;
+    Consensus::PQSignatureContext pqSignatureContext;
 
 public:
-    CScriptCheck(): ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
-    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn) :
-        m_tx_out(outIn), ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn) { }
+    CScriptCheck(): ptxTo(nullptr), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(nullptr), pqSignatureContext(Consensus::NullPQSignatureContext()) {}
+    CScriptCheck(const CTxOut& outIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn, PrecomputedTransactionData* txdataIn, const Consensus::PQSignatureContext& pqSignatureContextIn = Consensus::NullPQSignatureContext()) :
+        m_tx_out(outIn), ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR), txdata(txdataIn), pqSignatureContext(pqSignatureContextIn) { }
 
     bool operator()();
 
@@ -422,6 +428,7 @@ public:
         std::swap(cacheStore, check.cacheStore);
         std::swap(error, check.error);
         std::swap(txdata, check.txdata);
+        std::swap(pqSignatureContext, check.pqSignatureContext);
     }
 
     ScriptError GetScriptError() const { return error; }
@@ -458,6 +465,9 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
 
 /** Check whether witness commitments are required for block. */
 bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+/** Exact transaction weight for the supplied UTXO context and RIP-25 state. */
+int64_t GetContextualTransactionWeight(const CTransaction& tx, const CCoinsViewCache& view, bool pqWitnessDiscountActive);
 
 /** When there are blocks in the active chain with missing data, rewind the chainstate and remove them from the block index */
 bool RewindBlockIndex(const CChainParams& params);
@@ -532,6 +542,10 @@ extern CMessageChannelDB *pmessagechanneldb;
 /** Global variable that points to my wallets restricted database (protected by cs_main) */
 extern CMyRestrictedDB *pmyrestricteddb;
 
+#ifdef ENABLE_WALLET
+bool BackfillMyRestrictedIndex(const CChainParams& chainparams);
+#endif
+
 /** Global variable that points to the active restricted asset database (protected by cs_main) */
 extern CRestrictedDB *prestricteddb;
 
@@ -591,6 +605,9 @@ bool LoadMempool();
 /** RVN START */
 bool AreAssetsDeployed();
 
+// Only used by test framework; callers must restore the prior value.
+void SetAssetsDeployed(bool value);
+
 bool AreMessagesDeployed();
 
 bool AreRestrictedAssetsDeployed();
@@ -598,6 +615,18 @@ bool AreRestrictedAssetsDeployed();
 bool AreEnforcedValuesDeployed();
 
 bool AreCoinbaseCheckAssetsDeployed();
+
+/** Transfer-overflow enforcement for the block after pindexPrev. */
+bool IsTransferOverflowCheckActive(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+/** Effective PQ asset activation height for the block after pindexPrev, or -1.
+ *  The caller must hold cs_main so the versionbits state and chain context
+ *  cannot change during a wallet ownership calculation.
+ */
+int GetPQAssetActivationHeightForPrev(const CBlockIndex* pindexPrev, const Consensus::Params& params);
+
+/** Transfer-overflow state for active-tip policy callers. */
+bool IsTransferOverflowCheckDeployed();
 
 // Only used by test framework
 void SetEnforcedValues(bool value);
@@ -613,6 +642,9 @@ bool IsMessagingActive(unsigned int nBlockNumber);
 bool IsRestrictedActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
+
+/** RIP-25: active-chain deployment state used by wallet/RPC policy. */
+bool IsPQHybridDeployed();
 /** RVN END */
 
 #endif // RAVEN_VALIDATION_H

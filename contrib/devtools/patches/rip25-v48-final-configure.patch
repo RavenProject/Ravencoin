@@ -1,0 +1,70 @@
+diff --git a/configure.ac b/configure.ac
+index 7a657d5..b525e9f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -210,1 +210,11 @@ AC_ARG_ENABLE([zmq],
++AC_ARG_WITH([liboqs],
++  [AS_HELP_STRING([--with-liboqs],
++  [RIP-25 requires liboqs >= 0.12.0 (required; disabling is unsupported)])],
++  [use_liboqs=$withval],
++  [use_liboqs=yes])
++
++if test "x$use_liboqs" != "xyes"; then
++  AC_MSG_ERROR([RIP-25 requires liboqs >= 0.12.0; --without-liboqs is not supported])
++fi
++
+ AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
+@@ -380,7 +390,12 @@ case $host in
+      dnl libtool insists upon adding -nostdlib and a list of objects/libs to link against.
+      dnl That breaks our ability to build dll's with static libgcc/libstdc++/libssp. Override
+-     dnl its command here, with the predeps/postdeps removed, and -static inserted. Postdeps are
+-     dnl also overridden to prevent their insertion later.
++     dnl its command here, with the predeps/postdeps removed. Postdeps are also overridden to
++     dnl prevent their insertion later. The libtool supplied libraries are bracketed in
++     dnl -Bstatic so they keep linking statically, libgcc and libstdc++ use their dedicated
++     dnl driver flags, and -Bdynamic is restored before the trailing driver libraries. That
++     dnl way the -lpthread which the mingw-w64 posix driver appends from its own spec binds
++     dnl to the same winpthread import library that libravenconsensus already links, rather
++     dnl than pulling in a second, static implementation of the pthread mutex functions.
+      dnl This should only affect dll's.
+-     archive_cmds_CXX="\$CC -shared \$libobjs \$deplibs \$compiler_flags -static -o \$output_objdir/\$soname \${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker \$lib"
++     archive_cmds_CXX="\$CC -shared \$libobjs ${wl}-Bstatic \$deplibs \$compiler_flags -static-libgcc -static-libstdc++ ${wl}-Bdynamic -o \$output_objdir/\$soname \${wl}--enable-auto-image-base -Xlinker --out-implib -Xlinker \$lib"
+      postdeps_CXX=
+@@ -962,6 +977,22 @@ if test x$use_pkgconfig = xyes; then
+       else
+           AC_DEFINE_UNQUOTED([ENABLE_ZMQ],[0],[Define to 1 to enable ZMQ functions])
+       fi
++
++      dnl RIP-25: liboqs for ML-DSA-44 post-quantum signatures
++      if test "x$use_liboqs" = "xyes"; then
++        PKG_CHECK_MODULES([LIBOQS], [liboqs >= 0.12.0],
++          [AC_DEFINE([HAVE_LIBOQS], [1], [Define to 1 if liboqs is available])],
++          [
++            dnl Fallback: check for header and library directly
++            AC_CHECK_HEADER([oqs/oqs.h],
++              [AC_CHECK_LIB([oqs], [OQS_SIG_new],
++                [LIBOQS_LIBS=-loqs; AC_DEFINE([HAVE_LIBOQS], [1], [Define to 1 if liboqs is available])],
++                [AC_MSG_ERROR([RIP-25 requires liboqs >= 0.12.0; liboqs library not found])])],
++              [AC_MSG_ERROR([RIP-25 requires liboqs >= 0.12.0; liboqs headers not found])])
++          ])
++        AC_SUBST(LIBOQS_LIBS)
++        AC_SUBST(LIBOQS_CFLAGS)
++      fi
+     ]
+   )
+ else
+@@ -1005,3 +1036,14 @@ else
++  dnl RIP-25: liboqs fallback check (non-pkg-config path)
++  if test "x$use_liboqs" = "xyes"; then
++    AC_CHECK_HEADER([oqs/oqs.h],
++      [AC_CHECK_LIB([oqs], [OQS_SIG_new],
++        [LIBOQS_LIBS=-loqs; AC_DEFINE([HAVE_LIBOQS], [1], [Define to 1 if liboqs is available])],
++        [AC_MSG_ERROR([RIP-25 requires liboqs >= 0.12.0; liboqs library not found])])],
++      [AC_MSG_ERROR([RIP-25 requires liboqs >= 0.12.0; liboqs headers not found])])
++    AC_SUBST(LIBOQS_LIBS)
++    AC_SUBST(LIBOQS_CFLAGS)
++  fi
++
+   RAVEN_QT_CHECK(AC_CHECK_LIB([protobuf] ,[main],[PROTOBUF_LIBS=-lprotobuf], RAVEN_QT_FAIL(libprotobuf not found)))
+   if test x$use_qr != xno; then
+     RAVEN_QT_CHECK([AC_CHECK_LIB([qrencode], [main],[QR_LIBS=-lqrencode], [have_qrencode=no])])

@@ -11,6 +11,7 @@
 #include "primitives/transaction.h"
 #include "wallet/db.h"
 #include "key.h"
+#include "pqkey.h"
 #include "wallet/bip39.h"
 
 #include <list>
@@ -55,8 +56,13 @@ enum DBErrors
     DB_NONCRITICAL_ERROR,
     DB_TOO_NEW,
     DB_LOAD_FAIL,
-    DB_NEED_REWRITE
+    DB_NEED_REWRITE,
+    DB_NEED_REWRITE_ENCRYPTION,
+    DB_NEED_REWRITE_ENCRYPTION_NONCRITICAL
 };
+
+static constexpr uint32_t WALLET_ENCRYPTION_REWRITE_MARKER_VERSION = 1;
+static constexpr int WALLET_ENCRYPTION_REWRITE_MIN_VERSION = 0x7fffffff;
 
 /* simple HD chain data model */
 class CHDChain
@@ -64,7 +70,7 @@ class CHDChain
 public:
     uint32_t nExternalChainCounter;
     uint32_t nInternalChainCounter;
-    CKeyID seed_id; //!< seed hash160
+    CKeyID seed_id; //!< legacy key ID or domain-separated BIP39 seed ID
 
     bool bUse_bip44;
     SecureVector vchMnemonic;
@@ -101,6 +107,7 @@ public:
 
     void SetNull()
     {
+        ClearSensitiveData();
         nVersion = CHDChain::CURRENT_VERSION;
         nExternalChainCounter = 0;
         nInternalChainCounter = 0;
@@ -114,8 +121,82 @@ public:
     void UseBip44( bool b = true)   { bUse_bip44 = b;}
     bool IsBip44() const            { return bUse_bip44 == true;}
 
+    void ClearSensitiveData()
+    {
+        SecureVector().swap(vchMnemonic);
+        SecureVector().swap(vchMnemonicPassphrase);
+        SecureVector().swap(vchSeed);
+    }
+
 
     bool SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, SecureVector& vchSeed);
+};
+
+/** Versioned allocation state for the dedicated deterministic PQ branch. */
+class CPQHDChain
+{
+public:
+    static constexpr uint32_t VERSION_1 = 1;
+    static constexpr uint32_t CURRENT_VERSION = VERSION_1;
+    static constexpr uint32_t MAX_COUNTER = 0x80000000U;
+    static constexpr uint8_t SEED_SOURCE_NONE = 0;
+    static constexpr uint8_t SEED_SOURCE_LEGACY_HD = 1;
+    static constexpr uint8_t SEED_SOURCE_BIP39 = 2;
+
+    uint32_t nVersion;
+    uint32_t nExternalChainCounter;
+    uint8_t nSeedSource;
+    uint32_t nCoinType;
+    uint256 lineage_id;
+
+    CPQHDChain() { SetNull(); }
+
+    ADD_SERIALIZE_METHODS;
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(nVersion);
+        READWRITE(nExternalChainCounter);
+        READWRITE(nSeedSource);
+        READWRITE(nCoinType);
+        READWRITE(lineage_id);
+    }
+
+    void SetNull()
+    {
+        nVersion = CURRENT_VERSION;
+        nExternalChainCounter = 0;
+        nSeedSource = SEED_SOURCE_NONE;
+        nCoinType = 0;
+        lineage_id.SetNull();
+    }
+
+    bool IsValid() const
+    {
+        if (nVersion != CURRENT_VERSION ||
+            nExternalChainCounter > MAX_COUNTER)
+            return false;
+        if (nSeedSource == SEED_SOURCE_NONE)
+            return nExternalChainCounter == 0 && nCoinType == 0 &&
+                   lineage_id.IsNull();
+        return (nSeedSource == SEED_SOURCE_LEGACY_HD ||
+                nSeedSource == SEED_SOURCE_BIP39) &&
+               nCoinType < MAX_COUNTER && !lineage_id.IsNull();
+    }
+
+    bool IsInitialized() const
+    {
+        return IsValid() && nSeedSource != SEED_SOURCE_NONE;
+    }
+
+    void SetLineage(uint8_t seedSource, uint32_t coinType,
+                    const uint256& lineageId)
+    {
+        SetNull();
+        nSeedSource = seedSource;
+        nCoinType = coinType;
+        lineage_id = lineageId;
+    }
 };
 
 class CKeyMetadata
@@ -209,6 +290,17 @@ public:
 
     bool WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata &keyMeta);
     bool WriteCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret, const CKeyMetadata &keyMeta);
+    bool WriteKeyMetadata(const CPubKey& vchPubKey, const CKeyMetadata& keyMeta);
+
+    bool WritePQKey(const uint256& witnessProgram, const CPQPubKey& pqPubKey, const CPQKey::KeyData& pqKeyData);
+    bool WriteCryptedPQKey(const uint256& witnessProgram, const CPQPubKey& pqPubKey, const std::vector<unsigned char>& vchCryptedSecret);
+    bool HasPlaintextKeys(bool& hasPlaintext);
+    bool HasPlaintextPQKeys(bool& hasPlaintext);
+    bool HasPlaintextBip39(bool& hasPlaintext);
+    bool WriteEncryptionRewritePending(int previousMinVersion);
+    bool EraseEncryptionRewritePending();
+    bool ReadEncryptionRewritePending(bool& pending, int& previousMinVersion);
+
     bool WriteMasterKey(unsigned int nID, const CMasterKey& kMasterKey);
 
     bool WriteCScript(const uint160& hash, const CScript& redeemScript);
@@ -261,10 +353,13 @@ public:
     //! write the hdchain model (external chain child index counter)
     bool WriteHDChain(const CHDChain& chain);
 
+    //! Write the deterministic PQ branch allocation state.
+    bool WritePQHDChain(const CPQHDChain& chain);
+
     //! Begin a new transaction
-    bool TxnBegin();
+    bool TxnBegin(int flags = DB_TXN_WRITE_NOSYNC);
     //! Commit current transaction
-    bool TxnCommit();
+    bool TxnCommit(int flags = 0);
     //! Abort current transaction
     bool TxnAbort();
     //! Read wallet version
@@ -273,8 +368,11 @@ public:
     bool WriteVersion(int nVersion);
 
     bool WriteBip39Words(const uint256& hash, const std::vector<unsigned char>& vchWords, bool fEncrypted);
+    bool WriteBip39Words(const uint256& hash, const SecureVector& vchWords, bool fEncrypted);
     bool WriteBip39Passphrase(const std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool WriteBip39Passphrase(const SecureVector& vchPassphrase, bool fEncrypted);
     bool WriteBip39VchSeed(const std::vector<unsigned char>& vchSeed,  bool fEncrypted);
+    bool WriteBip39VchSeed(const SecureVector& vchSeed, bool fEncrypted);
     bool ReadBip39Words(uint256& hash, std::vector<unsigned char>& vchWords, bool fEncrypted);
     bool ReadBip39Passphrase(std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
     bool ReadBip39VchSeed(std::vector<unsigned char>& vchSeed,  bool fEncrypted);

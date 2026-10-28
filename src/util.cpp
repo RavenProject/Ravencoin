@@ -15,6 +15,7 @@
 #include "random.h"
 #include "serialize.h"
 #include "utilstrencodings.h"
+#include "support/cleanse.h"
 #include "utiltime.h"
 
 #include <stdarg.h>
@@ -392,6 +393,41 @@ static bool InterpretBool(const std::string &strValue)
     return (atoi(strValue) != 0);
 }
 
+static void CleanseString(std::string& value)
+{
+    if (!value.empty())
+        memory_cleanse(&value[0], value.size());
+    std::string().swap(value);
+}
+
+static void CleanseArgValues(std::map<std::string, std::string>& args)
+{
+    for (auto& item : args)
+        CleanseString(item.second);
+    args.clear();
+}
+
+static void CleanseArgValues(
+    std::map<std::string, std::vector<std::string>>& args)
+{
+    for (auto& item : args) {
+        for (std::string& value : item.second)
+            CleanseString(value);
+        item.second.clear();
+    }
+    args.clear();
+}
+
+class ScopedStringCleanser
+{
+private:
+    std::string& value;
+
+public:
+    explicit ScopedStringCleanser(std::string& valueIn) : value(valueIn) {}
+    ~ScopedStringCleanser() { CleanseString(value); }
+};
+
 /** Turn -noX into -X=0 */
 static void InterpretNegativeSetting(std::string &strKey, std::string &strValue)
 {
@@ -405,18 +441,23 @@ static void InterpretNegativeSetting(std::string &strKey, std::string &strValue)
 void ArgsManager::ParseParameters(int argc, const char *const argv[])
 {
     LOCK(cs_args);
-    mapArgs.clear();
-    mapMultiArgs.clear();
+    CleanseArgValues(mapArgs);
+    CleanseArgValues(mapMultiArgs);
 
     for (int i = 1; i < argc; i++)
     {
         std::string str(argv[i]);
         std::string strValue;
+        ScopedStringCleanser cleanseStr(str);
+        ScopedStringCleanser cleanseValue(strValue);
         size_t is_index = str.find('=');
         if (is_index != std::string::npos)
         {
-            strValue = str.substr(is_index + 1);
-            str = str.substr(0, is_index);
+            strValue.assign(str.begin() + is_index + 1, str.end());
+            if (is_index + 1 < str.size()) {
+                memory_cleanse(&str[is_index + 1], str.size() - is_index - 1);
+            }
+            str.resize(is_index);
         }
 #ifdef WIN32
         boost::to_lower(str);
@@ -433,6 +474,9 @@ void ArgsManager::ParseParameters(int argc, const char *const argv[])
             str = str.substr(1);
         InterpretNegativeSetting(str, strValue);
 
+        auto existing = mapArgs.find(str);
+        if (existing != mapArgs.end())
+            CleanseString(existing->second);
         mapArgs[str] = strValue;
         mapMultiArgs[str].push_back(strValue);
     }
@@ -450,6 +494,51 @@ bool ArgsManager::IsArgSet(const std::string &strArg) const
 {
     LOCK(cs_args);
     return mapArgs.count(strArg);
+}
+
+bool ArgsManager::IsArgSetAndNonEmpty(const std::string& strArg) const
+{
+    LOCK(cs_args);
+    const auto it = mapArgs.find(strArg);
+    return it != mapArgs.end() && !it->second.empty();
+}
+
+bool ArgsManager::TakeArgSecure(
+    const std::string& strArg, SecureString& valueOut)
+{
+    LOCK(cs_args);
+    ClearSecureString(valueOut);
+
+    const auto it = mapArgs.find(strArg);
+    if (it == mapArgs.end())
+        return false;
+
+    auto cleanseStored = [&]() {
+        CleanseString(it->second);
+        mapArgs.erase(it);
+        const auto multiIt = mapMultiArgs.find(strArg);
+        if (multiIt != mapMultiArgs.end()) {
+            for (std::string& value : multiIt->second)
+                CleanseString(value);
+            multiIt->second.clear();
+            mapMultiArgs.erase(multiIt);
+        }
+    };
+
+    SecureString secureValue;
+    try {
+        const size_t reserveSize = it->second.size() > 64 ? it->second.size() : 64;
+        secureValue.reserve(reserveSize);
+        secureValue.assign(it->second.begin(), it->second.end());
+    } catch (...) {
+        ClearSecureString(secureValue);
+        cleanseStored();
+        throw;
+    }
+    cleanseStored();
+    valueOut.swap(secureValue);
+    ClearSecureString(secureValue);
+    return true;
 }
 
 std::string ArgsManager::GetArg(const std::string &strArg, const std::string &strDefault) const
@@ -495,15 +584,39 @@ bool ArgsManager::SoftSetBoolArg(const std::string &strArg, bool fValue)
 void ArgsManager::ForceSetArg(const std::string &strArg, const std::string &strValue)
 {
     LOCK(cs_args);
+    auto existing = mapArgs.find(strArg);
+    if (existing != mapArgs.end())
+        CleanseString(existing->second);
+    auto multiExisting = mapMultiArgs.find(strArg);
+    if (multiExisting != mapMultiArgs.end()) {
+        for (std::string& value : multiExisting->second)
+            CleanseString(value);
+        multiExisting->second.clear();
+    }
     mapArgs[strArg] = strValue;
     mapMultiArgs[strArg] = {strValue};
 }
 
 void ArgsManager::ForceSetArg(const std::string &strArg, const int64_t &nValue)
 {
+    ForceSetArg(strArg, std::to_string(nValue));
+}
+
+void ArgsManager::ClearArg(const std::string& strArg)
+{
     LOCK(cs_args);
-    mapArgs[strArg] = std::to_string(nValue);
-    mapMultiArgs[strArg] = {std::to_string(nValue)};
+    auto it = mapArgs.find(strArg);
+    if (it != mapArgs.end()) {
+        CleanseString(it->second);
+        mapArgs.erase(it);
+    }
+    auto multiIt = mapMultiArgs.find(strArg);
+    if (multiIt != mapMultiArgs.end()) {
+        for (std::string& value : multiIt->second)
+            CleanseString(value);
+        multiIt->second.clear();
+        mapMultiArgs.erase(multiIt);
+    }
 }
 
 
@@ -642,6 +755,7 @@ void ArgsManager::ReadConfigFile(const std::string &confPath)
             // Don't overwrite existing settings so command line settings override raven.conf
             std::string strKey = std::string("-") + it->string_key;
             std::string strValue = it->value[0];
+            ScopedStringCleanser cleanseValue(strValue);
             InterpretNegativeSetting(strKey, strValue);
             if (mapArgs.count(strKey) == 0)
                 mapArgs[strKey] = strValue;

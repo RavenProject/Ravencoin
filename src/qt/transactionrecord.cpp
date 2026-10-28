@@ -17,6 +17,13 @@
 
 #include <stdint.h>
 
+static std::string AssetRecordAddress(const CTxOut& output, int originHeight,
+                                      int pqAssetActivationHeight)
+{
+    return EncodeContextualAssetDestination(
+        output.scriptPubKey, originHeight, pqAssetActivationHeight);
+}
+
 
 /* Return positive answer if transaction should be shown in list.
  */
@@ -34,6 +41,15 @@ bool TransactionRecord::showTransaction(const CWalletTx &wtx)
 QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *wallet, const CWalletTx &wtx)
 {
     QList<TransactionRecord> parts;
+    const CBlockIndex* originBlock = nullptr;
+    const int depth = wtx.GetDepthInMainChain(originBlock);
+    const int originHeight = depth > 0 && originBlock ? originBlock->nHeight : -1;
+    int pqAssetActivationHeight = -1;
+    {
+        LOCK(cs_main);
+        pqAssetActivationHeight = GetPQAssetActivationHeightForPrev(
+            chainActive.Tip(), GetParams().GetConsensus());
+    }
     int64_t nTime = wtx.GetTxTime();
     CAmount nCredit = wtx.GetCredit(ISMINE_ALL);
     CAmount nDebit = wtx.GetDebit(ISMINE_ALL);
@@ -54,7 +70,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
         for(unsigned int i = 0; i < wtx.tx->vout.size(); i++)
         {
             const CTxOut& txout = wtx.tx->vout[i];
-            isminetype mine = wallet->IsMine(txout);
+            isminetype mine = wallet->IsMine(txout, originBlock);
 
             /** RVN START */
             if (txout.scriptPubKey.IsAssetScript() || txout.scriptPubKey.IsNullAssetTxDataScript() || txout.scriptPubKey.IsNullGlobalRestrictionAssetTxDataScript())
@@ -109,7 +125,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 continue;
             /** RVN END */
 
-            isminetype mine = wallet->IsMine(txout);
+            isminetype mine = wallet->IsMine(txout, originBlock);
             if(mine & ISMINE_WATCH_ONLY) involvesWatchAddress = true;
             if(fAllToMe > mine) fAllToMe = mine;
         }
@@ -143,7 +159,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 sub.idx = nOut;
                 sub.involvesWatchAddress = involvesWatchAddress;
 
-                if(wallet->IsMine(txout))
+                if(wallet->IsMine(txout, originBlock))
                 {
                     // Ignore parts sent to self, as this is usually the change
                     // from a transaction sent back to our own address.
@@ -230,9 +246,10 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 sub.idx = data.vout;
 
                 const CTxOut& txout = wtx.tx->vout[sub.idx];
-                isminetype mine = wallet->IsMine(txout);
+                isminetype mine = wallet->IsMine(txout, originBlock);
 
-                sub.address = EncodeDestination(data.destination);
+                sub.address = AssetRecordAddress(txout, originHeight,
+                                                 pqAssetActivationHeight);
                 sub.assetName = data.assetName;
                 sub.credit = data.nAmount;
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
@@ -275,7 +292,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
             {
                 TransactionRecord sub(hash, nTime);
                 sub.idx = data.vout;
-                sub.address = EncodeDestination(data.destination);
+                sub.address = AssetRecordAddress(wtx.tx->vout[sub.idx],
+                                                 originHeight,
+                                                 pqAssetActivationHeight);
                 sub.assetName = data.assetName;
                 sub.credit = -data.nAmount;
                 sub.involvesWatchAddress = false;
@@ -313,6 +332,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
 bool TransactionRecord::isSwapTransaction(const CWallet *wallet, const CWalletTx &wtx, QList<TransactionRecord> &txRecords, const CAmount& nCredit, const CAmount& nDebit, const CAmount& nNet)
 {
     if(!AreAssetsDeployed()) return false;
+
+    const CBlockIndex* originBlock = nullptr;
+    wtx.GetDepthInMainChain(originBlock);
 
     bool isSwap = false;
     std::map<std::string, std::string> mapValue = wtx.mapValue;
@@ -379,7 +401,7 @@ bool TransactionRecord::isSwapTransaction(const CWallet *wallet, const CWalletTx
                 //We can't directly check the counterparties vin here, so we have to look at the vouts to determine if we were sent assets or not
                 for(const CTxOut &txout : wtx.tx->vout)
                 {
-                    if(wallet->IsMine(txout))
+                    if(wallet->IsMine(txout, originBlock))
                     {
                         //If we sent assets, we need to see if we were sent assets or RVN in return
                         if(txout.scriptPubKey.IsAssetScript())

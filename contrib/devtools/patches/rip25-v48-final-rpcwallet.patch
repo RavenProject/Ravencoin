@@ -1,0 +1,69 @@
+diff --git a/src/wallet/rpcwallet.cpp b/src/wallet/rpcwallet.cpp
+index a199735..dcb5bc3 100644
+--- a/src/wallet/rpcwallet.cpp
++++ b/src/wallet/rpcwallet.cpp
+@@ -6,6 +6,7 @@
+ 
+ #include "amount.h"
+ #include "base58.h"
++#include "bech32.h"
+ #include "chain.h"
+ #include "consensus/validation.h"
+ #include "core_io.h"
+@@ -24,6 +25,7 @@
+ #include "util.h"
+ #include "utiltime.h"
+ #include "utilmoneystr.h"
++#include "pqkey.h"
+ #include "wallet/coincontrol.h"
+ #include "wallet/feebumper.h"
+ #include "wallet/wallet.h"
+@@ -223,6 +225,32 @@ UniValue getnewaddress(const JSONRPCRequest& request)
+ }
+ 
+ 
++UniValue getnewpqaddress(const JSONRPCRequest& request)
++{
++    CWallet * const pwallet = GetWalletForJSONRPCRequest(request);
++    if (!EnsureWalletIsAvailable(pwallet, request.fHelp)) return NullUniValue;
++    if (request.fHelp || request.params.size() > 1)
++        throw std::runtime_error("getnewpqaddress ( \"account\" )\nReturns a new post-quantum Raven address (witness v2, ML-DSA-44).\n");
++    LOCK2(cs_main, pwallet->cs_wallet);
++
++    // RIP-25 witness-v2 outputs are anyone-can-spend to pre-activation consensus.
++    // Do not let mainnet wallets generate addresses that are not yet protected.
++    if (!IsPQHybridDeployed())
++        throw JSONRPCError(RPC_WALLET_ERROR, "RIP-25 is not active on this network; refusing to generate an unprotected witness-v2 address");
++
++    std::string strAccount;
++    if (!request.params[0].isNull()) strAccount = AccountFromValue(request.params[0]);
++    CPQKey pqKey;
++    pqKey.MakeNewKey();
++    if (!pqKey.IsValid()) throw JSONRPCError(RPC_WALLET_ERROR, "Error: Failed to generate ML-DSA-44 keypair");
++    CPQPubKey pqPubKey = pqKey.GetPubKey();
++    uint256 witnessProgram = pqPubKey.GetWitnessProgram();
++    if (!pwallet->AddPQKeyPubKey(pqKey, pqPubKey)) throw JSONRPCError(RPC_WALLET_ERROR, "Error: Failed to add PQ key to wallet");
++    WitnessV2PQDestination dest(witnessProgram);
++    pwallet->SetAddressBook(dest, strAccount, "receive");
++    return EncodeDestination(dest);
++}
++
+ CTxDestination GetAccountAddress(CWallet* const pwallet, std::string strAccount, bool bForceNew=false)
+ {
+     CPubKey pubKey;
+@@ -1369,6 +1397,7 @@ public:
+         }
+         return false;
+     }
++    bool operator()(const WitnessV2PQDestination &dest) const { return false; }
+ };
+ 
+ UniValue addwitnessaddress(const JSONRPCRequest& request)
+@@ -3542,6 +3571,7 @@ static const CRPCCommand commands[] =
+     { "wallet",             "getmasterkeyinfo",         &getmasterkeyinfo,         {} },
+     { "wallet",             "getmywords",               &getmywords,                        {} },
+     { "wallet",             "getnewaddress",            &getnewaddress,            {"account"} },
++    { "wallet",             "getnewpqaddress",          &getnewpqaddress,          {"account"} },
+     { "wallet",             "getrawchangeaddress",      &getrawchangeaddress,      {} },
+     { "wallet",             "getreceivedbyaccount",     &getreceivedbyaccount,     {"account","minconf"} },
+     { "wallet",             "getreceivedbyaddress",     &getreceivedbyaddress,     {"address","minconf"} },

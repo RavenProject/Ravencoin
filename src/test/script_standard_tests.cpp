@@ -3,11 +3,18 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "assets/assets.h"
+#include "base58.h"
+#include "hash.h"
 #include "key.h"
 #include "keystore.h"
+#include "pqkey.h"
+#include "policy/policy.h"
+#include "primitives/transaction.h"
 #include "script/ismine.h"
 #include "script/script.h"
 #include "script/script_error.h"
+#include "script/sign.h"
 #include "script/standard.h"
 #include "test/test_raven.h"
 
@@ -796,6 +803,78 @@ BOOST_FIXTURE_TEST_SUITE(script_standard_tests, BasicTestingSetup)
             result = IsMine(keystore, scriptPubKey, isInvalid);
             BOOST_CHECK_EQUAL(result, ISMINE_NO);
             BOOST_CHECK(!isInvalid);
+        }
+    }
+
+    BOOST_AUTO_TEST_CASE(pq_only_asset_signs_without_classical_key_test)
+    {
+        CKey classicalKey;
+        classicalKey.MakeNewKey(true);
+        const CKeyID classicalID = classicalKey.GetPubKey().GetID();
+
+        CPQKey pqKey;
+        pqKey.MakeNewKey();
+        BOOST_REQUIRE(pqKey.IsValid());
+        const CPQPubKey pqPubKey = pqKey.GetPubKey();
+        const uint256 program = pqPubKey.GetWitnessProgram();
+        const CKeyID assetID(Hash160(program.begin(), program.end()));
+        CKeyID decodedAssetID;
+        uint256 decodedProgram;
+        BOOST_CHECK(DecodePQOnlyAssetDestination(
+            EncodePQAssetDestination(assetID, program), decodedAssetID,
+            decodedProgram));
+        BOOST_CHECK(decodedAssetID == assetID);
+        BOOST_CHECK(decodedProgram == program);
+        BOOST_CHECK(!DecodePQOnlyAssetDestination(
+            EncodePQAssetDestination(classicalID, program), decodedAssetID,
+            decodedProgram));
+
+        CBasicKeyStore keystore;
+        BOOST_REQUIRE(keystore.AddPQKeyPubKey(pqKey, pqPubKey));
+        BOOST_CHECK(!keystore.HaveKey(classicalID));
+        CBasicKeyStore noPQKey;
+        BOOST_REQUIRE(noPQKey.AddKey(classicalKey));
+
+        CScript transfer = GetScriptForDestination(classicalID);
+        CAssetTransfer("RAVENTEST", COIN).ConstructTransaction(transfer);
+        CScript owner = GetScriptForDestination(classicalID);
+        CNewAsset("RAVENTEST", COIN, 0, 1, 0, "").ConstructOwnerTransaction(owner);
+        CScript reissue = GetScriptForDestination(classicalID);
+        CReissueAsset("RAVENTEST", COIN, 0, 1, "").ConstructTransaction(reissue);
+
+        for (const CScript& legacy : {transfer, owner, reissue}) {
+            CScript pqOnly;
+            BOOST_REQUIRE(BuildPQOnlyAssetScript(legacy, program, pqOnly));
+            uint256 parsed;
+            BOOST_REQUIRE(IsPQOnlyAssetScript(pqOnly, parsed));
+            BOOST_CHECK(parsed == program);
+            CScript tagged;
+            BOOST_REQUIRE(BuildPQAssetTaggedScript(legacy, program, tagged));
+            BOOST_CHECK(!IsPQOnlyAssetScript(tagged, parsed));
+
+            // This generic query has no origin height, so the preactivation
+            // anyone-can-spend output must not be credited as protected custody.
+            BOOST_CHECK_EQUAL(IsMine(keystore, pqOnly), ISMINE_NO);
+
+            CMutableTransaction funding;
+            funding.vin.emplace_back(COutPoint(uint256S("01"), 0));
+            funding.vout.emplace_back(0, pqOnly);
+            const CTransaction funded(funding);
+            CMutableTransaction spending;
+            spending.vin.emplace_back(COutPoint(funded.GetHash(), 0));
+            spending.vout.emplace_back(0, legacy);
+
+            BOOST_REQUIRE(SignSignature(keystore, funded, spending, 0, SIGHASH_ALL));
+            BOOST_CHECK(spending.vin[0].scriptSig.empty());
+            BOOST_CHECK(spending.vin[0].scriptWitness.IsNull());
+            ScriptError error = SCRIPT_ERR_UNKNOWN_ERROR;
+            BOOST_CHECK(VerifyScript(spending.vin[0].scriptSig, pqOnly,
+                        &spending.vin[0].scriptWitness, STANDARD_SCRIPT_VERIFY_FLAGS,
+                        MutableTransactionSignatureChecker(&spending, 0, 0), &error));
+            BOOST_CHECK_EQUAL(error, SCRIPT_ERR_OK);
+
+            CMutableTransaction classicalAttempt = spending;
+            BOOST_CHECK(!SignSignature(noPQKey, funded, classicalAttempt, 0, SIGHASH_ALL));
         }
     }
 

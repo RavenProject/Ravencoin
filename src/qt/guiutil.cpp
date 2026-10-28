@@ -18,6 +18,9 @@
 #include "script/script.h"
 #include "script/standard.h"
 #include "util.h"
+#include "base58.h"
+#include "chainparams.h"
+#include "validation.h"
 
 #ifdef WIN32
 #ifdef _WIN32_WINNT
@@ -217,6 +220,42 @@ void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
 #endif
     widget->setValidator(new RavenAddressEntryValidator(parent));
     widget->setCheckValidator(new RavenAddressCheckValidator(parent));
+}
+
+void setupAssetAddressWidget(QValidatedLineEdit *widget, QWidget *parent)
+{
+    parent->setFocusProxy(widget);
+    widget->setFont(getSubLabelFont());
+    widget->setPlaceholderText(QObject::tr("Enter an asset destination (PQ-only after activation)"));
+    widget->setValidator(new RavenAssetAddressEntryValidator(parent));
+    widget->setCheckValidator(new RavenAssetAddressCheckValidator(parent));
+}
+
+bool pqAssetDestinationRequired()
+{
+    LOCK(cs_main);
+    const int activationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
+    return activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight;
+}
+
+bool isValidAssetDestination(const QString& address)
+{
+    const std::string encoded = address.toStdString();
+    if (pqAssetDestinationRequired()) {
+        CKeyID classicalKey;
+        uint256 pqProgram;
+        return DecodePQOnlyAssetDestination(encoded, classicalKey, pqProgram);
+    }
+    return IsSupportedAssetDestination(DecodeDestination(encoded));
+}
+
+QString classicalAssetAddress(const QString& address)
+{
+    CKeyID classicalKey;
+    uint256 pqProgram;
+    if (DecodePQAssetDestination(address.toStdString(), classicalKey, pqProgram))
+        return QString::fromStdString(EncodeDestination(classicalKey));
+    return address;
 }
 
 void setupAmountWidget(QLineEdit *widget, QWidget *parent)

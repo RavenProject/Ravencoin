@@ -162,6 +162,7 @@ enum BlockStatus: uint32_t {
     BLOCK_FAILED_MASK        =   BLOCK_FAILED_VALID | BLOCK_FAILED_CHILD,
 
     BLOCK_OPT_WITNESS       =   128, //!< block data in blk*.data was received with a witness-enforcing client
+    BLOCK_HAVE_DECLARED_HEIGHT = 256, //!< disk index stores the KAWPOW height declared in the header
 };
 
 /** The block chain is a tree shaped structure starting with the
@@ -216,6 +217,7 @@ public:
     uint32_t nNonce;
 
     // KAWPOW
+    uint32_t nHeaderHeight;
     uint64_t nNonce64;
     uint256 mix_hash;
 
@@ -248,6 +250,7 @@ public:
         nNonce         = 0;
 
         //KAWPOW
+        nHeaderHeight  = 0;
         nNonce64       = 0;
         mix_hash       = uint256();
     }
@@ -269,6 +272,7 @@ public:
 
         //KAWPOW
         nHeight        = block.nHeight;
+        nHeaderHeight  = block.nHeight;
         nNonce64       = block.nNonce64;
         mix_hash       = block.mix_hash;
 
@@ -302,7 +306,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
-        block.nHeight        = nHeight;
+        block.nHeight        = nHeaderHeight;
         block.nNonce64       = nNonce64;
         block.mix_hash       = mix_hash;
         return block;
@@ -430,6 +434,10 @@ public:
             READWRITE(nNonce64);
             READWRITE(mix_hash);
         }
+        if (nStatus & BLOCK_HAVE_DECLARED_HEIGHT)
+            READWRITE(VARINT(nHeaderHeight));
+        else if (ser_action.ForRead())
+            nHeaderHeight = nHeight;
 
     }
 
@@ -443,7 +451,7 @@ public:
         block.nBits           = nBits;
         block.nNonce          = nNonce;
 
-        block.nHeight         = nHeight;
+        block.nHeight         = nHeaderHeight;
         block.nNonce64        = nNonce64;
         block.mix_hash        = mix_hash;
         return block.GetHash();

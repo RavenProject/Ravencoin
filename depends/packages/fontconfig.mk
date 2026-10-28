@@ -1,9 +1,16 @@
 package=fontconfig
 $(package)_version=2.12.1
-$(package)_download_path=https://www.freedesktop.org/software/fontconfig/release/
+$(package)_download_path=https://mirrors.mit.edu/macports/distfiles/fontconfig/
+$(package)_fallback_download_path=https://distfiles.macports.org/fontconfig
 $(package)_file_name=$(package)-$($(package)_version).tar.bz2
 $(package)_sha256_hash=b449a3e10c47e1d1c7a6ec6e2016cca73d3bd68fbbd4f0ae5cc6b573f7d6c7f3
 $(package)_dependencies=freetype expat
+
+define $(package)_fetch_cmds
+( test -f $(fontconfig_source) || \
+  $(call fetch_file_inner,fontconfig,$(fontconfig_download_path),$(fontconfig_download_file),$(fontconfig_file_name),$(fontconfig_sha256_hash)) || \
+  $(call fetch_file_inner,fontconfig,$(fontconfig_fallback_download_path),$(fontconfig_download_file),$(fontconfig_file_name),$(fontconfig_sha256_hash)) )
+endef
 
 define $(package)_set_vars
   $(package)_config_opts=--disable-docs --disable-static

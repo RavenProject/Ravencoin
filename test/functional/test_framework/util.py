@@ -19,8 +19,6 @@ import re
 import subprocess
 from subprocess import CalledProcessError
 import time
-import socket
-from contextlib import closing
 from . import coverage
 from .authproxy import AuthServiceProxy, JSONRPCException
 
@@ -318,10 +316,6 @@ MAX_NODES = 8
 PORT_MIN = 11000
 # The number of ports to "reserve" for p2p and rpc, each
 PORT_RANGE = 5000
-# List to store P2P ports
-p2p_ports = [-1, -1, -1, -1, -1, -1, -1, -1]
-# List to store RPC ports
-rpc_ports = [-1, -1, -1, -1, -1, -1, -1, -1]
 
 
 class PortSeed:
@@ -329,24 +323,15 @@ class PortSeed:
     n = None
 
 
-def find_free_port():
-    """
-    Ask the system for a free port.
-    In case of error return error message.
-    :return: {Tuple}
-    """
-    port = None
-    error = {}
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        try:
-            s.bind(('', 0))
-            sock_name = s.getsockname()
-            if type(sock_name) is tuple and len(sock_name) == 2:
-                port = sock_name[1]
-        except socket.error as e:
-            error = {'errno': e.errno, 'msg': str(e)}
-
-        return port, error
+def _port_for_node(n, rpc):
+    assert 0 <= n < MAX_NODES
+    seed = PortSeed.n if PortSeed.n is not None else os.getpid()
+    # Separate fixed blocks by test seed and node. Probing an ephemeral port
+    # and releasing it before ravend binds allows parallel tests to race.
+    assert PORT_RANGE % MAX_NODES == 0
+    slots = PORT_RANGE // MAX_NODES
+    assert slots > 0
+    return PORT_MIN + (PORT_RANGE if rpc else 0) + (seed % slots) * MAX_NODES + n
 
 
 def get_rpc_proxy(url, node_number, timeout=None, coverage_dir=None):
@@ -373,21 +358,11 @@ def get_rpc_proxy(url, node_number, timeout=None, coverage_dir=None):
 
 
 def p2p_port(n):
-    if p2p_ports[n] is -1:
-        # Port isn't in the list, find one that is available
-        p2p_ports[n] = find_free_port()[0]
-        return p2p_ports[n]
-    else:
-        return p2p_ports[n]
+    return _port_for_node(n, False)
 
 
 def rpc_port(n):
-    if rpc_ports[n] is -1:
-        # Port isn't in the list, find one that is available
-        rpc_ports[n] = find_free_port()[0]
-        return rpc_ports[n]
-    else:
-        return rpc_ports[n]
+    return _port_for_node(n, True)
 
 
 def rpc_url(data_dir, i, rpchost=None):

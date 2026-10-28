@@ -45,7 +45,7 @@ public:
                 LOCK(cs_main);
                 std::map<std::string, CAmount> balances;
                 std::map<std::string, std::vector<COutput> > outputs;
-                if (!GetAllMyAssetBalances(outputs, balances)) {
+                if (!GetAllMyAssetBalances(parent->walletModel->getWallet(), outputs, balances)) {
                     qWarning("AssetTablePriv::refreshWallet: Error retrieving asset balances");
                     return;
                 }

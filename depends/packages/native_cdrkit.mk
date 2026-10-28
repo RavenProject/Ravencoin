@@ -10,7 +10,7 @@ define $(package)_preprocess_cmds
 endef
 
 define $(package)_config_cmds
-  cmake -DCMAKE_INSTALL_PREFIX=$(build_prefix)
+  cmake -DCMAKE_INSTALL_PREFIX=$(build_prefix) -DCMAKE_C_FLAGS=-fcommon
 endef
 
 define $(package)_build_cmds

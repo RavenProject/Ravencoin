@@ -50,6 +50,29 @@ class AssetTransferTest(RavenTestFramework):
 
         self.sync_all()
 
+        self.log.info("Testing that asset outputs reject RIP-25 destinations...")
+
+        pq_address = n0.getnewpqaddress()
+        legacy_address = n1.getnewaddress()
+        assert_raises_rpc_error(
+            -5,
+            "asset outputs require a legacy P2PKH address",
+            n0.transfer,
+            "TRANSFER_TEST", 1, pq_address)
+        assert_raises_rpc_error(
+            -5,
+            "asset change requires a legacy P2PKH address",
+            n0.transfer,
+            "TRANSFER_TEST", 1, legacy_address, '', 0, '', pq_address)
+        assert_raises_rpc_error(
+            -5,
+            "asset outputs require a legacy P2PKH address",
+            n0.createrawtransaction,
+            [], {pq_address: {'transfer': {'TRANSFER_TEST': 1}}})
+
+        native_pq_raw = n0.createrawtransaction([], {pq_address: 1})
+        assert isinstance(native_pq_raw, str) and len(native_pq_raw) > 0
+
         self.log.info("Testing transfer with dedicated asset change address...")
 
         n1_address = n1.getnewaddress()
@@ -130,6 +153,36 @@ class AssetTransferTest(RavenTestFramework):
         assert_equal(n1.listassetbalancesbyaddress(n1_already_received_address_2)["TRANSFER_TEST"], 200)
         assert_equal(n1.listassetbalancesbyaddress(n1_address)["TRANSFER_TEST"], 450)
         assert_equal(n1.listassetbalancesbyaddress(n0_asset_change)["TRANSFER_TEST"], 150)
+
+        self.log.info("Testing PQ native RVN change with independent legacy asset change...")
+
+        pq_rvn_change = n0.getnewpqaddress()
+        final_asset_address = n1.getnewaddress()
+        txid = n0.transfer(
+            asset_name="TRANSFER_TEST", qty=1, to_address=final_asset_address,
+            message='', expire_time=0, change_address=pq_rvn_change,
+            asset_change_address='')[0]
+
+        decoded = n0.getrawtransaction(txid, True)
+        output_addresses = [
+            address
+            for output in decoded['vout']
+            for address in output['scriptPubKey'].get('addresses', [])
+        ]
+        assert pq_rvn_change in output_addresses
+
+        asset_change_addresses = [
+            output['scriptPubKey']['addresses'][0]
+            for output in decoded['vout']
+            if output['scriptPubKey'].get('asset', {}).get('name') == "TRANSFER_TEST"
+            and final_asset_address not in output['scriptPubKey'].get('addresses', [])
+        ]
+        assert_equal(len(asset_change_addresses), 1)
+        assert_equal(n0.validateaddress(asset_change_addresses[0]).get('ispqaddress', False), False)
+
+        n0.generate(1)
+        self.sync_all()
+        assert_equal(n1.listassetbalancesbyaddress(final_asset_address)["TRANSFER_TEST"], 1)
 
         self.log.info("All Tests Passed")
 

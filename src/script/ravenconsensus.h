@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-#define RAVENCONSENSUS_API_VER 1
+#define RAVENCONSENSUS_API_VER 2
 
 typedef enum ravenconsensus_error_t
 {
@@ -44,7 +44,17 @@ typedef enum ravenconsensus_error_t
     ravenconsensus_ERR_TX_DESERIALIZE,
     ravenconsensus_ERR_AMOUNT_REQUIRED,
     ravenconsensus_ERR_INVALID_FLAGS,
+    ravenconsensus_ERR_PQ_CONTEXT_REQUIRED,
+    ravenconsensus_ERR_INVALID_NETWORK,
 } ravenconsensus_error;
+
+/** Select the canonical RIP-25 signing domain for a network. */
+typedef enum ravenconsensus_network_t
+{
+    ravenconsensus_NETWORK_MAIN = 0,
+    ravenconsensus_NETWORK_TEST = 1,
+    ravenconsensus_NETWORK_REGTEST = 2,
+} ravenconsensus_network;
 
 /** Script verification flags */
 enum
@@ -56,9 +66,11 @@ enum
     ravenconsensus_SCRIPT_FLAGS_VERIFY_CHECKLOCKTIMEVERIFY = (1U << 9), // enable CHECKLOCKTIMEVERIFY (BIP65)
     ravenconsensus_SCRIPT_FLAGS_VERIFY_CHECKSEQUENCEVERIFY = (1U << 10), // enable CHECKSEQUENCEVERIFY (BIP112)
     ravenconsensus_SCRIPT_FLAGS_VERIFY_WITNESS             = (1U << 11), // enable WITNESS (BIP141)
+    ravenconsensus_SCRIPT_FLAGS_VERIFY_PQ_HYBRID           = (1U << 16), // enable RIP-25 witness-v2 verification
     ravenconsensus_SCRIPT_FLAGS_VERIFY_ALL                 = ravenconsensus_SCRIPT_FLAGS_VERIFY_P2SH | ravenconsensus_SCRIPT_FLAGS_VERIFY_DERSIG |
                                                                ravenconsensus_SCRIPT_FLAGS_VERIFY_NULLDUMMY | ravenconsensus_SCRIPT_FLAGS_VERIFY_CHECKLOCKTIMEVERIFY |
-                                                               ravenconsensus_SCRIPT_FLAGS_VERIFY_CHECKSEQUENCEVERIFY | ravenconsensus_SCRIPT_FLAGS_VERIFY_WITNESS
+                                                               ravenconsensus_SCRIPT_FLAGS_VERIFY_CHECKSEQUENCEVERIFY | ravenconsensus_SCRIPT_FLAGS_VERIFY_WITNESS |
+                                                               ravenconsensus_SCRIPT_FLAGS_VERIFY_PQ_HYBRID
 };
 
 /// Returns 1 if the input nIn of the serialized transaction pointed to by
@@ -72,6 +84,14 @@ EXPORT_SYMBOL int ravenconsensus_verify_script(const unsigned char *scriptPubKey
 EXPORT_SYMBOL int ravenconsensus_verify_script_with_amount(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen, int64_t amount,
                                     const unsigned char *txTo        , unsigned int txToLen,
                                     unsigned int nIn, unsigned int flags, ravenconsensus_error* err);
+
+/** Verify a script using an explicit network's RIP-25 signature domain.
+ * Callers must supply flags for the contextual activation state. In particular,
+ * set VERIFY_WITNESS and VERIFY_PQ_HYBRID when RIP-25 is active.
+ */
+EXPORT_SYMBOL int ravenconsensus_verify_script_with_amount_and_network(const unsigned char *scriptPubKey, unsigned int scriptPubKeyLen, int64_t amount,
+                                    const unsigned char *txTo        , unsigned int txToLen,
+                                    unsigned int nIn, unsigned int flags, unsigned int network, ravenconsensus_error* err);
 
 EXPORT_SYMBOL unsigned int ravenconsensus_version();
 

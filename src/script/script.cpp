@@ -424,11 +424,13 @@ bool CScript::IsPushOnly() const
 std::string CScriptWitness::ToString() const
 {
     std::string ret = "CScriptWitness(";
-    for (unsigned int i = 0; i < stack.size(); i++) {
-        if (i) {
+    bool first = true;
+    for (const auto& element : stack) {
+        if (!first) {
             ret += ", ";
         }
-        ret += HexStr(stack[i]);
+        ret += HexStr(element);
+        first = false;
     }
     return ret + ")";
 }
@@ -593,5 +595,4 @@ bool AmountFromReissueScript(const CScript& scriptPubKey, CAmount& nAmount)
     return true;
 }
 //!--------------------------------------------------------------------------------------------------------------------------!//
-
 

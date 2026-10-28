@@ -22,8 +22,14 @@ public:
     //! If set, all asset change will be sent to this address, if not destChange will be used
     CTxDestination assetDestChange;
 
+    //! Asset-only witness-v2 programs paired with classical P2PKH destinations.
+    boost::optional<uint256> pqAssetDestinationProgram;
+    boost::optional<uint256> pqAssetChangeProgram;
+
     //! If false, allows unselected inputs, but requires all selected inputs be used
     bool fAllowOtherInputs;
+    //! Restrict asset inputs to selected outpoints without changing native RVN input selection.
+    bool fRequireSelectedAssetInputs;
     //! Includes watch only addresses which match the ISMINE_WATCH_SOLVABLE criteria
     bool fAllowWatchOnly;
     //! Override automatic min/max checks on fee, m_feerate must be set if true
@@ -51,7 +57,10 @@ public:
     {
         destChange = CNoDestination();
         assetDestChange = CNoDestination();
+        pqAssetDestinationProgram.reset();
+        pqAssetChangeProgram.reset();
         fAllowOtherInputs = false;
+        fRequireSelectedAssetInputs = false;
         fAllowWatchOnly = false;
         setSelected.clear();
         m_feerate.reset();

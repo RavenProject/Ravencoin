@@ -2,6 +2,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <algorithm>
 #include <regex>
 #include <script/script.h>
 #include <version.h>
@@ -18,6 +19,8 @@
 #include <wallet/wallet.h>
 #include <boost/algorithm/string.hpp>
 #include <consensus/validation.h>
+#include <consensus/tx_verify.h>
+#include <hash.h>
 #include <rpc/protocol.h>
 #include <net.h>
 #include "assets.h"
@@ -662,6 +665,11 @@ bool OwnerFromTransaction(const CTransaction& tx, std::string& ownerName, std::s
 
 bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetTransfer, std::string& strAddress)
 {
+    return TransferAssetFromScript(scriptPubKey, assetTransfer, strAddress, AreTransferScriptsSizeDeployed());
+}
+
+bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetTransfer, std::string& strAddress, bool fTransferScriptsSizeDeployed)
+{
     int nStartingIndex = 0;
     if (!IsScriptTransferAsset(scriptPubKey, nStartingIndex)) {
         return false;
@@ -674,7 +682,7 @@ bool TransferAssetFromScript(const CScript& scriptPubKey, CAssetTransfer& assetT
 
     std::vector<unsigned char> vchTransferAsset;
 
-    if (AreTransferScriptsSizeDeployed()) {
+    if (fTransferScriptsSizeDeployed) {
         // Before kawpow activation we used the hardcoded 31 to find the data
         // This created a bug where large transfers scripts would fail to serialize.
         // This fixes that issue (https://github.com/RavenProject/Ravencoin/issues/752)
@@ -954,6 +962,11 @@ bool CTransaction::IsNewUniqueAsset() const
 //! Call this function after IsNewUniqueAsset
 bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
 {
+    return VerifyNewUniqueAsset(strError, AreTransferScriptsSizeDeployed());
+}
+
+bool CTransaction::VerifyNewUniqueAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const
+{
     // Must contain at least 3 outpoints (RVN burn, owner change and one or more new unique assets that share a root (should be in trailing position))
     if (vout.size() < 3) {
         strError  = "bad-txns-unique-vout-size-to-small";
@@ -1016,7 +1029,7 @@ bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
     for (auto out : vout) {
         CAssetTransfer transfer;
         std::string transferAddress;
-        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress, fTransferScriptsSizeDeployed)) {
             if (assetRoot + OWNER_TAG == transfer.strName) {
                 fOwnerOutFound = true;
                 break;
@@ -1046,6 +1059,10 @@ bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
 
 //! To be called on CTransactions where IsNewAsset returns true
 bool CTransaction::VerifyNewAsset(std::string& strError) const {
+    return VerifyNewAsset(strError, AreTransferScriptsSizeDeployed());
+}
+
+bool CTransaction::VerifyNewAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const {
     // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
     if (vout.size() < 3) {
         strError = "bad-txns-issue-vout-size-to-small";
@@ -1106,7 +1123,7 @@ bool CTransaction::VerifyNewAsset(std::string& strError) const {
         for (auto out : this->vout) {
             CAssetTransfer transfer;
             std::string transferAddress;
-            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress, fTransferScriptsSizeDeployed)) {
                 if (root + OWNER_TAG == transfer.strName) {
                     fOwnerOutFound = true;
                     break;
@@ -1151,6 +1168,11 @@ bool CTransaction::IsNewMsgChannelAsset() const
 //! To be called on CTransactions where IsNewAsset returns true
 bool CTransaction::VerifyNewMsgChannelAsset(std::string &strError) const
 {
+    return VerifyNewMsgChannelAsset(strError, AreTransferScriptsSizeDeployed());
+}
+
+bool CTransaction::VerifyNewMsgChannelAsset(std::string &strError, bool fTransferScriptsSizeDeployed) const
+{
     // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
     if (vout.size() < 3) {
         strError  = "bad-txns-issue-msgchannel-vout-size-to-small";
@@ -1194,7 +1216,7 @@ bool CTransaction::VerifyNewMsgChannelAsset(std::string &strError) const
     for (auto out : vout) {
         CAssetTransfer transfer;
         std::string transferAddress;
-        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress, fTransferScriptsSizeDeployed)) {
             if (root + OWNER_TAG == transfer.strName) {
                 fOwnerOutFound = true;
                 break;
@@ -1237,6 +1259,11 @@ bool CTransaction::IsNewQualifierAsset() const
 
 //! To be called on CTransactions where IsNewQualifierAsset returns true
 bool CTransaction::VerifyNewQualfierAsset(std::string &strError) const
+{
+    return VerifyNewQualfierAsset(strError, AreTransferScriptsSizeDeployed());
+}
+
+bool CTransaction::VerifyNewQualfierAsset(std::string &strError, bool fTransferScriptsSizeDeployed) const
 {
     // Issuing an Asset must contain at least 2 CTxOut( Raven Burn Tx, New Asset Tx, Any Number of other Outputs...)
     if (vout.size() < 2) {
@@ -1282,7 +1309,7 @@ bool CTransaction::VerifyNewQualfierAsset(std::string &strError) const
         for (auto out : vout) {
             CAssetTransfer transfer;
             std::string transferAddress;
-            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+            if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress, fTransferScriptsSizeDeployed)) {
                 if (root == transfer.strName) {
                     fOwnerOutFound = true;
                     break;
@@ -1326,6 +1353,10 @@ bool CTransaction::IsNewRestrictedAsset() const
 
 //! To be called on CTransactions where IsNewRestrictedAsset returns true
 bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
+    return VerifyNewRestrictedAsset(strError, AreTransferScriptsSizeDeployed());
+}
+
+bool CTransaction::VerifyNewRestrictedAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const {
     // Issuing a restricted asset must cointain at least 4 CTxOut(Raven Burn Tx, Asset Creation, Root Owner Token Transfer, and CNullAssetTxVerifierString)
     if (vout.size() < 4) {
         strError = "bad-txns-issue-restricted-vout-size-to-small";
@@ -1370,7 +1401,7 @@ bool CTransaction::VerifyNewRestrictedAsset(std::string& strError) const {
     for (auto out : vout) {
         CAssetTransfer transfer;
         std::string transferAddress;
-        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress, fTransferScriptsSizeDeployed)) {
             if (strippedRoot == transfer.strName) {
                 fRootOwnerOutFound = true;
                 break;
@@ -1455,6 +1486,11 @@ bool CTransaction::IsReissueAsset() const
 //! To be called on CTransactions where IsReissueAsset returns true
 bool CTransaction::VerifyReissueAsset(std::string& strError) const
 {
+    return VerifyReissueAsset(strError, AreTransferScriptsSizeDeployed());
+}
+
+bool CTransaction::VerifyReissueAsset(std::string& strError, bool fTransferScriptsSizeDeployed) const
+{
     // Reissuing an Asset must contain at least 3 CTxOut ( Raven Burn Tx, Any Number of other Outputs ..., Reissue Asset Tx, Owner Asset Change Tx)
     if (vout.size() < 3) {
         strError  = "bad-txns-vout-size-to-small";
@@ -1491,7 +1527,7 @@ bool CTransaction::VerifyReissueAsset(std::string& strError) const
     for (auto out : vout) {
         CAssetTransfer transfer;
         std::string transferAddress;
-        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress)) {
+        if (TransferAssetFromScript(out.scriptPubKey, transfer, transferAddress, fTransferScriptsSizeDeployed)) {
             if (asset_name_to_check + OWNER_TAG == transfer.strName) {
                 fOwnerOutFound = true;
                 break;
@@ -1693,7 +1729,7 @@ void CAssetsCache::AddToAssetBalance(const std::string& strName, const std::stri
     }
 }
 
-bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
+bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut, const TxAssetDeploymentContext* pAssetContext)
 {
     // Placeholder strings that will get set if you successfully get the transfer or asset from the script
     std::string address = "";
@@ -1714,7 +1750,7 @@ bool CAssetsCache::TrySpendCoin(const COutPoint& out, const CTxOut& txOut)
             }
         } else if (nType == TX_TRANSFER_ASSET) {
             CAssetTransfer transfer;
-            if (TransferAssetFromScript(txOut.scriptPubKey, transfer, address)) {
+            if (TransferAssetFromScript(txOut.scriptPubKey, transfer, address, pAssetContext ? pAssetContext->fTransferScriptsSizeDeployed : AreTransferScriptsSizeDeployed())) {
                 assetName = transfer.strName;
                 nAmount = transfer.nAmount;
             }
@@ -1768,7 +1804,7 @@ bool CAssetsCache::ContainsAsset(const std::string& assetName)
     return CheckIfAssetExists(assetName);
 }
 
-bool CAssetsCache::UndoAssetCoin(const Coin& coin, const COutPoint& out)
+bool CAssetsCache::UndoAssetCoin(const Coin& coin, const COutPoint& out, const TxAssetDeploymentContext* pAssetContext)
 {
     std::string strAddress = "";
     std::string assetName = "";
@@ -1791,7 +1827,7 @@ bool CAssetsCache::UndoAssetCoin(const Coin& coin, const COutPoint& out)
             nAmount = asset.nAmount;
         } else if (nType == TX_TRANSFER_ASSET) {
             CAssetTransfer transfer;
-            if (!TransferAssetFromScript(coin.out.scriptPubKey, transfer, strAddress))
+            if (!TransferAssetFromScript(coin.out.scriptPubKey, transfer, strAddress, pAssetContext ? pAssetContext->fTransferScriptsSizeDeployed : AreTransferScriptsSizeDeployed()))
                 return error(
                         "%s : Failed to get transfer asset from script while trying to undo asset spend. OutPoint : %s",
                         __func__,
@@ -2247,6 +2283,11 @@ bool CAssetsCache::AddRestrictedVerifier(const std::string& assetName, const std
     if (setNewRestrictedVerifierToRemove.count(newVerifier))
         setNewRestrictedVerifierToRemove.erase(newVerifier);
 
+    // VerifyDB replays multiple historical blocks through one cache.
+    // Unlike a normal block cache, an older value may still be present.
+    if (fVerifyDBHistoricalReplay)
+        setNewRestrictedVerifierToAdd.erase(newVerifier);
+
     setNewRestrictedVerifierToAdd.insert(newVerifier);
 
     return true;
@@ -2260,6 +2301,9 @@ bool CAssetsCache::RemoveRestrictedVerifier(const std::string& assetName, const 
 
     if (setNewRestrictedVerifierToAdd.count(newVerifier))
         setNewRestrictedVerifierToAdd.erase(newVerifier);
+
+    if (fVerifyDBHistoricalReplay)
+        setNewRestrictedVerifierToRemove.erase(newVerifier);
 
     setNewRestrictedVerifierToRemove.insert(newVerifier);
 
@@ -2807,10 +2851,18 @@ bool CAssetsCache::DumpCacheToDatabase()
     }
 }
 
-// This function will put all current cache data into the global passets cache.
-//! Do not call this function on the passets pointer
+CAssetsCache* CAssetsCache::GetParentCache() const
+{
+    return pVerifyDBPreBlockCache ? pVerifyDBPreBlockCache : ::passets;
+}
+
+// Merge this block's changes into its parent cache. Normal validation uses
+// the global cache; VerifyDB uses a private historical parent.
 bool CAssetsCache::Flush()
 {
+    // VerifyDB reconnects into a private historical parent, never the live
+    // asset cache. Normal block connection still uses the global cache.
+    CAssetsCache* passets = GetParentCache();
 
     if (!passets)
         return error("%s: Couldn't find passets pointer while trying to flush assets cache", __func__);
@@ -2976,13 +3028,15 @@ bool CAssetsCache::Flush()
 
         for (auto &item : mapRootQualifierAddressesAdd) {
             for (auto asset : item.second) {
+                passets->mapRootQualifierAddressesRemove[item.first].erase(asset);
                 passets->mapRootQualifierAddressesAdd[item.first].insert(asset);
             }
         }
 
         for (auto &item : mapRootQualifierAddressesRemove) {
             for (auto asset : item.second) {
-                passets->mapRootQualifierAddressesAdd[item.first].insert(asset);
+                passets->mapRootQualifierAddressesAdd[item.first].erase(asset);
+                passets->mapRootQualifierAddressesRemove[item.first].insert(asset);
             }
         }
 
@@ -3332,6 +3386,7 @@ bool IsScriptNewRestrictedAsset(const CScript &scriptPubKey, int &nStartingIndex
 //! Returns a boolean on if the asset exists
 bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplicateCheck)
 {
+    CAssetsCache* passets = GetParentCache();
     // If we are reindexing, we don't know if an asset exists when accepting blocks
     if (fReindex) {
         return true;
@@ -3347,11 +3402,6 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
         return false;
     }
 
-    // Check the dirty caches first and see if it was recently added or removed
-    if (passets->setNewAssetsToRemove.count(cachedAsset)) {
-        return false;
-    }
-
     if (setNewAssetsToAdd.count(cachedAsset)) {
         if (fForceDuplicateCheck) {
             return true;
@@ -3359,6 +3409,11 @@ bool CAssetsCache::CheckIfAssetExists(const std::string& name, bool fForceDuplic
         else {
             LogPrintf("%s : Found asset %s in setNewAssetsToAdd but force duplicate check wasn't true\n", __func__, name);
         }
+    }
+
+    // A replayed block can re-add an asset removed from its historical parent.
+    if (passets->setNewAssetsToRemove.count(cachedAsset)) {
+        return false;
     }
 
     if (passets->setNewAssetsToAdd.count(cachedAsset)) {
@@ -3408,6 +3463,7 @@ bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &
 
 bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &asset, int& nHeight, uint256& blockHash)
 {
+    CAssetsCache* passets = GetParentCache();
     // Check the map that contains the reissued asset data. If it is in this map, it hasn't been saved to disk yet
     if (mapReissuedAssetData.count(name)) {
         asset = mapReissuedAssetData.at(name);
@@ -3431,18 +3487,19 @@ bool CAssetsCache::GetAssetMetaDataIfExists(const std::string &name, CNewAsset &
         return false;
     }
 
-    // Check the dirty caches first and see if it was recently added or removed
-    if (passets->setNewAssetsToRemove.count(cachedAsset)) {
-        LogPrintf("%s : Found in new assets to Remove - Returning False\n", __func__);
-        return false;
-    }
-
     auto setIterator = setNewAssetsToAdd.find(cachedAsset);
     if (setIterator != setNewAssetsToAdd.end()) {
         asset = setIterator->asset;
         nHeight = setIterator->blockHeight;
         blockHash = setIterator->blockHash;
         return true;
+    }
+
+    // Local additions represent the block being replayed and override older
+    // removals retained by the historical parent cache.
+    if (passets->setNewAssetsToRemove.count(cachedAsset)) {
+        LogPrintf("%s : Found in new assets to Remove - Returning False\n", __func__);
+        return false;
     }
 
     setIterator = passets->setNewAssetsToAdd.find(cachedAsset);
@@ -3499,7 +3556,7 @@ bool GetAssetInfoFromCoin(const Coin& coin, std::string& strName, CAmount& nAmou
     return GetAssetInfoFromScript(coin.out.scriptPubKey, strName, nAmount);
 }
 
-bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
+bool GetAssetData(const CScript& script, CAssetOutputEntry& data, const TxAssetDeploymentContext* pAssetContext)
 {
     // Placeholder strings that will get set if you successfully get the transfer or asset from the script
     std::string address = "";
@@ -3540,7 +3597,7 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
         }
     } else if (type == TX_TRANSFER_ASSET) {
         CAssetTransfer transfer;
-        if (TransferAssetFromScript(script, transfer, address)) {
+        if (TransferAssetFromScript(script, transfer, address, pAssetContext ? pAssetContext->fTransferScriptsSizeDeployed : AreTransferScriptsSizeDeployed())) {
             data.type = TX_TRANSFER_ASSET;
             data.nAmount = transfer.nAmount;
             data.destination = DecodeDestination(address);
@@ -3573,7 +3630,256 @@ bool GetAssetData(const CScript& script, CAssetOutputEntry& data)
     return false;
 }
 
+bool GetPQAssetProgram(const CScript& script, uint256& program)
+{
+    if (script.size() < 26 + 1 + 4 + 32 || script[25] != OP_RVN_ASSET)
+        return false;
+
+    const bool classicalPrefix =
+        script[0] == OP_DUP && script[1] == OP_HASH160 && script[2] == 20 &&
+        script[23] == OP_EQUALVERIFY && script[24] == OP_CHECKSIG;
+    const bool pqOnlyPrefix =
+        script[0] == OP_1 && script[1] == OP_1 && script[2] == 20 &&
+        script[23] == OP_DROP && script[24] == OP_DROP;
+    if (!classicalPrefix && !pqOnlyPrefix)
+        return false;
+
+    size_t payloadStart = 27;
+    size_t payloadSize = script[26];
+    if (script[26] == OP_PUSHDATA1) {
+        if (script.size() < 28)
+            return false;
+        payloadSize = script[27];
+        payloadStart = 28;
+        if (payloadSize < OP_PUSHDATA1)
+            return false;
+    } else if (payloadSize == 0 || payloadSize >= OP_PUSHDATA1) {
+        return false;
+    }
+
+    if (payloadSize < 4 || payloadStart + payloadSize + 32 != script.size())
+        return false;
+    if (script[payloadStart] != RVN_R || script[payloadStart + 1] != RVN_V ||
+        script[payloadStart + 2] != RVN_N)
+        return false;
+
+    int type = 0;
+    bool isOwner = false;
+    if (!script.IsAssetScript(type, isOwner))
+        return false;
+
+    const unsigned char marker = script[payloadStart + 3];
+    std::vector<unsigned char> bytes(script.begin() + payloadStart + 4,
+                                     script.begin() + payloadStart + payloadSize);
+    CDataStream stream(bytes, SER_NETWORK, PROTOCOL_VERSION);
+    try {
+        if (marker == RVN_T && type == TX_TRANSFER_ASSET) {
+            CDataStream shape(bytes, SER_NETWORK, PROTOCOL_VERSION);
+            std::string name;
+            CAmount amount;
+            shape >> name;
+            shape >> amount;
+            // With a message, legacy deserialization would consume the first
+            // eight program bytes as expiry unless that field is explicit.
+            if (!shape.empty() &&
+                (shape.size() != 42 ||
+                 (shape[0] != IPFS_SHA2_256 && shape[0] != TXID_NOTIFIER) ||
+                 shape[1] != IPFS_SHA2_256_LEN)) {
+                return false;
+            }
+            CAssetTransfer transfer;
+            stream >> transfer;
+        } else if (marker == RVN_Q && type == TX_NEW_ASSET && !isOwner) {
+            CNewAsset asset;
+            stream >> asset;
+        } else if (marker == RVN_O && type == TX_NEW_ASSET && isOwner) {
+            std::string ownerName;
+            stream >> ownerName;
+        } else if (marker == RVN_R && type == TX_REISSUE_ASSET) {
+            CReissueAsset asset;
+            stream >> asset;
+        } else {
+            return false;
+        }
+    } catch (const std::exception&) {
+        return false;
+    }
+    if (!stream.empty())
+        return false;
+
+    std::copy(script.end() - 32, script.end(), program.begin());
+    if (pqOnlyPrefix) {
+        const uint160 addressHash = Hash160(program.begin(), program.end());
+        if (!std::equal(addressHash.begin(), addressHash.end(), script.begin() + 3))
+            return false;
+    }
+    return true;
+}
+
+bool IsPQOnlyAssetScript(const CScript& script, uint256& program)
+{
+    return script.size() >= 26 && script[0] == OP_1 &&
+        GetPQAssetProgram(script, program);
+}
+
+std::string EncodeContextualAssetDestination(const CScript& script,
+                                             int originHeight, int pqAssetActivationHeight)
+{
+    CTxDestination destination;
+    if (!ExtractDestination(script, destination))
+        return std::string();
+
+    if (pqAssetActivationHeight >= 0 &&
+        (originHeight < 0 || originHeight >= pqAssetActivationHeight)) {
+        const CKeyID* classicalKey = boost::get<CKeyID>(&destination);
+        uint256 program;
+        if (!classicalKey || !GetPQAssetProgram(script, program))
+            return std::string();
+        return EncodePQAssetDestination(*classicalKey, program);
+    }
+    return EncodeDestination(destination);
+}
+
+bool BuildPQAssetTaggedScript(const CScript& legacyScript, const uint256& program, CScript& taggedScript)
+{
+    // The legacy asset indexer requires the P2PKH envelope and a single,
+    // minimally encoded asset payload followed by OP_DROP.
+    if (legacyScript.size() < 32 ||
+        legacyScript[0] != OP_DUP || legacyScript[1] != OP_HASH160 ||
+        legacyScript[2] != 20 || legacyScript[23] != OP_EQUALVERIFY ||
+        legacyScript[24] != OP_CHECKSIG || legacyScript[25] != OP_RVN_ASSET ||
+        legacyScript.back() != OP_DROP) {
+        return false;
+    }
+
+    size_t payloadStart = 27;
+    size_t payloadSize = legacyScript[26];
+    if (legacyScript[26] == OP_PUSHDATA1) {
+        payloadStart = 28;
+        payloadSize = legacyScript[27];
+        if (payloadSize < OP_PUSHDATA1)
+            return false;
+    } else if (payloadSize == 0 || payloadSize >= OP_PUSHDATA1) {
+        return false;
+    }
+    if (payloadSize < 4 || payloadStart + payloadSize + 1 != legacyScript.size())
+        return false;
+
+    const TxAssetDeploymentContext parserContext{true, false, false, true, true, true};
+    CAssetOutputEntry before;
+    if (!GetAssetData(legacyScript, before, &parserContext))
+        return false;
+
+    std::vector<unsigned char> payload(legacyScript.begin() + payloadStart,
+                                       legacyScript.begin() + payloadStart + payloadSize);
+    if (payload[0] != RVN_R || payload[1] != RVN_V || payload[2] != RVN_N)
+        return false;
+
+    int type = 0;
+    bool isOwner = false;
+    if (!legacyScript.IsAssetScript(type, isOwner))
+        return false;
+    const std::vector<unsigned char> assetBytes(payload.begin() + 4, payload.end());
+    CDataStream stream(assetBytes, SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream canonical(SER_NETWORK, PROTOCOL_VERSION);
+    bool needsZeroExpiry = false;
+    try {
+        if (payload[3] == RVN_T && type == TX_TRANSFER_ASSET) {
+            CAssetTransfer transfer;
+            stream >> transfer;
+            canonical << transfer;
+            needsZeroExpiry = !transfer.message.empty() && transfer.nExpireTime == 0;
+        } else if (payload[3] == RVN_Q && type == TX_NEW_ASSET && !isOwner) {
+            CNewAsset asset;
+            stream >> asset;
+            canonical << asset;
+        } else if (payload[3] == RVN_O && type == TX_NEW_ASSET && isOwner) {
+            std::string ownerName;
+            stream >> ownerName;
+            canonical << ownerName;
+        } else if (payload[3] == RVN_R && type == TX_REISSUE_ASSET) {
+            CReissueAsset reissue;
+            stream >> reissue;
+            canonical << reissue;
+        } else {
+            return false;
+        }
+    } catch (const std::exception&) {
+        return false;
+    }
+    if (!stream.empty() || canonical.size() != assetBytes.size() ||
+        !std::equal(canonical.begin(), canonical.end(), assetBytes.begin(),
+                    [](char actual, unsigned char expected) {
+                        return static_cast<unsigned char>(actual) == expected;
+                    }))
+        return false;
+
+    // The legacy serializer omits a zero expiry, but tagged transfers
+    // with a message need it to keep the program outside that field.
+    if (needsZeroExpiry)
+        payload.insert(payload.end(), sizeof(int64_t), 0);
+
+    CScript candidate;
+    candidate.insert(candidate.end(), legacyScript.begin(), legacyScript.begin() + 25);
+    candidate << OP_RVN_ASSET << payload;
+    const std::vector<unsigned char> programBytes = ToByteVector(program);
+    candidate.insert(candidate.end(), programBytes.begin(), programBytes.end());
+
+    uint256 parsedProgram;
+    CAssetOutputEntry after;
+    if (!GetPQAssetProgram(candidate, parsedProgram) || parsedProgram != program ||
+        !GetAssetData(candidate, after, &parserContext) ||
+        before.type != after.type || before.assetName != after.assetName ||
+        before.nAmount != after.nAmount || before.destination != after.destination ||
+        (before.type == TX_TRANSFER_ASSET &&
+         (before.message != after.message || before.expireTime != after.expireTime)))
+        return false;
+
+    taggedScript = std::move(candidate);
+    return true;
+}
+
+bool BuildPQOnlyAssetScript(const CScript& legacyScript, const uint256& program, CScript& pqOnlyScript)
+{
+    CScript tagged;
+    if (!BuildPQAssetTaggedScript(legacyScript, program, tagged))
+        return false;
+
+    const uint160 addressHash = Hash160(program.begin(), program.end());
+    CScript candidate = CScript() << OP_1 << OP_1
+        << ToByteVector(addressHash) << OP_DROP << OP_DROP;
+    if (candidate.size() != 25)
+        return false;
+    candidate.insert(candidate.end(), tagged.begin() + 25, tagged.end());
+
+    uint256 parsedProgram;
+    if (!GetPQAssetProgram(candidate, parsedProgram) || parsedProgram != program)
+        return false;
+    pqOnlyScript = std::move(candidate);
+    return true;
+}
+
 #ifdef ENABLE_WALLET
+isminetype GetRestrictedAddressOwnership(const CWallet& wallet, const std::string& address)
+{
+    const CTxDestination destination = DecodeDestination(address);
+    const isminetype mine = IsMine(wallet, destination);
+    if (mine == ISMINE_SPENDABLE)
+        return mine;
+
+    const CKeyID* assetID = boost::get<CKeyID>(&destination);
+    if (!assetID)
+        return mine;
+    for (const std::string& descriptor : wallet.GetOwnedPQAssetDestinations()) {
+        CKeyID ownedID;
+        uint256 program;
+        if (DecodePQOnlyAssetDestination(descriptor, ownedID, program) &&
+            ownedID == *assetID)
+            return ISMINE_SPENDABLE;
+    }
+    return mine;
+}
+
 void GetAllAdministrativeAssets(CWallet *pwallet, std::vector<std::string> &names, int nMinConf)
 {
     if(!pwallet)
@@ -3724,6 +4030,7 @@ std::string GetBurnAddress(const AssetType type)
 bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName, const std::string& address)
 {
     if (fAssetIndex) {
+        CAssetsCache* parent = cache.GetParentCache();
         auto pair = make_pair(assetName, address);
 
         // If the caches map has the pair, return true because the map already contains the best dirty amount
@@ -3731,8 +4038,8 @@ bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName
             return true;
 
         // If the caches map has the pair, return true because the map already contains the best dirty amount
-        if (passets->mapAssetsAddressAmount.count(pair)) {
-            cache.mapAssetsAddressAmount[pair] = passets->mapAssetsAddressAmount.at(pair);
+        if (parent->mapAssetsAddressAmount.count(pair)) {
+            cache.mapAssetsAddressAmount[pair] = parent->mapAssetsAddressAmount.at(pair);
             return true;
         }
 
@@ -3750,14 +4057,14 @@ bool GetBestAssetAddressAmount(CAssetsCache& cache, const std::string& assetName
 
 #ifdef ENABLE_WALLET
 //! sets _balances_ with the total quantity of each owned asset
-bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations, const std::string& prefix) {
+bool GetAllMyAssetBalances(CWallet* pwallet, std::map<std::string, std::vector<COutput> >& outputs, std::map<std::string, CAmount>& amounts, const int confirmations, const std::string& prefix) {
 
     // Return false if no wallet was found to compute asset balances
-    if (!vpwallets.size())
+    if (!pwallet)
         return false;
 
     // Get the map of assetnames to outputs
-    vpwallets[0]->AvailableAssets(outputs, true, nullptr, 1, MAX_MONEY, MAX_MONEY, 0, confirmations);
+    pwallet->AvailableAssets(outputs, true, nullptr, 1, MAX_MONEY, MAX_MONEY, 0, confirmations);
 
     // Loop through all pairs of Asset Name -> vector<COutput>
     for (const auto& pair : outputs) {
@@ -3775,15 +4082,15 @@ bool GetAllMyAssetBalances(std::map<std::string, std::vector<COutput> >& outputs
     return true;
 }
 
-bool GetMyAssetBalance(const std::string& name, CAmount& balance, const int& confirmations) {
+bool GetMyAssetBalance(CWallet* pwallet, const std::string& name, CAmount& balance, const int& confirmations) {
 
     // Return false if no wallet was found to compute asset balances
-    if (!vpwallets.size())
+    if (!pwallet)
         return false;
 
     // Get the map of assetnames to outputs
     std::map<std::string, std::vector<COutput> > outputs;
-    vpwallets[0]->AvailableAssets(outputs, true, nullptr, 1, MAX_MONEY, MAX_MONEY, 0, confirmations);
+    pwallet->AvailableAssets(outputs, true, nullptr, 1, MAX_MONEY, MAX_MONEY, 0, confirmations);
 
     // Loop through all pairs of Asset Name -> vector<COutput>
     if (outputs.count(name)) {
@@ -3848,6 +4155,140 @@ std::string EncodeIPFS(std::string decoded){
 };
 
 #ifdef ENABLE_WALLET
+namespace {
+
+bool CheckSupportedAssetAddress(const std::string& address, std::pair<int, std::string>& error)
+{
+    const CTxDestination destination = DecodeDestination(address);
+    if (!IsValidDestination(destination)) {
+        error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        return false;
+    }
+    if (!IsSupportedAssetDestination(destination)) {
+        error = std::make_pair(
+            RPC_INVALID_ADDRESS_OR_KEY,
+            "Ravencoin asset outputs require a legacy P2PKH address; RIP-25 witness-v2 destinations protect native RVN only");
+        return false;
+    }
+    return true;
+}
+
+bool SelectSupportedAssetChangeAddress(CWallet* pwallet, CCoinControl& coinControl,
+                                       CReserveKey& reservekey, const std::string& nativeChangeAddress,
+                                       std::string& assetChangeAddress, std::pair<int, std::string>& error)
+{
+    if (!boost::get<CNoDestination>(&coinControl.assetDestChange)) {
+        assetChangeAddress = EncodeDestination(coinControl.assetDestChange);
+        return CheckSupportedAssetAddress(assetChangeAddress, error);
+    }
+
+    const CTxDestination nativeChangeDestination = DecodeDestination(nativeChangeAddress);
+    if (IsSupportedAssetDestination(nativeChangeDestination)) {
+        assetChangeAddress = nativeChangeAddress;
+        return true;
+    }
+
+    CKeyID keyID;
+    std::string failReason;
+    if (!pwallet->CreateNewChangeAddress(reservekey, keyID, failReason)) {
+        error = std::make_pair(RPC_WALLET_KEYPOOL_RAN_OUT, failReason);
+        return false;
+    }
+
+    coinControl.assetDestChange = keyID;
+    assetChangeAddress = EncodeDestination(keyID);
+    return true;
+}
+
+bool SelectProtectedAssetReturn(CWallet* pwallet, const std::string& authorityName,
+                                CTxDestination& destination, uint256& program,
+                                std::pair<int, std::string>& error,
+                                CCoinControl* coinControl = nullptr)
+{
+    LOCK2(cs_main, pwallet->cs_wallet);
+    const int activationHeight = GetPQAssetActivationHeightForPrev(
+        chainActive.Tip(), GetParams().GetConsensus());
+    std::map<std::string, std::vector<COutput>> available;
+    pwallet->AvailableAssets(available);
+    std::vector<COutput> nativeCoins;
+    pwallet->AvailableCoins(nativeCoins, true, coinControl);
+    std::vector<COutPoint> selectedAssets;
+    if (coinControl && coinControl->HasAssetSelected()) {
+        coinControl->ListSelectedAssets(selectedAssets);
+        if (selectedAssets.size() != 1) {
+            error = std::make_pair(RPC_WALLET_ERROR,
+                "Active PQ authority operation requires exactly one selected authority input");
+            return false;
+        }
+    }
+
+    bool hasProtectedAuthority = false;
+    const auto ownerCoins = available.find(authorityName);
+    if (ownerCoins != available.end()) {
+        for (const COutput& output : ownerCoins->second) {
+            const COutPoint outpoint(output.tx->GetHash(), output.i);
+            if (!selectedAssets.empty() && selectedAssets.front() != outpoint)
+                continue;
+            if (!output.fSpendable ||
+                !GetPQAssetProgram(output.tx->tx->vout[output.i].scriptPubKey, program) ||
+                !pwallet->HavePQKey(program))
+                continue;
+            CAssetOutputEntry authority;
+            if (!GetAssetData(output.tx->tx->vout[output.i].scriptPubKey, authority) ||
+                authority.assetName != authorityName ||
+                !IsSupportedAssetDestination(authority.destination))
+                continue;
+            hasProtectedAuthority = true;
+            const CBlockIndex* originBlock = nullptr;
+            const int depth = output.tx->GetDepthInMainChain(originBlock);
+            const bool historical = depth > 0 && originBlock &&
+                originBlock->nHeight < activationHeight;
+            const bool hasAnchor = std::any_of(nativeCoins.begin(), nativeCoins.end(),
+                [&](const COutput& coin) {
+                    if (!coin.fSpendable)
+                        return false;
+                    int version = -1;
+                    std::vector<unsigned char> witnessProgram;
+                    return coin.tx->tx->vout[coin.i].scriptPubKey.IsWitnessProgram(version, witnessProgram) &&
+                           version == 2 && witnessProgram.size() == 32 &&
+                           std::equal(witnessProgram.begin(), witnessProgram.end(), program.begin());
+                });
+            if (!historical && !hasAnchor)
+                continue;
+            destination = authority.destination;
+            if (coinControl) {
+                coinControl->SelectAsset(outpoint);
+                coinControl->fRequireSelectedAssetInputs = true;
+            }
+            return true;
+        }
+    }
+    error = hasProtectedAuthority
+        ? std::make_pair(RPC_WALLET_ERROR,
+            "Active PQ authority operation requires a funded matching PQ anchor")
+        : std::make_pair(RPC_WALLET_ERROR,
+            "Active PQ asset operation requires an owned protected authority asset; migrate the legacy authority first");
+    return false;
+}
+
+} // namespace
+
+bool GetWalletProtectedAssetReturnDescriptor(CWallet* pwallet, const std::string& authorityName,
+                                             std::string& descriptor, std::pair<int, std::string>& error)
+{
+    CTxDestination destination;
+    uint256 program;
+    if (!SelectProtectedAssetReturn(pwallet, authorityName, destination, program, error))
+        return false;
+    const CKeyID* classicalKey = boost::get<CKeyID>(&destination);
+    if (!classicalKey) {
+        error = std::make_pair(RPC_WALLET_ERROR, "Protected authority has no canonical P2PKH destination");
+        return false;
+    }
+    descriptor = EncodePQAssetDestination(*classicalKey, program);
+    return true;
+}
+
 bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CNewAsset& asset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string)
 {
     std::vector<CNewAsset> assets;
@@ -3859,6 +4300,13 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 {
     std::string change_address = EncodeDestination(coinControl.destChange);
 
+    bool pqAssetsActive;
+    {
+        LOCK(cs_main);
+        const int activationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
+        pqAssetsActive = activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight;
+    }
+
     auto currentActiveAssetCache = GetCurrentAssetCache();
     // Validate the assets data
     std::string strError;
@@ -3869,13 +4317,28 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
         }
     }
 
+    CTxDestination assetDestination = DecodeDestination(address);
+    if (pqAssetsActive) {
+        CKeyID classicalKey;
+        uint256 program;
+        if (!DecodePQOnlyAssetDestination(address, classicalKey, program)) {
+            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY,
+                "Active PQ asset issuance requires a canonical PQ-only asset destination");
+            return false;
+        }
+        assetDestination = classicalKey;
+        coinControl.pqAssetDestinationProgram = program;
+    } else if (!CheckSupportedAssetAddress(address, error)) {
+        return false;
+    }
+
     if (!change_address.empty()) {
         CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
             error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
             return false;
         }
-    } else {
+    } else if (!pqAssetsActive) {
         // no coin control: send change to newly generated address
         CKeyID keyID;
         std::string strFailReason;
@@ -3906,6 +4369,32 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
             error = std::make_pair(RPC_INVALID_PARAMETER, "All assets must have the same parent.");
             return false;
         }
+    }
+
+    std::string asset_change_address = change_address;
+    uint256 protectedParentProgram;
+    const bool needsAssetChange = assetType == AssetType::SUB || assetType == AssetType::UNIQUE ||
+                                  assetType == AssetType::MSGCHANNEL || assetType == AssetType::SUB_QUALIFIER ||
+                                  assetType == AssetType::RESTRICTED;
+    const bool protectedAuthorityReturn = pqAssetsActive &&
+        (assetType == AssetType::SUB || assetType == AssetType::UNIQUE ||
+         assetType == AssetType::MSGCHANNEL || assetType == AssetType::RESTRICTED ||
+         assetType == AssetType::SUB_QUALIFIER);
+    if (protectedAuthorityReturn) {
+        CTxDestination parentDestination;
+        const std::string authorityName = assetType == AssetType::SUB_QUALIFIER
+            ? parentName
+            : (assetType == AssetType::RESTRICTED ? parentName.substr(1) : parentName) + OWNER_TAG;
+        if (!SelectProtectedAssetReturn(pwallet, authorityName,
+                                        parentDestination, protectedParentProgram,
+                                        error, &coinControl))
+            return false;
+        asset_change_address = EncodeDestination(parentDestination);
+        coinControl.assetDestChange = parentDestination;
+        coinControl.pqAssetChangeProgram = protectedParentProgram;
+    } else if (needsAssetChange &&
+        !SelectSupportedAssetChangeAddress(pwallet, coinControl, reservekey, change_address, asset_change_address, error)) {
+        return false;
     }
 
     // Assign the correct burn amount and the correct burn address depending on the type of asset issuance that is happening
@@ -3939,10 +4428,20 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     // If the asset is a subasset or unique asset. We need to send the ownertoken change back to ourselfs
     if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         // Get the script for the destination address for the assets
-        CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
+        CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(asset_change_address));
 
         CAssetTransfer assetTransfer(parentName + OWNER_TAG, OWNER_ASSET_AMOUNT);
         assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+        if (protectedAuthorityReturn) {
+            CScript pqOnly;
+            if (!BuildPQOnlyAssetScript(scriptTransferOwnerAsset,
+                                        protectedParentProgram, pqOnly)) {
+                error = std::make_pair(RPC_WALLET_ERROR,
+                    "Could not construct protected parent owner-token return");
+                return false;
+            }
+            scriptTransferOwnerAsset = std::move(pqOnly);
+        }
         CRecipient rec = {scriptTransferOwnerAsset, 0, fSubtractFeeFromAmount};
         vecSend.push_back(rec);
     }
@@ -3950,10 +4449,20 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     // If the asset is a sub qualifier. We need to send the token parent change back to ourselfs
     if (assetType == AssetType::SUB_QUALIFIER) {
         // Get the script for the destination address for the assets
-        CScript scriptTransferQualifierAsset = GetScriptForDestination(DecodeDestination(change_address));
+        CScript scriptTransferQualifierAsset = GetScriptForDestination(DecodeDestination(asset_change_address));
 
         CAssetTransfer assetTransfer(parentName, OWNER_ASSET_AMOUNT);
         assetTransfer.ConstructTransaction(scriptTransferQualifierAsset);
+        if (protectedAuthorityReturn) {
+            CScript pqOnly;
+            if (!BuildPQOnlyAssetScript(scriptTransferQualifierAsset,
+                                        protectedParentProgram, pqOnly)) {
+                error = std::make_pair(RPC_WALLET_ERROR,
+                    "Could not construct protected parent qualifier return");
+                return false;
+            }
+            scriptTransferQualifierAsset = std::move(pqOnly);
+        }
         CRecipient rec = {scriptTransferQualifierAsset, 0, fSubtractFeeFromAmount};
         vecSend.push_back(rec);
     }
@@ -3962,7 +4471,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     if (assetType == AssetType::SUB || assetType == AssetType::UNIQUE || assetType == AssetType::MSGCHANNEL) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
         for (auto asset : assets) {
-            if (!VerifyWalletHasAsset(parentName + OWNER_TAG, error)) {
+            if (!VerifyWalletHasAsset(pwallet, parentName + OWNER_TAG, error)) {
                 return false;
             }
         }
@@ -3972,7 +4481,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     if (assetType == AssetType::SUB_QUALIFIER) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
         for (auto asset : assets) {
-            if (!VerifyWalletHasAsset(parentName, error)) {
+            if (!VerifyWalletHasAsset(pwallet, parentName, error)) {
                 return false;
             }
         }
@@ -3980,18 +4489,28 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 
     if (assetType == AssetType::RESTRICTED) {
         // Restricted assets require the ROOT! token to be sent with the issuance
-        CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
+        CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(asset_change_address));
 
         // Create a transaction that sends the ROOT owner token (e.g. $TOKEN requires TOKEN!)
         std::string strStripped = parentName.substr(1, parentName.size() - 1);
 
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-        if (!VerifyWalletHasAsset(strStripped + OWNER_TAG, error)) {
+        if (!VerifyWalletHasAsset(pwallet, strStripped + OWNER_TAG, error)) {
             return false;
         }
 
         CAssetTransfer assetTransfer(strStripped + OWNER_TAG, OWNER_ASSET_AMOUNT);
         assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+        if (protectedAuthorityReturn) {
+            CScript pqOnly;
+            if (!BuildPQOnlyAssetScript(scriptTransferOwnerAsset,
+                                        protectedParentProgram, pqOnly)) {
+                error = std::make_pair(RPC_WALLET_ERROR,
+                    "Could not construct protected restricted owner-token return");
+                return false;
+            }
+            scriptTransferOwnerAsset = std::move(pqOnly);
+        }
 
         CRecipient ownerRec = {scriptTransferOwnerAsset, 0, fSubtractFeeFromAmount};
         vecSend.push_back(ownerRec);
@@ -4011,7 +4530,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
         vecSend.push_back(rec);
     }
 
-    if (!pwallet->CreateTransactionWithAssets(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coinControl, assets, DecodeDestination(address), assetType)) {
+    if (!pwallet->CreateTransactionWithAssets(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coinControl, assets, assetDestination, assetType)) {
         if (!fSubtractFeeFromAmount && burnAmount + nFeeRequired > curBalance)
             strTxError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         error = std::make_pair(RPC_WALLET_ERROR, strTxError);
@@ -4022,6 +4541,13 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 
 bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const CReissueAsset& reissueAsset, const std::string& address, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::string* verifier_string)
 {
+    bool pqAssetsActive;
+    {
+        LOCK(cs_main);
+        const int activationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
+        pqAssetsActive = activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight;
+    }
+
     // Create transaction variables
     std::string strTxError;
     std::vector<CRecipient> vecSend;
@@ -4036,9 +4562,18 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     AssetType asset_type = AssetType::INVALID;
     IsAssetNameValid(asset_name, asset_type);
 
-    // Check that validitity of the address
-    if (!IsValidDestinationString(address)) {
-        error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+    CTxDestination assetDestination = DecodeDestination(address);
+    if (pqAssetsActive) {
+        CKeyID classicalKey;
+        uint256 program;
+        if (!DecodePQOnlyAssetDestination(address, classicalKey, program)) {
+            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY,
+                "Active PQ reissue requires a canonical PQ-only asset destination");
+            return false;
+        }
+        assetDestination = classicalKey;
+        coinControl.pqAssetDestinationProgram = program;
+    } else if (!CheckSupportedAssetAddress(address, error)) {
         return false;
     }
 
@@ -4049,7 +4584,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
             error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
             return false;
         }
-    } else {
+    } else if (!pqAssetsActive) {
         CKeyID keyID;
         std::string strFailReason;
         if (!pwallet->CreateNewChangeAddress(reservekey, keyID, strFailReason)) {
@@ -4059,6 +4594,13 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
 
         change_address = EncodeDestination(keyID);
         coinControl.destChange = DecodeDestination(change_address);
+    }
+
+    std::string asset_change_address;
+    if (!pqAssetsActive &&
+        !SelectSupportedAssetChangeAddress(
+            pwallet, coinControl, reservekey, change_address, asset_change_address, error)) {
+        return false;
     }
 
     // Check the assets name
@@ -4101,12 +4643,12 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     // If we are reissuing a restricted asset, check to see if we have the root owner token $TOKEN check for TOKEN!
     if (asset_type == AssetType::RESTRICTED) {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-        if (!VerifyWalletHasAsset(stripped_asset_name + OWNER_TAG, error)) {
+        if (!VerifyWalletHasAsset(pwallet, stripped_asset_name + OWNER_TAG, error)) {
             return false;
         }
     } else {
         // Verify that this wallet is the owner for the asset, and get the owner asset outpoint
-        if (!VerifyWalletHasAsset(asset_name + OWNER_TAG, error)) {
+        if (!VerifyWalletHasAsset(pwallet, asset_name + OWNER_TAG, error)) {
             return false;
         }
     }
@@ -4128,15 +4670,28 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
         return false;
     }
 
-    // Get the script for the destination address for the assets
-    CScript scriptTransferOwnerAsset = GetScriptForDestination(DecodeDestination(change_address));
-
-    if (asset_type == AssetType::RESTRICTED) {
-        CAssetTransfer assetTransfer(stripped_asset_name + OWNER_TAG, OWNER_ASSET_AMOUNT);
-        assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
-    } else {
-        CAssetTransfer assetTransfer(asset_name + OWNER_TAG, OWNER_ASSET_AMOUNT);
-        assetTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+    // Return the owner token to a wallet-owned protected key, independent of
+    // the reissue destination, so reissuing cannot transfer administration.
+    const std::string ownerName =
+        (asset_type == AssetType::RESTRICTED ? stripped_asset_name : asset_name) + OWNER_TAG;
+    CTxDestination ownerReturnDestination = DecodeDestination(asset_change_address);
+    uint256 ownerReturnProgram;
+    if (pqAssetsActive &&
+        !SelectProtectedAssetReturn(pwallet, ownerName, ownerReturnDestination,
+                                    ownerReturnProgram, error, &coinControl))
+        return false;
+    CScript scriptTransferOwnerAsset = GetScriptForDestination(ownerReturnDestination);
+    CAssetTransfer ownerTransfer(ownerName, OWNER_ASSET_AMOUNT);
+    ownerTransfer.ConstructTransaction(scriptTransferOwnerAsset);
+    if (pqAssetsActive) {
+        CScript pqOnly;
+        if (!BuildPQOnlyAssetScript(scriptTransferOwnerAsset,
+                                    ownerReturnProgram, pqOnly)) {
+            error = std::make_pair(RPC_WALLET_ERROR,
+                "Could not construct protected owner-token return");
+            return false;
+        }
+        scriptTransferOwnerAsset = std::move(pqOnly);
     }
 
     if (asset_type == AssetType::RESTRICTED) {
@@ -4145,7 +4700,8 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
             if (reissueAsset.nAmount > 0) {
                 std::string strError = "";
                 ErrorReport report;
-                if (!ContextualCheckVerifierString(passets, *verifier_string, address, strError, &report)) {
+                if (!ContextualCheckVerifierString(passets, *verifier_string,
+                                                   EncodeDestination(assetDestination), strError, &report)) {
                     error = std::make_pair(RPC_INVALID_PARAMETER, strError);
                     return false;
                 }
@@ -4167,7 +4723,8 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
                 }
 
                 std::string strError = "";
-                if (!ContextualCheckVerifierString(passets, verifier.verifier_string, address, strError)) {
+                if (!ContextualCheckVerifierString(passets, verifier.verifier_string,
+                                                   EncodeDestination(assetDestination), strError)) {
                     error = std::make_pair(RPC_INVALID_PARAMETER, strError);
                     return false;
                 }
@@ -4194,7 +4751,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     CRecipient recipient2 = {scriptTransferOwnerAsset, 0, fSubtractFeeFromAmount};
     vecSend.push_back(recipient);
     vecSend.push_back(recipient2);
-    if (!pwallet->CreateTransactionWithReissueAsset(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coinControl, reissueAsset, DecodeDestination(address))) {
+    if (!pwallet->CreateTransactionWithReissueAsset(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coinControl, reissueAsset, assetDestination)) {
         if (!fSubtractFeeFromAmount && burnAmount + nFeeRequired > curBalance)
             strTxError = strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired));
         error = std::make_pair(RPC_WALLET_ERROR, strTxError);
@@ -4208,11 +4765,27 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
 // nullGlobalRestrictionData -> Use this to globally freeze/unfreeze a restricted asset.
 bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinControl, const std::vector< std::pair<CAssetTransfer, std::string> >vTransfers, const std::string& changeAddress, std::pair<int, std::string>& error, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRequired, std::vector<std::pair<CNullAssetTxData, std::string> >* nullAssetTxData, std::vector<CNullAssetTxData>* nullGlobalRestrictionData)
 {
+    bool pqAssetsActive;
+    {
+        LOCK(cs_main);
+        const int activationHeight = GetPQAssetActivationHeightForPrev(chainActive.Tip(), GetParams().GetConsensus());
+        pqAssetsActive = activationHeight >= 0 && chainActive.Height() + 1 >= activationHeight;
+    }
+
     // Initialize Values for transaction
     std::string strTxError;
     std::vector<CRecipient> vecSend;
     int nChangePosRet = -1;
     bool fSubtractFeeFromAmount = false;
+    CCoinControl selectedCoinControl = coinControl;
+
+    if (!boost::get<CNoDestination>(&coinControl.assetDestChange) &&
+        !IsSupportedAssetDestination(coinControl.assetDestChange)) {
+        error = std::make_pair(
+            RPC_INVALID_ADDRESS_OR_KEY,
+            "Ravencoin asset change requires a legacy P2PKH address; RIP-25 witness-v2 destinations protect native RVN only");
+        return false;
+    }
 
     // Check for a balance before processing transfers
     CAmount curBalance = pwallet->GetBalance();
@@ -4235,17 +4808,27 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         CAmount nAmount = transfer.first.nAmount;
         int64_t expireTime = transfer.first.nExpireTime;
 
-        if (!IsValidDestinationString(address)) {
-            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        CTxDestination assetDestination = DecodeDestination(address);
+        uint256 pqProgram;
+        if (pqAssetsActive) {
+            CKeyID classicalKey;
+            if (!DecodePQOnlyAssetDestination(address, classicalKey, pqProgram)) {
+                error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY,
+                    "Active PQ asset transfer requires a canonical PQ-only asset destination");
+                return false;
+            }
+            assetDestination = classicalKey;
+        } else if (!CheckSupportedAssetAddress(address, error)) {
             return false;
         }
+        const std::string classicalAddress = EncodeDestination(assetDestination);
         auto currentActiveAssetCache = GetCurrentAssetCache();
         if (!currentActiveAssetCache) {
             error = std::make_pair(RPC_DATABASE_ERROR, std::string("passets isn't initialized"));
             return false;
         }
 
-        if (!VerifyWalletHasAsset(asset_name, error)) // Sets error if it fails
+        if (!VerifyWalletHasAsset(pwallet, asset_name, error)) // Sets error if it fails
             return false;
 
         // If it is an ownership transfer, make a quick check to make sure the amount is 1
@@ -4267,7 +4850,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 return false;
             }
 
-            if (!transfer.first.ContextualCheckAgainstVerifyString(passets, address, strError)) {
+            if (!transfer.first.ContextualCheckAgainstVerifyString(passets, classicalAddress, strError)) {
                 error = std::make_pair(RPC_INVALID_PARAMETER, strError);
                 return false;
             }
@@ -4289,11 +4872,20 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         }
 
         // Get the script for the burn address
-        CScript scriptPubKey = GetScriptForDestination(DecodeDestination(address));
+        CScript scriptPubKey = GetScriptForDestination(assetDestination);
 
         // Update the scriptPubKey with the transfer asset information
         CAssetTransfer assetTransfer(asset_name, nAmount, message, expireTime);
         assetTransfer.ConstructTransaction(scriptPubKey);
+        if (pqAssetsActive) {
+            CScript pqOnly;
+            if (!BuildPQOnlyAssetScript(scriptPubKey, pqProgram, pqOnly)) {
+                error = std::make_pair(RPC_TRANSACTION_ERROR,
+                    "Could not construct a canonical PQ asset transfer output");
+                return false;
+            }
+            scriptPubKey = std::move(pqOnly);
+        }
 
         CRecipient recipient = {scriptPubKey, 0, fSubtractFeeFromAmount};
         vecSend.push_back(recipient);
@@ -4304,6 +4896,18 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         std::string strError = "";
         int nAddTagCount = 0;
         for (auto pair : *nullAssetTxData) {
+
+            const CTxDestination nullDestination = DecodeDestination(pair.second);
+            if (!IsValidDestination(nullDestination)) {
+                error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + pair.second);
+                return false;
+            }
+            if (!IsSupportedNullAssetDestination(nullDestination)) {
+                error = std::make_pair(
+                    RPC_INVALID_ADDRESS_OR_KEY,
+                    "Ravencoin asset tag and freeze operations do not support RIP-25 witness-v2 destinations");
+                return false;
+            }
 
             if (IsAssetNameAQualifier(pair.first.asset_name)) {
                 if (!VerifyQualifierChange(*passets, pair.first, pair.second, strError)) {
@@ -4319,7 +4923,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 }
             }
 
-            CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
+            CScript dataScript = GetScriptForNullAssetDataDestination(nullDestination);
             pair.first.ConstructTransaction(dataScript);
 
             CRecipient recipient = {dataScript, 0, false};
@@ -4351,8 +4955,24 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         }
     }
 
+    // Administrative commands spend one protected authority outpoint. Pin
+    // that outpoint to a funded matching native PQ anchor before coin selection.
+    if (pqAssetsActive && (nullAssetTxData || nullGlobalRestrictionData)) {
+        if (vTransfers.size() != 1) {
+            error = std::make_pair(RPC_INVALID_PARAMETER,
+                "Active PQ administrative operation requires one authority transfer");
+            return false;
+        }
+        CTxDestination authorityDestination;
+        uint256 authorityProgram;
+        if (!SelectProtectedAssetReturn(pwallet, vTransfers.front().first.strName,
+                                        authorityDestination, authorityProgram,
+                                        error, &selectedCoinControl))
+            return false;
+    }
+
     // Create and send the transaction
-    if (!pwallet->CreateTransactionWithTransferAsset(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, coinControl)) {
+    if (!pwallet->CreateTransactionWithTransferAsset(vecSend, wtxNew, reservekey, nFeeRequired, nChangePosRet, strTxError, selectedCoinControl)) {
         if (!fSubtractFeeFromAmount && nFeeRequired > curBalance) {
             error = std::make_pair(RPC_WALLET_ERROR, strprintf("Error: This transaction requires a transaction fee of at least %s", FormatMoney(nFeeRequired)));
             return false;
@@ -4375,12 +4995,9 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
     return true;
 }
 
-bool VerifyWalletHasAsset(const std::string& asset_name, std::pair<int, std::string>& pairError)
+bool VerifyWalletHasAsset(CWallet* pwallet, const std::string& asset_name, std::pair<int, std::string>& pairError)
 {
-    CWallet* pwallet;
-    if (vpwallets.size() > 0)
-        pwallet = vpwallets[0];
-    else {
+    if (!pwallet) {
         pairError = std::make_pair(RPC_WALLET_ERROR, strprintf("Wallet not found. Can't verify if it contains: %s", asset_name));
         return false;
     }
@@ -4404,13 +5021,13 @@ bool CheckAmountWithUnits(const CAmount& nAmount, const int8_t nUnits)
     return nAmount % int64_t(pow(10, (MAX_UNIT - nUnits))) == 0;
 }
 
-bool CheckEncoded(const std::string& hash, std::string& strError) {
+bool CheckEncoded(const std::string& hash, std::string& strError, const TxAssetDeploymentContext* pAssetContext) {
     std::string encodedStr = EncodeAssetData(hash);
     if (encodedStr.substr(0, 2) == "Qm" && encodedStr.size() == 46) {
         return true;
     }
 
-    if (AreMessagesDeployed()) {
+    if (pAssetContext ? pAssetContext->fMessagesDeployed : AreMessagesDeployed()) {
         if (IsHex(encodedStr) && encodedStr.length() == 64) {
             return true;
         }
@@ -4439,7 +5056,7 @@ void GetTxOutAssetTypes(const std::vector<CTxOut>& vout, int& issues, int& reiss
     }
 }
 
-bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount) {
+bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount, const TxAssetDeploymentContext* pAssetContext) {
     int nType;
     bool fIsOwner;
     int _nStartingPoint;
@@ -4475,7 +5092,7 @@ bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &ass
             }
         } else if (nType == TX_TRANSFER_ASSET) {
             CAssetTransfer asset;
-            if (TransferAssetFromScript(scriptPubKey, asset, _strAddress)) {
+            if (TransferAssetFromScript(scriptPubKey, asset, _strAddress, pAssetContext ? pAssetContext->fTransferScriptsSizeDeployed : AreTransferScriptsSizeDeployed())) {
                 assetName = asset.strName;
                 assetAmount = asset.nAmount;
                 isAsset = true;
@@ -4570,6 +5187,11 @@ void CNullAssetTxVerifierString::ConstructTransaction(CScript &script) const
 bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNullAssetTxVerifierString& verifierString, bool fSkipTempCache)
 {
 
+    if (fSkipTempCache && pVerifyDBPreBlockCache)
+        return pVerifyDBPreBlockCache->GetAssetVerifierStringIfExists(name, verifierString);
+
+    CAssetsCache* passets = GetParentCache();
+
     /** There are circumstances where a blocks transactions could be changing an assets verifier string, While at the
      * same time a transaction is added to the same block that is trying to transfer the assets who verifier string is
      * changing.
@@ -4591,6 +5213,12 @@ bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNull
             return true;
         }
         return false;
+    }
+
+    setIterator = setNewRestrictedVerifierToAdd.find(tempCacheVerifier);
+    if (fVerifyDBHistoricalReplay && !fSkipTempCache && setIterator != setNewRestrictedVerifierToAdd.end()) {
+        verifierString.verifier_string = setIterator->verifier;
+        return true;
     }
 
     setIterator = passets->setNewRestrictedVerifierToRemove.find(tempCacheVerifier);
@@ -4636,103 +5264,91 @@ bool CAssetsCache::GetAssetVerifierStringIfExists(const std::string &name, CNull
     return false;
 }
 
-bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address, bool fSkipTempCache)
+bool CAssetsCache::CheckForAddressQualifierExact(const std::string& qualifierName, const std::string& address,
+                                                  bool skipTempCache)
 {
-    /** There are circumstances where a blocks transactions could be removing or adding a qualifier to an address,
-     * While at the same time a transaction is added to the same block that is trying to transfer to the same address.
-     * Depending on the ordering of these two transactions. The qualifier database used to verify the validity of the
-     * transactions could be different.
-     * To fix this all restricted asset transfer validation checks will use only the latest connect block tips caches
-     * and databases to validate it. This allows for asset transfers and address qualifier transactions to be added in the same block
-     * without failing validation
-    **/
+    CAssetsCache* passets = GetParentCache();
+    CAssetCacheQualifierAddress key(qualifierName, address, QualifierType::ADD_QUALIFIER);
+    auto it = setNewQualifierAddressToRemove.find(key);
+    if (!skipTempCache && it != setNewQualifierAddressToRemove.end())
+        return it->type == QualifierType::REMOVE_QUALIFIER;
 
-    // Create cache object that will be used to check the dirty caches
-    CAssetCacheQualifierAddress cachedQualifierAddress(qualifier_name, address, QualifierType::ADD_QUALIFIER);
+    // VerifyDB's reconstructed state is local and must override the live tip.
+    it = setNewQualifierAddressToAdd.find(key);
+    if (fVerifyDBHistoricalReplay && !skipTempCache && it != setNewQualifierAddressToAdd.end())
+        return it->type == QualifierType::ADD_QUALIFIER;
 
-    // Check the dirty caches first and see if it was recently added or removed
-    auto setIterator = setNewQualifierAddressToRemove.find(cachedQualifierAddress);
-    if (!fSkipTempCache &&setIterator != setNewQualifierAddressToRemove.end()) {
-        // Undoing a remove qualifier command, means that we are adding the qualifier to the address
-        return setIterator->type == QualifierType::REMOVE_QUALIFIER;
-    }
+    it = passets->setNewQualifierAddressToRemove.find(key);
+    if (it != passets->setNewQualifierAddressToRemove.end())
+        return it->type == QualifierType::REMOVE_QUALIFIER;
 
+    it = setNewQualifierAddressToAdd.find(key);
+    if (!skipTempCache && it != setNewQualifierAddressToAdd.end())
+        return it->type == QualifierType::ADD_QUALIFIER;
 
-    setIterator = passets->setNewQualifierAddressToRemove.find(cachedQualifierAddress);
-    if (setIterator != passets->setNewQualifierAddressToRemove.end()) {
-        // Undoing a remove qualifier command, means that we are adding the qualifier to the address
-        return setIterator->type == QualifierType::REMOVE_QUALIFIER;
-    }
+    it = passets->setNewQualifierAddressToAdd.find(key);
+    if (it != passets->setNewQualifierAddressToAdd.end())
+        return it->type == QualifierType::ADD_QUALIFIER;
 
-    setIterator = setNewQualifierAddressToAdd.find(cachedQualifierAddress);
-    if (!fSkipTempCache && setIterator != setNewQualifierAddressToAdd.end()) {
-        // Return true if we are adding the qualifier, and false if we are removing it
-        return setIterator->type == QualifierType::ADD_QUALIFIER;
-    }
+    if (passetsQualifierCache && passetsQualifierCache->Exists(key.GetHash().GetHex()))
+        return true;
 
-
-    setIterator = passets->setNewQualifierAddressToAdd.find(cachedQualifierAddress);
-    if (setIterator != passets->setNewQualifierAddressToAdd.end()) {
-        if (setIterator->type == QualifierType::ADD_QUALIFIER) {
-            return true;
-        } else {
-            // BUG FIX:
-            // This scenario can occur if a tag #TAG is removed from an address in a block, then in a later block
-            // #TAG/#SECOND is added to the address.
-            // If a database event hasn't occurred yet the in memory caches will find that #TAG should be removed from the
-            // address and would normally fail this check. Now we can check for the exact condition where a subqualifier
-            // was added later.
-
-            auto tempChecker = CAssetCacheRootQualifierChecker(qualifier_name, address);
-            if (passets->mapRootQualifierAddressesAdd.count(tempChecker)) {
-                if (passets->mapRootQualifierAddressesAdd.at(tempChecker).size()) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    auto tempChecker = CAssetCacheRootQualifierChecker(qualifier_name, address);
-    if (!fSkipTempCache && mapRootQualifierAddressesAdd.count(tempChecker)){
-        if (mapRootQualifierAddressesAdd.at(tempChecker).size()) {
-            return true;
-        }
-    }
-
-    if (passets->mapRootQualifierAddressesAdd.count(tempChecker)) {
-        if (passets->mapRootQualifierAddressesAdd.at(tempChecker).size()) {
-            return true;
-        }
-    }
-
-    // Check the cache, if it doesn't exist in the cache. Try and read it from database
-    if (passetsQualifierCache) {
-        if (passetsQualifierCache->Exists(cachedQualifierAddress.GetHash().GetHex())) {
-            return true;
-        }
-    }
-
-    if (prestricteddb) {
-        // Check for exact qualifier, and add to cache if it exists
-        if (prestricteddb->ReadAddressQualifier(address, qualifier_name)) {
-            passetsQualifierCache->Put(cachedQualifierAddress.GetHash().GetHex(), 1);
-            return true;
-        }
-
-        // Look for sub qualifiers
-        if (prestricteddb->CheckForAddressRootQualifier(address, qualifier_name)){
-            return true;
-        }
+    if (prestricteddb && prestricteddb->ReadAddressQualifier(address, qualifierName)) {
+        if (passetsQualifierCache)
+            passetsQualifierCache->Put(key.GetHash().GetHex(), 1);
+        return true;
     }
 
     return false;
 }
 
+bool CAssetsCache::CheckForAddressQualifier(const std::string &qualifier_name, const std::string& address, bool fSkipTempCache)
+{
+    if (fSkipTempCache && pVerifyDBPreBlockCache)
+        return pVerifyDBPreBlockCache->CheckForAddressQualifier(qualifier_name, address);
+
+    CAssetsCache* passets = GetParentCache();
+
+    // Restricted transfers deliberately skip changes made within their own
+    // block. The historical parent retains that rule during VerifyDB.
+    if (CheckForAddressQualifierExact(qualifier_name, address, fSkipTempCache))
+        return true;
+    if (IsAssetNameASubQualifier(qualifier_name))
+        return false;
+
+    // A root qualifier is true if any active subqualifier is present. The
+    // database can contain a subtag that a dirty cache has since removed, so
+    // each candidate must be checked against the exact-tag overlay.
+    const CAssetCacheRootQualifierChecker rootKey(qualifier_name, address);
+    auto local = mapRootQualifierAddressesAdd.find(rootKey);
+    if (!fSkipTempCache && local != mapRootQualifierAddressesAdd.end()) {
+        for (const auto& subQualifier : local->second) {
+            if (CheckForAddressQualifierExact(subQualifier, address, fSkipTempCache))
+                return true;
+        }
+    }
+    auto global = passets->mapRootQualifierAddressesAdd.find(rootKey);
+    if (global != passets->mapRootQualifierAddressesAdd.end()) {
+        for (const auto& subQualifier : global->second) {
+            if (CheckForAddressQualifierExact(subQualifier, address, fSkipTempCache))
+                return true;
+        }
+    }
+
+    return prestricteddb && prestricteddb->AnyAddressSubQualifier(
+        address, qualifier_name, [&](const std::string& subQualifier) {
+            return CheckForAddressQualifierExact(subQualifier, address, fSkipTempCache);
+        });
+}
+
 
 bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name, const std::string& address, bool fSkipTempCache)
 {
+    if (fSkipTempCache && pVerifyDBPreBlockCache)
+        return pVerifyDBPreBlockCache->CheckForAddressRestriction(restricted_name, address);
+
+    CAssetsCache* passets = GetParentCache();
+
     /** There are circumstances where a blocks transactions could be removing or adding a restriction to an address,
      * While at the same time a transaction is added to the same block that is trying to transfer from that address.
      * Depending on the ordering of these two transactions. The address restriction database used to verify the validity of the
@@ -4751,6 +5367,10 @@ bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name
         // Undoing a unfreeze, means that we are adding back a freeze
         return setIterator->type == RestrictedType::UNFREEZE_ADDRESS;
     }
+
+    setIterator = setNewRestrictedAddressToAdd.find(cachedRestrictedAddress);
+    if (fVerifyDBHistoricalReplay && !fSkipTempCache && setIterator != setNewRestrictedAddressToAdd.end())
+        return setIterator->type == RestrictedType::FREEZE_ADDRESS;
 
     setIterator = passets->setNewRestrictedAddressToRemove.find(cachedRestrictedAddress);
     if (setIterator != passets->setNewRestrictedAddressToRemove.end()) {
@@ -4791,6 +5411,11 @@ bool CAssetsCache::CheckForAddressRestriction(const std::string &restricted_name
 
 bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name, bool fSkipTempCache)
 {
+    if (fSkipTempCache && pVerifyDBPreBlockCache)
+        return pVerifyDBPreBlockCache->CheckForGlobalRestriction(restricted_name);
+
+    CAssetsCache* passets = GetParentCache();
+
     /** There are circumstances where a blocks transactions could be freezing all asset transfers. While at
      * the same time a transaction is added to the same block that is trying to transfer the same asset that is being
      * frozen.
@@ -4810,6 +5435,10 @@ bool CAssetsCache::CheckForGlobalRestriction(const std::string &restricted_name,
         // Undoing a removal of a global unfreeze, means that is will become frozen
         return setIterator->type == RestrictedType::GLOBAL_UNFREEZE;
     }
+
+    setIterator = setNewRestrictedGlobalToAdd.find(cachedRestrictedGlobal);
+    if (fVerifyDBHistoricalReplay && !fSkipTempCache && setIterator != setNewRestrictedGlobalToAdd.end())
+        return setIterator->type == RestrictedType::GLOBAL_FREEZE;
 
     setIterator = passets->setNewRestrictedGlobalToRemove.find(cachedRestrictedGlobal);
     if (setIterator != passets->setNewRestrictedGlobalToRemove.end()) {
@@ -5093,13 +5722,8 @@ bool ContextualCheckNullAssetTxOut(const CTxOut& txout, CAssetsCache* assetCache
         }
     }
 
-#ifdef ENABLE_WALLET
-    if (myNullAssetData && vpwallets.size()) {
-        if (IsMine(*vpwallets[0], DecodeDestination(address)) & ISMINE_ALL) {
-            myNullAssetData->emplace_back(std::make_pair(address, data));
-        }
-    }
-#endif
+    if (myNullAssetData)
+        myNullAssetData->emplace_back(address, data);
     return true;
 }
 
@@ -5215,7 +5839,7 @@ bool ContextualCheckVerifierString(CAssetsCache* cache, const std::string& verif
     }
 }
 
-bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError)
+bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer& transfer, const std::string& address, std::string& strError, const TxAssetDeploymentContext* pAssetContext)
 {
     strError = "";
     AssetType assetType;
@@ -5229,7 +5853,7 @@ bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer
         return false;
     }
 
-    if (AreMessagesDeployed()) {
+    if (pAssetContext ? pAssetContext->fMessagesDeployed : AreMessagesDeployed()) {
         // This is for the current testnet6 only.
         if (transfer.nAmount <= 0) {
             strError = "Invalid parameter: asset amount can't be equal to or less than zero.";
@@ -5246,21 +5870,21 @@ bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer
             return false;
         }
 
-        if (transfer.message.size() && !CheckEncoded(transfer.message, strError)) {
+        if (transfer.message.size() && !CheckEncoded(transfer.message, strError, pAssetContext)) {
             return false;
         }
     }
 
     // If the transfer is a message channel asset. Check to make sure that it is UNIQUE_ASSET_AMOUNT
     if (assetType == AssetType::MSGCHANNEL) {
-        if (!AreMessagesDeployed()) {
+        if (!(pAssetContext ? pAssetContext->fMessagesDeployed : AreMessagesDeployed())) {
             strError = "bad-txns-transfer-msgchannel-before-messaging-is-active";
             return false;
         }
     }
 
     if (assetType == AssetType::RESTRICTED) {
-        if (!AreRestrictedAssetsDeployed()) {
+        if (!(pAssetContext ? pAssetContext->fRestrictedAssetsDeployed : AreRestrictedAssetsDeployed())) {
             strError = "bad-txns-transfer-restricted-before-it-is-active";
             return false;
         }
@@ -5282,7 +5906,7 @@ bool ContextualCheckTransferAsset(CAssetsCache* assetCache, const CAssetTransfer
 
     // If the transfer is a qualifier channel asset.
     if (assetType == AssetType::QUALIFIER || assetType == AssetType::SUB_QUALIFIER) {
-        if (!AreRestrictedAssetsDeployed()) {
+        if (!(pAssetContext ? pAssetContext->fRestrictedAssetsDeployed : AreRestrictedAssetsDeployed())) {
             strError = "bad-txns-transfer-qualifier-before-it-is-active";
             return false;
         }
@@ -5368,9 +5992,9 @@ bool CheckNewAsset(const CNewAsset& asset, std::string& strError)
     return true;
 }
 
-bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, std::string& strError, bool fCheckMempool)
+bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, std::string& strError, bool fCheckMempool, const TxAssetDeploymentContext* pAssetContext)
 {
-    if (!AreAssetsDeployed() && !fUnitTest) {
+    if (!(pAssetContext ? pAssetContext->fAssetsDeployed : AreAssetsDeployed()) && !fUnitTest) {
         strError = "bad-txns-new-asset-when-assets-is-not-active";
         return false;
     }
@@ -5394,7 +6018,7 @@ bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, s
 
     // Check the ipfs hash as it changes when messaging goes active
     if (asset.nHasIPFS && asset.strIPFSHash.size() != 34) {
-        if (!AreMessagesDeployed()) {
+        if (!(pAssetContext ? pAssetContext->fMessagesDeployed : AreMessagesDeployed())) {
             strError = _("Invalid parameter: ipfs_hash must be 46 characters. Txid must be valid 64 character hash");
             return false;
         } else {
@@ -5406,7 +6030,7 @@ bool ContextualCheckNewAsset(CAssetsCache* assetCache, const CNewAsset& asset, s
     }
 
     if (asset.nHasIPFS) {
-        if (!CheckEncoded(asset.strIPFSHash, strError))
+        if (!CheckEncoded(asset.strIPFSHash, strError, pAssetContext))
             return false;
     }
 
@@ -5454,7 +6078,7 @@ bool CheckReissueAsset(const CReissueAsset& asset, std::string& strError)
     return true;
 }
 
-bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& reissue_asset, std::string& strError, const CTransaction& tx)
+bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& reissue_asset, std::string& strError, const CTransaction& tx, const TxAssetDeploymentContext* pAssetContext)
 {
     // We are using this just to get the strAddress
     CReissueAsset reissue;
@@ -5498,13 +6122,13 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
     }
 
     // Check the ipfs hash
-    if (reissue_asset.strIPFSHash != "" && reissue_asset.strIPFSHash.size() != 34 && (AreMessagesDeployed() && reissue_asset.strIPFSHash.size() != 32)) {
+    if (reissue_asset.strIPFSHash != "" && reissue_asset.strIPFSHash.size() != 34 && ((pAssetContext ? pAssetContext->fMessagesDeployed : AreMessagesDeployed()) && reissue_asset.strIPFSHash.size() != 32)) {
         strError = _("Invalid parameter: ipfs_hash must be 34 bytes, Txid must be 32 bytes");
         return false;
     }
 
     if (reissue_asset.strIPFSHash != "") {
-        if (!CheckEncoded(reissue_asset.strIPFSHash, strError))
+        if (!CheckEncoded(reissue_asset.strIPFSHash, strError, pAssetContext))
             return false;
     }
 
@@ -5597,7 +6221,7 @@ bool ContextualCheckReissueAsset(CAssetsCache* assetCache, const CReissueAsset& 
     return true;
 }
 
-bool ContextualCheckUniqueAssetTx(CAssetsCache* assetCache, std::string& strError, const CTransaction& tx)
+bool ContextualCheckUniqueAssetTx(CAssetsCache* assetCache, std::string& strError, const CTransaction& tx, const TxAssetDeploymentContext* pAssetContext)
 {
     for (auto out : tx.vout)
     {
@@ -5610,7 +6234,7 @@ bool ContextualCheckUniqueAssetTx(CAssetsCache* assetCache, std::string& strErro
                 return false;
             }
 
-            if (!ContextualCheckUniqueAsset(assetCache, asset, strError))
+            if (!ContextualCheckUniqueAsset(assetCache, asset, strError, pAssetContext))
                 return false;
         }
     }
@@ -5618,9 +6242,9 @@ bool ContextualCheckUniqueAssetTx(CAssetsCache* assetCache, std::string& strErro
     return true;
 }
 
-bool ContextualCheckUniqueAsset(CAssetsCache* assetCache, const CNewAsset& unique_asset, std::string& strError)
+bool ContextualCheckUniqueAsset(CAssetsCache* assetCache, const CNewAsset& unique_asset, std::string& strError, const TxAssetDeploymentContext* pAssetContext)
 {
-    if (!ContextualCheckNewAsset(assetCache, unique_asset, strError))
+    if (!ContextualCheckNewAsset(assetCache, unique_asset, strError, false, pAssetContext))
         return false;
 
     return true;

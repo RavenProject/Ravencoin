@@ -202,5 +202,59 @@ BOOST_FIXTURE_TEST_SUITE(asset_reissue_tests, BasicTestingSetup)
         BOOST_CHECK_MESSAGE(!ContextualCheckReissueAsset(&cache, reissue7, error), "Reissue should have been not valid because messaging isn't active yet, and txid aren't allowed until messaging is active");
     }
 
+    BOOST_AUTO_TEST_CASE(restricted_verifier_same_block_first_wins)
+    {
+        const std::string assetName = "$RESTRICTED";
+        const std::string firstVerifier = "KYC";
+        const std::string secondVerifier = "ACCREDITED";
+
+        CAssetsCache normalCache;
+        CAssetsCache replayParent;
+        replayParent.SetVerifyDBHistoricalReplay(true);
+        CAssetsCache replayBlock;
+        replayBlock.SetVerifyDBPreBlockCache(&replayParent);
+
+        BOOST_REQUIRE(normalCache.AddRestrictedVerifier(assetName, firstVerifier));
+        BOOST_REQUIRE(replayBlock.AddRestrictedVerifier(assetName, firstVerifier));
+        BOOST_REQUIRE(normalCache.AddRestrictedVerifier(assetName, secondVerifier));
+        BOOST_REQUIRE(replayBlock.AddRestrictedVerifier(assetName, secondVerifier));
+
+        BOOST_REQUIRE_EQUAL(normalCache.setNewRestrictedVerifierToAdd.size(), 1U);
+        BOOST_REQUIRE_EQUAL(replayBlock.setNewRestrictedVerifierToAdd.size(), 1U);
+        const std::string& normalVerifier = normalCache.setNewRestrictedVerifierToAdd.begin()->verifier;
+        const std::string& replayVerifier = replayBlock.setNewRestrictedVerifierToAdd.begin()->verifier;
+        BOOST_CHECK_EQUAL(normalVerifier, firstVerifier);
+        BOOST_CHECK_EQUAL(replayVerifier, normalVerifier);
+
+        BOOST_REQUIRE(replayBlock.Flush());
+        CAssetsCache nextReplayBlock;
+        nextReplayBlock.SetVerifyDBPreBlockCache(&replayParent);
+        BOOST_REQUIRE(nextReplayBlock.AddRestrictedVerifier(assetName, secondVerifier));
+        BOOST_REQUIRE(nextReplayBlock.Flush());
+        BOOST_REQUIRE_EQUAL(replayParent.setNewRestrictedVerifierToAdd.size(), 1U);
+        BOOST_CHECK_EQUAL(replayParent.setNewRestrictedVerifierToAdd.begin()->verifier, secondVerifier);
+    }
+
+    BOOST_AUTO_TEST_CASE(verifydb_same_block_new_asset_overrides_parent_removal)
+    {
+        const CNewAsset issued("VERIFYDBISSUE", CAmount(100 * COIN), 0, 1, 0, "");
+        const std::string address = GetParams().GlobalBurnAddress();
+
+        CAssetsCache replayParent;
+        replayParent.SetVerifyDBHistoricalReplay(true);
+        replayParent.setNewAssetsToRemove.insert(
+            CAssetCacheNewAsset(issued, address, 0, uint256()));
+
+        CAssetsCache replayBlock;
+        replayBlock.SetVerifyDBPreBlockCache(&replayParent);
+        BOOST_REQUIRE(replayBlock.AddNewAsset(issued, address, 433, uint256()));
+
+        CNewAsset lookedUp;
+        BOOST_CHECK(replayBlock.CheckIfAssetExists(issued.strName, true));
+        BOOST_REQUIRE(replayBlock.GetAssetMetaDataIfExists(issued.strName, lookedUp));
+        BOOST_CHECK_EQUAL(lookedUp.strName, issued.strName);
+        BOOST_CHECK_EQUAL(lookedUp.nAmount, issued.nAmount);
+    }
+
 
 BOOST_AUTO_TEST_SUITE_END()
